@@ -399,7 +399,7 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
  * Gets the list of current recording sessions since User has connected to the Room.
  * @method getRecordings
  * @return {JSON} The list of recording sessions.<ul>
- *   <li><code><#recordingId></code><var><b>{</b>JSON<b>}</b></var><p>The recording session.</p><ul>
+ *   <li><code>#recordingId</code><var><b>{</b>JSON<b>}</b></var><p>The recording session.</p><ul>
  *   <li><code>active</code><var><b>{</b>Boolean<b>}</b></var><p>The flag that indicates if the recording session is currently active.</p></li>
  *   <li><code>state</code><var><b>{</b>Number<b>}</b></var><p>The current recording state. [Rel: Skylink.RECORDING_STATE]</p></li>
  *   <li><code>startedDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session started DateTime in

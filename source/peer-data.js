@@ -230,10 +230,11 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 /**
  * Function that gets the list of connected Peers in the Room.
  * @method getPeersInRoom
- * @return {JSON} The list of the connected Peers.
- *   <small>Each property is the Peer ID with its value as the Peer current session information, which
- *   object signature matches the <code>peerInfo</code> parameter payload received in the
- *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
+ * @return {JSON} The list of connected Peers. <ul>
+ *   <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer information.
+ *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
+ *   <a href="#event_peerJoined"><code>peerJoined</code> event</a> except there is
+ *   the <code>isSelf</code> flag that determines if Peer is User or not.</small></p></li></ul>
  * @example
  *   // Example 1: Get the list of currently connected Peers in the same Room
  *   var peers = skylinkDemo.getPeersInRoom();
@@ -245,7 +246,13 @@ Skylink.prototype.getPeersInRoom = function() {
   var listOfPeers = Object.keys(this._peerInformations);
 
   for (var i = 0; i < listOfPeers.length; i++) {
-    listOfPeersInfo[listOfPeers[i]] = this.getPeerInfo(listOfPeers[i]);
+    listOfPeersInfo[listOfPeers[i]] = clone(this.getPeerInfo(listOfPeers[i]));
+    listOfPeersInfo[listOfPeers[i]].isSelf = false;
+  }
+
+  if (this._user && this._user.sid) {
+    listOfPeersInfo[this._user.sid] = clone(this.getPeerInfo());
+    listOfPeersInfo[this._user.sid].isSelf = true;
   }
 
   return listOfPeersInfo;
@@ -254,9 +261,12 @@ Skylink.prototype.getPeersInRoom = function() {
 /**
  * Function that gets the list of connected Peers Streams in the Room.
  * @method getPeersStream
- * @return {JSON} The list of the Peers Stream
- *   <small>Each property is the Peer ID with its value as Stream object. Defined as <code>null</code>
- *   if the Peer is not currently sending any Stream.</small>
+ * @return {JSON} The list of Peers Stream. <ul>
+ *   <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer Stream.</p><ul>
+ *   <li><code>stream</code><var><b>{</b>MediaStream<b>}</b></var><p>The Stream object.</p></li>
+ *   <li><code>streamId</code><var><b>{</b>String<b>}</b></var><p>The Stream ID.</p></li>
+ *   <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
+ *   </p></li></ul></li></ul>
  * @example
  *   // Example 1: Get the list of currently connected Peers in the same Room
  *   var streams = skylinkDemo.getPeersStream();
@@ -270,24 +280,42 @@ Skylink.prototype.getPeersStream = function() {
   for (var i = 0; i < listOfPeers.length; i++) {
     var stream = null;
 
-    if ((!this._sdpSettings.direction.audio.receive && !this._sdpSettings.direction.video.receive) ||
-      !(this._peerConnections[listOfPeers[i]] && this._peerConnections[listOfPeers[i]].remoteDescription &&
-      this._peerConnections[listOfPeers[i]].remoteDescription.sdp)) {
-      listOfPeersStreams[listOfPeers[i]] = stream;
-      continue;
-    }
+    if (this._peerConnections[listOfPeers[i]] &&
+      this._peerConnections[listOfPeers[i]].remoteDescription &&
+      this._peerConnections[listOfPeers[i]].remoteDescription.sdp &&
+      (this._sdpSettings.direction.audio.receive || this._sdpSettings.direction.video.receive)) {
+      var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
 
-    var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
-
-    for (var j = 0; j < streams.length; j++) {
-      if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
-        'msid:' + (streams[j].id || streams[j].label)) > 0) {
-        stream = streams[j];
-        break;
+      for (var j = 0; j < streams.length; j++) {
+        if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
+          'msid:' + (streams[j].id || streams[j].label)) > 0) {
+          stream = streams[j];
+          break;
+        }
       }
     }
 
-    listOfPeersStreams[listOfPeers[i]] = stream;
+    listOfPeersStreams[listOfPeers[i]] = {
+      streamId: stream ? stream.id || stream.label || null : null,
+      stream: stream,
+      isSelf: false
+    };
+  }
+
+  if (this._user && this._user.sid) {
+    var selfStream = null;
+
+    if (this._streams.screenshare && this._streams.screenshare.stream) {
+      selfStream = this._streams.screenshare.stream;
+    } else if (this._streams.userMedia && this._streams.userMedia.stream) {
+      selfStream = this._streams.userMedia.stream;
+    }
+
+    listOfPeersStreams[this._user.sid] = {
+      streamId: selfStream ? selfStream.id || selfStream.label || null : null,
+      stream: selfStream,
+      isSelf: true
+    };
   }
 
   return listOfPeersStreams;

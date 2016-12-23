@@ -6074,7 +6074,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l296"><code>source&#x2F;peer-data.js:296</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l324"><code>source&#x2F;peer-data.js:324</code></a>
       </small>
     
 
@@ -13267,10 +13267,11 @@ Function that retrieves the list of Peer IDs from Rooms within the same App spac
           
             <span class="type"><b>{</b>JSON<b>}</b></span>
           
-          <p>The list of the connected Peers.
-  <small>Each property is the Peer ID with its value as the Peer current session information, which
-  object signature matches the <code>peerInfo</code> parameter payload received in the
-  <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small></p>
+          <p>The list of connected Peers. <ul>
+  <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer information.
+  <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
+  <a href="#event_peerJoined"><code>peerJoined</code> event</a> except there is
+  the <code>isSelf</code> flag that determines if Peer is User or not.</small></p></li></ul></p>
 
         
       </div>
@@ -13327,7 +13328,7 @@ Function that retrieves the list of Peer IDs from Rooms within the same App spac
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l254"><code>source&#x2F;peer-data.js:254</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l261"><code>source&#x2F;peer-data.js:261</code></a>
       </small>
     
 
@@ -13376,9 +13377,12 @@ Function that retrieves the list of Peer IDs from Rooms within the same App spac
           
             <span class="type"><b>{</b>JSON<b>}</b></span>
           
-          <p>The list of the Peers Stream
-  <small>Each property is the Peer ID with its value as Stream object. Defined as <code>null</code>
-  if the Peer is not currently sending any Stream.</small></p>
+          <p>The list of Peers Stream. <ul>
+  <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer Stream.</p><ul>
+  <li><code>stream</code><var><b>{</b>MediaStream<b>}</b></var><p>The Stream object.</p></li>
+  <li><code>streamId</code><var><b>{</b>String<b>}</b></var><p>The Stream ID.</p></li>
+  <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
+  </p></li></ul></li></ul></p>
 
         
       </div>
@@ -13493,7 +13497,7 @@ Gets the list of current recording sessions since User has connected to the Room
             <span class="type"><b>{</b>JSON<b>}</b></span>
           
           <p>The list of recording sessions.<ul>
-  <li><code>&lt;#recordingId&gt;</code><var><b>{</b>JSON<b>}</b></var><p>The recording session.</p><ul>
+  <li><code>#recordingId</code><var><b>{</b>JSON<b>}</b></var><p>The recording session.</p><ul>
   <li><code>active</code><var><b>{</b>Boolean<b>}</b></var><p>The flag that indicates if the recording session is currently active.</p></li>
   <li><code>state</code><var><b>{</b>Number<b>}</b></var><p>The current recording state. [Rel: Skylink.RECORDING_STATE]</p></li>
   <li><code>startedDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session started DateTime in

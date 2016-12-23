@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 16:46:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 17:10:08 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 16:46:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 17:10:08 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -17566,10 +17566,11 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 /**
  * Function that gets the list of connected Peers in the Room.
  * @method getPeersInRoom
- * @return {JSON} The list of the connected Peers.
- *   <small>Each property is the Peer ID with its value as the Peer current session information, which
- *   object signature matches the <code>peerInfo</code> parameter payload received in the
- *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small>
+ * @return {JSON} The list of connected Peers. <ul>
+ *   <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer information.
+ *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
+ *   <a href="#event_peerJoined"><code>peerJoined</code> event</a> except there is
+ *   the <code>isSelf</code> flag that determines if Peer is User or not.</small></p></li></ul>
  * @example
  *   // Example 1: Get the list of currently connected Peers in the same Room
  *   var peers = skylinkDemo.getPeersInRoom();
@@ -17581,7 +17582,13 @@ Skylink.prototype.getPeersInRoom = function() {
   var listOfPeers = Object.keys(this._peerInformations);
 
   for (var i = 0; i < listOfPeers.length; i++) {
-    listOfPeersInfo[listOfPeers[i]] = this.getPeerInfo(listOfPeers[i]);
+    listOfPeersInfo[listOfPeers[i]] = clone(this.getPeerInfo(listOfPeers[i]));
+    listOfPeersInfo[listOfPeers[i]].isSelf = false;
+  }
+
+  if (this._user && this._user.sid) {
+    listOfPeersInfo[this._user.sid] = clone(this.getPeerInfo());
+    listOfPeersInfo[this._user.sid].isSelf = true;
   }
 
   return listOfPeersInfo;
@@ -17590,9 +17597,12 @@ Skylink.prototype.getPeersInRoom = function() {
 /**
  * Function that gets the list of connected Peers Streams in the Room.
  * @method getPeersStream
- * @return {JSON} The list of the Peers Stream
- *   <small>Each property is the Peer ID with its value as Stream object. Defined as <code>null</code>
- *   if the Peer is not currently sending any Stream.</small>
+ * @return {JSON} The list of Peers Stream. <ul>
+ *   <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer Stream.</p><ul>
+ *   <li><code>stream</code><var><b>{</b>MediaStream<b>}</b></var><p>The Stream object.</p></li>
+ *   <li><code>streamId</code><var><b>{</b>String<b>}</b></var><p>The Stream ID.</p></li>
+ *   <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
+ *   </p></li></ul></li></ul>
  * @example
  *   // Example 1: Get the list of currently connected Peers in the same Room
  *   var streams = skylinkDemo.getPeersStream();
@@ -17606,24 +17616,42 @@ Skylink.prototype.getPeersStream = function() {
   for (var i = 0; i < listOfPeers.length; i++) {
     var stream = null;
 
-    if ((!this._sdpSettings.direction.audio.receive && !this._sdpSettings.direction.video.receive) ||
-      !(this._peerConnections[listOfPeers[i]] && this._peerConnections[listOfPeers[i]].remoteDescription &&
-      this._peerConnections[listOfPeers[i]].remoteDescription.sdp)) {
-      listOfPeersStreams[listOfPeers[i]] = stream;
-      continue;
-    }
+    if (this._peerConnections[listOfPeers[i]] &&
+      this._peerConnections[listOfPeers[i]].remoteDescription &&
+      this._peerConnections[listOfPeers[i]].remoteDescription.sdp &&
+      (this._sdpSettings.direction.audio.receive || this._sdpSettings.direction.video.receive)) {
+      var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
 
-    var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
-
-    for (var j = 0; j < streams.length; j++) {
-      if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
-        'msid:' + (streams[j].id || streams[j].label)) > 0) {
-        stream = streams[j];
-        break;
+      for (var j = 0; j < streams.length; j++) {
+        if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
+          'msid:' + (streams[j].id || streams[j].label)) > 0) {
+          stream = streams[j];
+          break;
+        }
       }
     }
 
-    listOfPeersStreams[listOfPeers[i]] = stream;
+    listOfPeersStreams[listOfPeers[i]] = {
+      streamId: stream ? stream.id || stream.label || null : null,
+      stream: stream,
+      isSelf: false
+    };
+  }
+
+  if (this._user && this._user.sid) {
+    var selfStream = null;
+
+    if (this._streams.screenshare && this._streams.screenshare.stream) {
+      selfStream = this._streams.screenshare.stream;
+    } else if (this._streams.userMedia && this._streams.userMedia.stream) {
+      selfStream = this._streams.userMedia.stream;
+    }
+
+    listOfPeersStreams[this._user.sid] = {
+      streamId: selfStream ? selfStream.id || selfStream.label || null : null,
+      stream: selfStream,
+      isSelf: true
+    };
   }
 
   return listOfPeersStreams;
@@ -22444,7 +22472,7 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
  * Gets the list of current recording sessions since User has connected to the Room.
  * @method getRecordings
  * @return {JSON} The list of recording sessions.<ul>
- *   <li><code><#recordingId></code><var><b>{</b>JSON<b>}</b></var><p>The recording session.</p><ul>
+ *   <li><code>#recordingId</code><var><b>{</b>JSON<b>}</b></var><p>The recording session.</p><ul>
  *   <li><code>active</code><var><b>{</b>Boolean<b>}</b></var><p>The flag that indicates if the recording session is currently active.</p></li>
  *   <li><code>state</code><var><b>{</b>Number<b>}</b></var><p>The current recording state. [Rel: Skylink.RECORDING_STATE]</p></li>
  *   <li><code>startedDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session started DateTime in

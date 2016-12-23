@@ -2894,7 +2894,7 @@
             "itemtype": "method",
             "name": "getPeersInRoom",
             "return": {
-                "description": "The list of the connected Peers.\n  <small>Each property is the Peer ID with its value as the Peer current session information, which\n  object signature matches the <code>peerInfo</code> parameter payload received in the\n  <a href=\"#event_peerJoined\"><code>peerJoined</code> event</a>.</small>",
+                "description": "The list of connected Peers. <ul>\n  <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer information.\n  <small>Object signature matches the <code>peerInfo</code> parameter payload received in the\n  <a href=\"#event_peerJoined\"><code>peerJoined</code> event</a> except there is\n  the <code>isSelf</code> flag that determines if Peer is User or not.</small></p></li></ul>",
                 "type": "JSON"
             },
             "example": [
@@ -2905,12 +2905,12 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 254,
+            "line": 261,
             "description": "Function that gets the list of connected Peers Streams in the Room.",
             "itemtype": "method",
             "name": "getPeersStream",
             "return": {
-                "description": "The list of the Peers Stream\n  <small>Each property is the Peer ID with its value as Stream object. Defined as <code>null</code>\n  if the Peer is not currently sending any Stream.</small>",
+                "description": "The list of Peers Stream. <ul>\n  <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer Stream.</p><ul>\n  <li><code>stream</code><var><b>{</b>MediaStream<b>}</b></var><p>The Stream object.</p></li>\n  <li><code>streamId</code><var><b>{</b>String<b>}</b></var><p>The Stream ID.</p></li>\n  <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>\n  </p></li></ul></li></ul>",
                 "type": "JSON"
             },
             "example": [
@@ -2921,7 +2921,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 296,
+            "line": 324,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
@@ -7305,7 +7305,7 @@
             "itemtype": "method",
             "name": "getRecordings",
             "return": {
-                "description": "The list of recording sessions.<ul>\n  <li><code><#recordingId></code><var><b>{</b>JSON<b>}</b></var><p>The recording session.</p><ul>\n  <li><code>active</code><var><b>{</b>Boolean<b>}</b></var><p>The flag that indicates if the recording session is currently active.</p></li>\n  <li><code>state</code><var><b>{</b>Number<b>}</b></var><p>The current recording state. [Rel: Skylink.RECORDING_STATE]</p></li>\n  <li><code>startedDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session started DateTime in\n  <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</a>.<small>Note that this value may not be\n  very accurate as this value is recorded when the start event is received.</small></p></li>\n  <li><code>endedDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session ended DateTime in\n  <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</a>.<small>Note that this value may not be\n  very accurate as this value is recorded when the stop event is received.</small>\n  <small>Defined only after <code>state</code> has triggered <code>STOP</code>.</small></p></li>\n  <li><code>mixingDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session mixing completed DateTime in\n  <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</a>.<small>Note that this value may not be\n  very accurate as this value is recorded when the mixing completed event is received.</small>\n  <small>Defined only when <code>state</code> is <code>LINK</code>.</small></p></li>\n  <li><code>links</code><var><b>{</b>JSON<b>}</b></var><p>The recording session links.\n  <small>Object signature matches the <code>link</code> parameter payload received in the\n  <a href=\"#event_recordingState\"><code>recordingState</code> event</a>.</small>\n  <small>Defined only when <code>state</code> is <code>LINK</code>.</small></p></li>\n  <li><code>error</code><var><b>{</b>Error<b>}</b></var><p>The recording session error.\n  <small>Defined only when <code>state</code> is <code>ERROR</code>.</small></p></li></ul></li></ul>",
+                "description": "The list of recording sessions.<ul>\n  <li><code>#recordingId</code><var><b>{</b>JSON<b>}</b></var><p>The recording session.</p><ul>\n  <li><code>active</code><var><b>{</b>Boolean<b>}</b></var><p>The flag that indicates if the recording session is currently active.</p></li>\n  <li><code>state</code><var><b>{</b>Number<b>}</b></var><p>The current recording state. [Rel: Skylink.RECORDING_STATE]</p></li>\n  <li><code>startedDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session started DateTime in\n  <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</a>.<small>Note that this value may not be\n  very accurate as this value is recorded when the start event is received.</small></p></li>\n  <li><code>endedDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session ended DateTime in\n  <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</a>.<small>Note that this value may not be\n  very accurate as this value is recorded when the stop event is received.</small>\n  <small>Defined only after <code>state</code> has triggered <code>STOP</code>.</small></p></li>\n  <li><code>mixingDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session mixing completed DateTime in\n  <a href=\"https://en.wikipedia.org/wiki/ISO_8601\">ISO 8601 format</a>.<small>Note that this value may not be\n  very accurate as this value is recorded when the mixing completed event is received.</small>\n  <small>Defined only when <code>state</code> is <code>LINK</code>.</small></p></li>\n  <li><code>links</code><var><b>{</b>JSON<b>}</b></var><p>The recording session links.\n  <small>Object signature matches the <code>link</code> parameter payload received in the\n  <a href=\"#event_recordingState\"><code>recordingState</code> event</a>.</small>\n  <small>Defined only when <code>state</code> is <code>LINK</code>.</small></p></li>\n  <li><code>error</code><var><b>{</b>Error<b>}</b></var><p>The recording session error.\n  <small>Defined only when <code>state</code> is <code>ERROR</code>.</small></p></li></ul></li></ul>",
                 "type": "JSON"
             },
             "example": [
