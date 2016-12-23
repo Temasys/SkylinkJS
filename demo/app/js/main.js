@@ -957,7 +957,7 @@ $(document).ready(function() {
     }
   });
   $('#share_screen_btn').click(function () {
-    Demo.Skylink.shareScreen(false);
+    Demo.Skylink.shareScreen(true);
   });
   $('#stop_screen_btn').click(function() {
     Demo.Skylink.stopScreen();
