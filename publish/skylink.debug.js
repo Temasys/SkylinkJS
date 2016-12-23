@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 13:43:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 13:54:14 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -5324,11 +5324,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     return;
   }
 
-  self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
   self._peerConnections[targetMid].hasScreen = !!isSS;
-  if (!receiveOnly) {
-    self._addLocalMediaStreams(targetMid);
-  }
 };
 
 /**
@@ -5368,11 +5364,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
 
   // This is when the state is stable and re-handshaking is possible
   // This could be due to previous connection handshaking that is already done
-  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-    if (self._peerConnections[peerId] && !self._peerConnections[peerId].receiveOnly) {
-      self._addLocalMediaStreams(peerId);
-    }
-
+  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE && self._peerConnections[peerId]) {
     log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
     var restartMsg = {
@@ -6211,6 +6203,11 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     };
   }
 
+  // Add stream only at offer/answer end
+  if (!self._hasMCU || targetMid === 'MCU') {
+    self._addLocalMediaStreams(targetMid);
+  }
+
   if (self._enableDataChannel && self._peerInformations[targetMid] &&
     self._peerInformations[targetMid].config.enableDataChannel) {
     // Edge doesn't support datachannels yet
@@ -6265,6 +6262,11 @@ Skylink.prototype._doAnswer = function(targetMid) {
       'Dropping of creating of answer as signalingState is not "' +
       self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + '" ->'], pc.signalingState);
     return;
+  }
+
+  // Add stream only at offer/answer end
+  if (!self._hasMCU || targetMid === 'MCU') {
+    self._addLocalMediaStreams(targetMid);
   }
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48

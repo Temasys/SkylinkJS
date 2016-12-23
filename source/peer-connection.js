@@ -1015,11 +1015,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
     return;
   }
 
-  self._peerConnections[targetMid].receiveOnly = !!receiveOnly;
   self._peerConnections[targetMid].hasScreen = !!isSS;
-  if (!receiveOnly) {
-    self._addLocalMediaStreams(targetMid);
-  }
 };
 
 /**
@@ -1059,11 +1055,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
 
   // This is when the state is stable and re-handshaking is possible
   // This could be due to previous connection handshaking that is already done
-  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-    if (self._peerConnections[peerId] && !self._peerConnections[peerId].receiveOnly) {
-      self._addLocalMediaStreams(peerId);
-    }
-
+  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE && self._peerConnections[peerId]) {
     log.log([peerId, null, null, 'Sending restart message to signaling server']);
 
     var restartMsg = {
