@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Fri Dec 23 2016 17:10:08 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Wed Dec 28 2016 17:41:50 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -11483,7 +11483,7 @@ Skylink.prototype._recordingEventHandler = function (message) {
 
     if (Array.isArray(message.urls)) {
       for (var i = 0; i < message.urls.length; i++) {
-        links[messages.urls[i].id || ''] = essages.urls[i].url || '';
+        links[messages.urls[i].id || ''] = messages.urls[i].url || '';
       }
     } else if (typeof message.url === 'string') {
       links.mixin = message.url;

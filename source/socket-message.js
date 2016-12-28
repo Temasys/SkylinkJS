@@ -943,7 +943,7 @@ Skylink.prototype._recordingEventHandler = function (message) {
 
     if (Array.isArray(message.urls)) {
       for (var i = 0; i < message.urls.length; i++) {
-        links[messages.urls[i].id || ''] = essages.urls[i].url || '';
+        links[messages.urls[i].id || ''] = messages.urls[i].url || '';
       }
     } else if (typeof message.url === 'string') {
       links.mixin = message.url;
