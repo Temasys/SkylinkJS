@@ -217,7 +217,7 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
       }
 
       if (codecFmtpLineIndex > -1) {
-        sdpLines[codecFmtpLineIndex] += (!sdpLines[codecFmtpLineIndex].split(' ')[1] ? ';' : '') + xGoogleParams;
+        sdpLines[codecFmtpLineIndex] += (sdpLines[codecFmtpLineIndex].split(' ')[1] ? ';' : '') + xGoogleParams;
       } else {
         sdpLines.splice(codecRtpMapLineIndex + 1, 0, 'a=fmtp:' + codec + ' ' + xGoogleParams);
       }

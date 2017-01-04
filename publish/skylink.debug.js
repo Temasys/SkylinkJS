@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Wed Dec 28 2016 17:41:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Thu Jan 05 2017 00:15:45 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -14468,7 +14468,7 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
       }
 
       if (codecFmtpLineIndex > -1) {
-        sdpLines[codecFmtpLineIndex] += (!sdpLines[codecFmtpLineIndex].split(' ')[1] ? ';' : '') + xGoogleParams;
+        sdpLines[codecFmtpLineIndex] += (sdpLines[codecFmtpLineIndex].split(' ')[1] ? ';' : '') + xGoogleParams;
       } else {
         sdpLines.splice(codecRtpMapLineIndex + 1, 0, 'a=fmtp:' + codec + ' ' + xGoogleParams);
       }
