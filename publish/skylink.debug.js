@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Jan 10 2017 01:55:23 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Tue Jan 10 2017 01:58:42 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -7415,7 +7415,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
 };
 
-Skylink.prototype.VERSION = '0.6.16';
+Skylink.prototype.VERSION = '0.6.17';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
