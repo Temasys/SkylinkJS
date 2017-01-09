@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 13:34:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 13:37:37 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -6773,9 +6773,6 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   should be enabled when available.
  * @param {Boolean} [options.sdpSettings.direction.video.receive=true] The flag if downloading video streaming
  *   should be enabled when available.
-
- <blockquote class="info">
- *   
  * @param {JSON|Boolean} [options.publishOnly] <blockquote class="info">
  *   For MCU enabled Peer connections, defining this flag would make Peer not know other Peers presence in the Room.<br>
  *   For non-MCU enable Peer connections, defining this flag would cause other Peers in the Room to
