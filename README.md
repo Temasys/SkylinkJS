@@ -18,8 +18,6 @@ You'll need a Temasys Developer Account and an App key to use this. [Register he
 - (*) Commerical Temasys Plugin incorporates additional features from Temasys Free Plugin.
 - (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.com.sg). For Firefox extensions source code, [you may download from your Application Key in console.temasys.io](https://console.temasys.io).
 
-*Here
-
 ##### Installation
 Install SkylinkJS with [npm](https://www.npmjs.com/):
 ```
