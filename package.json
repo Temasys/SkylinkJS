@@ -19,7 +19,7 @@
     "prestart": "./start.sh &"
   },
   "dependencies": {
-    "socket.io-client": "1.4.4",
+    "socket.io-client": "1.4.8",
     "adapterjs": "0.14.0"
   },
   "devDependencies": {
