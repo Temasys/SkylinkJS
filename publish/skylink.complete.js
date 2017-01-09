@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 13:58:04 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 22:17:35 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 13:58:04 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 22:17:35 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -16411,7 +16411,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           rtt: 0,
           jitter: 0,
           jitterBufferMs: null,
-          codec: self._getSDPSelectedCodec(peerId, pc.localDescription, 'audio'),
+          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'audio'),
           inputLevel: null,
           echoReturnLoss: null,
           echoReturnLossEnhancement: null,
@@ -16442,7 +16442,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           rtt: 0,
           jitter: 0,
           jitterBufferMs: null,
-          codec: self._getSDPSelectedCodec(peerId, pc.localDescription, 'video'),
+          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'video'),
           frameWidth: null,
           frameHeight: null,
           framesInput: null,
@@ -21062,6 +21062,8 @@ var _eventsDocs = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} [stats.audio.receiving.codec] The Peer connection receiving audio streaming selected codec information.
    *   <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+   *   <small>Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
+   *   The value is derived from the remote session description.</small>
    * @param {String} stats.audio.receiving.codec.name The Peer connection receiving audio streaming selected codec name.
    * @param {Number} stats.audio.receiving.codec.payloadType The Peer connection receiving audio streaming selected codec payload type.
    * @param {String} [stats.audio.receiving.codec.implementation] The Peer connection receiving audio streaming selected codec implementation.
@@ -21150,6 +21152,8 @@ var _eventsDocs = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} [stats.video.receiving.codec] The Peer connection receiving video streaming selected codec information.
    *   <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+   *   <small>Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
+   *   The value is derived from the remote session description.</small>
    * @param {String} stats.video.receiving.codec.name The Peer connection receiving video streaming selected codec name.
    * @param {Number} stats.video.receiving.codec.payloadType The Peer connection receiving video streaming selected codec payload type.
    * @param {String} [stats.video.receiving.codec.implementation] The Peer connection receiving video streaming selected codec implementation.

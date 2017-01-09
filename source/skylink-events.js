@@ -737,6 +737,8 @@ var _eventsDocs = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} [stats.audio.receiving.codec] The Peer connection receiving audio streaming selected codec information.
    *   <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+   *   <small>Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
+   *   The value is derived from the remote session description.</small>
    * @param {String} stats.audio.receiving.codec.name The Peer connection receiving audio streaming selected codec name.
    * @param {Number} stats.audio.receiving.codec.payloadType The Peer connection receiving audio streaming selected codec payload type.
    * @param {String} [stats.audio.receiving.codec.implementation] The Peer connection receiving audio streaming selected codec implementation.
@@ -825,6 +827,8 @@ var _eventsDocs = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} [stats.video.receiving.codec] The Peer connection receiving video streaming selected codec information.
    *   <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+   *   <small>Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
+   *   The value is derived from the remote session description.</small>
    * @param {String} stats.video.receiving.codec.name The Peer connection receiving video streaming selected codec name.
    * @param {Number} stats.video.receiving.codec.payloadType The Peer connection receiving video streaming selected codec payload type.
    * @param {String} [stats.video.receiving.codec.implementation] The Peer connection receiving video streaming selected codec implementation.

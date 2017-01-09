@@ -828,6 +828,8 @@ var _eventsDocs = {
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} [stats.audio.receiving.codec] The Peer connection receiving audio streaming selected codec information.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if remote session description is not available before parsing.&lt;/small&gt;
+   *   &lt;small&gt;Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
+   *   The value is derived from the remote session description.&lt;/small&gt;
    * @param {String} stats.audio.receiving.codec.name The Peer connection receiving audio streaming selected codec name.
    * @param {Number} stats.audio.receiving.codec.payloadType The Peer connection receiving audio streaming selected codec payload type.
    * @param {String} [stats.audio.receiving.codec.implementation] The Peer connection receiving audio streaming selected codec implementation.
@@ -916,6 +918,8 @@ var _eventsDocs = {
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} [stats.video.receiving.codec] The Peer connection receiving video streaming selected codec information.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if remote session description is not available before parsing.&lt;/small&gt;
+   *   &lt;small&gt;Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
+   *   The value is derived from the remote session description.&lt;/small&gt;
    * @param {String} stats.video.receiving.codec.name The Peer connection receiving video streaming selected codec name.
    * @param {Number} stats.video.receiving.codec.payloadType The Peer connection receiving video streaming selected codec payload type.
    * @param {String} [stats.video.receiving.codec.implementation] The Peer connection receiving video streaming selected codec implementation.
