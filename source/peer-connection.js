@@ -78,9 +78,9 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  *   For MCU enabled Peer connections with <code>options.mcuUseRenegoRestart</code> set to <code>false</code>
  *   in the <a href="#method_init"><code>init()</code> method</a>, the restart functionality may differ, you
  *   may learn more about how to workaround it
- *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.
+ *   <a href="http://support.temasys.io/support/discussions/topics/12000002853">in this article here</a>.
  *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
- *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.
+ *   <a href="http://support.temasys.io/support/discussions/topics/12000005188">in this article here</a>.
  *   Note that this functionality should be used when Peer connection stream freezes during a connection.
  *   For a better user experience for only MCU enabled Peer connections, the functionality is throttled when invoked many
  *   times in less than the milliseconds interval configured in the <a href="#method_init"><code>init()</code> method</a>.

@@ -182,7 +182,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
  *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
  *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
  *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
- *   <a href="http://support.temasys.com.sg">contact us on our support portal</a>.
+ *   <a href="http://support.temasys.io">contact us on our support portal</a>.
  * </blockquote>
  * Starts a recording session.
  * @method startRecording
@@ -258,7 +258,7 @@ Skylink.prototype.startRecording = function (callback) {
  *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
  *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
  *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
- *   <a href="http://support.temasys.com.sg">contact us on our support portal</a>.
+ *   <a href="http://support.temasys.io">contact us on our support portal</a>.
  * </blockquote>
  * Stops a recording session.
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -394,7 +394,7 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
  *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
  *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
  *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
- *   <a href="http://support.temasys.com.sg">contact us on our support portal</a>.
+ *   <a href="http://support.temasys.io">contact us on our support portal</a>.
  * </blockquote>
  * Gets the list of current recording sessions since User has connected to the Room.
  * @method getRecordings

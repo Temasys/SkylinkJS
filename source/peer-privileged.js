@@ -4,7 +4,7 @@
  *   provided in the <a href="#method_init"><code>init()</code> method</a>, as only Users connecting using
  *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
  *   Peer IDs from Rooms within the same App space.
- *   <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+ *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
  *   Read more about privileged App Key feature here</a>.
  * </blockquote>
  * The list of <a href="#method_getPeers"><code>getPeers()</code> method</a> retrieval states.
@@ -32,7 +32,7 @@ Skylink.prototype.GET_PEERS_STATE = {
  *   <a href="#method_init"><code>init()</code> method</a>, as only Users connecting using
  *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
  *   Peer IDs from Rooms within the same App space.
- *   <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+ *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
  *   Read more about privileged App Key feature here</a>.
  * </blockquote>
  * The list of <a href="#method_introducePeer"><code>introducePeer</code> method</a> Peer introduction request states.
@@ -57,7 +57,7 @@ Skylink.prototype.INTRODUCE_STATE = {
  *   provided in the <a href="#method_init"><code>init()</code> method</a>, as only Users connecting using
  *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
  *   Peer IDs from Rooms within the same App space.
- *   <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+ *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
  *   Read more about privileged App Key feature here</a>.
  * </blockquote>
  * Function that retrieves the list of Peer IDs from Rooms within the same App space.
@@ -151,7 +151,7 @@ Skylink.prototype.getPeers = function(showAll, callback){
  *   <a href="#method_init"><code>init()</code> method</a>, as only Users connecting using
  *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
  *   Peer IDs from Rooms within the same App space.
- *   <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+ *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
  *   Read more about privileged App Key feature here</a>.
  * </blockquote>
  * Function that selects and introduces a pair of Peers to start connection with each other.

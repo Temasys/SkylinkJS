@@ -153,7 +153,7 @@ var clone = function (obj) {
  *   <a href="#method_joinRoom"><code>joinRoom()</code></a> methods should be called.
  *
  * If you have any issues, you may find answers to your questions in the FAQ section on [our support portal](
- * http://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.
+ * http://support.temasys.io), asks questions, request features or raise bug tickets as well.
  *
  * If you would like to contribute to our SkylinkJS codebase, see [the contributing README](
  * https://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).

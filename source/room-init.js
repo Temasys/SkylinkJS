@@ -46,7 +46,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_DOMAIN_NOT_MATCH        <small>Value <code>4002</code></small>
  *   The value of the failure code when <code>"domainName"</code> property in the App Key does not
  *   match the accessing server IP address.
- *   <small>To resolve this, contact our <a href="http://support.temasys.com.sg">support portal</a>.</small>
+ *   <small>To resolve this, contact our <a href="http://support.temasys.io">support portal</a>.</small>
  * @param {Number} API_CORS_DOMAIN_NOT_MATCH   <small>Value <code>4003</code></small>
  *   The value of the failure code when <code>"corsurl"</code> property in the App Key does not match accessing CORS.
  *   <small>To resolve this, configure the App Key CORS in
@@ -70,7 +70,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_NO_MEETING_RECORD_FOUND <small>Value <code>4010</code></small>
  *   The value of the failure code when provided <code>options.credentials</code>
  *   does not match any scheduled meetings available for the "Persistent Room" enabled App Key provided.
- *   <small>See the <a href="http://support.temasys.com.sg/support/solutions/articles/
+ *   <small>See the <a href="http://support.temasys.io/support/solutions/articles/
  * 12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article</a> to learn more.</small>
  * @param {Number} API_OVER_SEAT_LIMIT         <small>Value <code>4020</code></small>
  *   The value of the failure code when App Key has reached its current concurrent users limit.
@@ -79,11 +79,11 @@ Skylink.prototype.READY_STATE_CHANGE = {
  *   docs</a> for more information.</small>
  * @param {Number} API_RETRIEVAL_FAILED        <small>Value <code>4021</code></small>
  *   The value of the failure code when App Key retrieval of authentication token fails.
- *   <small>If this happens frequently, contact our <a href="http://support.temasys.com.sg">support portal</a>.</small>
+ *   <small>If this happens frequently, contact our <a href="http://support.temasys.io">support portal</a>.</small>
  * @param {Number} API_WRONG_ACCESS_DOMAIN     <small>Value <code>5005</code></small>
  *   The value of the failure code when App Key makes request to the incorrect Auth server.
  *   <small>To resolve this, ensure that the <code>roomServer</code> is not configured. If this persists even without
- *   <code>roomServer</code> configuration, contact our <a href="http://support.temasys.com.sg">support portal</a>.</small>
+ *   <code>roomServer</code> configuration, contact our <a href="http://support.temasys.io">support portal</a>.</small>
  * @param {Number} XML_HTTP_REQUEST_ERROR      <small>Value <code>-1</code></small>
  *   The value of the failure code when requesting to Auth server has timed out.
  * @param {Number} NO_SOCKET_IO                <small>Value <code>1</code></small>
@@ -176,11 +176,11 @@ Skylink.prototype.generateUUID = function() {
  * @param {String} options.appKey The App Key.
  *   <small>By default, <code>init()</code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
  *   authentication. For credentials based authentication, see the <code>options.credentials</code> configuration
- *   below. You can know more about the <a href="http://support.temasys.com.sg/support/solutions/articles/
+ *   below. You can know more about the <a href="http://support.temasys.io/support/solutions/articles/
  * 12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here</a>
  *   for more details on the various authentication methods.</small>
  *   <small>If you are using the Persistent Room feature for scheduled meetings, you will require to
- *   use the credential based authentication. See the <a href="http://support.temasys.com.sg/support
+ *   use the credential based authentication. See the <a href="http://support.temasys.io/support
  * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
  *   </a> for more information.</small>
  * @param {String} [options.defaultRoom] The default Room to connect to when no <code>room</code> parameter
