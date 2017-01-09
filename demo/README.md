@@ -1,6 +1,6 @@
 ## Running the demos
 ### 1. Hosting the project repo files in a `localhost` server
-In order to run these demos locally, firstly, you will require to host the demos in your localhost. You may use the `server.js` that uses [NodeJS](https://nodejs.org) to start the localhost server. Simply invoke `node server` when you are in the SkylinkJS project repository folder.
+In order to run these demos locally, firstly, you will require to host the demos in your localhost. You may use the `server.js` that uses [NodeJS](https://nodejs.org) to start the localhost server. Simply invoke `node server` when you are in the Temasys SkylinkJS project repository folder.
 
 For windows, you will require to use the Node shell to run the NodeJS server.
 For mac / linux, simple invoke the command from the terminal.
