@@ -1,7 +1,7 @@
 {
     "project": {
         "name": "skylinkjs",
-        "description": "SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
+        "description": "Temasys SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
         "version": "0.6.16",
         "url": "https://temasys.github.io/"
     },
@@ -183,7 +183,7 @@
             "extension_for": [],
             "file": "source/template/header.js",
             "line": 132,
-            "description": "<h2>Prerequisites on using Skylink</h2>\nBefore using any Skylink functionalities, you will need to authenticate your App Key using\n  the <a href=\"#method_init\">`init()` method</a>.\n\nTo manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).\n\nTo view the list of supported browsers, visit [the list here](\nhttps://github.com/Temasys/SkylinkJS#supported-browsers).\n\nHere are some articles to help you get started:\n- [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)\n- [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)\n- [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)\n\nHere are some demos you may use to aid your development:\n- Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]\n- Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]\n\nYou may see the example below in the <a href=\"#\">Constructor tab</a> to have a general idea how event subscription\n  and the ordering of <a href=\"#method_init\"><code>init()</code></a> and\n  <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> methods should be called.\n\nIf you have any issues, you may find answers to your questions in the FAQ section on [our support portal](\nhttp://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.\n\nIf you would like to contribute to our SkylinkJS codebase, see [the contributing README](\nhttps://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).\n\n[See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)",
+            "description": "<h2>Prerequisites on using Skylink</h2>\nBefore using any Skylink functionalities, you will need to authenticate your App Key using\n  the <a href=\"#method_init\">`init()` method</a>.\n\nTo manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).\n\nTo view the list of supported browsers, visit [the list here](\nhttps://github.com/Temasys/SkylinkJS#supported-browsers).\n\nHere are some articles to help you get started:\n- [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)\n- [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)\n- [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)\n\nHere are some demos you may use to aid your development:\n- Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]\n- Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]\n\nYou may see the example below in the <a href=\"#\">Constructor tab</a> to have a general idea how event subscription\n  and the ordering of <a href=\"#method_init\"><code>init()</code></a> and\n  <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> methods should be called.\n\nIf you have any issues, you may find answers to your questions in the FAQ section on [our support portal](\nhttp://support.temasys.io), asks questions, request features or raise bug tickets as well.\n\nIf you would like to contribute to our Temasys SkylinkJS codebase, see [the contributing README](\nhttps://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).\n\n[See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)",
             "is_constructor": 1,
             "example": [
                 "\n  // Here's a simple example on how you can start using Skylink.\n  var skylinkDemo = new Skylink();\n\n  // Subscribe all events first as a general guideline\n  skylinkDemo.on(\"incomingStream\", function (peerId, stream, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById(\"selfVideo\"), stream);\n    } else {\n      var peerVideo = document.createElement(\"video\");\n      peerVideo.id = peerId;\n      peerVideo.autoplay = \"autoplay\";\n      document.getElementById(\"peersVideo\").appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  skylinkDemo.on(\"peerLeft\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      var peerVideo = document.getElementById(peerId);\n      // do a check if peerVideo exists first\n      if (peerVideo) {\n        document.getElementById(\"peersVideo\").removeChild(peerVideo);\n      } else {\n        console.error(\"Peer video for \" + peerId + \" is not found.\");\n      }\n    }\n  });\n\n // init() should always be called first before other methods other than event methods like on() or off().\n skylinkDemo.init(\"YOUR_APP_KEY_HERE\", function (error, success) {\n   if (success) {\n     skylinkDemo.joinRoom(\"my_room\", {\n       userData: \"My Username\",\n       audio: true,\n       video: true\n     });\n   }\n });"
@@ -2581,7 +2581,7 @@
         {
             "file": "source/peer-connection.js",
             "line": 76,
-            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections with <code>options.mcuUseRenegoRestart</code> set to <code>false</code>\n  in the <a href=\"#method_init\"><code>init()</code> method</a>, the restart functionality may differ, you\n  may learn more about how to workaround it\n  <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000002853\">in this article here</a>.\n  For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in\n  <a href=\"http://support.temasys.com.sg/support/discussions/topics/12000005188\">in this article here</a>.\n  Note that this functionality should be used when Peer connection stream freezes during a connection.\n  For a better user experience for only MCU enabled Peer connections, the functionality is throttled when invoked many\n  times in less than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nFunction that refreshes Peer connections to update with the current streaming.",
+            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections with <code>options.mcuUseRenegoRestart</code> set to <code>false</code>\n  in the <a href=\"#method_init\"><code>init()</code> method</a>, the restart functionality may differ, you\n  may learn more about how to workaround it\n  <a href=\"http://support.temasys.io/support/discussions/topics/12000002853\">in this article here</a>.\n  For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in\n  <a href=\"http://support.temasys.io/support/discussions/topics/12000005188\">in this article here</a>.\n  Note that this functionality should be used when Peer connection stream freezes during a connection.\n  For a better user experience for only MCU enabled Peer connections, the functionality is throttled when invoked many\n  times in less than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nFunction that refreshes Peer connections to update with the current streaming.",
             "itemtype": "method",
             "name": "refreshConnection",
             "params": [
@@ -3004,7 +3004,7 @@
         {
             "file": "source/peer-privileged.js",
             "line": 1,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled for the App Key\n  provided in the <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nThe list of <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval states.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled for the App Key\n  provided in the <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nThe list of <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval states.",
             "itemtype": "attribute",
             "name": "GET_PEERS_STATE",
             "params": [
@@ -3027,7 +3027,7 @@
         {
             "file": "source/peer-privileged.js",
             "line": 28,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nThe list of <a href=\"#method_introducePeer\"><code>introducePeer</code> method</a> Peer introduction request states.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nThe list of <a href=\"#method_introducePeer\"><code>introducePeer</code> method</a> Peer introduction request states.",
             "itemtype": "attribute",
             "name": "INTRODUCE_STATE",
             "params": [
@@ -3049,7 +3049,7 @@
         {
             "file": "source/peer-privileged.js",
             "line": 54,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled for the App Key\n  provided in the <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nFunction that retrieves the list of Peer IDs from Rooms within the same App space.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled for the App Key\n  provided in the <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nFunction that retrieves the list of Peer IDs from Rooms within the same App space.",
             "itemtype": "method",
             "name": "getPeers",
             "params": [
@@ -3089,7 +3089,7 @@
         {
             "file": "source/peer-privileged.js",
             "line": 147,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nFunction that selects and introduces a pair of Peers to start connection with each other.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires <code>\"isPrivileged\"</code> flag to be enabled and\n  <code>\"autoIntroduce\"</code> flag to be disabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>, as only Users connecting using\n  the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of\n  Peer IDs from Rooms within the same App space.\n  <a href=\"http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-\">\n  Read more about privileged App Key feature here</a>.\n</blockquote>\nFunction that selects and introduces a pair of Peers to start connection with each other.",
             "itemtype": "method",
             "name": "introducePeer",
             "params": [
@@ -3609,7 +3609,7 @@
                 },
                 {
                     "name": "API_DOMAIN_NOT_MATCH",
-                    "description": "<small>Value <code>4002</code></small>\n  The value of the failure code when <code>\"domainName\"</code> property in the App Key does not\n  match the accessing server IP address.\n  <small>To resolve this, contact our <a href=\"http://support.temasys.com.sg\">support portal</a>.</small>",
+                    "description": "<small>Value <code>4002</code></small>\n  The value of the failure code when <code>\"domainName\"</code> property in the App Key does not\n  match the accessing server IP address.\n  <small>To resolve this, contact our <a href=\"http://support.temasys.io\">support portal</a>.</small>",
                     "type": "Number"
                 },
                 {
@@ -3634,7 +3634,7 @@
                 },
                 {
                     "name": "API_NO_MEETING_RECORD_FOUND",
-                    "description": "<small>Value <code>4010</code></small>\n  The value of the failure code when provided <code>options.credentials</code>\n  does not match any scheduled meetings available for the \"Persistent Room\" enabled App Key provided.\n  <small>See the <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002811-using-the-persistent-room-feature-to-configure-meetings\">Persistent Room article</a> to learn more.</small>",
+                    "description": "<small>Value <code>4010</code></small>\n  The value of the failure code when provided <code>options.credentials</code>\n  does not match any scheduled meetings available for the \"Persistent Room\" enabled App Key provided.\n  <small>See the <a href=\"http://support.temasys.io/support/solutions/articles/\n12000002811-using-the-persistent-room-feature-to-configure-meetings\">Persistent Room article</a> to learn more.</small>",
                     "type": "Number"
                 },
                 {
@@ -3644,12 +3644,12 @@
                 },
                 {
                     "name": "API_RETRIEVAL_FAILED",
-                    "description": "<small>Value <code>4021</code></small>\n  The value of the failure code when App Key retrieval of authentication token fails.\n  <small>If this happens frequently, contact our <a href=\"http://support.temasys.com.sg\">support portal</a>.</small>",
+                    "description": "<small>Value <code>4021</code></small>\n  The value of the failure code when App Key retrieval of authentication token fails.\n  <small>If this happens frequently, contact our <a href=\"http://support.temasys.io\">support portal</a>.</small>",
                     "type": "Number"
                 },
                 {
                     "name": "API_WRONG_ACCESS_DOMAIN",
-                    "description": "<small>Value <code>5005</code></small>\n  The value of the failure code when App Key makes request to the incorrect Auth server.\n  <small>To resolve this, ensure that the <code>roomServer</code> is not configured. If this persists even without\n  <code>roomServer</code> configuration, contact our <a href=\"http://support.temasys.com.sg\">support portal</a>.</small>",
+                    "description": "<small>Value <code>5005</code></small>\n  The value of the failure code when App Key makes request to the incorrect Auth server.\n  <small>To resolve this, ensure that the <code>roomServer</code> is not configured. If this persists even without\n  <code>roomServer</code> configuration, contact our <a href=\"http://support.temasys.io\">support portal</a>.</small>",
                     "type": "Number"
                 },
                 {
@@ -3728,7 +3728,7 @@
                     "props": [
                         {
                             "name": "appKey",
-                            "description": "The App Key.\n  <small>By default, <code>init()</code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)\n  authentication. For credentials based authentication, see the <code>options.credentials</code> configuration\n  below. You can know more about the <a href=\"http://support.temasys.com.sg/support/solutions/articles/\n12000002712-authenticating-your-application-key-to-start-a-connection\">in the authentication methods article here</a>\n  for more details on the various authentication methods.</small>\n  <small>If you are using the Persistent Room feature for scheduled meetings, you will require to\n  use the credential based authentication. See the <a href=\"http://support.temasys.com.sg/support\n/solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings\">Persistent Room article here\n  </a> for more information.</small>",
+                            "description": "The App Key.\n  <small>By default, <code>init()</code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)\n  authentication. For credentials based authentication, see the <code>options.credentials</code> configuration\n  below. You can know more about the <a href=\"http://support.temasys.io/support/solutions/articles/\n12000002712-authenticating-your-application-key-to-start-a-connection\">in the authentication methods article here</a>\n  for more details on the various authentication methods.</small>\n  <small>If you are using the Persistent Room feature for scheduled meetings, you will require to\n  use the credential based authentication. See the <a href=\"http://support.temasys.io/support\n/solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings\">Persistent Room article here\n  </a> for more information.</small>",
                             "type": "String"
                         },
                         {
@@ -7214,7 +7214,7 @@
         {
             "file": "source/socket-message.js",
             "line": 180,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.com.sg\">contact us on our support portal</a>.\n</blockquote>\nStarts a recording session.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.io\">contact us on our support portal</a>.\n</blockquote>\nStarts a recording session.",
             "itemtype": "method",
             "name": "startRecording",
             "params": [
@@ -7248,7 +7248,7 @@
         {
             "file": "source/socket-message.js",
             "line": 256,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.com.sg\">contact us on our support portal</a>.\n</blockquote>\nStops a recording session.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.io\">contact us on our support portal</a>.\n</blockquote>\nStops a recording session.",
             "params": [
                 {
                     "name": "callback",
@@ -7301,7 +7301,7 @@
         {
             "file": "source/socket-message.js",
             "line": 392,
-            "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.com.sg\">contact us on our support portal</a>.\n</blockquote>\nGets the list of current recording sessions since User has connected to the Room.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.io\">contact us on our support portal</a>.\n</blockquote>\nGets the list of current recording sessions since User has connected to the Room.",
             "itemtype": "method",
             "name": "getRecordings",
             "return": {

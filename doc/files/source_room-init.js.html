@@ -137,7 +137,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_DOMAIN_NOT_MATCH        &lt;small&gt;Value &lt;code&gt;4002&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when &lt;code&gt;&quot;domainName&quot;&lt;/code&gt; property in the App Key does not
  *   match the accessing server IP address.
- *   &lt;small&gt;To resolve this, contact our &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;support portal&lt;/a&gt;.&lt;/small&gt;
+ *   &lt;small&gt;To resolve this, contact our &lt;a href=&quot;http://support.temasys.io&quot;&gt;support portal&lt;/a&gt;.&lt;/small&gt;
  * @param {Number} API_CORS_DOMAIN_NOT_MATCH   &lt;small&gt;Value &lt;code&gt;4003&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when &lt;code&gt;&quot;corsurl&quot;&lt;/code&gt; property in the App Key does not match accessing CORS.
  *   &lt;small&gt;To resolve this, configure the App Key CORS in
@@ -161,7 +161,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_NO_MEETING_RECORD_FOUND &lt;small&gt;Value &lt;code&gt;4010&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when provided &lt;code&gt;options.credentials&lt;/code&gt;
  *   does not match any scheduled meetings available for the &quot;Persistent Room&quot; enabled App Key provided.
- *   &lt;small&gt;See the &lt;a href=&quot;http://support.temasys.com.sg/support/solutions/articles/
+ *   &lt;small&gt;See the &lt;a href=&quot;http://support.temasys.io/support/solutions/articles/
  * 12000002811-using-the-persistent-room-feature-to-configure-meetings&quot;&gt;Persistent Room article&lt;/a&gt; to learn more.&lt;/small&gt;
  * @param {Number} API_OVER_SEAT_LIMIT         &lt;small&gt;Value &lt;code&gt;4020&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when App Key has reached its current concurrent users limit.
@@ -170,11 +170,11 @@ Skylink.prototype.READY_STATE_CHANGE = {
  *   docs&lt;/a&gt; for more information.&lt;/small&gt;
  * @param {Number} API_RETRIEVAL_FAILED        &lt;small&gt;Value &lt;code&gt;4021&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when App Key retrieval of authentication token fails.
- *   &lt;small&gt;If this happens frequently, contact our &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;support portal&lt;/a&gt;.&lt;/small&gt;
+ *   &lt;small&gt;If this happens frequently, contact our &lt;a href=&quot;http://support.temasys.io&quot;&gt;support portal&lt;/a&gt;.&lt;/small&gt;
  * @param {Number} API_WRONG_ACCESS_DOMAIN     &lt;small&gt;Value &lt;code&gt;5005&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when App Key makes request to the incorrect Auth server.
  *   &lt;small&gt;To resolve this, ensure that the &lt;code&gt;roomServer&lt;/code&gt; is not configured. If this persists even without
- *   &lt;code&gt;roomServer&lt;/code&gt; configuration, contact our &lt;a href=&quot;http://support.temasys.com.sg&quot;&gt;support portal&lt;/a&gt;.&lt;/small&gt;
+ *   &lt;code&gt;roomServer&lt;/code&gt; configuration, contact our &lt;a href=&quot;http://support.temasys.io&quot;&gt;support portal&lt;/a&gt;.&lt;/small&gt;
  * @param {Number} XML_HTTP_REQUEST_ERROR      &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when requesting to Auth server has timed out.
  * @param {Number} NO_SOCKET_IO                &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
@@ -267,11 +267,11 @@ Skylink.prototype.generateUUID = function() {
  * @param {String} options.appKey The App Key.
  *   &lt;small&gt;By default, &lt;code&gt;init()&lt;/code&gt; uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
  *   authentication. For credentials based authentication, see the &lt;code&gt;options.credentials&lt;/code&gt; configuration
- *   below. You can know more about the &lt;a href=&quot;http://support.temasys.com.sg/support/solutions/articles/
+ *   below. You can know more about the &lt;a href=&quot;http://support.temasys.io/support/solutions/articles/
  * 12000002712-authenticating-your-application-key-to-start-a-connection&quot;&gt;in the authentication methods article here&lt;/a&gt;
  *   for more details on the various authentication methods.&lt;/small&gt;
  *   &lt;small&gt;If you are using the Persistent Room feature for scheduled meetings, you will require to
- *   use the credential based authentication. See the &lt;a href=&quot;http://support.temasys.com.sg/support
+ *   use the credential based authentication. See the &lt;a href=&quot;http://support.temasys.io/support
  * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings&quot;&gt;Persistent Room article here
  *   &lt;/a&gt; for more information.&lt;/small&gt;
  * @param {String} [options.defaultRoom] The default Room to connect to when no &lt;code&gt;room&lt;/code&gt; parameter
