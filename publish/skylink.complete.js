@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Jan 10 2017 01:13:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Jan 10 2017 01:30:55 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Tue Jan 10 2017 01:13:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Jan 10 2017 01:30:55 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -17479,6 +17479,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       if (peerInfo.settings.video.customSettings.frameRate) {
         peerInfo.settings.video.frameRate = clone(peerInfo.settings.video.customSettings.frameRate);
       }
+      if (peerInfo.settings.video.customSettings.facingMode) {
+        peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
+      }
       if (peerInfo.settings.video.customSettings.width) {
         peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
         peerInfo.settings.video.resolution.width = clone(peerInfo.settings.video.customSettings.width);
@@ -17675,6 +17678,11 @@ Skylink.prototype._getUserInfo = function(peerId) {
     if (userInfo.settings.video.frameRate && typeof userInfo.settings.video.frameRate === 'object') {
       userInfo.settings.video.customSettings.frameRate = clone(userInfo.settings.video.frameRate);
       userInfo.settings.video.frameRate = -1;
+    }
+
+    if (userInfo.settings.video.facingMode && typeof userInfo.settings.video.facingMode === 'object') {
+      userInfo.settings.video.customSettings.facingMode = clone(userInfo.settings.video.facingMode);
+      userInfo.settings.video.facingMode = '-1';
     }
 
     if (userInfo.settings.video.resolution && typeof userInfo.settings.video.resolution === 'object') {
@@ -20614,6 +20622,9 @@ var _eventsDocs = {
    *   requested values of <code>peerInfo.settings.video.resolution</code>,
    *   <code>peerInfo.settings.video.frameRate</code> and <code>peerInfo.settings.video.deviceId</code>
    *   when provided.
+   * @param {String|JSON} [peerInfo.settings.video.facingMode] The Peer Stream video camera facing mode.
+   *   <small>When defined as a JSON object, it is the user set facingMode settings with (<code>"min"</code> or
+   *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).</small>
    * @param {JSON} peerInfo.settings.bandwidth The maximum streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
@@ -24147,6 +24158,9 @@ Skylink.prototype.RECORDING_STATE = {
  *   <small>The list of available video source ID can be retrieved by the <a href="https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.</small>
+ * @param {String|JSON} [options.video.facingMode] The video camera facing mode.
+ *   <small>The list of available video source ID can be retrieved by the <a href="https://developer.mozilla.org
+ *   /en-US/docs/Web/API/MediaTrackConstraints/facingMode">MediaTrackConstraints <code>facingMode</code> API</a>.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -25448,14 +25462,19 @@ Skylink.prototype._parseStreamSettings = function(options) {
         settings.settings.video.resolution.height : (options.useExactConstraints ?
         { exact: settings.settings.video.resolution.height } : { max: settings.settings.video.resolution.height });
 
-      if ((options.video.frameRate && typeof options.video.frameRate === 'object') || typeof options.video.frameRate === 'number') {
-        //
-        if (!(typeof options.video.frameRate === 'number' && !options.useExactConstraints && self._isUsingPlugin)) {
-          settings.settings.video.frameRate = options.video.frameRate;
-          settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === 'object' ?
-            settings.settings.video.frameRate : (options.useExactConstraints ?
-            { exact: settings.settings.video.frameRate } : { max: settings.settings.video.frameRate });
-        }
+      if ((options.video.frameRate && typeof options.video.frameRate === 'object') ||
+        typeof options.video.frameRate === 'number' && !self._isUsingPlugin) {
+        settings.settings.video.frameRate = options.video.frameRate;
+        settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === 'object' ?
+          settings.settings.video.frameRate : (options.useExactConstraints ?
+          { exact: settings.settings.video.frameRate } : { max: settings.settings.video.frameRate });
+      }
+
+      if (options.video.facingMode && ['string', 'object'].indexOf(typeof options.video.facingMode) > -1 && self._isUsingPlugin) {
+        settings.settings.video.facingMode = options.video.facingMode;
+        settings.getUserMediaSettings.video.facingMode = typeof settings.settings.video.facingMode === 'object' ?
+          settings.settings.video.facingMode : (options.useExactConstraints ?
+          { exact: settings.settings.video.facingMode } : { max: settings.settings.video.facingMode });
       }
     } else if (options.useExactConstraints) {
       settings.getUserMediaSettings.video = {

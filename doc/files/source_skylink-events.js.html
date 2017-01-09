@@ -380,6 +380,9 @@ var _eventsDocs = {
    *   requested values of &lt;code&gt;peerInfo.settings.video.resolution&lt;/code&gt;,
    *   &lt;code&gt;peerInfo.settings.video.frameRate&lt;/code&gt; and &lt;code&gt;peerInfo.settings.video.deviceId&lt;/code&gt;
    *   when provided.
+   * @param {String|JSON} [peerInfo.settings.video.facingMode] The Peer Stream video camera facing mode.
+   *   &lt;small&gt;When defined as a JSON object, it is the user set facingMode settings with (&lt;code&gt;&quot;min&quot;&lt;/code&gt; or
+   *   &lt;code&gt;&quot;max&quot;&lt;/code&gt; or &lt;code&gt;&quot;ideal&quot;&lt;/code&gt; or &lt;code&gt;&quot;exact&quot;&lt;/code&gt; etc configurations).&lt;/small&gt;
    * @param {JSON} peerInfo.settings.bandwidth The maximum streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.

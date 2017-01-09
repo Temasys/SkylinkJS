@@ -233,6 +233,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       if (peerInfo.settings.video.customSettings.frameRate) {
         peerInfo.settings.video.frameRate = clone(peerInfo.settings.video.customSettings.frameRate);
       }
+      if (peerInfo.settings.video.customSettings.facingMode) {
+        peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
+      }
       if (peerInfo.settings.video.customSettings.width) {
         peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
         peerInfo.settings.video.resolution.width = clone(peerInfo.settings.video.customSettings.width);
@@ -429,6 +432,11 @@ Skylink.prototype._getUserInfo = function(peerId) {
     if (userInfo.settings.video.frameRate &amp;&amp; typeof userInfo.settings.video.frameRate === &#x27;object&#x27;) {
       userInfo.settings.video.customSettings.frameRate = clone(userInfo.settings.video.frameRate);
       userInfo.settings.video.frameRate = -1;
+    }
+
+    if (userInfo.settings.video.facingMode &amp;&amp; typeof userInfo.settings.video.facingMode === &#x27;object&#x27;) {
+      userInfo.settings.video.customSettings.facingMode = clone(userInfo.settings.video.facingMode);
+      userInfo.settings.video.facingMode = &#x27;-1&#x27;;
     }
 
     if (userInfo.settings.video.resolution &amp;&amp; typeof userInfo.settings.video.resolution === &#x27;object&#x27;) {
