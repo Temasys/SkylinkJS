@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Thu Jan 05 2017 00:15:45 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 10:48:31 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -10549,7 +10549,7 @@ Skylink.prototype._closeChannel = function() {
   this._channelOpen = false;
   this._trigger('channelClose');
 };
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.2';
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.2.3';
 
 /**
  * Stores the list of socket messaging protocol types.

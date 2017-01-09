@@ -9,7 +9,7 @@
  * @for Skylink
  * @since 0.6.0
  */
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.2';
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.2.3';
 
 /**
  * Stores the list of socket messaging protocol types.
