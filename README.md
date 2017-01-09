@@ -45,7 +45,7 @@ You can raise tickets on [our support portal](http://support.temasys.com.sg) or 
 ##### Current versions and stability
 Always use the latest versions of the SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: `0.6.15`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.15).
+[Latest version: `0.6.16`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.16).
 
 #### Noted Issues and Solutions
 ##### Installing `0.6.3` - `0.6.10` versions in NPM
@@ -90,6 +90,8 @@ npm install grunt -g
 npm install grunt-cli -g
 
 # 4. Install Browserify and Testling to run test scripts :
+
+> **Note** that currently the test scripts are outdated and may not work as we are evaluating to upgrade the test scripts in the future.
 
 npm install browserify -g
 npm install testling -g

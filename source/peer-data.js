@@ -1,45 +1,4 @@
 /**
- * Stores the list of Peers session information.
- * @attribute _peerInformations
- * @param {JSON} <#peerId> The Peer session information.
- * @param {JSON|String} <#peerId>.userData The Peer custom data.
- * @param {JSON} <#peerId>.settings The Peer streaming information.
- * @param {JSON} <#peerId>.mediaStatus The Peer streaming muted status.
- * @param {JSON} <#peerId>.agent The Peer agent information.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._peerInformations = {};
-
-/**
- * Stores the Signaling user credentials from the API response required for connecting to the Signaling server.
- * @attribute _user
- * @param {String} uid The API result "username".
- * @param {String} token The API result "userCred".
- * @param {String} timeStamp The API result "timeStamp".
- * @param {String} sid The Signaling server receive user Peer ID.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._user = null;
-
-/**
- * Stores the User custom data.
- * By default, if no custom user data is set, it is an empty string <code>""</code>.
- * @attribute _userData
- * @type JSON|String
- * @default ""
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._userData = '';
-
-/**
  * Function that overwrites the User current custom data.
  * @method setUserData
  * @param {JSON|String} userData The updated custom data.
@@ -76,16 +35,21 @@ Skylink.prototype._userData = '';
  */
 Skylink.prototype.setUserData = function(userData) {
   var self = this;
+  var updatedUserData = '';
 
-  this._userData = userData || '';
+  if (!(typeof userData === 'undefined' || userData === null)) {
+    updatedUserData = userData;
+  }
+
+  this._userData = updatedUserData;
 
   if (self._inRoom) {
-    log.log('Updated userData -> ', userData);
+    log.log('Updated userData -> ', updatedUserData);
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
       mid: self._user.sid,
       rid: self._room.id,
-      userData: self._userData,
+      userData: updatedUserData,
       stamp: (new Date()).getTime()
     });
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
@@ -111,15 +75,12 @@ Skylink.prototype.setUserData = function(userData) {
  * @since 0.5.10
  */
 Skylink.prototype.getUserData = function(peerId) {
-  if (peerId && peerId !== this._user.sid) {
-    // peer info
-    var peerInfo = this._peerInformations[peerId];
-
-    if (typeof peerInfo === 'object') {
-      return peerInfo.userData;
+  if (peerId && this._peerInformations[peerId]) {
+    var userData = this._peerInformations[peerId].userData;
+    if (!(userData !== null && typeof userData === 'undefined')) {
+      userData = '';
     }
-
-    return null;
+    return userData;
   }
   return this._userData;
 };
@@ -148,14 +109,73 @@ Skylink.prototype.getPeerInfo = function(peerId) {
   if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
     peerInfo = clone(this._peerInformations[peerId]);
     peerInfo.room = clone(this._selectedRoom);
-    
-    if (peerInfo.settings.video && peerInfo.settings.video.frameRate === -1) {
-      delete peerInfo.settings.video.frameRate;
+    peerInfo.settings.bandwidth = peerInfo.settings.bandwidth || {};
+    peerInfo.settings.googleXBandwidth = peerInfo.settings.googleXBandwidth || {};
+
+    if (!(typeof peerInfo.settings.video === 'boolean' || (peerInfo.settings.video &&
+      typeof peerInfo.settings.video === 'object'))) {
+      peerInfo.settings.video = false;
+      peerInfo.mediaStatus.audioMuted = true;
+    }
+
+    if (!(typeof peerInfo.settings.audio === 'boolean' || (peerInfo.settings.audio &&
+      typeof peerInfo.settings.audio === 'object'))) {
+      peerInfo.settings.audio = false;
+      peerInfo.mediaStatus.audioMuted = true;
+    }
+
+    if (typeof peerInfo.mediaStatus.audioMuted !== 'boolean') {
+      peerInfo.mediaStatus.audioMuted = true;
+    }
+
+    if (typeof peerInfo.mediaStatus.videoMuted !== 'boolean') {
+      peerInfo.mediaStatus.videoMuted = true;
+    }
+
+    if (peerInfo.settings.maxBandwidth) {
+      peerInfo.settings.bandwidth = clone(peerInfo.settings.maxBandwidth);
+      delete peerInfo.settings.maxBandwidth;
+    }
+
+    if (peerInfo.settings.video && typeof peerInfo.settings.video === 'object' &&
+      peerInfo.settings.video.customSettings && typeof peerInfo.settings.video.customSettings === 'object') {
+      if (peerInfo.settings.video.customSettings.frameRate) {
+        peerInfo.settings.video.frameRate = clone(peerInfo.settings.video.customSettings.frameRate);
+      }
+      if (peerInfo.settings.video.customSettings.width) {
+        peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+        peerInfo.settings.video.resolution.width = clone(peerInfo.settings.video.customSettings.width);
+      }
+      if (peerInfo.settings.video.customSettings.height) {
+        peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+        peerInfo.settings.video.resolution.height = clone(peerInfo.settings.video.customSettings.height);
+      }
+      if (peerInfo.settings.video.customSettings.facingMode) {
+        peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
+      }
+    }
+
+    if (peerInfo.settings.audio && typeof peerInfo.settings.audio === 'object') {
+      peerInfo.settings.audio.stereo = peerInfo.settings.audio.stereo === true;
+    }
+
+    if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
+      peerInfo.userData = '';
+    }
+
+    peerInfo.parentId = peerInfo.parentId || null;
+
+    if (peerId === 'MCU') {
+      peerInfo.config.receiveOnly = true;
+      peerInfo.config.publishOnly = false;
+    } else if (this._hasMCU) {
+      peerInfo.config.receiveOnly = false;
+      peerInfo.config.publishOnly = true;
     }
 
   } else {
     peerInfo = {
-      userData: clone(this._userData) || '',
+      userData: clone(this._userData),
       settings: {
         audio: false,
         video: false
@@ -165,16 +185,35 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         name: window.webrtcDetectedBrowser,
         version: window.webrtcDetectedVersion,
         os: window.navigator.platform,
-        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null
+        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        SMProtocolVersion: this.SMProtocolVersion,
+        DTProtocolVersion: this.DTProtocolVersion
       },
-      room: clone(this._selectedRoom)
+      room: clone(this._selectedRoom),
+      config: {
+        enableDataChannel: this._enableDataChannel,
+        enableIceTrickle: this._enableIceTrickle,
+        enableIceRestart: this._enableIceRestart,
+        priorityWeight: this._peerPriorityWeight,
+        receiveOnly: false,
+        publishOnly: !!this._publishOnly
+      }
     };
+
+    if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
+      peerInfo.userData = '';
+    }
 
     if (this._streams.screenshare) {
       peerInfo.settings = clone(this._streams.screenshare.settings);
     } else if (this._streams.userMedia) {
       peerInfo.settings = clone(this._streams.userMedia.settings);
     }
+
+    peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
+    peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
+    peerInfo.parentId = this._publishOnly ? this._publishOnly.parentId || null : null;
+    peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
   }
 
   if (!peerInfo.settings.audio) {
@@ -189,6 +228,100 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 };
 
 /**
+ * Function that gets the list of connected Peers in the Room.
+ * @method getPeersInRoom
+ * @return {JSON} The list of connected Peers. <ul>
+ *   <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer information.
+ *   <small>Object signature matches the <code>peerInfo</code> parameter payload received in the
+ *   <a href="#event_peerJoined"><code>peerJoined</code> event</a> except there is
+ *   the <code>isSelf</code> flag that determines if Peer is User or not.</small></p></li></ul>
+ * @example
+ *   // Example 1: Get the list of currently connected Peers in the same Room
+ *   var peers = skylinkDemo.getPeersInRoom();
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype.getPeersInRoom = function() {
+  var listOfPeersInfo = {};
+  var listOfPeers = Object.keys(this._peerInformations);
+
+  for (var i = 0; i < listOfPeers.length; i++) {
+    listOfPeersInfo[listOfPeers[i]] = clone(this.getPeerInfo(listOfPeers[i]));
+    listOfPeersInfo[listOfPeers[i]].isSelf = false;
+  }
+
+  if (this._user && this._user.sid) {
+    listOfPeersInfo[this._user.sid] = clone(this.getPeerInfo());
+    listOfPeersInfo[this._user.sid].isSelf = true;
+  }
+
+  return listOfPeersInfo;
+};
+
+/**
+ * Function that gets the list of connected Peers Streams in the Room.
+ * @method getPeersStream
+ * @return {JSON} The list of Peers Stream. <ul>
+ *   <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer Stream.</p><ul>
+ *   <li><code>stream</code><var><b>{</b>MediaStream<b>}</b></var><p>The Stream object.</p></li>
+ *   <li><code>streamId</code><var><b>{</b>String<b>}</b></var><p>The Stream ID.</p></li>
+ *   <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
+ *   </p></li></ul></li></ul>
+ * @example
+ *   // Example 1: Get the list of currently connected Peers in the same Room
+ *   var streams = skylinkDemo.getPeersStream();
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype.getPeersStream = function() {
+  var listOfPeersStreams = {};
+  var listOfPeers = Object.keys(this._peerConnections);
+
+  for (var i = 0; i < listOfPeers.length; i++) {
+    var stream = null;
+
+    if (this._peerConnections[listOfPeers[i]] &&
+      this._peerConnections[listOfPeers[i]].remoteDescription &&
+      this._peerConnections[listOfPeers[i]].remoteDescription.sdp &&
+      (this._sdpSettings.direction.audio.receive || this._sdpSettings.direction.video.receive)) {
+      var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
+
+      for (var j = 0; j < streams.length; j++) {
+        if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
+          'msid:' + (streams[j].id || streams[j].label)) > 0) {
+          stream = streams[j];
+          break;
+        }
+      }
+    }
+
+    listOfPeersStreams[listOfPeers[i]] = {
+      streamId: stream ? stream.id || stream.label || null : null,
+      stream: stream,
+      isSelf: false
+    };
+  }
+
+  if (this._user && this._user.sid) {
+    var selfStream = null;
+
+    if (this._streams.screenshare && this._streams.screenshare.stream) {
+      selfStream = this._streams.screenshare.stream;
+    } else if (this._streams.userMedia && this._streams.userMedia.stream) {
+      selfStream = this._streams.userMedia.stream;
+    }
+
+    listOfPeersStreams[this._user.sid] = {
+      streamId: selfStream ? selfStream.id || selfStream.label || null : null,
+      stream: selfStream,
+      isSelf: true
+    };
+  }
+
+  return listOfPeersStreams;
+};
+
+/**
  * Function that returns the User session information to be sent to Peers.
  * @method _getUserInfo
  * @private
@@ -198,12 +331,34 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 Skylink.prototype._getUserInfo = function(peerId) {
   var userInfo = clone(this.getPeerInfo());
 
-  if (userInfo.settings.video && !userInfo.settings.video.frameRate) {
-    userInfo.settings.video.frameRate = -1;
+  // Adhere to SM protocol without breaking the other SDKs.
+  if (userInfo.settings.video && typeof userInfo.settings.video === 'object') {
+    userInfo.settings.video.customSettings = {};
+
+    if (userInfo.settings.video.frameRate && typeof userInfo.settings.video.frameRate === 'object') {
+      userInfo.settings.video.customSettings.frameRate = clone(userInfo.settings.video.frameRate);
+      userInfo.settings.video.frameRate = -1;
+    }
+
+    if (userInfo.settings.video.resolution && typeof userInfo.settings.video.resolution === 'object') {
+      if (userInfo.settings.video.resolution.width && typeof userInfo.settings.video.resolution.width === 'object') {
+        userInfo.settings.video.customSettings.width = clone(userInfo.settings.video.width);
+        userInfo.settings.video.resolution.width = -1;
+      }
+
+      if (userInfo.settings.video.resolution.height && typeof userInfo.settings.video.resolution.height === 'object') {
+        userInfo.settings.video.customSettings.height = clone(userInfo.settings.video.height);
+        userInfo.settings.video.resolution.height = -1;
+      }
+    }
+  }
+
+  if (userInfo.settings.bandwidth) {
+    userInfo.settings.maxBandwidth = clone(userInfo.settings.bandwidth);
+    delete userInfo.settings.bandwidth;
   }
 
   delete userInfo.agent;
   delete userInfo.room;
-
   return userInfo;
 };

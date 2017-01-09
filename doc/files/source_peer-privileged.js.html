@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.15</title>
+    <title>SkylinkJS 0.6.16</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.15</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.16</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -141,42 +141,6 @@ Skylink.prototype.INTRODUCE_STATE = {
 	INTRODUCING: &#x27;introducing&#x27;,
 	ERROR: &#x27;error&#x27;
 };
-
-/**
- * Stores the flag that indicates if &quot;autoIntroduce&quot; is enabled.
- * If enabled, the Peers connecting the same Room will receive each others &quot;enter&quot; message ping.
- * @attribute _autoIntroduce
- * @type Boolean
- * @default true
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._autoIntroduce = true;
-
-/**
- * Stores the flag that indicates if &quot;isPrivileged&quot; is enabled.
- * If enabled, the User has Privileged features which has the ability to retrieve the list of
- *   Peers in the same App space with &lt;code&gt;getPeers()&lt;/code&gt; method
- *   and introduce Peers to each other with &lt;code&gt;introducePeer&lt;/code&gt; method.
- * @attribute isPrivileged
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._isPrivileged = false;
-
-/**
- * Stores the list of Peers retrieved from the Signaling from &lt;code&gt;getPeers()&lt;/code&gt; method.
- * @attribute _peerList
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._peerList = null;
 
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;

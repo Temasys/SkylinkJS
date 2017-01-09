@@ -1,3 +1,5 @@
+> **Note** that currently the test scripts are outdated and may not work as we are evaluating to upgrade the test scripts in the future.
+
 ## Running the tests
 
 ### 1. Setting up the Configuration (`config.js`) file

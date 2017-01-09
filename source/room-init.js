@@ -1,4 +1,14 @@
 /**
+ * Contains the current version of Skylink Web SDK.
+ * @attribute VERSION
+ * @type String
+ * @readOnly
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.VERSION = '@@version';
+
+/**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
  * @attribute READY_STATE_CHANGE
  * @param {Number} INIT      <small>Value <code>0</code></small>
@@ -125,192 +135,38 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 };
 
 /**
- * <blockquote class="info"><b>Deprecation Warning!</b>
- *   This constant has been deprecated.<br>Automatic nearest regional server has been implemented
- *   on the platform.
- * </blockquote>
- * The list of available Auth servers in these regions configured in the
- * <a href="#method_init"><code>init()</code> method</a>.
+ * Spoofs the REGIONAL_SERVER to prevent errors on deployed apps except the fact this no longer works.
+ * Automatic regional selection has already been implemented hence REGIONAL_SERVER is no longer useful.
  * @attribute REGIONAL_SERVER
- * @param {String} APAC1 <small>Value <code>"sg"</code></small>
- *   The value of the option to use the Auth server in Asia Pacific (APAC).
- * @param {String} US1   <small>Value <code>"us2"</code></small>
- *   The value of the option to use the Auth server in United States (US).
- * @deprecated
  * @type JSON
  * @readOnly
+ * @private
  * @for Skylink
- * @since 0.5.0
+ * @since 0.6.16
  */
 Skylink.prototype.REGIONAL_SERVER = {
-  APAC1: 'sg',
-  US1: 'us2'
+  APAC1: '',
+  US1: ''
 };
 
 /**
- * Stores the flag if HTTPS connections should be enforced when connecting to
- *   the API or Signaling server if App is accessing from HTTP domain.
- * HTTPS connections are enforced if App is accessing from HTTPS domains.
- * @attribute _forceSSL
- * @type Boolean
- * @default false
- * @private
+ * Function that generates an <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a> (Unique ID).
+ * @method generateUUID
+ * @return {String} Returns a generated UUID (Unique ID).
  * @for Skylink
- * @since 0.5.4
+ * @since 0.5.9
  */
-Skylink.prototype._forceSSL = false;
-
-/**
- * Stores the flag if TURNS connections should be enforced when connecting to
- *   the TURN server if App is accessing from HTTP domain.
- * TURNS connections are enforced if App is accessing from HTTPS domains.
- * @attribute _forceTURNSSL
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._forceTURNSSL = false;
-
-/**
- * Stores the flag if TURN connections should be enforced when connecting to Peers.
- * This filters all non "relay" ICE candidates to enforce connections via the TURN server.
- * @attribute _forceTURN
- * @type Boolean
- * @default false
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._forceTURN = false;
-
-/**
- * Stores the construct API REST path to obtain Room credentials.
- * @attribute _path
- * @type String
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._path = null;
-
-/**
- * Stores the server region for the Signaling server to use.
- * This is already deprecated an no longer useful. To discuss and remove.
- * @attribute _serverRegion
- * @type String
- * @private
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype._serverRegion = null;
-
-/**
- * Stores the API server url.
- * @attribute _roomServer
- * @type String
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._roomServer = '//api.temasys.com.sg';
-
-/**
- * Stores the App Key configured in <code>init()</code>.
- * @attribute _appKey
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._appKey = null;
-
-/**
- * Stores the default Room name to connect to when <code>joinRoom()</code> does not provide a Room name.
- * @attribute _defaultRoom
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._defaultRoom = null;
-
-/**
- * Stores the <code>init()</code> credentials starting DateTime stamp in ISO 8601.
- * @attribute _roomStart
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._roomStart = null;
-
-/**
- * Stores the <code>init()</code> credentials duration counted in hours.
- * @attribute _roomDuration
- * @type Number
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._roomDuration = null;
-
-/**
- * Stores the <code>init()</code> generated credentials string.
- * @attribute _roomCredentials
- * @type String
- * @private
- * @for Skylink
- * @since 0.3.0
- */
-Skylink.prototype._roomCredentials = null;
-
-/**
- * Stores the current <code>init()</code> readyState.
- * @attribute _readyState
- * @type Number
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._readyState = 0;
-
-/**
- * Stores the "cid" used for <code>joinRoom()</code>.
- * @attribute _key
- * @type String
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._key = null;
-
-/**
- * Stores the "apiOwner" used for <code>joinRoom()</code>.
- * @attribute _appKeyOwner
- * @type String
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._appKeyOwner = null;
-
-/**
- * Stores the Room credentials information for <code>joinRoom()</code>.
- * @attribute _room
- * @param {String} id The "rid" for <code>joinRoom()</code>.
- * @param {String} token The "roomCred" for <code>joinRoom()</code>.
- * @param {String} startDateTime The "start" for <code>joinRoom()</code>.
- * @param {String} duration The "len" for <code>joinRoom()</code>.
- * @param {String} connection The RTCPeerConnection constraints and configuration. This is not used in the SDK
- *   except for the "mediaConstraints" property that sets the default <code>getUserMedia()</code> settings.
- * @type JSON
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._room = null;
+/* jshint ignore:start */
+Skylink.prototype.generateUUID = function() {
+  var d = new Date().getTime();
+  var uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
+    var r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c === 'x' ? r : (r && 0x7 | 0x8)).toString(16);
+  });
+  return uuid;
+};
+/* jshint ignore:end */
 
 /**
  * Function that authenticates and initialises App Key used for Room connections.
@@ -329,16 +185,11 @@ Skylink.prototype._room = null;
  *   </a> for more information.</small>
  * @param {String} [options.defaultRoom] The default Room to connect to when no <code>room</code> parameter
  *    is provided in  <a href="#method_joinRoom"><code>joinRoom()</code> method</a>.
- * - When not provided, its value is <code>options.appKey</code>.
+ * - When not provided or is provided as an empty string, its value is <code>options.appKey</code>.
  *   <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.
  *   The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>
  * @param {String} [options.roomServer] The Auth server.
  * <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
- * @param {String} [options.region] <blockquote class="info"><b>Deprecation Warning!</b>
- *   This option has been deprecated.<br>Automatic nearest regional server has been implemented
- *   on the platform.</blockquote>
- *   The Auth server in the various regions to connect to for better connectivity.
- *   [Rel: Skylink.REGIONAL_SERVER]
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
  * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections should be enabled.
@@ -351,10 +202,14 @@ Skylink.prototype._room = null;
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
- *   <small>This sets <code>options.enableTURNServer</code> value to <code>true</code> and
- *   <code>options.enableSTUNServer</code> value to <code>false</code>.</small>
- *   <small>During Peer connections, it filters out non <code>"relay"</code> ICE candidates to
- *   ensure that TURN connections is enforced.</small>
+ *   <small>This overrides <code>options.enableTURNServer</code> value to <code>true</code> and
+ *   <code>options.enableSTUNServer</code> value to <code>false</code>, <code>options.filterCandidatesType.host</code>
+ *   value to <code>true</code>, <code>options.filterCandidatesType.srflx</code> value to <code>true</code> and
+ *   <code>options.filterCandidatesType.relay</code> value to <code>false</code>.</small>
+ *   <small>Note that currently for MCU enabled Peer connections, the <code>options.filterCandidatesType</code>
+ *   configuration is not honoured as Peers connected with MCU is similar as a forced TURN connection. The flags
+ *   will act as if the value is <code>false</code> and ICE candidates will never be filtered regardless of the
+ *   <code>options.filterCandidatesType</code> configuration.</small>
  * @param {Boolean} [options.usePublicSTUN=true] The flag if publicly available STUN ICE servers should
  *   be used if <code>options.enableSTUNServer</code> is enabled.
  * @param {Boolean} [options.TURNServerTransport] <blockquote class="info">
@@ -366,6 +221,22 @@ Skylink.prototype._room = null;
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is <code>ANY</code>.
  *   [Rel: Skylink.TURN_TRANSPORT]
+ * @param {Boolean} [options.disableVideoFecCodecs=false] <blockquote class="info">
+ *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled,
+ *   and to prevent connectivity issues, these codecs will not be removed for MCU enabled Peer connections.
+ *   </blockquote> The flag if video FEC (Forward Error Correction)
+ *   codecs like ulpfec and red should be removed in sending session descriptions.
+ *   <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>
+ * @param {Boolean} [options.disableComfortNoiseCodec=false] <blockquote class="info">
+ *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
+ *   </blockquote> The flag if audio
+ *   <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
+ *   in sending session descriptions.
+ *   <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small>
+ * @param {Boolean} [options.disableREMB=false] <blockquote class="info">
+ *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
+ *   it may cause disruptions in connections or connectivity issues when toggled. </blockquote>
+ *   The flag if video REMB feedback packets should be disabled in sending session descriptions.
  * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
  *   <code>joinRoom()</code> method</a>.
@@ -403,15 +274,17 @@ Skylink.prototype._room = null;
  *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.</blockquote>
  *   The option to configure the preferred audio codec
- *   to use to encode sending audio data when available for Peer connection.
+ *   to use to decode receiving audio data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
+ *   <small>Note that Peers may override the receiving audio codec depending on the Peers configuration.</small>
  *   [Rel: Skylink.AUDIO_CODEC]
  * @param {String} [options.videoCodec] <blockquote class="info">
- *    Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
+ *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.</blockquote>
  *   The option to configure the preferred video codec
- *   to use to encode sending video data when available for Peer connection.
+ *   to use to decode receiving video data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
+ *   <small>Note that Peers may override the receiving video codec depending on the Peers configuration.</small>
  *   [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
@@ -420,7 +293,29 @@ Skylink.prototype._room = null;
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
  *   TURN ICE servers using port <code>443</code> will be used instead.</blockquote>
  *   The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.
- *   <small>By default, <code>"https:"</code> protocol connections uses TURNS protocol.</small>
+ * @param {JSON} [options.filterCandidatesType] <blockquote class="info">
+ *   Note that this a debugging feature and there might be connectivity issues when toggling these flags.
+ *   </blockquote> The configuration options to filter the type of ICE candidates sent and received.
+ * @param {Boolean} [options.filterCandidatesType.host=false] The flag if local network ICE candidates should be filtered out.
+ * @param {Boolean} [options.filterCandidatesType.srflx=false] The flag if STUN ICE candidates should be filtered out.
+ * @param {Boolean} [options.filterCandidatesType.relay=false] The flag if TURN ICE candidates should be filtered out.
+ * @param {JSON} [options.throttleIntervals] The configuration options to configure the throttling method timeouts.
+ * @param {Number} [options.throttleIntervals.shareScreen=10000] The interval timeout for
+ *   <a href="#method_shareScreen"><code>shareScreen()</code> method</a> throttling in milliseconds.
+ * @param {Number} [options.throttleIntervals.getUserMedia=0] The interval timeout for
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> throttling in milliseconds.
+ * @param {Number} [options.throttleIntervals.refreshConnection=5000] <blockquote class="info">
+ *   Note that this throttling is only done for MCU enabled Peer connections with the
+ *   <code>options.mcuUseRenegoRestart</code> being set to <code>false</code>.
+ *   </blockquote> The interval timeout for <a href="#method_refreshConnection">
+ *   <code>refreshConnection()</code> method</a> throttling in milliseconds.
+ *   <small>Note that there will be no throttling when <a href="#method_refreshConnection">
+ *   <code>refreshConnection()</code> method</a> is called internally.</small>
+ * @param {Boolean} [options.throttleShouldThrowError=false] The flag if throttled methods should throw errors when
+ *   method is invoked less than the interval timeout value configured in <code>options.throttleIntervals</code>.
+ * @param {Boolean} [options.mcuUseRenegoRestart=false] The flag if <a href="#method_refreshConnection"><code>
+ *   refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU
+ *   enabled Peer connections instead of invoking <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -451,7 +346,6 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.enableTURNServer The configured value of the <code>options.enableTURNServer</code>.
  * @param {Boolean} callback.success.enableSTUNServer The configured value of the <code>options.enableSTUNServer</code>.
  * @param {Boolean} callback.success.TURNTransport The configured value of the <code>options.TURNServerTransport</code>.
- * @param {String} callback.success.serverRegion The configured value of the <code>options.region</code>.
  * @param {Boolean} callback.success.audioFallback The configured value of the <code>options.audioFallback</code>.
  * @param {Boolean} callback.success.forceSSL The configured value of the <code>options.forceSSL</code>.
  * @param {String} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.
@@ -460,6 +354,13 @@ Skylink.prototype._room = null;
  * @param {Boolean} callback.success.forceTURNSSL The configured value of the <code>options.forceTURNSSL</code>.
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
+ * @param {Boolean} callback.success.disableVideoFecCodecs The configured value of the <code>options.disableVideoFecCodecs</code>.
+ * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the <code>options.disableComfortNoiseCodec</code>.
+ * @param {Boolean} callback.success.disableREMB The configured value of the <code>options.disableREMB</code>.
+ * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
+ * @param {Number} callback.success.throttleIntervals The configured value of the <code>options.throttleIntervals</code>.
+ * @param {Number} callback.success.throttleShouldThrowError The configured value of the <code>options.throttleShouldThrowError</code>.
+ * @param {Number} callback.success.mcuUseRenegoRestart The configured value of the <code>options.mcuUseRenegoRestart</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -536,7 +437,7 @@ Skylink.prototype.init = function(options, callback) {
     return;
   }
 
-  var appKey, room, defaultRoom, region;
+  var appKey, room, defaultRoom;
   var startDateTime, duration, credentials;
   var roomServer = self._roomServer;
   // NOTE: Should we get all the default values from the variables
@@ -548,12 +449,27 @@ Skylink.prototype.init = function(options, callback) {
   var TURNTransport = self.TURN_TRANSPORT.ANY;
   var audioFallback = false;
   var forceSSL = false;
-  var socketTimeout = 0;
+  var socketTimeout = 20000;
   var forceTURNSSL = false;
   var audioCodec = self.AUDIO_CODEC.AUTO;
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
   var usePublicSTUN = true;
+  var disableVideoFecCodecs = false;
+  var disableComfortNoiseCodec = false;
+  var disableREMB = false;
+  var filterCandidatesType = {
+    host: false,
+    srflx: false,
+    relay: false
+  };
+  var throttleIntervals = {
+    shareScreen: 10000,
+    refreshConnection: 5000,
+    getUserMedia: 0
+  };
+  var throttleShouldThrowError = false;
+  var mcuUseRenegoRestart = false;
 
   log.log('Provided init options:', options);
 
@@ -572,11 +488,8 @@ Skylink.prototype.init = function(options, callback) {
     roomServer = (roomServer.lastIndexOf('/') ===
       (roomServer.length - 1)) ? roomServer.substring(0,
       roomServer.length - 1) : roomServer;
-    // set the region
-    region = (typeof options.region === 'string') ?
-      options.region : region;
     // set the default room
-    defaultRoom = (typeof options.defaultRoom === 'string') ?
+    defaultRoom = (typeof options.defaultRoom === 'string' && options.defaultRoom) ?
       options.defaultRoom : appKey;
     // set the selected room
     room = defaultRoom;
@@ -615,6 +528,39 @@ Skylink.prototype.init = function(options, callback) {
     // set the use public stun option
     usePublicSTUN = (typeof options.usePublicSTUN === 'boolean') ?
       options.usePublicSTUN : usePublicSTUN;
+    // set the use of disabling ulpfec and red codecs
+    disableVideoFecCodecs = (typeof options.disableVideoFecCodecs === 'boolean') ?
+      options.disableVideoFecCodecs : disableVideoFecCodecs;
+    // set the use of disabling CN codecs
+    disableComfortNoiseCodec = (typeof options.disableComfortNoiseCodec === 'boolean') ?
+      options.disableComfortNoiseCodec : disableComfortNoiseCodec;
+    // set the use of disabling REMB packets
+    disableREMB = (typeof options.disableREMB === 'boolean') ?
+      options.disableREMB : disableREMB;
+    // set the flag if throttling should throw error when called less than the interval timeout configured
+    throttleShouldThrowError = (typeof options.throttleShouldThrowError === 'boolean') ?
+      options.throttleShouldThrowError : throttleShouldThrowError;
+    // set the flag if MCU refreshConnection() should use renegotiation
+    mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
+      options.mcuUseRenegoRestart : mcuUseRenegoRestart;
+    // set the use of filtering ICE candidates
+    if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
+      filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
+        options.filterCandidatesType.host : filterCandidatesType.host;
+      filterCandidatesType.srflx = (typeof options.filterCandidatesType.srflx === 'boolean') ?
+        options.filterCandidatesType.srflx : filterCandidatesType.srflx;
+      filterCandidatesType.relay = (typeof options.filterCandidatesType.relay === 'boolean') ?
+        options.filterCandidatesType.relay : filterCandidatesType.relay;
+    }
+    // set the use of throttling interval timeouts
+    if (typeof options.throttleIntervals === 'object' && options.throttleIntervals) {
+      throttleIntervals.shareScreen = (typeof options.throttleIntervals.shareScreen === 'number') ?
+        options.throttleIntervals.shareScreen : throttleIntervals.shareScreen;
+      throttleIntervals.refreshConnection = (typeof options.throttleIntervals.refreshConnection === 'number') ?
+        options.throttleIntervals.refreshConnection : throttleIntervals.refreshConnection;
+      throttleIntervals.getUserMedia = (typeof options.throttleIntervals.getUserMedia === 'number') ?
+        options.throttleIntervals.getUserMedia : throttleIntervals.getUserMedia;
+    }
 
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
@@ -649,6 +595,9 @@ Skylink.prototype.init = function(options, callback) {
     if (forceTURN === true) {
       enableTURNServer = true;
       enableSTUNServer = false;
+      filterCandidatesType.host = true;
+      filterCandidatesType.srflx = true;
+      filterCandidatesType.relay = false;
     }
   }
   // api key path options
@@ -656,7 +605,6 @@ Skylink.prototype.init = function(options, callback) {
   self._roomServer = roomServer;
   self._defaultRoom = defaultRoom;
   self._selectedRoom = room;
-  self._serverRegion = region || null;
   self._path = roomServer + '/api/' + appKey + '/' + room;
   // set credentials if there is
   if (credentials && startDateTime && duration) {
@@ -669,10 +617,6 @@ Skylink.prototype.init = function(options, callback) {
 
   self._path += ((credentials) ? '&' : '?') + 'rand=' + (new Date()).toISOString();
 
-  // check if there is a other query parameters or not
-  if (region) {
-    self._path += '&rg=' + region;
-  }
   // skylink functionality options
   self._enableIceTrickle = enableIceTrickle;
   self._enableDataChannel = enableDataChannel;
@@ -687,6 +631,13 @@ Skylink.prototype.init = function(options, callback) {
   self._selectedVideoCodec = videoCodec;
   self._forceTURN = forceTURN;
   self._usePublicSTUN = usePublicSTUN;
+  self._disableVideoFecCodecs = disableVideoFecCodecs;
+  self._disableComfortNoiseCodec = disableComfortNoiseCodec;
+  self._filterCandidatesType = filterCandidatesType;
+  self._throttlingTimeouts = throttleIntervals;
+  self._throttlingShouldThrowError = throttleShouldThrowError;
+  self._disableREMB = disableREMB;
+  self._mcuUseRenegoRestart = mcuUseRenegoRestart;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -695,7 +646,6 @@ Skylink.prototype.init = function(options, callback) {
     roomServer: self._roomServer,
     defaultRoom: self._defaultRoom,
     selectedRoom: self._selectedRoom,
-    serverRegion: self._serverRegion,
     enableDataChannel: self._enableDataChannel,
     enableIceTrickle: self._enableIceTrickle,
     enableTURNServer: self._enableTURN,
@@ -708,7 +658,14 @@ Skylink.prototype.init = function(options, callback) {
     audioCodec: self._selectedAudioCodec,
     videoCodec: self._selectedVideoCodec,
     forceTURN: self._forceTURN,
-    usePublicSTUN: self._usePublicSTUN
+    usePublicSTUN: self._usePublicSTUN,
+    disableVideoFecCodecs: self._disableVideoFecCodecs,
+    disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+    disableREMB: self._disableREMB,
+    filterCandidatesType: self._filterCandidatesType,
+    throttleIntervals: self._throttlingTimeouts,
+    throttleShouldThrowError: self._throttlingShouldThrowError,
+    mcuUseRenegoRestart: self._mcuUseRenegoRestart
   });
   // trigger the readystate
   self._readyState = 0;
@@ -731,7 +688,6 @@ Skylink.prototype.init = function(options, callback) {
             roomServer: self._roomServer,
             defaultRoom: self._defaultRoom,
             selectedRoom: self._selectedRoom,
-            serverRegion: self._serverRegion,
             enableDataChannel: self._enableDataChannel,
             enableIceTrickle: self._enableIceTrickle,
             enableTURNServer: self._enableTURN,
@@ -744,7 +700,14 @@ Skylink.prototype.init = function(options, callback) {
             audioCodec: self._selectedAudioCodec,
             videoCodec: self._selectedVideoCodec,
             forceTURN: self._forceTURN,
-            usePublicSTUN: self._usePublicSTUN
+            usePublicSTUN: self._usePublicSTUN,
+            disableVideoFecCodecs: self._disableVideoFecCodecs,
+            disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+            disableREMB: self._disableREMB,
+            filterCandidatesType: self._filterCandidatesType,
+            throttleIntervals: self._throttlingTimeouts,
+            throttleShouldThrowError: self._throttlingShouldThrowError,
+            mcuUseRenegoRestart: self._mcuUseRenegoRestart
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -973,6 +936,8 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   adapter.webRTCReady(function () {
+    self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
+
     if (!window.RTCPeerConnection) {
       log.error('WebRTC not supported. Please upgrade your browser');
       self._readyState = -1;
@@ -1020,12 +985,29 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   }
   var defaultRoom = self._defaultRoom;
   var initOptions = {
-    roomServer: self._roomServer,
-    defaultRoom: room || defaultRoom,
     appKey: self._appKey,
-    region: self._serverRegion,
+    roomServer: self._roomServer,
+    defaultRoom: room,
     enableDataChannel: self._enableDataChannel,
-    enableIceTrickle: self._enableIceTrickle
+    enableIceTrickle: self._enableIceTrickle,
+    enableTURNServer: self._enableTURN,
+    enableSTUNServer: self._enableSTUN,
+    TURNServerTransport: self._TURNTransport,
+    audioFallback: self._audioFallback,
+    forceSSL: self._forceSSL,
+    socketTimeout: self._socketTimeout,
+    forceTURNSSL: self._forceTURNSSL,
+    audioCodec: self._selectedAudioCodec,
+    videoCodec: self._selectedVideoCodec,
+    forceTURN: self._forceTURN,
+    usePublicSTUN: self._usePublicSTUN,
+    disableVideoFecCodecs: self._disableVideoFecCodecs,
+    disableComfortNoiseCodec: self._disableComfortNoiseCodec,
+    disableREMB: self._disableREMB,
+    filterCandidatesType: self._filterCandidatesType,
+    throttleIntervals: self._throttlingTimeouts,
+    throttleShouldThrowError: self._throttlingShouldThrowError,
+    mcuUseRenegoRestart: self._mcuUseRenegoRestart
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -1037,14 +1019,10 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   self.init(initOptions, function (error, success) {
     self._defaultRoom = defaultRoom;
     if (error) {
-      callback(error);
+      callback(error, null);
     } else {
-      callback(null);
+      callback(null, success);
     }
   });
 };
-
-
-
-
 

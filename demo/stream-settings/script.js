@@ -109,10 +109,16 @@ function toggleAudio () {
 	var toggleAudio = document.getElementById('toggleAudio');
 	setTimeout(function () {
 		if (audioMuted) {
-			SkylinkDemo.enableAudio();
+			SkylinkDemo.muteStream({
+	      audioMuted: false,
+	      videoMuted: SkylinkDemo.getPeerInfo().mediaStatus.videoMuted
+	    });
 			toggleAudio.innerHTML = 'Disable Audio';
 		} else {
-			SkylinkDemo.disableAudio();
+			SkylinkDemo.muteStream({
+	      audioMuted: true,
+	      videoMuted: SkylinkDemo.getPeerInfo().mediaStatus.videoMuted
+	    });
 			toggleAudio.innerHTML = 'Enable Audio';
 		}
 	}, 1000);
@@ -122,10 +128,16 @@ function toggleVideo () {
 	var toggleVideo = document.getElementById('toggleVideo');
 	setTimeout(function () {
 		if (videoMuted) {
-			SkylinkDemo.enableVideo();
+			SkylinkDemo.muteStream({
+	      videoMuted: false,
+	      audioMuted: SkylinkDemo.getPeerInfo().mediaStatus.audioMuted
+	    });
 			toggleVideo.innerHTML = 'Disable Video';
 		} else {
-			SkylinkDemo.disableVideo();
+			SkylinkDemo.muteStream({
+	      videoMuted: true,
+	      audioMuted: SkylinkDemo.getPeerInfo().mediaStatus.audioMuted
+	    });
 			toggleVideo.innerHTML = 'Enable Video';
 		}
 	}, 1000);
