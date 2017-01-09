@@ -18,6 +18,8 @@ You'll need a Temasys Developer Account and an App key to use this. [Register he
 - (*) Commerical Temasys Plugin incorporates additional features from Temasys Free Plugin.
 - (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.com.sg). For Firefox extensions source code, [you may download from your Application Key in console.temasys.io](https://console.temasys.io).
 
+*Here
+
 ##### Installation
 Install SkylinkJS with [npm](https://www.npmjs.com/):
 ```
@@ -53,6 +55,13 @@ Due to corrupted files being uploaded for `0.6.3` - `0.6.10` versions, we have r
 You may still install these versions using this command:
 ```
 npm install git://github.com/Temasys/SkylinkJS#<version_tag>
+```
+
+##### Encoding issues from AdapterJS dependency
+There is a [known issue](https://github.com/Temasys/AdapterJS/issues/240) caused by the AdapterJS `0.14.0` where it appears weird characters. To resolve this, it is recommend to set the charset of the HTML file:
+
+```
+<meta charset="utf-8">
 ```
 
 ##### Upgrading from `0.5.7` and below:
