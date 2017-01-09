@@ -309,7 +309,10 @@ Skylink.prototype.generateUUID = function() {
  *   <code>refreshConnection()</code> method</a> is called internally.</small>
  * @param {Boolean} [options.throttleShouldThrowError=false] The flag if throttled methods should throw errors when
  *   method is invoked less than the interval timeout value configured in <code>options.throttleIntervals</code>.
- * @param {Boolean} [options.mcuUseRenegoRestart=false] The flag if <a href="#method_refreshConnection"><code>
+ * @param {Boolean} [options.mcuUseRenegoRestart=false] <blockquote class="info">
+ *   Note that this feature is currently is beta and for any enquiries on enabling and its support, please
+ *   contact <a href="http://support.temasys.io">our support portal</a>.</blockquote>
+ *   The flag if <a href="#method_refreshConnection"><code>
  *   refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU
  *   enabled Peer connections instead of invoking <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.
  * @param {Function} [callback] The callback function fired when request has completed.

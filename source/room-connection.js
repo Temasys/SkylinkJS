@@ -179,6 +179,9 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   should be enabled when available.
  * @param {Boolean} [options.sdpSettings.direction.video.receive=true] The flag if downloading video streaming
  *   should be enabled when available.
+
+ <blockquote class="info">
+ *   
  * @param {JSON|Boolean} [options.publishOnly] <blockquote class="info">
  *   For MCU enabled Peer connections, defining this flag would make Peer not know other Peers presence in the Room.<br>
  *   For non-MCU enable Peer connections, defining this flag would cause other Peers in the Room to
@@ -186,7 +189,9 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   <code>options.sdpSettings.direction.audio.receive</code> value to <code>false</code>,
  *   <code>options.sdpSettings.direction.video.receive</code> value to <code>false</code>,
  *   <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and
- *   <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.</blockquote>
+ *   <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.<br>
+ *   Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled
+ *   Peer connections, please  contact <a href="http://support.temasys.io">our support portal</a>.</blockquote></blockquote>
  *   The config if Peer would publish only.
  * @param {String} [options.publishOnly.parentId] The parent Peer ID to match to when Peer is connected.
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>

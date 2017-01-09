@@ -2593,7 +2593,7 @@
                 },
                 {
                     "name": "iceRestart",
-                    "description": "<blockquote class=\"info\">\n  Note that this flag will not be honoured for MCU enabled Peer connections where\n  <code>options.mcuUseRenegoRestart</code> flag is set to <code>false</code> as it is not necessary since for MCU\n  \"restart\" case is to invoke <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> again.</blockquote>\n  The flag if ICE connections should restart when refreshing Peer connections.\n  <small>This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which state\n  can be retrieved with the <a href=\"#event_iceConnectionState\"><code>iceConnectionState</code> event</a>.</small>",
+                    "description": "<blockquote class=\"info\">\n  Note that this flag will not be honoured for MCU enabled Peer connections where\n  <code>options.mcuUseRenegoRestart</code> flag is set to <code>false</code> as it is not necessary since for MCU\n  \"restart\" case is to invoke <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> again, or that it is\n  not supported by the MCU.</blockquote>\n  The flag if ICE connections should restart when refreshing Peer connections.\n  <small>This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which state\n  can be retrieved with the <a href=\"#event_iceConnectionState\"><code>iceConnectionState</code> event</a>.</small>",
                     "type": "Boolean",
                     "optional": true,
                     "optdefault": "false"
@@ -2650,7 +2650,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 257,
+            "line": 258,
             "description": "Function that refresh connections.",
             "itemtype": "method",
             "name": "_refreshPeerConnection",
@@ -2661,7 +2661,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 334,
+            "line": 335,
             "description": "Function that retrieves Peer connection bandwidth and ICE connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -2744,7 +2744,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 987,
+            "line": 988,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -2755,7 +2755,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1022,
+            "line": 1023,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -2766,7 +2766,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1144,
+            "line": 1145,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2777,7 +2777,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1214,
+            "line": 1215,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2788,7 +2788,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1365,
+            "line": 1366,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -2799,7 +2799,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1482,
+            "line": 1483,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -2810,7 +2810,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1502,
+            "line": 1503,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -3371,7 +3371,7 @@
                                 },
                                 {
                                     "name": "direction.video.receive",
-                                    "description": "The flag if downloading video streaming\n  should be enabled when available.",
+                                    "description": "The flag if downloading video streaming\n  should be enabled when available.\n\n<blockquote class=\"info\">",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "true"
@@ -3380,7 +3380,7 @@
                         },
                         {
                             "name": "publishOnly",
-                            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, defining this flag would make Peer not know other Peers presence in the Room.<br>\n  For non-MCU enable Peer connections, defining this flag would cause other Peers in the Room to\n  not to send Stream to Peer, and overrides the config\n  <code>options.sdpSettings.direction.audio.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and\n  <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.</blockquote>\n  The config if Peer would publish only.",
+                            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, defining this flag would make Peer not know other Peers presence in the Room.<br>\n  For non-MCU enable Peer connections, defining this flag would cause other Peers in the Room to\n  not to send Stream to Peer, and overrides the config\n  <code>options.sdpSettings.direction.audio.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and\n  <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.<br>\n  Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled\n  Peer connections, please  contact <a href=\"http://support.temasys.io\">our support portal</a>.</blockquote></blockquote>\n  The config if Peer would publish only.",
                             "type": "JSON|Boolean",
                             "optional": true,
                             "props": [
@@ -3457,7 +3457,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 428,
+            "line": 433,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -3522,7 +3522,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 545,
+            "line": 550,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -3532,7 +3532,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 574,
+            "line": 579,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -3542,7 +3542,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 603,
+            "line": 608,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -3942,7 +3942,7 @@
                         },
                         {
                             "name": "mcuUseRenegoRestart",
-                            "description": "The flag if <a href=\"#method_refreshConnection\"><code>\n  refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU\n  enabled Peer connections instead of invoking <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> again.",
+                            "description": "<blockquote class=\"info\">\n  Note that this feature is currently is beta and for any enquiries on enabling and its support, please\n  contact <a href=\"http://support.temasys.io\">our support portal</a>.</blockquote>\n  The flag if <a href=\"#method_refreshConnection\"><code>\n  refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU\n  enabled Peer connections instead of invoking <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> again.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -4126,7 +4126,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 729,
+            "line": 732,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4137,7 +4137,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 803,
+            "line": 806,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4148,7 +4148,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 876,
+            "line": 879,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4159,7 +4159,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 969,
+            "line": 972,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -8478,7 +8478,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:334"
+            "line": " source/peer-connection.js:335"
         },
         {
             "message": "unknown tag: trigger",
@@ -8498,15 +8498,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:428"
+            "line": " source/room-connection.js:433"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:545"
+            "line": " source/room-connection.js:550"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:574"
+            "line": " source/room-connection.js:579"
         },
         {
             "message": "unknown tag: trigger",

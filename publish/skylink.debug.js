@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 12:37:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 13:34:58 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -4406,7 +4406,8 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  * @param {Boolean} [iceRestart=false] <blockquote class="info">
  *   Note that this flag will not be honoured for MCU enabled Peer connections where
  *   <code>options.mcuUseRenegoRestart</code> flag is set to <code>false</code> as it is not necessary since for MCU
- *   "restart" case is to invoke <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.</blockquote>
+ *   "restart" case is to invoke <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again, or that it is
+ *   not supported by the MCU.</blockquote>
  *   The flag if ICE connections should restart when refreshing Peer connections.
  *   <small>This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which state
  *   can be retrieved with the <a href="#event_iceConnectionState"><code>iceConnectionState</code> event</a>.</small>
@@ -6772,6 +6773,9 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   should be enabled when available.
  * @param {Boolean} [options.sdpSettings.direction.video.receive=true] The flag if downloading video streaming
  *   should be enabled when available.
+
+ <blockquote class="info">
+ *   
  * @param {JSON|Boolean} [options.publishOnly] <blockquote class="info">
  *   For MCU enabled Peer connections, defining this flag would make Peer not know other Peers presence in the Room.<br>
  *   For non-MCU enable Peer connections, defining this flag would cause other Peers in the Room to
@@ -6779,7 +6783,9 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   <code>options.sdpSettings.direction.audio.receive</code> value to <code>false</code>,
  *   <code>options.sdpSettings.direction.video.receive</code> value to <code>false</code>,
  *   <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and
- *   <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.</blockquote>
+ *   <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.<br>
+ *   Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled
+ *   Peer connections, please  contact <a href="http://support.temasys.io">our support portal</a>.</blockquote></blockquote>
  *   The config if Peer would publish only.
  * @param {String} [options.publishOnly.parentId] The parent Peer ID to match to when Peer is connected.
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
@@ -7654,7 +7660,10 @@ Skylink.prototype.generateUUID = function() {
  *   <code>refreshConnection()</code> method</a> is called internally.</small>
  * @param {Boolean} [options.throttleShouldThrowError=false] The flag if throttled methods should throw errors when
  *   method is invoked less than the interval timeout value configured in <code>options.throttleIntervals</code>.
- * @param {Boolean} [options.mcuUseRenegoRestart=false] The flag if <a href="#method_refreshConnection"><code>
+ * @param {Boolean} [options.mcuUseRenegoRestart=false] <blockquote class="info">
+ *   Note that this feature is currently is beta and for any enquiries on enabling and its support, please
+ *   contact <a href="http://support.temasys.io">our support portal</a>.</blockquote>
+ *   The flag if <a href="#method_refreshConnection"><code>
  *   refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU
  *   enabled Peer connections instead of invoking <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.
  * @param {Function} [callback] The callback function fired when request has completed.

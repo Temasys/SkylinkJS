@@ -188,7 +188,8 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  * @param {Boolean} [iceRestart=false] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this flag will not be honoured for MCU enabled Peer connections where
  *   &lt;code&gt;options.mcuUseRenegoRestart&lt;/code&gt; flag is set to &lt;code&gt;false&lt;/code&gt; as it is not necessary since for MCU
- *   &quot;restart&quot; case is to invoke &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; again.&lt;/blockquote&gt;
+ *   &quot;restart&quot; case is to invoke &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; again, or that it is
+ *   not supported by the MCU.&lt;/blockquote&gt;
  *   The flag if ICE connections should restart when refreshing Peer connections.
  *   &lt;small&gt;This is used when ICE connection state is &lt;code&gt;FAILED&lt;/code&gt; or &lt;code&gt;DISCONNECTED&lt;/code&gt;, which state
  *   can be retrieved with the &lt;a href=&quot;#event_iceConnectionState&quot;&gt;&lt;code&gt;iceConnectionState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
