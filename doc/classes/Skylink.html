@@ -3756,7 +3756,7 @@ to be missing from Firefox answer session description to Chrome connection causi
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1631"><code>source&#x2F;socket-message.js:1631</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1632"><code>source&#x2F;socket-message.js:1632</code></a>
       </small>
     
 
@@ -4358,7 +4358,7 @@ See confluence docs for the &quot;bye&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1536"><code>source&#x2F;socket-message.js:1536</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1537"><code>source&#x2F;socket-message.js:1537</code></a>
       </small>
     
 
@@ -6415,7 +6415,7 @@ This is experimental and never recommended to end-users.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l973"><code>source&#x2F;room-init.js:973</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l969"><code>source&#x2F;room-init.js:969</code></a>
       </small>
     
 
@@ -6674,7 +6674,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1736"><code>source&#x2F;socket-message.js:1736</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1738"><code>source&#x2F;socket-message.js:1738</code></a>
       </small>
     
 
@@ -6759,7 +6759,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l880"><code>source&#x2F;room-init.js:880</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l876"><code>source&#x2F;room-init.js:876</code></a>
       </small>
     
 
@@ -7873,7 +7873,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l807"><code>source&#x2F;room-init.js:807</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l803"><code>source&#x2F;room-init.js:803</code></a>
       </small>
     
 
@@ -9504,7 +9504,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l733"><code>source&#x2F;room-init.js:733</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l729"><code>source&#x2F;room-init.js:729</code></a>
       </small>
     
 
@@ -11324,7 +11324,7 @@ See confluence docs for the &quot;updateUserEvent&quot; expected properties to b
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l604"><code>source&#x2F;room-connection.js:604</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l603"><code>source&#x2F;room-connection.js:603</code></a>
       </small>
     
 
@@ -14883,11 +14883,9 @@ Global_Objects/encodeURIComponent">encodeURIComponent() API</a>.</small></li></o
                       <p><blockquote class="info">
   Note that if the audio codec is not supported, the SDK will not configure the local <code>&quot;offer&quot;</code> or
   <code>&quot;answer&quot;</code> session description to prefer the codec.</blockquote>
-  The option to configure the preferred audio codec
-  to use to decode receiving audio data when available for Peer connection.</p>
+  The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.</p>
 <ul>
 <li>When not provided, its value is <code>AUTO</code>.
-<small>Note that Peers may override the receiving audio codec depending on the Peers configuration.</small>
 [Rel: Skylink.AUDIO_CODEC]</li>
 </ul>
 
@@ -14908,11 +14906,9 @@ Global_Objects/encodeURIComponent">encodeURIComponent() API</a>.</small></li></o
                       <p><blockquote class="info">
   Note that if the video codec is not supported, the SDK will not configure the local <code>&quot;offer&quot;</code> or
   <code>&quot;answer&quot;</code> session description to prefer the codec.</blockquote>
-  The option to configure the preferred video codec
-  to use to decode receiving video data when available for Peer connection.</p>
+  The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.</p>
 <ul>
 <li>When not provided, its value is <code>AUTO</code>.
-<small>Note that Peers may override the receiving video codec depending on the Peers configuration.</small>
 [Rel: Skylink.VIDEO_CODEC]</li>
 </ul>
 
@@ -16104,8 +16100,7 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
                       <p><blockquote class="info">Note that this is currently not supported
   with Firefox browsers versions 48 and below as noted in an existing
   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
-  The configuration to set the maximum streaming bandwidth to send to / receive from Peers.
-  <small>Note that Peers may override the &quot;receive from&quot; maximum streaming bandwidth depending on the Peers configuration.</small></p>
+  The configuration to set the maximum streaming bandwidth to send to Peers.</p>
 
                     </div>
 
@@ -16679,7 +16674,7 @@ that is not the same as the <code>options.defaultRoom</code> defined in the
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l429"><code>source&#x2F;room-connection.js:429</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l428"><code>source&#x2F;room-connection.js:428</code></a>
       </small>
     
 
@@ -16936,7 +16931,7 @@ and <code>stopMediaOptions.screenshare</code> to its boolean value.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l546"><code>source&#x2F;room-connection.js:546</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l545"><code>source&#x2F;room-connection.js:545</code></a>
       </small>
     
 
@@ -21267,7 +21262,7 @@ Function that stops <a href="#method_getUserMedia"><code>getUserMedia()</code> S
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l575"><code>source&#x2F;room-connection.js:575</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-connection.js.html#l574"><code>source&#x2F;room-connection.js:574</code></a>
       </small>
     
 

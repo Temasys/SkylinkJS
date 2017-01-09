@@ -1489,6 +1489,7 @@ Skylink.prototype._offerHandler = function(message) {
     'Session description object created'], offer);
 
   offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
+  offer.sdp = self._setSDPCodec(targetMid, offer);
   offer.sdp = self._setSDPBitrate(targetMid, offer);
   offer.sdp = self._setSDPOpusConfig(targetMid, offer);
   offer.sdp = self._removeSDPCodecs(targetMid, offer);
@@ -1682,6 +1683,7 @@ Skylink.prototype._answerHandler = function(message) {
   }*/
 
   answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
+  answer.sdp = self._setSDPCodec(targetMid, answer);
   answer.sdp = self._setSDPBitrate(targetMid, answer);
   answer.sdp = self._setSDPOpusConfig(targetMid, answer);
   answer.sdp = self._removeSDPCodecs(targetMid, answer);

@@ -3247,7 +3247,7 @@
                         },
                         {
                             "name": "bandwidth",
-                            "description": "<blockquote class=\"info\">Note that this is currently not supported\n  with Firefox browsers versions 48 and below as noted in an existing\n  <a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21\">bugzilla ticket here</a>.</blockquote>\n  The configuration to set the maximum streaming bandwidth to send to / receive from Peers.\n  <small>Note that Peers may override the \"receive from\" maximum streaming bandwidth depending on the Peers configuration.</small>",
+                            "description": "<blockquote class=\"info\">Note that this is currently not supported\n  with Firefox browsers versions 48 and below as noted in an existing\n  <a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21\">bugzilla ticket here</a>.</blockquote>\n  The configuration to set the maximum streaming bandwidth to send to Peers.",
                             "type": "JSON",
                             "optional": true,
                             "props": [
@@ -3457,7 +3457,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 429,
+            "line": 428,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -3522,7 +3522,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 546,
+            "line": 545,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -3532,7 +3532,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 575,
+            "line": 574,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -3542,7 +3542,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 604,
+            "line": 603,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -3851,13 +3851,13 @@
                         },
                         {
                             "name": "audioCodec",
-                            "description": "<blockquote class=\"info\">\n  Note that if the audio codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.</blockquote>\n  The option to configure the preferred audio codec\n  to use to decode receiving audio data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  <small>Note that Peers may override the receiving audio codec depending on the Peers configuration.</small>\n  [Rel: Skylink.AUDIO_CODEC]",
+                            "description": "<blockquote class=\"info\">\n  Note that if the audio codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.</blockquote>\n  The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.AUDIO_CODEC]",
                             "type": "String",
                             "optional": true
                         },
                         {
                             "name": "videoCodec",
-                            "description": "<blockquote class=\"info\">\n  Note that if the video codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.</blockquote>\n  The option to configure the preferred video codec\n  to use to decode receiving video data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  <small>Note that Peers may override the receiving video codec depending on the Peers configuration.</small>\n  [Rel: Skylink.VIDEO_CODEC]",
+                            "description": "<blockquote class=\"info\">\n  Note that if the video codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.</blockquote>\n  The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.VIDEO_CODEC]",
                             "type": "String",
                             "optional": true
                         },
@@ -4126,7 +4126,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 733,
+            "line": 729,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4137,7 +4137,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 807,
+            "line": 803,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4148,7 +4148,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 880,
+            "line": 876,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4159,7 +4159,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 973,
+            "line": 969,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -7573,7 +7573,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1536,
+            "line": 1537,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -7584,7 +7584,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1631,
+            "line": 1632,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -7595,7 +7595,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1736,
+            "line": 1738,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -8498,15 +8498,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:429"
+            "line": " source/room-connection.js:428"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:546"
+            "line": " source/room-connection.js:545"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:575"
+            "line": " source/room-connection.js:574"
         },
         {
             "message": "unknown tag: trigger",
