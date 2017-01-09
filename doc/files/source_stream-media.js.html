@@ -337,7 +337,10 @@ Skylink.prototype.RECORDING_STATE = {
  *   The flag if &lt;code&gt;getUserMedia()&lt;/code&gt; should request for camera Stream to match exact requested values of
  *   &lt;code&gt;options.audio.deviceId&lt;/code&gt; and &lt;code&gt;options.video.deviceId&lt;/code&gt;, &lt;code&gt;options.video.resolution&lt;/code&gt;
  *   and &lt;code&gt;options.video.frameRate&lt;/code&gt; when provided.
- * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
+ * @param {Boolean|JSON} [options.audio=false] &lt;blockquote class=&quot;info&quot;&gt;
+ *    Note that the current Edge browser implementation does not support the &lt;code&gt;options.audio.optional&lt;/code&gt;,
+ *    &lt;code&gt;options.audio.deviceId&lt;/code&gt;, &lt;code&gt;options.audio.echoCancellation&lt;/code&gt;.&lt;/blockquote&gt;
+ *    The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending / receiving audio data.
  *   &lt;small&gt;Note that Peers may override the &quot;receiving&quot; &lt;code&gt;stereo&lt;/code&gt; config depending on the Peers configuration.&lt;/small&gt;
@@ -379,7 +382,11 @@ Skylink.prototype.RECORDING_STATE = {
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices&quot;&gt;&lt;code&gt;navigator.mediaDevices.enumerateDevices&lt;/code&gt;
  *   API&lt;/a&gt;.&lt;/small&gt;
  * @param {Boolean} [options.audio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
- * @param {Boolean|JSON} [options.video=false] The video configuration options.
+ * @param {Boolean|JSON} [options.video=false] &lt;blockquote class=&quot;info&quot;&gt;
+ *    Note that the current Edge browser implementation does not support the &lt;code&gt;options.video.optional&lt;/code&gt;,
+ *    &lt;code&gt;options.video.deviceId&lt;/code&gt;, &lt;code&gt;options.video.resolution&lt;/code&gt; and
+ *    &lt;code&gt;options.video.frameRate&lt;/code&gt;, &lt;code&gt;options.video.facingMode&lt;/code&gt;.&lt;/blockquote&gt;
+ *   The video configuration options.
  * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
  *   &lt;small&gt;Providing the value as &lt;code&gt;false&lt;/code&gt; does nothing to &lt;code&gt;peerInfo.mediaStatus.videoMuted&lt;/code&gt;,
  *   but when provided as &lt;code&gt;true&lt;/code&gt;, this sets the &lt;code&gt;peerInfo.mediaStatus.videoMuted&lt;/code&gt; value to
@@ -1161,6 +1168,9 @@ Skylink.prototype.disableVideo = function() {
  * &lt;blockquote class=&quot;info&quot;&gt;
  *   For a better user experience, the functionality is throttled when invoked many times in less
  *   than the milliseconds interval configured in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
+ *   Note that the Opera and Edge browser does not support screensharing, and as for IE / Safari browsers using
+ *   the Temasys Plugin screensharing support, check out the &lt;a href=&quot;https://temasys.com.sg/plugin/#commercial-licensing&quot;&gt;
+ *   commercial licensing&lt;/a&gt; for more options.
  * &lt;/blockquote&gt;
  * Function that retrieves screensharing Stream.
  * @method shareScreen
@@ -1593,40 +1603,39 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
   if (options.audio) {
     // For Edge to work since they do not support the advanced constraints yet
-    if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
-      settings.getUserMediaSettings.audio = true;
-    } else {
-      settings.settings.audio = {
-        stereo: false,
-        exactConstraints: !!options.useExactConstraints,
-        echoCancellation: false
-      };
-      settings.getUserMediaSettings.audio = {
-        echoCancellation: false
-      };
+    settings.settings.audio = {
+      stereo: false,
+      exactConstraints: !!options.useExactConstraints,
+      echoCancellation: false
+    };
+    settings.getUserMediaSettings.audio = {
+      echoCancellation: false
+    };
 
-      if (typeof options.audio === &#x27;object&#x27;) {
-        if (typeof options.audio.stereo === &#x27;boolean&#x27;) {
-          settings.settings.audio.stereo = options.audio.stereo;
-        }
+    if (typeof options.audio === &#x27;object&#x27;) {
+      if (typeof options.audio.stereo === &#x27;boolean&#x27;) {
+        settings.settings.audio.stereo = options.audio.stereo;
+      }
 
-        if (typeof options.audio.useinbandfec === &#x27;boolean&#x27;) {
-          settings.settings.audio.useinbandfec = options.audio.useinbandfec;
-        }
+      if (typeof options.audio.useinbandfec === &#x27;boolean&#x27;) {
+        settings.settings.audio.useinbandfec = options.audio.useinbandfec;
+      }
 
-        if (typeof options.audio.usedtx === &#x27;boolean&#x27;) {
-          settings.settings.audio.usedtx = options.audio.usedtx;
-        }
+      if (typeof options.audio.usedtx === &#x27;boolean&#x27;) {
+        settings.settings.audio.usedtx = options.audio.usedtx;
+      }
 
-        if (typeof options.audio.maxplaybackrate === &#x27;number&#x27; &amp;&amp;
-          options.audio.maxplaybackrate &gt;= 8000 &amp;&amp; options.audio.maxplaybackrate &lt;= 48000) {
-          settings.settings.audio.maxplaybackrate = options.audio.maxplaybackrate;
-        }
+      if (typeof options.audio.maxplaybackrate === &#x27;number&#x27; &amp;&amp;
+        options.audio.maxplaybackrate &gt;= 8000 &amp;&amp; options.audio.maxplaybackrate &lt;= 48000) {
+        settings.settings.audio.maxplaybackrate = options.audio.maxplaybackrate;
+      }
 
-        if (typeof options.audio.mute === &#x27;boolean&#x27;) {
-          settings.mutedSettings.shouldAudioMuted = options.audio.mute;
-        }
+      if (typeof options.audio.mute === &#x27;boolean&#x27;) {
+        settings.mutedSettings.shouldAudioMuted = options.audio.mute;
+      }
 
+      // Not supported in Edge browser features
+      if (window.webrtcDetectedBrowser !== &#x27;edge&#x27;) {
         if (typeof options.audio.echoCancellation === &#x27;boolean&#x27;) {
           settings.settings.audio.echoCancellation = options.audio.echoCancellation;
           settings.getUserMediaSettings.audio.echoCancellation = options.audio.echoCancellation;
@@ -1656,88 +1665,96 @@ Skylink.prototype._parseStreamSettings = function(options) {
         }
       }
     }
+
+    if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+      settings.getUserMediaSettings.audio = true;
+    }
   }
 
   if (options.video) {
     // For Edge to work since they do not support the advanced constraints yet
-    if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
-      settings.getUserMediaSettings.video = true;
+    settings.settings.video = {
+      resolution: clone(this.VIDEO_RESOLUTION.VGA),
+      screenshare: false,
+      exactConstraints: !!options.useExactConstraints
+    };
+    settings.getUserMediaSettings.video = {};
+
+    if (typeof options.video === &#x27;object&#x27;) {
+      if (typeof options.video.mute === &#x27;boolean&#x27;) {
+        settings.mutedSettings.shouldVideoMuted = options.video.mute;
+      }
+
+      if (Array.isArray(options.video.optional)) {
+        settings.settings.video.optional = clone(options.video.optional);
+        settings.getUserMediaSettings.video.optional = clone(options.video.optional);
+      }
+
+      if (options.video.deviceId &amp;&amp; typeof options.video.deviceId === &#x27;string&#x27; &amp;&amp;
+        window.webrtcDetectedBrowser !== &#x27;firefox&#x27;) {
+        settings.settings.video.deviceId = options.video.deviceId;
+
+        if (options.useExactConstraints) {
+          settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
+
+        } else {
+          if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
+            settings.getUserMediaSettings.video.optional = [];
+          }
+
+          settings.getUserMediaSettings.video.optional.push({
+            sourceId: options.video.deviceId
+          });
+        }
+      }
+
+      if (options.video.resolution &amp;&amp; typeof options.video.resolution === &#x27;object&#x27;) {
+        if ((options.video.resolution.width &amp;&amp; typeof options.video.resolution.width === &#x27;object&#x27;) ||
+          typeof options.video.resolution.width === &#x27;number&#x27;) {
+          settings.settings.video.resolution.width = options.video.resolution.width;
+        }
+        if ((options.video.resolution.height &amp;&amp; typeof options.video.resolution.height === &#x27;object&#x27;) ||
+          typeof options.video.resolution.height === &#x27;number&#x27;) {
+          settings.settings.video.resolution.height = options.video.resolution.height;
+        }
+      }
+
+      settings.getUserMediaSettings.video.width = typeof settings.settings.video.resolution.width === &#x27;object&#x27; ?
+        settings.settings.video.resolution.width : (options.useExactConstraints ?
+        { exact: settings.settings.video.resolution.width } : { max: settings.settings.video.resolution.width });
+
+      settings.getUserMediaSettings.video.height = typeof settings.settings.video.resolution.height === &#x27;object&#x27; ?
+        settings.settings.video.resolution.height : (options.useExactConstraints ?
+        { exact: settings.settings.video.resolution.height } : { max: settings.settings.video.resolution.height });
+
+      if ((options.video.frameRate &amp;&amp; typeof options.video.frameRate === &#x27;object&#x27;) || typeof options.video.frameRate === &#x27;number&#x27;) {
+        //
+        if (!(typeof options.video.frameRate === &#x27;number&#x27; &amp;&amp; !options.useExactConstraints &amp;&amp; self._isUsingPlugin)) {
+          settings.settings.video.frameRate = options.video.frameRate;
+          settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === &#x27;object&#x27; ?
+            settings.settings.video.frameRate : (options.useExactConstraints ?
+            { exact: settings.settings.video.frameRate } : { max: settings.settings.video.frameRate });
+        }
+      }
+    } else if (options.useExactConstraints) {
+      settings.getUserMediaSettings.video = {
+        width: { exact: settings.settings.video.resolution.width },
+        height: { exact: settings.settings.video.resolution.height }
+      };
+
     } else {
+      settings.getUserMediaSettings.video.mandatory = {
+        maxWidth: settings.settings.video.resolution.width,
+        maxHeight: settings.settings.video.resolution.height
+      };
+    }
+
+    if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
       settings.settings.video = {
-        resolution: clone(this.VIDEO_RESOLUTION.VGA),
         screenshare: false,
         exactConstraints: !!options.useExactConstraints
       };
-      settings.getUserMediaSettings.video = {};
-
-      if (typeof options.video === &#x27;object&#x27;) {
-        if (typeof options.video.mute === &#x27;boolean&#x27;) {
-          settings.mutedSettings.shouldVideoMuted = options.video.mute;
-        }
-
-        if (Array.isArray(options.video.optional)) {
-          settings.settings.video.optional = clone(options.video.optional);
-          settings.getUserMediaSettings.video.optional = clone(options.video.optional);
-        }
-
-        if (options.video.deviceId &amp;&amp; typeof options.video.deviceId === &#x27;string&#x27; &amp;&amp;
-          window.webrtcDetectedBrowser !== &#x27;firefox&#x27;) {
-          settings.settings.video.deviceId = options.video.deviceId;
-
-          if (options.useExactConstraints) {
-            settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
-
-          } else {
-            if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
-              settings.getUserMediaSettings.video.optional = [];
-            }
-
-            settings.getUserMediaSettings.video.optional.push({
-              sourceId: options.video.deviceId
-            });
-          }
-        }
-
-        if (options.video.resolution &amp;&amp; typeof options.video.resolution === &#x27;object&#x27;) {
-          if ((options.video.resolution.width &amp;&amp; typeof options.video.resolution.width === &#x27;object&#x27;) ||
-            typeof options.video.resolution.width === &#x27;number&#x27;) {
-            settings.settings.video.resolution.width = options.video.resolution.width;
-          }
-          if ((options.video.resolution.height &amp;&amp; typeof options.video.resolution.height === &#x27;object&#x27;) ||
-            typeof options.video.resolution.height === &#x27;number&#x27;) {
-            settings.settings.video.resolution.height = options.video.resolution.height;
-          }
-        }
-
-        settings.getUserMediaSettings.video.width = typeof settings.settings.video.resolution.width === &#x27;object&#x27; ?
-          settings.settings.video.resolution.width : (options.useExactConstraints ?
-          { exact: settings.settings.video.resolution.width } : { max: settings.settings.video.resolution.width });
-
-        settings.getUserMediaSettings.video.height = typeof settings.settings.video.resolution.height === &#x27;object&#x27; ?
-          settings.settings.video.resolution.height : (options.useExactConstraints ?
-          { exact: settings.settings.video.resolution.height } : { max: settings.settings.video.resolution.height });
-
-        if ((options.video.frameRate &amp;&amp; typeof options.video.frameRate === &#x27;object&#x27;) || typeof object.video.frameRate === &#x27;number&#x27;) {
-          //
-          if (!(typeof options.video.frameRate === &#x27;number&#x27; &amp;&amp; !options.useExactConstraints &amp;&amp; self._isUsingPlugin)) {
-            settings.settings.video.frameRate = options.video.frameRate;
-            settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === &#x27;object&#x27; ?
-              settings.settings.video.frameRate : (options.useExactConstraints ?
-              { exact: settings.settings.video.frameRate } : { max: settings.settings.video.frameRate });
-          }
-        }
-      } else if (options.useExactConstraints) {
-        settings.getUserMediaSettings.video = {
-          width: { exact: settings.settings.video.resolution.width },
-          height: { exact: settings.settings.video.resolution.height }
-        };
-
-      } else {
-        settings.getUserMediaSettings.video.mandatory = {
-          maxWidth: settings.settings.video.resolution.width,
-          maxHeight: settings.settings.video.resolution.height
-        };
-      }
+      settings.getUserMediaSettings.video = true;
     }
   }
 

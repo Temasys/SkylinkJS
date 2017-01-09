@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Jan 10 2017 00:55:38 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Jan 10 2017 01:13:11 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11531,7 +11531,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.16 - Tue Jan 10 2017 00:55:38 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Jan 10 2017 01:13:11 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -24058,7 +24058,10 @@ Skylink.prototype.RECORDING_STATE = {
  *   The flag if <code>getUserMedia()</code> should request for camera Stream to match exact requested values of
  *   <code>options.audio.deviceId</code> and <code>options.video.deviceId</code>, <code>options.video.resolution</code>
  *   and <code>options.video.frameRate</code> when provided.
- * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
+ * @param {Boolean|JSON} [options.audio=false] <blockquote class="info">
+ *    Note that the current Edge browser implementation does not support the <code>options.audio.optional</code>,
+ *    <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.</blockquote>
+ *    The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
  *   <small>Note that Peers may override the "receiving" <code>stereo</code> config depending on the Peers configuration.</small>
@@ -24100,7 +24103,11 @@ Skylink.prototype.RECORDING_STATE = {
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.</small>
  * @param {Boolean} [options.audio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
- * @param {Boolean|JSON} [options.video=false] The video configuration options.
+ * @param {Boolean|JSON} [options.video=false] <blockquote class="info">
+ *    Note that the current Edge browser implementation does not support the <code>options.video.optional</code>,
+ *    <code>options.video.deviceId</code>, <code>options.video.resolution</code> and
+ *    <code>options.video.frameRate</code>, <code>options.video.facingMode</code>.</blockquote>
+ *   The video configuration options.
  * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.videoMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
@@ -24882,6 +24889,9 @@ Skylink.prototype.disableVideo = function() {
  * <blockquote class="info">
  *   For a better user experience, the functionality is throttled when invoked many times in less
  *   than the milliseconds interval configured in the <a href="#method_init"><code>init()</code> method</a>.
+ *   Note that the Opera and Edge browser does not support screensharing, and as for IE / Safari browsers using
+ *   the Temasys Plugin screensharing support, check out the <a href="https://temasys.com.sg/plugin/#commercial-licensing">
+ *   commercial licensing</a> for more options.
  * </blockquote>
  * Function that retrieves screensharing Stream.
  * @method shareScreen
@@ -25345,43 +25355,39 @@ Skylink.prototype._parseStreamSettings = function(options) {
         settings.mutedSettings.shouldAudioMuted = options.audio.mute;
       }
 
-      if (typeof options.audio.echoCancellation === 'boolean') {
-        settings.settings.audio.echoCancellation = options.audio.echoCancellation;
-        settings.getUserMediaSettings.audio.echoCancellation = options.audio.echoCancellation;
-      }
+      // Not supported in Edge browser features
+      if (window.webrtcDetectedBrowser !== 'edge') {
+        if (typeof options.audio.echoCancellation === 'boolean') {
+          settings.settings.audio.echoCancellation = options.audio.echoCancellation;
+          settings.getUserMediaSettings.audio.echoCancellation = options.audio.echoCancellation;
+        }
 
-      if (Array.isArray(options.audio.optional)) {
-        settings.settings.audio.optional = clone(options.audio.optional);
-        settings.getUserMediaSettings.audio.optional = clone(options.audio.optional);
-      }
+        if (Array.isArray(options.audio.optional)) {
+          settings.settings.audio.optional = clone(options.audio.optional);
+          settings.getUserMediaSettings.audio.optional = clone(options.audio.optional);
+        }
 
-      if (options.audio.deviceId && typeof options.audio.deviceId === 'string' &&
-        window.webrtcDetectedBrowser !== 'firefox') {
-        settings.settings.audio.deviceId = options.audio.deviceId;
+        if (options.audio.deviceId && typeof options.audio.deviceId === 'string' &&
+          window.webrtcDetectedBrowser !== 'firefox') {
+          settings.settings.audio.deviceId = options.audio.deviceId;
 
-        if (options.useExactConstraints) {
-          settings.getUserMediaSettings.audio.deviceId = { exact: options.audio.deviceId };
+          if (options.useExactConstraints) {
+            settings.getUserMediaSettings.audio.deviceId = { exact: options.audio.deviceId };
 
-        } else {
-          if (!Array.isArray(settings.getUserMediaSettings.audio.optional)) {
-            settings.getUserMediaSettings.audio.optional = [];
+          } else {
+            if (!Array.isArray(settings.getUserMediaSettings.audio.optional)) {
+              settings.getUserMediaSettings.audio.optional = [];
+            }
+
+            settings.getUserMediaSettings.audio.optional.push({
+              sourceId: options.audio.deviceId
+            });
           }
-
-          settings.getUserMediaSettings.audio.optional.push({
-            sourceId: options.audio.deviceId
-          });
         }
       }
     }
 
     if (window.webrtcDetectedBrowser === 'edge') {
-      log.warn('Enforcing video settings not to set any echo cancellation or exact constraints as it is not supported for Edge browser.');
-      settings.settings.audio.exactConstraints = false;
-      settings.settings.audio.echoCancellation = false;
-
-      delete settings.settings.audio.optional;
-      delete settings.settings.audio.deviceId;
-
       settings.getUserMediaSettings.audio = true;
     }
   }
@@ -25465,10 +25471,9 @@ Skylink.prototype._parseStreamSettings = function(options) {
     }
 
     if (window.webrtcDetectedBrowser === 'edge') {
-      log.warn('Enforcing video settings not to set any resolution or exact constraints as it is not supported for Edge browser.');
       settings.settings.video = {
         screenshare: false,
-        exactConstraints: false
+        exactConstraints: !!options.useExactConstraints
       };
       settings.getUserMediaSettings.video = true;
     }
