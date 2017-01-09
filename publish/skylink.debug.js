@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 13:58:04 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Tue Jan 10 2017 01:58:42 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -3876,6 +3876,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
     log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Generated ICE candidate ->'], candidate);
 
+    if (candidateType === 'endOfCandidates') {
+      log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate ' +
+        'end-of-candidates signal to prevent errors ->'], candidate);
+      return;
+    }
+
     if (self._filterCandidatesType[candidateType]) {
       if (!(self._hasMCU && self._forceTURN)) {
         log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
@@ -4156,7 +4162,6 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       window.webrtcDetectedBrowser === 'safari' ||
       window.webrtcDetectedBrowser === 'IE') {
       useTURNSSLProtocol = true;
-      useTURNSSLPort = false;
     } else {
       useTURNSSLPort = true;
     }
@@ -4232,7 +4237,10 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       server.url = protocolParts[0] + ':' + urlParts[1];
 
       // add the ICE server port
-      if (protocolParts[2]) {
+      // Edge uses 3478 with ?transport=udp for now
+      if (window.webrtcDetectedBrowser === 'edge') {
+        server.url += ':3478';
+      } else if (protocolParts[2]) {
         server.url += ':' + protocolParts[2];
       }
     }
@@ -4295,6 +4303,11 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     hasUrlsSupport = true;
   }
 
+  // bowser / edge
+  if (['bowser', 'edge'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    hasUrlsSupport = true;
+  }
+
   for (var serverUsername in iceServersList) {
     if (iceServersList.hasOwnProperty(serverUsername)) {
       for (var serverCred in iceServersList[serverUsername]) {
@@ -4309,7 +4322,17 @@ Skylink.prototype._setIceServers = function(givenConfig) {
             if (serverCred !== 'none') {
               urlsItem.credential = serverCred;
             }
-            newIceServers.push(urlsItem);
+
+            // Edge uses 1 url only for now
+            if (window.webrtcDetectedBrowser === 'edge') {
+              if (urlsItem.username && urlsItem.credential) {
+                urlsItem.urls = [urlsItem.urls[0]];
+                newIceServers.push(urlsItem);
+                break;
+              }
+            } else {
+              newIceServers.push(urlsItem);
+            }
           } else {
             for (var j = 0; j < iceServersList[serverUsername][serverCred].length; j++) {
               var urlItem = {
@@ -4878,7 +4901,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           rtt: 0,
           jitter: 0,
           jitterBufferMs: null,
-          codec: self._getSDPSelectedCodec(peerId, pc.localDescription, 'audio'),
+          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'audio'),
           inputLevel: null,
           echoReturnLoss: null,
           echoReturnLossEnhancement: null,
@@ -4909,7 +4932,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           rtt: 0,
           jitter: 0,
           jitterBufferMs: null,
-          codec: self._getSDPSelectedCodec(peerId, pc.localDescription, 'video'),
+          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'video'),
           frameWidth: null,
           frameHeight: null,
           framesInput: null,
@@ -5823,15 +5846,46 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     return;
   }
 
-  if (self._peerConnections[targetMid].remoteDescription &&
-    self._peerConnections[targetMid].remoteDescription.sdp &&
+  // If remote description is set
+  if (self._peerConnections[targetMid].remoteDescription && self._peerConnections[targetMid].remoteDescription.sdp &&
+  // If end-of-candidates signal is received
     typeof self._peerEndOfCandidatesCounter[targetMid].expectedLen === 'number' &&
+  // If all ICE candidates are received
     self._peerEndOfCandidatesCounter[targetMid].len >= self._peerEndOfCandidatesCounter[targetMid].expectedLen &&
+  // If there is no ICE candidates queue
     (self._peerCandidatesQueue[targetMid] ? self._peerCandidatesQueue[targetMid].length === 0 : true) &&
+  // If it has not been set yet
     !self._peerEndOfCandidatesCounter[targetMid].hasSet) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
     self._peerEndOfCandidatesCounter[targetMid].hasSet = true;
-    self._peerConnections[targetMid].addIceCandidate(null);
+    try {
+      if (window.webrtcDetectedBrowser === 'edge') {
+        var mLineCounter = -1;
+        var addedMids = [];
+        var sdpLines = self._peerConnections[targetMid].remoteDescription.sdp.split('\r\n');
+
+        for (var i = 0; i < sdpLines.length; i++) {
+          if (sdpLines[i].indexOf('m=') === 0) {
+            mLineCounter++;
+          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
+            var mid = sdpLines[i].split('a=mid:')[1] || '';
+            if (mid && addedMids.indexOf(mid) === -1) {
+              addedMids.push(mid);
+              self._peerConnections[targetMid].addIceCandidate(new RTCIceCandidate({
+                sdpMid: mid,
+                sdpMLineIndex: mLineCounter,
+                candidate: 'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates'
+              }));
+            }
+          }
+        }
+
+      } else {
+        self._peerConnections[targetMid].addIceCandidate(null);
+      }
+    } catch (error) {
+      log.error([targetMid, 'RTCPeerConnection', null, 'Failed signaling end-of-candidates ->'], error);
+    }
   }
 };
 
@@ -5945,6 +5999,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.settings.video.customSettings && typeof peerInfo.settings.video.customSettings === 'object') {
       if (peerInfo.settings.video.customSettings.frameRate) {
         peerInfo.settings.video.frameRate = clone(peerInfo.settings.video.customSettings.frameRate);
+      }
+      if (peerInfo.settings.video.customSettings.facingMode) {
+        peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
       }
       if (peerInfo.settings.video.customSettings.width) {
         peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
@@ -6144,6 +6201,11 @@ Skylink.prototype._getUserInfo = function(peerId) {
       userInfo.settings.video.frameRate = -1;
     }
 
+    if (userInfo.settings.video.facingMode && typeof userInfo.settings.video.facingMode === 'object') {
+      userInfo.settings.video.customSettings.facingMode = clone(userInfo.settings.video.facingMode);
+      userInfo.settings.video.facingMode = '-1';
+    }
+
     if (userInfo.settings.video.resolution && typeof userInfo.settings.video.resolution === 'object') {
       if (userInfo.settings.video.resolution.width && typeof userInfo.settings.video.resolution.width === 'object') {
         userInfo.settings.video.customSettings.width = clone(userInfo.settings.video.width);
@@ -6255,8 +6317,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   if (self._enableDataChannel && self._peerInformations[targetMid] &&
     self._peerInformations[targetMid].config.enableDataChannel) {
     // Edge doesn't support datachannels yet
-    if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main) &&
-      window.webrtcDetectedBrowser !== 'edge') {
+    if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main)) {
       self._createDataChannel(targetMid);
       self._peerConnections[targetMid].hasMainChannel = true;
     }
@@ -7354,7 +7415,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
 };
 
-Skylink.prototype.VERSION = '0.6.16';
+Skylink.prototype.VERSION = '0.6.17';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -7540,13 +7601,17 @@ Skylink.prototype.generateUUID = function() {
  * <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
- * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections should be enabled.
+ * @param {Boolean} [options.enableDataChannel=true] <blockquote class="info">
+ *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
+ *   </blockquote> The flag if Datachannel connections should be enabled.
  *   <small>This is required to be enabled for <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>,
  *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> and
  *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small>
  * @param {Boolean} [options.enableTURNServer=true] The flag if TURN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.
- * @param {Boolean} [options.enableSTUNServer=true] The flag if STUN ICE servers should
+ * @param {Boolean} [options.enableSTUNServer=true] <blockquote class="info">
+ *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
+ *   </blockquote> The flag if STUN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
@@ -7564,7 +7629,8 @@ Skylink.prototype.generateUUID = function() {
  *   Note that configuring the protocol may not necessarily result in the desired network transports protocol
  *   used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.
  *   This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing
- *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.
+ *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.<br>
+ *   Note that for Edge browsers, this value is overriden as <code>UDP</code> due to its supports.
  *   </blockquote> The option to configure the <code>?transport=</code>
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is <code>ANY</code>.
@@ -7620,13 +7686,15 @@ Skylink.prototype.generateUUID = function() {
  *   <small>By default, <code>"https:"</code> protocol connections uses HTTPS connections.</small>
  * @param {String} [options.audioCodec] <blockquote class="info">
  *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
- *   <code>"answer"</code> session description to prefer the codec.</blockquote>
+ *   <code>"answer"</code> session description to prefer the codec.<br>
+ *   Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>
  *   The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.AUDIO_CODEC]
  * @param {String} [options.videoCodec] <blockquote class="info">
  *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
- *   <code>"answer"</code> session description to prefer the codec.</blockquote>
+ *   <code>"answer"</code> session description to prefer the codec.<br>
+ *   Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>
  *   The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.VIDEO_CODEC]
@@ -7635,7 +7703,9 @@ Skylink.prototype.generateUUID = function() {
  *   <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>
  * @param {Boolean} [options.forceTURNSSL=false] <blockquote class="info">
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
- *   TURN ICE servers using port <code>443</code> will be used instead.</blockquote>
+ *   TURN ICE servers using port <code>443</code> will be used instead.<br>
+ *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports and
+ *   only port <code>3478</code> is used.</blockquote>
  *   The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.
  * @param {JSON} [options.filterCandidatesType] <blockquote class="info">
  *   Note that this a debugging feature and there might be connectivity issues when toggling these flags.
@@ -7947,6 +8017,16 @@ Skylink.prototype.init = function(options, callback) {
       filterCandidatesType.relay = false;
     }
   }
+
+  if (window.webrtcDetectedBrowser === 'edge') {
+    enableSTUNServer = false;
+    forceTURNSSL = false;
+    TURNTransport = self.TURN_TRANSPORT.UDP;
+    audioCodec = self.AUDIO_CODEC.OPUS;
+    videoCodec = self.VIDEO_CODEC.H264;
+    enableDataChannel = false;
+  }
+
   // api key path options
   self._appKey = appKey;
   self._roomServer = roomServer;
@@ -9081,6 +9161,9 @@ var _eventsDocs = {
    *   requested values of <code>peerInfo.settings.video.resolution</code>,
    *   <code>peerInfo.settings.video.frameRate</code> and <code>peerInfo.settings.video.deviceId</code>
    *   when provided.
+   * @param {String|JSON} [peerInfo.settings.video.facingMode] The Peer Stream video camera facing mode.
+   *   <small>When defined as a JSON object, it is the user set facingMode settings with (<code>"min"</code> or
+   *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).</small>
    * @param {JSON} peerInfo.settings.bandwidth The maximum streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.audio] The maximum audio streaming bandwidth sent from Peer.
    * @param {Number} [peerInfo.settings.bandwidth.video] The maximum video streaming bandwidth sent from Peer.
@@ -9529,6 +9612,8 @@ var _eventsDocs = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} [stats.audio.receiving.codec] The Peer connection receiving audio streaming selected codec information.
    *   <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+   *   <small>Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
+   *   The value is derived from the remote session description.</small>
    * @param {String} stats.audio.receiving.codec.name The Peer connection receiving audio streaming selected codec name.
    * @param {Number} stats.audio.receiving.codec.payloadType The Peer connection receiving audio streaming selected codec payload type.
    * @param {String} [stats.audio.receiving.codec.implementation] The Peer connection receiving audio streaming selected codec implementation.
@@ -9617,6 +9702,8 @@ var _eventsDocs = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} [stats.video.receiving.codec] The Peer connection receiving video streaming selected codec information.
    *   <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>
+   *   <small>Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
+   *   The value is derived from the remote session description.</small>
    * @param {String} stats.video.receiving.codec.name The Peer connection receiving video streaming selected codec name.
    * @param {Number} stats.video.receiving.codec.payloadType The Peer connection receiving video streaming selected codec payload type.
    * @param {String} [stats.video.receiving.codec.implementation] The Peer connection receiving video streaming selected codec implementation.
@@ -12521,7 +12608,10 @@ Skylink.prototype.RECORDING_STATE = {
  *   The flag if <code>getUserMedia()</code> should request for camera Stream to match exact requested values of
  *   <code>options.audio.deviceId</code> and <code>options.video.deviceId</code>, <code>options.video.resolution</code>
  *   and <code>options.video.frameRate</code> when provided.
- * @param {Boolean|JSON} [options.audio=false] The audio configuration options.
+ * @param {Boolean|JSON} [options.audio=false] <blockquote class="info">
+ *    Note that the current Edge browser implementation does not support the <code>options.audio.optional</code>,
+ *    <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.</blockquote>
+ *    The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
  *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
  *   <small>Note that Peers may override the "receiving" <code>stereo</code> config depending on the Peers configuration.</small>
@@ -12563,7 +12653,11 @@ Skylink.prototype.RECORDING_STATE = {
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.</small>
  * @param {Boolean} [options.audio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
- * @param {Boolean|JSON} [options.video=false] The video configuration options.
+ * @param {Boolean|JSON} [options.video=false] <blockquote class="info">
+ *    Note that the current Edge browser implementation does not support the <code>options.video.optional</code>,
+ *    <code>options.video.deviceId</code>, <code>options.video.resolution</code> and
+ *    <code>options.video.frameRate</code>, <code>options.video.facingMode</code>.</blockquote>
+ *   The video configuration options.
  * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.videoMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
@@ -12603,6 +12697,9 @@ Skylink.prototype.RECORDING_STATE = {
  *   <small>The list of available video source ID can be retrieved by the <a href="https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.</small>
+ * @param {String|JSON} [options.video.facingMode] The video camera facing mode.
+ *   <small>The list of available video source ID can be retrieved by the <a href="https://developer.mozilla.org
+ *   /en-US/docs/Web/API/MediaTrackConstraints/facingMode">MediaTrackConstraints <code>facingMode</code> API</a>.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -13345,6 +13442,9 @@ Skylink.prototype.disableVideo = function() {
  * <blockquote class="info">
  *   For a better user experience, the functionality is throttled when invoked many times in less
  *   than the milliseconds interval configured in the <a href="#method_init"><code>init()</code> method</a>.
+ *   Note that the Opera and Edge browser does not support screensharing, and as for IE / Safari browsers using
+ *   the Temasys Plugin screensharing support, check out the <a href="https://temasys.com.sg/plugin/#commercial-licensing">
+ *   commercial licensing</a> for more options.
  * </blockquote>
  * Function that retrieves screensharing Stream.
  * @method shareScreen
@@ -13777,40 +13877,39 @@ Skylink.prototype._parseStreamSettings = function(options) {
 
   if (options.audio) {
     // For Edge to work since they do not support the advanced constraints yet
-    if (window.webrtcDetectedBrowser === 'edge') {
-      settings.getUserMediaSettings.audio = true;
-    } else {
-      settings.settings.audio = {
-        stereo: false,
-        exactConstraints: !!options.useExactConstraints,
-        echoCancellation: false
-      };
-      settings.getUserMediaSettings.audio = {
-        echoCancellation: false
-      };
+    settings.settings.audio = {
+      stereo: false,
+      exactConstraints: !!options.useExactConstraints,
+      echoCancellation: false
+    };
+    settings.getUserMediaSettings.audio = {
+      echoCancellation: false
+    };
 
-      if (typeof options.audio === 'object') {
-        if (typeof options.audio.stereo === 'boolean') {
-          settings.settings.audio.stereo = options.audio.stereo;
-        }
+    if (typeof options.audio === 'object') {
+      if (typeof options.audio.stereo === 'boolean') {
+        settings.settings.audio.stereo = options.audio.stereo;
+      }
 
-        if (typeof options.audio.useinbandfec === 'boolean') {
-          settings.settings.audio.useinbandfec = options.audio.useinbandfec;
-        }
+      if (typeof options.audio.useinbandfec === 'boolean') {
+        settings.settings.audio.useinbandfec = options.audio.useinbandfec;
+      }
 
-        if (typeof options.audio.usedtx === 'boolean') {
-          settings.settings.audio.usedtx = options.audio.usedtx;
-        }
+      if (typeof options.audio.usedtx === 'boolean') {
+        settings.settings.audio.usedtx = options.audio.usedtx;
+      }
 
-        if (typeof options.audio.maxplaybackrate === 'number' &&
-          options.audio.maxplaybackrate >= 8000 && options.audio.maxplaybackrate <= 48000) {
-          settings.settings.audio.maxplaybackrate = options.audio.maxplaybackrate;
-        }
+      if (typeof options.audio.maxplaybackrate === 'number' &&
+        options.audio.maxplaybackrate >= 8000 && options.audio.maxplaybackrate <= 48000) {
+        settings.settings.audio.maxplaybackrate = options.audio.maxplaybackrate;
+      }
 
-        if (typeof options.audio.mute === 'boolean') {
-          settings.mutedSettings.shouldAudioMuted = options.audio.mute;
-        }
+      if (typeof options.audio.mute === 'boolean') {
+        settings.mutedSettings.shouldAudioMuted = options.audio.mute;
+      }
 
+      // Not supported in Edge browser features
+      if (window.webrtcDetectedBrowser !== 'edge') {
         if (typeof options.audio.echoCancellation === 'boolean') {
           settings.settings.audio.echoCancellation = options.audio.echoCancellation;
           settings.getUserMediaSettings.audio.echoCancellation = options.audio.echoCancellation;
@@ -13840,88 +13939,101 @@ Skylink.prototype._parseStreamSettings = function(options) {
         }
       }
     }
+
+    if (window.webrtcDetectedBrowser === 'edge') {
+      settings.getUserMediaSettings.audio = true;
+    }
   }
 
   if (options.video) {
     // For Edge to work since they do not support the advanced constraints yet
-    if (window.webrtcDetectedBrowser === 'edge') {
-      settings.getUserMediaSettings.video = true;
+    settings.settings.video = {
+      resolution: clone(this.VIDEO_RESOLUTION.VGA),
+      screenshare: false,
+      exactConstraints: !!options.useExactConstraints
+    };
+    settings.getUserMediaSettings.video = {};
+
+    if (typeof options.video === 'object') {
+      if (typeof options.video.mute === 'boolean') {
+        settings.mutedSettings.shouldVideoMuted = options.video.mute;
+      }
+
+      if (Array.isArray(options.video.optional)) {
+        settings.settings.video.optional = clone(options.video.optional);
+        settings.getUserMediaSettings.video.optional = clone(options.video.optional);
+      }
+
+      if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
+        window.webrtcDetectedBrowser !== 'firefox') {
+        settings.settings.video.deviceId = options.video.deviceId;
+
+        if (options.useExactConstraints) {
+          settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
+
+        } else {
+          if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
+            settings.getUserMediaSettings.video.optional = [];
+          }
+
+          settings.getUserMediaSettings.video.optional.push({
+            sourceId: options.video.deviceId
+          });
+        }
+      }
+
+      if (options.video.resolution && typeof options.video.resolution === 'object') {
+        if ((options.video.resolution.width && typeof options.video.resolution.width === 'object') ||
+          typeof options.video.resolution.width === 'number') {
+          settings.settings.video.resolution.width = options.video.resolution.width;
+        }
+        if ((options.video.resolution.height && typeof options.video.resolution.height === 'object') ||
+          typeof options.video.resolution.height === 'number') {
+          settings.settings.video.resolution.height = options.video.resolution.height;
+        }
+      }
+
+      settings.getUserMediaSettings.video.width = typeof settings.settings.video.resolution.width === 'object' ?
+        settings.settings.video.resolution.width : (options.useExactConstraints ?
+        { exact: settings.settings.video.resolution.width } : { max: settings.settings.video.resolution.width });
+
+      settings.getUserMediaSettings.video.height = typeof settings.settings.video.resolution.height === 'object' ?
+        settings.settings.video.resolution.height : (options.useExactConstraints ?
+        { exact: settings.settings.video.resolution.height } : { max: settings.settings.video.resolution.height });
+
+      if ((options.video.frameRate && typeof options.video.frameRate === 'object') ||
+        typeof options.video.frameRate === 'number' && !self._isUsingPlugin) {
+        settings.settings.video.frameRate = options.video.frameRate;
+        settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === 'object' ?
+          settings.settings.video.frameRate : (options.useExactConstraints ?
+          { exact: settings.settings.video.frameRate } : { max: settings.settings.video.frameRate });
+      }
+
+      if (options.video.facingMode && ['string', 'object'].indexOf(typeof options.video.facingMode) > -1 && self._isUsingPlugin) {
+        settings.settings.video.facingMode = options.video.facingMode;
+        settings.getUserMediaSettings.video.facingMode = typeof settings.settings.video.facingMode === 'object' ?
+          settings.settings.video.facingMode : (options.useExactConstraints ?
+          { exact: settings.settings.video.facingMode } : { max: settings.settings.video.facingMode });
+      }
+    } else if (options.useExactConstraints) {
+      settings.getUserMediaSettings.video = {
+        width: { exact: settings.settings.video.resolution.width },
+        height: { exact: settings.settings.video.resolution.height }
+      };
+
     } else {
+      settings.getUserMediaSettings.video.mandatory = {
+        maxWidth: settings.settings.video.resolution.width,
+        maxHeight: settings.settings.video.resolution.height
+      };
+    }
+
+    if (window.webrtcDetectedBrowser === 'edge') {
       settings.settings.video = {
-        resolution: clone(this.VIDEO_RESOLUTION.VGA),
         screenshare: false,
         exactConstraints: !!options.useExactConstraints
       };
-      settings.getUserMediaSettings.video = {};
-
-      if (typeof options.video === 'object') {
-        if (typeof options.video.mute === 'boolean') {
-          settings.mutedSettings.shouldVideoMuted = options.video.mute;
-        }
-
-        if (Array.isArray(options.video.optional)) {
-          settings.settings.video.optional = clone(options.video.optional);
-          settings.getUserMediaSettings.video.optional = clone(options.video.optional);
-        }
-
-        if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
-          window.webrtcDetectedBrowser !== 'firefox') {
-          settings.settings.video.deviceId = options.video.deviceId;
-
-          if (options.useExactConstraints) {
-            settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
-
-          } else {
-            if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
-              settings.getUserMediaSettings.video.optional = [];
-            }
-
-            settings.getUserMediaSettings.video.optional.push({
-              sourceId: options.video.deviceId
-            });
-          }
-        }
-
-        if (options.video.resolution && typeof options.video.resolution === 'object') {
-          if ((options.video.resolution.width && typeof options.video.resolution.width === 'object') ||
-            typeof options.video.resolution.width === 'number') {
-            settings.settings.video.resolution.width = options.video.resolution.width;
-          }
-          if ((options.video.resolution.height && typeof options.video.resolution.height === 'object') ||
-            typeof options.video.resolution.height === 'number') {
-            settings.settings.video.resolution.height = options.video.resolution.height;
-          }
-        }
-
-        settings.getUserMediaSettings.video.width = typeof settings.settings.video.resolution.width === 'object' ?
-          settings.settings.video.resolution.width : (options.useExactConstraints ?
-          { exact: settings.settings.video.resolution.width } : { max: settings.settings.video.resolution.width });
-
-        settings.getUserMediaSettings.video.height = typeof settings.settings.video.resolution.height === 'object' ?
-          settings.settings.video.resolution.height : (options.useExactConstraints ?
-          { exact: settings.settings.video.resolution.height } : { max: settings.settings.video.resolution.height });
-
-        if ((options.video.frameRate && typeof options.video.frameRate === 'object') || typeof object.video.frameRate === 'number') {
-          //
-          if (!(typeof options.video.frameRate === 'number' && !options.useExactConstraints && self._isUsingPlugin)) {
-            settings.settings.video.frameRate = options.video.frameRate;
-            settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === 'object' ?
-              settings.settings.video.frameRate : (options.useExactConstraints ?
-              { exact: settings.settings.video.frameRate } : { max: settings.settings.video.frameRate });
-          }
-        }
-      } else if (options.useExactConstraints) {
-        settings.getUserMediaSettings.video = {
-          width: { exact: settings.settings.video.resolution.width },
-          height: { exact: settings.settings.video.resolution.height }
-        };
-
-      } else {
-        settings.getUserMediaSettings.video.mandatory = {
-          maxWidth: settings.settings.video.resolution.width,
-          maxHeight: settings.settings.video.resolution.height
-        };
-      }
+      settings.getUserMediaSettings.video = true;
     }
   }
 

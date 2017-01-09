@@ -122,7 +122,6 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       window.webrtcDetectedBrowser === 'safari' ||
       window.webrtcDetectedBrowser === 'IE') {
       useTURNSSLProtocol = true;
-      useTURNSSLPort = false;
     } else {
       useTURNSSLPort = true;
     }
@@ -198,7 +197,10 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       server.url = protocolParts[0] + ':' + urlParts[1];
 
       // add the ICE server port
-      if (protocolParts[2]) {
+      // Edge uses 3478 with ?transport=udp for now
+      if (window.webrtcDetectedBrowser === 'edge') {
+        server.url += ':3478';
+      } else if (protocolParts[2]) {
         server.url += ':' + protocolParts[2];
       }
     }
@@ -261,6 +263,11 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     hasUrlsSupport = true;
   }
 
+  // bowser / edge
+  if (['bowser', 'edge'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    hasUrlsSupport = true;
+  }
+
   for (var serverUsername in iceServersList) {
     if (iceServersList.hasOwnProperty(serverUsername)) {
       for (var serverCred in iceServersList[serverUsername]) {
@@ -275,7 +282,17 @@ Skylink.prototype._setIceServers = function(givenConfig) {
             if (serverCred !== 'none') {
               urlsItem.credential = serverCred;
             }
-            newIceServers.push(urlsItem);
+
+            // Edge uses 1 url only for now
+            if (window.webrtcDetectedBrowser === 'edge') {
+              if (urlsItem.username && urlsItem.credential) {
+                urlsItem.urls = [urlsItem.urls[0]];
+                newIceServers.push(urlsItem);
+                break;
+              }
+            } else {
+              newIceServers.push(urlsItem);
+            }
           } else {
             for (var j = 0; j < iceServersList[serverUsername][serverCred].length; j++) {
               var urlItem = {

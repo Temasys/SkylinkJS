@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.16</title>
+    <title>SkylinkJS 0.6.17</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.16</small>
+          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.17</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -213,7 +213,6 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       window.webrtcDetectedBrowser === &#x27;safari&#x27; ||
       window.webrtcDetectedBrowser === &#x27;IE&#x27;) {
       useTURNSSLProtocol = true;
-      useTURNSSLPort = false;
     } else {
       useTURNSSLPort = true;
     }
@@ -289,7 +288,10 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       server.url = protocolParts[0] + &#x27;:&#x27; + urlParts[1];
 
       // add the ICE server port
-      if (protocolParts[2]) {
+      // Edge uses 3478 with ?transport=udp for now
+      if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+        server.url += &#x27;:3478&#x27;;
+      } else if (protocolParts[2]) {
         server.url += &#x27;:&#x27; + protocolParts[2];
       }
     }
@@ -352,6 +354,11 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     hasUrlsSupport = true;
   }
 
+  // bowser / edge
+  if ([&#x27;bowser&#x27;, &#x27;edge&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
+    hasUrlsSupport = true;
+  }
+
   for (var serverUsername in iceServersList) {
     if (iceServersList.hasOwnProperty(serverUsername)) {
       for (var serverCred in iceServersList[serverUsername]) {
@@ -366,7 +373,17 @@ Skylink.prototype._setIceServers = function(givenConfig) {
             if (serverCred !== &#x27;none&#x27;) {
               urlsItem.credential = serverCred;
             }
-            newIceServers.push(urlsItem);
+
+            // Edge uses 1 url only for now
+            if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+              if (urlsItem.username &amp;&amp; urlsItem.credential) {
+                urlsItem.urls = [urlsItem.urls[0]];
+                newIceServers.push(urlsItem);
+                break;
+              }
+            } else {
+              newIceServers.push(urlsItem);
+            }
           } else {
             for (var j = 0; j &lt; iceServersList[serverUsername][serverCred].length; j++) {
               var urlItem = {

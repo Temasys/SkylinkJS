@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.16",
+        "version": "0.6.17",
         "url": "https://temasys.github.io/"
     },
     "files": {
@@ -2371,7 +2371,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 179,
+            "line": 185,
             "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -2382,7 +2382,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 203,
+            "line": 209,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -2393,7 +2393,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 235,
+            "line": 241,
             "description": "Function that adds the ICE candidate to Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidate",
@@ -2889,7 +2889,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 230,
+            "line": 233,
             "description": "Function that gets the list of connected Peers in the Room.",
             "itemtype": "method",
             "name": "getPeersInRoom",
@@ -2905,7 +2905,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 261,
+            "line": 264,
             "description": "Function that gets the list of connected Peers Streams in the Room.",
             "itemtype": "method",
             "name": "getPeersStream",
@@ -2921,7 +2921,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 324,
+            "line": 327,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
@@ -2981,7 +2981,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 139,
+            "line": 138,
             "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -2992,7 +2992,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 184,
+            "line": 183,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -3752,7 +3752,7 @@
                         },
                         {
                             "name": "enableDataChannel",
-                            "description": "The flag if Datachannel connections should be enabled.\n  <small>This is required to be enabled for <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>,\n  <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> and\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.\n  </blockquote> The flag if Datachannel connections should be enabled.\n  <small>This is required to be enabled for <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>,\n  <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> and\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
@@ -3766,7 +3766,7 @@
                         },
                         {
                             "name": "enableSTUNServer",
-                            "description": "The flag if STUN ICE servers should\n  be used when constructing Peer connections to allow TURN connections when required.",
+                            "description": "<blockquote class=\"info\">\n  Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.\n  </blockquote> The flag if STUN ICE servers should\n  be used when constructing Peer connections to allow TURN connections when required.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
@@ -3787,7 +3787,7 @@
                         },
                         {
                             "name": "TURNServerTransport",
-                            "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired network transports protocol\n  used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.\n  This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing\n  the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.\n  </blockquote> The option to configure the <code>?transport=</code>\n  query parameter in TURN ICE servers when constructing a Peer connections.\n- When not provided, its value is <code>ANY</code>.\n  [Rel: Skylink.TURN_TRANSPORT]",
+                            "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired network transports protocol\n  used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.\n  This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing\n  the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.<br>\n  Note that for Edge browsers, this value is overriden as <code>UDP</code> due to its supports.\n  </blockquote> The option to configure the <code>?transport=</code>\n  query parameter in TURN ICE servers when constructing a Peer connections.\n- When not provided, its value is <code>ANY</code>.\n  [Rel: Skylink.TURN_TRANSPORT]",
                             "type": "Boolean",
                             "optional": true
                         },
@@ -3851,13 +3851,13 @@
                         },
                         {
                             "name": "audioCodec",
-                            "description": "<blockquote class=\"info\">\n  Note that if the audio codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.</blockquote>\n  The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.AUDIO_CODEC]",
+                            "description": "<blockquote class=\"info\">\n  Note that if the audio codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.<br>\n  Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>\n  The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.AUDIO_CODEC]",
                             "type": "String",
                             "optional": true
                         },
                         {
                             "name": "videoCodec",
-                            "description": "<blockquote class=\"info\">\n  Note that if the video codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.</blockquote>\n  The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.VIDEO_CODEC]",
+                            "description": "<blockquote class=\"info\">\n  Note that if the video codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.<br>\n  Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>\n  The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.VIDEO_CODEC]",
                             "type": "String",
                             "optional": true
                         },
@@ -3870,7 +3870,7 @@
                         },
                         {
                             "name": "forceTURNSSL",
-                            "description": "<blockquote class=\"info\">\n  Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,\n  TURN ICE servers using port <code>443</code> will be used instead.</blockquote>\n  The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.",
+                            "description": "<blockquote class=\"info\">\n  Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,\n  TURN ICE servers using port <code>443</code> will be used instead.<br>\n  Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports and\n  only port <code>3478</code> is used.</blockquote>\n  The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -4126,7 +4126,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 732,
+            "line": 751,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4137,7 +4137,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 806,
+            "line": 825,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4148,7 +4148,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 879,
+            "line": 898,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4159,7 +4159,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 972,
+            "line": 991,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5052,6 +5052,12 @@
                                     "type": "Boolean"
                                 },
                                 {
+                                    "name": "video.facingMode",
+                                    "description": "The Peer Stream video camera facing mode.\n  <small>When defined as a JSON object, it is the user set facingMode settings with (<code>\"min\"</code> or\n  <code>\"max\"</code> or <code>\"ideal\"</code> or <code>\"exact\"</code> etc configurations).</small>",
+                                    "type": "String|JSON",
+                                    "optional": true
+                                },
+                                {
                                     "name": "bandwidth",
                                     "description": "The maximum streaming bandwidth sent from Peer.",
                                     "type": "JSON"
@@ -5200,7 +5206,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 337,
+            "line": 340,
             "description": "Event triggered when a Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "peerRestart",
@@ -5231,7 +5237,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 351,
+            "line": 354,
             "description": "Event triggered when a Peer session information has been updated.",
             "itemtype": "event",
             "name": "peerUpdated",
@@ -5257,7 +5263,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 364,
+            "line": 367,
             "description": "Event triggered when a Peer leaves the room.",
             "itemtype": "event",
             "name": "peerLeft",
@@ -5283,7 +5289,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 377,
+            "line": 380,
             "description": "Event triggered when Room session has ended abruptly due to network disconnections.",
             "itemtype": "event",
             "name": "sessionDisconnect",
@@ -5304,7 +5310,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 389,
+            "line": 392,
             "description": "Event triggered when receiving Peer Stream.",
             "itemtype": "event",
             "name": "incomingStream",
@@ -5345,7 +5351,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 406,
+            "line": 409,
             "description": "Event triggered when receiving message from Peer.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -5410,7 +5416,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 437,
+            "line": 440,
             "description": "Event triggered when receiving completed data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingData",
@@ -5446,7 +5452,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 453,
+            "line": 456,
             "description": "Event triggered when receiving upload data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingDataRequest",
@@ -5477,7 +5483,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 467,
+            "line": 470,
             "description": "Event triggered when Room locked status has changed.",
             "itemtype": "event",
             "name": "roomLock",
@@ -5508,7 +5514,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 481,
+            "line": 484,
             "description": "Event triggered when a Datachannel connection state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -5550,7 +5556,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 500,
+            "line": 503,
             "description": "Event triggered when a data transfer state has changed.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -5658,7 +5664,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 548,
+            "line": 551,
             "description": "Event triggered when Signaling server reaction state has changed.",
             "itemtype": "event",
             "name": "systemAction",
@@ -5684,7 +5690,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 561,
+            "line": 564,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -5705,7 +5711,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 572,
+            "line": 575,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -5726,7 +5732,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 583,
+            "line": 586,
             "description": "Event triggered when a server Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -5747,7 +5753,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 594,
+            "line": 597,
             "description": "Event triggered when a Peer Stream streaming has stopped.\n<small>Note that it may not be the currently sent Stream to User, and it also triggers\nwhen User leaves the Room for any currently sent Stream to User from Peer.</small>",
             "itemtype": "event",
             "name": "streamEnded",
@@ -5783,7 +5789,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 611,
+            "line": 614,
             "description": "Event triggered when Peer Stream audio or video tracks has been muted / unmuted.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -5814,7 +5820,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 625,
+            "line": 628,
             "description": "Event triggered when <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval state changes.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -5847,7 +5853,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 638,
+            "line": 641,
             "description": "Event triggered when <a href=\"#method_introducePeer\"><code>introducePeer()</code> method</a>\nintroduction request state changes.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -5884,7 +5890,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 654,
+            "line": 657,
             "description": "Event triggered when recording session state has changed.",
             "itemtype": "event",
             "name": "recordingState",
@@ -5923,7 +5929,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 675,
+            "line": 678,
             "description": "Event triggered when <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code> method</a>\nretrieval state changes.",
             "itemtype": "event",
             "name": "getConnectionStatusStateChange",
@@ -6121,7 +6127,7 @@
                                 },
                                 {
                                     "name": "receiving.codec",
-                                    "description": "The Peer connection receiving audio streaming selected codec information.\n  <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>",
+                                    "description": "The Peer connection receiving audio streaming selected codec information.\n  <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>\n  <small>Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.\n  The value is derived from the remote session description.</small>",
                                     "type": "JSON",
                                     "optional": true
                                 },
@@ -6392,7 +6398,7 @@
                                 },
                                 {
                                     "name": "receiving.codec",
-                                    "description": "The Peer connection receiving video streaming selected codec information.\n  <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>",
+                                    "description": "The Peer connection receiving video streaming selected codec information.\n  <small>Defined as <code>null</code> if remote session description is not available before parsing.</small>\n  <small>Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.\n  The value is derived from the remote session description.</small>",
                                     "type": "JSON",
                                     "optional": true
                                 },
@@ -6815,7 +6821,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 980,
+            "line": 987,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -6843,7 +6849,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 997,
+            "line": 1004,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -6902,7 +6908,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1026,
+            "line": 1033,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -6926,7 +6932,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1050,
+            "line": 1057,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -6963,7 +6969,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1108,
+            "line": 1115,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -6988,7 +6994,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1157,
+            "line": 1164,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -6999,7 +7005,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1211,
+            "line": 1218,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -7010,7 +7016,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1237,
+            "line": 1244,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -7021,7 +7027,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1275,
+            "line": 1282,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -7865,7 +7871,7 @@
                         },
                         {
                             "name": "audio",
-                            "description": "The audio configuration options.",
+                            "description": "<blockquote class=\"info\">\n   Note that the current Edge browser implementation does not support the <code>options.audio.optional</code>,\n   <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.</blockquote>\n   The audio configuration options.",
                             "type": "Boolean|JSON",
                             "optional": true,
                             "optdefault": "false",
@@ -7925,7 +7931,7 @@
                         },
                         {
                             "name": "video",
-                            "description": "The video configuration options.",
+                            "description": "<blockquote class=\"info\">\n   Note that the current Edge browser implementation does not support the <code>options.video.optional</code>,\n   <code>options.video.deviceId</code>, <code>options.video.resolution</code> and\n   <code>options.video.frameRate</code>, <code>options.video.facingMode</code>.</blockquote>\n  The video configuration options.",
                             "type": "Boolean|JSON",
                             "optional": true,
                             "optdefault": "false",
@@ -7972,6 +7978,12 @@
                                     "description": "<blockquote class=\"info\">\n  Note this is currently not supported in Firefox browsers.\n  </blockquote> The video track source ID of the device to use.\n  <small>The list of available video source ID can be retrieved by the <a href=\"https://developer.\nmozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices\"><code>navigator.mediaDevices.enumerateDevices</code>\n  API</a>.</small>",
                                     "type": "String",
                                     "optional": true
+                                },
+                                {
+                                    "name": "facingMode",
+                                    "description": "The video camera facing mode.\n  <small>The list of available video source ID can be retrieved by the <a href=\"https://developer.mozilla.org\n  /en-US/docs/Web/API/MediaTrackConstraints/facingMode\">MediaTrackConstraints <code>facingMode</code> API</a>.</small>",
+                                    "type": "String|JSON",
+                                    "optional": true
                                 }
                             ]
                         }
@@ -8005,7 +8017,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 572,
+            "line": 582,
             "description": "<blockquote class=\"info\">\n  Note that if <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is available despite having\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> available, the\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is sent instead of the\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> to Peers.\n</blockquote>\nFunction that sends a new <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>\nto all connected Peers in the Room.",
             "itemtype": "method",
             "name": "sendStream",
@@ -8043,7 +8055,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 784,
+            "line": 794,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -8056,7 +8068,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 823,
+            "line": 833,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -8092,7 +8104,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 961,
+            "line": 971,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -8107,7 +8119,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 988,
+            "line": 998,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -8122,7 +8134,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1015,
+            "line": 1025,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -8137,7 +8149,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1042,
+            "line": 1052,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -8152,8 +8164,8 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1069,
-            "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nFunction that retrieves screensharing Stream.",
+            "line": 1079,
+            "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n  Note that the Opera and Edge browser does not support screensharing, and as for IE / Safari browsers using\n  the Temasys Plugin screensharing support, check out the <a href=\"https://temasys.com.sg/plugin/#commercial-licensing\">\n  commercial licensing</a> for more options.\n</blockquote>\nFunction that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
             "params": [
@@ -8226,7 +8238,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1310,
+            "line": 1323,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -8239,7 +8251,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1369,
+            "line": 1382,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -8250,7 +8262,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1416,
+            "line": 1429,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -8261,7 +8273,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1489,
+            "line": 1502,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -8272,7 +8284,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1656,
+            "line": 1681,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -8283,7 +8295,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1791,
+            "line": 1816,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -8294,7 +8306,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1831,
+            "line": 1856,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -8305,7 +8317,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1865,
+            "line": 1890,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -8316,7 +8328,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1940,
+            "line": 1965,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -8590,39 +8602,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:572"
+            "line": " source/stream-media.js:582"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:784"
+            "line": " source/stream-media.js:794"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:823"
+            "line": " source/stream-media.js:833"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:961"
+            "line": " source/stream-media.js:971"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:988"
+            "line": " source/stream-media.js:998"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1015"
+            "line": " source/stream-media.js:1025"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1042"
+            "line": " source/stream-media.js:1052"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1069"
+            "line": " source/stream-media.js:1079"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1310"
+            "line": " source/stream-media.js:1323"
         },
         {
             "message": "Missing item type\nPolyfill for Object.keys() from Mozilla\nFrom https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys",
