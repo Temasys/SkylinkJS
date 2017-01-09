@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 13:37:37 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Mon Jan 09 2017 13:42:13 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -155,7 +155,7 @@ var clone = function (obj) {
  *   <a href="#method_joinRoom"><code>joinRoom()</code></a> methods should be called.
  *
  * If you have any issues, you may find answers to your questions in the FAQ section on [our support portal](
- * http://support.temasys.com.sg), asks questions, request features or raise bug tickets as well.
+ * http://support.temasys.io), asks questions, request features or raise bug tickets as well.
  *
  * If you would like to contribute to our SkylinkJS codebase, see [the contributing README](
  * https://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).
@@ -771,7 +771,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.5.2
    */
-  this._roomServer = '//api.temasys.com.sg';
+  this._roomServer = '//api.temasys.io';
 
   /**
    * Stores the App Key configured in <code>init()</code>.
@@ -4387,9 +4387,9 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  *   For MCU enabled Peer connections with <code>options.mcuUseRenegoRestart</code> set to <code>false</code>
  *   in the <a href="#method_init"><code>init()</code> method</a>, the restart functionality may differ, you
  *   may learn more about how to workaround it
- *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000002853">in this article here</a>.
+ *   <a href="http://support.temasys.io/support/discussions/topics/12000002853">in this article here</a>.
  *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
- *   <a href="http://support.temasys.com.sg/support/discussions/topics/12000005188">in this article here</a>.
+ *   <a href="http://support.temasys.io/support/discussions/topics/12000005188">in this article here</a>.
  *   Note that this functionality should be used when Peer connection stream freezes during a connection.
  *   For a better user experience for only MCU enabled Peer connections, the functionality is throttled when invoked many
  *   times in less than the milliseconds interval configured in the <a href="#method_init"><code>init()</code> method</a>.
@@ -6434,7 +6434,7 @@ Skylink.prototype.GET_PEERS_STATE = {
  *   <a href="#method_init"><code>init()</code> method</a>, as only Users connecting using
  *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
  *   Peer IDs from Rooms within the same App space.
- *   <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+ *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
  *   Read more about privileged App Key feature here</a>.
  * </blockquote>
  * The list of <a href="#method_introducePeer"><code>introducePeer</code> method</a> Peer introduction request states.
@@ -6459,7 +6459,7 @@ Skylink.prototype.INTRODUCE_STATE = {
  *   provided in the <a href="#method_init"><code>init()</code> method</a>, as only Users connecting using
  *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
  *   Peer IDs from Rooms within the same App space.
- *   <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+ *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
  *   Read more about privileged App Key feature here</a>.
  * </blockquote>
  * Function that retrieves the list of Peer IDs from Rooms within the same App space.
@@ -6553,7 +6553,7 @@ Skylink.prototype.getPeers = function(showAll, callback){
  *   <a href="#method_init"><code>init()</code> method</a>, as only Users connecting using
  *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
  *   Peer IDs from Rooms within the same App space.
- *   <a href="http://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+ *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
  *   Read more about privileged App Key feature here</a>.
  * </blockquote>
  * Function that selects and introduces a pair of Peers to start connection with each other.
@@ -7394,7 +7394,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_DOMAIN_NOT_MATCH        <small>Value <code>4002</code></small>
  *   The value of the failure code when <code>"domainName"</code> property in the App Key does not
  *   match the accessing server IP address.
- *   <small>To resolve this, contact our <a href="http://support.temasys.com.sg">support portal</a>.</small>
+ *   <small>To resolve this, contact our <a href="http://support.temasys.io">support portal</a>.</small>
  * @param {Number} API_CORS_DOMAIN_NOT_MATCH   <small>Value <code>4003</code></small>
  *   The value of the failure code when <code>"corsurl"</code> property in the App Key does not match accessing CORS.
  *   <small>To resolve this, configure the App Key CORS in
@@ -7418,7 +7418,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} API_NO_MEETING_RECORD_FOUND <small>Value <code>4010</code></small>
  *   The value of the failure code when provided <code>options.credentials</code>
  *   does not match any scheduled meetings available for the "Persistent Room" enabled App Key provided.
- *   <small>See the <a href="http://support.temasys.com.sg/support/solutions/articles/
+ *   <small>See the <a href="http://support.temasys.io/support/solutions/articles/
  * 12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article</a> to learn more.</small>
  * @param {Number} API_OVER_SEAT_LIMIT         <small>Value <code>4020</code></small>
  *   The value of the failure code when App Key has reached its current concurrent users limit.
@@ -7427,11 +7427,11 @@ Skylink.prototype.READY_STATE_CHANGE = {
  *   docs</a> for more information.</small>
  * @param {Number} API_RETRIEVAL_FAILED        <small>Value <code>4021</code></small>
  *   The value of the failure code when App Key retrieval of authentication token fails.
- *   <small>If this happens frequently, contact our <a href="http://support.temasys.com.sg">support portal</a>.</small>
+ *   <small>If this happens frequently, contact our <a href="http://support.temasys.io">support portal</a>.</small>
  * @param {Number} API_WRONG_ACCESS_DOMAIN     <small>Value <code>5005</code></small>
  *   The value of the failure code when App Key makes request to the incorrect Auth server.
  *   <small>To resolve this, ensure that the <code>roomServer</code> is not configured. If this persists even without
- *   <code>roomServer</code> configuration, contact our <a href="http://support.temasys.com.sg">support portal</a>.</small>
+ *   <code>roomServer</code> configuration, contact our <a href="http://support.temasys.io">support portal</a>.</small>
  * @param {Number} XML_HTTP_REQUEST_ERROR      <small>Value <code>-1</code></small>
  *   The value of the failure code when requesting to Auth server has timed out.
  * @param {Number} NO_SOCKET_IO                <small>Value <code>1</code></small>
@@ -7524,11 +7524,11 @@ Skylink.prototype.generateUUID = function() {
  * @param {String} options.appKey The App Key.
  *   <small>By default, <code>init()</code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
  *   authentication. For credentials based authentication, see the <code>options.credentials</code> configuration
- *   below. You can know more about the <a href="http://support.temasys.com.sg/support/solutions/articles/
+ *   below. You can know more about the <a href="http://support.temasys.io/support/solutions/articles/
  * 12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here</a>
  *   for more details on the various authentication methods.</small>
  *   <small>If you are using the Persistent Room feature for scheduled meetings, you will require to
- *   use the credential based authentication. See the <a href="http://support.temasys.com.sg/support
+ *   use the credential based authentication. See the <a href="http://support.temasys.io/support
  * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
  *   </a> for more information.</small>
  * @param {String} [options.defaultRoom] The default Room to connect to when no <code>room</code> parameter
@@ -10723,7 +10723,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
  *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
  *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
  *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
- *   <a href="http://support.temasys.com.sg">contact us on our support portal</a>.
+ *   <a href="http://support.temasys.io">contact us on our support portal</a>.
  * </blockquote>
  * Starts a recording session.
  * @method startRecording
@@ -10799,7 +10799,7 @@ Skylink.prototype.startRecording = function (callback) {
  *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
  *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
  *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
- *   <a href="http://support.temasys.com.sg">contact us on our support portal</a>.
+ *   <a href="http://support.temasys.io">contact us on our support portal</a>.
  * </blockquote>
  * Stops a recording session.
  * @param {Function} [callback] The callback function fired when request has completed.
@@ -10935,7 +10935,7 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
  *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
  *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
  *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
- *   <a href="http://support.temasys.com.sg">contact us on our support portal</a>.
+ *   <a href="http://support.temasys.io">contact us on our support portal</a>.
  * </blockquote>
  * Gets the list of current recording sessions since User has connected to the Room.
  * @method getRecordings

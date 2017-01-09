@@ -769,7 +769,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.5.2
    */
-  this._roomServer = '//api.temasys.com.sg';
+  this._roomServer = '//api.temasys.io';
 
   /**
    * Stores the App Key configured in <code>init()</code>.
