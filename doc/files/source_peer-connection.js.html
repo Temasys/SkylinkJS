@@ -1605,15 +1605,46 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     return;
   }
 
-  if (self._peerConnections[targetMid].remoteDescription &amp;&amp;
-    self._peerConnections[targetMid].remoteDescription.sdp &amp;&amp;
+  // If remote description is set
+  if (self._peerConnections[targetMid].remoteDescription &amp;&amp; self._peerConnections[targetMid].remoteDescription.sdp &amp;&amp;
+  // If end-of-candidates signal is received
     typeof self._peerEndOfCandidatesCounter[targetMid].expectedLen === &#x27;number&#x27; &amp;&amp;
+  // If all ICE candidates are received
     self._peerEndOfCandidatesCounter[targetMid].len &gt;= self._peerEndOfCandidatesCounter[targetMid].expectedLen &amp;&amp;
+  // If there is no ICE candidates queue
     (self._peerCandidatesQueue[targetMid] ? self._peerCandidatesQueue[targetMid].length === 0 : true) &amp;&amp;
+  // If it has not been set yet
     !self._peerEndOfCandidatesCounter[targetMid].hasSet) {
     log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Signaling of end-of-candidates remote ICE gathering.&#x27;]);
     self._peerEndOfCandidatesCounter[targetMid].hasSet = true;
-    self._peerConnections[targetMid].addIceCandidate(null);
+    try {
+      if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+        var mLineCounter = -1;
+        var addedMids = [];
+        var sdpLines = self._peerConnections[targetMid].remoteDescription.sdp.split(&#x27;\r\n&#x27;);
+
+        for (var i = 0; i &lt; sdpLines.length; i++) {
+          if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
+            mLineCounter++;
+          } else if (sdpLines[i].indexOf(&#x27;a=mid:&#x27;) === 0) {
+            var mid = sdpLines[i].split(&#x27;a=mid:&#x27;)[1] || &#x27;&#x27;;
+            if (mid &amp;&amp; addedMids.indexOf(mid) === -1) {
+              addedMids.push(mid);
+              self._peerConnections[targetMid].addIceCandidate(new RTCIceCandidate({
+                sdpMid: mid,
+                sdpMLineIndex: mLineCounter,
+                candidate: &#x27;candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates&#x27;
+              }));
+            }
+          }
+        }
+
+      } else {
+        self._peerConnections[targetMid].addIceCandidate(null);
+      }
+    } catch (error) {
+      log.error([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Failed signaling end-of-candidates -&gt;&#x27;], error);
+    }
   }
 };
 

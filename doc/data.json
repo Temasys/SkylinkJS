@@ -2371,7 +2371,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 179,
+            "line": 185,
             "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -2382,7 +2382,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 203,
+            "line": 209,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -2393,7 +2393,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 235,
+            "line": 241,
             "description": "Function that adds the ICE candidate to Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidate",
@@ -2981,7 +2981,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 139,
+            "line": 138,
             "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -2992,7 +2992,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 184,
+            "line": 183,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -3752,7 +3752,7 @@
                         },
                         {
                             "name": "enableDataChannel",
-                            "description": "The flag if Datachannel connections should be enabled.\n  <small>This is required to be enabled for <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>,\n  <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> and\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.\n  </blockquote> The flag if Datachannel connections should be enabled.\n  <small>This is required to be enabled for <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>,\n  <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> and\n  <a href=\"#method_sendP2PMessage\"><code>sendP2PMessage()</code> method</a>.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
@@ -3766,7 +3766,7 @@
                         },
                         {
                             "name": "enableSTUNServer",
-                            "description": "The flag if STUN ICE servers should\n  be used when constructing Peer connections to allow TURN connections when required.",
+                            "description": "<blockquote class=\"info\">\n  Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.\n  </blockquote> The flag if STUN ICE servers should\n  be used when constructing Peer connections to allow TURN connections when required.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
@@ -3787,7 +3787,7 @@
                         },
                         {
                             "name": "TURNServerTransport",
-                            "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired network transports protocol\n  used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.\n  This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing\n  the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.\n  </blockquote> The option to configure the <code>?transport=</code>\n  query parameter in TURN ICE servers when constructing a Peer connections.\n- When not provided, its value is <code>ANY</code>.\n  [Rel: Skylink.TURN_TRANSPORT]",
+                            "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired network transports protocol\n  used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.\n  This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing\n  the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.<br>\n  Note that for Edge browsers, this value is overriden as <code>UDP</code> due to its supports.\n  </blockquote> The option to configure the <code>?transport=</code>\n  query parameter in TURN ICE servers when constructing a Peer connections.\n- When not provided, its value is <code>ANY</code>.\n  [Rel: Skylink.TURN_TRANSPORT]",
                             "type": "Boolean",
                             "optional": true
                         },
@@ -3851,13 +3851,13 @@
                         },
                         {
                             "name": "audioCodec",
-                            "description": "<blockquote class=\"info\">\n  Note that if the audio codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.</blockquote>\n  The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.AUDIO_CODEC]",
+                            "description": "<blockquote class=\"info\">\n  Note that if the audio codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.<br>\n  Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>\n  The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.AUDIO_CODEC]",
                             "type": "String",
                             "optional": true
                         },
                         {
                             "name": "videoCodec",
-                            "description": "<blockquote class=\"info\">\n  Note that if the video codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.</blockquote>\n  The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.VIDEO_CODEC]",
+                            "description": "<blockquote class=\"info\">\n  Note that if the video codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.<br>\n  Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>\n  The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.VIDEO_CODEC]",
                             "type": "String",
                             "optional": true
                         },
@@ -3870,7 +3870,7 @@
                         },
                         {
                             "name": "forceTURNSSL",
-                            "description": "<blockquote class=\"info\">\n  Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,\n  TURN ICE servers using port <code>443</code> will be used instead.</blockquote>\n  The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.",
+                            "description": "<blockquote class=\"info\">\n  Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,\n  TURN ICE servers using port <code>443</code> will be used instead.<br>\n  Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports and\n  only port <code>3478</code> is used.</blockquote>\n  The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -4126,7 +4126,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 732,
+            "line": 751,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4137,7 +4137,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 806,
+            "line": 825,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4148,7 +4148,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 879,
+            "line": 898,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4159,7 +4159,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 972,
+            "line": 991,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",

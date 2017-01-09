@@ -283,13 +283,17 @@ Skylink.prototype.generateUUID = function() {
  * &lt;small&gt;Note that this is a debugging feature and is only used when instructed for debugging purposes.&lt;/small&gt;
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
- * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections should be enabled.
+ * @param {Boolean} [options.enableDataChannel=true] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that for Edge browsers, this value is overriden as &lt;code&gt;false&lt;/code&gt; due to its supports.
+ *   &lt;/blockquote&gt; The flag if Datachannel connections should be enabled.
  *   &lt;small&gt;This is required to be enabled for &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt;,
  *   &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; and
  *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
  * @param {Boolean} [options.enableTURNServer=true] The flag if TURN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.
- * @param {Boolean} [options.enableSTUNServer=true] The flag if STUN ICE servers should
+ * @param {Boolean} [options.enableSTUNServer=true] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that for Edge browsers, this value is overriden as &lt;code&gt;false&lt;/code&gt; due to its supports.
+ *   &lt;/blockquote&gt; The flag if STUN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
@@ -307,7 +311,8 @@ Skylink.prototype.generateUUID = function() {
  *   Note that configuring the protocol may not necessarily result in the desired network transports protocol
  *   used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.
  *   This simply configures the TURN ICE server urls &lt;code?transport=(protocol)&lt;/code&gt; query option when constructing
- *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.
+ *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.&lt;br&gt;
+ *   Note that for Edge browsers, this value is overriden as &lt;code&gt;UDP&lt;/code&gt; due to its supports.
  *   &lt;/blockquote&gt; The option to configure the &lt;code&gt;?transport=&lt;/code&gt;
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is &lt;code&gt;ANY&lt;/code&gt;.
@@ -363,13 +368,15 @@ Skylink.prototype.generateUUID = function() {
  *   &lt;small&gt;By default, &lt;code&gt;&quot;https:&quot;&lt;/code&gt; protocol connections uses HTTPS connections.&lt;/small&gt;
  * @param {String} [options.audioCodec] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that if the audio codec is not supported, the SDK will not configure the local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; or
- *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session description to prefer the codec.&lt;/blockquote&gt;
+ *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session description to prefer the codec.&lt;br&gt;
+ *   Note that for Edge browsers, this value is set as &lt;code&gt;OPUS&lt;/code&gt; due to its supports.&lt;/blockquote&gt;
  *   The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.
  * - When not provided, its value is &lt;code&gt;AUTO&lt;/code&gt;.
  *   [Rel: Skylink.AUDIO_CODEC]
  * @param {String} [options.videoCodec] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that if the video codec is not supported, the SDK will not configure the local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; or
- *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session description to prefer the codec.&lt;/blockquote&gt;
+ *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt; session description to prefer the codec.&lt;br&gt;
+ *   Note that for Edge browsers, this value is set as &lt;code&gt;H264&lt;/code&gt; due to its supports.&lt;/blockquote&gt;
  *   The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.
  * - When not provided, its value is &lt;code&gt;AUTO&lt;/code&gt;.
  *   [Rel: Skylink.VIDEO_CODEC]
@@ -378,7 +385,9 @@ Skylink.prototype.generateUUID = function() {
  *   &lt;small&gt;Note that the mininum timeout value is &lt;code&gt;5000&lt;/code&gt;. If less, this value will be &lt;code&gt;5000&lt;/code&gt;.&lt;/small&gt;
  * @param {Boolean} [options.forceTURNSSL=false] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
- *   TURN ICE servers using port &lt;code&gt;443&lt;/code&gt; will be used instead.&lt;/blockquote&gt;
+ *   TURN ICE servers using port &lt;code&gt;443&lt;/code&gt; will be used instead.&lt;br&gt;
+ *   Note that for Edge browsers, this value is overriden as &lt;code&gt;false&lt;/code&gt; due to its supports and
+ *   only port &lt;code&gt;3478&lt;/code&gt; is used.&lt;/blockquote&gt;
  *   The flag if TURNS protocol should be used when &lt;code&gt;options.enableTURNServer&lt;/code&gt; is enabled.
  * @param {JSON} [options.filterCandidatesType] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this a debugging feature and there might be connectivity issues when toggling these flags.
@@ -690,6 +699,16 @@ Skylink.prototype.init = function(options, callback) {
       filterCandidatesType.relay = false;
     }
   }
+
+  if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+    enableSTUNServer = false;
+    forceTURNSSL = false;
+    TURNTransport = self.TURN_TRANSPORT.UDP;
+    audioCodec = self.AUDIO_CODEC.OPUS;
+    videoCodec = self.VIDEO_CODEC.H264;
+    enableDataChannel = false;
+  }
+
   // api key path options
   self._appKey = appKey;
   self._roomServer = roomServer;

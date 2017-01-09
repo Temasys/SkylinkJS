@@ -92,6 +92,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
     log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Generated ICE candidate ->'], candidate);
 
+    if (candidateType === 'endOfCandidates') {
+      log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate ' +
+        'end-of-candidates signal to prevent errors ->'], candidate);
+      return;
+    }
+
     if (self._filterCandidatesType[candidateType]) {
       if (!(self._hasMCU && self._forceTURN)) {
         log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +

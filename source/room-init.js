@@ -192,13 +192,17 @@ Skylink.prototype.generateUUID = function() {
  * <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
- * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections should be enabled.
+ * @param {Boolean} [options.enableDataChannel=true] <blockquote class="info">
+ *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
+ *   </blockquote> The flag if Datachannel connections should be enabled.
  *   <small>This is required to be enabled for <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>,
  *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> and
  *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small>
  * @param {Boolean} [options.enableTURNServer=true] The flag if TURN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.
- * @param {Boolean} [options.enableSTUNServer=true] The flag if STUN ICE servers should
+ * @param {Boolean} [options.enableSTUNServer=true] <blockquote class="info">
+ *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
+ *   </blockquote> The flag if STUN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
@@ -216,7 +220,8 @@ Skylink.prototype.generateUUID = function() {
  *   Note that configuring the protocol may not necessarily result in the desired network transports protocol
  *   used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.
  *   This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing
- *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.
+ *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.<br>
+ *   Note that for Edge browsers, this value is overriden as <code>UDP</code> due to its supports.
  *   </blockquote> The option to configure the <code>?transport=</code>
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is <code>ANY</code>.
@@ -272,13 +277,15 @@ Skylink.prototype.generateUUID = function() {
  *   <small>By default, <code>"https:"</code> protocol connections uses HTTPS connections.</small>
  * @param {String} [options.audioCodec] <blockquote class="info">
  *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
- *   <code>"answer"</code> session description to prefer the codec.</blockquote>
+ *   <code>"answer"</code> session description to prefer the codec.<br>
+ *   Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>
  *   The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.AUDIO_CODEC]
  * @param {String} [options.videoCodec] <blockquote class="info">
  *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
- *   <code>"answer"</code> session description to prefer the codec.</blockquote>
+ *   <code>"answer"</code> session description to prefer the codec.<br>
+ *   Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>
  *   The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.VIDEO_CODEC]
@@ -287,7 +294,9 @@ Skylink.prototype.generateUUID = function() {
  *   <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>
  * @param {Boolean} [options.forceTURNSSL=false] <blockquote class="info">
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
- *   TURN ICE servers using port <code>443</code> will be used instead.</blockquote>
+ *   TURN ICE servers using port <code>443</code> will be used instead.<br>
+ *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports and
+ *   only port <code>3478</code> is used.</blockquote>
  *   The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.
  * @param {JSON} [options.filterCandidatesType] <blockquote class="info">
  *   Note that this a debugging feature and there might be connectivity issues when toggling these flags.
@@ -599,6 +608,16 @@ Skylink.prototype.init = function(options, callback) {
       filterCandidatesType.relay = false;
     }
   }
+
+  if (window.webrtcDetectedBrowser === 'edge') {
+    enableSTUNServer = false;
+    forceTURNSSL = false;
+    TURNTransport = self.TURN_TRANSPORT.UDP;
+    audioCodec = self.AUDIO_CODEC.OPUS;
+    videoCodec = self.VIDEO_CODEC.H264;
+    enableDataChannel = false;
+  }
+
   // api key path options
   self._appKey = appKey;
   self._roomServer = roomServer;

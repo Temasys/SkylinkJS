@@ -1514,15 +1514,46 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     return;
   }
 
-  if (self._peerConnections[targetMid].remoteDescription &&
-    self._peerConnections[targetMid].remoteDescription.sdp &&
+  // If remote description is set
+  if (self._peerConnections[targetMid].remoteDescription && self._peerConnections[targetMid].remoteDescription.sdp &&
+  // If end-of-candidates signal is received
     typeof self._peerEndOfCandidatesCounter[targetMid].expectedLen === 'number' &&
+  // If all ICE candidates are received
     self._peerEndOfCandidatesCounter[targetMid].len >= self._peerEndOfCandidatesCounter[targetMid].expectedLen &&
+  // If there is no ICE candidates queue
     (self._peerCandidatesQueue[targetMid] ? self._peerCandidatesQueue[targetMid].length === 0 : true) &&
+  // If it has not been set yet
     !self._peerEndOfCandidatesCounter[targetMid].hasSet) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
     self._peerEndOfCandidatesCounter[targetMid].hasSet = true;
-    self._peerConnections[targetMid].addIceCandidate(null);
+    try {
+      if (window.webrtcDetectedBrowser === 'edge') {
+        var mLineCounter = -1;
+        var addedMids = [];
+        var sdpLines = self._peerConnections[targetMid].remoteDescription.sdp.split('\r\n');
+
+        for (var i = 0; i < sdpLines.length; i++) {
+          if (sdpLines[i].indexOf('m=') === 0) {
+            mLineCounter++;
+          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
+            var mid = sdpLines[i].split('a=mid:')[1] || '';
+            if (mid && addedMids.indexOf(mid) === -1) {
+              addedMids.push(mid);
+              self._peerConnections[targetMid].addIceCandidate(new RTCIceCandidate({
+                sdpMid: mid,
+                sdpMLineIndex: mLineCounter,
+                candidate: 'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates'
+              }));
+            }
+          }
+        }
+
+      } else {
+        self._peerConnections[targetMid].addIceCandidate(null);
+      }
+    } catch (error) {
+      log.error([targetMid, 'RTCPeerConnection', null, 'Failed signaling end-of-candidates ->'], error);
+    }
   }
 };
 

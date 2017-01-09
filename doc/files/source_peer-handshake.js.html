@@ -203,8 +203,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
     self._peerInformations[targetMid].config.enableDataChannel) {
     // Edge doesn&#x27;t support datachannels yet
-    if (!(self._dataChannels[targetMid] &amp;&amp; self._dataChannels[targetMid].main) &amp;&amp;
-      window.webrtcDetectedBrowser !== &#x27;edge&#x27;) {
+    if (!(self._dataChannels[targetMid] &amp;&amp; self._dataChannels[targetMid].main)) {
       self._createDataChannel(targetMid);
       self._peerConnections[targetMid].hasMainChannel = true;
     }

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.16 - Tue Jan 10 2017 01:30:55 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.16 - Tue Jan 10 2017 01:55:23 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -3876,6 +3876,12 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
     log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Generated ICE candidate ->'], candidate);
 
+    if (candidateType === 'endOfCandidates') {
+      log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate ' +
+        'end-of-candidates signal to prevent errors ->'], candidate);
+      return;
+    }
+
     if (self._filterCandidatesType[candidateType]) {
       if (!(self._hasMCU && self._forceTURN)) {
         log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
@@ -4156,7 +4162,6 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       window.webrtcDetectedBrowser === 'safari' ||
       window.webrtcDetectedBrowser === 'IE') {
       useTURNSSLProtocol = true;
-      useTURNSSLPort = false;
     } else {
       useTURNSSLPort = true;
     }
@@ -4232,7 +4237,10 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       server.url = protocolParts[0] + ':' + urlParts[1];
 
       // add the ICE server port
-      if (protocolParts[2]) {
+      // Edge uses 3478 with ?transport=udp for now
+      if (window.webrtcDetectedBrowser === 'edge') {
+        server.url += ':3478';
+      } else if (protocolParts[2]) {
         server.url += ':' + protocolParts[2];
       }
     }
@@ -4295,6 +4303,11 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     hasUrlsSupport = true;
   }
 
+  // bowser / edge
+  if (['bowser', 'edge'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    hasUrlsSupport = true;
+  }
+
   for (var serverUsername in iceServersList) {
     if (iceServersList.hasOwnProperty(serverUsername)) {
       for (var serverCred in iceServersList[serverUsername]) {
@@ -4309,7 +4322,17 @@ Skylink.prototype._setIceServers = function(givenConfig) {
             if (serverCred !== 'none') {
               urlsItem.credential = serverCred;
             }
-            newIceServers.push(urlsItem);
+
+            // Edge uses 1 url only for now
+            if (window.webrtcDetectedBrowser === 'edge') {
+              if (urlsItem.username && urlsItem.credential) {
+                urlsItem.urls = [urlsItem.urls[0]];
+                newIceServers.push(urlsItem);
+                break;
+              }
+            } else {
+              newIceServers.push(urlsItem);
+            }
           } else {
             for (var j = 0; j < iceServersList[serverUsername][serverCred].length; j++) {
               var urlItem = {
@@ -5823,15 +5846,46 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     return;
   }
 
-  if (self._peerConnections[targetMid].remoteDescription &&
-    self._peerConnections[targetMid].remoteDescription.sdp &&
+  // If remote description is set
+  if (self._peerConnections[targetMid].remoteDescription && self._peerConnections[targetMid].remoteDescription.sdp &&
+  // If end-of-candidates signal is received
     typeof self._peerEndOfCandidatesCounter[targetMid].expectedLen === 'number' &&
+  // If all ICE candidates are received
     self._peerEndOfCandidatesCounter[targetMid].len >= self._peerEndOfCandidatesCounter[targetMid].expectedLen &&
+  // If there is no ICE candidates queue
     (self._peerCandidatesQueue[targetMid] ? self._peerCandidatesQueue[targetMid].length === 0 : true) &&
+  // If it has not been set yet
     !self._peerEndOfCandidatesCounter[targetMid].hasSet) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
     self._peerEndOfCandidatesCounter[targetMid].hasSet = true;
-    self._peerConnections[targetMid].addIceCandidate(null);
+    try {
+      if (window.webrtcDetectedBrowser === 'edge') {
+        var mLineCounter = -1;
+        var addedMids = [];
+        var sdpLines = self._peerConnections[targetMid].remoteDescription.sdp.split('\r\n');
+
+        for (var i = 0; i < sdpLines.length; i++) {
+          if (sdpLines[i].indexOf('m=') === 0) {
+            mLineCounter++;
+          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
+            var mid = sdpLines[i].split('a=mid:')[1] || '';
+            if (mid && addedMids.indexOf(mid) === -1) {
+              addedMids.push(mid);
+              self._peerConnections[targetMid].addIceCandidate(new RTCIceCandidate({
+                sdpMid: mid,
+                sdpMLineIndex: mLineCounter,
+                candidate: 'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates'
+              }));
+            }
+          }
+        }
+
+      } else {
+        self._peerConnections[targetMid].addIceCandidate(null);
+      }
+    } catch (error) {
+      log.error([targetMid, 'RTCPeerConnection', null, 'Failed signaling end-of-candidates ->'], error);
+    }
   }
 };
 
@@ -6263,8 +6317,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   if (self._enableDataChannel && self._peerInformations[targetMid] &&
     self._peerInformations[targetMid].config.enableDataChannel) {
     // Edge doesn't support datachannels yet
-    if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main) &&
-      window.webrtcDetectedBrowser !== 'edge') {
+    if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main)) {
       self._createDataChannel(targetMid);
       self._peerConnections[targetMid].hasMainChannel = true;
     }
@@ -7548,13 +7601,17 @@ Skylink.prototype.generateUUID = function() {
  * <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
- * @param {Boolean} [options.enableDataChannel=true] The flag if Datachannel connections should be enabled.
+ * @param {Boolean} [options.enableDataChannel=true] <blockquote class="info">
+ *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
+ *   </blockquote> The flag if Datachannel connections should be enabled.
  *   <small>This is required to be enabled for <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>,
  *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> and
  *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small>
  * @param {Boolean} [options.enableTURNServer=true] The flag if TURN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.
- * @param {Boolean} [options.enableSTUNServer=true] The flag if STUN ICE servers should
+ * @param {Boolean} [options.enableSTUNServer=true] <blockquote class="info">
+ *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
+ *   </blockquote> The flag if STUN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
@@ -7572,7 +7629,8 @@ Skylink.prototype.generateUUID = function() {
  *   Note that configuring the protocol may not necessarily result in the desired network transports protocol
  *   used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.
  *   This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing
- *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.
+ *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.<br>
+ *   Note that for Edge browsers, this value is overriden as <code>UDP</code> due to its supports.
  *   </blockquote> The option to configure the <code>?transport=</code>
  *   query parameter in TURN ICE servers when constructing a Peer connections.
  * - When not provided, its value is <code>ANY</code>.
@@ -7628,13 +7686,15 @@ Skylink.prototype.generateUUID = function() {
  *   <small>By default, <code>"https:"</code> protocol connections uses HTTPS connections.</small>
  * @param {String} [options.audioCodec] <blockquote class="info">
  *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
- *   <code>"answer"</code> session description to prefer the codec.</blockquote>
+ *   <code>"answer"</code> session description to prefer the codec.<br>
+ *   Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>
  *   The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.AUDIO_CODEC]
  * @param {String} [options.videoCodec] <blockquote class="info">
  *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
- *   <code>"answer"</code> session description to prefer the codec.</blockquote>
+ *   <code>"answer"</code> session description to prefer the codec.<br>
+ *   Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>
  *   The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.VIDEO_CODEC]
@@ -7643,7 +7703,9 @@ Skylink.prototype.generateUUID = function() {
  *   <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>
  * @param {Boolean} [options.forceTURNSSL=false] <blockquote class="info">
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
- *   TURN ICE servers using port <code>443</code> will be used instead.</blockquote>
+ *   TURN ICE servers using port <code>443</code> will be used instead.<br>
+ *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports and
+ *   only port <code>3478</code> is used.</blockquote>
  *   The flag if TURNS protocol should be used when <code>options.enableTURNServer</code> is enabled.
  * @param {JSON} [options.filterCandidatesType] <blockquote class="info">
  *   Note that this a debugging feature and there might be connectivity issues when toggling these flags.
@@ -7955,6 +8017,16 @@ Skylink.prototype.init = function(options, callback) {
       filterCandidatesType.relay = false;
     }
   }
+
+  if (window.webrtcDetectedBrowser === 'edge') {
+    enableSTUNServer = false;
+    forceTURNSSL = false;
+    TURNTransport = self.TURN_TRANSPORT.UDP;
+    audioCodec = self.AUDIO_CODEC.OPUS;
+    videoCodec = self.VIDEO_CODEC.H264;
+    enableDataChannel = false;
+  }
+
   // api key path options
   self._appKey = appKey;
   self._roomServer = roomServer;
