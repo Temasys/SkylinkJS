@@ -47,7 +47,7 @@ Skylink.prototype.SOCKET_ERROR = {
  * @param {String} LONG_POLLING      <small>Value <code>"fallbackLongPollingNonSSL"</code></small>
  *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
  *   another new HTTP port using Polling transports to attempt to establish connection with Signaling server.
- * @param {String} LONG_POLLING      <small>Value <code>"fallbackLongPollingSSL"</code></small>
+ * @param {String} LONG_POLLING_SSL  <small>Value <code>"fallbackLongPollingSSL"</code></small>
  *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
  *   another new HTTPS port using Polling transports to attempt to establish connection with Signaling server.
  * @type JSON

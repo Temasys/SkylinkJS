@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Tue Jan 10 2017 12:06:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Tue Jan 10 2017 13:55:47 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -10195,7 +10195,7 @@ Skylink.prototype.SOCKET_ERROR = {
  * @param {String} LONG_POLLING      <small>Value <code>"fallbackLongPollingNonSSL"</code></small>
  *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
  *   another new HTTP port using Polling transports to attempt to establish connection with Signaling server.
- * @param {String} LONG_POLLING      <small>Value <code>"fallbackLongPollingSSL"</code></small>
+ * @param {String} LONG_POLLING_SSL  <small>Value <code>"fallbackLongPollingSSL"</code></small>
  *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
  *   another new HTTPS port using Polling transports to attempt to establish connection with Signaling server.
  * @type JSON
