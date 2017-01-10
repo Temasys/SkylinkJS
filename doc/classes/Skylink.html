@@ -6415,7 +6415,7 @@ This is experimental and never recommended to end-users.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l991"><code>source&#x2F;room-init.js:991</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l993"><code>source&#x2F;room-init.js:993</code></a>
       </small>
     
 
@@ -6759,7 +6759,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l898"><code>source&#x2F;room-init.js:898</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l900"><code>source&#x2F;room-init.js:900</code></a>
       </small>
     
 
@@ -7873,7 +7873,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l825"><code>source&#x2F;room-init.js:825</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l827"><code>source&#x2F;room-init.js:827</code></a>
       </small>
     
 
@@ -9504,7 +9504,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l751"><code>source&#x2F;room-init.js:751</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l753"><code>source&#x2F;room-init.js:753</code></a>
       </small>
     
 
@@ -14957,7 +14957,9 @@ Global_Objects/encodeURIComponent">encodeURIComponent() API</a>.</small></li></o
                       <small class="default"><span>DEFAULT: </span><code>20000</code></small>
                       <p>The timeout for each attempts for socket connection
   with the Signaling server to indicate that connection has timed out and has failed to establish.
-  <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small></p>
+  <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>
+  <small>Note that it is recommended to use <code>12000</code> as the lowest timeout value if Peers are connecting
+  using Polling transports to prevent connection errors.</small></p>
 
                     </div>
 

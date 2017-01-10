@@ -383,6 +383,8 @@ Skylink.prototype.generateUUID = function() {
  * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
  *   &lt;small&gt;Note that the mininum timeout value is &lt;code&gt;5000&lt;/code&gt;. If less, this value will be &lt;code&gt;5000&lt;/code&gt;.&lt;/small&gt;
+ *   &lt;small&gt;Note that it is recommended to use &lt;code&gt;12000&lt;/code&gt; as the lowest timeout value if Peers are connecting
+ *   using Polling transports to prevent connection errors.&lt;/small&gt;
  * @param {Boolean} [options.forceTURNSSL=false] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
  *   TURN ICE servers using port &lt;code&gt;443&lt;/code&gt; will be used instead.&lt;br&gt;

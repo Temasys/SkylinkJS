@@ -3863,7 +3863,7 @@
                         },
                         {
                             "name": "socketTimeout",
-                            "description": "The timeout for each attempts for socket connection\n  with the Signaling server to indicate that connection has timed out and has failed to establish.\n  <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>",
+                            "description": "The timeout for each attempts for socket connection\n  with the Signaling server to indicate that connection has timed out and has failed to establish.\n  <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>\n  <small>Note that it is recommended to use <code>12000</code> as the lowest timeout value if Peers are connecting\n  using Polling transports to prevent connection errors.</small>",
                             "type": "Number",
                             "optional": true,
                             "optdefault": "20000"
@@ -4126,7 +4126,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 751,
+            "line": 753,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4137,7 +4137,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 825,
+            "line": 827,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4148,7 +4148,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 898,
+            "line": 900,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4159,7 +4159,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 991,
+            "line": 993,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
