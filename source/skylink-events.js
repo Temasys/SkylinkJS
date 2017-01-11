@@ -2,6 +2,13 @@ var _eventsDocs = {
   /**
    * Event triggered when socket connection to Signaling server has opened.
    * @event channelOpen
+   * @param {JSON} session The socket connection session information.
+   * @param {String} session.serverUrl The socket connection Signaling url used.
+   * @param {String} session.transportType The socket connection transport type used.
+   * @param {JSON} session.socketOptions The socket connection options.
+   * @param {Number} session.attempts The socket connection current reconnection attempts.
+   * @param {Number} session.finalAttempts The socket connection current last attempts
+   *   for the last available transports and port.
    * @for Skylink
    * @since 0.1.0
    */
@@ -10,6 +17,9 @@ var _eventsDocs = {
   /**
    * Event triggered when socket connection to Signaling server has closed.
    * @event channelClose
+   * @param {JSON} session The socket connection session information.
+   *   <small>Object signature matches the <code>session</code> parameter payload received in the
+   *   <a href="#event_channelOpen"><code>channelOpen</code> event</a>.</small>
    * @for Skylink
    * @since 0.1.0
    */
@@ -22,6 +32,9 @@ var _eventsDocs = {
    * Event triggered when receiving socket message from the Signaling server.
    * @event channelMessage
    * @param {JSON} message The socket message object.
+   * @param {JSON} session The socket connection session information.
+   *   <small>Object signature matches the <code>session</code> parameter payload received in the
+   *   <a href="#event_channelOpen"><code>channelOpen</code> event</a>.</small>
    * @for Skylink
    * @since 0.1.0
    */
@@ -36,6 +49,9 @@ var _eventsDocs = {
    * Event triggered when socket connection encountered exception.
    * @event channelError
    * @param {Error|String} error The error object.
+   * @param {JSON} session The socket connection session information.
+   *   <small>Object signature matches the <code>session</code> parameter payload received in the
+   *   <a href="#event_channelOpen"><code>channelOpen</code> event</a>.</small>
    * @for Skylink
    * @since 0.1.0
    */
@@ -46,7 +62,10 @@ var _eventsDocs = {
    * @event channelRetry
    * @param {String} fallbackType The current fallback state.
    *   [Rel: Skylink.SOCKET_FALLBACK]
-   * @param {Number} currentAttempt The current reconnection attempt.
+   * @param {Number} currentAttempt The current socket reconnection attempt.
+   * @param {JSON} session The socket connection session information.
+   *   <small>Object signature matches the <code>session</code> parameter payload received in the
+   *   <a href="#event_channelOpen"><code>channelOpen</code> event</a>.</small>
    * @for Skylink
    * @since 0.5.6
    */
@@ -60,6 +79,9 @@ var _eventsDocs = {
    * @param {Error|String|Number} error The error object.
    * @param {String} type The fallback state of the socket connection attempt.
    *   [Rel: Skylink.SOCKET_FALLBACK]
+   * @param {JSON} session The socket connection session information.
+   *   <small>Object signature matches the <code>session</code> parameter payload received in the
+   *   <a href="#event_channelOpen"><code>channelOpen</code> event</a>.</small>
    * @for Skylink
    * @since 0.5.5
    */

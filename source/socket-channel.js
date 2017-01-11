@@ -267,48 +267,60 @@ Skylink.prototype._sendChannelMessage = function(message) {
  */
 Skylink.prototype._createSocket = function (type) {
   var self = this;
-
   var options = {
     forceNew: true,
-    //'sync disconnect on unload' : true,
-    reconnection: false,
-    timeout: self._socketTimeout
+    reconnection: true,
+    timeout: self._socketTimeout,
+    reconnectionAttempts: 2,
+    reconnectionDelayMax: 5000,
+    reconnectionDelay: 1000,
+    transports: ['websocket']
   };
-
   var ports = self._socketPorts[self._signalingServerProtocol];
-  var connectionType = null;
+  var fallbackType = null;
 
   // just beginning
   if (self._signalingServerPort === null) {
     self._signalingServerPort = ports[0];
-    connectionType = self.SOCKET_FALLBACK.NON_FALLBACK;
+    self._socketSession.finalAttempts = 0;
+    self._socketSession.attempts = 0;
+    fallbackType = self.SOCKET_FALLBACK.NON_FALLBACK;
 
   // reached the end of the last port for the protocol type
-  } else if ( ports.indexOf(self._signalingServerPort) === ports.length - 1 ) {
-
+  } else if (ports.indexOf(self._signalingServerPort) === ports.length - 1) {
     // re-refresh to long-polling port
     if (type === 'WebSocket') {
       type = 'Polling';
       self._signalingServerPort = ports[0];
-
-    } else if (type === 'Polling') {
-      options.reconnection = true;
-      options.reconnectionAttempts = 4;
-      options.reconectionDelayMax = 1000;
+    } else {
+      self._socketSession.finalAttempts++;
     }
-
   // move to the next port
   } else {
     self._signalingServerPort = ports[ ports.indexOf(self._signalingServerPort) + 1 ];
   }
 
+  if (type === 'Polling') {
+    options.reconnectionDelayMax = 1000;
+    options.reconnectionAttempts = 4;
+    options.transports = ['xhr-polling', 'jsonp-polling', 'polling'];
+  }
+
   var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
     //'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
 
-  if (type === 'WebSocket') {
-    options.transports = ['websocket'];
-  } else if (type === 'Polling') {
-    options.transports = ['xhr-polling', 'jsonp-polling', 'polling'];
+  self._socketSession.transportType = type;
+  self._socketSession.socketOptions = options;
+  self._socketSession.socketServer = url;
+
+  if (fallbackType === null) {
+    fallbackType = self._signalingServerProtocol === 'http:' ?
+      (type === 'Polling' ? self.SOCKET_FALLBACK.LONG_POLLING : self.SOCKET_FALLBACK.FALLBACK_PORT) :
+      (type === 'Polling' ? self.SOCKET_FALLBACK.LONG_POLLING_SSL : self.SOCKET_FALLBACK.FALLBACK_SSL_PORT);
+
+    self._socketSession.attempts++;
+    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT, null, fallbackType, clone(self._socketSession));
+    self._trigger('channelRetry', fallbackType, self._socketSession.attempts, clone(self._socketSession));
   }
 
   // if socket instance already exists, exit
@@ -328,97 +340,80 @@ Skylink.prototype._createSocket = function (type) {
 
   self._channelOpen = false;
 
-  log.log('Opening channel with signaling server url:', {
-    url: url,
-    useXDR: self._socketUseXDR,
-    options: options
-  });
-
-  self._socketSession = {
-    type: type,
-    options: options,
-    url: url
-  };
+  log.log('Opening channel with signaling server url:', clone(self._socketSession));
 
   self._socket = io.connect(url, options);
 
-  if (connectionType === null) {
-    connectionType = self._signalingServerProtocol === 'http:' ?
-      (type === 'Polling' ? self.SOCKET_FALLBACK.LONG_POLLING :
-        self.SOCKET_FALLBACK.FALLBACK_PORT) :
-      (type === 'Polling' ? self.SOCKET_FALLBACK.LONG_POLLING_SSL :
-        self.SOCKET_FALLBACK.FALLBACK_SSL_PORT);
-  }
-
-  self._socket.on('connect_error', function (error) {
-    self._channelOpen = false;
-
-    self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED,
-      error, connectionType);
-
-    self._trigger('channelRetry', connectionType, 1);
-
-    if (options.reconnection === false) {
-      self._createSocket(type);
-    }
-  });
-
   self._socket.on('reconnect_attempt', function (attempt) {
-    self._channelOpen = false;
-    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT,
-      attempt, connectionType);
-
-    self._trigger('channelRetry', connectionType, attempt);
+    self._socketSession.attempts++;
+    self._trigger('channelRetry', fallbackType, self._socketSession.attempts, clone(self._socketSession));
   });
 
-  self._socket.on('reconnect_error', function (error) {
-    self._channelOpen = false;
-    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED,
-      error, connectionType);
-  });
+  self._socket.on('reconnect_failed', function () {
+    if (fallbackType === self.SOCKET_FALLBACK.NON_FALLBACK) {
+      self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED, new Error('Failed connection with transport "' +
+        type + '" and port ' + self._signalingServerPort + '.'), fallbackType, clone(self._socketSession));
+    } else {
+      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED, new Error('Failed reconnection with transport "' +
+        type + '" and port ' + self._signalingServerPort + '.'), fallbackType, clone(self._socketSession));
+    }
 
-  self._socket.on('reconnect_failed', function (error) {
-    self._channelOpen = false;
-    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED,
-      error, connectionType);
+    if (self._socketSession.finalAttempts < 4) {
+      self._createSocket(type);
+    } else {
+      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED, new Error('Reconnection aborted as ' +
+        'there no more available ports, transports and final attempts left.'), fallbackType, clone(self._socketSession));
+    }
   });
 
   self._socket.on('connect', function () {
     if (!self._channelOpen) {
-      self._channelOpen = true;
-      self._trigger('channelOpen');
       log.log([null, 'Socket', null, 'Channel opened']);
+      self._channelOpen = true;
+      self._trigger('channelOpen', clone(self._socketSession));
     }
   });
 
   self._socket.on('reconnect', function () {
     if (!self._channelOpen) {
-      self._channelOpen = true;
-      self._trigger('channelOpen');
       log.log([null, 'Socket', null, 'Channel opened']);
+      self._channelOpen = true;
+      self._trigger('channelOpen', clone(self._socketSession));
     }
   });
 
   self._socket.on('error', function(error) {
-    self._channelOpen = false;
-    self._trigger('channelError', error);
-    log.error([null, 'Socket', null, 'Exception occurred:'], error);
+    log.error([null, 'Socket', null, 'Exception occurred ->'], error);
+    self._trigger('channelError', error, clone(self._socketSession));
   });
 
   self._socket.on('disconnect', function() {
     self._channelOpen = false;
-    self._trigger('channelClose');
+    self._trigger('channelClose', clone(self._socketSession));
     log.log([null, 'Socket', null, 'Channel closed']);
 
-    if (self._inRoom) {
+    if (self._inRoom && self._user && self._user.sid) {
       self.leaveRoom(false);
       self._trigger('sessionDisconnect', self._user.sid, self.getPeerInfo());
     }
   });
 
-  self._socket.on('message', function(message) {
-    log.log([null, 'Socket', null, 'Received message']);
-    self._processSigMessage(message);
+  self._socket.on('message', function(messageStr) {
+    var message = JSON.parse(messageStr);
+
+    log.log([null, 'Socket', null, 'Received message ->'], message);
+
+    if (message.type === self._SIG_MESSAGE_TYPE.GROUP) {
+      log.debug('Bundle of ' + message.lists.length + ' messages');
+      for (var i = 0; i < message.lists.length; i++) {
+        var indiMessage = JSON.parse(message.lists[i]);
+        self._processSigMessage(indiMessage);
+        self._trigger('channelMessage', indiMessage, clone(self._socketSession));
+      }
+    } else {
+      self._processSigMessage(message);
+      self._trigger('channelMessage', message, clone(self._socketSession));
+    }
   });
 };
 
@@ -488,6 +483,4 @@ Skylink.prototype._closeChannel = function() {
     this._socket.disconnect();
     this._socket = null;
   }
-  this._channelOpen = false;
-  this._trigger('channelClose');
 };

@@ -431,33 +431,13 @@ Skylink.prototype.getRecordings = function () {
 };
 
 /**
- * Function that process and parses the socket message string received from the Signaling.
+ * Function that handles and processes the socket message received.
  * @method _processSigMessage
  * @private
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._processSigMessage = function(messageString) {
-  var message = JSON.parse(messageString);
-  if (message.type === this._SIG_MESSAGE_TYPE.GROUP) {
-    log.debug('Bundle of ' + message.lists.length + ' messages');
-    for (var i = 0; i < message.lists.length; i++) {
-      this._processSingleMessage(JSON.parse(message.lists[i]));
-    }
-  } else {
-    this._processSingleMessage(message);
-  }
-};
-
-/**
- * Function that handles and processes the socket message received.
- * @method _processingSingleMessage
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._processSingleMessage = function(message) {
-  this._trigger('channelMessage', message);
+Skylink.prototype._processSigMessage = function(message, session) {
   var origin = message.mid;
   if (!origin || origin === this._user.sid) {
     origin = 'Server';
