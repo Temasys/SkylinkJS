@@ -176,6 +176,16 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.config.publishOnly = true;
     }
 
+    // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
+    if (window.webrtcDetectedBrowser !== 'edge' && peerInfo.agent.name === 'edge' ?
+    // If User is IE/safari and does not have H264 support, remove video support
+      ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && !this._currentCodecSupport.video.h264 :
+    // If User is Edge and Peer is not and no H264 support, remove video support
+      window.webrtcDetectedBrowser === 'edge' && peerInfo.agent.name !== 'edge' && !this._currentCodecSupport.video.h264) {
+      peerInfo.settings.video = false;
+      peerInfo.mediaStatus.videoMuted = true;
+    }
+
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -333,6 +343,7 @@ Skylink.prototype.getPeersStream = function() {
  */
 Skylink.prototype._getUserInfo = function(peerId) {
   var userInfo = clone(this.getPeerInfo());
+  var peerInfo = clone(this.getPeerInfo(peerId));
 
   // Adhere to SM protocol without breaking the other SDKs.
   if (userInfo.settings.video && typeof userInfo.settings.video === 'object') {
@@ -364,6 +375,18 @@ Skylink.prototype._getUserInfo = function(peerId) {
   if (userInfo.settings.bandwidth) {
     userInfo.settings.maxBandwidth = clone(userInfo.settings.bandwidth);
     delete userInfo.settings.bandwidth;
+  }
+
+  // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
+  if (peerId ? (window.webrtcDetectedBrowser !== 'edge' && peerInfo.agent.name === 'edge' ?
+  // If User is IE/safari and does not have H264 support, remove video support
+    ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && !this._currentCodecSupport.video.h264 :
+  // If User is Edge and Peer is not and no H264 support, remove video support
+    window.webrtcDetectedBrowser === 'edge' && peerInfo.agent.name !== 'edge' && !this._currentCodecSupport.video.h264) :
+  // If broadcast ENTER message and User is Edge and has no H264 support
+    window.webrtcDetectedBrowser === 'edge' && !this._currentCodecSupport.video.h264) {
+    userInfo.settings.video = false;
+    userInfo.mediaStatus.videoMuted = true;
   }
 
   delete userInfo.agent;

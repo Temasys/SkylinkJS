@@ -1373,6 +1373,30 @@
             "class": "Skylink"
         },
         {
+            "file": "source/template/header.js",
+            "line": 1127,
+            "description": "Stores the currently supported codecs.",
+            "itemtype": "attribute",
+            "name": "_currentCodecSupport",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 1137,
+            "description": "Stores the session description orders and info.",
+            "itemtype": "attribute",
+            "name": "_sdpSessions",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
             "file": "source/data-channel.js",
             "line": 1,
             "description": "The list of Datachannel connection states.",
@@ -2395,7 +2419,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 185,
+            "line": 186,
             "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -2406,7 +2430,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 209,
+            "line": 210,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -2417,7 +2441,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 241,
+            "line": 242,
             "description": "Function that adds the ICE candidate to Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidate",
@@ -2801,7 +2825,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1215,
+            "line": 1219,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2812,7 +2836,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1366,
+            "line": 1384,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -2823,7 +2847,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1483,
+            "line": 1501,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -2834,7 +2858,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1503,
+            "line": 1521,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -2913,7 +2937,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 233,
+            "line": 243,
             "description": "Function that gets the list of connected Peers in the Room.",
             "itemtype": "method",
             "name": "getPeersInRoom",
@@ -2929,7 +2953,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 264,
+            "line": 274,
             "description": "Function that gets the list of connected Peers Streams in the Room.",
             "itemtype": "method",
             "name": "getPeersStream",
@@ -2945,7 +2969,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 327,
+            "line": 337,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
@@ -3005,7 +3029,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 138,
+            "line": 143,
             "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -3016,7 +3040,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 183,
+            "line": 188,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -3556,7 +3580,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 576,
+            "line": 581,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -3566,7 +3590,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 605,
+            "line": 615,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -3705,6 +3729,11 @@
                     "name": "ADAPTER_NO_LOADED",
                     "description": "<small>Value <code>7</code></small>\n  The value of the failure code when dependency <a href=\"https://github.com/Temasys/AdapterJS/\">AdapterJS</a>\n  is not loaded.\n  <small>To resolve this, ensure that the AdapterJS dependency is loaded before the Skylink dependency.\n  You may use the provided AdapterJS <a href=\"https://github.com/Temasys/AdapterJS/\">CDN here</a>.</small>",
                     "type": "Number"
+                },
+                {
+                    "name": "PARSE_CODECS",
+                    "description": "<small>Value <code>8</code></small>\n  The value of the failure code when codecs support cannot be parsed and retrieved.",
+                    "type": "Number"
                 }
             ],
             "type": "JSON",
@@ -3714,7 +3743,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 137,
+            "line": 140,
             "description": "Spoofs the REGIONAL_SERVER to prevent errors on deployed apps except the fact this no longer works.\nAutomatic regional selection has already been implemented hence REGIONAL_SERVER is no longer useful.",
             "itemtype": "attribute",
             "name": "REGIONAL_SERVER",
@@ -3727,7 +3756,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 152,
+            "line": 155,
             "description": "Function that generates an <a href=\"https://en.wikipedia.org/wiki/Universally_unique_identifier\">UUID</a> (Unique ID).",
             "itemtype": "method",
             "name": "generateUUID",
@@ -3740,7 +3769,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 171,
+            "line": 174,
             "description": "Function that authenticates and initialises App Key used for Room connections.",
             "itemtype": "method",
             "name": "init",
@@ -4172,7 +4201,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 776,
+            "line": 779,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4183,7 +4212,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 850,
+            "line": 853,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4194,7 +4223,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 923,
+            "line": 926,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4205,7 +4234,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1016,
+            "line": 1044,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -7015,7 +7044,45 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1055,
+            "line": 1054,
+            "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when all remote ICE candidates gathering has completed and been processed.",
+            "itemtype": "event",
+            "name": "candidatesGathered",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "length",
+                    "description": "The remote ICE candidates length.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "expected",
+                            "description": "The expected total number of remote ICE candidates to be received.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "received",
+                            "description": "The actual total number of remote ICE candidates received.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "processed",
+                            "description": "The total number of remote ICE candidates processed.",
+                            "type": "Number"
+                        }
+                    ]
+                }
+            ],
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 1074,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -7039,7 +7106,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1079,
+            "line": 1098,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -7076,7 +7143,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1137,
+            "line": 1156,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -7101,7 +7168,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1186,
+            "line": 1205,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -7112,7 +7179,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1240,
+            "line": 1259,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -7123,7 +7190,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1266,
+            "line": 1285,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -7134,7 +7201,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1304,
+            "line": 1323,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -7232,7 +7299,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 261,
+            "line": 259,
             "description": "Function that creates and opens a socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_createSocket",
@@ -7243,7 +7310,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 420,
+            "line": 418,
             "description": "Function that starts the socket connection to the Signaling.\nThis starts creating the socket connection and called at first not when requiring to fallback.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -7254,7 +7321,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 462,
+            "line": 460,
             "description": "Function that stops the socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -7675,7 +7742,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1517,
+            "line": 1523,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -7686,7 +7753,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1612,
+            "line": 1622,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -7697,7 +7764,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1718,
+            "line": 1729,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -8490,7 +8557,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 394,
+            "line": 423,
             "description": "Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.",
             "itemtype": "method",
             "name": "_removeSDPH264VP9AptRtxForOlderPlugin",
@@ -8501,7 +8568,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 425,
+            "line": 454,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -8512,7 +8579,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 494,
+            "line": 523,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -8523,7 +8590,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 510,
+            "line": 539,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -8534,7 +8601,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 565,
+            "line": 594,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -8545,7 +8612,18 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 607,
+            "line": 636,
+            "description": "Function that retrieves the current list of support codecs.",
+            "itemtype": "method",
+            "name": "_getCodecsSupport",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 712,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -8614,11 +8692,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:576"
+            "line": " source/room-connection.js:581"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:171"
+            "line": " source/room-init.js:174"
         },
         {
             "message": "unknown tag: scoped",

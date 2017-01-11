@@ -479,6 +479,35 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     }
   }
 
+  // Ensure that m= lines that are rejected resurfaces again. 
+  if (this._sdpSessions[targetMid] &amp;&amp; sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER) {
+    var mediaIndex = -1;
+    var bundleLineIndex = -1;
+    for (var i = 0; i &lt; sdpLines.length; i++) {
+      if (sdpLines[i].indexOf(&#x27;a=group:BUNDLE&#x27;) === 0 &amp;&amp; this._sdpSessions[targetMid].remote.groupLine) {
+        sdpLines[i] = this._sdpSessions[targetMid].remote.groupLine;
+      } else if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
+        mediaIndex++;
+        if (this._sdpSessions[targetMid].remote.lines[mediaIndex]) {
+          var compareA = this._sdpSessions[targetMid].remote.lines[mediaIndex].split(&#x27; &#x27;);
+          var compareB = sdpLines[i].split(&#x27; &#x27;);
+          console.info(compareA, compareB, compareA[0], compareB[0]);
+          if (compareA[0] &amp;&amp; compareB[0] &amp;&amp; compareA[0] !== compareB[0]) {
+            compareA[1] = 0;
+            sdpLines.splice(i, 0, compareA.join(&#x27; &#x27;));
+            mediaIndex++;
+            i++;
+          }
+        }
+      }
+    }
+  }
+
+  if (window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; !this._currentCodecSupport.video.h264 &amp;&amp;
+    [&#x27;edge&#x27;, &#x27;firefox&#x27;].indexOf(agent) === -1 &amp;&amp; sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER) {
+    sdpLines.push(&#x27;&#x27;);
+  }
+
   return sdpLines.join(&#x27;\r\n&#x27;);
 };
 
@@ -696,6 +725,82 @@ Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDes
 };
 
 /**
+ * Function that retrieves the current list of support codecs.
+ * @method _getCodecsSupport
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getCodecsSupport = function (callback) {
+  var self = this;
+
+  if (self._currentCodecSupport) {
+    callback(null);
+  }
+
+  self._currentCodecSupport = { audio: {}, video: {} };
+
+  try {
+    if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+      var codecs = RTCRtpSender.getCapabilities().codecs;
+
+      for (var i = 0; i &lt; codecs.length; i++) {
+        if ([&#x27;audio&#x27;,&#x27;video&#x27;].indexOf(codecs[i].kind) &gt; -1 &amp;&amp; codecs[i].name) {
+          var codec = codecs[i].name.toLowerCase();
+          self._currentCodecSupport[codecs[i].kind][codec] = codecs[i].clockRate +
+            (codecs[i].numChannels &gt; 1 ? &#x27;/&#x27; + codecs[i].numChannels : &#x27;&#x27;);
+        }
+      }
+      // Ignore .fecMechanisms for now
+      callback(null);
+
+    } else {
+      var pc = new RTCPeerConnection(null);
+      var offerConstraints = {
+        offerToReceiveAudio: true,
+        offerToReceiveVideo: true
+      };
+
+      if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
+        offerConstraints = {
+          mandatory: {
+            OfferToReceiveVideo: true,
+            OfferToReceiveAudio: true
+          }
+        };
+      }
+
+      pc.createOffer(function (offer) {
+        var sdpLines = offer.sdp.split(&#x27;\r\n&#x27;);
+        var mediaType = &#x27;&#x27;;
+
+        for (var i = 0; i &lt; sdpLines.length; i++) {
+          if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
+            mediaType = (sdpLines[i].split(&#x27;m=&#x27;)[1] || &#x27;&#x27;).split(&#x27; &#x27;)[0];
+          } else if (sdpLines[i].indexOf(&#x27;a=rtpmap:&#x27;) === 0) {
+            if ([&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) === -1) {
+              continue;
+            }
+            var parts = (sdpLines[i].split(&#x27; &#x27;)[1] || &#x27;&#x27;).split(&#x27;/&#x27;);
+            var codec = (parts[0] || &#x27;&#x27;).toLowerCase();
+            var info = parts[1] + (parts[2] ? &#x27;/&#x27; + parts[2] : &#x27;&#x27;);
+
+            self._currentCodecSupport[mediaType][codec] = info;
+          }
+        }
+
+        callback(null);
+
+      }, function (error) {
+        callback(error);
+      }, offerConstraints);
+    }
+  } catch (error) {
+    callback(error);
+  }
+};
+
+/**
  * Function that modifies the session description to handle the connection settings.
  * This is experimental and never recommended to end-users.
  * @method _handleSDPConnectionSettings
@@ -703,22 +808,63 @@ Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDes
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDescription) {
+Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDescription, direction) {
   var self = this;
   var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
+  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
+
   var mediaType = &#x27;&#x27;;
+  var rejectMLine = false;
+
+  var bundleLineIndex = -1;
+  var sdpMids = [];
+  
+  self._sdpSessions[targetMid] = self._sdpSessions[targetMid] || {
+    local: { lines: [], groupLine: &#x27;&#x27; },
+    remote: { lines: [], groupLine: &#x27;&#x27; }
+  };
+
+  // ANSWERER: Reject only the m= lines. Returned rejected m= lines as well.
+  // OFFERER: Remove m= lines
 
   for (var i = 0; i &lt; sdpLines.length; i++) {
-    if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
+    if (sdpLines[i].indexOf(&#x27;a=group:BUNDLE&#x27;) === 0) {
+      self._sdpSessions[targetMid][direction].groupLine = sdpLines[i];
+      bundleLineIndex = i;
+    } else if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
       mediaType = (sdpLines[i].split(&#x27;m=&#x27;)[1] || &#x27;&#x27;).split(&#x27; &#x27;)[0] || &#x27;&#x27;;
+      // Check if we have to reject m= line. MCU Peer cannot be rejected
+      rejectMLine = !self._sdpSettings.connection[mediaType === &#x27;application&#x27; ? &#x27;data&#x27; : mediaType] &amp;&amp; targetMid !== &#x27;MCU&#x27;;
+
+      // Check if there is missing unsupported video codecs support and reject it regardles of MCU Peer or not
+      if (!rejectMLine &amp;&amp; mediaType === &#x27;video&#x27;) {
+        rejectMLine = !((window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
+          ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
+          !!self._currentCodecSupport.video.h264 : true);
+      }
+
+      self._sdpSessions[targetMid][direction].lines.push(sdpLines[i]);
+
+      // Check if Peer is answerer, and if so, it has to return rejected line.
+      if (rejectMLine) {
+        sdpLines.splice(i, 1);
+        i--;
+      }
+      continue;
     }
 
     if (mediaType) {
-      if (!self._sdpSettings.connection[mediaType === &#x27;application&#x27; ? &#x27;data&#x27; : mediaType] &amp;&amp; targetMid !== &#x27;MCU&#x27;) {
+      // Remove lines if we are rejecting the media and ensure unless (rejectVideoMedia is true), MCU has to enable those m= lines
+      if (rejectMLine) {
         sdpLines.splice(i, 1);
         i--;
-      } else if (mediaType &amp;&amp; [&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) &gt; -1 &amp;&amp;
+      // Store the mids session description
+      } else if (sdpLines[i].indexOf(&#x27;a=mid:&#x27;) === 0) {
+        sdpMids.push(sdpLines[i].split(&#x27;a=mid:&#x27;)[1] || &#x27;&#x27;);
+      // Configure direction a=sendonly etc for local sessiondescription
+      }  else if (direction !== &#x27;remote&#x27; &amp;&amp; mediaType &amp;&amp; [&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) &gt; -1 &amp;&amp;
         [&#x27;a=sendrecv&#x27;, &#x27;a=sendonly&#x27;, &#x27;a=recvonly&#x27;].indexOf(sdpLines[i]) &gt; -1) {
+        // Configure direction for sessiondescription to MCU Peers
         if (self._hasMCU) {
           sdpLines[i] = targetMid === &#x27;MCU&#x27; ? &#x27;a=sendonly&#x27; : &#x27;a=recvonly&#x27;;
         }
@@ -728,22 +874,24 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
         } else if (!self._sdpSettings.direction[mediaType].send &amp;&amp; self._sdpSettings.direction[mediaType].receive) {
           sdpLines[i] = sdpLines[i].indexOf(&#x27;recv&#x27;) &gt; -1 ? &#x27;a=recvonly&#x27; : &#x27;a=inactive&#x27;;
         } else if (!self._sdpSettings.direction[mediaType].send &amp;&amp; !self._sdpSettings.direction[mediaType].receive) {
+        // MCU currently does not support a=inactive flag.. what do we do here?
           sdpLines[i] = &#x27;a=inactive&#x27;;
         }
 
-        // MCU currently does not support a=inactive flag
-        if (!self._hasMCU) {
-          var agent = ((self._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
-          // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
-          if (window.webrtcDetectedBrowser !== &#x27;firefox&#x27; &amp;&amp; agent === &#x27;firefox&#x27; &amp;&amp;
-            sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp; sdpLines[i] === &#x27;a=recvonly&#x27;) {
-            log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Overriding any original settings &#x27; +
-              &#x27;to receive only to send and receive to resolve chrome BUNDLE errors.&#x27;]);
-            sdpLines[i] = &#x27;a=sendrecv&#x27;;
-          }
+        // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+        if (!self._hasMCU &amp;&amp; window.webrtcDetectedBrowser !== &#x27;firefox&#x27; &amp;&amp; peerAgent === &#x27;firefox&#x27; &amp;&amp;
+          sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp; sdpLines[i] === &#x27;a=recvonly&#x27;) {
+          log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Overriding any original settings &#x27; +
+            &#x27;to receive only to send and receive to resolve chrome BUNDLE errors.&#x27;]);
+          sdpLines[i] = &#x27;a=sendrecv&#x27;;
         }
       }
     }
+  }
+
+  // Fix chrome &quot;offerToReceiveAudio&quot; local offer not removing audio BUNDLE
+  if (bundleLineIndex &gt; -1) {
+    sdpLines[bundleLineIndex] = &#x27;a=group:BUNDLE &#x27; + sdpMids.join(&#x27; &#x27;);
   }
 
   return sdpLines.join(&#x27;\r\n&#x27;);

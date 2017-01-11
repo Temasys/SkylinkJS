@@ -233,10 +233,6 @@ Skylink.prototype._sendChannelMessage = function(message) {
         isDataChannel: false,
         senderPeerId: self._user.sid
       }, self._user.sid, self.getPeerInfo(), true);
-
-    } else if (eventMessage.type === self._SIG_MESSAGE_TYPE.ROOM_LOCK) {
-      self._roomLocked = !!eventMessage.lock;
-      self._trigger(&#x27;roomLock&#x27;, !!eventMessage.lock, self._user.sid, self.getPeerInfo(), true);
     }
   };
 
@@ -297,7 +293,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
         rid: self._room.id
       };
 
-      log.debug([null, &#x27;Socket&#x27;, null, &#x27;Sending queued messages (max: 16 per group) -&gt;&#x27;], groupMessage);
+      log.debug([null, &#x27;Socket&#x27;, groupMessage.type, &#x27;Sending queued grouped message (max: 16 per group) -&gt;&#x27;], groupMessage);
 
       self._socket.send(JSON.stringify(groupMessage));
       self._timestamp.socketMessage = (new Date()).getTime();
@@ -323,12 +319,13 @@ Skylink.prototype._sendChannelMessage = function(message) {
   if (self._groupMessageList.indexOf(message.type) &gt; -1) {
     if (!(self._timestamp.socketMessage &amp;&amp; ((new Date ()).getTime() - self._timestamp.socketMessage) &lt;= interval)) {
       if (!checkStampFn(message)) {
-        log.warn([null, &#x27;Socket&#x27;, null, &#x27;Dropping of outdated status message -&gt;&#x27;], message);
+        log.warn([null, &#x27;Socket&#x27;, message.type, &#x27;Dropping of outdated status message -&gt;&#x27;], message);
         return;
       }
       if (self._socketMessageTimeout) {
         clearTimeout(self._socketMessageTimeout);
       }
+      log.warn([null, &#x27;Socket&#x27;, message.type, &#x27;Sending message -&gt;&#x27;], message);
       self._socket.send(JSON.stringify(message));
       setStampFn(message);
       triggerEventFn(message);
@@ -336,7 +333,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       self._timestamp.socketMessage = (new Date()).getTime();
 
     } else {
-      log.warn([null, &#x27;Socket&#x27;, null, &#x27;Queueing socket message to prevent message drop -&gt;&#x27;], message);
+      log.warn([null, &#x27;Socket&#x27;, message.type, &#x27;Queueing socket message to prevent message drop -&gt;&#x27;], message);
 
       self._socketMessageQueue.push(message);
 
@@ -345,6 +342,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       }
     }
   } else {
+    log.debug([message.target || null, &#x27;Socket&#x27;, message.type, &#x27;Sending message -&gt;&#x27;], message);
     self._socket.send(JSON.stringify(message));
   }
 };

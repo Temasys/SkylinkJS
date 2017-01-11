@@ -61,10 +61,15 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   }
 
   var peerIceRestartSupport = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart;
+  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+  // Enforce no video connection for IE/safari without h264 codec support and Edge browsers without h264 support (which is by default)
+  var videoSupport = self._sdpSettings.connection.video ? ((window.webrtcDetectedBrowser === 'edge' &&
+    peerAgent !== 'edge') || (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
+    !!self._currentCodecSupport.video.h264 : true) : false;
 
   var offerConstraints = {
-    offerToReceiveAudio: true,
-    offerToReceiveVideo: true,
+    offerToReceiveAudio: self._sdpSettings.connection.audio,
+    offerToReceiveVideo: videoSupport,
     iceRestart: self._enableIceRestart && peerIceRestartSupport ? iceRestart === true : false
   };
 
@@ -97,8 +102,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
     offerConstraints = {
       mandatory: {
-        OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true,
+        OfferToReceiveAudio: self._sdpSettings.connection.audio,
+        OfferToReceiveVideo: videoSupport,
         iceRestart: self._enableIceRestart && peerIceRestartSupport ? iceRestart === true : false
       }
     };
@@ -233,7 +238,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
-  sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription);
+  sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   //sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
 

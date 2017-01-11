@@ -1123,4 +1123,24 @@ function Skylink() {
    * @since 0.6.18
    */
   this._socketServer = null;
+
+  /**
+   * Stores the currently supported codecs.
+   * @attribute _currentCodecSupport
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._currentCodecSupport = null;
+
+  /**
+   * Stores the session description orders and info.
+   * @attribute _sdpSessions
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._sdpSessions = {};
 }

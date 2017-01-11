@@ -1203,6 +1203,10 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerEndOfCandidatesCounter[peerId] !== 'undefined') {
     delete this._peerEndOfCandidatesCounter[peerId];
   }
+  // remove peer sdp session
+  if (typeof this._sdpSessions[peerId] !== 'undefined') {
+    delete this._sdpSessions[peerId];
+  }
 
   // close datachannel connection
   if (this._dataChannels[peerId]) {
@@ -1263,6 +1267,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
   self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
   self._peerEndOfCandidatesCounter[targetMid] = self._peerEndOfCandidatesCounter[targetMid] || {};
+  self._sdpSessions[targetMid] = {
+    local: { lines: [], groupLine: '' },
+    remote: { lines: [], groupLine: '' }
+  };
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
@@ -1328,9 +1336,19 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   };
 
   pc.oniceconnectionstatechange = function(evt) {
-    log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], pc.iceConnectionState);
+    var iceConnectionState = pc.iceConnectionState;
 
-    self._trigger('iceConnectionState', pc.iceConnectionState, targetMid);
+    log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], iceConnectionState);
+
+    if (window.webrtcDetectedBrowser === 'edge') {
+      if (iceConnectionState === 'connecting') {
+        iceConnectionState = self.ICE_CONNECTION_STATE.CHECKING;
+      } else if (iceConnectionState === 'new') {
+        iceConnectionState = self.ICE_CONNECTION_STATE.FAILED;
+      }
+    }
+
+    self._trigger('iceConnectionState', iceConnectionState, targetMid);
 
     if (pc.iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
       self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
@@ -1539,7 +1557,7 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
             var mid = sdpLines[i].split('a=mid:')[1] || '';
             if (mid && addedMids.indexOf(mid) === -1) {
               addedMids.push(mid);
-              self._peerConnections[targetMid].addIceCandidate(new RTCIceCandidate({
+              self._addIceCandidate(targetMid, 'endofcan-' + (new Date()).getTime(), new RTCIceCandidate({
                 sdpMid: mid,
                 sdpMLineIndex: mLineCounter,
                 candidate: 'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates'
@@ -1551,6 +1569,17 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
       } else {
         self._peerConnections[targetMid].addIceCandidate(null);
       }
+
+      if (self._gatheredCandidates[targetMid]) {
+        self._trigger('candidatesGathered', targetMid, {
+          expected: self._peerEndOfCandidatesCounter[targetMid].expectedLen || 0,
+          received: self._peerEndOfCandidatesCounter[targetMid].len || 0,
+          processed: self._gatheredCandidates[targetMid].receiving.srflx.length +
+            self._gatheredCandidates[targetMid].receiving.relay.length +
+            self._gatheredCandidates[targetMid].receiving.host.length
+        });
+      }
+
     } catch (error) {
       log.error([targetMid, 'RTCPeerConnection', null, 'Failed signaling end-of-candidates ->'], error);
     }

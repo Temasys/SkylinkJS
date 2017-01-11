@@ -1294,6 +1294,10 @@ Skylink.prototype._removePeer = function(peerId) {
   if (typeof this._peerEndOfCandidatesCounter[peerId] !== &#x27;undefined&#x27;) {
     delete this._peerEndOfCandidatesCounter[peerId];
   }
+  // remove peer sdp session
+  if (typeof this._sdpSessions[peerId] !== &#x27;undefined&#x27;) {
+    delete this._sdpSessions[peerId];
+  }
 
   // close datachannel connection
   if (this._dataChannels[peerId]) {
@@ -1354,6 +1358,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
   self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
   self._peerEndOfCandidatesCounter[targetMid] = self._peerEndOfCandidatesCounter[targetMid] || {};
+  self._sdpSessions[targetMid] = {
+    local: { lines: [], groupLine: &#x27;&#x27; },
+    remote: { lines: [], groupLine: &#x27;&#x27; }
+  };
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
@@ -1419,9 +1427,19 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   };
 
   pc.oniceconnectionstatechange = function(evt) {
-    log.debug([targetMid, &#x27;RTCIceConnectionState&#x27;, null, &#x27;Ice connection state changed -&gt;&#x27;], pc.iceConnectionState);
+    var iceConnectionState = pc.iceConnectionState;
 
-    self._trigger(&#x27;iceConnectionState&#x27;, pc.iceConnectionState, targetMid);
+    log.debug([targetMid, &#x27;RTCIceConnectionState&#x27;, null, &#x27;Ice connection state changed -&gt;&#x27;], iceConnectionState);
+
+    if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+      if (iceConnectionState === &#x27;connecting&#x27;) {
+        iceConnectionState = self.ICE_CONNECTION_STATE.CHECKING;
+      } else if (iceConnectionState === &#x27;new&#x27;) {
+        iceConnectionState = self.ICE_CONNECTION_STATE.FAILED;
+      }
+    }
+
+    self._trigger(&#x27;iceConnectionState&#x27;, iceConnectionState, targetMid);
 
     if (pc.iceConnectionState === self.ICE_CONNECTION_STATE.FAILED &amp;&amp; self._enableIceTrickle) {
       self._trigger(&#x27;iceConnectionState&#x27;, self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
@@ -1630,7 +1648,7 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
             var mid = sdpLines[i].split(&#x27;a=mid:&#x27;)[1] || &#x27;&#x27;;
             if (mid &amp;&amp; addedMids.indexOf(mid) === -1) {
               addedMids.push(mid);
-              self._peerConnections[targetMid].addIceCandidate(new RTCIceCandidate({
+              self._addIceCandidate(targetMid, &#x27;endofcan-&#x27; + (new Date()).getTime(), new RTCIceCandidate({
                 sdpMid: mid,
                 sdpMLineIndex: mLineCounter,
                 candidate: &#x27;candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates&#x27;
@@ -1642,6 +1660,17 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
       } else {
         self._peerConnections[targetMid].addIceCandidate(null);
       }
+
+      if (self._gatheredCandidates[targetMid]) {
+        self._trigger(&#x27;candidatesGathered&#x27;, targetMid, {
+          expected: self._peerEndOfCandidatesCounter[targetMid].expectedLen || 0,
+          received: self._peerEndOfCandidatesCounter[targetMid].len || 0,
+          processed: self._gatheredCandidates[targetMid].receiving.srflx.length +
+            self._gatheredCandidates[targetMid].receiving.relay.length +
+            self._gatheredCandidates[targetMid].receiving.host.length
+        });
+      }
+
     } catch (error) {
       log.error([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Failed signaling end-of-candidates -&gt;&#x27;], error);
     }

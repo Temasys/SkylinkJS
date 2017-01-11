@@ -202,7 +202,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
         rid: self._room.id
       };
 
-      log.debug([null, 'Socket', null, 'Sending queued messages (max: 16 per group) ->'], groupMessage);
+      log.debug([null, 'Socket', groupMessage.type, 'Sending queued grouped message (max: 16 per group) ->'], groupMessage);
 
       self._socket.send(JSON.stringify(groupMessage));
       self._timestamp.socketMessage = (new Date()).getTime();
@@ -228,12 +228,13 @@ Skylink.prototype._sendChannelMessage = function(message) {
   if (self._groupMessageList.indexOf(message.type) > -1) {
     if (!(self._timestamp.socketMessage && ((new Date ()).getTime() - self._timestamp.socketMessage) <= interval)) {
       if (!checkStampFn(message)) {
-        log.warn([null, 'Socket', null, 'Dropping of outdated status message ->'], message);
+        log.warn([null, 'Socket', message.type, 'Dropping of outdated status message ->'], message);
         return;
       }
       if (self._socketMessageTimeout) {
         clearTimeout(self._socketMessageTimeout);
       }
+      log.warn([null, 'Socket', message.type, 'Sending message ->'], message);
       self._socket.send(JSON.stringify(message));
       setStampFn(message);
       triggerEventFn(message);
@@ -241,7 +242,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       self._timestamp.socketMessage = (new Date()).getTime();
 
     } else {
-      log.warn([null, 'Socket', null, 'Queueing socket message to prevent message drop ->'], message);
+      log.warn([null, 'Socket', message.type, 'Queueing socket message to prevent message drop ->'], message);
 
       self._socketMessageQueue.push(message);
 
@@ -250,6 +251,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       }
     }
   } else {
+    log.debug([message.target || null, 'Socket', message.type, 'Sending message ->'], message);
     self._socket.send(JSON.stringify(message));
   }
 };

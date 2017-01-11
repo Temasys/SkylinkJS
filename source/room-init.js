@@ -110,6 +110,8 @@ Skylink.prototype.READY_STATE_CHANGE = {
  *   is not loaded.
  *   <small>To resolve this, ensure that the AdapterJS dependency is loaded before the Skylink dependency.
  *   You may use the provided AdapterJS <a href="https://github.com/Temasys/AdapterJS/">CDN here</a>.</small>
+ * @param {Number} PARSE_CODECS                <small>Value <code>8</code></small>
+ *   The value of the failure code when codecs support cannot be parsed and retrieved.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -131,7 +133,8 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   NO_XMLHTTPREQUEST_SUPPORT: 2,
   NO_WEBRTC_SUPPORT: 3,
   NO_PATH: 4,
-  ADAPTER_NO_LOADED: 7
+  ADAPTER_NO_LOADED: 7,
+  PARSE_CODECS: 8
 };
 
 /**
@@ -991,24 +994,49 @@ Skylink.prototype._loadInfo = function() {
       }, self._selectedRoom);
       return;
     }
-    self._readyState = 1;
-    self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
-    self._requestServerInfo('GET', self._path, function(status, response) {
-      if (status !== 200) {
-        // 403 - Room is locked
-        // 401 - API Not authorized
-        // 402 - run out of credits
-        var errorMessage = 'XMLHttpRequest status not OK\nStatus was: ' + status;
-        self._readyState = 0;
+
+    self._getCodecsSupport(function (error) {
+      if (error) {
+        log.error(error);
+        self._readyState = -1;
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-          status: status,
-          content: (response) ? (response.info || errorMessage) : errorMessage,
-          errorCode: response.error ||
-            self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
+          status: null,
+          content: error.message || error.toString(),
+          errorCode: self.READY_STATE_CHANGE_ERROR.PARSE_CODECS
         }, self._selectedRoom);
         return;
       }
-      self._parseInfo(response);
+
+      if (Object.keys(self._currentCodecSupport.audio).length === 0 && Object.keys(self._currentCodecSupport.video).length === 0) {
+        log.error('No audio/video codecs available to start connection.');
+        self._readyState = -1;
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+          status: null,
+          content: 'No audio/video codecs available to start connection',
+          errorCode: self.READY_STATE_CHANGE_ERROR.PARSE_CODECS
+        }, self._selectedRoom);
+        return;
+      }
+
+      self._readyState = 1;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
+      self._requestServerInfo('GET', self._path, function(status, response) {
+        if (status !== 200) {
+          // 403 - Room is locked
+          // 401 - API Not authorized
+          // 402 - run out of credits
+          var errorMessage = 'XMLHttpRequest status not OK\nStatus was: ' + status;
+          self._readyState = 0;
+          self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+            status: status,
+            content: (response) ? (response.info || errorMessage) : errorMessage,
+            errorCode: response.error ||
+              self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
+          }, self._selectedRoom);
+          return;
+        }
+        self._parseInfo(response);
+      });
     });
   });
 };

@@ -1474,6 +1474,7 @@ Skylink.prototype._offerHandler = function(message) {
   offer.sdp = self._setSDPOpusConfig(targetMid, offer);
   offer.sdp = self._removeSDPCodecs(targetMid, offer);
   offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
+  offer.sdp = self._handleSDPConnectionSettings(targetMid, offer, 'remote');
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote offer ->'], offer.sdp);
 
@@ -1496,6 +1497,11 @@ Skylink.prototype._offerHandler = function(message) {
   }
 
   pc.processingRemoteSDP = true;
+
+  // Edge FIXME problem: Add stream only at offer/answer end
+  if (window.webrtcDetectedBrowser === 'edge' && (!self._hasMCU || targetMid === 'MCU')) {
+    self._addLocalMediaStreams(targetMid);
+  }
 
   pc.setRemoteDescription(offer, function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
@@ -1527,6 +1533,10 @@ Skylink.prototype._candidateHandler = function(message) {
   var targetMid = message.mid;
 
   if (!message.candidate && !message.id) {
+    if (message.endOfCandidates) {
+      this._endOfCandidatesHandler(message);
+      return;
+    }
     log.warn([targetMid, 'RTCIceCandidate', null, 'Received invalid ICE candidate message ->'], message);
     return;
   }
@@ -1668,6 +1678,7 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._setSDPOpusConfig(targetMid, answer);
   answer.sdp = self._removeSDPCodecs(targetMid, answer);
   answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
+  answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
