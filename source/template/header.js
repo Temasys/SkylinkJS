@@ -1103,4 +1103,24 @@ function Skylink() {
    * @since 0.6.16
    */
   this._mcuUseRenegoRestart = false;
+
+  /**
+   * Stores the debugging TURN/STUN ICE server.
+   * @attribute _turnServer
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._turnServer = null;
+
+  /**
+   * Stores the debugging Signaling server.
+   * @attribute _socketServer
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._socketServer = null;
 }

@@ -199,6 +199,7 @@ Skylink.prototype.TURN_TRANSPORT = {
  * @since 0.5.4
  */
 Skylink.prototype._setIceServers = function(givenConfig) {
+  var self = this;
   var givenIceServers = clone(givenConfig.iceServers);
   var iceServersList = {};
   var newIceServers = [];
@@ -208,7 +209,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
 
-  if (this._forceTURNSSL) {
+  if (self._forceTURNSSL) {
     if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; ||
       window.webrtcDetectedBrowser === &#x27;safari&#x27; ||
       window.webrtcDetectedBrowser === &#x27;IE&#x27;) {
@@ -232,6 +233,14 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       iceServersList[username][credential] = [];
     }
 
+    if (self._turnServer &amp;&amp; url.indexOf(&#x27;temasys&#x27;) &gt; 0) {
+      var parts = url.split(&#x27;:&#x27;);
+      var subparts = (parts[1] || &#x27;&#x27;).split(&#x27;?&#x27;);
+      subparts[0] = self._turnServer;
+      parts[1] = subparts.join(&#x27;?&#x27;);
+      url = parts.join(&#x27;:&#x27;);
+    }
+
     if (iceServersList[username][credential].indexOf(url) === -1) {
       if (typeof index === &#x27;number&#x27;) {
         iceServersList[username][credential].splice(index, 0, url);
@@ -252,18 +261,18 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     }
 
     if (server.url.indexOf(&#x27;stun&#x27;) === 0) {
-      if (!this._enableSTUN) {
+      if (!self._enableSTUN) {
         log.warn(&#x27;Ignoring STUN server provided at index &#x27; + i, clone(server));
         continue;
       }
 
-      if (!this._usePublicSTUN &amp;&amp; server.url.indexOf(&#x27;temasys&#x27;) === -1) {
+      if (!self._usePublicSTUN &amp;&amp; server.url.indexOf(&#x27;temasys&#x27;) === -1) {
         log.warn(&#x27;Ignoring public STUN server provided at index &#x27; + i, clone(server));
         continue;
       }
 
     } else if (server.url.indexOf(&#x27;turn&#x27;) === 0) {
-      if (!this._enableTURN) {
+      if (!self._enableTURN) {
         log.warn(&#x27;Ignoring TURN server provided at index &#x27; + i, clone(server));
         continue;
       }
@@ -300,7 +309,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     var credential = typeof server.credential === &#x27;string&#x27; ? server.credential : &#x27;none&#x27;;
 
     if (server.url.indexOf(&#x27;turn&#x27;) === 0) {
-      if (this._TURNTransport === this.TURN_TRANSPORT.ANY) {
+      if (self._TURNTransport === self.TURN_TRANSPORT.ANY) {
         pushIceServer(username, credential, server.url);
 
       } else {
@@ -310,17 +319,17 @@ Skylink.prototype._setIceServers = function(givenConfig) {
           rawUrl = rawUrl.split(&#x27;?transport=&#x27;)[0];
         }
 
-        if (this._TURNTransport === this.TURN_TRANSPORT.NONE) {
+        if (self._TURNTransport === self.TURN_TRANSPORT.NONE) {
           pushIceServer(username, credential, rawUrl);
-        } else if (this._TURNTransport === this.TURN_TRANSPORT.UDP) {
+        } else if (self._TURNTransport === self.TURN_TRANSPORT.UDP) {
           pushIceServer(username, credential, rawUrl + &#x27;?transport=udp&#x27;);
-        } else if (this._TURNTransport === this.TURN_TRANSPORT.TCP) {
+        } else if (self._TURNTransport === self.TURN_TRANSPORT.TCP) {
           pushIceServer(username, credential, rawUrl + &#x27;?transport=tcp&#x27;);
-        } else if (this._TURNTransport === this.TURN_TRANSPORT.ALL) {
+        } else if (self._TURNTransport === self.TURN_TRANSPORT.ALL) {
           pushIceServer(username, credential, rawUrl + &#x27;?transport=tcp&#x27;);
           pushIceServer(username, credential, rawUrl + &#x27;?transport=udp&#x27;);
         } else {
-          log.warn(&#x27;Invalid TURN transport option &quot;&#x27; + this._TURNTransport +
+          log.warn(&#x27;Invalid TURN transport option &quot;&#x27; + self._TURNTransport +
             &#x27;&quot;. Ignoring TURN server at index&#x27; + i, clone(server));
           continue;
         }
@@ -331,7 +340,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   }
 
   // add mozilla STUN for firefox
-  if (this._enableSTUN &amp;&amp; this._usePublicSTUN &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+  if (self._enableSTUN &amp;&amp; self._usePublicSTUN &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
     pushIceServer(&#x27;none&#x27;, &#x27;none&#x27;, &#x27;stun:stun.services.mozilla.com&#x27;, 0);
   }
 

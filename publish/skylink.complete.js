@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 11 2017 17:38:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 11 2017 18:04:44 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Wed Jan 11 2017 17:38:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 11 2017 18:04:44 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -12639,6 +12639,26 @@ function Skylink() {
    * @since 0.6.16
    */
   this._mcuUseRenegoRestart = false;
+
+  /**
+   * Stores the debugging TURN/STUN ICE server.
+   * @attribute _turnServer
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._turnServer = null;
+
+  /**
+   * Stores the debugging Signaling server.
+   * @attribute _socketServer
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._socketServer = null;
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -15682,6 +15702,7 @@ Skylink.prototype.TURN_TRANSPORT = {
  * @since 0.5.4
  */
 Skylink.prototype._setIceServers = function(givenConfig) {
+  var self = this;
   var givenIceServers = clone(givenConfig.iceServers);
   var iceServersList = {};
   var newIceServers = [];
@@ -15691,7 +15712,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
 
-  if (this._forceTURNSSL) {
+  if (self._forceTURNSSL) {
     if (window.webrtcDetectedBrowser === 'chrome' ||
       window.webrtcDetectedBrowser === 'safari' ||
       window.webrtcDetectedBrowser === 'IE') {
@@ -15715,6 +15736,14 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       iceServersList[username][credential] = [];
     }
 
+    if (self._turnServer && url.indexOf('temasys') > 0) {
+      var parts = url.split(':');
+      var subparts = (parts[1] || '').split('?');
+      subparts[0] = self._turnServer;
+      parts[1] = subparts.join('?');
+      url = parts.join(':');
+    }
+
     if (iceServersList[username][credential].indexOf(url) === -1) {
       if (typeof index === 'number') {
         iceServersList[username][credential].splice(index, 0, url);
@@ -15735,18 +15764,18 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     }
 
     if (server.url.indexOf('stun') === 0) {
-      if (!this._enableSTUN) {
+      if (!self._enableSTUN) {
         log.warn('Ignoring STUN server provided at index ' + i, clone(server));
         continue;
       }
 
-      if (!this._usePublicSTUN && server.url.indexOf('temasys') === -1) {
+      if (!self._usePublicSTUN && server.url.indexOf('temasys') === -1) {
         log.warn('Ignoring public STUN server provided at index ' + i, clone(server));
         continue;
       }
 
     } else if (server.url.indexOf('turn') === 0) {
-      if (!this._enableTURN) {
+      if (!self._enableTURN) {
         log.warn('Ignoring TURN server provided at index ' + i, clone(server));
         continue;
       }
@@ -15783,7 +15812,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     var credential = typeof server.credential === 'string' ? server.credential : 'none';
 
     if (server.url.indexOf('turn') === 0) {
-      if (this._TURNTransport === this.TURN_TRANSPORT.ANY) {
+      if (self._TURNTransport === self.TURN_TRANSPORT.ANY) {
         pushIceServer(username, credential, server.url);
 
       } else {
@@ -15793,17 +15822,17 @@ Skylink.prototype._setIceServers = function(givenConfig) {
           rawUrl = rawUrl.split('?transport=')[0];
         }
 
-        if (this._TURNTransport === this.TURN_TRANSPORT.NONE) {
+        if (self._TURNTransport === self.TURN_TRANSPORT.NONE) {
           pushIceServer(username, credential, rawUrl);
-        } else if (this._TURNTransport === this.TURN_TRANSPORT.UDP) {
+        } else if (self._TURNTransport === self.TURN_TRANSPORT.UDP) {
           pushIceServer(username, credential, rawUrl + '?transport=udp');
-        } else if (this._TURNTransport === this.TURN_TRANSPORT.TCP) {
+        } else if (self._TURNTransport === self.TURN_TRANSPORT.TCP) {
           pushIceServer(username, credential, rawUrl + '?transport=tcp');
-        } else if (this._TURNTransport === this.TURN_TRANSPORT.ALL) {
+        } else if (self._TURNTransport === self.TURN_TRANSPORT.ALL) {
           pushIceServer(username, credential, rawUrl + '?transport=tcp');
           pushIceServer(username, credential, rawUrl + '?transport=udp');
         } else {
-          log.warn('Invalid TURN transport option "' + this._TURNTransport +
+          log.warn('Invalid TURN transport option "' + self._TURNTransport +
             '". Ignoring TURN server at index' + i, clone(server));
           continue;
         }
@@ -15814,7 +15843,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   }
 
   // add mozilla STUN for firefox
-  if (this._enableSTUN && this._usePublicSTUN && window.webrtcDetectedBrowser === 'firefox') {
+  if (self._enableSTUN && self._usePublicSTUN && window.webrtcDetectedBrowser === 'firefox') {
     pushIceServer('none', 'none', 'stun:stun.services.mozilla.com', 0);
   }
 
@@ -19269,6 +19298,10 @@ Skylink.prototype.generateUUID = function() {
  *   The flag if <a href="#method_refreshConnection"><code>
  *   refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU
  *   enabled Peer connections instead of invoking <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.
+ * @param {String} [options.iceServer] The ICE server.
+ *   <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
+ * @param {String} [options.socketServer] The Signaling server.
+ *   <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -19314,6 +19347,8 @@ Skylink.prototype.generateUUID = function() {
  * @param {Number} callback.success.throttleIntervals The configured value of the <code>options.throttleIntervals</code>.
  * @param {Number} callback.success.throttleShouldThrowError The configured value of the <code>options.throttleShouldThrowError</code>.
  * @param {Number} callback.success.mcuUseRenegoRestart The configured value of the <code>options.mcuUseRenegoRestart</code>.
+ * @param {Number} callback.success.iceServer The configured value of the <code>options.iceServer</code>.
+ * @param {Number} callback.success.socketServer The configured value of the <code>options.socketServer</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -19423,6 +19458,8 @@ Skylink.prototype.init = function(options, callback) {
   };
   var throttleShouldThrowError = false;
   var mcuUseRenegoRestart = false;
+  var iceServer = null;
+  var socketServer = null;
 
   log.log('Provided init options:', options);
 
@@ -19493,6 +19530,15 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if throttling should throw error when called less than the interval timeout configured
     throttleShouldThrowError = (typeof options.throttleShouldThrowError === 'boolean') ?
       options.throttleShouldThrowError : throttleShouldThrowError;
+    // set the flag if MCU refreshConnection() should use renegotiation
+    mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
+      options.mcuUseRenegoRestart : mcuUseRenegoRestart;
+    // set the TURN/STUN ICE server url for debugging purposes
+    iceServer = (options.iceServer && typeof options.iceServer === 'string') ?
+      options.iceServer : iceServer;
+    // set the Signaling server url for debugging purposes
+    socketServer = (options.socketServer && typeof options.socketServer === 'string') ?
+      options.socketServer : socketServer;
     // set the flag if MCU refreshConnection() should use renegotiation
     mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
       options.mcuUseRenegoRestart : mcuUseRenegoRestart;
@@ -19601,6 +19647,8 @@ Skylink.prototype.init = function(options, callback) {
   self._throttlingShouldThrowError = throttleShouldThrowError;
   self._disableREMB = disableREMB;
   self._mcuUseRenegoRestart = mcuUseRenegoRestart;
+  self._turnServer = iceServer;
+  self._socketServer = socketServer;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -19628,7 +19676,9 @@ Skylink.prototype.init = function(options, callback) {
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError,
-    mcuUseRenegoRestart: self._mcuUseRenegoRestart
+    mcuUseRenegoRestart: self._mcuUseRenegoRestart,
+    iceServer: self._turnServer,
+    socketServer: self._socketServer
   });
   // trigger the readystate
   self._readyState = 0;
@@ -19670,7 +19720,9 @@ Skylink.prototype.init = function(options, callback) {
             filterCandidatesType: self._filterCandidatesType,
             throttleIntervals: self._throttlingTimeouts,
             throttleShouldThrowError: self._throttlingShouldThrowError,
-            mcuUseRenegoRestart: self._mcuUseRenegoRestart
+            mcuUseRenegoRestart: self._mcuUseRenegoRestart,
+            iceServer: self._turnServer,
+            socketServer: self._socketServer
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -19970,7 +20022,9 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError,
-    mcuUseRenegoRestart: self._mcuUseRenegoRestart
+    mcuUseRenegoRestart: self._mcuUseRenegoRestart,
+    iceServer: self._turnServer,
+    socketServer: self._socketServer
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -22010,7 +22064,7 @@ Skylink.prototype._createSocket = function (type) {
     options.transports = ['xhr-polling', 'jsonp-polling', 'polling'];
   }
 
-  var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
+  var url = self._signalingServerProtocol + '//' + (self._socketServer || self._signalingServer) + ':' + self._signalingServerPort;
     //'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
 
   self._socketSession.transportType = type;

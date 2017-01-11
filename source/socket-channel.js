@@ -306,7 +306,7 @@ Skylink.prototype._createSocket = function (type) {
     options.transports = ['xhr-polling', 'jsonp-polling', 'polling'];
   }
 
-  var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
+  var url = self._signalingServerProtocol + '//' + (self._socketServer || self._signalingServer) + ':' + self._signalingServerPort;
     //'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
 
   self._socketSession.transportType = type;

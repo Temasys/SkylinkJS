@@ -2112,6 +2112,15 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
+                  <a href="#attr__socketServer" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_socketServer
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#attr__socketSession" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_socketSession
                     <span class="settings">
@@ -2231,6 +2240,15 @@ Before using any Skylink functionalities, you will need to authenticate your App
                 
                   <a href="#attr__timestamp" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_timestamp
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__turnServer" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_turnServer
                     <span class="settings">
                       
                       
@@ -6406,7 +6424,7 @@ This is experimental and never recommended to end-users.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l993"><code>source&#x2F;room-init.js:993</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1016"><code>source&#x2F;room-init.js:1016</code></a>
       </small>
     
 
@@ -6750,7 +6768,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l900"><code>source&#x2F;room-init.js:900</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l923"><code>source&#x2F;room-init.js:923</code></a>
       </small>
     
 
@@ -7864,7 +7882,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l827"><code>source&#x2F;room-init.js:827</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l850"><code>source&#x2F;room-init.js:850</code></a>
       </small>
     
 
@@ -9410,7 +9428,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l753"><code>source&#x2F;room-init.js:753</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l776"><code>source&#x2F;room-init.js:776</code></a>
       </small>
     
 
@@ -15059,6 +15077,40 @@ Global_Objects/encodeURIComponent">encodeURIComponent() API</a>.</small></li></o
                     
                   </li>
                 
+                  <li class="param">
+                    <code class="param-name">iceServer</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The ICE server.
+  <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small></p>
+
+                    </div>
+
+                    
+                  </li>
+                
+                  <li class="param">
+                    <code class="param-name">socketServer</code>
+                    <span class="type"><b>{</b>String<b>}</b></span>
+
+                    <span class="label">Optional</span>
+                    
+
+                    <div class="param-description">
+                      
+                      <p>The Signaling server.
+  <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small></p>
+
+                    </div>
+
+                    
+                  </li>
+                
               </ul>
             
           </li>
@@ -15504,6 +15556,32 @@ Global_Objects/encodeURIComponent">encodeURIComponent() API</a>.</small></li></o
                             <div class="param-description">
                               
                               The configured value of the <code>options.mcuUseRenegoRestart</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">iceServer</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The configured value of the <code>options.iceServer</code>.
+                            </div>
+                          </li>
+                        
+                          <li class="param">
+                            <code class="param-name">socketServer</code>
+                            <span class="type"><b>{</b>Number<b>}</b></span>
+
+                            
+                            
+
+                            <div class="param-description">
+                              
+                              The configured value of the <code>options.socketServer</code>.
                             </div>
                           </li>
                         
@@ -27984,6 +28062,82 @@ Should re-evaluate this sometime.</p>
   <hr>
 </div>
             
+              <div id="attr__socketServer" class="code-item attr item private-attr-item ">
+  <a name="config__socketServer"></a> 
+  <h3 class="code-item-name"><code>_socketServer</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>String<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l1117"><code>source&#x2F;template&#x2F;header.js:1117</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.18</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the debugging Signaling server.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
               <div id="attr__socketSession" class="code-item attr item private-attr-item ">
   <a name="config__socketSession"></a> 
   <h3 class="code-item-name"><code>_socketSession</code></h3>
@@ -29038,6 +29192,82 @@ Defined as <code>false</code> when Stream has already ended.</p>
 
   <div class="code-item-description">
     <p>Stores the timestamps data used for throttling.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__turnServer" class="code-item attr item private-attr-item ">
+  <a name="config__turnServer"></a> 
+  <h3 class="code-item-name"><code>_turnServer</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>String<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l1107"><code>source&#x2F;template&#x2F;header.js:1107</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.18</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Stores the debugging TURN/STUN ICE server.</p>
 
   </div>
 

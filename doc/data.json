@@ -1349,6 +1349,30 @@
             "class": "Skylink"
         },
         {
+            "file": "source/template/header.js",
+            "line": 1107,
+            "description": "Stores the debugging TURN/STUN ICE server.",
+            "itemtype": "attribute",
+            "name": "_turnServer",
+            "type": "String",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 1117,
+            "description": "Stores the debugging Signaling server.",
+            "itemtype": "attribute",
+            "name": "_socketServer",
+            "type": "String",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
             "file": "source/data-channel.js",
             "line": 1,
             "description": "The list of Datachannel connection states.",
@@ -3946,6 +3970,18 @@
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
+                        },
+                        {
+                            "name": "iceServer",
+                            "description": "The ICE server.\n  <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
+                            "type": "String",
+                            "optional": true
+                        },
+                        {
+                            "name": "socketServer",
+                            "description": "The Signaling server.\n  <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
+                            "type": "String",
+                            "optional": true
                         }
                     ]
                 },
@@ -4111,6 +4147,16 @@
                                     "name": "mcuUseRenegoRestart",
                                     "description": "The configured value of the <code>options.mcuUseRenegoRestart</code>.",
                                     "type": "Number"
+                                },
+                                {
+                                    "name": "iceServer",
+                                    "description": "The configured value of the <code>options.iceServer</code>.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "socketServer",
+                                    "description": "The configured value of the <code>options.socketServer</code>.",
+                                    "type": "Number"
                                 }
                             ]
                         }
@@ -4126,7 +4172,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 753,
+            "line": 776,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4137,7 +4183,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 827,
+            "line": 850,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4148,7 +4194,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 900,
+            "line": 923,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4159,7 +4205,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 993,
+            "line": 1016,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
