@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 11 2017 18:04:44 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 11 2017 18:09:31 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -7248,6 +7248,9 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
  * @since 0.5.0
  */
 Skylink.prototype.lockRoom = function() {
+  if (!(this._user && this._user.sid)) {
+    return;
+  }
   log.log('Update to isRoomLocked status ->', true);
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
@@ -7255,6 +7258,8 @@ Skylink.prototype.lockRoom = function() {
     rid: this._room.id,
     lock: true
   });
+  this._roomLocked = true;
+  this._trigger('roomLock', true, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**
@@ -7277,6 +7282,9 @@ Skylink.prototype.lockRoom = function() {
  * @since 0.5.0
  */
 Skylink.prototype.unlockRoom = function() {
+  if (!(this._user && this._user.sid)) {
+    return;
+  }
   log.log('Update to isRoomLocked status ->', false);
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
@@ -7284,6 +7292,8 @@ Skylink.prototype.unlockRoom = function() {
     rid: this._room.id,
     lock: false
   });
+  this._roomLocked = false;
+  this._trigger('roomLock', false, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**
@@ -10366,10 +10376,6 @@ Skylink.prototype._sendChannelMessage = function(message) {
         isDataChannel: false,
         senderPeerId: self._user.sid
       }, self._user.sid, self.getPeerInfo(), true);
-
-    } else if (eventMessage.type === self._SIG_MESSAGE_TYPE.ROOM_LOCK) {
-      self._roomLocked = !!eventMessage.lock;
-      self._trigger('roomLock', !!eventMessage.lock, self._user.sid, self.getPeerInfo(), true);
     }
   };
 

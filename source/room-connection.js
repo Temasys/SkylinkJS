@@ -564,6 +564,9 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
  * @since 0.5.0
  */
 Skylink.prototype.lockRoom = function() {
+  if (!(this._user && this._user.sid)) {
+    return;
+  }
   log.log('Update to isRoomLocked status ->', true);
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
@@ -571,6 +574,8 @@ Skylink.prototype.lockRoom = function() {
     rid: this._room.id,
     lock: true
   });
+  this._roomLocked = true;
+  this._trigger('roomLock', true, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**
@@ -593,6 +598,9 @@ Skylink.prototype.lockRoom = function() {
  * @since 0.5.0
  */
 Skylink.prototype.unlockRoom = function() {
+  if (!(this._user && this._user.sid)) {
+    return;
+  }
   log.log('Update to isRoomLocked status ->', false);
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
@@ -600,6 +608,8 @@ Skylink.prototype.unlockRoom = function() {
     rid: this._room.id,
     lock: false
   });
+  this._roomLocked = false;
+  this._trigger('roomLock', false, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**

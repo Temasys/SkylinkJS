@@ -142,10 +142,6 @@ Skylink.prototype._sendChannelMessage = function(message) {
         isDataChannel: false,
         senderPeerId: self._user.sid
       }, self._user.sid, self.getPeerInfo(), true);
-
-    } else if (eventMessage.type === self._SIG_MESSAGE_TYPE.ROOM_LOCK) {
-      self._roomLocked = !!eventMessage.lock;
-      self._trigger('roomLock', !!eventMessage.lock, self._user.sid, self.getPeerInfo(), true);
     }
   };
 
