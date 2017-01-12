@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Thu Jan 12 2017 17:59:38 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Jan 12 2017 18:11:44 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -4000,8 +4000,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       });
     } else if (self._gatheredCandidates[targetMid]) {
       self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.CANDIDATE,//.END_OF_CANDIDATES,
-        endOfCandidates: true,
+        type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
         noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
           self._gatheredCandidates[targetMid].sending.host.length +
           self._gatheredCandidates[targetMid].sending.relay.length,
@@ -12349,10 +12348,6 @@ Skylink.prototype._candidateHandler = function(message) {
   var targetMid = message.mid;
 
   if (!message.candidate && !message.id) {
-    if (message.endOfCandidates) {
-      this._endOfCandidatesHandler(message);
-      return;
-    }
     log.warn([targetMid, 'RTCIceCandidate', null, 'Received invalid ICE candidate message ->'], message);
     return;
   }

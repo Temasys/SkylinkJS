@@ -1533,10 +1533,6 @@ Skylink.prototype._candidateHandler = function(message) {
   var targetMid = message.mid;
 
   if (!message.candidate && !message.id) {
-    if (message.endOfCandidates) {
-      this._endOfCandidatesHandler(message);
-      return;
-    }
     log.warn([targetMid, 'RTCIceCandidate', null, 'Received invalid ICE candidate message ->'], message);
     return;
   }
