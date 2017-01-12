@@ -1714,6 +1714,12 @@ Skylink.prototype._answerHandler = function(message) {
       self._peerMessagesStamps[targetMid].hasRestart = false;
     }
 
+    if (self._dataChannels[targetMid] && (pc.remoteDescription.sdp.indexOf('m=application') === -1 ||
+      pc.remoteDescription.sdp.indexOf('m=application 0') > 0)) {
+      log.warn([targetMid, 'RTCPeerConnection', null, 'Closing all datachannels as they were rejected.']);
+      self._closeDataChannel(targetMid);
+    }
+
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 

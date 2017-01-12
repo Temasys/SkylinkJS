@@ -1267,10 +1267,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
   self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
   self._peerEndOfCandidatesCounter[targetMid] = self._peerEndOfCandidatesCounter[targetMid] || {};
-  self._sdpSessions[targetMid] = {
-    local: { lines: [], groupLine: '' },
-    remote: { lines: [], groupLine: '' }
-  };
+  self._sdpSessions[targetMid] = { local: {}, remote: {} };
 
   // callbacks
   // standard not implemented: onnegotiationneeded,

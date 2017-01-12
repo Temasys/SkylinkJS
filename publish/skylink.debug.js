@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 11 2017 23:42:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Jan 12 2017 17:21:25 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -1305,12 +1305,18 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
 
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName, channelType, null);
 
+    if (self._peerConnections[peerId] && self._peerConnections[peerId].remoteDescription &&
+      self._peerConnections[peerId].remoteDescription.sdp && (self._peerConnections[peerId].remoteDescription.sdp.indexOf(
+      'm=application') === -1 || self._peerConnections[peerId].remoteDescription.sdp.indexOf('m=application 0') > 0)) {
+      return;
+    }
+
     if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
       setTimeout(function () {
         if (self._peerConnections[peerId] &&
           self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
           (self._peerConnections[peerId].localDescription &&
-            self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
+          self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
           log.debug([peerId, 'RTCDataChannel', channelName, 'Reviving Datachannel connection']);
           self._createDataChannel(peerId, channelName, true);
         }
@@ -5649,10 +5655,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
   self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
   self._peerEndOfCandidatesCounter[targetMid] = self._peerEndOfCandidatesCounter[targetMid] || {};
-  self._sdpSessions[targetMid] = {
-    local: { lines: [], groupLine: '' },
-    remote: { lines: [], groupLine: '' }
-  };
+  self._sdpSessions[targetMid] = { local: {}, remote: {} };
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
@@ -6367,51 +6370,31 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
-  var peerIceRestartSupport = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart;
   var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
-  // Enforce no video connection for IE/safari without h264 codec support and Edge browsers without h264 support (which is by default)
-  var videoSupport = self._sdpSettings.connection.video ? ((window.webrtcDetectedBrowser === 'edge' &&
-    peerAgent !== 'edge') || (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-    !!self._currentCodecSupport.video.h264 : true) : false;
+  var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &&
+    iceRestart && self._enableIceRestart;
+  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
+    ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
+    (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
+    !!self._currentCodecSupport.video.h264 : true);
 
   var offerConstraints = {
-    offerToReceiveAudio: self._sdpSettings.connection.audio,
-    offerToReceiveVideo: videoSupport,
-    iceRestart: self._enableIceRestart && peerIceRestartSupport ? iceRestart === true : false
+    offerToReceiveAudio: offerToReceiveAudio,
+    offerToReceiveVideo: offerToReceiveVideo,
+    iceRestart: doIceRestart
   };
-
-  // NOTE: Removing ICE restart functionality as of now since Firefox does not support it yet
-  // Check if ICE connection failed or disconnected, and if so, do an ICE restart
-  /*if ([self.ICE_CONNECTION_STATE.DISCONNECTED, self.ICE_CONNECTION_STATE.FAILED].indexOf(pc.iceConnectionState) > -1) {
-    offerConstraints.iceRestart = true;
-  }*/
 
   // Prevent undefined OS errors
   peerBrowser.os = peerBrowser.os || '';
-
-  /*
-    Ignoring these old codes as Firefox 39 and below is no longer supported
-    if (window.webrtcDetectedType === 'moz' && peerBrowser.agent === 'MCU') {
-      unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
-      unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
-      beOfferer = true;
-    }
-
-    if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
-      unifiedOfferConstraints = {
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true
-      };
-    }
-  */
 
   // Fallback to use mandatory constraints for plugin based browsers
   if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
     offerConstraints = {
       mandatory: {
-        OfferToReceiveAudio: self._sdpSettings.connection.audio,
-        OfferToReceiveVideo: videoSupport,
-        iceRestart: self._enableIceRestart && peerIceRestartSupport ? iceRestart === true : false
+        OfferToReceiveAudio: offerToReceiveAudio,
+        OfferToReceiveVideo: offerToReceiveVideo,
+        iceRestart: doIceRestart
       }
     };
   }
@@ -6422,7 +6405,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   }
 
   if (self._enableDataChannel && self._peerInformations[targetMid] &&
-    self._peerInformations[targetMid].config.enableDataChannel) {
+    self._peerInformations[targetMid].config.enableDataChannel &&
+    !(!self._sdpSettings.connection.data && targetMid !== 'MCU')) {
     // Edge doesn't support datachannels yet
     if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main)) {
       self._createDataChannel(targetMid);
@@ -12546,6 +12530,12 @@ Skylink.prototype._answerHandler = function(message) {
       self._peerMessagesStamps[targetMid].hasRestart = false;
     }
 
+    if (self._dataChannels[targetMid] && (pc.remoteDescription.sdp.indexOf('m=application') === -1 ||
+      pc.remoteDescription.sdp.indexOf('m=application 0') > 0)) {
+      log.warn([targetMid, 'RTCPeerConnection', null, 'Closing all datachannels as they were rejected.']);
+      self._closeDataChannel(targetMid);
+    }
+
   }, function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
@@ -14936,7 +14926,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
   parseFn('audio', localStream.getAudioTracks());
   parseFn('video', localStream.getVideoTracks());
 
-  // Signaling end-of-candidates
+  // Append signaling of end-of-candidates
   if (!this._enableIceTrickle){
     for (var i = 0; i < sdpLines.length; i++) {
       if (sdpLines[i].indexOf('a=candidate:') === 0) {
@@ -14949,33 +14939,37 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     }
   }
 
-  // Ensure that m= lines that are rejected resurfaces again. 
-  if (this._sdpSessions[targetMid] && sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER) {
-    var mediaIndex = -1;
+  if (sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER && this._sdpSessions[targetMid]) {
     var bundleLineIndex = -1;
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('a=group:BUNDLE') === 0 && this._sdpSessions[targetMid].remote.groupLine) {
-        sdpLines[i] = this._sdpSessions[targetMid].remote.groupLine;
-      } else if (sdpLines[i].indexOf('m=') === 0) {
-        mediaIndex++;
-        if (this._sdpSessions[targetMid].remote.lines[mediaIndex]) {
-          var compareA = this._sdpSessions[targetMid].remote.lines[mediaIndex].split(' ');
-          var compareB = sdpLines[i].split(' ');
-          console.info(compareA, compareB, compareA[0], compareB[0]);
-          if (compareA[0] && compareB[0] && compareA[0] !== compareB[0]) {
-            compareA[1] = 0;
-            sdpLines.splice(i, 0, compareA.join(' '));
-            mediaIndex++;
-            i++;
-          }
+    var mLineIndex = -1;
+
+    for (var j = 0; j < sdpLines.length; j++) {
+      if (sdpLines[j].indexOf('a=group:BUNDLE') === 0 && this._sdpSessions[targetMid].remote.bundleLine) {
+        sdpLines[j] = this._sdpSessions[targetMid].remote.bundleLine;
+      } else if (sdpLines[j].indexOf('m=') === 0) {
+        mLineIndex++;
+        var compareA = sdpLines[j].split(' ');
+        var compareB = (this._sdpSessions[targetMid].remote.mLines[mLineIndex] || '').split(' ');
+
+        if (compareA[0] && compareB[0] && compareA[0] !== compareB[0]) {
+          compareB[1] = 0;
+          sdpLines.splice(j, 0, compareB.join(' '));
+          j++;
+          mLineIndex++;
         }
       }
     }
-  }
 
-  if (window.webrtcDetectedBrowser === 'edge' && !this._currentCodecSupport.video.h264 &&
-    ['edge', 'firefox'].indexOf(agent) === -1 && sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER) {
-    sdpLines.push('');
+    while (this._sdpSessions[targetMid].remote.mLines[mLineIndex + 1]) {
+      mLineIndex++;
+      var appendIndex = sdpLines.length;
+      if (!sdpLines[appendIndex - 1].replace(/\s/gi, '')) {
+        appendIndex -= 1;
+      }
+      var parts = (this._sdpSessions[targetMid].remote.mLines[mLineIndex] || '').split(' ');
+      parts[1] = 0;
+      sdpLines.splice(appendIndex, 0, parts.join(' '));
+    }
   }
 
   return sdpLines.join('\r\n');
@@ -15282,50 +15276,54 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   var self = this;
   var sdpLines = sessionDescription.sdp.split('\r\n');
   var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
-
   var mediaType = '';
   var rejectMLine = false;
-
+  var rejectMLineAsInactive = false;
   var bundleLineIndex = -1;
+  var mLineIndex = -1;
   var sdpMids = [];
-  
-  self._sdpSessions[targetMid] = self._sdpSessions[targetMid] || {
-    local: { lines: [], groupLine: '' },
-    remote: { lines: [], groupLine: '' }
-  };
+
+  if (!self._sdpSessions[targetMid]) {
+    return sessionDescription.sdp;
+  }
 
   // ANSWERER: Reject only the m= lines. Returned rejected m= lines as well.
   // OFFERER: Remove m= lines
 
+  self._sdpSessions[targetMid][direction].mLines = [];
+  self._sdpSessions[targetMid][direction].bundleLine = '';
+
   for (var i = 0; i < sdpLines.length; i++) {
+    // Cache the a=group:BUNDLE line used for remote answer from Edge later
     if (sdpLines[i].indexOf('a=group:BUNDLE') === 0) {
-      self._sdpSessions[targetMid][direction].groupLine = sdpLines[i];
+      self._sdpSessions[targetMid][direction].bundleLine = sdpLines[i];
       bundleLineIndex = i;
+    // Check if there's a need to reject m= line
     } else if (sdpLines[i].indexOf('m=') === 0) {
       mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0] || '';
-      // Check if we have to reject m= line. MCU Peer cannot be rejected
       rejectMLine = !self._sdpSettings.connection[mediaType === 'application' ? 'data' : mediaType] && targetMid !== 'MCU';
+      rejectMLineAsInactive = false;
+      mLineIndex++;
 
+      self._sdpSessions[targetMid][direction].mLines[mLineIndex] = sdpLines[i];
+      
       // Check if there is missing unsupported video codecs support and reject it regardles of MCU Peer or not
-      if (!rejectMLine && mediaType === 'video') {
+      if (rejectMLine) {
+        // Check if answerer and we do not have the power to remove the m line if index is 0
+        rejectMLineAsInactive = mLineIndex === 0 && direction === 'remote' ?
+          sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER :
+          sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER;
+
+      } else if (mediaType === 'video') {
         rejectMLine = !((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
           (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
           !!self._currentCodecSupport.video.h264 : true);
       }
-
-      self._sdpSessions[targetMid][direction].lines.push(sdpLines[i]);
-
-      // Check if Peer is answerer, and if so, it has to return rejected line.
-      if (rejectMLine) {
-        sdpLines.splice(i, 1);
-        i--;
-      }
-      continue;
     }
 
     if (mediaType) {
       // Remove lines if we are rejecting the media and ensure unless (rejectVideoMedia is true), MCU has to enable those m= lines
-      if (rejectMLine) {
+      if (rejectMLine && !rejectMLineAsInactive) {
         sdpLines.splice(i, 1);
         i--;
       // Store the mids session description
@@ -15355,13 +15353,37 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
             'to receive only to send and receive to resolve chrome BUNDLE errors.']);
           sdpLines[i] = 'a=sendrecv';
         }
+
+        // Set as a=inactive because we do not have that power to reject it somehow..
+        // first m= line cannot be rejected for BUNDLE
+        if (rejectMLineAsInactive) {
+          sdpLines[i] = 'a=inactive';
+        }
       }
+    }
+
+    // Remove weird empty characters for Edge case.. :(
+    if (self._hasMCU && direction === 'remote' && !(sdpLines[i] || '').replace(/\n|\r|\s/gi, '')) {
+      sdpLines.splice(i, 1);
+      i--;
     }
   }
 
   // Fix chrome "offerToReceiveAudio" local offer not removing audio BUNDLE
   if (bundleLineIndex > -1) {
     sdpLines[bundleLineIndex] = 'a=group:BUNDLE ' + sdpMids.join(' ');
+  }
+
+  var hasDatachannel = self._enableDataChannel && self.getPeerInfo(targetMid).config.enableDataChannel;
+
+  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
+    // Local or remote just audio call with datachannel causes issues
+    ((!self._sdpSettings.connection.data || !hasDatachannel) && (!self._sdpSettings.connection.video &&
+    // Remote offer with just audio(rejected but cant remove)+video
+    self._sdpSettings.connection.audio) || ((!self._sdpSettings.connection.data || !hasDatachannel) &&
+    direction === 'remote' && sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && 
+    self._sdpSettings.connection.video))) {
+    sdpLines.push('');
   }
 
   return sdpLines.join('\r\n');
