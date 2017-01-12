@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Thu Jan 12 2017 17:21:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Jan 12 2017 17:59:38 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Thu Jan 12 2017 17:21:25 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Jan 12 2017 17:59:38 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -26506,6 +26506,11 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     }
   }
 
+  if (window.webrtcDetectedBrowser === 'edge' && sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER &&
+    !sdpLines[sdpLines.length - 1].replace(/\s/gi, '')) {
+    sdpLines.splice(sdpLines.length - 1, 1);
+  }
+
   return sdpLines.join('\r\n');
 };
 
@@ -26808,7 +26813,15 @@ Skylink.prototype._getCodecsSupport = function (callback) {
  */
 Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDescription, direction) {
   var self = this;
-  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var sessionDescriptionStr = sessionDescription.sdp;
+  
+  if (!self._sdpSessions[targetMid]) {
+    return sessionDescription.sdp;
+  } else if (direction === 'remote' && !self.getPeerInfo(targetMid).config.enableIceTrickle) {
+    sessionDescriptionStr = sessionDescriptionStr.replace(/a=end-of-candidates\r\n/g, '');
+  }
+
+  var sdpLines = sessionDescriptionStr.split('\r\n');
   var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
   var mediaType = '';
   var rejectMLine = false;
@@ -26816,10 +26829,6 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   var bundleLineIndex = -1;
   var mLineIndex = -1;
   var sdpMids = [];
-
-  if (!self._sdpSessions[targetMid]) {
-    return sessionDescription.sdp;
-  }
 
   // ANSWERER: Reject only the m= lines. Returned rejected m= lines as well.
   // OFFERER: Remove m= lines
@@ -26852,6 +26861,15 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
         rejectMLine = !((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
           (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
           !!self._currentCodecSupport.video.h264 : true);
+      }
+    }
+
+    if (direction === 'remote' && !self.getPeerInfo(targetMid).config.enableIceTrickle &&
+      sdpLines[i].indexOf('a=candidate:') === 0) {
+      if (sdpLines[i + 1] ? !(sdpLines[i + 1].indexOf('a=candidate:') === 0 ||
+        sdpLines[i + 1].indexOf('a=end-of-candidates') === 0) : true) {
+        sdpLines.splice(i + 1, 0, 'a=end-of-candidates');
+        i++;
       }
     }
 
@@ -26912,11 +26930,11 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
 
   if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
     // Local or remote just audio call with datachannel causes issues
-    ((!self._sdpSettings.connection.data || !hasDatachannel) && (!self._sdpSettings.connection.video &&
+    (!self._sdpSettings.connection.data || !hasDatachannel) && (!self._sdpSettings.connection.video &&
     // Remote offer with just audio(rejected but cant remove)+video
     self._sdpSettings.connection.audio) || ((!self._sdpSettings.connection.data || !hasDatachannel) &&
     direction === 'remote' && sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && 
-    self._sdpSettings.connection.video))) {
+    self._sdpSettings.connection.video)) {
     sdpLines.push('');
   }
 
