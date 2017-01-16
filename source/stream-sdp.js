@@ -830,7 +830,8 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     }
 
     // Remove weird empty characters for Edge case.. :(
-    if (self._hasMCU && direction === 'remote' && !(sdpLines[i] || '').replace(/\n|\r|\s/gi, '')) {
+    if (window.webrtcDetectedBrowser === 'edge' && self._hasMCU && direction === 'remote' &&
+      !(sdpLines[i] || '').replace(/\n|\r|\s/gi, '')) {
       sdpLines.splice(i, 1);
       i--;
     }

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Thu Jan 12 2017 18:11:44 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Mon Jan 16 2017 20:41:46 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -15376,7 +15376,8 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     }
 
     // Remove weird empty characters for Edge case.. :(
-    if (self._hasMCU && direction === 'remote' && !(sdpLines[i] || '').replace(/\n|\r|\s/gi, '')) {
+    if (window.webrtcDetectedBrowser === 'edge' && self._hasMCU && direction === 'remote' &&
+      !(sdpLines[i] || '').replace(/\n|\r|\s/gi, '')) {
       sdpLines.splice(i, 1);
       i--;
     }
