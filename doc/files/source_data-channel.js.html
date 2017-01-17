@@ -164,13 +164,16 @@ Skylink.prototype.DATA_CHANNEL_TYPE = {
 /**
  * The list of Datachannel sending message error types.
  * @attribute DATA_CHANNEL_MESSAGE_ERROR
- * @param {String} MESSAGE &lt;small&gt;Value &lt;code&gt;&quot;message&quot;&lt;/code&gt;&lt;/small&gt;
+ * @param {String} MESSAGE     &lt;small&gt;Value &lt;code&gt;&quot;message&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the Datachannel sending message error type when encountered during
  *   sending P2P message from &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.
- * @param {String} TRANSFER &lt;small&gt;Value &lt;code&gt;&quot;transfer&quot;&lt;/code&gt;&lt;/small&gt;
+ * @param {String} TRANSFER    &lt;small&gt;Value &lt;code&gt;&quot;transfer&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the Datachannel sending message error type when encountered during
  *   data transfers from &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; or
  *   &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt;.
+ * @param {String} STREAM_DATA &lt;small&gt;Value &lt;code&gt;&quot;data&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the Datachannel sending message error type when encountered during
+ *   stream data chunks from &lt;a href=&quot;#method_streamData&quot;&gt;&lt;code&gt;treamData()&lt;/code&gt; method&lt;/a&gt;.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -178,7 +181,8 @@ Skylink.prototype.DATA_CHANNEL_TYPE = {
  */
 Skylink.prototype.DATA_CHANNEL_MESSAGE_ERROR = {
   MESSAGE: &#x27;message&#x27;,
-  TRANSFER: &#x27;transfer&#x27;
+  TRANSFER: &#x27;transfer&#x27;,
+  STREAM_DATA: &#x27;data&#x27;
 };
 
 /**
@@ -217,7 +221,10 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
 
   if (!dataChannel) {
     try {
-      dataChannel = self._peerConnections[peerId].createDataChannel(channelName);
+      dataChannel = self._peerConnections[peerId].createDataChannel(channelName, {
+        reliable: true,
+        ordered: true
+      });
 
     } catch (error) {
       log.error([peerId, &#x27;RTCDataChannel&#x27;, channelName, &#x27;Failed creating Datachannel -&gt;&#x27;], error);
@@ -388,6 +395,16 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
   var messageType = typeof data === &#x27;object&#x27; &amp;&amp; data.type === self._DC_PROTOCOL_TYPE.MESSAGE ?
     self.DATA_CHANNEL_MESSAGE_ERROR.MESSAGE : self.DATA_CHANNEL_MESSAGE_ERROR.TRANSFER;
 
+  if (messageType === self.DATA_CHANNEL_MESSAGE_ERROR.TRANSFER) {
+    var transferId = self._dataChannels[peerId][channelProp].transferId;
+
+    if (transferId &amp;&amp; self._dataTransfers[transferId] &amp;&amp; ([self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+      self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(self._dataTransfers[transferId].chunkType) &gt; -1 ||
+      self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) &gt; -1) &amp;&amp; !(data instanceof Blob) &amp;&amp; !data.type) {
+      messageType = self.DATA_CHANNEL_MESSAGE_ERROR.STREAM_DATA;
+    }
+  }
+
   if (readyState !== self.DATA_CHANNEL_STATE.OPEN) {
     var notOpenError = &#x27;Failed sending message as Datachannel connection state is not opened. Current &#x27; +
       &#x27;readyState is &quot;&#x27; + readyState + &#x27;&quot;&#x27;;
@@ -396,7 +413,7 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
 
     self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR, peerId,
       new Error(notOpenError), channelName, channelType, messageType);
-    
+
     throw new Error(notOpenError);
   }
 

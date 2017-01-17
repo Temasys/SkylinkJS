@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 00:37:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 03:02:48 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -1200,13 +1200,16 @@ Skylink.prototype.DATA_CHANNEL_TYPE = {
 /**
  * The list of Datachannel sending message error types.
  * @attribute DATA_CHANNEL_MESSAGE_ERROR
- * @param {String} MESSAGE <small>Value <code>"message"</code></small>
+ * @param {String} MESSAGE     <small>Value <code>"message"</code></small>
  *   The value of the Datachannel sending message error type when encountered during
  *   sending P2P message from <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.
- * @param {String} TRANSFER <small>Value <code>"transfer"</code></small>
+ * @param {String} TRANSFER    <small>Value <code>"transfer"</code></small>
  *   The value of the Datachannel sending message error type when encountered during
  *   data transfers from <a href="#method_sendURLData"><code>sendURLData()</code> method</a> or
  *   <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>.
+ * @param {String} STREAM_DATA <small>Value <code>"data"</code></small>
+ *   The value of the Datachannel sending message error type when encountered during
+ *   stream data chunks from <a href="#method_streamData"><code>treamData()</code> method</a>.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -1214,7 +1217,8 @@ Skylink.prototype.DATA_CHANNEL_TYPE = {
  */
 Skylink.prototype.DATA_CHANNEL_MESSAGE_ERROR = {
   MESSAGE: 'message',
-  TRANSFER: 'transfer'
+  TRANSFER: 'transfer',
+  STREAM_DATA: 'data'
 };
 
 /**
@@ -1253,7 +1257,10 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
 
   if (!dataChannel) {
     try {
-      dataChannel = self._peerConnections[peerId].createDataChannel(channelName);
+      dataChannel = self._peerConnections[peerId].createDataChannel(channelName, {
+        reliable: true,
+        ordered: true
+      });
 
     } catch (error) {
       log.error([peerId, 'RTCDataChannel', channelName, 'Failed creating Datachannel ->'], error);
@@ -1424,6 +1431,16 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
   var messageType = typeof data === 'object' && data.type === self._DC_PROTOCOL_TYPE.MESSAGE ?
     self.DATA_CHANNEL_MESSAGE_ERROR.MESSAGE : self.DATA_CHANNEL_MESSAGE_ERROR.TRANSFER;
 
+  if (messageType === self.DATA_CHANNEL_MESSAGE_ERROR.TRANSFER) {
+    var transferId = self._dataChannels[peerId][channelProp].transferId;
+
+    if (transferId && self._dataTransfers[transferId] && ([self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+      self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(self._dataTransfers[transferId].chunkType) > -1 ||
+      self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1) && !(data instanceof Blob) && !data.type) {
+      messageType = self.DATA_CHANNEL_MESSAGE_ERROR.STREAM_DATA;
+    }
+  }
+
   if (readyState !== self.DATA_CHANNEL_STATE.OPEN) {
     var notOpenError = 'Failed sending message as Datachannel connection state is not opened. Current ' +
       'readyState is "' + readyState + '"';
@@ -1432,7 +1449,7 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
 
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR, peerId,
       new Error(notOpenError), channelName, channelType, messageType);
-    
+
     throw new Error(notOpenError);
   }
 
@@ -2822,6 +2839,151 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 };
 
 /**
+ * <blockquote class="info">
+ * Note that this functionality is currently not supported by MCU enabled Peer connections.<br>
+ * The current maximum data chunk size is <code>65456</code>.
+ * </blockquote>
+ * Function that streams a data chunk to Peers.
+ * @method streamData
+ * @param {Blob} data The data stream chunk.
+ * @param {String|Array} [targetPeerId] The target Peer ID to send message to.
+ * - When provided as an Array, it will stream the data chunk to only Peers which IDs are in the list.
+ * - When not provided, it will stream the data chunk to all connected Peers with Datachannel connection in the Room.
+ * @trigger <ol class="desc-seq">
+ *  <li>Sends P2P message to all targeted Peers. <ol>
+ *  <li>If Peer connection Datachannel has not been opened: <small>This can be checked with
+ *  <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
+ *  triggering parameter payload <code>state</code> as <code>OPEN</code> and
+ *  <code>channelType</code> as <code>MESSAGING</code> for Peer.</small> <ol>
+ *  <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers
+ *  parameter payload <code>state</code> as <code>STREAM_DATA_ERROR</code>.</li>
+ *  <li><b>ABORT</b> step and return error.</li></ol></li>
+ *  <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers
+ *  parameter payload <code>message.isDataChannel</code> value as <code>true</code> and
+ *  <code>isSelf</code> value as <code>true</code>.</li></ol></li></ol>
+ * @example
+ *   // Example 1: Broadcasting to all Peers
+ *   skylinkDemo.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
+ *      if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&
+ *        channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {
+ *        skylinkDemo.streamData(new Blob(["<a href='#'></a>""]));
+ *      }
+ *   });
+ *
+ *   // Example 2: Streaming to specific Peers
+ *   var peersInExclusiveParty = [];
+ *
+ *   skylinkDemo.on("peerJoined", function (peerId, peerInfo, isSelf) {
+ *     if (isSelf) return;
+ *     if (peerInfo.userData.exclusive) {
+ *       peersInExclusiveParty[peerId] = false;
+ *     }
+ *   });
+ *
+ *   skylinkDemo.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
+ *      if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&
+ *        channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {
+ *        peersInExclusiveParty[peerId] = true;
+ *      }
+ *   });
+ *
+ *   function updateExclusivePartyStatus (dataChunk) {
+ *     var readyToSend = [];
+ *     for (var p in peersInExclusiveParty) {
+ *       if (peersInExclusiveParty.hasOwnProperty(p)) {
+ *         readyToSend.push(p);
+ *       }
+ *     }
+ *     skylinkDemo.streamData(dataChunk, readyToSend);
+ *   }
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.streamData = function(data, targetPeerId) {
+  var self = this;
+  var listOfPeers = Object.keys(self._dataChannels);
+  var isPrivate = false;
+
+  if (Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+    isPrivate = true;
+  } else if (targetPeerId && typeof targetPeerId === 'string') {
+    listOfPeers = [targetPeerId];
+    isPrivate = true;
+  }
+
+  if (!(data && data instanceof Blob)) {
+    log.error('Unable to stream invalid data chunk ->', data);
+    return;
+  }
+
+  if (data.size > 65456) {
+    log.error('Unable to stream data chunk greater that specified maximum size (65456) ->', data);
+    return;
+  }
+
+  if (!self._enableDataChannel) {
+    log.error('Unable to stream data chunk as User does not have Datachannel enabled. ->', data);
+    return;
+  }
+
+  if (self._hasMCU) {
+    log.error('Unable to stream data chunk as MCU does not support this functionality. ->', data);
+    return;
+  }
+
+  self._blobToArrayBuffer(data, function (arrayBufferData) {
+    if (!self._inRoom || !self._user) {
+      log.error('Unable to stream data chunk as User is not in Room. ->', data);
+      return;
+    }
+
+    // Loop out unwanted Peers
+    for (var i = 0; i < listOfPeers.length; i++) {
+      var peerId = listOfPeers[i];
+
+      if (!self._dataChannels[peerId]) {
+        log.error([peerId, 'RTCDataChannel', null, 'Dropping of streaming data chunk to Peer as ' +
+          'Datachannel connection does not exists']);
+        listOfPeers.splice(i, 1);
+        i--;
+      } else {
+        var transferId = self._dataChannels[peerId].main.transferId;
+
+        if (transferId && self._dataTransfers[transferId] && [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+          self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(self._dataTransfers[transferId].chunkType) === -1 &&
+          self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) === -1) {
+          log.error([peerId, 'RTCDataChannel', null, 'Dropping of streaming data chunk to Peer as ' +
+            'Datachannel connection is streaming binary data chunks for blob transfer']);
+          listOfPeers.splice(i, 1);
+          i--;
+          continue;
+        }
+
+        log.debug([peerId, 'RTCDataChannel', null, 'Streaming ' + (isPrivate ? 'private' : '') +
+          ' data chunk to Peer']);
+
+        self._sendMessageToDataChannel(peerId, arrayBufferData, 'main', true);
+      }
+    }
+
+    if (listOfPeers.length === 0) {
+      log.warn('Currently there are no Peers to stream data chunk.');
+    }
+
+    self._trigger('incomingDataStream', {
+      content: data,
+      chunkSize: data.size,
+      chunkType: self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER,
+      isPrivate: isPrivate,
+      targetPeerId: targetPeerId || null,
+      listOfPeers: listOfPeers,
+      senderPeerId: self._user.sid
+    }, self._user.sid, self.getPeerInfo(), true);
+  });
+};
+
+/**
  * Function that starts the data transfer to Peers.
  * @method _startDataTransfer
  * @private
@@ -3513,8 +3675,10 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
     }
   } else {
     if (rawData instanceof Blob) {
-      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob data chunk @' +
-        self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], rawData.size);
+      if (transferId && self._dataTransfers[transferId]) {
+        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob data chunk @' +
+          self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], rawData.size);
+      }
 
       self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.BLOB, rawData.size, channelProp);
 
@@ -3528,8 +3692,10 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
 
       var blob = new Blob([byteArray]);
 
-      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk @' +
-        self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], blob.size);
+      if (transferId && self._dataTransfers[transferId]) {
+        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk @' +
+          self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], blob.size);
+      }
 
       self._DATAProtocolHandler(peerId, blob, self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, blob.size, channelProp);
     }
@@ -3817,6 +3983,26 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
     transferId = self._dataChannels[peerId].main.transferId;
   }
 
+  if (transferId ? [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(
+    self._dataTransfers[transferId].chunkType) > -1 : true) {
+    if ([self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(chunkType) === -1) {
+      self._trigger('incomingDataStream', {
+        content: chunk,
+        chunkSize: chunkSize,
+        chunkType: chunkType,
+        isPrivate: false,
+        listOfPeers: null,
+        targetPeerId: (self._user ? self._user.sid : null) || null,
+        senderPeerId: peerId
+      }, peerId, self.getPeerInfo(peerId), false);
+      return;
+    }
+
+    if (!transferId) {
+      return;
+    }
+  }
+
   if (self._dataTransfers[transferId].senderPeerId) {
     senderPeerId = self._dataTransfers[transferId].senderPeerId;
   }
@@ -3828,7 +4014,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
   self._dataTransfers[transferId].chunks[self._dataTransfers[transferId].sessions[peerId].ackN] = chunk;
 
   if (self._dataTransfers[transferId].sessions[peerId].receivedSize >= self._dataTransfers[transferId].size) {
-    log.log([peerId, 'RTCDataChannel', channelProp, 'Data transfer has been completed. Computed size ->'], 
+    log.log([peerId, 'RTCDataChannel', channelProp, 'Data transfer has been completed. Computed size ->'],
       self._dataTransfers[transferId].sessions[peerId].receivedSize);
 
     // Send last ACK to Peer to indicate completion of data transfers
@@ -9528,6 +9714,31 @@ var _eventsDocs = {
    */
   incomingData: [],
 
+  /**
+   * Event triggered when receiving data stream chunk.
+   * @event incomingDataStream
+   * @param {JSON} data The data result.
+   * @param {JSON|String} data.content The data stream chunk.
+   * @param {String} data.senderPeerId The sender Peer ID.
+   * @param {String|Array} [data.targetPeerId] The value of the <code>targetPeerId</code>
+   *   defined in <a href="#method_streamData"><code>streamData()</code> method</a>.
+   *   <small>Defined as User's Peer ID when <code>isSelf</code> payload value is <code>false</code>.</small>
+   *   <small>Defined as <code>null</code> when provided <code>targetPeerId</code> in
+   *   <a href="#method_streamData"><code>streamData()</code> method</a> is not defined.</small>
+   * @param {Array} [data.listOfPeers] The list of Peers that the data stream has been sent to.
+   *  <small>Defined only when <code>isSelf</code> payload value is <code>true</code>.</small>
+   * @param {Boolean} data.isPrivate The flag if data stream is targeted or not, basing
+   *   off the <code>targetPeerId</code> parameter being defined in
+   *   <a href="#method_streamData"><code>streamData()</code> method</a>.
+   * @param {Number} data.chunkSize The data stream chunk size.
+   * @param {String} data.chunkType The data stream chunk type.
+   *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
+   * @param {String} peerId The Peer ID.
+   * @param {Boolean} isSelf The flag if Peer is User.
+   * @for Skylink
+   * @since 0.6.18
+   */
+  incomingDataStream: [],
 
   /**
    * Event triggered when receiving upload data transfer from Peer.
