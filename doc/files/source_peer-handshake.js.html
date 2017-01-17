@@ -151,51 +151,31 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
-  var peerIceRestartSupport = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart;
   var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
-  // Enforce no video connection for IE/safari without h264 codec support and Edge browsers without h264 support (which is by default)
-  var videoSupport = self._sdpSettings.connection.video ? ((window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp;
-    peerAgent !== &#x27;edge&#x27;) || ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
-    !!self._currentCodecSupport.video.h264 : true) : false;
+  var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &amp;&amp;
+    iceRestart &amp;&amp; self._enableIceRestart;
+  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;);
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp;
+    ((window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
+    ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
+    !!self._currentCodecSupport.video.h264 : true);
 
   var offerConstraints = {
-    offerToReceiveAudio: self._sdpSettings.connection.audio,
-    offerToReceiveVideo: videoSupport,
-    iceRestart: self._enableIceRestart &amp;&amp; peerIceRestartSupport ? iceRestart === true : false
+    offerToReceiveAudio: offerToReceiveAudio,
+    offerToReceiveVideo: offerToReceiveVideo,
+    iceRestart: doIceRestart
   };
-
-  // NOTE: Removing ICE restart functionality as of now since Firefox does not support it yet
-  // Check if ICE connection failed or disconnected, and if so, do an ICE restart
-  /*if ([self.ICE_CONNECTION_STATE.DISCONNECTED, self.ICE_CONNECTION_STATE.FAILED].indexOf(pc.iceConnectionState) &gt; -1) {
-    offerConstraints.iceRestart = true;
-  }*/
 
   // Prevent undefined OS errors
   peerBrowser.os = peerBrowser.os || &#x27;&#x27;;
-
-  /*
-    Ignoring these old codes as Firefox 39 and below is no longer supported
-    if (window.webrtcDetectedType === &#x27;moz&#x27; &amp;&amp; peerBrowser.agent === &#x27;MCU&#x27;) {
-      unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
-      unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
-      beOfferer = true;
-    }
-
-    if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; window.webrtcDetectedVersion &gt;= 32) {
-      unifiedOfferConstraints = {
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true
-      };
-    }
-  */
 
   // Fallback to use mandatory constraints for plugin based browsers
   if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
     offerConstraints = {
       mandatory: {
-        OfferToReceiveAudio: self._sdpSettings.connection.audio,
-        OfferToReceiveVideo: videoSupport,
-        iceRestart: self._enableIceRestart &amp;&amp; peerIceRestartSupport ? iceRestart === true : false
+        OfferToReceiveAudio: offerToReceiveAudio,
+        OfferToReceiveVideo: offerToReceiveVideo,
+        iceRestart: doIceRestart
       }
     };
   }
@@ -206,7 +186,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   }
 
   if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
-    self._peerInformations[targetMid].config.enableDataChannel) {
+    self._peerInformations[targetMid].config.enableDataChannel &amp;&amp;
+    !(!self._sdpSettings.connection.data &amp;&amp; targetMid !== &#x27;MCU&#x27;)) {
     // Edge doesn&#x27;t support datachannels yet
     if (!(self._dataChannels[targetMid] &amp;&amp; self._dataChannels[targetMid].main)) {
       self._createDataChannel(targetMid);

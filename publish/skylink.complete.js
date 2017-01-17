@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Tue Jan 17 2017 18:43:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 00:37:58 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Tue Jan 17 2017 18:43:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 00:37:58 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -12589,12 +12589,22 @@ function Skylink() {
   /**
    * Stores the publish only settings.
    * @attribute _publishOnly
-   * @type JSON|Boolean
+   * @type Boolean
    * @private
    * @for Skylink
    * @since 0.6.16
    */
   this._publishOnly = false;
+
+  /**
+   * Stores the parent ID.
+   * @attribute _parentId
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._parentId = null;
 
   /**
    * Stores the list of recordings.
@@ -17007,9 +17017,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       restartMsg.publishOnly = {
         type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
       };
-      if (self._publishOnly.parentId) {
-        restartMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      restartMsg.parentId = self._parentId;
     }
 
     self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
@@ -17341,9 +17352,10 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
       restartMsg.publishOnly = {
         type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
       };
-      if (self._publishOnly.parentId) {
-        restartMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      restartMsg.parentId = self._parentId;
     }
 
     log.log([listOfPeers[i], 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
@@ -17698,7 +17710,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
     peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
-    peerInfo.parentId = this._publishOnly ? this._publishOnly.parentId || null : null;
+    peerInfo.parentId = this._parentId ? this._parentId : null;
     peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
   }
 
@@ -17708,6 +17720,11 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
   if (!peerInfo.settings.video) {
     peerInfo.mediaStatus.videoMuted = true;
+  }
+
+  if (!peerInfo.settings.audio && !peerInfo.settings.video) {
+    peerInfo.config.receiveOnly = true;
+    peerInfo.config.publishOnly = false;
   }
 
   return peerInfo;
@@ -18469,8 +18486,15 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled
  *   Peer connections, please  contact <a href="http://support.temasys.io">our support portal</a>.</blockquote></blockquote>
  *   The config if Peer would publish only.
- * @param {String} [options.publishOnly.parentId] The parent Peer ID to match to when Peer is connected.
+ * @param {String} [options.publishOnly.parentId] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Use <code>options.parentId</code> instead.
+ *   </blockquote> The parent Peer ID to match to when Peer is connected.
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ * @param {String} [options.parentId] The parent Peer ID to match to when Peer is connected.
+ *   <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>
+ *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
@@ -18809,8 +18833,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   self._wait(function () {
     log.log([null, 'Room', previousRoom, 'User left the room']);
 
-    self._trigger('peerLeft', previousUserPeerId, self.getPeerInfo(), true,
-      self._publishOnly && self._publishOnly.parentId ? self._publishOnly.parentId : null);
+    self._trigger('peerLeft', previousUserPeerId, self.getPeerInfo(), true);
 
     if (typeof callback === 'function') {
       callback(null, {
@@ -18981,12 +19004,16 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         self._sdpSettings.direction.audio.receive = false;
         self._sdpSettings.direction.video.send = true;
         self._sdpSettings.direction.video.receive = false;
-        self._publishOnly = { parentId: null };
+        self._publishOnly = true;
 
         if (typeof mediaOptions.publishOnly === 'object' && mediaOptions.publishOnly.parentId &&
           typeof mediaOptions.publishOnly.parentId === 'string') {
-          self._publishOnly.parentId = mediaOptions.publishOnly.parentId;
+          self._parentId = mediaOptions.publishOnly.parentId;
         }
+      }
+
+      if (mediaOptions.parentId) {
+        self._parentId = mediaOptions.parentId;
       }
 
       // get the stream
@@ -22971,9 +22998,10 @@ Skylink.prototype._approachEventHandler = function(message){
     enterMsg.publishOnly = {
       type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
     };
-    if (self._publishOnly.parentId) {
-      enterMsg.parentId = self._publishOnly.parentId;
-    }
+  }
+
+  if (self._parentId) {
+    enterMsg.parentId = self._parentId;
   }
 
   self._sendChannelMessage(enterMsg);
@@ -23370,9 +23398,10 @@ Skylink.prototype._inRoomHandler = function(message) {
     enterMsg.publishOnly = {
       type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
     };
-    if (self._publishOnly.parentId) {
-      enterMsg.parentId = self._publishOnly.parentId;
-    }
+  }
+
+  if (self._parentId) {
+    enterMsg.parentId = self._parentId;
   }
 
   self._sendChannelMessage(enterMsg);
@@ -23432,9 +23461,8 @@ Skylink.prototype._enterHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
 
-  if (self._publishOnly && ((self._hasMCU && targetMid !== 'MCU') || (self._publishOnly.parentId &&
-    self._publishOnly.parentId === targetMid))) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for publishOnly case ->'], message);
+  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for parentId case ->'], message);
     return;
   }
 
@@ -23494,9 +23522,10 @@ Skylink.prototype._enterHandler = function(message) {
     welcomeMsg.publishOnly = {
       type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
     };
-    if (self._publishOnly.parentId) {
-      welcomeMsg.parentId = self._publishOnly.parentId;
-    }
+  }
+
+  if (self._parentId) {
+    welcomeMsg.parentId = self._parentId;
   }
 
   self._sendChannelMessage(welcomeMsg);
@@ -23564,6 +23593,11 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
+  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "restart" for parentId case ->'], message);
+    return;
+  }
+
   if (self._hasMCU && !self._mcuUseRenegoRestart) {
     log.warn([targetMid, 'RTCPeerConnection', null, 'Dropping restart request as MCU does not support re-negotiation. ' +
       'Restart workaround is to re-join Room for Peer.']);
@@ -23624,9 +23658,10 @@ Skylink.prototype._restartHandler = function(message){
       restartMsg.publishOnly = {
         type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
       };
-      if (self._publishOnly.parentId) {
-        restartMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      restartMsg.parentId = self._parentId;
     }
 
     self._sendChannelMessage(restartMsg);
@@ -23689,9 +23724,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
 
-  if (self._publishOnly && ((self._hasMCU && targetMid !== 'MCU') || (self._publishOnly.parentId &&
-    self._publishOnly.parentId === targetMid))) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for publishOnly case ->'], message);
+  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for parentId case ->'], message);
     return;
   }
 
@@ -23771,9 +23805,10 @@ Skylink.prototype._welcomeHandler = function(message) {
       welcomeMsg.publishOnly = {
         type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
       };
-      if (self._publishOnly.parentId) {
-        welcomeMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      welcomeMsg.parentId = self._parentId;
     }
 
     self._sendChannelMessage(welcomeMsg);

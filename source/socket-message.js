@@ -614,9 +614,10 @@ Skylink.prototype._approachEventHandler = function(message){
     enterMsg.publishOnly = {
       type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
     };
-    if (self._publishOnly.parentId) {
-      enterMsg.parentId = self._publishOnly.parentId;
-    }
+  }
+
+  if (self._parentId) {
+    enterMsg.parentId = self._parentId;
   }
 
   self._sendChannelMessage(enterMsg);
@@ -1013,9 +1014,10 @@ Skylink.prototype._inRoomHandler = function(message) {
     enterMsg.publishOnly = {
       type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
     };
-    if (self._publishOnly.parentId) {
-      enterMsg.parentId = self._publishOnly.parentId;
-    }
+  }
+
+  if (self._parentId) {
+    enterMsg.parentId = self._parentId;
   }
 
   self._sendChannelMessage(enterMsg);
@@ -1075,9 +1077,8 @@ Skylink.prototype._enterHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
 
-  if (self._publishOnly && ((self._hasMCU && targetMid !== 'MCU') || (self._publishOnly.parentId &&
-    self._publishOnly.parentId === targetMid))) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for publishOnly case ->'], message);
+  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for parentId case ->'], message);
     return;
   }
 
@@ -1137,9 +1138,10 @@ Skylink.prototype._enterHandler = function(message) {
     welcomeMsg.publishOnly = {
       type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
     };
-    if (self._publishOnly.parentId) {
-      welcomeMsg.parentId = self._publishOnly.parentId;
-    }
+  }
+
+  if (self._parentId) {
+    welcomeMsg.parentId = self._parentId;
   }
 
   self._sendChannelMessage(welcomeMsg);
@@ -1207,6 +1209,11 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
+  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "restart" for parentId case ->'], message);
+    return;
+  }
+
   if (self._hasMCU && !self._mcuUseRenegoRestart) {
     log.warn([targetMid, 'RTCPeerConnection', null, 'Dropping restart request as MCU does not support re-negotiation. ' +
       'Restart workaround is to re-join Room for Peer.']);
@@ -1267,9 +1274,10 @@ Skylink.prototype._restartHandler = function(message){
       restartMsg.publishOnly = {
         type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
       };
-      if (self._publishOnly.parentId) {
-        restartMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      restartMsg.parentId = self._parentId;
     }
 
     self._sendChannelMessage(restartMsg);
@@ -1332,9 +1340,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
 
-  if (self._publishOnly && ((self._hasMCU && targetMid !== 'MCU') || (self._publishOnly.parentId &&
-    self._publishOnly.parentId === targetMid))) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for publishOnly case ->'], message);
+  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for parentId case ->'], message);
     return;
   }
 
@@ -1414,9 +1421,10 @@ Skylink.prototype._welcomeHandler = function(message) {
       welcomeMsg.publishOnly = {
         type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
       };
-      if (self._publishOnly.parentId) {
-        welcomeMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      welcomeMsg.parentId = self._parentId;
     }
 
     self._sendChannelMessage(welcomeMsg);

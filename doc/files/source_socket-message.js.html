@@ -705,9 +705,10 @@ Skylink.prototype._approachEventHandler = function(message){
     enterMsg.publishOnly = {
       type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
     };
-    if (self._publishOnly.parentId) {
-      enterMsg.parentId = self._publishOnly.parentId;
-    }
+  }
+
+  if (self._parentId) {
+    enterMsg.parentId = self._parentId;
   }
 
   self._sendChannelMessage(enterMsg);
@@ -1104,9 +1105,10 @@ Skylink.prototype._inRoomHandler = function(message) {
     enterMsg.publishOnly = {
       type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
     };
-    if (self._publishOnly.parentId) {
-      enterMsg.parentId = self._publishOnly.parentId;
-    }
+  }
+
+  if (self._parentId) {
+    enterMsg.parentId = self._parentId;
   }
 
   self._sendChannelMessage(enterMsg);
@@ -1166,9 +1168,8 @@ Skylink.prototype._enterHandler = function(message) {
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;enter&quot; received -&gt;&#x27;], message);
 
-  if (self._publishOnly &amp;&amp; ((self._hasMCU &amp;&amp; targetMid !== &#x27;MCU&#x27;) || (self._publishOnly.parentId &amp;&amp;
-    self._publishOnly.parentId === targetMid))) {
-    log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;enter&quot; for publishOnly case -&gt;&#x27;], message);
+  if (targetMid !== &#x27;MCU&#x27; &amp;&amp; self._parentId &amp;&amp; self._parentId === targetMid) {
+    log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;enter&quot; for parentId case -&gt;&#x27;], message);
     return;
   }
 
@@ -1228,9 +1229,10 @@ Skylink.prototype._enterHandler = function(message) {
     welcomeMsg.publishOnly = {
       type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
     };
-    if (self._publishOnly.parentId) {
-      welcomeMsg.parentId = self._publishOnly.parentId;
-    }
+  }
+
+  if (self._parentId) {
+    welcomeMsg.parentId = self._parentId;
   }
 
   self._sendChannelMessage(welcomeMsg);
@@ -1298,6 +1300,11 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
+  if (targetMid !== &#x27;MCU&#x27; &amp;&amp; self._parentId &amp;&amp; self._parentId === targetMid) {
+    log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;restart&quot; for parentId case -&gt;&#x27;], message);
+    return;
+  }
+
   if (self._hasMCU &amp;&amp; !self._mcuUseRenegoRestart) {
     log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Dropping restart request as MCU does not support re-negotiation. &#x27; +
       &#x27;Restart workaround is to re-join Room for Peer.&#x27;]);
@@ -1315,7 +1322,7 @@ Skylink.prototype._restartHandler = function(message){
   self._peerEndOfCandidatesCounter[targetMid].len = 0;
 
   // Make peer with highest weight do the offer
-  if (self._hasMCU ? message.isRestartResend : self._peerPriorityWeight &gt; message.weight) {
+  if (self._peerPriorityWeight &gt; message.weight) {
     log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Re-negotiating new offer/answer.&#x27;]);
 
     if (self._peerMessagesStamps[targetMid].hasRestart) {
@@ -1358,9 +1365,10 @@ Skylink.prototype._restartHandler = function(message){
       restartMsg.publishOnly = {
         type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
       };
-      if (self._publishOnly.parentId) {
-        restartMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      restartMsg.parentId = self._parentId;
     }
 
     self._sendChannelMessage(restartMsg);
@@ -1423,9 +1431,8 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;welcome&quot; received -&gt;&#x27;], message);
 
-  if (self._publishOnly &amp;&amp; ((self._hasMCU &amp;&amp; targetMid !== &#x27;MCU&#x27;) || (self._publishOnly.parentId &amp;&amp;
-    self._publishOnly.parentId === targetMid))) {
-    log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;welcome&quot; for publishOnly case -&gt;&#x27;], message);
+  if (targetMid !== &#x27;MCU&#x27; &amp;&amp; self._parentId &amp;&amp; self._parentId === targetMid) {
+    log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;welcome&quot; for parentId case -&gt;&#x27;], message);
     return;
   }
 
@@ -1505,9 +1512,10 @@ Skylink.prototype._welcomeHandler = function(message) {
       welcomeMsg.publishOnly = {
         type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
       };
-      if (self._publishOnly.parentId) {
-        welcomeMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      welcomeMsg.parentId = self._parentId;
     }
 
     self._sendChannelMessage(welcomeMsg);
@@ -1624,10 +1632,6 @@ Skylink.prototype._candidateHandler = function(message) {
   var targetMid = message.mid;
 
   if (!message.candidate &amp;&amp; !message.id) {
-    if (message.endOfCandidates) {
-      this._endOfCandidatesHandler(message);
-      return;
-    }
     log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;Received invalid ICE candidate message -&gt;&#x27;], message);
     return;
   }
@@ -1803,6 +1807,12 @@ Skylink.prototype._answerHandler = function(message) {
 
     if (self._peerMessagesStamps[targetMid]) {
       self._peerMessagesStamps[targetMid].hasRestart = false;
+    }
+
+    if (self._dataChannels[targetMid] &amp;&amp; (pc.remoteDescription.sdp.indexOf(&#x27;m=application&#x27;) === -1 ||
+      pc.remoteDescription.sdp.indexOf(&#x27;m=application 0&#x27;) &gt; 0)) {
+      log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Closing all datachannels as they were rejected.&#x27;]);
+      self._closeDataChannel(targetMid);
     }
 
   }, function(error) {

@@ -1291,7 +1291,7 @@
             "description": "Stores the publish only settings.",
             "itemtype": "attribute",
             "name": "_publishOnly",
-            "type": "JSON|Boolean",
+            "type": "Boolean",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",
@@ -1300,6 +1300,18 @@
         {
             "file": "source/template/header.js",
             "line": 1063,
+            "description": "Stores the parent ID.",
+            "itemtype": "attribute",
+            "name": "_parentId",
+            "type": "String",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 1073,
             "description": "Stores the list of recordings.",
             "itemtype": "attribute",
             "name": "_recordings",
@@ -1312,7 +1324,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1074,
+            "line": 1084,
             "description": "Stores the current active recording session ID.\nThere can only be 1 recording session at a time in a Room",
             "itemtype": "attribute",
             "name": "_currentRecordingId",
@@ -1325,7 +1337,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1086,
+            "line": 1096,
             "description": "Stores the recording session timeout to ensure 4 seconds has been recorded.",
             "itemtype": "attribute",
             "name": "_recordingStartInterval",
@@ -1338,7 +1350,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1097,
+            "line": 1107,
             "description": "Stores the flag if MCU should use renegotiation.",
             "itemtype": "attribute",
             "name": "_mcuUseRenegoRestart",
@@ -1350,7 +1362,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1107,
+            "line": 1117,
             "description": "Stores the debugging TURN/STUN ICE server.",
             "itemtype": "attribute",
             "name": "_turnServer",
@@ -1362,7 +1374,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1117,
+            "line": 1127,
             "description": "Stores the debugging Signaling server.",
             "itemtype": "attribute",
             "name": "_socketServer",
@@ -1374,7 +1386,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1127,
+            "line": 1137,
             "description": "Stores the currently supported codecs.",
             "itemtype": "attribute",
             "name": "_currentCodecSupport",
@@ -1386,7 +1398,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1137,
+            "line": 1147,
             "description": "Stores the session description orders and info.",
             "itemtype": "attribute",
             "name": "_sdpSessions",
@@ -1514,7 +1526,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 254,
+            "line": 260,
             "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
             "name": "_sendMessageToDataChannel",
@@ -1525,7 +1537,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 327,
+            "line": 333,
             "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -2419,7 +2431,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 186,
+            "line": 185,
             "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -2430,7 +2442,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 210,
+            "line": 209,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -2441,7 +2453,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 242,
+            "line": 241,
             "description": "Function that adds the ICE candidate to Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidate",
@@ -2814,7 +2826,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1145,
+            "line": 1146,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2825,7 +2837,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1219,
+            "line": 1220,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2836,7 +2848,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1384,
+            "line": 1382,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -2847,7 +2859,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1501,
+            "line": 1500,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -2858,7 +2870,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1521,
+            "line": 1520,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -2937,7 +2949,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 243,
+            "line": 248,
             "description": "Function that gets the list of connected Peers in the Room.",
             "itemtype": "method",
             "name": "getPeersInRoom",
@@ -2953,7 +2965,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 274,
+            "line": 279,
             "description": "Function that gets the list of connected Peers Streams in the Room.",
             "itemtype": "method",
             "name": "getPeersStream",
@@ -2969,7 +2981,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 337,
+            "line": 342,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
@@ -3029,7 +3041,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 143,
+            "line": 124,
             "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -3040,7 +3052,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 188,
+            "line": 169,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -3434,11 +3446,17 @@
                             "props": [
                                 {
                                     "name": "parentId",
-                                    "description": "The parent Peer ID to match to when Peer is connected.\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>",
+                                    "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Use <code>options.parentId</code> instead.\n  </blockquote> The parent Peer ID to match to when Peer is connected.\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>\n  <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>",
                                     "type": "String",
                                     "optional": true
                                 }
                             ]
+                        },
+                        {
+                            "name": "parentId",
+                            "description": "The parent Peer ID to match to when Peer is connected.\n  <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>\n  <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>",
+                            "type": "String",
+                            "optional": true
                         }
                     ]
                 },
@@ -3505,7 +3523,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 430,
+            "line": 437,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -3570,7 +3588,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 547,
+            "line": 553,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -3580,7 +3598,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 581,
+            "line": 587,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -3590,7 +3608,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 615,
+            "line": 621,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -7552,7 +7570,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 625,
+            "line": 626,
             "description": "Function that handles the \"redirect\" socket message received.\nSee confluence docs for the \"redirect\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -7563,7 +7581,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 657,
+            "line": 658,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -7574,7 +7592,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 684,
+            "line": 685,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -7585,7 +7603,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 699,
+            "line": 700,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -7596,7 +7614,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 729,
+            "line": 730,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -7607,7 +7625,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 759,
+            "line": 760,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -7618,7 +7636,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 791,
+            "line": 792,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -7629,7 +7647,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 812,
+            "line": 813,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -7640,7 +7658,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 834,
+            "line": 835,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -7651,7 +7669,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 856,
+            "line": 857,
             "description": "Handles the RECORDING Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_recordingEventHandler",
@@ -7687,7 +7705,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 959,
+            "line": 960,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -7698,7 +7716,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1024,
+            "line": 1026,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -7709,7 +7727,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1152,
+            "line": 1154,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -7720,7 +7738,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1281,
+            "line": 1289,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -7731,7 +7749,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1426,
+            "line": 1434,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -7742,7 +7760,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1523,
+            "line": 1531,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -7753,7 +7771,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1622,
+            "line": 1626,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -7764,7 +7782,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1729,
+            "line": 1739,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -8557,7 +8575,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 423,
+            "line": 432,
             "description": "Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.",
             "itemtype": "method",
             "name": "_removeSDPH264VP9AptRtxForOlderPlugin",
@@ -8568,7 +8586,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 454,
+            "line": 463,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -8579,7 +8597,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 523,
+            "line": 532,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -8590,7 +8608,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 539,
+            "line": 548,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -8601,7 +8619,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 594,
+            "line": 603,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -8612,7 +8630,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 636,
+            "line": 645,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -8623,7 +8641,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 712,
+            "line": 721,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -8684,15 +8702,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:430"
+            "line": " source/room-connection.js:437"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:547"
+            "line": " source/room-connection.js:553"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:581"
+            "line": " source/room-connection.js:587"
         },
         {
             "message": "unknown tag: trigger",

@@ -1086,9 +1086,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       restartMsg.publishOnly = {
         type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
       };
-      if (self._publishOnly.parentId) {
-        restartMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      restartMsg.parentId = self._parentId;
     }
 
     self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
@@ -1420,9 +1421,10 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
       restartMsg.publishOnly = {
         type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
       };
-      if (self._publishOnly.parentId) {
-        restartMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      restartMsg.parentId = self._parentId;
     }
 
     log.log([listOfPeers[i], 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);

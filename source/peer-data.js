@@ -225,7 +225,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
     peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
-    peerInfo.parentId = this._publishOnly ? this._publishOnly.parentId || null : null;
+    peerInfo.parentId = this._parentId ? this._parentId : null;
     peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
   }
 
@@ -235,6 +235,11 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
   if (!peerInfo.settings.video) {
     peerInfo.mediaStatus.videoMuted = true;
+  }
+
+  if (!peerInfo.settings.audio && !peerInfo.settings.video) {
+    peerInfo.config.receiveOnly = true;
+    peerInfo.config.publishOnly = false;
   }
 
   return peerInfo;

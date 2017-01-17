@@ -261,8 +261,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       });
     } else if (self._gatheredCandidates[targetMid]) {
       self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.CANDIDATE,//.END_OF_CANDIDATES,
-        endOfCandidates: true,
+        type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
         noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
           self._gatheredCandidates[targetMid].sending.host.length +
           self._gatheredCandidates[targetMid].sending.relay.length,

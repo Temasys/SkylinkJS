@@ -281,8 +281,15 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled
  *   Peer connections, please  contact &lt;a href=&quot;http://support.temasys.io&quot;&gt;our support portal&lt;/a&gt;.&lt;/blockquote&gt;&lt;/blockquote&gt;
  *   The config if Peer would publish only.
- * @param {String} [options.publishOnly.parentId] The parent Peer ID to match to when Peer is connected.
+ * @param {String} [options.publishOnly.parentId] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
+ *   This property has been deprecated. Use &lt;code&gt;options.parentId&lt;/code&gt; instead.
+ *   &lt;/blockquote&gt; The parent Peer ID to match to when Peer is connected.
  *   &lt;small&gt;This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.&lt;/small&gt;
+ *   &lt;small&gt;If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.&lt;/small&gt;
+ * @param {String} [options.parentId] The parent Peer ID to match to when Peer is connected.
+ *   &lt;small&gt;Note that configuring this value overrides the &lt;code&gt;options.publishOnly.parentId&lt;/code&gt; value.&lt;/small&gt;
+ *   &lt;small&gt;This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.&lt;/small&gt;
+ *   &lt;small&gt;If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.&lt;/small&gt;
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_peerJoined&quot;&gt;
@@ -621,8 +628,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   self._wait(function () {
     log.log([null, &#x27;Room&#x27;, previousRoom, &#x27;User left the room&#x27;]);
 
-    self._trigger(&#x27;peerLeft&#x27;, previousUserPeerId, self.getPeerInfo(), true,
-      self._publishOnly &amp;&amp; self._publishOnly.parentId ? self._publishOnly.parentId : null);
+    self._trigger(&#x27;peerLeft&#x27;, previousUserPeerId, self.getPeerInfo(), true);
 
     if (typeof callback === &#x27;function&#x27;) {
       callback(null, {
@@ -793,12 +799,16 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         self._sdpSettings.direction.audio.receive = false;
         self._sdpSettings.direction.video.send = true;
         self._sdpSettings.direction.video.receive = false;
-        self._publishOnly = { parentId: null };
+        self._publishOnly = true;
 
         if (typeof mediaOptions.publishOnly === &#x27;object&#x27; &amp;&amp; mediaOptions.publishOnly.parentId &amp;&amp;
           typeof mediaOptions.publishOnly.parentId === &#x27;string&#x27;) {
-          self._publishOnly.parentId = mediaOptions.publishOnly.parentId;
+          self._parentId = mediaOptions.publishOnly.parentId;
         }
+      }
+
+      if (mediaOptions.parentId) {
+        self._parentId = mediaOptions.parentId;
       }
 
       // get the stream

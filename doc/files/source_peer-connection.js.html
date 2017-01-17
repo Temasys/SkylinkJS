@@ -1177,9 +1177,10 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       restartMsg.publishOnly = {
         type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
       };
-      if (self._publishOnly.parentId) {
-        restartMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      restartMsg.parentId = self._parentId;
     }
 
     self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
@@ -1358,10 +1359,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
 
   self._streamsSession[targetMid] = self._streamsSession[targetMid] || {};
   self._peerEndOfCandidatesCounter[targetMid] = self._peerEndOfCandidatesCounter[targetMid] || {};
-  self._sdpSessions[targetMid] = {
-    local: { lines: [], groupLine: &#x27;&#x27; },
-    remote: { lines: [], groupLine: &#x27;&#x27; }
-  };
+  self._sdpSessions[targetMid] = { local: {}, remote: {} };
 
   // callbacks
   // standard not implemented: onnegotiationneeded,
@@ -1514,9 +1512,10 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
       restartMsg.publishOnly = {
         type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
       };
-      if (self._publishOnly.parentId) {
-        restartMsg.parentId = self._publishOnly.parentId;
-      }
+    }
+
+    if (self._parentId) {
+      restartMsg.parentId = self._parentId;
     }
 
     log.log([listOfPeers[i], &#x27;RTCPeerConnection&#x27;, null, &#x27;Sending restart message to signaling server -&gt;&#x27;], restartMsg);
