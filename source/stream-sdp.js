@@ -830,8 +830,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     }
 
     // Remove weird empty characters for Edge case.. :(
-    if (window.webrtcDetectedBrowser === 'edge' && self._hasMCU && direction === 'remote' &&
-      !(sdpLines[i] || '').replace(/\n|\r|\s/gi, '')) {
+    if (!(sdpLines[i] || '').replace(/\n|\r|\s/gi, '')) {
       sdpLines.splice(i, 1);
       i--;
     }
@@ -842,15 +841,10 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     sdpLines[bundleLineIndex] = 'a=group:BUNDLE ' + sdpMids.join(' ');
   }
 
-  var hasDatachannel = self._enableDataChannel && self.getPeerInfo(targetMid).config.enableDataChannel;
-
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
-    // Local or remote just audio call with datachannel causes issues
-    (!self._sdpSettings.connection.data || !hasDatachannel) && (!self._sdpSettings.connection.video &&
-    // Remote offer with just audio(rejected but cant remove)+video
-    self._sdpSettings.connection.audio) || ((!self._sdpSettings.connection.data || !hasDatachannel) &&
-    direction === 'remote' && sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && 
-    self._sdpSettings.connection.video)) {
+  // Append empty space below
+  if (!sdpLines[sdpLines.length - 1].replace(/\n|\r|\s/gi, '')) {
+    sdpLines[sdpLines.length - 1] = '';
+  } else {
     sdpLines.push('');
   }
 

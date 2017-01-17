@@ -465,9 +465,6 @@ Skylink.prototype._openChannel = function() {
  * @since 0.5.5
  */
 Skylink.prototype._closeChannel = function() {
-  if (!this._channelOpen) {
-    return;
-  }
   if (this._socket) {
     this._socket.removeAllListeners('connect_error');
     this._socket.removeAllListeners('reconnect_attempt');
@@ -478,7 +475,18 @@ Skylink.prototype._closeChannel = function() {
     this._socket.removeAllListeners('error');
     this._socket.removeAllListeners('disconnect');
     this._socket.removeAllListeners('message');
-    this._socket.disconnect();
-    this._socket = null;
   }
+
+  if (this._channelOpen) {
+    if (this._socket) {
+      this._socket.disconnect();
+    }
+
+    log.log([null, 'Socket', null, 'Channel closed']);
+
+    this._channelOpen = false;
+    this._trigger('channelClose', clone(this._socketSession));
+  }
+
+  this._socket = null;
 };

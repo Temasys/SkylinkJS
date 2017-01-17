@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Mon Jan 16 2017 20:41:46 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Tue Jan 17 2017 16:13:20 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Mon Jan 16 2017 20:41:46 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Tue Jan 17 2017 16:13:20 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -22341,9 +22341,6 @@ Skylink.prototype._openChannel = function() {
  * @since 0.5.5
  */
 Skylink.prototype._closeChannel = function() {
-  if (!this._channelOpen) {
-    return;
-  }
   if (this._socket) {
     this._socket.removeAllListeners('connect_error');
     this._socket.removeAllListeners('reconnect_attempt');
@@ -22354,9 +22351,20 @@ Skylink.prototype._closeChannel = function() {
     this._socket.removeAllListeners('error');
     this._socket.removeAllListeners('disconnect');
     this._socket.removeAllListeners('message');
-    this._socket.disconnect();
-    this._socket = null;
   }
+
+  if (this._channelOpen) {
+    if (this._socket) {
+      this._socket.disconnect();
+    }
+
+    log.log([null, 'Socket', null, 'Channel closed']);
+
+    this._channelOpen = false;
+    this._trigger('channelClose', clone(this._socketSession));
+  }
+
+  this._socket = null;
 };
 Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.2.3';
 
@@ -26910,8 +26918,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     }
 
     // Remove weird empty characters for Edge case.. :(
-    if (window.webrtcDetectedBrowser === 'edge' && self._hasMCU && direction === 'remote' &&
-      !(sdpLines[i] || '').replace(/\n|\r|\s/gi, '')) {
+    if (!(sdpLines[i] || '').replace(/\n|\r|\s/gi, '')) {
       sdpLines.splice(i, 1);
       i--;
     }
@@ -26922,15 +26929,10 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     sdpLines[bundleLineIndex] = 'a=group:BUNDLE ' + sdpMids.join(' ');
   }
 
-  var hasDatachannel = self._enableDataChannel && self.getPeerInfo(targetMid).config.enableDataChannel;
-
-  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
-    // Local or remote just audio call with datachannel causes issues
-    (!self._sdpSettings.connection.data || !hasDatachannel) && (!self._sdpSettings.connection.video &&
-    // Remote offer with just audio(rejected but cant remove)+video
-    self._sdpSettings.connection.audio) || ((!self._sdpSettings.connection.data || !hasDatachannel) &&
-    direction === 'remote' && sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && 
-    self._sdpSettings.connection.video)) {
+  // Append empty space below
+  if (!sdpLines[sdpLines.length - 1].replace(/\n|\r|\s/gi, '')) {
+    sdpLines[sdpLines.length - 1] = '';
+  } else {
     sdpLines.push('');
   }
 
