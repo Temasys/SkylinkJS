@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 21:02:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 21:50:51 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 21:02:29 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 21:50:51 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -12970,7 +12970,8 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
 
     if (transferId && self._dataTransfers[transferId] && ([self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
       self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(self._dataTransfers[transferId].chunkType) > -1 ||
-      self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1) && !(data instanceof Blob) && !data.type) {
+      (Array.isArray(self._dataTransfers[transferId].enforceBSPeers) &&
+      self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1)) && !(data instanceof Blob) && !data.type) {
       messageType = self.DATA_CHANNEL_MESSAGE_ERROR.STREAM_DATA;
     }
   }
@@ -13243,7 +13244,7 @@ Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
 
   return dataURLArray;
 };
-Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.0';
+Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.1';
 
 /**
  * The list of data transfers directions.
@@ -13607,6 +13608,8 @@ Skylink.prototype._SUPPORTED_WEB_AGENTS = ['chrome', 'firefox', 'safari', 'IE', 
 Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunksAsBinary, callback) {
   var self = this;
   var listOfPeers = Object.keys(self._peerConnections);
+  var sessionType = 'blob';
+  var sessionChunkType = 'string';
   var transferInfo = {
     name: null,
     size: null,
@@ -13659,6 +13662,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
   } else if (timeout && typeof timeout === 'boolean') {
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
     transferInfo.chunkSize = self._BINARY_FILE_SIZE;
+    sessionChunkType = 'binary';
   } else if (typeof timeout === 'function') {
     callback = timeout;
   }
@@ -13671,6 +13675,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
   } else if (targetPeerId && typeof targetPeerId === 'boolean') {
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
     transferInfo.chunkSize = self._BINARY_FILE_SIZE;
+    sessionChunkType = 'binary';
   } else if (typeof targetPeerId === 'function') {
     callback = targetPeerId;
   }
@@ -13679,6 +13684,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
   if (sendChunksAsBinary && typeof sendChunksAsBinary === 'boolean') {
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
     transferInfo.chunkSize = self._BINARY_FILE_SIZE;
+    sessionChunkType = 'binary';
   } else if (typeof sendChunksAsBinary === 'function') {
     callback = sendChunksAsBinary;
   }
@@ -13693,6 +13699,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
       'Fallbacking to binary string data chunks transfer.');
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING;
     transferInfo.chunkSize = self._CHUNK_FILE_SIZE;
+    sessionChunkType = 'string';
   }
 
   // Use BLOB for Firefox
@@ -13700,6 +13707,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
     window.webrtcDetectedBrowser === 'firefox') {
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.BLOB;
     transferInfo.chunkSize = self._MOZ_BINARY_FILE_SIZE;
+    sessionChunkType = 'binary';
   }
 
   // Start checking if data transfer can start
@@ -13742,7 +13750,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
     transferInfo.chunkSize = 4 * Math.ceil(transferInfo.chunkSize / 3);
   }
 
-  self._startDataTransfer(chunks, transferInfo, listOfPeers, callback);
+  self._startDataTransfer(chunks, transferInfo, sessionType, sessionChunkType, listOfPeers, callback);
 };
 
 /**
@@ -13882,6 +13890,8 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
 Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) {
   var self = this;
   var listOfPeers = Object.keys(self._peerConnections);
+  var sessionType = 'data';
+  var sessionChunkType = 'string';
   var transferInfo = {
     name: null,
     size: null,
@@ -13971,7 +13981,7 @@ Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) 
 
   transferInfo.originalSize = transferInfo.size;
 
-  self._startDataTransfer(chunks, transferInfo, listOfPeers, callback);
+  self._startDataTransfer(chunks, transferInfo, sessionType, sessionChunkType, listOfPeers, callback);
 };
 
 /**
@@ -14530,7 +14540,7 @@ Skylink.prototype.streamData = function(data, targetPeerId) {
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeers, callback) {
+Skylink.prototype._startDataTransfer = function(chunks, transferInfo, sessionType, sessionChunkType, listOfPeers, callback) {
   var self = this;
   var transferId = self._user.sid + '_' + (new Date()).getTime();
   var transferErrors = {};
@@ -14550,6 +14560,8 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
   self._dataTransfers[transferId].chunks = chunks;
   self._dataTransfers[transferId].enforceBSPeers = [];
   self._dataTransfers[transferId].enforcedBSInfo = {};
+  self._dataTransfers[transferId].sessionType = sessionType;
+  self._dataTransfers[transferId].sessionChunkType = sessionChunkType;
 
   // Check if fallback chunks is required
   if ([self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, self.DATA_TRANSFER_DATA_TYPE.BLOB].indexOf(
@@ -14687,7 +14699,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   var sendWRQFn = function () {
     var size = self._dataTransfers[transferId].size;
     var chunkSize = self._dataTransfers[transferId].chunkSize;
-    var chunkType = self._dataTransfers[transferId].chunkType;
+    var chunkType = self._dataTransfers[transferId].sessionChunkType;
 
     if (self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1) {
       log.warn([peerId, 'RTCDataChannel', transferId,
@@ -14696,7 +14708,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
 
       size = self._dataTransfers[transferId].enforceBSInfo.size;
       chunkSize = self._dataTransfers[transferId].enforceBSInfo.chunkSize;
-      chunkType = self._dataTransfers[transferId].enforceBSInfo.chunkType;
+      chunkType = 'string';
     }
 
     self._sendMessageToDataChannel(peerId, {
@@ -14705,7 +14717,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       name: self._dataTransfers[transferId].name,
       size: size,
       originalSize: self._dataTransfers[transferId].originalSize,
-      dataType: self._dataTransfers[transferId].dataType,
+      dataType: self._dataTransfers[transferId].sessionType,
       mimeType: self._dataTransfers[transferId].mimeType,
       chunkType: chunkType,
       chunkSize: chunkSize,
@@ -15258,6 +15270,10 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
   var transferId = channelProp === 'main' ? data.transferId || peerId + '_' + (new Date()).getTime() : channelProp;
   var senderPeerId = data.sender || peerId;
 
+  if (data.dataType === 'data' && data.chunkType === 'blob') {
+    return;
+  }
+
   self._dataTransfers[transferId] = {
     name: data.name || transferId,
     size: data.size || 0,
@@ -15266,9 +15282,11 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
     timeout: data.timeout || 60,
     isPrivate: !!data.isPrivate,
     senderPeerId: data.sender || peerId,
-    dataType: data.dataType || self.DATA_TRANSFER_SESSION_TYPE.BLOB,
+    dataType: data.dataType === 'data' ? self.DATA_TRANSFER_SESSION_TYPE.DATA_URL : self.DATA_TRANSFER_SESSION_TYPE.BLOB,
     mimeType: data.mimeType || null,
-    chunkType: data.chunkType || self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+    chunkType: data.chunkType ? (data.chunkType === 'string' ? (data.dataType === 'blob' ?
+      self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING : self.DATA_TRANSFER_DATA_TYPE.STRING) :
+      self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) : self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
     direction: self.DATA_TRANSFER_TYPE.DOWNLOAD,
     chunks: [],
     sessions: {}
@@ -17973,7 +17991,7 @@ Skylink.prototype.getPeersInRoom = function() {
  *   <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
  *   </p></li></ul></li></ul>
  * @example
- *   // Example 1: Get the list of currently connected Peers in the same Room
+ *   // Example 1: Get the list of current Peer Streams in the same Room
  *   var streams = skylinkDemo.getPeersStream();
  * @for Skylink
  * @since 0.6.16
@@ -18024,6 +18042,40 @@ Skylink.prototype.getPeersStream = function() {
   }
 
   return listOfPeersStreams;
+};
+
+/**
+ * Function that gets the list of current data transfers.
+ * @method getCurrentDataTransfers
+ * @return {JSON} The list of Peers Stream. <ul>
+ *   <li><code>#transferId</code><var><b>{</b>JSON<b>}</b></var><p>The data transfer session.</p><ul>
+ *   <li><code>transferInfo</code><var><b>{</b>JSON<b>}</b></var><p>The Stream object.
+ *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   except without the <code>data</code> property.</small></p></li>
+ *   <li><code>peerId</code><var><b>{</b>String<b>}</b></var><p>The Peer ID.</p></li>
+ *   <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
+ *   </p></li></ul></li></ul>
+ * @example
+ *   // Example 1: Get the list of current data transfers in the same Room
+ *   var currentTransfers = skylinkDemo.getCurrentDataTransfers();
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.getCurrentDataTransfers = function() {
+  var listOfDataTransfers = {};
+
+  if (!(this._user && this._user.sid)) {
+    return {};
+  }
+
+  for (var prop in this._dataTransfers) {
+    if (this._dataTransfers.hasOwnProperty(prop) && this._dataTransfers[prop]) {
+      listOfDataTransfers[prop] = this._getTransferInfo(prop, this._user.sid, true, true, true);
+    }
+  }
+
+  return listOfDataTransfers;
 };
 
 /**
@@ -21257,7 +21309,8 @@ var _eventsDocs = {
    * @param {String} peerId The Peer ID.
    * @param {JSON} transferInfo The data transfer information.
    *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
-   *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+   *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+   *   except without the <code>data</code> property.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.6.1

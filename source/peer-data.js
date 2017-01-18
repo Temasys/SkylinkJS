@@ -286,7 +286,7 @@ Skylink.prototype.getPeersInRoom = function() {
  *   <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
  *   </p></li></ul></li></ul>
  * @example
- *   // Example 1: Get the list of currently connected Peers in the same Room
+ *   // Example 1: Get the list of current Peer Streams in the same Room
  *   var streams = skylinkDemo.getPeersStream();
  * @for Skylink
  * @since 0.6.16
@@ -337,6 +337,40 @@ Skylink.prototype.getPeersStream = function() {
   }
 
   return listOfPeersStreams;
+};
+
+/**
+ * Function that gets the list of current data transfers.
+ * @method getCurrentDataTransfers
+ * @return {JSON} The list of Peers Stream. <ul>
+ *   <li><code>#transferId</code><var><b>{</b>JSON<b>}</b></var><p>The data transfer session.</p><ul>
+ *   <li><code>transferInfo</code><var><b>{</b>JSON<b>}</b></var><p>The Stream object.
+ *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
+ *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   except without the <code>data</code> property.</small></p></li>
+ *   <li><code>peerId</code><var><b>{</b>String<b>}</b></var><p>The Peer ID.</p></li>
+ *   <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
+ *   </p></li></ul></li></ul>
+ * @example
+ *   // Example 1: Get the list of current data transfers in the same Room
+ *   var currentTransfers = skylinkDemo.getCurrentDataTransfers();
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.getCurrentDataTransfers = function() {
+  var listOfDataTransfers = {};
+
+  if (!(this._user && this._user.sid)) {
+    return {};
+  }
+
+  for (var prop in this._dataTransfers) {
+    if (this._dataTransfers.hasOwnProperty(prop) && this._dataTransfers[prop]) {
+      listOfDataTransfers[prop] = this._getTransferInfo(prop, this._user.sid, true, true, true);
+    }
+  }
+
+  return listOfDataTransfers;
 };
 
 /**

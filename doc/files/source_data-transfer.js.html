@@ -101,7 +101,7 @@
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype.DT_PROTOCOL_VERSION = &#x27;0.1.0&#x27;;
+Skylink.prototype.DT_PROTOCOL_VERSION = &#x27;0.1.1&#x27;;
 
 /**
  * The list of data transfers directions.
@@ -465,6 +465,8 @@ Skylink.prototype._SUPPORTED_WEB_AGENTS = [&#x27;chrome&#x27;, &#x27;firefox&#x2
 Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunksAsBinary, callback) {
   var self = this;
   var listOfPeers = Object.keys(self._peerConnections);
+  var sessionType = &#x27;blob&#x27;;
+  var sessionChunkType = &#x27;string&#x27;;
   var transferInfo = {
     name: null,
     size: null,
@@ -517,6 +519,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
   } else if (timeout &amp;&amp; typeof timeout === &#x27;boolean&#x27;) {
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
     transferInfo.chunkSize = self._BINARY_FILE_SIZE;
+    sessionChunkType = &#x27;binary&#x27;;
   } else if (typeof timeout === &#x27;function&#x27;) {
     callback = timeout;
   }
@@ -529,6 +532,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
   } else if (targetPeerId &amp;&amp; typeof targetPeerId === &#x27;boolean&#x27;) {
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
     transferInfo.chunkSize = self._BINARY_FILE_SIZE;
+    sessionChunkType = &#x27;binary&#x27;;
   } else if (typeof targetPeerId === &#x27;function&#x27;) {
     callback = targetPeerId;
   }
@@ -537,6 +541,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
   if (sendChunksAsBinary &amp;&amp; typeof sendChunksAsBinary === &#x27;boolean&#x27;) {
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
     transferInfo.chunkSize = self._BINARY_FILE_SIZE;
+    sessionChunkType = &#x27;binary&#x27;;
   } else if (typeof sendChunksAsBinary === &#x27;function&#x27;) {
     callback = sendChunksAsBinary;
   }
@@ -551,6 +556,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
       &#x27;Fallbacking to binary string data chunks transfer.&#x27;);
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING;
     transferInfo.chunkSize = self._CHUNK_FILE_SIZE;
+    sessionChunkType = &#x27;string&#x27;;
   }
 
   // Use BLOB for Firefox
@@ -558,6 +564,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
     window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
     transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.BLOB;
     transferInfo.chunkSize = self._MOZ_BINARY_FILE_SIZE;
+    sessionChunkType = &#x27;binary&#x27;;
   }
 
   // Start checking if data transfer can start
@@ -600,7 +607,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
     transferInfo.chunkSize = 4 * Math.ceil(transferInfo.chunkSize / 3);
   }
 
-  self._startDataTransfer(chunks, transferInfo, listOfPeers, callback);
+  self._startDataTransfer(chunks, transferInfo, sessionType, sessionChunkType, listOfPeers, callback);
 };
 
 /**
@@ -740,6 +747,8 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
 Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) {
   var self = this;
   var listOfPeers = Object.keys(self._peerConnections);
+  var sessionType = &#x27;data&#x27;;
+  var sessionChunkType = &#x27;string&#x27;;
   var transferInfo = {
     name: null,
     size: null,
@@ -829,7 +838,7 @@ Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) 
 
   transferInfo.originalSize = transferInfo.size;
 
-  self._startDataTransfer(chunks, transferInfo, listOfPeers, callback);
+  self._startDataTransfer(chunks, transferInfo, sessionType, sessionChunkType, listOfPeers, callback);
 };
 
 /**
@@ -1343,8 +1352,13 @@ Skylink.prototype.streamData = function(data, targetPeerId) {
       } else {
         var transferId = self._dataChannels[peerId].main.transferId;
 
-        if (transferId &amp;&amp; self._dataTransfers[transferId] &amp;&amp; [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
-          self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(self._dataTransfers[transferId].chunkType) === -1 &amp;&amp;
+        if (transferId &amp;&amp; self._dataTransfers[transferId] &amp;&amp;
+          // Check if its upload direction
+          self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.UPLOAD &amp;&amp;
+          // Check if its not string / binarystring transfer
+          [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(
+          self._dataTransfers[transferId].chunkType) === -1 &amp;&amp;
+          // Check if there is no polyfill for peer
           self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) === -1) {
           log.error([peerId, &#x27;RTCDataChannel&#x27;, null, &#x27;Dropping of streaming data chunk to Peer as &#x27; +
             &#x27;Datachannel connection is streaming binary data chunks for blob transfer&#x27;]);
@@ -1383,7 +1397,7 @@ Skylink.prototype.streamData = function(data, targetPeerId) {
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeers, callback) {
+Skylink.prototype._startDataTransfer = function(chunks, transferInfo, sessionType, sessionChunkType, listOfPeers, callback) {
   var self = this;
   var transferId = self._user.sid + &#x27;_&#x27; + (new Date()).getTime();
   var transferErrors = {};
@@ -1403,6 +1417,8 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, listOfPeer
   self._dataTransfers[transferId].chunks = chunks;
   self._dataTransfers[transferId].enforceBSPeers = [];
   self._dataTransfers[transferId].enforcedBSInfo = {};
+  self._dataTransfers[transferId].sessionType = sessionType;
+  self._dataTransfers[transferId].sessionChunkType = sessionChunkType;
 
   // Check if fallback chunks is required
   if ([self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, self.DATA_TRANSFER_DATA_TYPE.BLOB].indexOf(
@@ -1540,7 +1556,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   var sendWRQFn = function () {
     var size = self._dataTransfers[transferId].size;
     var chunkSize = self._dataTransfers[transferId].chunkSize;
-    var chunkType = self._dataTransfers[transferId].chunkType;
+    var chunkType = self._dataTransfers[transferId].sessionChunkType;
 
     if (self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) &gt; -1) {
       log.warn([peerId, &#x27;RTCDataChannel&#x27;, transferId,
@@ -1549,7 +1565,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
 
       size = self._dataTransfers[transferId].enforceBSInfo.size;
       chunkSize = self._dataTransfers[transferId].enforceBSInfo.chunkSize;
-      chunkType = self._dataTransfers[transferId].enforceBSInfo.chunkType;
+      chunkType = &#x27;string&#x27;;
     }
 
     self._sendMessageToDataChannel(peerId, {
@@ -1558,7 +1574,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       name: self._dataTransfers[transferId].name,
       size: size,
       originalSize: self._dataTransfers[transferId].originalSize,
-      dataType: self._dataTransfers[transferId].dataType,
+      dataType: self._dataTransfers[transferId].sessionType,
       mimeType: self._dataTransfers[transferId].mimeType,
       chunkType: chunkType,
       chunkSize: chunkSize,
@@ -2071,6 +2087,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
       if (transferId &amp;&amp; self._dataTransfers[transferId]) {
         log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Received blob data chunk @&#x27; +
           self._dataTransfers[transferId].sessions[peerId].ackN + &#x27; with size -&gt;&#x27;], rawData.size);
+      } else {
+        log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Received blob stream data chunk with size -&gt;&#x27;], rawData.size);
       }
 
       self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.BLOB, rawData.size, channelProp);
@@ -2088,6 +2106,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
       if (transferId &amp;&amp; self._dataTransfers[transferId]) {
         log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Received arraybuffer data chunk @&#x27; +
           self._dataTransfers[transferId].sessions[peerId].ackN + &#x27; with size -&gt;&#x27;], blob.size);
+      } else {
+        log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Received arraybuffer stream data chunk with size -&gt;&#x27;], blob.size);
       }
 
       self._DATAProtocolHandler(peerId, blob, self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, blob.size, channelProp);
@@ -2107,6 +2127,10 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
   var transferId = channelProp === &#x27;main&#x27; ? data.transferId || peerId + &#x27;_&#x27; + (new Date()).getTime() : channelProp;
   var senderPeerId = data.sender || peerId;
 
+  if (data.dataType === &#x27;data&#x27; &amp;&amp; data.chunkType === &#x27;blob&#x27;) {
+    return;
+  }
+
   self._dataTransfers[transferId] = {
     name: data.name || transferId,
     size: data.size || 0,
@@ -2115,9 +2139,11 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
     timeout: data.timeout || 60,
     isPrivate: !!data.isPrivate,
     senderPeerId: data.sender || peerId,
-    dataType: data.dataType || self.DATA_TRANSFER_SESSION_TYPE.BLOB,
+    dataType: data.dataType === &#x27;data&#x27; ? self.DATA_TRANSFER_SESSION_TYPE.DATA_URL : self.DATA_TRANSFER_SESSION_TYPE.BLOB,
     mimeType: data.mimeType || null,
-    chunkType: data.chunkType || self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+    chunkType: data.chunkType ? (data.chunkType === &#x27;string&#x27; ? (data.dataType === &#x27;blob&#x27; ?
+      self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING : self.DATA_TRANSFER_DATA_TYPE.STRING) :
+      self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) : self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
     direction: self.DATA_TRANSFER_TYPE.DOWNLOAD,
     chunks: [],
     sessions: {}
@@ -2376,9 +2402,15 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
     transferId = self._dataChannels[peerId].main.transferId;
   }
 
-  if (transferId ? [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(
-    self._dataTransfers[transferId].chunkType) &gt; -1 : true) {
-    if ([self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(chunkType) === -1) {
+  // Check if it is binary stream packet
+  if ([self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, self.DATA_TRANSFER_DATA_TYPE.BLOB].indexOf(chunkType) &gt; -1) {
+    // Check if there is data transfer going on
+    if (!(transferId &amp;&amp; self._dataTransfers[transferId] &amp;&amp;
+    // Check if direction is downloading
+      self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.DOWNLOAD &amp;&amp;
+    // Check if it is not binary data transfer
+      [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(
+      self._dataTransfers[transferId].chunkType) === -1)) {
       self._trigger(&#x27;incomingDataStream&#x27;, {
         content: chunk,
         chunkSize: chunkSize,
@@ -2389,11 +2421,11 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
         senderPeerId: peerId
       }, peerId, self.getPeerInfo(peerId), false);
       return;
-    }
-
-    if (!transferId) {
+    } else if (!transferId) {
       return;
     }
+  } else if (!transferId) {
+    return;
   }
 
   if (self._dataTransfers[transferId].senderPeerId) {

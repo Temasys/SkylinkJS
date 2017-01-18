@@ -309,7 +309,8 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
 
     if (transferId && self._dataTransfers[transferId] && ([self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
       self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(self._dataTransfers[transferId].chunkType) > -1 ||
-      self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1) && !(data instanceof Blob) && !data.type) {
+      (Array.isArray(self._dataTransfers[transferId].enforceBSPeers) &&
+      self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1)) && !(data instanceof Blob) && !data.type) {
       messageType = self.DATA_CHANNEL_MESSAGE_ERROR.STREAM_DATA;
     }
   }

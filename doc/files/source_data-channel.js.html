@@ -400,7 +400,8 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
 
     if (transferId &amp;&amp; self._dataTransfers[transferId] &amp;&amp; ([self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
       self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(self._dataTransfers[transferId].chunkType) &gt; -1 ||
-      self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) &gt; -1) &amp;&amp; !(data instanceof Blob) &amp;&amp; !data.type) {
+      (Array.isArray(self._dataTransfers[transferId].enforceBSPeers) &amp;&amp;
+      self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) &gt; -1)) &amp;&amp; !(data instanceof Blob) &amp;&amp; !data.type) {
       messageType = self.DATA_CHANNEL_MESSAGE_ERROR.STREAM_DATA;
     }
   }
@@ -424,7 +425,8 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
       self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data));
 
     } else {
-      log.debug([peerId, &#x27;RTCDataChannel&#x27;, &#x27;prop:&#x27; + channelProp, &#x27;Sending data with size -&gt;&#x27;], data.size || data.length);
+      log.debug([peerId, &#x27;RTCDataChannel&#x27;, &#x27;prop:&#x27; + channelProp, &#x27;Sending data with size -&gt;&#x27;],
+        data.size || data.length || data.byteLength);
 
       self._dataChannels[peerId][channelProp].channel.send(data);
     }

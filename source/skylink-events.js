@@ -467,7 +467,8 @@ var _eventsDocs = {
    * @param {String} peerId The Peer ID.
    * @param {JSON} transferInfo The data transfer information.
    *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
-   *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+   *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+   *   except without the <code>data</code> property.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.6.1

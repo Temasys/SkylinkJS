@@ -377,7 +377,7 @@ Skylink.prototype.getPeersInRoom = function() {
  *   &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Boolean&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The flag if Peer is User.&lt;/p&gt;&lt;/li&gt;
  *   &lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
  * @example
- *   // Example 1: Get the list of currently connected Peers in the same Room
+ *   // Example 1: Get the list of current Peer Streams in the same Room
  *   var streams = skylinkDemo.getPeersStream();
  * @for Skylink
  * @since 0.6.16
@@ -428,6 +428,40 @@ Skylink.prototype.getPeersStream = function() {
   }
 
   return listOfPeersStreams;
+};
+
+/**
+ * Function that gets the list of current data transfers.
+ * @method getCurrentDataTransfers
+ * @return {JSON} The list of Peers Stream. &lt;ul&gt;
+ *   &lt;li&gt;&lt;code&gt;#transferId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data transfer session.&lt;/p&gt;&lt;ul&gt;
+ *   &lt;li&gt;&lt;code&gt;transferInfo&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Stream object.
+ *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
+ *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;
+ *   except without the &lt;code&gt;data&lt;/code&gt; property.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Peer ID.&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Boolean&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The flag if Peer is User.&lt;/p&gt;&lt;/li&gt;
+ *   &lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
+ * @example
+ *   // Example 1: Get the list of current data transfers in the same Room
+ *   var currentTransfers = skylinkDemo.getCurrentDataTransfers();
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.getCurrentDataTransfers = function() {
+  var listOfDataTransfers = {};
+
+  if (!(this._user &amp;&amp; this._user.sid)) {
+    return {};
+  }
+
+  for (var prop in this._dataTransfers) {
+    if (this._dataTransfers.hasOwnProperty(prop) &amp;&amp; this._dataTransfers[prop]) {
+      listOfDataTransfers[prop] = this._getTransferInfo(prop, this._user.sid, true, true, true);
+    }
+  }
+
+  return listOfDataTransfers;
 };
 
 /**
