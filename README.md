@@ -11,7 +11,7 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 > **Edge `14.14352`+** | **Bowser `0.2.1`+**<br><br>
 > _Do note that MCU connections, file transfers and P2P messages does not work in Edge browsers due to its current supports and beta phase. Earlier Edge browser versions might require you to toggle the H264 experimental flag to enable video connections from Edge to Chrome/Firefox browsers._
 
-| Features       | Chrome<br>`45`-`51`+ | Firefox<br>`40`-`48`+ | Opera<br>`32`-`36`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  |
+| Features       | Chrome<br>`52`-`55`+ | Firefox<br>`48`-`50`+ | Opera<br>`38`-`42`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  |
 | -------------- | ---------- | ----------- | --------- | ---------- | ---------- |
 | **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.com.sg/plugin/#commercial-licensing)  | Yes with [Commercial Temasys Plugin*](https://temasys.com.sg/plugin/#commercial-licensing) |
 | **Video Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes [Temasys Plugin](http://skylink.io/plugin/)  |
