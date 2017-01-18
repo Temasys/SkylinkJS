@@ -118,3 +118,21 @@ In this demo, you can find an example of how to utilize the privileged key conce
 
 ##### How to use
 First, open the index page of the privileged demo. Each button there when being clicked will open another browser tab for the corresponding type of user, with corresponding functionalities available. For example privileged users have getPeers() and introduce() options while the rest do not. To introduce two peers, enter the peer ID of each peer to the textbox then hit "Introduce".
+
+### demo/data-streaming
+In this demo, you can find an example of how you can share video (mp4) with peers with Skylink.
+
+##### Functionalities covered
+`init()`, `joinRoom()`, `on()`, `streamData()`, `sendP2PMessage()`
+
+##### Events used
+`incomingDataStream`, `incomingMessage`, `peerLeft`, `dataChannelState`
+
+### demo/screenshare-and-camera
+In this demo, you can find an example of how you can share both camera and screenshare to peers with Skylink.
+
+##### Functionalities covered
+`init()`, `joinRoom()`, `on()`, `shareScreen()`
+
+##### Events used
+`incomingStream`, `peerLeft`

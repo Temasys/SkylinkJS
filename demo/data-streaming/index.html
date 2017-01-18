@@ -1,0 +1,141 @@
+<!doctype html>
+<html>
+<head>
+<title>Temasys SkylinkJS Demo : Data Streaming</title>
+<style>
+	body {
+		background: #000;
+		font-family: sans-serif, helvetica;
+	}
+	.videos {
+		padding-top: 55px;
+	}
+	#video {
+		position: fixed;
+		z-index: 1;
+		background: #000;
+		top: 0;
+		left: 0;
+		right: 0;
+		bottom: 0;
+		width: 100%;
+		height: 100%;
+	}
+	.header {
+		background: #fff;
+		border-bottom: solid 1px #eee;
+		padding: 12px;
+		position: fixed;
+		top: 0;
+		left: 0;
+		right: 0;
+		z-index: 2;
+	}
+	.header input {
+		margin-left: 15px;
+	}
+	.header span {
+		display: inline-block;
+		font-weight: 600;
+	}
+	.header span.title {
+		float: right;
+		font-weight: 400;
+		color: #888;
+	}
+</style>
+</head>
+<body>
+	<div class="header">
+		<span id="loading">LOADING</span>
+		<input id="source" type="file" onchange="streamVideo(this.files[0])" accept="video/mp4" disabled>
+		<span class="title">Share and stream videos</span>
+	</div>
+	<video id="video" autoplay loop controls></video>
+	<script src="../config.js"></script>
+	<script src="../../publish/skylink.complete.js"></script>
+	<script>
+		var skylink = new Skylink();
+		var streams = {};
+
+		function streamVideo (file) {
+			var chunks = [];
+			var chunkLimit = 65456;
+		  var startCount = 0, endCount = 0;
+
+		  document.getElementById('source').disabled = true;
+
+		  // Chunk file
+		  if (file.size > chunkLimit) {
+		    while ((file.size - 1) > endCount) {
+		      endCount = startCount + chunkLimit;
+		      chunks.push(file.slice(startCount, endCount));
+		      startCount += chunkLimit;
+		    }
+		    if ((file.size - (startCount + 1)) > 0) {
+		      chunks.push(file.slice(startCount, file.size - 1));
+		    }
+		  } else {
+		    chunks.push(file);
+		  }
+
+		  var processNextFn = function () {
+		  	if (chunks.length > 0) {
+		  		var c = chunks[0];
+		  		chunks.splice(0, 1);
+		  		skylink.once('incomingDataStream', function () {
+		  			setTimeout(processNextFn, 1);
+		  		}, function (a,b,c,isSelf) {
+		  			return isSelf;
+		  		});
+		  		skylink.streamData(c);
+		  	} else {
+		  		skylink.sendP2PMessage('END');
+		  		document.getElementById('source').disabled = false;
+		  	}
+		  };
+
+		  skylink.once('incomingMessage', processNextFn, function (a,b,c,isSelf) {
+		  	return isSelf;
+		  });
+		  skylink.sendP2PMessage('START');
+		}
+
+		skylink.on('incomingDataStream', function (data, peerId, peerInfo) {
+			if (!streams[peerId]) {
+				streams[peerId] = [];
+			}
+			streams[peerId].push(data.content);
+		});
+
+		skylink.on('incomingMessage', function (message, peerId) {
+			if (message.content === 'START') {
+				document.getElementById('source').disabled = true;
+				streams[peerId] = [];
+
+			} else {
+				document.getElementById('source').disabled = false;
+				if (message.content === 'END' && streams[peerId]) {
+					document.getElementById('video').src = URL.createObjectURL(new Blob(streams[peerId]));
+				}
+			}
+		});
+
+		skylink.once('dataChannelState', function (state) {
+			document.getElementById('source').disabled = false;
+			document.getElementById('loading').innerHTML = 'READY';
+		}, function (state) {
+			return state === skylink.DATA_CHANNEL_STATE.OPEN;
+		});
+
+		skylink.on('peerLeft', function (peerId) {
+			delete streams[peerId];
+		});
+
+		skylink.init(config, function (ierr) {
+			if (ierr) return;
+			skylink.joinRoom();
+		});
+	</script>
+</body>
+</html>
