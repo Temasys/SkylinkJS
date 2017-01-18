@@ -1980,6 +1980,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
       if (transferId && self._dataTransfers[transferId]) {
         log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob data chunk @' +
           self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], rawData.size);
+      } else {
+        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob stream data chunk with size ->'], rawData.size);
       }
 
       self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.BLOB, rawData.size, channelProp);
@@ -1997,6 +1999,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
       if (transferId && self._dataTransfers[transferId]) {
         log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk @' +
           self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], blob.size);
+      } else {
+        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer stream data chunk with size ->'], blob.size);
       }
 
       self._DATAProtocolHandler(peerId, blob, self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, blob.size, channelProp);

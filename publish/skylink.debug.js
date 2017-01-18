@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 03:02:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 17:03:41 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -1460,7 +1460,8 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
       self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data));
 
     } else {
-      log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending data with size ->'], data.size || data.length);
+      log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending data with size ->'],
+        data.size || data.length || data.byteLength);
 
       self._dataChannels[peerId][channelProp].channel.send(data);
     }
@@ -3678,6 +3679,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
       if (transferId && self._dataTransfers[transferId]) {
         log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob data chunk @' +
           self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], rawData.size);
+      } else {
+        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob stream data chunk with size ->'], rawData.size);
       }
 
       self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.BLOB, rawData.size, channelProp);
@@ -3695,6 +3698,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
       if (transferId && self._dataTransfers[transferId]) {
         log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk @' +
           self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], blob.size);
+      } else {
+        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer stream data chunk with size ->'], blob.size);
       }
 
       self._DATAProtocolHandler(peerId, blob, self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, blob.size, channelProp);
@@ -12631,7 +12636,7 @@ Skylink.prototype._candidateHandler = function(message) {
   if (!(this._peerConnections[targetMid] &&
     this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
-      'as Peer connection does not exists or is closed'], this._peerConnections[targetMid].signalingState);
+      'as Peer connection does not exists or is closed']);
     this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
       targetMid, canId, candidateType, {
       candidate: candidate.candidate,

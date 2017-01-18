@@ -333,7 +333,8 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
       self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data));
 
     } else {
-      log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending data with size ->'], data.size || data.length);
+      log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending data with size ->'],
+        data.size || data.length || data.byteLength);
 
       self._dataChannels[peerId][channelProp].channel.send(data);
     }

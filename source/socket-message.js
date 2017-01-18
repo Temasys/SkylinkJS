@@ -1570,7 +1570,7 @@ Skylink.prototype._candidateHandler = function(message) {
   if (!(this._peerConnections[targetMid] &&
     this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
-      'as Peer connection does not exists or is closed'], this._peerConnections[targetMid].signalingState);
+      'as Peer connection does not exists or is closed']);
     this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
       targetMid, canId, candidateType, {
       candidate: candidate.candidate,

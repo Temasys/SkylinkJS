@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 03:02:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 17:03:41 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 03:02:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 17:03:41 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -12994,7 +12994,8 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
       self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data));
 
     } else {
-      log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending data with size ->'], data.size || data.length);
+      log.debug([peerId, 'RTCDataChannel', 'prop:' + channelProp, 'Sending data with size ->'],
+        data.size || data.length || data.byteLength);
 
       self._dataChannels[peerId][channelProp].channel.send(data);
     }
@@ -15212,6 +15213,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
       if (transferId && self._dataTransfers[transferId]) {
         log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob data chunk @' +
           self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], rawData.size);
+      } else {
+        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob stream data chunk with size ->'], rawData.size);
       }
 
       self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.BLOB, rawData.size, channelProp);
@@ -15229,6 +15232,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
       if (transferId && self._dataTransfers[transferId]) {
         log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk @' +
           self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], blob.size);
+      } else {
+        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer stream data chunk with size ->'], blob.size);
       }
 
       self._DATAProtocolHandler(peerId, blob, self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, blob.size, channelProp);
@@ -24165,7 +24170,7 @@ Skylink.prototype._candidateHandler = function(message) {
   if (!(this._peerConnections[targetMid] &&
     this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
-      'as Peer connection does not exists or is closed'], this._peerConnections[targetMid].signalingState);
+      'as Peer connection does not exists or is closed']);
     this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
       targetMid, canId, candidateType, {
       candidate: candidate.candidate,
