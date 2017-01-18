@@ -933,10 +933,12 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   }
 
   // Append empty space below
-  if (!sdpLines[sdpLines.length - 1].replace(/\n|\r|\s/gi, &#x27;&#x27;)) {
-    sdpLines[sdpLines.length - 1] = &#x27;&#x27;;
-  } else {
-    sdpLines.push(&#x27;&#x27;);
+  if (window.webrtcDetectedBrowser !== &#x27;edge&#x27;) {
+    if (!sdpLines[sdpLines.length - 1].replace(/\n|\r|\s/gi, &#x27;&#x27;)) {
+      sdpLines[sdpLines.length - 1] = &#x27;&#x27;;
+    } else {
+      sdpLines.push(&#x27;&#x27;);
+    }
   }
 
   return sdpLines.join(&#x27;\r\n&#x27;);

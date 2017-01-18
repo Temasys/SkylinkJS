@@ -842,10 +842,12 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   }
 
   // Append empty space below
-  if (!sdpLines[sdpLines.length - 1].replace(/\n|\r|\s/gi, '')) {
-    sdpLines[sdpLines.length - 1] = '';
-  } else {
-    sdpLines.push('');
+  if (window.webrtcDetectedBrowser !== 'edge') {
+    if (!sdpLines[sdpLines.length - 1].replace(/\n|\r|\s/gi, '')) {
+      sdpLines[sdpLines.length - 1] = '';
+    } else {
+      sdpLines.push('');
+    }
   }
 
   return sdpLines.join('\r\n');

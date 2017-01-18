@@ -745,6 +745,15 @@ Skylink.prototype.sendStream = function(options, callback) {
     return;
   }
 
+  if (window.webrtcDetectedBrowser === 'edge') {
+    var edgeNotSupportError = 'Edge browser currently does not support renegotiation.';
+    log.error(edgeNotSupportError, options);
+    if (typeof callback === 'function'){
+      callback(new Error(edgeNotSupportError),null);
+    }
+    return;
+  }
+
   if (typeof options.getAudioTracks === 'function' || typeof options.getVideoTracks === 'function') {
     var checkActiveTracksFn = function (tracks) {
       for (var t = 0; t < tracks.length; t++) {

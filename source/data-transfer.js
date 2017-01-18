@@ -1946,7 +1946,7 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
         log.error([peerId, 'RTCDataChannel', channelProp, 'Received error ->'], error);
 
         self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error, channelName, channelType, null);
-        throw error;
+        return;
       }
 
       if (!(transferId && self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {

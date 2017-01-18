@@ -434,5 +434,7 @@ Skylink.prototype._getUserInfo = function(peerId) {
 
   delete userInfo.agent;
   delete userInfo.room;
+  delete userInfo.config;
+  delete userInfo.parentId;
   return userInfo;
 };
