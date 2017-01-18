@@ -2212,13 +2212,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1357,
+            "line": 1358,
             "description": "Complete Peer function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1421,
+            "line": 1422,
             "description": "Function that starts or listens the data transfer status to Peer.\nThis reacts differently during MCU environment.",
             "itemtype": "method",
             "name": "_startDataTransferToPeer",
@@ -2233,25 +2233,25 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1436,
+            "line": 1437,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1446,
+            "line": 1447,
             "description": "Return error and trigger them if failed before or during data transfers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1462,
+            "line": 1463,
             "description": "Send WRQ protocol to start data transfers.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1682,
+            "line": 1683,
             "description": "Function that returns the data transfer session.",
             "itemtype": "method",
             "name": "_getTransferInfo",
@@ -2262,7 +2262,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1764,
+            "line": 1765,
             "description": "Function that returns the compiled data transfer data.",
             "itemtype": "method",
             "name": "_getTransferData",
@@ -2273,7 +2273,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1791,
+            "line": 1792,
             "description": "Function that handles the data transfers sessions timeouts.",
             "itemtype": "method",
             "name": "_handleDataTransferTimeoutForPeer",
@@ -2284,13 +2284,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1835,
+            "line": 1836,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1882,
+            "line": 1883,
             "description": "Function that handles the data received from Datachannel and\nroutes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_processDataChannelData",
@@ -2301,7 +2301,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2027,
+            "line": 2028,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -2312,7 +2312,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2075,
+            "line": 2076,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -2323,13 +2323,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2094,
+            "line": 2095,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2177,
+            "line": 2178,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -2340,7 +2340,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2198,
+            "line": 2199,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -2351,13 +2351,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2217,
+            "line": 2218,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2249,
+            "line": 2250,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -2368,13 +2368,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2266,
+            "line": 2267,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2298,
+            "line": 2299,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -3017,7 +3017,7 @@
             "itemtype": "method",
             "name": "getCurrentDataTransfers",
             "return": {
-                "description": "The list of Peers Stream. <ul>\n  <li><code>#transferId</code><var><b>{</b>JSON<b>}</b></var><p>The data transfer session.</p><ul>\n  <li><code>transferInfo</code><var><b>{</b>JSON<b>}</b></var><p>The Stream object.\n  <small>Object signature matches the <code>transferInfo</code> parameter payload received in the\n  <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  except without the <code>data</code> property.</small></p></li>\n  <li><code>peerId</code><var><b>{</b>String<b>}</b></var><p>The Peer ID.</p></li>\n  <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>\n  </p></li></ul></li></ul>",
+                "description": "The list of Peers Stream. <ul>\n  <li><code>#transferId</code><var><b>{</b>JSON<b>}</b></var><p>The data transfer session.</p><ul>\n  <li><code>transferInfo</code><var><b>{</b>JSON<b>}</b></var><p>The Stream object.\n  <small>Object signature matches the <code>transferInfo</code> parameter payload received in the\n  <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  except without the <code>data</code> property.</small></p></li>\n  <li><code>peerId</code><var><b>{</b>String<b>}</b></var><p>The sender Peer ID.</p></li>\n  <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>\n  </p></li></ul></li></ul>",
                 "type": "JSON"
             },
             "example": [
@@ -3028,7 +3028,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 376,
+            "line": 380,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
@@ -8970,35 +8970,35 @@
         },
         {
             "message": "Missing item type\nComplete Peer function.",
-            "line": " source/data-transfer.js:1357"
+            "line": " source/data-transfer.js:1358"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1436"
+            "line": " source/data-transfer.js:1437"
         },
         {
             "message": "Missing item type\nReturn error and trigger them if failed before or during data transfers function.",
-            "line": " source/data-transfer.js:1446"
+            "line": " source/data-transfer.js:1447"
         },
         {
             "message": "Missing item type\nSend WRQ protocol to start data transfers.",
-            "line": " source/data-transfer.js:1462"
+            "line": " source/data-transfer.js:1463"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1835"
+            "line": " source/data-transfer.js:1836"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2094"
+            "line": " source/data-transfer.js:2095"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2217"
+            "line": " source/data-transfer.js:2218"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2266"
+            "line": " source/data-transfer.js:2267"
         }
     ]
 }

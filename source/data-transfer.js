@@ -1328,6 +1328,7 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, sessionTyp
   self._dataTransfers[transferId].enforcedBSInfo = {};
   self._dataTransfers[transferId].sessionType = sessionType;
   self._dataTransfers[transferId].sessionChunkType = sessionChunkType;
+  self._dataTransfers[transferId].senderPeerId = self._user.sid;
 
   // Check if fallback chunks is required
   if ([self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, self.DATA_TRANSFER_DATA_TYPE.BLOB].indexOf(

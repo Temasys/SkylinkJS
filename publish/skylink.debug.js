@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 21:50:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 22:00:04 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -3028,6 +3028,7 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, sessionTyp
   self._dataTransfers[transferId].enforcedBSInfo = {};
   self._dataTransfers[transferId].sessionType = sessionType;
   self._dataTransfers[transferId].sessionChunkType = sessionChunkType;
+  self._dataTransfers[transferId].senderPeerId = self._user.sid;
 
   // Check if fallback chunks is required
   if ([self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, self.DATA_TRANSFER_DATA_TYPE.BLOB].indexOf(
@@ -6519,7 +6520,7 @@ Skylink.prototype.getPeersStream = function() {
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
  *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   except without the <code>data</code> property.</small></p></li>
- *   <li><code>peerId</code><var><b>{</b>String<b>}</b></var><p>The Peer ID.</p></li>
+ *   <li><code>peerId</code><var><b>{</b>String<b>}</b></var><p>The sender Peer ID.</p></li>
  *   <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
  *   </p></li></ul></li></ul>
  * @example
@@ -6537,7 +6538,11 @@ Skylink.prototype.getCurrentDataTransfers = function() {
 
   for (var prop in this._dataTransfers) {
     if (this._dataTransfers.hasOwnProperty(prop) && this._dataTransfers[prop]) {
-      listOfDataTransfers[prop] = this._getTransferInfo(prop, this._user.sid, true, true, true);
+      listOfDataTransfers[prop] = {
+        transferInfo: this._getTransferInfo(prop, this._user.sid, true, true, true),
+        isSelf: this._dataTransfers[prop].senderPeerId === this._user.sid,
+        peerId: this._dataTransfers[prop].senderPeerId || this._user.sid
+      };
     }
   }
 
