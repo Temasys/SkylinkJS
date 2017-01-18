@@ -6,6 +6,10 @@ We've gone to great length to make this library work in as many browsers as poss
 You'll need a Temasys Account and an App key to use this. [Register here to get your App key](https://console.temasys.io).
 
 #### Supported Browsers
+
+> **Current Beta supported browsers:** Edge `14.14352`+, Bowser `0.2.1`+
+> _Do note that MCU connections, file transfers and P2P messages does not work in Edge browsers due to its current supports and beta phase. Earlier Edge browser versions might require you to toggle the H264 experimental flag to enable video connections from Edge to Chrome/Firefox browsers._
+
 | Features       | Chrome<br>`45`-`51`+ | Firefox<br>`40`-`48`+ | Opera<br>`32`-`36`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  |
 | -------------- | ---------- | ----------- | --------- | ---------- | ---------- |
 | **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.com.sg/plugin/#commercial-licensing)  | Yes with [Commercial Temasys Plugin*](https://temasys.com.sg/plugin/#commercial-licensing) |
