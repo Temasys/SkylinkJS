@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 15:44:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 15:46:14 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -6418,6 +6418,8 @@ Skylink.prototype._getUserInfo = function(peerId) {
 
   delete userInfo.agent;
   delete userInfo.room;
+  delete userInfo.config;
+  delete userInfo.parentId;
   return userInfo;
 };
 
