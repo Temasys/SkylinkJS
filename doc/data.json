@@ -1877,19 +1877,6 @@
         {
             "file": "source/data-transfer.js",
             "line": 132,
-            "description": "Stores the list of agent names supported by the Web for Web only functionalities.",
-            "itemtype": "attribute",
-            "name": "_SUPPORTED_WEB_AGENTS",
-            "type": "Array",
-            "readonly": "",
-            "access": "private",
-            "tagname": "",
-            "since": "0.6.16",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-transfer.js",
-            "line": 143,
             "description": "<blockquote class=\"info\">\n  Note that Android, iOS and C++ SDKs do not support simultaneous data transfers.\n</blockquote>\nFunction that starts an uploading data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -1991,7 +1978,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 522,
+            "line": 511,
             "description": "<blockquote class=\"info\">\n  Currently, the Android, iOS and C++ SDKs do not support this type of data transfer session.\n</blockquote>\nFunction that starts an uploading string data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -2086,7 +2073,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 753,
+            "line": 742,
             "description": "Function that accepts or rejects an upload data transfer request from Peer to User.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -2118,7 +2105,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 889,
+            "line": 878,
             "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the cancel data transfer functionality may differ, as it\n  will result in all Peers related to the data transfer ID to be terminated.\n</blockquote>\nFunction that terminates a currently uploading / downloading data transfer from / to Peer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -2143,13 +2130,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 944,
+            "line": 933,
             "description": "Emit data state event function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1017,
+            "line": 1006,
             "description": "Function that sends a message to Peers via the Datachannel connection.\n<small>Consider using <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> if you are\nsending large strings to Peers.</small>",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -2175,7 +2162,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1152,
+            "line": 1141,
             "description": "<blockquote class=\"info\">\nNote that this functionality is currently not supported by MCU enabled Peer connections.<br>\nThe current maximum data chunk size is <code>65456</code>.\n</blockquote>\nFunction that streams a data chunk to Peers.",
             "itemtype": "method",
             "name": "streamData",
@@ -2201,7 +2188,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1302,
+            "line": 1290,
             "description": "Function that starts the data transfer to Peers.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -2212,13 +2199,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1358,
+            "line": 1345,
             "description": "Complete Peer function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1422,
+            "line": 1409,
             "description": "Function that starts or listens the data transfer status to Peer.\nThis reacts differently during MCU environment.",
             "itemtype": "method",
             "name": "_startDataTransferToPeer",
@@ -2233,25 +2220,25 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1437,
+            "line": 1424,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1447,
+            "line": 1434,
             "description": "Return error and trigger them if failed before or during data transfers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1463,
+            "line": 1450,
             "description": "Send WRQ protocol to start data transfers.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1683,
+            "line": 1671,
             "description": "Function that returns the data transfer session.",
             "itemtype": "method",
             "name": "_getTransferInfo",
@@ -2262,7 +2249,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1765,
+            "line": 1753,
             "description": "Function that returns the compiled data transfer data.",
             "itemtype": "method",
             "name": "_getTransferData",
@@ -2273,7 +2260,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1792,
+            "line": 1780,
             "description": "Function that handles the data transfers sessions timeouts.",
             "itemtype": "method",
             "name": "_handleDataTransferTimeoutForPeer",
@@ -2284,13 +2271,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1836,
+            "line": 1824,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1883,
+            "line": 1871,
             "description": "Function that handles the data received from Datachannel and\nroutes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_processDataChannelData",
@@ -2301,7 +2288,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2028,
+            "line": 2016,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -2312,7 +2299,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2076,
+            "line": 2073,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -2323,13 +2310,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2095,
+            "line": 2092,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2178,
+            "line": 2175,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -2340,7 +2327,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2199,
+            "line": 2196,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -2351,13 +2338,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2218,
+            "line": 2215,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2250,
+            "line": 2247,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -2368,13 +2355,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2267,
+            "line": 2264,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2299,
+            "line": 2296,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -5343,6 +5330,16 @@
                                     "description": "The Peer Temasys Plugin version.\n <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>",
                                     "type": "String",
                                     "optional": true
+                                },
+                                {
+                                    "name": "DTProtocolVersion",
+                                    "description": "The Peer data transfer (DT) protocol version.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "SMProtocolVersion",
+                                    "description": "The Peer signaling message (SM) protocol version.",
+                                    "type": "String"
                                 }
                             ]
                         },
@@ -5407,7 +5404,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 362,
+            "line": 364,
             "description": "Event triggered when a Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "peerRestart",
@@ -5438,7 +5435,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 376,
+            "line": 378,
             "description": "Event triggered when a Peer session information has been updated.",
             "itemtype": "event",
             "name": "peerUpdated",
@@ -5464,7 +5461,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 389,
+            "line": 391,
             "description": "Event triggered when a Peer leaves the room.",
             "itemtype": "event",
             "name": "peerLeft",
@@ -5490,7 +5487,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 402,
+            "line": 404,
             "description": "Event triggered when Room session has ended abruptly due to network disconnections.",
             "itemtype": "event",
             "name": "sessionDisconnect",
@@ -5511,7 +5508,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 414,
+            "line": 416,
             "description": "Event triggered when receiving Peer Stream.",
             "itemtype": "event",
             "name": "incomingStream",
@@ -5552,7 +5549,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 431,
+            "line": 433,
             "description": "Event triggered when receiving message from Peer.",
             "itemtype": "event",
             "name": "incomingMessage",
@@ -5617,7 +5614,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 462,
+            "line": 464,
             "description": "Event triggered when receiving completed data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingData",
@@ -5653,7 +5650,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 478,
+            "line": 480,
             "description": "Event triggered when receiving data stream chunk.",
             "itemtype": "event",
             "name": "incomingDataStream",
@@ -5718,7 +5715,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 504,
+            "line": 506,
             "description": "Event triggered when receiving upload data transfer from Peer.",
             "itemtype": "event",
             "name": "incomingDataRequest",
@@ -5749,7 +5746,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 518,
+            "line": 520,
             "description": "Event triggered when Room locked status has changed.",
             "itemtype": "event",
             "name": "roomLock",
@@ -5780,7 +5777,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 532,
+            "line": 534,
             "description": "Event triggered when a Datachannel connection state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -5822,7 +5819,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 551,
+            "line": 553,
             "description": "Event triggered when a data transfer state has changed.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -5930,7 +5927,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 599,
+            "line": 601,
             "description": "Event triggered when Signaling server reaction state has changed.",
             "itemtype": "event",
             "name": "systemAction",
@@ -5956,7 +5953,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 612,
+            "line": 614,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -5977,7 +5974,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 623,
+            "line": 625,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -5998,7 +5995,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 634,
+            "line": 636,
             "description": "Event triggered when a server Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -6019,7 +6016,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 645,
+            "line": 647,
             "description": "Event triggered when a Peer Stream streaming has stopped.\n<small>Note that it may not be the currently sent Stream to User, and it also triggers\nwhen User leaves the Room for any currently sent Stream to User from Peer.</small>",
             "itemtype": "event",
             "name": "streamEnded",
@@ -6055,7 +6052,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 662,
+            "line": 664,
             "description": "Event triggered when Peer Stream audio or video tracks has been muted / unmuted.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -6086,7 +6083,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 676,
+            "line": 678,
             "description": "Event triggered when <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval state changes.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -6119,7 +6116,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 689,
+            "line": 691,
             "description": "Event triggered when <a href=\"#method_introducePeer\"><code>introducePeer()</code> method</a>\nintroduction request state changes.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -6156,7 +6153,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 705,
+            "line": 707,
             "description": "Event triggered when recording session state has changed.",
             "itemtype": "event",
             "name": "recordingState",
@@ -6195,7 +6192,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 726,
+            "line": 728,
             "description": "Event triggered when <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code> method</a>\nretrieval state changes.",
             "itemtype": "event",
             "name": "getConnectionStatusStateChange",
@@ -7087,7 +7084,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1035,
+            "line": 1037,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -7115,7 +7112,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1052,
+            "line": 1054,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -7174,7 +7171,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1080,
+            "line": 1082,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when all remote ICE candidates gathering has completed and been processed.",
             "itemtype": "event",
             "name": "candidatesGathered",
@@ -7212,7 +7209,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1100,
+            "line": 1102,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -7236,7 +7233,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1124,
+            "line": 1126,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -7273,7 +7270,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1182,
+            "line": 1184,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -7298,7 +7295,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1231,
+            "line": 1233,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -7309,7 +7306,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1285,
+            "line": 1287,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -7320,7 +7317,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1311,
+            "line": 1313,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -7331,7 +7328,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1349,
+            "line": 1351,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -8770,27 +8767,27 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:143"
+            "line": " source/data-transfer.js:132"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:522"
+            "line": " source/data-transfer.js:511"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:753"
+            "line": " source/data-transfer.js:742"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:889"
+            "line": " source/data-transfer.js:878"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1017"
+            "line": " source/data-transfer.js:1006"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1152"
+            "line": " source/data-transfer.js:1141"
         },
         {
             "message": "unknown tag: trigger",
@@ -8966,39 +8963,39 @@
         },
         {
             "message": "Missing item type\nEmit data state event function.",
-            "line": " source/data-transfer.js:944"
+            "line": " source/data-transfer.js:933"
         },
         {
             "message": "Missing item type\nComplete Peer function.",
-            "line": " source/data-transfer.js:1358"
+            "line": " source/data-transfer.js:1345"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1437"
+            "line": " source/data-transfer.js:1424"
         },
         {
             "message": "Missing item type\nReturn error and trigger them if failed before or during data transfers function.",
-            "line": " source/data-transfer.js:1447"
+            "line": " source/data-transfer.js:1434"
         },
         {
             "message": "Missing item type\nSend WRQ protocol to start data transfers.",
-            "line": " source/data-transfer.js:1463"
+            "line": " source/data-transfer.js:1450"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1836"
+            "line": " source/data-transfer.js:1824"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2095"
+            "line": " source/data-transfer.js:2092"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2218"
+            "line": " source/data-transfer.js:2215"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2267"
+            "line": " source/data-transfer.js:2264"
         }
     ]
 }

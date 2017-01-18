@@ -340,6 +340,8 @@ var _eventsDocs = {
    *  <small>Data may be accessing OS platform version from Web SDK.</small>
    * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
    *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
+   * @param {String} peerInfo.agent.DTProtocolVersion The Peer data transfer (DT) protocol version.
+   * @param {String} peerInfo.agent.SMProtocolVersion The Peer signaling message (SM) protocol version.
    * @param {String} peerInfo.room The Room Peer is from.
    * @param {JSON} peerInfo.config The Peer connection configuration.
    * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connection has

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 22:00:04 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 23:21:01 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 22:00:04 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 23:21:01 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -13364,17 +13364,6 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 };
 
 /**
- * Stores the list of agent names supported by the Web for Web only functionalities.
- * @attribute _SUPPORTED_WEB_AGENTS
- * @type Array
- * @readOnly
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._SUPPORTED_WEB_AGENTS = ['chrome', 'firefox', 'safari', 'IE', 'edge' ,'opera', 'bowser', 'blink'];
-
-/**
  * <blockquote class="info">
  *   Note that Android, iOS and C++ SDKs do not support simultaneous data transfers.
  * </blockquote>
@@ -14497,12 +14486,11 @@ Skylink.prototype.streamData = function(data, targetPeerId) {
 
         if (transferId && self._dataTransfers[transferId] &&
           // Check if its upload direction
-          self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.UPLOAD &&
+          self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.UPLOAD ?
           // Check if its not string / binarystring transfer
-          [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(
-          self._dataTransfers[transferId].chunkType) === -1 &&
+          self._dataTransfers[transferId].sessionChunkType === 'binary' &&
           // Check if there is no polyfill for peer
-          self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) === -1) {
+          self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) === -1 : false) {
           log.error([peerId, 'RTCDataChannel', null, 'Dropping of streaming data chunk to Peer as ' +
             'Datachannel connection is streaming binary data chunks for blob transfer']);
           listOfPeers.splice(i, 1);
@@ -14565,13 +14553,12 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, sessionTyp
   self._dataTransfers[transferId].senderPeerId = self._user.sid;
 
   // Check if fallback chunks is required
-  if ([self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, self.DATA_TRANSFER_DATA_TYPE.BLOB].indexOf(
-    transferInfo.chunkType) > -1) {
+  if (sessionType === 'blob' && sessionChunkType === 'binary') {
     for (var p = 0; p < listOfPeers.length; p++) {
-      var agentName = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).name || '';
+      var protocolVer = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).DTProtocolVersion || '0.1.0';
 
       // C++ SDK does not support binary file transfer for now
-      if (self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1) {
+      if (self._isLowerThanVersion(protocolVer, '0.1.1')) {
         self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
       }
     }
@@ -14831,11 +14818,12 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     return;
   }
 
-  var agentName = (self._peerInformations[peerId].agent || {}).name || '';
-  var requireInterop = self._SUPPORTED_WEB_AGENTS.indexOf(agentName) === -1 && agentName !== 'cpp';
+  var protocolVer = (self._peerInformations[peerId].agent || {}).DTProtocolVersion || '0.1.0';
+  var requireInterop = self._isLowerThanVersion(protocolVer, '0.1.0.1');
 
   // Prevent DATA_URL (or "string" dataType transfers) with Android / iOS / C++ SDKs
-  if ((requireInterop || agentName === 'cpp') && self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
+  if (self._isLowerThanVersion(protocolVer, '0.1.1') && self._dataTransfers[transferId].sessionType === 'data' &&
+    self._dataTransfers[transferId].sessionChunkType === 'string') {
     returnErrorBeforeTransferFn('Unable to start data transfer as Peer do not support DATA_URL type of data transfers');
     return;
   }
@@ -15283,15 +15271,24 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
     timeout: data.timeout || 60,
     isPrivate: !!data.isPrivate,
     senderPeerId: data.sender || peerId,
-    dataType: data.dataType === 'data' ? self.DATA_TRANSFER_SESSION_TYPE.DATA_URL : self.DATA_TRANSFER_SESSION_TYPE.BLOB,
+    dataType: self.DATA_TRANSFER_SESSION_TYPE.BLOB,
     mimeType: data.mimeType || null,
-    chunkType: data.chunkType ? (data.chunkType === 'string' ? (data.dataType === 'blob' ?
-      self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING : self.DATA_TRANSFER_DATA_TYPE.STRING) :
-      self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) : self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+    chunkType: self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
     direction: self.DATA_TRANSFER_TYPE.DOWNLOAD,
     chunks: [],
-    sessions: {}
+    sessions: {},
+    sessionType: data.dataType || 'blob',
+    sessionChunkType: data.chunkType || 'string'
   };
+
+  if (self._dataTransfers[transferId].sessionType === 'data' &&
+    self._dataTransfers[transferId].sessionChunkType === 'string') {
+    self._dataTransfers[transferId].dataType = self.DATA_TRANSFER_SESSION_TYPE.DATA_URL;
+    self._dataTransfers[transferId].chunkType = self.DATA_TRANSFER_DATA_TYPE.STRING;
+  } else if (self._dataTransfers[transferId].sessionType === 'blob' &&
+    self._dataTransfers[transferId].sessionChunkType === 'binary') {
+    self._dataTransfers[transferId].chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
+  }
 
   self._dataChannels[peerId][channelProp].transferId = transferId;
   self._dataTransfers[transferId].sessions[peerId] = {
@@ -15553,8 +15550,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
     // Check if direction is downloading
       self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.DOWNLOAD &&
     // Check if it is not binary data transfer
-      [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(
-      self._dataTransfers[transferId].chunkType) === -1)) {
+      self._dataTransfers[transferId].sessionChunkType === 'binary')) {
       self._trigger('incomingDataStream', {
         content: chunk,
         chunkSize: chunkSize,
@@ -21187,6 +21183,8 @@ var _eventsDocs = {
    *  <small>Data may be accessing OS platform version from Web SDK.</small>
    * @param {String} [peerInfo.agent.pluginVersion] The Peer Temasys Plugin version.
    *  <small>Defined only when Peer is using the Temasys Plugin (IE / Safari).</small>
+   * @param {String} peerInfo.agent.DTProtocolVersion The Peer data transfer (DT) protocol version.
+   * @param {String} peerInfo.agent.SMProtocolVersion The Peer signaling message (SM) protocol version.
    * @param {String} peerInfo.room The Room Peer is from.
    * @param {JSON} peerInfo.config The Peer connection configuration.
    * @param {Boolean} peerInfo.config.enableIceTrickle The flag if Peer connection has
