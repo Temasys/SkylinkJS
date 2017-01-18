@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 00:37:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 15:44:47 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -3477,7 +3477,7 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
         log.error([peerId, 'RTCDataChannel', channelProp, 'Received error ->'], error);
 
         self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error, channelName, channelType, null);
-        throw error;
+        return;
       }
 
       if (!(transferId && self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
@@ -4472,6 +4472,7 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 
 /**
  * <blockquote class="info">
+ *   Note that Edge browser does not support renegotiation.
  *   For MCU enabled Peer connections with <code>options.mcuUseRenegoRestart</code> set to <code>false</code>
  *   in the <a href="#method_init"><code>init()</code> method</a>, the restart functionality may differ, you
  *   may learn more about how to workaround it
@@ -4635,8 +4636,13 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
     }
   };
 
-  if (listOfPeers.length === 0) {
+  if (listOfPeers.length === 0 && !(self._hasMCU && !self._mcuUseRenegoRestart)) {
     emitErrorForPeersFn('There is currently no peer connections to restart');
+    return;
+  }
+
+  if (window.webrtcDetectedBrowser === 'edge') {
+    emitErrorForPeersFn('Edge browser currently does not support renegotiation.');
     return;
   }
 
@@ -4730,6 +4736,9 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
 };
 
 /**
+ * <blockquote class="info">
+ * Note that this is not well supported in the Edge browser.
+ * </blockquote>
  * Function that retrieves Peer connection bandwidth and ICE connection stats.
  * @method getConnectionStatus
  * @param {String|Array} [targetPeerId] The target Peer ID to retrieve connection stats from.
@@ -4903,6 +4912,10 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
     return;
   }
 
+  if (window.webrtcDetectedBrowser === 'edge') {
+    log.warn('Edge browser does not have well support for stats.');
+  }
+
   var completedTaskCounter = [];
 
   var checkCompletedFn = function (peerId) {
@@ -5000,6 +5013,9 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'video'),
           frameWidth: null,
           frameHeight: null,
+          framesDecoded: null,
+          framesCorrupted: null,
+          framesPerSecond: null,
           framesInput: null,
           frames: null,
           frameRateMean: null,
@@ -5008,12 +5024,15 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           nacks: null,
           plis: null,
           firs: null,
+          slis: null,
           totalBytes: 0,
           totalPackets: 0,
           totalPacketsLost: 0,
-          totalNacks: 0,
-          totalPlis: 0,
-          totalFirs: 0
+          totalNacks: null,
+          totalPlis: null,
+          totalFirs: null,
+          totalSlis: null,
+          totalFrames: null
         },
         receiving: {
           ssrc: null,
@@ -5026,6 +5045,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           frameWidth: null,
           frameHeight: null,
           framesDecoded: null,
+          framesCorrupted: null,
+          framesPerSecond: null,
           framesOutput: null,
           frames: null,
           frameRateMean: null,
@@ -5033,13 +5054,16 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
           nacks: null,
           plis: null,
           firs: null,
+          slis: null,
           e2eDelay: null,
           totalBytes: 0,
           totalPackets: 0,
           totalPacketsLost: 0,
-          totalNacks: 0,
-          totalPlis: 0,
-          totalFirs: 0
+          totalNacks: null,
+          totalPlis: null,
+          totalFirs: null,
+          totalSlis: null,
+          totalFrames: null
         }
       },
       selectedCandidate: {
@@ -5076,7 +5100,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
     };
 
     pc.getStats(null, function (stats) {
-      log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
+      log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], JSON.stringify(stats));
 
       result.raw = stats;
 
@@ -5146,44 +5170,91 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
         });
 
       } else if (window.webrtcDetectedBrowser === 'edge') {
+        var tracks = [];
+
         if (pc.getRemoteStreams().length > 0) {
-          var tracks = pc.getRemoteStreams()[0].getTracks();
-
-          loopFn(tracks, function (track) {
-            loopFn(stats, function (obj, prop) {
-              if (obj.type === 'track' && obj.trackIdentifier === track.id) {
-                loopFn(stats, function (streamObj) {
-                  if (streamObj.associateStatsId === obj.id &&
-                    ['outboundrtp', 'inboundrtp'].indexOf(streamObj.type) > -1) {
-                    var dirType = streamObj.type === 'outboundrtp' ? 'sending' : 'receiving';
-
-                    if (!self._peerStats[peerId][prop]) {
-                      self._peerStats[peerId][prop] = streamObj;
-                    }
-
-                    result[track.kind][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj,
-                      dirType === 'sending' ? 'bytesSent' : 'bytesReceived');
-                    result[track.kind][dirType].totalBytes = parseInt(
-                      (dirType === 'sending' ? streamObj.bytesSent : streamObj.bytesReceived) || '0', 10);
-                    result[track.kind][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj,
-                      dirType === 'sending' ? 'packetsSent' : 'packetsReceived');
-                    result[track.kind][dirType].totalPackets = parseInt(
-                      (dirType === 'sending' ? streamObj.packetsSent : streamObj.packetsReceived) || '0', 10);
-                    result[track.kind][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop], streamObj, 'packetsLost');
-                    result[track.kind][dirType].totalPacketsLost = parseInt(streamObj.packetsLost || '0', 10);
-                    result[track.kind][dirType].ssrc = parseInt(streamObj.ssrc || '0', 10);
-
-                    if (dirType === 'sending') {
-                      result[track.kind].sending.rtt = obj.roundTripTime || 0;
-                    }
-
-                    self._peerStats[peerId][prop] = streamObj;
-                  }
-                });
-              }
-            });
-          });
+          tracks = tracks.concat(pc.getRemoteStreams()[0].getTracks());
         }
+
+        if (pc.getLocalStreams().length > 0) {
+          tracks = tracks.concat(pc.getLocalStreams()[0].getTracks());
+        }
+
+        loopFn(tracks, function (track) {
+          loopFn(stats, function (obj, prop) {
+            if (obj.type === 'track' && obj.trackIdentifier === track.id) {
+              var dirType = obj.remoteSource ? 'receiving' : 'sending';
+              var mediaType = track.kind;
+
+              if (mediaType === 'audio') {
+                result[mediaType][dirType][dirType === 'sending' ? 'inputLevel' : 'outputLevel'] = obj.audioLevel;
+                if (dirType === 'sending') {
+                  result[mediaType][dirType].echoReturnLoss = obj.echoReturnLoss;
+                  result[mediaType][dirType].echoReturnLossEnhancement = obj.echoReturnLossEnhancement;
+                }
+              } else {
+                result[mediaType][dirType].frames = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                  streamObj,dirType === 'sending' ? obj.framesSent : obj.framesReceived);
+                result[mediaType][dirType].framesDropped = obj.framesDropped;
+                result[mediaType][dirType].framesDecoded = obj.framesDecoded;
+                result[mediaType][dirType].framesCorrupted = obj.framesCorrupted;
+                result[mediaType][dirType].framesPerSecond = obj.framesPerSecond;
+                result[mediaType][dirType].frameHeight = obj.frameHeight || null;
+                result[mediaType][dirType].frameWidth = obj.frameWidth || null;
+                result[mediaType][dirType].totalFrames = dirType === 'sending' ? obj.framesSent : obj.framesReceived;
+              }
+
+              loopFn(stats, function (streamObj, subprop) {
+                if (streamObj.mediaTrackId === obj.id && ['outboundrtp', 'inboundrtp'].indexOf(streamObj.type) > -1) {
+                  if (!self._peerStats[peerId][subprop]) {
+                    self._peerStats[peerId][subprop] = streamObj;
+                  }
+
+                  result[mediaType][dirType].ssrc = parseInt(streamObj.ssrc || '0', 10);
+
+                  if (mediaType === 'audio') {
+                    result[mediaType][dirType].jitter = streamObj.jitter || null;
+                  } else {
+                    result[mediaType][dirType].firs = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                      streamObj, 'firCount');
+                    result[mediaType][dirType].nacks = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                      streamObj, 'nackCount');
+                    result[mediaType][dirType].plis = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                      streamObj, 'pliCount');
+                    result[mediaType][dirType].slis = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                      streamObj, 'sliCount');
+
+                    result[mediaType][dirType].totalFirs = streamObj.firCount;
+                    result[mediaType][dirType].totalNacks = streamObj.nackCount;
+                    result[mediaType][dirType].totalPlis = streamObj.plisCount;
+                    result[mediaType][dirType].totalSlis = streamObj.sliCount;
+                  }
+
+                  result[mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                    streamObj, dirType === 'receiving' ? 'bytesReceived' : 'bytesSent');
+                  result[mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                    streamObj, dirType === 'receiving' ? 'packetsReceived' : 'packetsSent');
+                  result[mediaType][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                    streamObj, 'packetsLost');
+
+                  result[mediaType][dirType].totalBytes = dirType === 'receiving' ? streamObj.bytesReceived : streamObj.bytesSent;
+                  result[mediaType][dirType].totalPackets = dirType === 'receiving' ? streamObj.packetsReceived : streamObj.packetsSent;
+                  result[mediaType][dirType].totalPacketsLost = streamObj.packetsLost;
+
+                  if (dirType === 'receiving') {
+                    result[mediaType].receiving.fractionLost = streamObj.fractionLost;
+                  } else {
+                    result[mediaType].sending.rtt = streamObj.roundTripTime || 0;
+                  }
+
+                  if (result[mediaType][dirType].codec && streamObj.codecId) {
+                    result[mediaType][dirType].codec.name = streamObj.codecId;
+                  }
+                }
+              });
+            }
+          });
+        });
 
       } else {
         var reportedCandidate = false;
@@ -9871,6 +9942,14 @@ var _eventsDocs = {
    * @param {Number} [stats.video.sending.frameRateMean] The Peer connection sending video streaming fps mean.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.frameRateStdDev] The Peer connection sending video streaming fps standard deviation.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small> 
+   * @param {Number} [stats.video.sending.framesPerSecond] The Peer connection sending video streaming fps.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.framesDecoded] The Peer connection sending video streaming frames decoded.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.framesCorrupted] The Peer connection sending video streaming frames corrupted.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.totalFrames] The Peer connection total sending video streaming frames.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.nacks] The Peer connection current sending video streaming nacks.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
@@ -9884,6 +9963,10 @@ var _eventsDocs = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.totalFirs] The Peer connection total sending video streaming firs.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.slis] The Peer connection current sending video streaming slis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.sending.totalPlis] The Peer connection total sending video streaming slis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.video.receiving The Peer connection receiving video streaming stats.
    * @param {Number} stats.video.receiving.bytes The Peer connection current receiving video streaming bytes.
    *   <small>Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</small>
@@ -9894,7 +9977,7 @@ var _eventsDocs = {
    * @param {Number} stats.video.receiving.packetsLost The Peer connection current receiving video streaming packets lost.
    * @param {Number} stats.video.receiving.totalPacketsLost The Peer connection total receiving video streaming packets lost.
    * @param {Number} stats.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
-   * @param {Number} stats.video.receiving.e2eDelay The Peer connection receiving video streaming e2e delay.
+   * @param {Number} [stats.video.receiving.e2eDelay] The Peer connection receiving video streaming e2e delay.
    *   <small>Defined as <code>null</code> if it's not present in original raw stats before parsing, and that
    *   it finds any existing audio, video or object (plugin) DOM elements that has set with the
    *   Peer remote stream object to parse current time. Note that <code>document.getElementsByTagName</code> function
@@ -9929,17 +10012,29 @@ var _eventsDocs = {
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.frameRateStdDev] The Peer connection receiving video streaming fps standard deviation.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.framesPerSecond] The Peer connection receiving video streaming fps.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.framesDecoded] The Peer connection receiving video streaming frames decoded.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.framesCorrupted] The Peer connection receiving video streaming frames corrupted.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.totalFrames] The Peer connection total receiving video streaming frames.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.nacks] The Peer connection current receiving video streaming nacks.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.totalNacks] The Peer connection total receiving video streaming nacks.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.plis] The Peer connection current receiving video streaming plis.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
-   * @param {Number} [stats.video.receiving.totalPlis] The Peer connection totally receiving video streaming plis.
+   * @param {Number} [stats.video.receiving.totalPlis] The Peer connection total receiving video streaming plis.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.firs] The Peer connection current receiving video streaming firs.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.receiving.totalFirs] The Peer connection total receiving video streaming firs.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.slis] The Peer connection current receiving video streaming slis.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {Number} [stats.video.receiving.totalPlis] The Peer connection total receiving video streaming slis.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.selectedCandidate The Peer connection selected ICE candidate pair stats.
    * @param {JSON} stats.selectedCandidate.local The Peer connection selected local ICE candidate.
@@ -13330,6 +13425,15 @@ Skylink.prototype.sendStream = function(options, callback) {
     return;
   }
 
+  if (window.webrtcDetectedBrowser === 'edge') {
+    var edgeNotSupportError = 'Edge browser currently does not support renegotiation.';
+    log.error(edgeNotSupportError, options);
+    if (typeof callback === 'function'){
+      callback(new Error(edgeNotSupportError),null);
+    }
+    return;
+  }
+
   if (typeof options.getAudioTracks === 'function' || typeof options.getVideoTracks === 'function') {
     var checkActiveTracksFn = function (tracks) {
       for (var t = 0; t < tracks.length; t++) {
@@ -15431,10 +15535,12 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   }
 
   // Append empty space below
-  if (!sdpLines[sdpLines.length - 1].replace(/\n|\r|\s/gi, '')) {
-    sdpLines[sdpLines.length - 1] = '';
-  } else {
-    sdpLines.push('');
+  if (window.webrtcDetectedBrowser !== 'edge') {
+    if (!sdpLines[sdpLines.length - 1].replace(/\n|\r|\s/gi, '')) {
+      sdpLines[sdpLines.length - 1] = '';
+    } else {
+      sdpLines.push('');
+    }
   }
 
   return sdpLines.join('\r\n');
