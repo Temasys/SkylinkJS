@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 17:03:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 18 2017 21:02:29 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -2951,8 +2951,13 @@ Skylink.prototype.streamData = function(data, targetPeerId) {
       } else {
         var transferId = self._dataChannels[peerId].main.transferId;
 
-        if (transferId && self._dataTransfers[transferId] && [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
-          self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(self._dataTransfers[transferId].chunkType) === -1 &&
+        if (transferId && self._dataTransfers[transferId] &&
+          // Check if its upload direction
+          self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.UPLOAD &&
+          // Check if its not string / binarystring transfer
+          [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(
+          self._dataTransfers[transferId].chunkType) === -1 &&
+          // Check if there is no polyfill for peer
           self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) === -1) {
           log.error([peerId, 'RTCDataChannel', null, 'Dropping of streaming data chunk to Peer as ' +
             'Datachannel connection is streaming binary data chunks for blob transfer']);
@@ -3988,9 +3993,15 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
     transferId = self._dataChannels[peerId].main.transferId;
   }
 
-  if (transferId ? [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(
-    self._dataTransfers[transferId].chunkType) > -1 : true) {
-    if ([self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(chunkType) === -1) {
+  // Check if it is binary stream packet
+  if ([self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, self.DATA_TRANSFER_DATA_TYPE.BLOB].indexOf(chunkType) > -1) {
+    // Check if there is data transfer going on
+    if (!(transferId && self._dataTransfers[transferId] &&
+    // Check if direction is downloading
+      self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.DOWNLOAD &&
+    // Check if it is not binary data transfer
+      [self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING, self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(
+      self._dataTransfers[transferId].chunkType) === -1)) {
       self._trigger('incomingDataStream', {
         content: chunk,
         chunkSize: chunkSize,
@@ -4001,11 +4012,11 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
         senderPeerId: peerId
       }, peerId, self.getPeerInfo(peerId), false);
       return;
-    }
-
-    if (!transferId) {
+    } else if (!transferId) {
       return;
     }
+  } else if (!transferId) {
+    return;
   }
 
   if (self._dataTransfers[transferId].senderPeerId) {
