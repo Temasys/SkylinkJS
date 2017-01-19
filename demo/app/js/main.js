@@ -680,7 +680,6 @@ Demo.Skylink.on('recordingState', function(state, recordingId, url, error) {
 
 Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
   if (state === Demo.Skylink.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
-    console.info(stats);
     var statsElm = $('#video' + (peerId === 'MCU' ? _peerId : peerId)).find('.connstats');
     var formatStatItem = function (type, dir) {
       var itemStr = '';
@@ -794,7 +793,9 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
       $(statsElm).find('.candidate .' + type).html((stats.selectedCandidate[type].ipAddress || '-') + ':' +
         (stats.selectedCandidate[type].portNumber || '-') + ' - (transport: ' +
         (stats.selectedCandidate[type].transport || 'N/A') +
-        ', type: ' + (stats.selectedCandidate[type].candidateType || 'N/A') + ')');
+        ', type: ' + (stats.selectedCandidate[type].candidateType || 'N/A') +
+        (stats.selectedCandidate[type].turnMediaTransport ? ', turn media transport: ' +
+        stats.selectedCandidate[type].turnMediaTransport : '') + ')');
     };
 
     formatStatItem('audio', 'sending');

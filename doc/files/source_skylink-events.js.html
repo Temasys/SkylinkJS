@@ -834,14 +834,26 @@ var _eventsDocs = {
    *   &lt;small&gt;Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.&lt;/small&gt;
    * @param {Number} stats.audio.sending.packets The Peer connection current sending audio streaming packets.
    * @param {Number} stats.audio.sending.totalPackets The Peer connection total sending audio streaming packets.
-   * @param {Number} stats.audio.sending.packetsLost The Peer connection current sending audio streaming packets lost.
-   * @param {Number} stats.audio.sending.totalPacketsLost The Peer connection total sending audio streaming packets lost.
+   * @param {Number} stats.audio.sending.packetsLost &lt;blockquote class=&quot;info&quot;&gt;
+   *   This property has been deprecated and would be removed in future releases
+   *   as it should not be in &lt;code&gt;sending&lt;/code&gt; property.
+   *   &lt;/blockquote&gt; The Peer connection current sending audio streaming packets lost.
+   * @param {Number} stats.audio.sending.totalPacketsLost &lt;blockquote class=&quot;info&quot;&gt;
+   *   This property has been deprecated and would be removed in future releases
+   *   as it should not be in &lt;code&gt;sending&lt;/code&gt; property.
+   *   &lt;/blockquote&gt; The Peer connection total sending audio streaming packets lost.
    * @param {Number} stats.audio.sending.ssrc The Peer connection sending audio streaming RTP packets SSRC.
    * @param {Number} stats.audio.sending.rtt The Peer connection sending audio streaming RTT (Round-trip delay time).
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
-   * @param {Number} stats.audio.sending.jitter The Peer connection sending audio streaming RTP packets jitter in seconds.
+   * @param {Number} stats.audio.sending.jitter &lt;blockquote class=&quot;info&quot;&gt;
+   *   This property has been deprecated and would be removed in future releases
+   *   as it should not be in &lt;code&gt;sending&lt;/code&gt; property.
+   *   &lt;/blockquote&gt; The Peer connection sending audio streaming RTP packets jitter in seconds.
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
-   * @param {Number} [stats.audio.sending.jitterBufferMs] The Peer connection sending audio streaming
+   * @param {Number} [stats.audio.sending.jitterBufferMs] &lt;blockquote class=&quot;info&quot;&gt;
+   *   This property has been deprecated and would be removed in future releases
+   *   as it should not be in &lt;code&gt;sending&lt;/code&gt; property.
+   *   &lt;/blockquote&gt; The Peer connection sending audio streaming
    *   RTP packets jitter buffer in miliseconds.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} [stats.audio.sending.codec] The Peer connection sending audio streaming selected codec information.
@@ -872,7 +884,10 @@ var _eventsDocs = {
    * @param {Number} stats.audio.receiving.packets The Peer connection current receiving audio streaming packets.
    * @param {Number} stats.audio.receiving.totalPackets The Peer connection total receiving audio streaming packets.
    * @param {Number} stats.audio.receiving.packetsLost The Peer connection current receiving audio streaming packets lost.
+   * @param {Number} stats.audio.receiving.fractionLost The Peer connection current receiving audio streaming fraction packets lost.
+   * @param {Number} stats.audio.receiving.packetsDiscarded The Peer connection current receiving audio streaming packets discarded.
    * @param {Number} stats.audio.receiving.totalPacketsLost The Peer connection total receiving audio streaming packets lost.
+   * @param {Number} stats.audio.receiving.totalPacketsDiscarded The Peer connection total receiving audio streaming packets discarded.
    * @param {Number} stats.audio.receiving.ssrc The Peer connection receiving audio streaming RTP packets SSRC.
    * @param {Number} stats.audio.receiving.jitter The Peer connection receiving audio streaming RTP packets jitter in seconds.
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
@@ -904,15 +919,28 @@ var _eventsDocs = {
    *   &lt;small&gt;Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.&lt;/small&gt;
    * @param {Number} stats.video.sending.packets The Peer connection current sending video streaming packets.
    * @param {Number} stats.video.sending.totalPackets The Peer connection total sending video streaming packets.
-   * @param {Number} stats.video.sending.packetsLost The Peer connection current sending video streaming packets lost.
-   * @param {Number} stats.video.sending.totalPacketsLost The Peer connection total sending video streaming packets lost.
+   * @param {Number} stats.video.sending.packetsLost &lt;blockquote class=&quot;info&quot;&gt;
+   *   This property has been deprecated and would be removed in future releases
+   *   as it should not be in &lt;code&gt;sending&lt;/code&gt; property.
+   *   &lt;/blockquote&gt; The Peer connection current sending video streaming packets lost.
+   * @param {Number} stats.video.sending.totalPacketsLost &lt;blockquote class=&quot;info&quot;&gt;
+   *   This property has been deprecated and would be removed in future releases
+   *   as it should not be in &lt;code&gt;sending&lt;/code&gt; property.
+   *   &lt;/blockquote&gt; The Peer connection total sending video streaming packets lost.
    * @param {Number} stats.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
    * @param {Number} stats.video.sending.rtt The Peer connection sending video streaming RTT (Round-trip delay time).
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
-   * @param {Number} stats.video.sending.jitter The Peer connection sending video streaming RTP packets jitter in seconds.
+   * @param {Number} stats.video.sending.jitter &lt;blockquote class=&quot;info&quot;&gt;
+   *   This property has been deprecated and would be removed in future releases
+   *   as it should not be in &lt;code&gt;sending&lt;/code&gt; property.
+   *   &lt;/blockquote&gt; The Peer connection sending video streaming RTP packets jitter in seconds.
    *   &lt;small&gt;Defined as &lt;code&gt;0&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing.&lt;/small&gt;
-   * @param {Number} [stats.video.sending.jitterBufferMs] The Peer connection sending video streaming
-   *   RTP packets jitter buffer in miliseconds.
+   * @param {Number} [stats.video.sending.jitterBufferMs] &lt;blockquote class=&quot;info&quot;&gt;
+   *   This property has been deprecated and would be removed in future releases
+   *   as it should not be in &lt;code&gt;sending&lt;/code&gt; property.
+   *   &lt;/blockquote&gt; The Peer connection sending video streaming RTP packets jitter buffer in miliseconds.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.qpSum] The Peer connection sending video streaming sum of the QP values of frames passed.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} [stats.video.sending.codec] The Peer connection sending video streaming selected codec information.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if local session description is not available before parsing.&lt;/small&gt;
@@ -929,7 +957,9 @@ var _eventsDocs = {
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} [stats.video.sending.frames] The Peer connection sending video streaming frames.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
-   * @param {Number} [stats.video.sending.framesInput] The Peer connection sending video streaming frames input.
+   * @param {Number} [stats.video.sending.frameRateInput] The Peer connection sending video streaming fps input.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Number} [stats.video.sending.frameRateInput] The Peer connection sending video streaming fps input.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} [stats.video.sending.framesDropped] The Peer connection sending video streaming frames dropped.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
@@ -959,7 +989,7 @@ var _eventsDocs = {
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} [stats.video.sending.slis] The Peer connection current sending video streaming slis.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
-   * @param {Number} [stats.video.sending.totalPlis] The Peer connection total sending video streaming slis.
+   * @param {Number} [stats.video.sending.totalSlis] The Peer connection total sending video streaming slis.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} stats.video.receiving The Peer connection receiving video streaming stats.
    * @param {Number} stats.video.receiving.bytes The Peer connection current receiving video streaming bytes.
@@ -969,7 +999,10 @@ var _eventsDocs = {
    * @param {Number} stats.video.receiving.packets The Peer connection current receiving video streaming packets.
    * @param {Number} stats.video.receiving.totalPackets The Peer connection total receiving video streaming packets.
    * @param {Number} stats.video.receiving.packetsLost The Peer connection current receiving video streaming packets lost.
+   * @param {Number} stats.video.receiving.fractionLost The Peer connection current receiving video streaming fraction packets lost.
+   * @param {Number} stats.video.receiving.packetsDiscarded The Peer connection current receiving video streaming packets discarded.
    * @param {Number} stats.video.receiving.totalPacketsLost The Peer connection total receiving video streaming packets lost.
+   * @param {Number} stats.video.receiving.totalPacketsDiscarded The Peer connection total receiving video streaming packets discarded.
    * @param {Number} stats.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
    * @param {Number} [stats.video.receiving.e2eDelay] The Peer connection receiving video streaming e2e delay.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not present in original raw stats before parsing, and that
@@ -998,7 +1031,7 @@ var _eventsDocs = {
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} [stats.video.receiving.frames] The Peer connection receiving video streaming frames.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
-   * @param {Number} [stats.video.receiving.framesOutput] The Peer connection receiving video streaming frames output.
+   * @param {Number} [stats.video.receiving.framesOutput] The Peer connection receiving video streaming fps output.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {Number} [stats.video.receiving.framesDecoded] The Peer connection receiving video streaming frames decoded.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
@@ -1040,6 +1073,10 @@ var _eventsDocs = {
    *   local ICE candidate IP transport type.
    * @param {String} stats.selectedCandidate.local.candidateType The Peer connection selected
    *   local ICE candidate type.
+   * @param {String} [stats.selectedCandidate.local.turnMediaTransport] The Peer connection possible
+   *   transport used when relaying local media to TURN server.
+   *   &lt;small&gt;Types are &lt;code&gt;&quot;UDP&quot;&lt;/code&gt; (UDP connections), &lt;code&gt;&quot;TCP&quot;&lt;/code&gt; (TCP connections) and
+   *   &lt;code&gt;&quot;TCP/TLS&quot;&lt;/code&gt; (TCP over TLS connections).&lt;/small&gt;
    * @param {JSON} stats.selectedCandidate.remote The Peer connection selected remote ICE candidate.
    * @param {String} stats.selectedCandidate.remote.ipAddress The Peer connection selected
    *   remote ICE candidate IP address.
@@ -1049,6 +1086,51 @@ var _eventsDocs = {
    *   remote ICE candidate IP transport type.
    * @param {String} stats.selectedCandidate.remote.candidateType The Peer connection selected
    *   remote ICE candidate type.
+   
+   * @param {Boolean} [stats.selectedCandidate.writable] The flag if Peer has gotten ACK to an ICE request.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {Boolean} [stats.selectedCandidate.readable] The flag if Peer has gotten a valid incoming ICE request.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.rtt] The current STUN connectivity checks RTT (Round-trip delay time).
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.totalRtt] The total STUN connectivity checks RTT (Round-trip delay time).
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {JSON} stats.selectedCandidate.requests The ICE connectivity check requests.
+   * @param {String} [stats.selectedCandidate.requests.received] The current ICE connectivity check requests received.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.requests.sent] The current ICE connectivity check requests sent.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.requests.totalReceived] The total ICE connectivity check requests received.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.requests.totalSent] The total ICE connectivity check requests sent.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {JSON} stats.selectedCandidate.responses The ICE connectivity check responses.
+   * @param {String} [stats.selectedCandidate.responses.received] The current ICE connectivity check responses received.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.responses.sent] The current ICE connectivity check responses sent.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.responses.totalReceived] The total ICE connectivity check responses received.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.responses.totalSent] The total ICE connectivity check responses sent.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {JSON} stats.selectedCandidate.consentRequests The current ICE consent requests.
+   * @param {String} [stats.selectedCandidate.consentRequests.received] The current ICE consent requests received.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.consentRequests.sent] The current ICE consent requests sent.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.consentRequests.totalReceived] The total ICE consent requests received.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.consentRequests.totalSent] The total ICE consent requests sent.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {JSON} stats.selectedCandidate.consentResponses The current ICE consent responses.
+   * @param {String} [stats.selectedCandidate.consentResponses.received] The current ICE consent responses received.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.consentResponses.sent] The current ICE consent responses sent.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.consentResponses.totalReceived] The total ICE consent responses received.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.selectedCandidate.consentResponses.totalSent] The total ICE consent responses sent.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} stats.certificate The Peer connection DTLS/SRTP exchanged certificates information.
    * @param {JSON} stats.certificate.local The Peer connection local certificate information.
    * @param {String} [stats.certificate.local.fingerprint] The Peer connection local certificate fingerprint.

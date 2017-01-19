@@ -2822,7 +2822,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1094,
+            "line": 1254,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -2833,7 +2833,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1129,
+            "line": 1289,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -2844,7 +2844,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1252,
+            "line": 1412,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2855,7 +2855,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1323,
+            "line": 1483,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2866,7 +2866,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1492,
+            "line": 1652,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -2877,7 +2877,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1610,
+            "line": 1770,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -2888,7 +2888,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1630,
+            "line": 1790,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -6250,12 +6250,12 @@
                                 },
                                 {
                                     "name": "sending.packetsLost",
-                                    "description": "The Peer connection current sending audio streaming packets lost.",
+                                    "description": "<blockquote class=\"info\">\n  This property has been deprecated and would be removed in future releases\n  as it should not be in <code>sending</code> property.\n  </blockquote> The Peer connection current sending audio streaming packets lost.",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "sending.totalPacketsLost",
-                                    "description": "The Peer connection total sending audio streaming packets lost.",
+                                    "description": "<blockquote class=\"info\">\n  This property has been deprecated and would be removed in future releases\n  as it should not be in <code>sending</code> property.\n  </blockquote> The Peer connection total sending audio streaming packets lost.",
                                     "type": "Number"
                                 },
                                 {
@@ -6270,12 +6270,12 @@
                                 },
                                 {
                                     "name": "sending.jitter",
-                                    "description": "The Peer connection sending audio streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "description": "<blockquote class=\"info\">\n  This property has been deprecated and would be removed in future releases\n  as it should not be in <code>sending</code> property.\n  </blockquote> The Peer connection sending audio streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "sending.jitterBufferMs",
-                                    "description": "The Peer connection sending audio streaming\n  RTP packets jitter buffer in miliseconds.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "<blockquote class=\"info\">\n  This property has been deprecated and would be removed in future releases\n  as it should not be in <code>sending</code> property.\n  </blockquote> The Peer connection sending audio streaming\n  RTP packets jitter buffer in miliseconds.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
@@ -6368,8 +6368,23 @@
                                     "type": "Number"
                                 },
                                 {
+                                    "name": "receiving.fractionLost",
+                                    "description": "The Peer connection current receiving audio streaming fraction packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.packetsDiscarded",
+                                    "description": "The Peer connection current receiving audio streaming packets discarded.",
+                                    "type": "Number"
+                                },
+                                {
                                     "name": "receiving.totalPacketsLost",
                                     "description": "The Peer connection total receiving audio streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalPacketsDiscarded",
+                                    "description": "The Peer connection total receiving audio streaming packets discarded.",
                                     "type": "Number"
                                 },
                                 {
@@ -6468,12 +6483,12 @@
                                 },
                                 {
                                     "name": "sending.packetsLost",
-                                    "description": "The Peer connection current sending video streaming packets lost.",
+                                    "description": "<blockquote class=\"info\">\n  This property has been deprecated and would be removed in future releases\n  as it should not be in <code>sending</code> property.\n  </blockquote> The Peer connection current sending video streaming packets lost.",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "sending.totalPacketsLost",
-                                    "description": "The Peer connection total sending video streaming packets lost.",
+                                    "description": "<blockquote class=\"info\">\n  This property has been deprecated and would be removed in future releases\n  as it should not be in <code>sending</code> property.\n  </blockquote> The Peer connection total sending video streaming packets lost.",
                                     "type": "Number"
                                 },
                                 {
@@ -6488,12 +6503,18 @@
                                 },
                                 {
                                     "name": "sending.jitter",
-                                    "description": "The Peer connection sending video streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
+                                    "description": "<blockquote class=\"info\">\n  This property has been deprecated and would be removed in future releases\n  as it should not be in <code>sending</code> property.\n  </blockquote> The Peer connection sending video streaming RTP packets jitter in seconds.\n  <small>Defined as <code>0</code> if it's not present in original raw stats before parsing.</small>",
                                     "type": "Number"
                                 },
                                 {
                                     "name": "sending.jitterBufferMs",
-                                    "description": "The Peer connection sending video streaming\n  RTP packets jitter buffer in miliseconds.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "<blockquote class=\"info\">\n  This property has been deprecated and would be removed in future releases\n  as it should not be in <code>sending</code> property.\n  </blockquote> The Peer connection sending video streaming RTP packets jitter buffer in miliseconds.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.qpSum",
+                                    "description": "The Peer connection sending video streaming sum of the QP values of frames passed.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
@@ -6544,8 +6565,14 @@
                                     "optional": true
                                 },
                                 {
-                                    "name": "sending.framesInput",
-                                    "description": "The Peer connection sending video streaming frames input.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "name": "sending.frameRateInput",
+                                    "description": "The Peer connection sending video streaming fps input.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "sending.frameRateInput",
+                                    "description": "The Peer connection sending video streaming fps input.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
@@ -6634,7 +6661,7 @@
                                     "optional": true
                                 },
                                 {
-                                    "name": "sending.totalPlis",
+                                    "name": "sending.totalSlis",
                                     "description": "The Peer connection total sending video streaming slis.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
@@ -6670,8 +6697,23 @@
                                     "type": "Number"
                                 },
                                 {
+                                    "name": "receiving.fractionLost",
+                                    "description": "The Peer connection current receiving video streaming fraction packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.packetsDiscarded",
+                                    "description": "The Peer connection current receiving video streaming packets discarded.",
+                                    "type": "Number"
+                                },
+                                {
                                     "name": "receiving.totalPacketsLost",
                                     "description": "The Peer connection total receiving video streaming packets lost.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "receiving.totalPacketsDiscarded",
+                                    "description": "The Peer connection total receiving video streaming packets discarded.",
                                     "type": "Number"
                                 },
                                 {
@@ -6744,7 +6786,7 @@
                                 },
                                 {
                                     "name": "receiving.framesOutput",
-                                    "description": "The Peer connection receiving video streaming frames output.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "description": "The Peer connection receiving video streaming fps output.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
@@ -6871,6 +6913,12 @@
                                     "type": "String"
                                 },
                                 {
+                                    "name": "local.turnMediaTransport",
+                                    "description": "The Peer connection possible\n  transport used when relaying local media to TURN server.\n  <small>Types are <code>\"UDP\"</code> (UDP connections), <code>\"TCP\"</code> (TCP connections) and\n  <code>\"TCP/TLS\"</code> (TCP over TLS connections).</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
                                     "name": "remote",
                                     "description": "The Peer connection selected remote ICE candidate.",
                                     "type": "JSON"
@@ -6894,6 +6942,146 @@
                                     "name": "remote.candidateType",
                                     "description": "The Peer connection selected\n  remote ICE candidate type.",
                                     "type": "String"
+                                },
+                                {
+                                    "name": "writable",
+                                    "description": "The flag if Peer has gotten ACK to an ICE request.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "readable",
+                                    "description": "The flag if Peer has gotten a valid incoming ICE request.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "rtt",
+                                    "description": "The current STUN connectivity checks RTT (Round-trip delay time).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "totalRtt",
+                                    "description": "The total STUN connectivity checks RTT (Round-trip delay time).\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "requests",
+                                    "description": "The ICE connectivity check requests.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "requests.received",
+                                    "description": "The current ICE connectivity check requests received.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "requests.sent",
+                                    "description": "The current ICE connectivity check requests sent.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "requests.totalReceived",
+                                    "description": "The total ICE connectivity check requests received.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "requests.totalSent",
+                                    "description": "The total ICE connectivity check requests sent.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "responses",
+                                    "description": "The ICE connectivity check responses.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "responses.received",
+                                    "description": "The current ICE connectivity check responses received.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "responses.sent",
+                                    "description": "The current ICE connectivity check responses sent.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "responses.totalReceived",
+                                    "description": "The total ICE connectivity check responses received.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "responses.totalSent",
+                                    "description": "The total ICE connectivity check responses sent.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "consentRequests",
+                                    "description": "The current ICE consent requests.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "consentRequests.received",
+                                    "description": "The current ICE consent requests received.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "consentRequests.sent",
+                                    "description": "The current ICE consent requests sent.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "consentRequests.totalReceived",
+                                    "description": "The total ICE consent requests received.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "consentRequests.totalSent",
+                                    "description": "The total ICE consent requests sent.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "consentResponses",
+                                    "description": "The current ICE consent responses.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "consentResponses.received",
+                                    "description": "The current ICE consent responses received.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "consentResponses.sent",
+                                    "description": "The current ICE consent responses sent.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "consentResponses.totalReceived",
+                                    "description": "The total ICE consent responses received.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "consentResponses.totalSent",
+                                    "description": "The total ICE consent responses sent.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
                                 }
                             ]
                         },
@@ -7222,7 +7410,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1084,
+            "line": 1166,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -7250,7 +7438,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1101,
+            "line": 1183,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -7309,7 +7497,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1129,
+            "line": 1211,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when all remote ICE candidates gathering has completed and been processed.",
             "itemtype": "event",
             "name": "candidatesGathered",
@@ -7347,7 +7535,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1149,
+            "line": 1231,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -7371,7 +7559,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1173,
+            "line": 1255,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -7408,7 +7596,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1231,
+            "line": 1313,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -7433,7 +7621,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1280,
+            "line": 1362,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -7444,7 +7632,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1334,
+            "line": 1416,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -7455,7 +7643,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1360,
+            "line": 1442,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -7466,7 +7654,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1398,
+            "line": 1480,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
