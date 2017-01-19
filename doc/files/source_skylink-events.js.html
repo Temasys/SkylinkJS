@@ -1049,6 +1049,29 @@ var _eventsDocs = {
    *   remote ICE candidate IP transport type.
    * @param {String} stats.selectedCandidate.remote.candidateType The Peer connection selected
    *   remote ICE candidate type.
+   * @param {JSON} stats.certificate The Peer connection DTLS/SRTP exchanged certificates information.
+   * @param {JSON} stats.certificate.local The Peer connection local certificate information.
+   * @param {String} [stats.certificate.local.fingerprint] The Peer connection local certificate fingerprint.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.certificate.local.fingerprintAlgorithm] The Peer connection local
+   *   certificate fingerprint algorithm.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.certificate.local.derBase64] The Peer connection local
+   *   base64 certificate in binary DER format encoded in base64.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {JSON} stats.certificate.remote The Peer connection remote certificate information.
+   * @param {String} [stats.certificate.remote.fingerprint] The Peer connection remote certificate fingerprint.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.certificate.remote.fingerprintAlgorithm] The Peer connection remote
+   *   certificate fingerprint algorithm.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.certificate.remote.derBase64] The Peer connection remote
+   *   base64 certificate in binary DER format encoded in base64.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.certificate.srtpCipher] The certificates SRTP cipher.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
+   * @param {String} [stats.certificate.dtlsCipher] The certificates DTLS cipher.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; if it&#x27;s not available in original raw stats before parsing.&lt;/small&gt;
    * @param {JSON} stats.connection The Peer connection object stats.
    * @param {String} stats.connection.iceConnectionState The Peer connection ICE connection state.
    * @param {String} stats.connection.iceGatheringState The Peer connection ICE gathering state.

@@ -900,3 +900,35 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
 
   return sdpLines.join('\r\n');
 };
+
+/**
+ * Function that parses and retrieves the session description fingerprint.
+ * @method _getSDPFingerprint
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription) {
+  var fingerprint = {
+    fingerprint: null,
+    fingerprintAlgorithm: null,
+    derBase64: null
+  };
+
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return fingerprint;
+  }
+
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].indexOf('a=fingerprint') === 0) {
+      var parts = sdpLines[i].replace('a=fingerprint:', '').split(' ');
+      fingerprint.fingerprint = parts[1];
+      fingerprint.fingerprintAlgorithm = parts[0];
+      break;
+    }
+  }
+
+  return fingerprint;
+};

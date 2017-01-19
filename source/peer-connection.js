@@ -672,6 +672,12 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
       selectedCandidate: {
         local: { ipAddress: null, candidateType: null, portNumber: null, transport: null },
         remote: { ipAddress: null, candidateType: null, portNumber: null, transport: null }
+      },
+      certificate: {
+        local: self._getSDPFingerprint(peerId, pc.localDescription),
+        remote: self._getSDPFingerprint(peerId, pc.remoteDescription),
+        dtlsCipher: null,
+        srtpCipher: null
       }
     };
 
@@ -861,6 +867,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
       } else {
         var reportedCandidate = false;
+        var reportedCertificate = false;
 
         loopFn(stats, function (obj, prop) {
           if (prop.indexOf('ssrc_') === 0) {
@@ -1008,6 +1015,34 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
                   }
                 }
               });
+            }
+
+            if (!reportedCertificate && stats[obj.transportId]) {
+              result.certificate.srtpCipher = stats[obj.transportId].srtpCipher || null;
+              result.certificate.dtlsCipher = stats[obj.transportId].dtlsCipher || null;
+
+              var localCertId = stats[obj.transportId].localCertificateId;
+              var remoteCertId = stats[obj.transportId].remoteCertificateId;
+
+              if (localCertId && stats[localCertId]) {
+                result.certificate.local.derBase64 = stats[localCertId].googDerBase64 || null;
+                if (stats[localCertId].googFingerprint) {
+                  result.certificate.local.fingerprint = stats[localCertId].googFingerprint;
+                }
+                if (stats[localCertId].googFingerprintAlgorithm) {
+                  result.certificate.local.fingerprintAlgorithm = stats[localCertId].googFingerprintAlgorithm;
+                }
+              }
+
+              if (remoteCertId && stats[remoteCertId]) {
+                result.certificate.remote.derBase64 = stats[remoteCertId].googDerBase64 || null;
+                if (stats[remoteCertId].googFingerprint) {
+                  result.certificate.remote.fingerprint = stats[remoteCertId].googFingerprint;
+                }
+                if (stats[remoteCertId].googFingerprintAlgorithm) {
+                  result.certificate.remote.fingerprintAlgorithm = stats[remoteCertId].googFingerprintAlgorithm;
+                }
+              }
             }
           }
         });

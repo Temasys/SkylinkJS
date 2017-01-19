@@ -2822,7 +2822,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1059,
+            "line": 1094,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -2833,7 +2833,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1094,
+            "line": 1129,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -2844,7 +2844,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1217,
+            "line": 1252,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2855,7 +2855,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1291,
+            "line": 1323,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2866,7 +2866,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1453,
+            "line": 1492,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -2877,7 +2877,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1571,
+            "line": 1610,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -2888,7 +2888,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1591,
+            "line": 1630,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -6898,6 +6898,71 @@
                             ]
                         },
                         {
+                            "name": "certificate",
+                            "description": "The Peer connection DTLS/SRTP exchanged certificates information.",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "local",
+                                    "description": "The Peer connection local certificate information.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "local.fingerprint",
+                                    "description": "The Peer connection local certificate fingerprint.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "local.fingerprintAlgorithm",
+                                    "description": "The Peer connection local\n  certificate fingerprint algorithm.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "local.derBase64",
+                                    "description": "The Peer connection local\n  base64 certificate in binary DER format encoded in base64.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "remote",
+                                    "description": "The Peer connection remote certificate information.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "remote.fingerprint",
+                                    "description": "The Peer connection remote certificate fingerprint.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "remote.fingerprintAlgorithm",
+                                    "description": "The Peer connection remote\n  certificate fingerprint algorithm.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "remote.derBase64",
+                                    "description": "The Peer connection remote\n  base64 certificate in binary DER format encoded in base64.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "srtpCipher",
+                                    "description": "The certificates SRTP cipher.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "dtlsCipher",
+                                    "description": "The certificates DTLS cipher.\n  <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                }
+                            ]
+                        },
+                        {
                             "name": "connection",
                             "description": "The Peer connection object stats.",
                             "type": "JSON",
@@ -7157,7 +7222,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1061,
+            "line": 1084,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -7185,7 +7250,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1078,
+            "line": 1101,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -7244,7 +7309,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1106,
+            "line": 1129,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when all remote ICE candidates gathering has completed and been processed.",
             "itemtype": "event",
             "name": "candidatesGathered",
@@ -7282,7 +7347,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1126,
+            "line": 1149,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -7306,7 +7371,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1150,
+            "line": 1173,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -7343,7 +7408,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1208,
+            "line": 1231,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -7368,7 +7433,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1257,
+            "line": 1280,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -7379,7 +7444,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1311,
+            "line": 1334,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -7390,7 +7455,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1337,
+            "line": 1360,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -7401,7 +7466,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1375,
+            "line": 1398,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -8724,7 +8789,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 230,
+            "line": 232,
             "description": "Function that modifies the session description to set the preferred audio/video codec.",
             "itemtype": "method",
             "name": "_setSDPCodec",
@@ -8735,7 +8800,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 284,
+            "line": 286,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -8746,7 +8811,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 300,
+            "line": 302,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -8757,7 +8822,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 432,
+            "line": 445,
             "description": "Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.",
             "itemtype": "method",
             "name": "_removeSDPH264VP9AptRtxForOlderPlugin",
@@ -8768,7 +8833,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 463,
+            "line": 476,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -8779,7 +8844,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 532,
+            "line": 545,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -8790,7 +8855,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 548,
+            "line": 561,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -8801,7 +8866,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 603,
+            "line": 616,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -8812,7 +8877,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 645,
+            "line": 658,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -8823,13 +8888,24 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 721,
+            "line": 734,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 904,
+            "description": "Function that parses and retrieves the session description fingerprint.",
+            "itemtype": "method",
+            "name": "_getSDPFingerprint",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
             "class": "Skylink"
         }
     ],

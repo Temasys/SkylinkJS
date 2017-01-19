@@ -352,7 +352,9 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
       '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
         '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
       '<div class="candidate row"><b class="col-md-12">Selected Candidate</b><p class="col-md-6">Local: <span class="local"></span></p>' +
-        '<p class="col-md-6">Remote: <span class="remote"></span></p></div></div></div>');
+        '<p class="col-md-6">Remote: <span class="remote"></span></p></div>' +
+      '<div class="certificate row"><b class="col-md-12">Certificates</b><p class="col-md-6"><span class="certleft"></span></p>' +
+        '<p class="col-md-6"><span class="certright"></span></p></div></div></div>');
   }
 });
 //---------------------------------------------------
@@ -678,6 +680,7 @@ Demo.Skylink.on('recordingState', function(state, recordingId, url, error) {
 
 Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats, error) {
   if (state === Demo.Skylink.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS) {
+    console.info(stats);
     var statsElm = $('#video' + (peerId === 'MCU' ? _peerId : peerId)).find('.connstats');
     var formatStatItem = function (type, dir) {
       var itemStr = '';
@@ -699,7 +702,9 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
         ' jitter buffer <i>ms</i>' : '') + (dir === 'sending' ? ', ' + stats[type][dir].rtt + ' rtt' : '') +
         (typeof stats[type][dir].nacks === 'number' ? ', ' + stats[type][dir].nacks + ' nacks' : '') +
         (typeof stats[type][dir].plis === 'number' ? ', ' + stats[type][dir].plis + ' plis' : '') +
-        (typeof stats[type][dir].firs === 'number' ? ', ' + stats[type][dir].firs + ' firs' : '') + ')';
+        (typeof stats[type][dir].firs === 'number' ? ', ' + stats[type][dir].firs + ' firs' : '') +
+        (typeof stats[type][dir].slis === 'number' ? ', ' + stats[type][dir].slis + ' slis' : '') +
+        (typeof stats[type][dir].e2eDelay === 'number' ? ', ' + stats[type][dir].e2eDelay + ' e2eDelay' : '') + ')';
 
       // format codec stats
       if (stats[type][dir].codec) {
@@ -767,6 +772,18 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
         if (typeof stats.video[dir].frameRateStdDev === 'number') {
           itemAddStr += (itemAddStr ? ', ' : '') + 'fps std dev: ' + stats.video[dir].frameRateStdDev.toFixed(2);
         }
+
+        if (typeof stats.video[dir].framesDecoded === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'decoded: ' + stats.video[dir].framesDecoded.toFixed(2);
+        }
+
+        if (typeof stats.video[dir].framesCorrupted === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'corrupted: ' + stats.video[dir].framesCorrupted.toFixed(2);
+        }
+
+        if (typeof stats.video[dir].framesPerSecond === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'fps: ' + stats.video[dir].framesPerSecond.toFixed(2);
+        }
       }
 
       itemStr += itemAddStr + ')';
@@ -786,6 +803,13 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
     formatStatItem('video', 'receiving');
     formatCanStatItem('local');
     formatCanStatItem('remote');
+
+    $(statsElm).find('.certificate .certleft').html('Certificate algorithm - (local: ' +
+      (stats.certificate.local.fingerprintAlgorithm || '-') + ', remote: ' +
+      (stats.certificate.remote.fingerprintAlgorithm || '-') + ')');
+    $(statsElm).find('.certificate .certright').html('Ciphers - (srtp: ' +
+      (stats.certificate.srtpCipher ? '<small>' + stats.certificate.srtpCipher + '</small>' : 'N/A') + ', dtls: ' +
+      (stats.certificate.dtlsCipher ? '<small>' + stats.certificate.dtlsCipher + '</small>' : 'N/A') + ')');
   }
 });
 

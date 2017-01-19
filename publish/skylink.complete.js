@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Thu Jan 19 2017 17:00:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Jan 19 2017 18:31:33 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Thu Jan 19 2017 17:00:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Jan 19 2017 18:31:33 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -16820,6 +16820,12 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
       selectedCandidate: {
         local: { ipAddress: null, candidateType: null, portNumber: null, transport: null },
         remote: { ipAddress: null, candidateType: null, portNumber: null, transport: null }
+      },
+      certificate: {
+        local: self._getSDPFingerprint(peerId, pc.localDescription),
+        remote: self._getSDPFingerprint(peerId, pc.remoteDescription),
+        dtlsCipher: null,
+        srtpCipher: null
       }
     };
 
@@ -17009,6 +17015,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
       } else {
         var reportedCandidate = false;
+        var reportedCertificate = false;
 
         loopFn(stats, function (obj, prop) {
           if (prop.indexOf('ssrc_') === 0) {
@@ -17156,6 +17163,34 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
                   }
                 }
               });
+            }
+
+            if (!reportedCertificate && stats[obj.transportId]) {
+              result.certificate.srtpCipher = stats[obj.transportId].srtpCipher || null;
+              result.certificate.dtlsCipher = stats[obj.transportId].dtlsCipher || null;
+
+              var localCertId = stats[obj.transportId].localCertificateId;
+              var remoteCertId = stats[obj.transportId].remoteCertificateId;
+
+              if (localCertId && stats[localCertId]) {
+                result.certificate.local.derBase64 = stats[localCertId].googDerBase64 || null;
+                if (stats[localCertId].googFingerprint) {
+                  result.certificate.local.fingerprint = stats[localCertId].googFingerprint;
+                }
+                if (stats[localCertId].googFingerprintAlgorithm) {
+                  result.certificate.local.fingerprintAlgorithm = stats[localCertId].googFingerprintAlgorithm;
+                }
+              }
+
+              if (remoteCertId && stats[remoteCertId]) {
+                result.certificate.remote.derBase64 = stats[remoteCertId].googDerBase64 || null;
+                if (stats[remoteCertId].googFingerprint) {
+                  result.certificate.remote.fingerprint = stats[remoteCertId].googFingerprint;
+                }
+                if (stats[remoteCertId].googFingerprintAlgorithm) {
+                  result.certificate.remote.fingerprintAlgorithm = stats[remoteCertId].googFingerprintAlgorithm;
+                }
+              }
             }
           }
         });
@@ -21878,6 +21913,29 @@ var _eventsDocs = {
    *   remote ICE candidate IP transport type.
    * @param {String} stats.selectedCandidate.remote.candidateType The Peer connection selected
    *   remote ICE candidate type.
+   * @param {JSON} stats.certificate The Peer connection DTLS/SRTP exchanged certificates information.
+   * @param {JSON} stats.certificate.local The Peer connection local certificate information.
+   * @param {String} [stats.certificate.local.fingerprint] The Peer connection local certificate fingerprint.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {String} [stats.certificate.local.fingerprintAlgorithm] The Peer connection local
+   *   certificate fingerprint algorithm.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {String} [stats.certificate.local.derBase64] The Peer connection local
+   *   base64 certificate in binary DER format encoded in base64.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {JSON} stats.certificate.remote The Peer connection remote certificate information.
+   * @param {String} [stats.certificate.remote.fingerprint] The Peer connection remote certificate fingerprint.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {String} [stats.certificate.remote.fingerprintAlgorithm] The Peer connection remote
+   *   certificate fingerprint algorithm.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {String} [stats.certificate.remote.derBase64] The Peer connection remote
+   *   base64 certificate in binary DER format encoded in base64.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {String} [stats.certificate.srtpCipher] The certificates SRTP cipher.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
+   * @param {String} [stats.certificate.dtlsCipher] The certificates DTLS cipher.
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {JSON} stats.connection The Peer connection object stats.
    * @param {String} stats.connection.iceConnectionState The Peer connection ICE connection state.
    * @param {String} stats.connection.iceGatheringState The Peer connection ICE gathering state.
@@ -27415,6 +27473,38 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Handling connection lines and direction ->'], settings);
 
   return sdpLines.join('\r\n');
+};
+
+/**
+ * Function that parses and retrieves the session description fingerprint.
+ * @method _getSDPFingerprint
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription) {
+  var fingerprint = {
+    fingerprint: null,
+    fingerprintAlgorithm: null,
+    derBase64: null
+  };
+
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return fingerprint;
+  }
+
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].indexOf('a=fingerprint') === 0) {
+      var parts = sdpLines[i].replace('a=fingerprint:', '').split(' ');
+      fingerprint.fingerprint = parts[1];
+      fingerprint.fingerprintAlgorithm = parts[0];
+      break;
+    }
+  }
+
+  return fingerprint;
 };
 
 
