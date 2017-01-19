@@ -703,7 +703,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
     };
 
     pc.getStats(null, function (stats) {
-      log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], JSON.stringify(stats));
+      log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
 
       result.raw = stats;
 
@@ -1245,11 +1245,8 @@ Skylink.prototype._removePeer = function(peerId) {
   }
 
   // check if health timer exists
-  if (typeof this._peerConnections[peerId] !== 'undefined') {
-    // new flag to check if datachannels are all closed
-    this._peerConnections[peerId].dataChannelClosed = true;
-
-    if (this._peerConnections[peerId].signalingState !== 'closed') {
+  if (this._peerConnections[peerId]) {
+    if (this._peerConnections[peerId].signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
       this._peerConnections[peerId].close();
     }
 
@@ -1260,23 +1257,23 @@ Skylink.prototype._removePeer = function(peerId) {
     delete this._peerConnections[peerId];
   }
   // remove peer informations session
-  if (typeof this._peerInformations[peerId] !== 'undefined') {
+  if (this._peerInformations[peerId]) {
     delete this._peerInformations[peerId];
   }
   // remove peer messages stamps session
-  if (typeof this._peerMessagesStamps[peerId] !== 'undefined') {
+  if (this._peerMessagesStamps[peerId]) {
     delete this._peerMessagesStamps[peerId];
   }
   // remove peer streams session
-  if (typeof this._streamsSession[peerId] !== 'undefined') {
+  if (this._streamsSession[peerId]) {
     delete this._streamsSession[peerId];
   }
   // remove peer streams session
-  if (typeof this._peerEndOfCandidatesCounter[peerId] !== 'undefined') {
+  if (this._peerEndOfCandidatesCounter[peerId]) {
     delete this._peerEndOfCandidatesCounter[peerId];
   }
   // remove peer sdp session
-  if (typeof this._sdpSessions[peerId] !== 'undefined') {
+  if (this._sdpSessions[peerId]) {
     delete this._sdpSessions[peerId];
   }
 
@@ -1297,6 +1294,10 @@ Skylink.prototype._removePeer = function(peerId) {
  */
 Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   var pc, self = this;
+  if (!self._inRoom || !(self._room && self._room.connection &&
+    self._room.connection.peerConfig && Array.isArray(self._room.connection.peerConfig.iceServers))) {
+    return;
+  }
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
@@ -1367,6 +1368,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   };
 
   pc.onaddstream = function(event) {
+    if (!self._peerConnections[targetMid]) {
+      return;
+    }
+
     var stream = event.stream || event;
     var streamId = stream.id || stream.label;
 
@@ -1396,7 +1401,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     pc.hasScreen = !!hasScreenshare;
 
     self._streamsSession[targetMid][streamId] = peerSettings;
-
     self._onRemoteStreamAdded(targetMid, stream, !!hasScreenshare);
   };
 
