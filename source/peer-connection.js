@@ -546,685 +546,43 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
   };
 
   var statsFn = function (peerId) {
-    log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
+    var retrieveFn = function (firstRetrieval, nextCb) {
+      return function (err, result) {
+        if (err) {
+          log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], error);
+          listOfPeerErrors[peerId] = error;
+          self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
+            peerId, null, error);
+          checkCompletedFn(peerId);
+          if (firstRetrieval) {
+            delete self._peerStats[peerId];
+          }
+          return;
+        }
+
+        if (firstRetrieval) {
+          nextCb();
+        } else {
+          listOfPeerStats[peerId] = result;
+          self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+            peerId, listOfPeerStats[peerId], null);
+          checkCompletedFn(peerId);
+        }
+      };
+    };
 
     if (!self._peerStats[peerId]) {
       self._peerStats[peerId] = {};
+
+      log.debug([peerId, 'RTCStatsReport', null, 'Retrieving first report to tabulate results']);
+
+      self._retrieveStats(peerId, retrieveFn(true, function () {
+        self._retrieveStats(peerId, retrieveFn());
+      }));
+      return;
     }
 
-    var pc = self._peerConnections[peerId];
-    var result = {
-      raw: null,
-      connection: {
-        iceConnectionState: pc.iceConnectionState,
-        iceGatheringState: pc.iceGatheringState,
-        signalingState: pc.signalingState,
-        remoteDescription: {
-          type: pc.remoteDescription ? pc.remoteDescription.type || null : null,
-          sdp : pc.remoteDescription ? pc.remoteDescription.sdp || null : null
-        },
-        localDescription: {
-          type: pc.localDescription ? pc.localDescription.type || null : null,
-          sdp : pc.localDescription ? pc.localDescription.sdp || null : null
-        },
-        candidates: clone(self._gatheredCandidates[peerId] || {
-          sending: { host: [], srflx: [], relay: [] },
-          receiving: { host: [], srflx: [], relay: [] }
-        }),
-        dataChannels: {}
-      },
-      audio: {
-        sending: {
-          ssrc: null,
-          bytes: 0,
-          packets: 0,
-          // Should not be for sending?
-          packetsLost: 0,
-          rtt: 0,
-          // Should not be for sending?
-          jitter: 0,
-          // Should not be for sending?
-          jitterBufferMs: null,
-          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'audio'),
-          nacks: null,
-          inputLevel: null,
-          echoReturnLoss: null,
-          echoReturnLossEnhancement: null,
-          totalBytes: 0,
-          totalPackets: 0,
-          totalPacketsLost: 0,
-          totalNacks: null
-        },
-        receiving: {
-          ssrc: null,
-          bytes: 0,
-          packets: 0,
-          packetsLost: 0,
-          packetsDiscarded: 0,
-          fractionLost: 0,
-          nacks: null,
-          jitter: 0,
-          jitterBufferMs: null,
-          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'audio'),
-          outputLevel: null,
-          totalBytes: 0,
-          totalPackets: 0,
-          totalPacketsLost: 0,
-          totalNacks: null
-        }
-      },
-      video: {
-        sending: {
-          ssrc: null,
-          bytes: 0,
-          packets: 0,
-          // Should not be for sending?
-          packetsLost: 0,
-          rtt: 0,
-          // Should not be for sending?
-          jitter: 0,
-          // Should not be for sending?
-          jitterBufferMs: null,
-          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'video'),
-          frameWidth: null,
-          frameHeight: null,
-          framesDecoded: null,
-          framesCorrupted: null,
-          framesDropped: null,
-          framesPerSecond: null,
-          framesInput: null,
-          frames: null,
-          frameRateEncoded: null,
-          frameRate: null,
-          frameRateInput: null,
-          frameRateMean: null,
-          frameRateStdDev: null,
-          nacks: null,
-          plis: null,
-          firs: null,
-          slis: null,
-          qpSum: null,
-          totalBytes: 0,
-          totalPackets: 0,
-          totalPacketsLost: 0,
-          totalNacks: null,
-          totalPlis: null,
-          totalFirs: null,
-          totalSlis: null,
-          totalFrames: null
-        },
-        receiving: {
-          ssrc: null,
-          bytes: 0,
-          packets: 0,
-          packetsDiscarded: 0,
-          packetsLost: 0,
-          fractionLost: 0,
-          jitter: 0,
-          jitterBufferMs: null,
-          codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'video'),
-          frameWidth: null,
-          frameHeight: null,
-          framesDecoded: null,
-          framesCorrupted: null,
-          framesPerSecond: null,
-          framesDropped: null,
-          framesOutput: null,
-          frames: null,
-          frameRateMean: null,
-          frameRateStdDev: null,
-          nacks: null,
-          plis: null,
-          firs: null,
-          slis: null,
-          e2eDelay: null,
-          totalBytes: 0,
-          totalPackets: 0,
-          totalPacketsLost: 0,
-          totalNacks: null,
-          totalPlis: null,
-          totalFirs: null,
-          totalSlis: null,
-          totalFrames: null
-        }
-      },
-      selectedCandidate: {
-        local: {
-          ipAddress: null,
-          candidateType: null,
-          portNumber: null,
-          transport: null, 
-          turnMediaTransport: null
-        },
-        remote: {
-          ipAddress: null,
-          candidateType: null,
-          portNumber: null,
-          transport: null
-        },
-        consentResponses: {
-          received: null,
-          sent: null,
-          totalReceived: null,
-          totalSent: null
-        },
-        consentRequests: {
-          received: null,
-          sent: null,
-          totalReceived: null,
-          totalSent: null
-        },
-        responses: {
-          received: null,
-          sent: null,
-          totalReceived: null,
-          totalSent: null
-        },
-        requests: {
-          received: null,
-          sent: null,
-          totalReceived: null,
-          totalSent: null
-        }
-      },
-      certificate: {
-        local: self._getSDPFingerprint(peerId, pc.localDescription),
-        remote: self._getSDPFingerprint(peerId, pc.remoteDescription),
-        dtlsCipher: null,
-        srtpCipher: null
-      }
-    };
-
-    for (var channelProp in self._dataChannels[peerId]) {
-      if (self._dataChannels[peerId].hasOwnProperty(channelProp) && self._dataChannels[peerId][channelProp]) {
-        result.connection.dataChannels[self._dataChannels[peerId][channelProp].channel.label] = {
-          label: self._dataChannels[peerId][channelProp].channel.label,
-          readyState: self._dataChannels[peerId][channelProp].channel.readyState,
-          channelType: channelProp === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA,
-          currentTransferId: self._dataChannels[peerId][channelProp].transferId || null
-        };
-      }
-    }
-
-    var loopFn = function (obj, fn) {
-      for (var prop in obj) {
-        if (obj.hasOwnProperty(prop) && obj[prop]) {
-          fn(obj[prop], prop);
-        }
-      }
-    };
-
-    var formatCandidateFn = function (candidateDirType, candidate) {
-      result.selectedCandidate[candidateDirType].ipAddress = candidate.ipAddress;
-      result.selectedCandidate[candidateDirType].candidateType = candidate.candidateType;
-      result.selectedCandidate[candidateDirType].portNumber = typeof candidate.portNumber !== 'number' ?
-        parseInt(candidate.portNumber, 10) || null : candidate.portNumber;
-      result.selectedCandidate[candidateDirType].transport = candidate.transport;
-    };
-
-    pc.getStats(null, function (stats) {
-      log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
-
-      result.raw = stats;
-
-      if (window.webrtcDetectedBrowser === 'firefox') {
-        loopFn(stats, function (obj, prop) {
-          var dirType = '';
-
-          // Receiving/Sending RTP packets
-          if (prop.indexOf('inbound_rtp') === 0 || prop.indexOf('outbound_rtp') === 0) {
-            dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
-
-            if (!self._peerStats[peerId][prop]) {
-              self._peerStats[peerId][prop] = obj;
-            }
-
-            result[obj.mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop],
-              obj, dirType === 'receiving' ? 'bytesReceived' : 'bytesSent');
-            result[obj.mediaType][dirType].totalBytes = parseInt(
-              (dirType === 'receiving' ? obj.bytesReceived : obj.bytesSent) || '0', 10);
-            result[obj.mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop],
-              obj, dirType === 'receiving' ? 'packetsReceived' : 'packetsSent');
-            result[obj.mediaType][dirType].totalPackets = parseInt(
-              (dirType === 'receiving' ? obj.packetsReceived : obj.packetsSent) || '0', 10);
-            result[obj.mediaType][dirType].ssrc = obj.ssrc;
-            
-            if (obj.mediaType === 'video') {
-              result.video[dirType].frameRateMean = obj.framerateMean || 0;
-              result.video[dirType].frameRateStdDev = obj.framerateStdDev || 0;
-              result.video[dirType].framesDropped = typeof obj.framesDropped === 'number' ? obj.framesDropped :
-                (typeof obj.droppedFrames === 'number' ? obj.droppedFrames : null);
-              result.video[dirType].framesCorrupted = typeof obj.framesCorrupted === 'number' ? obj.framesCorrupted : null;
-              result.video[dirType].framesPerSecond = typeof obj.framesPerSecond === 'number' ? obj.framesPerSecond : null;
-
-              if (dirType === 'sending') {
-                result.video[dirType].framesEncoded = typeof obj.framesEncoded === 'number' ? obj.framesEncoded : null;
-                result.video[dirType].frames = typeof obj.framesSent === 'number' ? obj.framesSent : null;
-              } else {
-                result.video[dirType].framesDecoded = typeof obj.framesDecoded === 'number' ? obj.framesDecoded : null;
-                result.video[dirType].frames = typeof obj.framesReceived === 'number' ? obj.framesReceived : null;
-              }
-            }
-
-            if (dirType === 'receiving') {
-              obj.packetsDiscarded = (typeof obj.packetsDiscarded === 'number' ? obj.packetsDiscarded :
-                obj.discardedPackets) || 0;
-              obj.packetsLost = typeof obj.packetsLost === 'number' ? obj.packetsLost : 0;
-  
-              result[obj.mediaType].receiving.packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
-                obj, 'packetsLost');
-              result[obj.mediaType].receiving.packetsDiscarded = self._parseConnectionStats(self._peerStats[peerId][prop],
-                obj, 'packetsDiscarded');
-              result[obj.mediaType].receiving.totalPacketsDiscarded = obj.packetsDiscarded;
-              result[obj.mediaType].receiving.totalPacketsLost = obj.packetsLost;
-            }
-
-            self._peerStats[peerId][prop] = obj;
-
-          // Sending RTP packets lost
-          } else if (prop.indexOf('inbound_rtcp') === 0 || prop.indexOf('outbound_rtcp') === 0) {
-            dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
-
-            if (!self._peerStats[peerId][prop]) {
-              self._peerStats[peerId][prop] = obj;
-            }
-
-            if (dirType === 'sending') {
-              result[obj.mediaType].sending.rtt = obj.mozRtt || 0;
-              result[obj.mediaType].sending.targetBitrate = typeof obj.targetBitrate === 'number' ? obj.targetBitrate : 0;
-            } else {
-              result[obj.mediaType].receiving.jitter = obj.jitter || 0;
-            }
-
-            self._peerStats[peerId][prop] = obj;
-
-          // Candidates
-          } else if (obj.nominated && obj.selected) {
-            formatCandidateFn('remote', stats[obj.remoteCandidateId]);
-            formatCandidateFn('local', stats[obj.localCandidateId]);
-          }
-        });
-
-      } else if (window.webrtcDetectedBrowser === 'edge') {
-        var tracks = [];
-
-        if (pc.getRemoteStreams().length > 0) {
-          tracks = tracks.concat(pc.getRemoteStreams()[0].getTracks());
-        }
-
-        if (pc.getLocalStreams().length > 0) {
-          tracks = tracks.concat(pc.getLocalStreams()[0].getTracks());
-        }
-
-        loopFn(tracks, function (track) {
-          loopFn(stats, function (obj, prop) {
-            if (obj.type === 'track' && obj.trackIdentifier === track.id) {
-              var dirType = obj.remoteSource ? 'receiving' : 'sending';
-              var mediaType = track.kind;
-
-              if (mediaType === 'audio') {
-                result[mediaType][dirType][dirType === 'sending' ? 'inputLevel' : 'outputLevel'] = obj.audioLevel;
-                if (dirType === 'sending') {
-                  result[mediaType][dirType].echoReturnLoss = obj.echoReturnLoss;
-                  result[mediaType][dirType].echoReturnLossEnhancement = obj.echoReturnLossEnhancement;
-                }
-              } else {
-                result[mediaType][dirType].frames = self._parseConnectionStats(self._peerStats[peerId][subprop],
-                  streamObj,dirType === 'sending' ? obj.framesSent : obj.framesReceived);
-                result[mediaType][dirType].framesDropped = obj.framesDropped;
-                result[mediaType][dirType].framesDecoded = obj.framesDecoded;
-                result[mediaType][dirType].framesCorrupted = obj.framesCorrupted;
-                result[mediaType][dirType].framesPerSecond = obj.framesPerSecond;
-                result[mediaType][dirType].frameHeight = obj.frameHeight || null;
-                result[mediaType][dirType].frameWidth = obj.frameWidth || null;
-                result[mediaType][dirType].totalFrames = dirType === 'sending' ? obj.framesSent : obj.framesReceived;
-              }
-
-              loopFn(stats, function (streamObj, subprop) {
-                if (streamObj.mediaTrackId === obj.id && ['outboundrtp', 'inboundrtp'].indexOf(streamObj.type) > -1) {
-                  if (!self._peerStats[peerId][subprop]) {
-                    self._peerStats[peerId][subprop] = streamObj;
-                  }
-
-                  result[mediaType][dirType].ssrc = parseInt(streamObj.ssrc || '0', 10);
-                  result[mediaType][dirType].nacks = self._parseConnectionStats(self._peerStats[peerId][subprop],
-                    streamObj, 'nackCount');
-                  result[mediaType][dirType].totalNacks = streamObj.nackCount;
-
-                  if (mediaType === 'video') {
-                    result[mediaType][dirType].firs = self._parseConnectionStats(self._peerStats[peerId][subprop],
-                      streamObj, 'firCount');
-                    result[mediaType][dirType].plis = self._parseConnectionStats(self._peerStats[peerId][subprop],
-                      streamObj, 'pliCount');
-                    result[mediaType][dirType].slis = self._parseConnectionStats(self._peerStats[peerId][subprop],
-                      streamObj, 'sliCount');
-                    result[mediaType][dirType].totalFirs = streamObj.firCount;
-                    result[mediaType][dirType].totalPlis = streamObj.plisCount;
-                    result[mediaType][dirType].totalSlis = streamObj.sliCount;
-                  }
-
-                  result[mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][subprop],
-                    streamObj, dirType === 'receiving' ? 'bytesReceived' : 'bytesSent');
-                  result[mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][subprop],
-                    streamObj, dirType === 'receiving' ? 'packetsReceived' : 'packetsSent');
-
-                  result[mediaType][dirType].totalBytes = dirType === 'receiving' ? streamObj.bytesReceived : streamObj.bytesSent;
-                  result[mediaType][dirType].totalPackets = dirType === 'receiving' ? streamObj.packetsReceived : streamObj.packetsSent;
-
-                  if (dirType === 'receiving') {
-                    result[mediaType][dirType].jitter = streamObj.jitter || 0;
-                    result[mediaType].receiving.fractionLost = streamObj.fractionLost;
-                    result[mediaType][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][subprop],
-                      streamObj, 'packetsLost');
-                    result[mediaType][dirType].packetsDiscarded = self._parseConnectionStats(self._peerStats[peerId][subprop],
-                      streamObj, 'packetsDiscarded');
-                    result[mediaType][dirType].totalPacketsLost = streamObj.packetsLost;
-                    result[mediaType][dirType].totalPacketsDiscarded = streamObj.packetsDiscarded || 0;
-                  } else {
-                    result[mediaType].sending.rtt = streamObj.roundTripTime || 0;
-                    result[mediaType].sending.targetBitrate = streamObj.targetBitrate || 0;
-                  }
-
-                  if (result[mediaType][dirType].codec && streamObj.codecId) {
-                    result[mediaType][dirType].codec.name = streamObj.codecId;
-                  }
-                }
-              });
-            }
-          });
-        });
-
-      } else {
-        var reportedCandidate = false;
-        var reportedCertificate = false;
-
-        loopFn(stats, function (obj, prop) {
-          if (prop.indexOf('ssrc_') === 0) {
-            var dirType = prop.indexOf('_recv') > 0 ? 'receiving' : 'sending';
-
-            // Polyfill fix for plugin. Plugin should fix this though
-            if (!obj.mediaType) {
-              obj.mediaType = obj.hasOwnProperty('audioOutputLevel') || obj.hasOwnProperty('audioInputLevel') ||
-                obj.hasOwnProperty('googEchoCancellationReturnLoss') || obj.hasOwnProperty('googEchoCancellation') ?
-                'audio' : 'video';
-            }
-
-            if (!self._peerStats[peerId][prop]) {
-              self._peerStats[peerId][prop] = obj;
-            }
-
-            // Capture e2e delay
-            try {
-              if (obj.mediaType === 'video' && dirType === 'receiving') {
-                var captureStartNtpTimeMs = parseInt(obj.googCaptureStartNtpTimeMs || '0', 10);
-
-                if (captureStartNtpTimeMs > 0 && pc.getRemoteStreams().length > 0 && document &&
-                  typeof document.getElementsByTagName === 'function') {
-                  var streamId = pc.getRemoteStreams()[0].id || pc.getRemoteStreams()[0].label;
-                  var elements = [];
-
-                  if (self._isUsingPlugin) {
-                    elements = document.getElementsByTagName('object');
-                  } else {
-                    elements = document.getElementsByTagName('video');
-
-                    if (elements.length === 0) {
-                      elements = document.getElementsByTagName('audio');
-                    }
-                  }
-
-                  for (var e = 0; e < elements.length; e++) {
-                    var videoElmStreamId = null;
-
-                    if (self._isUsingPlugin) {
-                      if (!(elements[e].children && typeof elements[e].children === 'object' &&
-                        typeof elements[e].children.length === 'number' && elements[e].children.length > 0)) {
-                        break;
-                      }
-
-                      for (var ec = 0; ec < elements[e].children.length; ec++) {
-                        if (elements[e].children[ec].name === 'streamId') {
-                          videoElmStreamId = elements[e].children[ec].value || null;
-                          break;
-                        }
-                      }
-
-                    } else {
-                      videoElmStreamId = elements[e].srcObject ? elements[e].srcObject.id ||
-                        elements[e].srcObject.label : null;
-                    }
-
-                    if (videoElmStreamId && videoElmStreamId === streamId) {
-                      result[obj.mediaType][dirType].e2eDelay = ((new Date()).getTime() + 2208988800000) -
-                        captureStartNtpTimeMs - elements[e].currentTime * 1000;
-                      break;
-                    }
-                  }
-                }
-              }
-            } catch (error) {
-              log.warn([peerId, 'RTCStatsReport', null, 'Failed retrieving e2e delay ->'], error);
-            }
-
-            // Receiving/Sending RTP packets
-            result[obj.mediaType][dirType].ssrc = parseInt(obj.ssrc || '0', 10);
-            result[obj.mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop],
-              obj, dirType === 'receiving' ? 'bytesReceived' : 'bytesSent');
-            result[obj.mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop],
-              obj, dirType === 'receiving' ? 'packetsReceived' : 'packetsSent');
-            result[obj.mediaType][dirType].nacks = self._parseConnectionStats(self._peerStats[peerId][prop],
-              obj, dirType === 'receiving' ? 'googNacksReceived' : 'googNacksSent');
-            result[obj.mediaType][dirType].totalPackets = parseInt((dirType === 'receiving' ? obj.packetsReceived :
-              obj.packetsSent) || '0', 10);
-            result[obj.mediaType][dirType].totalBytes = parseInt((dirType === 'receiving' ? obj.bytesReceived :
-              obj.bytesSent) || '0', 10);
-            result[obj.mediaType][dirType].totalNacks = parseInt((dirType === 'receiving' ? obj.googNacksReceived :
-              obj.googNacksSent) || '0', 10);
-
-            if (result[obj.mediaType][dirType].codec) {
-              if (obj.googCodecName && obj.googCodecName !== 'unknown') {
-                result[obj.mediaType][dirType].codec.name = obj.googCodecName;
-              }
-              if (obj.codecImplementationName && obj.codecImplementationName !== 'unknown') {
-                result[obj.mediaType][dirType].codec.implementation = obj.codecImplementationName;
-              }
-            }
-
-            if (dirType === 'sending') {
-              // NOTE: Chrome sending audio does have it but plugin has..
-              result[obj.mediaType].sending.rtt = parseFloat(obj.googRtt || '0', 10);
-              result[obj.mediaType].sending.targetBitrate = obj.targetBitrate ? parseInt(obj.targetBitrate, 10) : null;
-            } else {
-              result[obj.mediaType].receiving.packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
-                obj, 'packetsLost');
-              result[obj.mediaType].receiving.packetsDiscarded = self._parseConnectionStats(self._peerStats[peerId][prop],
-                obj, 'packetsDiscarded');
-              result[obj.mediaType].receiving.jitter = parseFloat(obj.googJitterReceived || '0', 10);
-              result[obj.mediaType].receiving.jitterBufferMs = obj.googJitterBufferMs ? parseFloat(obj.googJitterBufferMs || '0', 10) : null;
-              result[obj.mediaType].receiving.totalPacketsLost = parseInt(obj.packetsLost || '0', 10);
-              result[obj.mediaType].receiving.totalPacketsDiscarded = parseInt(obj.packetsDiscarded || '0', 10);
-            }
-
-            if (obj.mediaType === 'video') {
-              result.video[dirType].framesCorrupted = obj.framesCorrupted ? parseInt(obj.framesCorrupted, 10) : null;
-              result.video[dirType].framesPerSecond = obj.framesPerSecond ? parseFloat(obj.framesPerSecond, 10) : null;
-              result.video[dirType].framesDropped = obj.framesDropped ? parseInt(obj.framesDropped, 10) : null;
-              
-              if (dirType === 'sending') {
-                result.video[dirType].frameWidth = obj.googFrameWidthSent ?
-                  parseInt(obj.googFrameWidthSent, 10) : null;
-                result.video[dirType].frameHeight = obj.googFrameHeightSent ?
-                  parseInt(obj.googFrameHeightSent, 10) : null;
-                result.video[dirType].plis = obj.googPlisSent ?
-                  self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'googPlisSent') : null;
-                result.video[dirType].firs = obj.googFirsSent ?
-                  self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'googFirsSent') : null;
-                result[obj.mediaType][dirType].totalPlis = obj.googPlisSent ? parseInt(obj.googPlisSent, 10) : null;
-                result[obj.mediaType][dirType].totalFirs = obj.googFirsSent ? parseInt(obj.googFirsSent, 10) : null;
-                result.video[dirType].framesEncoded = obj.framesEncoded ? parseInt(obj.framesEncoded, 10) : null;
-                result.video[dirType].frameRateEncoded = obj.googFrameRateEncoded ?
-                  parseInt(obj.googFrameRateEncoded, 10) : null;
-                result.video[dirType].frameRateInput = obj.googFrameRateInput ?
-                  parseInt(obj.googFrameRateInput, 10) : null;
-                result.video[dirType].frameRate = obj.googFrameRateSent ?
-                  parseInt(obj.googFrameRateSent, 10) : null;
-                result.video[dirType].qpSum = obj.qpSum ? parseInt(obj.qpSum, 10) : null;
-                result.video[dirType].frames = obj.framesSent ?
-                  self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'framesSent') : null;
-                result.video[dirType].totalFrames = obj.framesSent ? parseInt(obj.framesSent, 10) : null;
-              } else {
-                result.video[dirType].frameWidth = obj.googFrameWidthReceived ?
-                  parseInt(obj.googFrameWidthReceived, 10) : null;
-                result.video[dirType].frameHeight = obj.googFrameHeightReceived ?
-                  parseInt(obj.googFrameHeightReceived, 10) : null;
-                result.video[dirType].plis = obj.googPlisReceived ?
-                  self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'googPlisReceived') : null;
-                result.video[dirType].firs = obj.googFirsReceived ?
-                  self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'googFirsReceived') : null;
-                result[obj.mediaType][dirType].totalPlis = obj.googPlisReceived ? parseInt(obj.googPlisReceived, 10) : null;
-                result[obj.mediaType][dirType].totalFirs = obj.googFirsReceived ? parseInt(obj.googFirsReceived, 10) : null;
-                result.video[dirType].framesDecoded = obj.framesDecoded ? parseInt(obj.framesDecoded, 10) : null;
-                result.video[dirType].frameRateDecoded = obj.googFrameRateDecoded ?
-                  parseInt(obj.googFrameRateDecoded, 10) : null;
-                result.video[dirType].frameRateOutput = obj.googFrameRateOutput ?
-                  parseInt(obj.googFrameRateOutput, 10) : null;
-                result.video[dirType].frameRate = obj.googFrameRateReceived ?
-                  parseInt(obj.googFrameRateReceived, 10) : null;
-                result.video[dirType].frames = obj.framesReceived ?
-                  self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'framesReceived') : null;
-                result.video[dirType].totalFrames = obj.framesReceived ? parseInt(obj.framesReceived, 10) : null;
-              }
-            } else {
-              if (dirType === 'receiving') {
-                result.audio[dirType].outputLevel = parseFloat(obj.audioOutputLevel || '0', 10);
-              } else {
-                result.audio[dirType].inputLevel = parseFloat(obj.audioInputLevel || '0', 10);
-                result.audio[dirType].echoReturnLoss = parseFloat(obj.googEchoCancellationReturnLoss || '0', 10);
-                result.audio[dirType].echoReturnLossEnhancement = parseFloat(obj.googEchoCancellationReturnLossEnhancement || '0', 10);
-              }
-            }
-
-            self._peerStats[peerId][prop] = obj;
-
-            if (!reportedCandidate) {
-              loopFn(stats, function (canObj, canProp) {
-                if (!reportedCandidate && canProp.indexOf('Conn-') === 0) {
-                  if (obj.transportId === canObj.googChannelId) {
-                    if (!self._peerStats[peerId][canProp]) {
-                      self._peerStats[peerId][canProp] = canObj;
-                    }
-                    formatCandidateFn('local', stats[canObj.localCandidateId]);
-                    formatCandidateFn('remote', stats[canObj.remoteCandidateId]);
-                    result.selectedCandidate.writable = canObj.googWritable ? canObj.googWritable === 'true' : null;
-                    result.selectedCandidate.readable = canObj.googReadable ? canObj.googReadable === 'true' : null;
-                    result.selectedCandidate.rtt = canObj.googRtt ?
-                      self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'googRtt') : null;
-                    result.selectedCandidate.totalRtt = canObj.googRtt ? parseInt(canObj.googRtt, 10) : null;
-                    result.selectedCandidate.requests = {
-                      received: canObj.requestsReceived ?
-                        self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'requestsReceived') : null,
-                      sent: canObj.requestsSent ?
-                        self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'requestsSent') : null,
-                      totalReceived: canObj.requestsReceived ? parseInt(canObj.requestsReceived, 10) : null,
-                      totalSent: canObj.requestsSent ? parseInt(canObj.requestsSent, 10) : null
-                    };
-                    result.selectedCandidate.responses = {
-                      received: canObj.responsesReceived ?
-                        self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'responsesReceived') : null,
-                      sent: canObj.responsesSent ?
-                        self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'responsesSent') : null,
-                      totalReceived: canObj.responsesReceived ? parseInt(canObj.responsesReceived, 10) : null,
-                      totalSent: canObj.responsesSent ? parseInt(canObj.responsesSent, 10) : null
-                    };
-                    result.selectedCandidate.consentRequests = {
-                      received: canObj.consentRequestsReceived ?
-                        self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'consentRequestsReceived') : null,
-                      sent: canObj.consentRequestsSent ?
-                        self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'consentRequestsSent') : null,
-                      totalReceived: canObj.consentRequestsReceived ? parseInt(canObj.consentRequestsReceived, 10) : null,
-                      totalSent: canObj.consentRequestsSent ? parseInt(canObj.consentRequestsSent, 10) : null
-                    };
-                    result.selectedCandidate.consentResponses = {
-                      received: canObj.consentResponsesReceived ?
-                        self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'consentResponsesReceived') : null,
-                      sent: canObj.consentResponsesSent ?
-                        self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'consentResponsesSent') : null,
-                      totalReceived: canObj.consentResponsesReceived ? parseInt(canObj.consentResponsesReceived, 10) : null,
-                      totalSent: canObj.consentResponsesSent ? parseInt(canObj.consentResponsesSent, 10) : null
-                    };
-    
-                    self._peerStats[peerId][canProp] = canObj;
-                    reportedCandidate = true;
-                  }
-                }
-              });
-            }
-
-            if (!reportedCertificate && stats[obj.transportId]) {
-              result.certificate.srtpCipher = stats[obj.transportId].srtpCipher || null;
-              result.certificate.dtlsCipher = stats[obj.transportId].dtlsCipher || null;
-
-              var localCertId = stats[obj.transportId].localCertificateId;
-              var remoteCertId = stats[obj.transportId].remoteCertificateId;
-
-              if (localCertId && stats[localCertId]) {
-                result.certificate.local.derBase64 = stats[localCertId].googDerBase64 || null;
-                if (stats[localCertId].googFingerprint) {
-                  result.certificate.local.fingerprint = stats[localCertId].googFingerprint;
-                }
-                if (stats[localCertId].googFingerprintAlgorithm) {
-                  result.certificate.local.fingerprintAlgorithm = stats[localCertId].googFingerprintAlgorithm;
-                }
-              }
-
-              if (remoteCertId && stats[remoteCertId]) {
-                result.certificate.remote.derBase64 = stats[remoteCertId].googDerBase64 || null;
-                if (stats[remoteCertId].googFingerprint) {
-                  result.certificate.remote.fingerprint = stats[remoteCertId].googFingerprint;
-                }
-                if (stats[remoteCertId].googFingerprintAlgorithm) {
-                  result.certificate.remote.fingerprintAlgorithm = stats[remoteCertId].googFingerprintAlgorithm;
-                }
-              }
-              reportedCertificate = true;
-            }
-          }
-        });
-      }
-
-      if ((result.selectedCandidate.local.candidateType || '').indexOf('relay') === 0) {
-        result.selectedCandidate.local.turnMediaTransport = 'UDP';
-        if (self._forceTURNSSL && window.webrtcDetectedBrowser !== 'firefox') {
-          result.selectedCandidate.local.turnMediaTransport = 'TCP/TLS';
-        } else if ((self._TURNTransport === self.TURN_TRANSPORT.TCP || self._forceTURNSSL) &&
-          self._room && self._room.connection && self._room.connection.peerConfig &&
-          Array.isArray(self._room.connection.peerConfig.iceServers) &&
-          self._room.connection.peerConfig.iceServers[0] &&
-          self._room.connection.peerConfig.iceServers[0].urls[0] &&
-          self._room.connection.peerConfig.iceServers[0].urls[0].indexOf('?transport=tcp') > 0) {
-          result.selectedCandidate.local.turnMediaTransport = 'TCP';
-        }
-      } else {
-        result.selectedCandidate.local.turnMediaTransport = null;
-      }
-
-      listOfPeerStats[peerId] = result;
-
-      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
-        peerId, listOfPeerStats[peerId], null);
-
-      checkCompletedFn(peerId);
-
-    }, function (error) {
-      log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], error);
-
-      listOfPeerErrors[peerId] = error;
-
-      self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
-        peerId, null, error);
-
-      checkCompletedFn(peerId);
-    });
+    self._retrieveStats(peerId, retrieveFn());
   };
 
   // Loop through all the list of Peers selected to retrieve connection status
@@ -1249,6 +607,681 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
       checkCompletedFn(peerId);
     }
   }
+};
+
+/**
+ * Function that retrieves Peer connection stats.
+ * @method _retrieveStats
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._retrieveStats = function (peerId, callback) {
+  var self = this;
+
+  log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
+
+  var pc = self._peerConnections[peerId];
+  var result = {
+    raw: null,
+    connection: {
+      iceConnectionState: pc.iceConnectionState,
+      iceGatheringState: pc.iceGatheringState,
+      signalingState: pc.signalingState,
+      remoteDescription: {
+        type: pc.remoteDescription ? pc.remoteDescription.type || null : null,
+        sdp : pc.remoteDescription ? pc.remoteDescription.sdp || null : null
+      },
+      localDescription: {
+        type: pc.localDescription ? pc.localDescription.type || null : null,
+        sdp : pc.localDescription ? pc.localDescription.sdp || null : null
+      },
+      candidates: clone(self._gatheredCandidates[peerId] || {
+        sending: { host: [], srflx: [], relay: [] },
+        receiving: { host: [], srflx: [], relay: [] }
+      }),
+      dataChannels: {}
+    },
+    audio: {
+      sending: {
+        ssrc: null,
+        bytes: 0,
+        packets: 0,
+        // Should not be for sending?
+        packetsLost: 0,
+        rtt: 0,
+        // Should not be for sending?
+        jitter: 0,
+        // Should not be for sending?
+        jitterBufferMs: null,
+        codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'audio'),
+        nacks: null,
+        inputLevel: null,
+        echoReturnLoss: null,
+        echoReturnLossEnhancement: null,
+        totalBytes: 0,
+        totalPackets: 0,
+        totalPacketsLost: 0,
+        totalNacks: null
+      },
+      receiving: {
+        ssrc: null,
+        bytes: 0,
+        packets: 0,
+        packetsLost: 0,
+        packetsDiscarded: 0,
+        fractionLost: 0,
+        nacks: null,
+        jitter: 0,
+        jitterBufferMs: null,
+        codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'audio'),
+        outputLevel: null,
+        totalBytes: 0,
+        totalPackets: 0,
+        totalPacketsLost: 0,
+        totalNacks: null
+      }
+    },
+    video: {
+      sending: {
+        ssrc: null,
+        bytes: 0,
+        packets: 0,
+        // Should not be for sending?
+        packetsLost: 0,
+        rtt: 0,
+        // Should not be for sending?
+        jitter: 0,
+        // Should not be for sending?
+        jitterBufferMs: null,
+        codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'video'),
+        frameWidth: null,
+        frameHeight: null,
+        framesDecoded: null,
+        framesCorrupted: null,
+        framesDropped: null,
+        framesPerSecond: null,
+        framesInput: null,
+        frames: null,
+        frameRateEncoded: null,
+        frameRate: null,
+        frameRateInput: null,
+        frameRateMean: null,
+        frameRateStdDev: null,
+        nacks: null,
+        plis: null,
+        firs: null,
+        slis: null,
+        qpSum: null,
+        totalBytes: 0,
+        totalPackets: 0,
+        totalPacketsLost: 0,
+        totalNacks: null,
+        totalPlis: null,
+        totalFirs: null,
+        totalSlis: null,
+        totalFrames: null
+      },
+      receiving: {
+        ssrc: null,
+        bytes: 0,
+        packets: 0,
+        packetsDiscarded: 0,
+        packetsLost: 0,
+        fractionLost: 0,
+        jitter: 0,
+        jitterBufferMs: null,
+        codec: self._getSDPSelectedCodec(peerId, pc.remoteDescription, 'video'),
+        frameWidth: null,
+        frameHeight: null,
+        framesDecoded: null,
+        framesCorrupted: null,
+        framesPerSecond: null,
+        framesDropped: null,
+        framesOutput: null,
+        frames: null,
+        frameRateMean: null,
+        frameRateStdDev: null,
+        nacks: null,
+        plis: null,
+        firs: null,
+        slis: null,
+        e2eDelay: null,
+        totalBytes: 0,
+        totalPackets: 0,
+        totalPacketsLost: 0,
+        totalNacks: null,
+        totalPlis: null,
+        totalFirs: null,
+        totalSlis: null,
+        totalFrames: null
+      }
+    },
+    selectedCandidate: {
+      local: {
+        ipAddress: null,
+        candidateType: null,
+        portNumber: null,
+        transport: null, 
+        turnMediaTransport: null
+      },
+      remote: {
+        ipAddress: null,
+        candidateType: null,
+        portNumber: null,
+        transport: null
+      },
+      consentResponses: {
+        received: null,
+        sent: null,
+        totalReceived: null,
+        totalSent: null
+      },
+      consentRequests: {
+        received: null,
+        sent: null,
+        totalReceived: null,
+        totalSent: null
+      },
+      responses: {
+        received: null,
+        sent: null,
+        totalReceived: null,
+        totalSent: null
+      },
+      requests: {
+        received: null,
+        sent: null,
+        totalReceived: null,
+        totalSent: null
+      }
+    },
+    certificate: {
+      local: self._getSDPFingerprint(peerId, pc.localDescription),
+      remote: self._getSDPFingerprint(peerId, pc.remoteDescription),
+      dtlsCipher: null,
+      srtpCipher: null
+    }
+  };
+
+  for (var channelProp in self._dataChannels[peerId]) {
+    if (self._dataChannels[peerId].hasOwnProperty(channelProp) && self._dataChannels[peerId][channelProp]) {
+      result.connection.dataChannels[self._dataChannels[peerId][channelProp].channel.label] = {
+        label: self._dataChannels[peerId][channelProp].channel.label,
+        readyState: self._dataChannels[peerId][channelProp].channel.readyState,
+        channelType: channelProp === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA,
+        currentTransferId: self._dataChannels[peerId][channelProp].transferId || null
+      };
+    }
+  }
+
+  var loopFn = function (obj, fn) {
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop) && obj[prop]) {
+        fn(obj[prop], prop);
+      }
+    }
+  };
+
+  var formatCandidateFn = function (candidateDirType, candidate) {
+    result.selectedCandidate[candidateDirType].ipAddress = candidate.ipAddress;
+    result.selectedCandidate[candidateDirType].candidateType = candidate.candidateType;
+    result.selectedCandidate[candidateDirType].portNumber = typeof candidate.portNumber !== 'number' ?
+      parseInt(candidate.portNumber, 10) || null : candidate.portNumber;
+    result.selectedCandidate[candidateDirType].transport = candidate.transport;
+  };
+
+  pc.getStats(null, function (stats) {
+    log.debug([peerId, 'RTCStatsReport', null, 'Retrieval success ->'], stats);
+
+    result.raw = stats;
+
+    if (window.webrtcDetectedBrowser === 'firefox') {
+      loopFn(stats, function (obj, prop) {
+        var dirType = '';
+
+        // Receiving/Sending RTP packets
+        if (prop.indexOf('inbound_rtp') === 0 || prop.indexOf('outbound_rtp') === 0) {
+          dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
+
+          if (!self._peerStats[peerId][prop]) {
+            self._peerStats[peerId][prop] = obj;
+          }
+
+          result[obj.mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop],
+            obj, dirType === 'receiving' ? 'bytesReceived' : 'bytesSent');
+          result[obj.mediaType][dirType].totalBytes = parseInt(
+            (dirType === 'receiving' ? obj.bytesReceived : obj.bytesSent) || '0', 10);
+          result[obj.mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop],
+            obj, dirType === 'receiving' ? 'packetsReceived' : 'packetsSent');
+          result[obj.mediaType][dirType].totalPackets = parseInt(
+            (dirType === 'receiving' ? obj.packetsReceived : obj.packetsSent) || '0', 10);
+          result[obj.mediaType][dirType].ssrc = obj.ssrc;
+          
+          if (obj.mediaType === 'video') {
+            result.video[dirType].frameRateMean = obj.framerateMean || 0;
+            result.video[dirType].frameRateStdDev = obj.framerateStdDev || 0;
+            result.video[dirType].framesDropped = typeof obj.framesDropped === 'number' ? obj.framesDropped :
+              (typeof obj.droppedFrames === 'number' ? obj.droppedFrames : null);
+            result.video[dirType].framesCorrupted = typeof obj.framesCorrupted === 'number' ? obj.framesCorrupted : null;
+            result.video[dirType].framesPerSecond = typeof obj.framesPerSecond === 'number' ? obj.framesPerSecond : null;
+
+            if (dirType === 'sending') {
+              result.video[dirType].framesEncoded = typeof obj.framesEncoded === 'number' ? obj.framesEncoded : null;
+              result.video[dirType].frames = typeof obj.framesSent === 'number' ? obj.framesSent : null;
+            } else {
+              result.video[dirType].framesDecoded = typeof obj.framesDecoded === 'number' ? obj.framesDecoded : null;
+              result.video[dirType].frames = typeof obj.framesReceived === 'number' ? obj.framesReceived : null;
+            }
+          }
+
+          if (dirType === 'receiving') {
+            obj.packetsDiscarded = (typeof obj.packetsDiscarded === 'number' ? obj.packetsDiscarded :
+              obj.discardedPackets) || 0;
+            obj.packetsLost = typeof obj.packetsLost === 'number' ? obj.packetsLost : 0;
+
+            result[obj.mediaType].receiving.packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, 'packetsLost');
+            result[obj.mediaType].receiving.packetsDiscarded = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, 'packetsDiscarded');
+            result[obj.mediaType].receiving.totalPacketsDiscarded = obj.packetsDiscarded;
+            result[obj.mediaType].receiving.totalPacketsLost = obj.packetsLost;
+          }
+
+          self._peerStats[peerId][prop] = obj;
+
+        // Sending RTP packets lost
+        } else if (prop.indexOf('inbound_rtcp') === 0 || prop.indexOf('outbound_rtcp') === 0) {
+          dirType = prop.indexOf('inbound_rtp') === 0 ? 'receiving' : 'sending';
+
+          if (!self._peerStats[peerId][prop]) {
+            self._peerStats[peerId][prop] = obj;
+          }
+
+          if (dirType === 'sending') {
+            result[obj.mediaType].sending.rtt = obj.mozRtt || 0;
+            result[obj.mediaType].sending.targetBitrate = typeof obj.targetBitrate === 'number' ? obj.targetBitrate : 0;
+          } else {
+            result[obj.mediaType].receiving.jitter = obj.jitter || 0;
+          }
+
+          self._peerStats[peerId][prop] = obj;
+
+        // Candidates
+        } else if (obj.nominated && obj.selected) {
+          formatCandidateFn('remote', stats[obj.remoteCandidateId]);
+          formatCandidateFn('local', stats[obj.localCandidateId]);
+        }
+      });
+
+    } else if (window.webrtcDetectedBrowser === 'edge') {
+      var tracks = [];
+
+      if (pc.getRemoteStreams().length > 0) {
+        tracks = tracks.concat(pc.getRemoteStreams()[0].getTracks());
+      }
+
+      if (pc.getLocalStreams().length > 0) {
+        tracks = tracks.concat(pc.getLocalStreams()[0].getTracks());
+      }
+
+      loopFn(tracks, function (track) {
+        loopFn(stats, function (obj, prop) {
+          if (obj.type === 'track' && obj.trackIdentifier === track.id) {
+            var dirType = obj.remoteSource ? 'receiving' : 'sending';
+            var mediaType = track.kind;
+
+            if (mediaType === 'audio') {
+              result[mediaType][dirType][dirType === 'sending' ? 'inputLevel' : 'outputLevel'] = obj.audioLevel;
+              if (dirType === 'sending') {
+                result[mediaType][dirType].echoReturnLoss = obj.echoReturnLoss;
+                result[mediaType][dirType].echoReturnLossEnhancement = obj.echoReturnLossEnhancement;
+              }
+            } else {
+              result[mediaType][dirType].frames = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                streamObj,dirType === 'sending' ? obj.framesSent : obj.framesReceived);
+              result[mediaType][dirType].framesDropped = obj.framesDropped;
+              result[mediaType][dirType].framesDecoded = obj.framesDecoded;
+              result[mediaType][dirType].framesCorrupted = obj.framesCorrupted;
+              result[mediaType][dirType].framesPerSecond = obj.framesPerSecond;
+              result[mediaType][dirType].frameHeight = obj.frameHeight || null;
+              result[mediaType][dirType].frameWidth = obj.frameWidth || null;
+              result[mediaType][dirType].totalFrames = dirType === 'sending' ? obj.framesSent : obj.framesReceived;
+            }
+
+            loopFn(stats, function (streamObj, subprop) {
+              if (streamObj.mediaTrackId === obj.id && ['outboundrtp', 'inboundrtp'].indexOf(streamObj.type) > -1) {
+                if (!self._peerStats[peerId][subprop]) {
+                  self._peerStats[peerId][subprop] = streamObj;
+                }
+
+                result[mediaType][dirType].ssrc = parseInt(streamObj.ssrc || '0', 10);
+                result[mediaType][dirType].nacks = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                  streamObj, 'nackCount');
+                result[mediaType][dirType].totalNacks = streamObj.nackCount;
+
+                if (mediaType === 'video') {
+                  result[mediaType][dirType].firs = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                    streamObj, 'firCount');
+                  result[mediaType][dirType].plis = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                    streamObj, 'pliCount');
+                  result[mediaType][dirType].slis = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                    streamObj, 'sliCount');
+                  result[mediaType][dirType].totalFirs = streamObj.firCount;
+                  result[mediaType][dirType].totalPlis = streamObj.plisCount;
+                  result[mediaType][dirType].totalSlis = streamObj.sliCount;
+                }
+
+                result[mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                  streamObj, dirType === 'receiving' ? 'bytesReceived' : 'bytesSent');
+                result[mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                  streamObj, dirType === 'receiving' ? 'packetsReceived' : 'packetsSent');
+
+                result[mediaType][dirType].totalBytes = dirType === 'receiving' ? streamObj.bytesReceived : streamObj.bytesSent;
+                result[mediaType][dirType].totalPackets = dirType === 'receiving' ? streamObj.packetsReceived : streamObj.packetsSent;
+
+                if (dirType === 'receiving') {
+                  result[mediaType][dirType].jitter = streamObj.jitter || 0;
+                  result[mediaType].receiving.fractionLost = streamObj.fractionLost;
+                  result[mediaType][dirType].packetsLost = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                    streamObj, 'packetsLost');
+                  result[mediaType][dirType].packetsDiscarded = self._parseConnectionStats(self._peerStats[peerId][subprop],
+                    streamObj, 'packetsDiscarded');
+                  result[mediaType][dirType].totalPacketsLost = streamObj.packetsLost;
+                  result[mediaType][dirType].totalPacketsDiscarded = streamObj.packetsDiscarded || 0;
+                } else {
+                  result[mediaType].sending.rtt = streamObj.roundTripTime || 0;
+                  result[mediaType].sending.targetBitrate = streamObj.targetBitrate || 0;
+                }
+
+                if (result[mediaType][dirType].codec && streamObj.codecId) {
+                  result[mediaType][dirType].codec.name = streamObj.codecId;
+                }
+              }
+            });
+          }
+        });
+      });
+
+    } else {
+      var reportedCandidate = false;
+      var reportedCertificate = false;
+
+      loopFn(stats, function (obj, prop) {
+        if (prop.indexOf('ssrc_') === 0) {
+          var dirType = prop.indexOf('_recv') > 0 ? 'receiving' : 'sending';
+
+          // Polyfill fix for plugin. Plugin should fix this though
+          if (!obj.mediaType) {
+            obj.mediaType = obj.hasOwnProperty('audioOutputLevel') || obj.hasOwnProperty('audioInputLevel') ||
+              obj.hasOwnProperty('googEchoCancellationReturnLoss') || obj.hasOwnProperty('googEchoCancellation') ?
+              'audio' : 'video';
+          }
+
+          if (!self._peerStats[peerId][prop]) {
+            self._peerStats[peerId][prop] = obj;
+          }
+
+          // Capture e2e delay
+          try {
+            if (obj.mediaType === 'video' && dirType === 'receiving') {
+              var captureStartNtpTimeMs = parseInt(obj.googCaptureStartNtpTimeMs || '0', 10);
+
+              if (captureStartNtpTimeMs > 0 && pc.getRemoteStreams().length > 0 && document &&
+                typeof document.getElementsByTagName === 'function') {
+                var streamId = pc.getRemoteStreams()[0].id || pc.getRemoteStreams()[0].label;
+                var elements = [];
+
+                if (self._isUsingPlugin) {
+                  elements = document.getElementsByTagName('object');
+                } else {
+                  elements = document.getElementsByTagName('video');
+
+                  if (elements.length === 0) {
+                    elements = document.getElementsByTagName('audio');
+                  }
+                }
+
+                for (var e = 0; e < elements.length; e++) {
+                  var videoElmStreamId = null;
+
+                  if (self._isUsingPlugin) {
+                    if (!(elements[e].children && typeof elements[e].children === 'object' &&
+                      typeof elements[e].children.length === 'number' && elements[e].children.length > 0)) {
+                      break;
+                    }
+
+                    for (var ec = 0; ec < elements[e].children.length; ec++) {
+                      if (elements[e].children[ec].name === 'streamId') {
+                        videoElmStreamId = elements[e].children[ec].value || null;
+                        break;
+                      }
+                    }
+
+                  } else {
+                    videoElmStreamId = elements[e].srcObject ? elements[e].srcObject.id ||
+                      elements[e].srcObject.label : null;
+                  }
+
+                  if (videoElmStreamId && videoElmStreamId === streamId) {
+                    result[obj.mediaType][dirType].e2eDelay = ((new Date()).getTime() + 2208988800000) -
+                      captureStartNtpTimeMs - elements[e].currentTime * 1000;
+                    break;
+                  }
+                }
+              }
+            }
+          } catch (error) {
+            log.warn([peerId, 'RTCStatsReport', null, 'Failed retrieving e2e delay ->'], error);
+          }
+
+          // Receiving/Sending RTP packets
+          result[obj.mediaType][dirType].ssrc = parseInt(obj.ssrc || '0', 10);
+          result[obj.mediaType][dirType].bytes = self._parseConnectionStats(self._peerStats[peerId][prop],
+            obj, dirType === 'receiving' ? 'bytesReceived' : 'bytesSent');
+          result[obj.mediaType][dirType].packets = self._parseConnectionStats(self._peerStats[peerId][prop],
+            obj, dirType === 'receiving' ? 'packetsReceived' : 'packetsSent');
+          result[obj.mediaType][dirType].nacks = self._parseConnectionStats(self._peerStats[peerId][prop],
+            obj, dirType === 'receiving' ? 'googNacksReceived' : 'googNacksSent');
+          result[obj.mediaType][dirType].totalPackets = parseInt((dirType === 'receiving' ? obj.packetsReceived :
+            obj.packetsSent) || '0', 10);
+          result[obj.mediaType][dirType].totalBytes = parseInt((dirType === 'receiving' ? obj.bytesReceived :
+            obj.bytesSent) || '0', 10);
+          result[obj.mediaType][dirType].totalNacks = parseInt((dirType === 'receiving' ? obj.googNacksReceived :
+            obj.googNacksSent) || '0', 10);
+
+          if (result[obj.mediaType][dirType].codec) {
+            if (obj.googCodecName && obj.googCodecName !== 'unknown') {
+              result[obj.mediaType][dirType].codec.name = obj.googCodecName;
+            }
+            if (obj.codecImplementationName && obj.codecImplementationName !== 'unknown') {
+              result[obj.mediaType][dirType].codec.implementation = obj.codecImplementationName;
+            }
+          }
+
+          if (dirType === 'sending') {
+            // NOTE: Chrome sending audio does have it but plugin has..
+            result[obj.mediaType].sending.rtt = parseFloat(obj.googRtt || '0', 10);
+            result[obj.mediaType].sending.targetBitrate = obj.targetBitrate ? parseInt(obj.targetBitrate, 10) : null;
+          } else {
+            result[obj.mediaType].receiving.packetsLost = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, 'packetsLost');
+            result[obj.mediaType].receiving.packetsDiscarded = self._parseConnectionStats(self._peerStats[peerId][prop],
+              obj, 'packetsDiscarded');
+            result[obj.mediaType].receiving.jitter = parseFloat(obj.googJitterReceived || '0', 10);
+            result[obj.mediaType].receiving.jitterBufferMs = obj.googJitterBufferMs ? parseFloat(obj.googJitterBufferMs || '0', 10) : null;
+            result[obj.mediaType].receiving.totalPacketsLost = parseInt(obj.packetsLost || '0', 10);
+            result[obj.mediaType].receiving.totalPacketsDiscarded = parseInt(obj.packetsDiscarded || '0', 10);
+          }
+
+          if (obj.mediaType === 'video') {
+            result.video[dirType].framesCorrupted = obj.framesCorrupted ? parseInt(obj.framesCorrupted, 10) : null;
+            result.video[dirType].framesPerSecond = obj.framesPerSecond ? parseFloat(obj.framesPerSecond, 10) : null;
+            result.video[dirType].framesDropped = obj.framesDropped ? parseInt(obj.framesDropped, 10) : null;
+            
+            if (dirType === 'sending') {
+              result.video[dirType].frameWidth = obj.googFrameWidthSent ?
+                parseInt(obj.googFrameWidthSent, 10) : null;
+              result.video[dirType].frameHeight = obj.googFrameHeightSent ?
+                parseInt(obj.googFrameHeightSent, 10) : null;
+              result.video[dirType].plis = obj.googPlisSent ?
+                self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'googPlisSent') : null;
+              result.video[dirType].firs = obj.googFirsSent ?
+                self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'googFirsSent') : null;
+              result[obj.mediaType][dirType].totalPlis = obj.googPlisSent ? parseInt(obj.googPlisSent, 10) : null;
+              result[obj.mediaType][dirType].totalFirs = obj.googFirsSent ? parseInt(obj.googFirsSent, 10) : null;
+              result.video[dirType].framesEncoded = obj.framesEncoded ? parseInt(obj.framesEncoded, 10) : null;
+              result.video[dirType].frameRateEncoded = obj.googFrameRateEncoded ?
+                parseInt(obj.googFrameRateEncoded, 10) : null;
+              result.video[dirType].frameRateInput = obj.googFrameRateInput ?
+                parseInt(obj.googFrameRateInput, 10) : null;
+              result.video[dirType].frameRate = obj.googFrameRateSent ?
+                parseInt(obj.googFrameRateSent, 10) : null;
+              result.video[dirType].qpSum = obj.qpSum ? parseInt(obj.qpSum, 10) : null;
+              result.video[dirType].frames = obj.framesSent ?
+                self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'framesSent') : null;
+              result.video[dirType].totalFrames = obj.framesSent ? parseInt(obj.framesSent, 10) : null;
+            } else {
+              result.video[dirType].frameWidth = obj.googFrameWidthReceived ?
+                parseInt(obj.googFrameWidthReceived, 10) : null;
+              result.video[dirType].frameHeight = obj.googFrameHeightReceived ?
+                parseInt(obj.googFrameHeightReceived, 10) : null;
+              result.video[dirType].plis = obj.googPlisReceived ?
+                self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'googPlisReceived') : null;
+              result.video[dirType].firs = obj.googFirsReceived ?
+                self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'googFirsReceived') : null;
+              result[obj.mediaType][dirType].totalPlis = obj.googPlisReceived ? parseInt(obj.googPlisReceived, 10) : null;
+              result[obj.mediaType][dirType].totalFirs = obj.googFirsReceived ? parseInt(obj.googFirsReceived, 10) : null;
+              result.video[dirType].framesDecoded = obj.framesDecoded ? parseInt(obj.framesDecoded, 10) : null;
+              result.video[dirType].frameRateDecoded = obj.googFrameRateDecoded ?
+                parseInt(obj.googFrameRateDecoded, 10) : null;
+              result.video[dirType].frameRateOutput = obj.googFrameRateOutput ?
+                parseInt(obj.googFrameRateOutput, 10) : null;
+              result.video[dirType].frameRate = obj.googFrameRateReceived ?
+                parseInt(obj.googFrameRateReceived, 10) : null;
+              result.video[dirType].frames = obj.framesReceived ?
+                self._parseConnectionStats(self._peerStats[peerId][prop], obj, 'framesReceived') : null;
+              result.video[dirType].totalFrames = obj.framesReceived ? parseInt(obj.framesReceived, 10) : null;
+            }
+          } else {
+            if (dirType === 'receiving') {
+              result.audio[dirType].outputLevel = parseFloat(obj.audioOutputLevel || '0', 10);
+            } else {
+              result.audio[dirType].inputLevel = parseFloat(obj.audioInputLevel || '0', 10);
+              result.audio[dirType].echoReturnLoss = parseFloat(obj.googEchoCancellationReturnLoss || '0', 10);
+              result.audio[dirType].echoReturnLossEnhancement = parseFloat(obj.googEchoCancellationReturnLossEnhancement || '0', 10);
+            }
+          }
+
+          self._peerStats[peerId][prop] = obj;
+
+          if (!reportedCandidate) {
+            loopFn(stats, function (canObj, canProp) {
+              if (!reportedCandidate && canProp.indexOf('Conn-') === 0) {
+                if (obj.transportId === canObj.googChannelId) {
+                  if (!self._peerStats[peerId][canProp]) {
+                    self._peerStats[peerId][canProp] = canObj;
+                  }
+                  formatCandidateFn('local', stats[canObj.localCandidateId]);
+                  formatCandidateFn('remote', stats[canObj.remoteCandidateId]);
+                  result.selectedCandidate.writable = canObj.googWritable ? canObj.googWritable === 'true' : null;
+                  result.selectedCandidate.readable = canObj.googReadable ? canObj.googReadable === 'true' : null;
+                  result.selectedCandidate.rtt = canObj.googRtt ?
+                    self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'googRtt') : null;
+                  result.selectedCandidate.totalRtt = canObj.googRtt ? parseInt(canObj.googRtt, 10) : null;
+                  result.selectedCandidate.requests = {
+                    received: canObj.requestsReceived ?
+                      self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'requestsReceived') : null,
+                    sent: canObj.requestsSent ?
+                      self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'requestsSent') : null,
+                    totalReceived: canObj.requestsReceived ? parseInt(canObj.requestsReceived, 10) : null,
+                    totalSent: canObj.requestsSent ? parseInt(canObj.requestsSent, 10) : null
+                  };
+                  result.selectedCandidate.responses = {
+                    received: canObj.responsesReceived ?
+                      self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'responsesReceived') : null,
+                    sent: canObj.responsesSent ?
+                      self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'responsesSent') : null,
+                    totalReceived: canObj.responsesReceived ? parseInt(canObj.responsesReceived, 10) : null,
+                    totalSent: canObj.responsesSent ? parseInt(canObj.responsesSent, 10) : null
+                  };
+                  result.selectedCandidate.consentRequests = {
+                    received: canObj.consentRequestsReceived ?
+                      self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'consentRequestsReceived') : null,
+                    sent: canObj.consentRequestsSent ?
+                      self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'consentRequestsSent') : null,
+                    totalReceived: canObj.consentRequestsReceived ? parseInt(canObj.consentRequestsReceived, 10) : null,
+                    totalSent: canObj.consentRequestsSent ? parseInt(canObj.consentRequestsSent, 10) : null
+                  };
+                  result.selectedCandidate.consentResponses = {
+                    received: canObj.consentResponsesReceived ?
+                      self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'consentResponsesReceived') : null,
+                    sent: canObj.consentResponsesSent ?
+                      self._parseConnectionStats(self._peerStats[peerId][canProp], canObj, 'consentResponsesSent') : null,
+                    totalReceived: canObj.consentResponsesReceived ? parseInt(canObj.consentResponsesReceived, 10) : null,
+                    totalSent: canObj.consentResponsesSent ? parseInt(canObj.consentResponsesSent, 10) : null
+                  };
+  
+                  self._peerStats[peerId][canProp] = canObj;
+                  reportedCandidate = true;
+                }
+              }
+            });
+          }
+
+          if (!reportedCertificate && stats[obj.transportId]) {
+            result.certificate.srtpCipher = stats[obj.transportId].srtpCipher || null;
+            result.certificate.dtlsCipher = stats[obj.transportId].dtlsCipher || null;
+
+            var localCertId = stats[obj.transportId].localCertificateId;
+            var remoteCertId = stats[obj.transportId].remoteCertificateId;
+
+            if (localCertId && stats[localCertId]) {
+              result.certificate.local.derBase64 = stats[localCertId].googDerBase64 || null;
+              if (stats[localCertId].googFingerprint) {
+                result.certificate.local.fingerprint = stats[localCertId].googFingerprint;
+              }
+              if (stats[localCertId].googFingerprintAlgorithm) {
+                result.certificate.local.fingerprintAlgorithm = stats[localCertId].googFingerprintAlgorithm;
+              }
+            }
+
+            if (remoteCertId && stats[remoteCertId]) {
+              result.certificate.remote.derBase64 = stats[remoteCertId].googDerBase64 || null;
+              if (stats[remoteCertId].googFingerprint) {
+                result.certificate.remote.fingerprint = stats[remoteCertId].googFingerprint;
+              }
+              if (stats[remoteCertId].googFingerprintAlgorithm) {
+                result.certificate.remote.fingerprintAlgorithm = stats[remoteCertId].googFingerprintAlgorithm;
+              }
+            }
+            reportedCertificate = true;
+          }
+        }
+      });
+    }
+
+    if ((result.selectedCandidate.local.candidateType || '').indexOf('relay') === 0) {
+      result.selectedCandidate.local.turnMediaTransport = 'UDP';
+      if (self._forceTURNSSL && window.webrtcDetectedBrowser !== 'firefox') {
+        result.selectedCandidate.local.turnMediaTransport = 'TCP/TLS';
+      } else if ((self._TURNTransport === self.TURN_TRANSPORT.TCP || self._forceTURNSSL) &&
+        self._room && self._room.connection && self._room.connection.peerConfig &&
+        Array.isArray(self._room.connection.peerConfig.iceServers) &&
+        self._room.connection.peerConfig.iceServers[0] &&
+        self._room.connection.peerConfig.iceServers[0].urls[0] &&
+        self._room.connection.peerConfig.iceServers[0].urls[0].indexOf('?transport=tcp') > 0) {
+        result.selectedCandidate.local.turnMediaTransport = 'TCP';
+      }
+    } else {
+      result.selectedCandidate.local.turnMediaTransport = null;
+    }
+
+    callback(null, result);
+
+  }, function (error) {
+    callback(error, null);
+  });
 };
 
 /**
