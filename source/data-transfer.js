@@ -364,159 +364,7 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  * @since 0.5.5
  */
 Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunksAsBinary, callback) {
-  var self = this;
-  var listOfPeers = Object.keys(self._peerConnections);
-  var sessionType = 'blob';
-  var sessionChunkType = 'string';
-  var transferInfo = {
-    name: null,
-    size: null,
-    chunkSize: self._CHUNK_FILE_SIZE,
-    chunkType: self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
-    dataType: self.DATA_TRANSFER_SESSION_TYPE.BLOB,
-    mimeType: null,
-    direction: self.DATA_TRANSFER_TYPE.UPLOAD,
-    timeout: 60,
-    isPrivate: false,
-    percentage: 0
-  };
-
-  // Function that returns the error emitted before data transfer has started
-  var emitErrorBeforeDataTransferFn = function (error) {
-    log.error(error);
-
-    if (typeof callback === 'function') {
-      var transferErrors = {};
-
-      if (listOfPeers.length === 0) {
-        transferErrors.self = new Error(error);
-        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, null, transferInfo, {
-          transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
-          message: new Error(error)
-        });
-      } else {
-        for (var i = 0; i < listOfPeers.length; i++) {
-          transferErrors[listOfPeers[i]] = new Error(error);
-          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, listOfPeers[i], transferInfo, {
-            transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
-            message: new Error(error)
-          });
-        }
-      }
-
-      callback({
-        transferId: null,
-        transferInfo: transferInfo,
-        listOfPeers: listOfPeers,
-        transferErrors: transferErrors
-      }, null);
-    }
-  };
-
-  // Remove MCU Peer as list of Peers
-  if (listOfPeers.indexOf('MCU') > -1) {
-    listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
-  }
-
-  // sendBlobData(.., timeout)
-  if (typeof timeout === 'number') {
-    transferInfo.timeout = timeout;
-  } else if (Array.isArray(timeout)) {
-    listOfPeers = timeout;
-  } else if (timeout && typeof timeout === 'string') {
-    listOfPeers = [timeout];
-  } else if (timeout && typeof timeout === 'boolean') {
-    transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
-    transferInfo.chunkSize = self._BINARY_FILE_SIZE;
-    sessionChunkType = 'binary';
-  } else if (typeof timeout === 'function') {
-    callback = timeout;
-  }
-
-  // sendBlobData(.., .., targetPeerId)
-  if (Array.isArray(targetPeerId)) {
-    listOfPeers = targetPeerId;
-  } else if (targetPeerId && typeof targetPeerId === 'string') {
-    listOfPeers = [targetPeerId];
-  } else if (targetPeerId && typeof targetPeerId === 'boolean') {
-    transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
-    transferInfo.chunkSize = self._BINARY_FILE_SIZE;
-    sessionChunkType = 'binary';
-  } else if (typeof targetPeerId === 'function') {
-    callback = targetPeerId;
-  }
-
-  // sendBlobData(.., .., .., sendChunksAsBinary)
-  if (sendChunksAsBinary && typeof sendChunksAsBinary === 'boolean') {
-    transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
-    transferInfo.chunkSize = self._BINARY_FILE_SIZE;
-    sessionChunkType = 'binary';
-  } else if (typeof sendChunksAsBinary === 'function') {
-    callback = sendChunksAsBinary;
-  }
-
-  if (window.webrtcDetectedBrowser === 'firefox' &&
-    transferInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
-    transferInfo.chunkSize = self._MOZ_CHUNK_FILE_SIZE;
-  }
-
-  if (self._hasMCU && transferInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) {
-    log.warn('Binary data chunks transfer is not yet supported with MCU environment. ' +
-      'Fallbacking to binary string data chunks transfer.');
-    transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING;
-    transferInfo.chunkSize = self._CHUNK_FILE_SIZE;
-    sessionChunkType = 'string';
-  }
-
-  // Use BLOB for Firefox
-  if (transferInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER &&
-    window.webrtcDetectedBrowser === 'firefox') {
-    transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.BLOB;
-    transferInfo.chunkSize = self._MOZ_BINARY_FILE_SIZE;
-    sessionChunkType = 'binary';
-  }
-
-  // Start checking if data transfer can start
-  if (!(data && typeof data === 'object' && data instanceof Blob)) {
-    emitErrorBeforeDataTransferFn('Provided data is not a Blob data');
-    return;
-  }
-
-  transferInfo.name = data.name || null;
-  transferInfo.mimeType = data.type || null;
-
-  if (data.size < 1) {
-    emitErrorBeforeDataTransferFn('Provided data is not a valid Blob data.');
-    return;
-  }
-
-  transferInfo.size = data.size;
-
-  if (!self._user) {
-    emitErrorBeforeDataTransferFn('Unable to send any blob data. User is not in Room.');
-    return;
-  }
-
-  if (listOfPeers.length === 0) {
-    emitErrorBeforeDataTransferFn('Unable to send any blob data. There are no Peers to start data transfer with');
-    return;
-  }
-
-  if (!self._enableDataChannel) {
-    emitErrorBeforeDataTransferFn('Unable to send any blob data. Datachannel is disabled');
-    return;
-  }
-
-  var chunks = self._chunkBlobData(data, transferInfo.chunkSize);
-
-  transferInfo.originalSize = transferInfo.size;
-
-  if (transferInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING) {
-    transferInfo.size = 4 * Math.ceil(transferInfo.size / 3);
-    transferInfo.chunkSize = 4 * Math.ceil(transferInfo.chunkSize / 3);
-  }
-
-  self._startDataTransfer(chunks, transferInfo, sessionType, sessionChunkType, listOfPeers, callback);
+  this._startDataTransfer(data, timeout, targetPeerId, sendChunksAsBinary, callback, 'blob');
 };
 
 /**
@@ -654,108 +502,7 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
  * @since 0.6.1
  */
 Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) {
-  var self = this;
-  var listOfPeers = Object.keys(self._peerConnections);
-  var sessionType = 'data';
-  var sessionChunkType = 'string';
-  var transferInfo = {
-    name: null,
-    size: null,
-    chunkSize: self._CHUNK_FILE_SIZE,
-    chunkType: self.DATA_TRANSFER_DATA_TYPE.STRING,
-    dataType: self.DATA_TRANSFER_SESSION_TYPE.DATA_URL,
-    mimeType: null,
-    direction: self.DATA_TRANSFER_TYPE.UPLOAD,
-    timeout: 60,
-    isPrivate: false,
-    percentage: 0
-  };
-
-  // Function that returns the error emitted before data transfer has started
-  var emitErrorBeforeDataTransferFn = function (error) {
-    log.error(error);
-
-    if (typeof callback === 'function') {
-      var transferErrors = {};
-
-      if (listOfPeers.length === 0) {
-        transferErrors.self = new Error(error);
-        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, null, transferInfo, {
-          transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
-          message: new Error(error)
-        });
-      } else {
-        for (var i = 0; i < listOfPeers.length; i++) {
-          transferErrors[listOfPeers[i]] = new Error(error);
-          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, listOfPeers[i], transferInfo, {
-            transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
-            message: new Error(error)
-          });
-        }
-      }
-
-      callback({
-        transferId: null,
-        transferInfo: transferInfo,
-        listOfPeers: listOfPeers,
-        transferErrors: transferErrors
-      }, null);
-    }
-  };
-
-  // Remove MCU Peer as list of Peers
-  if (listOfPeers.indexOf('MCU') > -1) {
-    listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
-  }
-
-  // sendURLData(.., timeout)
-  if (typeof timeout === 'number') {
-    transferInfo.timeout = timeout;
-  } else if (Array.isArray(timeout)) {
-    listOfPeers = timeout;
-  } else if (timeout && typeof timeout === 'string') {
-    listOfPeers = [timeout];
-  } else if (typeof timeout === 'function') {
-    callback = timeout;
-  }
-
-  // sendURLData(.., .., targetPeerId)
-  if (Array.isArray(targetPeerId)) {
-    listOfPeers = targetPeerId;
-  } else if (targetPeerId && typeof targetPeerId === 'string') {
-    listOfPeers = [targetPeerId];
-  } else if (typeof targetPeerId === 'function') {
-    callback = targetPeerId;
-  }
-
-  // Start checking if data transfer can start
-  if (!(data && typeof data === 'string')) {
-    emitErrorBeforeDataTransferFn('Provided data is not a dataURL');
-    return;
-  }
-
-  transferInfo.size = data.length || data.size;
-
-  if (!self._user) {
-    emitErrorBeforeDataTransferFn('Unable to send any dataURL. User is not in Room.');
-    return;
-  }
-
-  if (listOfPeers.length === 0) {
-    emitErrorBeforeDataTransferFn('Unable to send any dataURL. There are no Peers to start data transfer with');
-    return;
-  }
-
-  if (!self._enableDataChannel) {
-    emitErrorBeforeDataTransferFn('Unable to send any dataURL. Datachannel is disabled');
-    return;
-  }
-
-  var chunks = self._chunkDataURL(data, transferInfo.chunkSize);
-
-  transferInfo.originalSize = transferInfo.size;
-
-  self._startDataTransfer(chunks, transferInfo, sessionType, sessionChunkType, listOfPeers, callback);
+  this._startDataTransfer(data, timeout, targetPeerId, callback, null, 'data');
 };
 
 /**
@@ -1164,16 +911,160 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype._startDataTransfer = function(chunks, transferInfo, sessionType, sessionChunkType, listOfPeers, callback) {
+Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sendChunksAsBinary, callback, sessionType) {
   var self = this;
-  var transferId = self._user.sid + '_' + (new Date()).getTime();
+  var transferId = (self._user ? self._user.sid : '') + '_' + (new Date()).getTime();
   var transferErrors = {};
   var transferCompleted = [];
+  var chunks = [];
+  var listOfPeers = Object.keys(self._peerConnections);
+  var sessionChunkType = 'string';
+  var transferInfo = {
+    name: null,
+    size: null,
+    chunkSize: null,
+    chunkType: null,
+    dataType: null,
+    mimeType: null,
+    direction: self.DATA_TRANSFER_TYPE.UPLOAD,
+    timeout: 60,
+    isPrivate: false,
+    percentage: 0
+  };
 
-  // Polyfill data name to prevent empty fields in WRQ
-  // TODO: What happens if transfer requires extension?
-  if (!transferInfo.name) {
-    transferInfo.name = transferId;
+  // sendBlobData(.., timeout)
+  if (typeof timeout === 'number') {
+    transferInfo.timeout = timeout;
+  } else if (Array.isArray(timeout)) {
+    listOfPeers = timeout;
+  } else if (timeout && typeof timeout === 'string') {
+    listOfPeers = [timeout];
+  } else if (timeout && typeof timeout === 'boolean') {
+    sessionChunkType = 'binary';
+  } else if (typeof timeout === 'function') {
+    callback = timeout;
+  }
+
+  // sendBlobData(.., .., targetPeerId)
+  if (Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+  } else if (targetPeerId && typeof targetPeerId === 'string') {
+    listOfPeers = [targetPeerId];
+  } else if (targetPeerId && typeof targetPeerId === 'boolean') {
+    sessionChunkType = 'binary';
+  } else if (typeof targetPeerId === 'function') {
+    callback = targetPeerId;
+  }
+
+  // sendBlobData(.., .., .., sendChunksAsBinary)
+  if (sendChunksAsBinary && typeof sendChunksAsBinary === 'boolean') {
+    sessionChunkType = 'binary';
+  } else if (typeof sendChunksAsBinary === 'function') {
+    callback = sendChunksAsBinary;
+  }
+
+  // Remove MCU Peer as list of Peers
+  if (listOfPeers.indexOf('MCU') > -1) {
+    listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
+  }
+
+  // Function that returns the error emitted before data transfer has started
+  var emitErrorBeforeDataTransferFn = function (error) {
+    log.error(error);
+
+    if (typeof callback === 'function') {
+      var transferErrors = {};
+
+      if (listOfPeers.length === 0) {
+        transferErrors.self = new Error(error);
+        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, null, transferInfo, {
+          transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
+          message: new Error(error)
+        });
+      } else {
+        for (var i = 0; i < listOfPeers.length; i++) {
+          transferErrors[listOfPeers[i]] = new Error(error);
+          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, listOfPeers[i], transferInfo, {
+            transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
+            message: new Error(error)
+          });
+        }
+      }
+
+      callback({
+        transferId: null,
+        transferInfo: transferInfo,
+        listOfPeers: listOfPeers,
+        transferErrors: transferErrors
+      }, null);
+    }
+  };
+
+  if (sessionType === 'blob') {
+    if (self._hasMCU && sessionChunkType === 'binary') {
+      log.warn('Binary data chunks transfer is not yet supported with MCU environment. ' +
+        'Fallbacking to binary string data chunks transfer.');
+      sessionChunkType = 'string';
+    }
+
+    var chunkSize = sessionChunkType === 'string' ? (window.webrtcDetectedBrowser === 'firefox' ?
+      self._MOZ_CHUNK_FILE_SIZE : self._CHUNK_FILE_SIZE) : (window.webrtcDetectedBrowser === 'firefox' ?
+      self._MOZ_BINARY_FILE_SIZE : self._BINARY_FILE_SIZE);
+
+    transferInfo.dataType = self.DATA_TRANSFER_SESSION_TYPE.BLOB;
+    transferInfo.chunkSize = sessionChunkType === 'string' ? 4 * Math.ceil(chunkSize / 3) : chunkSize;
+    transferInfo.chunkType = sessionChunkType === 'binary' ? (window.webrtcDetectedBrowser === 'firefox' ?
+      self.DATA_TRANSFER_DATA_TYPE.BLOB : self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) :
+      self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING;
+
+    // Start checking if data transfer can start
+    if (!(data && typeof data === 'object' && data instanceof Blob)) {
+      emitErrorBeforeDataTransferFn('Provided data is not a Blob data');
+      return;
+    }
+
+    transferInfo.name = data.name || transferId;
+    transferInfo.mimeType = data.type || null;
+
+    if (data.size < 1) {
+      emitErrorBeforeDataTransferFn('Provided data is not a valid Blob data.');
+      return;
+    }
+
+    transferInfo.originalSize = data.size;
+    transferInfo.size = sessionChunkType === 'string' ? 4 * Math.ceil(data.size / 3) : data.size;
+    chunks = self._chunkBlobData(data, chunkSize);
+  } else {
+    transferInfo.dataType = self.DATA_TRANSFER_SESSION_TYPE.DATA_URL;
+    transferInfo.chunkSize = self._CHUNK_DATAURL_SIZE;
+    transferInfo.chunkType = self.DATA_TRANSFER_DATA_TYPE.STRING;
+
+    // Start checking if data transfer can start
+    if (!(data && typeof data === 'string')) {
+      emitErrorBeforeDataTransferFn('Provided data is not a dataURL');
+      return;
+    }
+
+    transferInfo.originalSize = transferInfo.size = data.length || data.size;
+    chunks = self._chunkDataURL(data, transferInfo.chunkSize);
+  }
+
+  if (!self._user) {
+    emitErrorBeforeDataTransferFn('Unable to send any ' +
+      sessionType.replace('data', 'dataURL') + ' data. User is not in Room.');
+    return;
+  }
+
+  if (!self._enableDataChannel) {
+    emitErrorBeforeDataTransferFn('Unable to send any ' +
+      sessionType.replace('data', 'dataURL') + ' data. Datachannel is disabled');
+    return;
+  }
+
+  if (listOfPeers.length === 0) {
+    emitErrorBeforeDataTransferFn('Unable to send any ' +
+      sessionType.replace('data', 'dataURL') + ' data. There are no Peers to start data transfer with');
+    return;
   }
 
   self._dataTransfers[transferId] = clone(transferInfo);
