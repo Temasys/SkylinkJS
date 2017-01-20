@@ -569,32 +569,6 @@ var _eventsDocs = {
   incomingData: [],
 
   /**
-   * Event triggered when receiving data stream chunk.
-   * @event incomingDataStream
-   * @param {JSON} data The data result.
-   * @param {JSON|String} data.content The data stream chunk.
-   * @param {String} data.senderPeerId The sender Peer ID.
-   * @param {String|Array} [data.targetPeerId] The value of the &lt;code&gt;targetPeerId&lt;/code&gt;
-   *   defined in &lt;a href=&quot;#method_streamData&quot;&gt;&lt;code&gt;streamData()&lt;/code&gt; method&lt;/a&gt;.
-   *   &lt;small&gt;Defined as User&#x27;s Peer ID when &lt;code&gt;isSelf&lt;/code&gt; payload value is &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
-   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when provided &lt;code&gt;targetPeerId&lt;/code&gt; in
-   *   &lt;a href=&quot;#method_streamData&quot;&gt;&lt;code&gt;streamData()&lt;/code&gt; method&lt;/a&gt; is not defined.&lt;/small&gt;
-   * @param {Array} [data.listOfPeers] The list of Peers that the data stream has been sent to.
-   *  &lt;small&gt;Defined only when &lt;code&gt;isSelf&lt;/code&gt; payload value is &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
-   * @param {Boolean} data.isPrivate The flag if data stream is targeted or not, basing
-   *   off the &lt;code&gt;targetPeerId&lt;/code&gt; parameter being defined in
-   *   &lt;a href=&quot;#method_streamData&quot;&gt;&lt;code&gt;streamData()&lt;/code&gt; method&lt;/a&gt;.
-   * @param {Number} data.chunkSize The data stream chunk size.
-   * @param {String} data.chunkType The data stream chunk type.
-   *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
-   * @param {String} peerId The Peer ID.
-   * @param {Boolean} isSelf The flag if Peer is User.
-   * @for Skylink
-   * @since 0.6.18
-   */
-  incomingDataStream: [],
-
-  /**
    * Event triggered when receiving upload data transfer from Peer.
    * @event incomingDataRequest
    * @param {String} transferId The transfer ID.

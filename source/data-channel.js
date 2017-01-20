@@ -73,16 +73,13 @@ Skylink.prototype.DATA_CHANNEL_TYPE = {
 /**
  * The list of Datachannel sending message error types.
  * @attribute DATA_CHANNEL_MESSAGE_ERROR
- * @param {String} MESSAGE     <small>Value <code>"message"</code></small>
+ * @param {String} MESSAGE  <small>Value <code>"message"</code></small>
  *   The value of the Datachannel sending message error type when encountered during
  *   sending P2P message from <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.
- * @param {String} TRANSFER    <small>Value <code>"transfer"</code></small>
+ * @param {String} TRANSFER <small>Value <code>"transfer"</code></small>
  *   The value of the Datachannel sending message error type when encountered during
  *   data transfers from <a href="#method_sendURLData"><code>sendURLData()</code> method</a> or
  *   <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>.
- * @param {String} STREAM_DATA <small>Value <code>"data"</code></small>
- *   The value of the Datachannel sending message error type when encountered during
- *   stream data chunks from <a href="#method_streamData"><code>treamData()</code> method</a>.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -90,8 +87,7 @@ Skylink.prototype.DATA_CHANNEL_TYPE = {
  */
 Skylink.prototype.DATA_CHANNEL_MESSAGE_ERROR = {
   MESSAGE: 'message',
-  TRANSFER: 'transfer',
-  STREAM_DATA: 'data'
+  TRANSFER: 'transfer'
 };
 
 /**
@@ -303,17 +299,6 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
   var readyState  = self._dataChannels[peerId][channelProp].channel.readyState;
   var messageType = typeof data === 'object' && data.type === self._DC_PROTOCOL_TYPE.MESSAGE ?
     self.DATA_CHANNEL_MESSAGE_ERROR.MESSAGE : self.DATA_CHANNEL_MESSAGE_ERROR.TRANSFER;
-
-  if (messageType === self.DATA_CHANNEL_MESSAGE_ERROR.TRANSFER) {
-    var transferId = self._dataChannels[peerId][channelProp].transferId;
-
-    if (transferId && self._dataTransfers[transferId] && ([self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
-      self.DATA_TRANSFER_DATA_TYPE.STRING].indexOf(self._dataTransfers[transferId].chunkType) > -1 ||
-      (Array.isArray(self._dataTransfers[transferId].enforceBSPeers) &&
-      self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1)) && !(data instanceof Blob) && !data.type) {
-      messageType = self.DATA_CHANNEL_MESSAGE_ERROR.STREAM_DATA;
-    }
-  }
 
   if (readyState !== self.DATA_CHANNEL_STATE.OPEN) {
     var notOpenError = 'Failed sending message as Datachannel connection state is not opened. Current ' +

@@ -344,6 +344,13 @@ Skylink.prototype._sendChannelMessage = function(message) {
   } else {
     log.debug([message.target || null, &#x27;Socket&#x27;, message.type, &#x27;Sending message -&gt;&#x27;], message);
     self._socket.send(JSON.stringify(message));
+
+    // If Peer sends &quot;bye&quot; on its own, we trigger it as session disconnected abruptly
+    if (message.type === self._SIG_MESSAGE_TYPE.BYE &amp;&amp; self._inRoom &amp;&amp;
+      self._user &amp;&amp; self._user.sid &amp;&amp; message.mid === self._user.sid) {
+      self.leaveRoom(false);
+      self._trigger(&#x27;sessionDisconnect&#x27;, self._user.sid, self.getPeerInfo());
+    }
   }
 };
 
