@@ -10,7 +10,7 @@
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.1';
+Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.3';
 
 /**
  * The list of data transfers directions.
@@ -1324,7 +1324,7 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, sessionTyp
       var protocolVer = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).DTProtocolVersion || '0.1.0';
 
       // C++ SDK does not support binary file transfer for now
-      if (self._isLowerThanVersion(protocolVer, '0.1.1')) {
+      if (self._isLowerThanVersion(protocolVer, '0.1.3')) {
         self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
       }
     }
@@ -1585,10 +1585,10 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var protocolVer = (self._peerInformations[peerId].agent || {}).DTProtocolVersion || '0.1.0';
-  var requireInterop = self._isLowerThanVersion(protocolVer, '0.1.0.1');
+  var requireInterop = self._isLowerThanVersion(protocolVer, '0.1.2');
 
   // Prevent DATA_URL (or "string" dataType transfers) with Android / iOS / C++ SDKs
-  if (self._isLowerThanVersion(protocolVer, '0.1.1') && self._dataTransfers[transferId].sessionType === 'data' &&
+  if (self._isLowerThanVersion(protocolVer, '0.1.2') && self._dataTransfers[transferId].sessionType === 'data' &&
     self._dataTransfers[transferId].sessionChunkType === 'string') {
     returnErrorBeforeTransferFn('Unable to start data transfer as Peer do not support DATA_URL type of data transfers');
     return;

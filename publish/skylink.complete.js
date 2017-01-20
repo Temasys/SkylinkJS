@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Thu Jan 19 2017 22:50:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Fri Jan 20 2017 17:15:27 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Thu Jan 19 2017 22:50:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Fri Jan 20 2017 17:15:27 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -13244,7 +13244,7 @@ Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
 
   return dataURLArray;
 };
-Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.1';
+Skylink.prototype.DT_PROTOCOL_VERSION = '0.1.3';
 
 /**
  * The list of data transfers directions.
@@ -14558,7 +14558,7 @@ Skylink.prototype._startDataTransfer = function(chunks, transferInfo, sessionTyp
       var protocolVer = (((self._peerInformations[listOfPeers[p]]) || {}).agent || {}).DTProtocolVersion || '0.1.0';
 
       // C++ SDK does not support binary file transfer for now
-      if (self._isLowerThanVersion(protocolVer, '0.1.1')) {
+      if (self._isLowerThanVersion(protocolVer, '0.1.3')) {
         self._dataTransfers[transferId].enforceBSPeers.push(listOfPeers[p]);
       }
     }
@@ -14819,10 +14819,10 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var protocolVer = (self._peerInformations[peerId].agent || {}).DTProtocolVersion || '0.1.0';
-  var requireInterop = self._isLowerThanVersion(protocolVer, '0.1.0.1');
+  var requireInterop = self._isLowerThanVersion(protocolVer, '0.1.2');
 
   // Prevent DATA_URL (or "string" dataType transfers) with Android / iOS / C++ SDKs
-  if (self._isLowerThanVersion(protocolVer, '0.1.1') && self._dataTransfers[transferId].sessionType === 'data' &&
+  if (self._isLowerThanVersion(protocolVer, '0.1.2') && self._dataTransfers[transferId].sessionType === 'data' &&
     self._dataTransfers[transferId].sessionChunkType === 'string') {
     returnErrorBeforeTransferFn('Unable to start data transfer as Peer do not support DATA_URL type of data transfers');
     return;
@@ -24180,7 +24180,7 @@ Skylink.prototype._enterHandler = function(message) {
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
     DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
-      message.DTProtocolVersion : '0.1.0'
+      message.DTProtocolVersion : (self._hasMCU || targetMid === 'MCU' ? '0.1.2' : '0.1.0')
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
@@ -24307,7 +24307,7 @@ Skylink.prototype._restartHandler = function(message){
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
     DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
-      message.DTProtocolVersion : '0.1.0'
+      message.DTProtocolVersion : (self._hasMCU || targetMid === 'MCU' ? '0.1.2' : '0.1.0')
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "restart" received ->'], message);
@@ -24443,7 +24443,7 @@ Skylink.prototype._welcomeHandler = function(message) {
     SMProtocolVersion: message.SMProtocolVersion && typeof message.SMProtocolVersion === 'string' ?
       message.SMProtocolVersion : '0.1.1',
     DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
-      message.DTProtocolVersion : '0.1.0'
+      message.DTProtocolVersion : (self._hasMCU || targetMid === 'MCU' ? '0.1.2' : '0.1.0')
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
