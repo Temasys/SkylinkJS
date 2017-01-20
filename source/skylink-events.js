@@ -530,7 +530,10 @@ var _eventsDocs = {
    * @param {String} state The current data transfer state.
    *   [Rel: Skylink.DATA_TRANSFER_STATE]
    * @param {String} transferId The data transfer ID.
+   *   <small>Note that this is defined <code>null</code> when <code>state</code> payload is <code>START_ERROR</code>.</small>
    * @param {String} peerId The Peer ID.
+   *   <small>Note that this could be defined <code>null</code> when <code>state</code> payload is
+   *   <code>START_ERROR</code> and there is no Peers to start data transfer with.</small>
    * @param {JSON} transferInfo The data transfer information.
    * @param {Blob|String} [transferInfo.data] The data object.
    *   <small>Defined only when <code>state</code> payload is <code>UPLOAD_STARTED</code> or

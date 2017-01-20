@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Fri Jan 20 2017 17:46:12 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Fri Jan 20 2017 18:03:31 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Fri Jan 20 2017 17:46:12 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Fri Jan 20 2017 18:03:31 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -13304,6 +13304,8 @@ Skylink.prototype.DATA_TRANSFER_SESSION_TYPE = {
  *   The value of the state when data transfer has been terminated from / to Peer.
  * @param {String} ERROR              <small>Value <code>"error"</code></small>
  *   The value of the state when data transfer has errors and has been terminated from / to Peer.
+ * @param {String} START_ERROR        <small>Value <code>"startError"</code></small>
+ *   The value of the state when data transfer failed to start to Peer.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -13321,7 +13323,8 @@ Skylink.prototype.DATA_TRANSFER_STATE = {
   UPLOAD_COMPLETED: 'uploadCompleted',
   DOWNLOAD_COMPLETED: 'downloadCompleted',
   USER_REJECTED: 'userRejected',
-  USER_UPLOAD_REQUEST: 'userRequest'
+  USER_UPLOAD_REQUEST: 'userRequest',
+  START_ERROR: 'startError'
 };
 
 /**
@@ -13606,9 +13609,17 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
 
       if (listOfPeers.length === 0) {
         transferErrors.self = new Error(error);
+        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, null, transferInfo, {
+          transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
+          message: new Error(error)
+        });
       } else {
         for (var i = 0; i < listOfPeers.length; i++) {
           transferErrors[listOfPeers[i]] = new Error(error);
+          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, listOfPeers[i], transferInfo, {
+            transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
+            message: new Error(error)
+          });
         }
       }
 
@@ -13888,9 +13899,17 @@ Skylink.prototype.sendURLData = function(data, timeout, targetPeerId, callback) 
 
       if (listOfPeers.length === 0) {
         transferErrors.self = new Error(error);
+        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, null, transferInfo, {
+          transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
+          message: new Error(error)
+        });
       } else {
         for (var i = 0; i < listOfPeers.length; i++) {
           transferErrors[listOfPeers[i]] = new Error(error);
+          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, listOfPeers[i], transferInfo, {
+            transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
+            message: new Error(error)
+          });
         }
       }
 
@@ -21481,7 +21500,10 @@ var _eventsDocs = {
    * @param {String} state The current data transfer state.
    *   [Rel: Skylink.DATA_TRANSFER_STATE]
    * @param {String} transferId The data transfer ID.
+   *   <small>Note that this is defined <code>null</code> when <code>state</code> payload is <code>START_ERROR</code>.</small>
    * @param {String} peerId The Peer ID.
+   *   <small>Note that this could be defined <code>null</code> when <code>state</code> payload is
+   *   <code>START_ERROR</code> and there is no Peers to start data transfer with.</small>
    * @param {JSON} transferInfo The data transfer information.
    * @param {Blob|String} [transferInfo.data] The data object.
    *   <small>Defined only when <code>state</code> payload is <code>UPLOAD_STARTED</code> or
