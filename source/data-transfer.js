@@ -133,9 +133,6 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
 };
 
 /**
- * <blockquote class="info">
- *   Note that Android, iOS and C++ SDKs do not support simultaneous data transfers.
- * </blockquote>
  * Function that starts an uploading data transfer from User to Peers.
  * @method sendBlobData
  * @param {Blob} data The Blob object.
@@ -368,9 +365,6 @@ Skylink.prototype.sendBlobData = function(data, timeout, targetPeerId, sendChunk
 };
 
 /**
- * <blockquote class="info">
- *   Currently, the Android, iOS and C++ SDKs do not support this type of data transfer session.
- * </blockquote>
  * Function that starts an uploading string data transfer from User to Peers.
  * @method sendURLData
  * @param {String} data The data string to transfer to Peer.
