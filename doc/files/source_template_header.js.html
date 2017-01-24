@@ -332,6 +332,17 @@ function Skylink() {
   this._dataTransfers = {};
 
   /**
+   * Stores the list of sending data streaming sessions to Peers.
+   * @attribute _dataStreams
+   * @param {JSON} #streamId The data stream session.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._dataStreams = {};
+
+  /**
    * Stores the list of buffered ICE candidates that is received before
    *   remote session description is received and set.
    * @attribute _peerCandidatesQueue

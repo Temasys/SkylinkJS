@@ -254,7 +254,8 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     self._dataChannels[peerId][channelName] = {
       channelName: channelName,
       channelType: channelType,
-      transferId: channelName,
+      transferId: null,
+      streamId: null,
       channel: dataChannel
     };
   }

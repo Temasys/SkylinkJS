@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Tue Jan 24 2017 11:23:41 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 02:24:34 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -241,6 +241,17 @@ function Skylink() {
    * @since 0.6.16
    */
   this._dataTransfers = {};
+
+  /**
+   * Stores the list of sending data streaming sessions to Peers.
+   * @attribute _dataStreams
+   * @param {JSON} #streamId The data stream session.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._dataStreams = {};
 
   /**
    * Stores the list of buffered ICE candidates that is received before
@@ -1381,7 +1392,8 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     self._dataChannels[peerId][channelName] = {
       channelName: channelName,
       channelType: channelType,
-      transferId: channelName,
+      transferId: null,
+      streamId: null,
       channel: dataChannel
     };
   }
@@ -1790,6 +1802,41 @@ Skylink.prototype.DATA_TRANSFER_STATE = {
   DOWNLOAD_COMPLETED: 'downloadCompleted',
   USER_REJECTED: 'userRejected',
   USER_UPLOAD_REQUEST: 'userRequest',
+  START_ERROR: 'startError'
+};
+
+/**
+ * The list of data streaming states.
+ * @attribute DATA_STREAM_STATE
+ * @param {String} SENDING_STARTED   <small>Value <code>"sendStart"</code></small>
+ *   The value of the state when data streaming session has started from User to Peer.
+ * @param {String} RECEIVING_STARTED <small>Value <code>"receiveStart"</code></small>
+ *   The value of the state when data streaming session has started from Peer to Peer.
+ * @param {String} RECEIVED          <small>Value <code>"received"</code></small>
+ *   The value of the state when data streaming session data chunk has been received from Peer to User.
+ * @param {String} SENT              <small>Value <code>"sent"</code></small>
+ *   The value of the state when data streaming session data chunk has been sent from User to Peer.
+ * @param {String} SENDING_STOPPED   <small>Value <code>"sendStop"</code></small>
+ *   The value of the state when data streaming session has stopped from User to Peer.
+ * @param {String} RECEIVING_STOPPED <small>Value <code>"receivingStop"</code></small>
+ *   The value of the state when data streaming session has stopped from Peer to User.
+ * @param {String} ERROR             <small>Value <code>"error"</code></small>
+ *   The value of the state when data streaming session has errors.
+ * @param {String} START_ERROR       <small>Value <code>"startError"</code></small>
+ *   The value of the state when data streaming session failed to start from User to Peer.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.DATA_STREAM_STATE = {
+  SENDING_STARTED: 'sendStart',
+  SENDING_STOPPED: 'sendStop',
+  RECEIVING_STARTED: 'receiveStart',
+  RECEIVING_STOPPED: 'receiveStop',
+  RECEIVED: 'received',
+  SENT: 'sent',
+  ERROR: 'error',
   START_ERROR: 'startError'
 };
 
@@ -2584,6 +2631,495 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 };
 
 /**
+ * Function that starts a data chunks streaming session from User to Peers.
+ * @method startStreamingData
+ * @param {Boolean} [isStringStream=false] The flag if data streaming session sending data chunks
+ *   should be expected as string data chunks sent.
+ *   <small>By default, data chunks are expected to be sent in Blob or ArrayBuffer, and ArrayBuffer
+ *   data chunks will be converted to Blob.</small>
+ * @param {String|Array} [targetPeerId] The target Peer ID to send message to.
+ * - When provided as an Array, it will start streaming session to only Peers which IDs are in the list.
+ * - When not provided, it will start the streaming session to all connected Peers with Datachannel connection in the Room.
+ * @trigger <ol class="desc-seq"></ol>
+ * @example
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
+  var self = this;
+  var listOfPeers = Object.keys(self._dataChannels);
+  var isPrivate = false;
+  var sessionChunkType = 'binary';
+
+  if (Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+    isPrivate = true;
+  } else if (targetPeerId && typeof targetPeerId === 'string') {
+    listOfPeers = [targetPeerId];
+    isPrivate = true;
+  }
+
+  if (Array.isArray(isStringStream)) {
+    listOfPeers = isStringStream;
+    targetPeerId = isStringStream;
+    isPrivate = true;
+  } else if (isStringStream && typeof isStringStream === 'string') {
+    listOfPeers = [isStringStream];
+    targetPeerId = isStringStream;
+    isPrivate = true;
+  } else if (isStringStream && typeof isStringStream === 'boolean') {
+    sessionChunkType = 'string';
+  }
+
+  var sessionInfo = {
+    chunk: null,
+    chunkSize: 0,
+    chunkType: sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING :
+      self.DATA_TRANSFER_DATA_TYPE.BLOB,
+    isPrivate: isPrivate,
+    isStringStream: sessionChunkType === 'string',
+    senderPeerId: self._user && self._user.sid ? self._user.sid : null
+  };
+
+  // Remove MCU from list
+  if (listOfPeers.indexOf('MCU') > -1) {
+    listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
+  }
+
+  var emitErrorBeforeStreamingFn = function (error) {
+    log.error(error);
+
+    if (listOfPeers.length > 0) {
+      for (var i = 0; i < listOfPeers.length; i++) {
+        self._trigger('dataStreamState', self.DATA_STREAM_STATE.START_ERROR, null,
+          listOfPeers[i], sessionInfo, new Error(error));
+      }
+    } else {
+      self._trigger('dataStreamState', self.DATA_STREAM_STATE.START_ERROR, null,
+        null, sessionInfo, new Error(error));
+    }
+  };
+
+  if (!this._inRoom || !(this._user && this._user.sid)) {
+    return emitErrorBeforeStreamingFn('Unable to start data streaming as User is not in Room.');
+  }
+
+  if (!this._enableDataChannel) {
+    return emitErrorBeforeStreamingFn('Unable to start data streaming as User does not have Datachannel enabled.');
+  }
+
+  if (listOfPeers.length === 0) {
+    return emitErrorBeforeStreamingFn('Unable to start data streaming as there are no Peers to start session with.');
+  }
+
+  var transferId = 'stream_' + (self._user && self._user.sid ? self._user.sid : '-') + '_' + (new Date()).getTime();
+  var peersInterop = [];
+  var peersNonInterop = [];
+  var sessions = {};
+  var listenToPeerFn = function (peerId, channelProp) {
+    var hasStarted = false;
+    sessions[peerId] = channelProp;
+
+    self.once('dataStreamState', function () {}, function (state, evtTransferId, evtPeerId, evtSessionInfo) {
+      if (!(evtTransferId === transferId && evtPeerId === peerId)) {
+        return;
+      }
+
+      var dataChunk = evtSessionInfo.chunk;
+      var updatedSessionInfo = clone(evtSessionInfo);
+      delete updatedSessionInfo.chunk;
+
+      if (state === self.DATA_STREAM_STATE.SENDING_STARTED) {
+        hasStarted = true;
+        self._trigger('incomingDataStreamStarted', transferId, peerId, updatedSessionInfo, true);
+        return;
+      }
+
+      if (hasStarted) {
+        if (state === self.DATA_STREAM_STATE.SENT) {
+          self._trigger('incomingDataStream', dataChunk, transferId, peerId, updatedSessionInfo, true);
+          return;
+        } else if ([self.DATA_STREAM_STATE.ERROR, self.DATA_STREAM_STATE.SENDING_STOPPED].indexOf(state) > -1) {
+          if (state === self.DATA_STREAM_STATE.ERROR) {
+            self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENDING_STOPPED, transferId, peerId, sessionInfo, null);
+          }
+
+          self._trigger('incomingDataStreamStopped', transferId, peerId, updatedSessionInfo, true);
+
+          if (channelProp === transferId) {
+            self._closeDataChannel(peerId, transferId);
+          }
+
+          if (self._dataStreams[transferId] && self._dataStreams[transferId].sessions[peerId]) {
+            delete self._dataStreams[transferId].sessions[peerId];
+
+            if (Object.keys(self._dataStreams[transferId].sessions).length === 0) {
+              delete self._dataStreams[transferId];
+            }
+          }
+          return true;
+        }
+      }
+    });
+  };
+  var i;
+
+  // Loop out unwanted Peers
+  for (i = 0; i < listOfPeers.length; i++) {
+    var peerId = listOfPeers[i];
+    var error = null;
+    var dtProtocolVersion = ((self._peerInformations[peerId] || {}).agent || {}).DTProtocolVersion || '';
+    var channelProp = self._isLowerThanVersion(dtProtocolVersion, '0.1.2') ? 'main' : transferId;
+
+    if (!(self._dataChannels[peerId] && self._dataChannels[peerId].main)) {
+      error = 'Datachannel connection does not exists';
+    } else if (self._hasMCU && !(self._dataChannels.MCU && self._dataChannels.MCU.main)) {
+      error = 'MCU Datachannel connection does not exists';
+    } else if (self._isLowerThanVersion(dtProtocolVersion, '0.1.3')) {
+      error = 'Peer DTProtocolVersion does not support data streaming. (received: "' + dtProtocolVersion + '", expected: "0.1.3")';
+    } else {
+      if (channelProp === 'main') {
+        var dataTransferId = self._hasMCU ? self._dataChannels.MCU.main.transferId : self._dataChannels[peerId].main.transferId;
+
+        if (self._dataChannels[peerId].main.streamId) {
+          error = 'Peer Datachannel currently has an active data transfer session.';
+        } else if (self._hasMCU && self._dataChannels.MCU.main.streamId) {
+          error = 'MCU Peer Datachannel currently has an active data transfer session.';
+        } else if (self._dataTransfers[dataTransferId] && self._dataTransfers[dataTransferId].sessionChunkType === sessionChunkType) {
+          error = (self._hasMCU ? 'MCU ' : '') + 'Peer Datachannel currently has an active ' + sessionChunkType + ' data transfer.';
+        } else {
+          peersInterop.push(peerId);
+        }
+      } else {
+        peersNonInterop.push(peerId);
+      }
+    }
+
+    if (error) {
+      self._trigger('dataStreamState', self.DATA_STREAM_STATE.START_ERROR, transferId, peerId, sessionInfo, new Error(error));
+      listOfPeers.splice(i, 1);
+      i--;
+    } else {
+      listenToPeerFn(peerId, channelProp);
+    }
+  }
+
+  if (listOfPeers.length === 0) {
+    log.warn('There are no Peers to start data session with.');
+    return;
+  }
+
+  self._dataStreams[transferId] = {
+    started: true,
+    sessions: sessions,
+    chunkType: sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING :
+      self.DATA_TRANSFER_DATA_TYPE.BLOB,
+    sessionChunkType: sessionChunkType,
+    isPrivate: isPrivate,
+    isStringStream: sessionChunkType === 'string',
+    senderPeerId: self._user && self._user.sid ? self._user.sid : null,
+    isUpload: true
+  };
+
+  var startDataSessionFn = function (peerId, channelProp, targetPeers) {
+    var sendWRQFn = function () {
+      self._sendMessageToDataChannel(peerId, {
+        type: self._DC_PROTOCOL_TYPE.WRQ,
+        transferId: transferId,
+        name: transferId,
+        size: 0,
+        originalSize: 0,
+        dataType: 'start',
+        mimeType: null,
+        chunkType: sessionChunkType,
+        chunkSize: sessionChunkType === 'string' ? self._CHUNK_DATAURL_SIZE : self._BINARY_FILE_SIZE,
+        timeout: 0,
+        isPrivate: isPrivate,
+        sender: self._user.sid,
+        agent: window.webrtcDetectedBrowser,
+        version: window.webrtcDetectedVersion,
+        target: peerId === 'MCU' ? targetPeers : peerId
+      }, channelProp);
+      self._dataChannels[peerId][channelProp].streamId = transferId;
+    };
+
+    self.once('dataChannelState', function () {}, function (state, evtPeerId, channelName, channelType, error) {
+      if (!self._dataStreams[transferId]) {
+        return true;
+      }
+
+      if (!(evtPeerId === peerId && (channelProp === 'main' ? channelType === self.DATA_CHANNEL_TYPE.MESSAGING :
+        channelName === transferId && channelType === self.DATA_CHANNEL_TYPE.DATA))) {
+        return;
+      }
+
+      if (channelProp !== 'main' && state === self.DATA_CHANNEL_STATE.OPEN) {
+        sendWRQFn();
+      }
+
+      if ([self.DATA_CHANNEL_STATE.ERROR, self.DATA_CHANNEL_STATE.CLOSED].indexOf(state) > -1) {
+        var updatedError = new Error(error && error.message ? error.message :
+          'Failed data transfer as datachannel state is "' + state + '".');
+
+        if (peerId === 'MCU') {
+          for (var i = 0; i < targetPeers.length; i++) {
+            self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, targetPeers[i], sessionInfo, updatedError);
+          }
+        } else {
+          self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, peerId, sessionInfo, updatedError);
+        }
+        return true;
+      }
+    });
+
+    if (channelProp === 'main') {
+      sendWRQFn();
+    }
+
+    if (peerId === 'MCU') {
+      for (var i = 0; i < targetPeers.length; i++) {
+        self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENDING_STARTED, transferId, targetPeers[i], sessionInfo, null);
+      }
+    } else {
+      self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENDING_STARTED, transferId, peerId, sessionInfo, null);
+    }
+  };
+
+  if (peersNonInterop.length > 0) {
+    if (self._hasMCU) {
+      startDataSessionFn('MCU', transferId, peersNonInterop);
+    } else {
+      for (i = 0; i < peersNonInterop.length; i++) {
+        startDataSessionFn(peersNonInterop[i], transferId, null);
+      }
+    }
+  }
+
+  if (peersInterop.length > 0) {
+    if (self._hasMCU) {
+      startDataSessionFn('MCU', transferId, peersInterop);
+    } else {
+      for (i = 0; i < peersInterop.length; i++) {
+        startDataSessionFn(peersInterop[i], 'main', null);
+      }
+    }
+  }
+};
+
+/**
+ * Function that sends a data chunk from User to Peers for an existing active data streaming session.
+ * @method streamData
+ * @param {String} streamId The data streaming session ID.
+ * @param {Blob|ArrayBuffer} The data chunk.
+ *   <small>By default when it is not string data streaming, data chunks when is are expected to be
+ *   sent in Blob or ArrayBuffer, and ArrayBuffer data chunks will be converted to Blob.</small>
+ *   <small>For binary data chunks, the limit is <code>65456</code>.</small>
+ *   <small>For string data chunks, the limit is <code>1212</code>.</small>
+ * @trigger <ol class="desc-seq"></ol>
+ * @example
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.streamData = function(transferId, dataChunk) {
+  var self = this;
+
+  if (!(transferId && typeof transferId === 'string')) {
+    log.error('Failed streaming data chunk as stream session ID is not provided.');
+    return;
+  }
+
+  if (!(dataChunk && typeof dataChunk === 'object' && (dataChunk instanceof Blob || dataChunk instanceof ArrayBuffer))) {
+    log.error('Failed streaming data chunk as it is not provided.');
+    return;
+  }
+
+  if (!(self._inRoom && self._user && self._user.sid)) {
+    log.error('Failed streaming data chunk as User is not in the Room.');
+    return;
+  }
+
+  if (!self._dataStreams[transferId]) {
+    log.error('Failed streaming data chunk as session does not exists.');
+    return;
+  }
+
+  if (self._dataStreams[transferId].isUpload) {
+    log.error('Failed streaming data chunk as session is not sending.');
+    return;
+  }
+
+  if (self._dataStreams[transferId].sessionChunkType === 'string' ? typeof dataChunk !== 'string' :
+    typeof dataChunk !== 'object') {
+    log.error('Failed streaming data chunk as data chunk does not match expected data type.');
+    return;
+  }
+
+  var updatedDataChunk = dataChunk instanceof ArrayBuffer ? new Blob(dataChunk) : dataChunk;
+
+  if (self._dataStreams[transferId].sessionChunkType === 'string' ? updatedDataChunk.length > self._CHUNK_DATAURL_SIZE :
+    updatedDataChunk.length > self._BINARY_FILE_SIZE) {
+    log.error('Failed streaming data chunk as data chunk exceeds maximum chunk limit.');
+    return;
+  }
+
+  var sessionInfo = {
+    chunk: updatedDataChunk,
+    chunkSize: updatedDataChunk.size || updatedDataChunk.length || updatedDataChunk.byteLength,
+    chunkType: self._dataStreams[transferId].sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING :
+      self.DATA_TRANSFER_DATA_TYPE.BLOB,
+    isPrivate: self._dataStreams[transferId].sessionChunkType.isPrivate,
+    isStringStream: self._dataStreams[transferId].sessionChunkType === 'string',
+    senderPeerId: self._user && self._user.sid ? self._user.sid : null
+  };
+
+  var peersInterop = [];
+  var peersNonInterop = [];
+  var sendDataFn = function (peerId, channelProp, targetPeers) {
+    if (dataChunk instanceof Blob) {
+      self._blobToArrayBuffer(self._dataTransfers[transferId].chunks[data.ackN], function (buffer) {
+        self._sendMessageToDataChannel(peerId, buffer, channelProp, true);
+        if (targetPeers) {
+          for (var i = 0; i < targetPeers.length; i++) {
+            self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENT, transferId, targetPeers[i], sessionInfo, null);
+          }
+        } else {
+          self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENT, transferId, peerId, sessionInfo, null);
+        }
+      });
+    } else {
+      self._sendMessageToDataChannel(peerId, dataChunk, channelProp, true);
+      if (targetPeers) {
+        for (var i = 0; i < targetPeers.length; i++) {
+          self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENT, transferId, targetPeers[i], sessionInfo, null);
+        }
+      } else {
+        self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENT, transferId, peerId, sessionInfo, null);
+      }
+    }
+  };
+
+  for (var peerId in self._dataStreams[transferId].sessions) {
+    if (self._dataStreams[transferId].sessions.hasOwnProperty(peerId) && self._dataStreams[transferId].sessions[peerId]) {
+      if (self._hasMCU) {
+        if (self._dataStreams[transferId].sessions[peerId] === 'main') {
+          peersInterop.push(peerId);
+        } else {
+          peersNonInterop.push(peerId);
+        }
+      } else {
+        sendDataFn(peerId, self._dataStreams[transferId].sessions[peerId]);
+      }
+    }
+  }
+
+  if (self._hasMCU) {
+    if (peersInterop.length > 0) {
+      sendDataFn(peerId, 'main', peersInterop);
+    }
+    if (peersNonInterop.length > 0) {
+      sendDataFn(peerId, transferId, peersNonInterop);
+    }
+  }
+};
+
+/**
+ * Function that stops a data chunks streaming session from User to Peers.
+ * @method stopStreamingData
+ * @param {String} streamId The data streaming session ID.
+ * @trigger <ol class="desc-seq"></ol>
+ * @example
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.stopStreamingData = function(transferId) {
+  var self = this;
+
+  if (!(transferId && typeof transferId === 'string')) {
+    log.error('Failed streaming data chunk as stream session ID is not provided.');
+    return;
+  }
+
+  if (!(self._inRoom && self._user && self._user.sid)) {
+    log.error('Failed streaming data chunk as User is not in the Room.');
+    return;
+  }
+
+  if (!self._dataStreams[transferId]) {
+    log.error('Failed streaming data chunk as session does not exists.');
+    return;
+  }
+
+  if (self._dataStreams[transferId].isUpload) {
+    log.error('Failed streaming data chunk as session is not sending.');
+    return;
+  }
+
+  var sessionInfo = {
+    chunk: dataChunk instanceof ArrayBuffer ? new Blob(dataChunk) : dataChunk,
+    chunkSize: 0,
+    chunkType: self._dataStreams[transferId].sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING :
+      self.DATA_TRANSFER_DATA_TYPE.BLOB,
+    isPrivate: self._dataStreams[transferId].sessionChunkType.isPrivate,
+    isStringStream: self._dataStreams[transferId].sessionChunkType === 'string',
+    senderPeerId: self._user && self._user.sid ? self._user.sid : null
+  };
+
+  var peersInterop = [];
+  var peersNonInterop = [];
+  var sendDataFn = function (peerId, channelProp, targetPeers) {
+    self._sendMessageToDataChannel(peerId, {
+      type: self._DC_PROTOCOL_TYPE.WRQ,
+      transferId: transferId,
+      name: transferId,
+      size: 0,
+      originalSize: 0,
+      dataType: 'stop',
+      mimeType: null,
+      chunkType: self._dataStreams[transferId].sessionChunkType,
+      chunkSize: self._dataStreams[transferId].sessionChunkType === 'string' ? self._CHUNK_DATAURL_SIZE : self._BINARY_FILE_SIZE,
+      timeout: 0,
+      isPrivate: isPrivate,
+      sender: self._user.sid,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      target: targetPeers ? targetPeers : peerId
+    }, channelProp);
+
+    if (targetPeers) {
+      for (var i = 0; i < targetPeers.length; i++) {
+        self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENDING_STOPPED, transferId, targetPeers[i], sessionInfo, null);
+      }
+    } else {
+      self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENDING_STOPPED, transferId, peerId, sessionInfo, null);
+    }
+  };
+
+  for (var peerId in self._dataStreams[transferId].sessions) {
+    if (self._dataStreams[transferId].sessions.hasOwnProperty(peerId) && self._dataStreams[transferId].sessions[peerId]) {
+      if (self._hasMCU) {
+        if (self._dataStreams[transferId].sessions[peerId] === 'main') {
+          peersInterop.push(peerId);
+        } else {
+          peersNonInterop.push(peerId);
+        }
+      } else {
+        sendDataFn(peerId, self._dataStreams[transferId].sessions[peerId]);
+      }
+    }
+  }
+
+  if (self._hasMCU) {
+    if (peersInterop.length > 0) {
+      sendDataFn(peerId, 'main', peersInterop);
+    }
+    if (peersNonInterop.length > 0) {
+      sendDataFn(peerId, transferId, peersNonInterop);
+    }
+  }
+};
+
+
+/**
  * Function that starts the data transfer to Peers.
  * @method _startDataTransfer
  * @private
@@ -3024,6 +3560,20 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     return;
   }
 
+  var streamId = self._dataChannels[peerId].main.streamId;
+
+  if (channelProp === 'main' && self._dataStreams[streamId] &&
+    (self._dataStreams[streamId].sessionChunkType === 'string' &&
+    (self._dataTransfers[transferId].sessionChunkType === 'string' ||
+    self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1)) ||
+    (self._dataStreams[streamId].sessionChunkType === 'binary' &&
+    self._dataStreams[streamId].sessionChunkType === 'binary' &&
+    self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) === -1)) {
+    returnErrorBeforeTransferFn('Unable to start data transfer as Peer Datachannel currently has an active ' +
+      self._dataStreams[streamId].sessionChunkType + ' data streaming session.');
+    return;
+  }
+
   var protocolVer = (self._peerInformations[peerId].agent || {}).DTProtocolVersion || '0.1.0';
   var requireInterop = self._isLowerThanVersion(protocolVer, '0.1.2');
 
@@ -3087,6 +3637,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     if (evtPeerId === peerId && (channelType === self.DATA_CHANNEL_TYPE.DATA ? channelName === transferId : true)) {
       if (state === self.DATA_CHANNEL_STATE.OPEN && channelType === self.DATA_CHANNEL_TYPE.DATA &&
         channelName === transferId) {
+        self._dataChannels[peerId][channelProp].transferId = transferId;
         sendWRQFn();
         return false;
       }
@@ -3098,12 +3649,9 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   // Create new Datachannel for Peer to start data transfer
   if (!((requireInterop && peerId !== 'MCU') || channelProp === 'main')) {
     channelProp = transferId;
-
     self._createDataChannel(peerId, transferId);
-
   } else {
     self._dataChannels[peerId].main.transferId = transferId;
-
     sendWRQFn();
   }
 };
@@ -3454,48 +4002,167 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
  */
 Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
   var self = this;
-  var transferId = channelProp === 'main' ? data.transferId || peerId + '_' + (new Date()).getTime() : channelProp;
+  var transferId = channelProp === 'main' ? data.transferId || null : channelProp;
   var senderPeerId = data.sender || peerId;
 
-  self._dataTransfers[transferId] = {
-    name: data.name || transferId,
-    size: data.size || 0,
-    chunkSize: data.chunkSize,
-    originalSize: data.originalSize || 0,
-    timeout: data.timeout || 60,
-    isPrivate: !!data.isPrivate,
-    senderPeerId: data.sender || peerId,
-    dataType: self.DATA_TRANSFER_SESSION_TYPE.BLOB,
-    mimeType: data.mimeType || null,
-    chunkType: self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
-    direction: self.DATA_TRANSFER_TYPE.DOWNLOAD,
-    chunks: [],
-    sessions: {},
-    sessionType: data.dataType || 'blob',
-    sessionChunkType: data.chunkType || 'string'
-  };
+  if (['start', 'stop'].indexOf(data.dataType) > -1) {
+    if (data.dataType === 'start') {
+      if (!transferId) {
+        transferId = 'stream_' + peerId + '_' + (new Date()).getTime();
+      }
+      self._dataStreams[transferId] = {
+        chunkSize: 0,
+        chunkType: data.chunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING : self.DATA_TRANSFER_DATA_TYPE.BLOB,
+        sessionChunkType: data.chunkType,
+        isPrivate: !!data.isPrivate,
+        isStringStream: data.chunkType === 'string',
+        senderPeerId: senderPeerId,
+        isUpload: false
+      };
+      self._dataChannels[peerId][channelProp].streamId = transferId;
+      var hasStarted = false;
+      self.once('dataStreamState', function () {}, function (state, evtTransferId, evtPeerId, evtSessionInfo) {
+        if (!self._dataStreams[transferId]) {
+          return;
+        }
 
-  if (self._dataTransfers[transferId].sessionType === 'data' &&
-    self._dataTransfers[transferId].sessionChunkType === 'string') {
-    self._dataTransfers[transferId].dataType = self.DATA_TRANSFER_SESSION_TYPE.DATA_URL;
-    self._dataTransfers[transferId].chunkType = self.DATA_TRANSFER_DATA_TYPE.STRING;
-  } else if (self._dataTransfers[transferId].sessionType === 'blob' &&
-    self._dataTransfers[transferId].sessionChunkType === 'binary') {
-    self._dataTransfers[transferId].chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
+        if (!(evtPeerId === senderPeerId && evtTransferId === transferId)) {
+          return;
+        }
+
+        var dataChunk = evtSessionInfo.chunk;
+        var updatedSessionInfo = clone(evtSessionInfo);
+        delete updatedSessionInfo.chunk;
+
+        if (state === self.DATA_STREAM_STATE.RECEIVING_STARTED) {
+          hasStarted = true;
+          self._trigger('incomingDataStreamStarted', transferId, peerId, updatedSessionInfo, false);
+          return;
+        }
+
+        if (hasStarted) {
+          if (state === self.DATA_STREAM_STATE.RECEIVED) {
+            self._trigger('incomingDataStream', dataChunk, transferId, peerId, updatedSessionInfo, false);
+            return;
+          } else if ([self.DATA_STREAM_STATE.ERROR, self.DATA_STREAM_STATE.RECEIVING_STOPPED].indexOf(state) > -1) {
+            if (state === self.DATA_STREAM_STATE.ERROR) {
+              self._trigger('dataStreamState', self.DATA_STREAM_STATE.RECEIVING_STOPPED, transferId, peerId, evtSessionInfo, null);
+            }
+
+            self._trigger('incomingDataStreamStopped', transferId, peerId, updatedSessionInfo, false);
+
+            if (channelProp === transferId) {
+              self._closeDataChannel(peerId, transferId);
+            }
+
+            if (self._dataStreams[transferId] && self._dataStreams[transferId].sessions[peerId]) {
+              delete self._dataStreams[transferId].sessions[peerId];
+
+              if (Object.keys(self._dataStreams[transferId].sessions).length === 0) {
+                delete self._dataStreams[transferId];
+              }
+            }
+            return true;
+          }
+        }
+      });
+      self.once('dataChannelState', function () {}, function (state, evtPeerId, channelName, channelType, error) {
+        if (!self._dataStreams[transferId]) {
+          return true;
+        }
+
+        if (!(evtPeerId === peerId && (channelProp === 'main' ? channelType === self.DATA_CHANNEL_TYPE.MESSAGING :
+          channelName === transferId && channelType === self.DATA_CHANNEL_TYPE.DATA))) {
+          return;
+        }
+
+        if ([self.DATA_CHANNEL_STATE.ERROR, self.DATA_CHANNEL_STATE.CLOSED].indexOf(state) > -1) {
+          var updatedError = new Error(error && error.message ? error.message :
+            'Failed data transfer as datachannel state is "' + state + '".');
+
+          self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, senderPeerId, {
+            chunk: null,
+            chunkSize: 0,
+            chunkType: self._dataStreams[transferId].chunkType,
+            isPrivate: self._dataStreams[transferId].isPrivate,
+            isStringStream: self._dataStreams[transferId].sessionChunkType === 'string',
+            senderPeerId: senderPeerId
+          }, updatedError);
+          return true;
+        }
+      });
+
+      self._trigger('dataStreamState', self.DATA_STREAM_STATE.RECEIVING_STARTED, transferId, senderPeerId, {
+        chunk: null,
+        chunkSize: 0,
+        chunkType: self._dataStreams[transferId].chunkType,
+        isPrivate: self._dataStreams[transferId].isPrivate,
+        isStringStream: self._dataStreams[transferId].sessionChunkType === 'string',
+        senderPeerId: senderPeerId
+      }, null);
+
+    } else {
+      transferId = self._dataChannels[peerId][channelProp].streamId;
+      if (self._dataStreams[transferId] && !self._dataStreams[transferId].isUpload) {
+        self._trigger('dataStreamState', self.DATA_STREAM_STATE.RECEIVING_STOPPED, transferId, senderPeerId, {
+          chunk: null,
+          chunkSize: 0,
+          chunkType: self._dataStreams[transferId].chunkType,
+          isPrivate: self._dataStreams[transferId].isPrivate,
+          isStringStream: self._dataStreams[transferId].sessionChunkType === 'string',
+          senderPeerId: senderPeerId
+        }, null);
+        self._dataChannels[peerId][channelProp].streamId = null;
+        if (channelProp !== 'main') {
+          self._closeDataChannel(peerId, channelProp);
+        }
+      }
+    }
+  } else {
+    if (!transferId) {
+      transferId = 'transfer_' + peerId + '_' + (new Date()).getTime();
+    }
+
+    self._dataTransfers[transferId] = {
+      name: data.name || transferId,
+      size: data.size || 0,
+      chunkSize: data.chunkSize,
+      originalSize: data.originalSize || 0,
+      timeout: data.timeout || 60,
+      isPrivate: !!data.isPrivate,
+      senderPeerId: data.sender || peerId,
+      dataType: self.DATA_TRANSFER_SESSION_TYPE.BLOB,
+      mimeType: data.mimeType || null,
+      chunkType: self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+      direction: self.DATA_TRANSFER_TYPE.DOWNLOAD,
+      chunks: [],
+      sessions: {},
+      sessionType: data.dataType || 'blob',
+      sessionChunkType: data.chunkType || 'string'
+    };
+
+    if (self._dataTransfers[transferId].sessionType === 'data' &&
+      self._dataTransfers[transferId].sessionChunkType === 'string') {
+      self._dataTransfers[transferId].dataType = self.DATA_TRANSFER_SESSION_TYPE.DATA_URL;
+      self._dataTransfers[transferId].chunkType = self.DATA_TRANSFER_DATA_TYPE.STRING;
+    } else if (self._dataTransfers[transferId].sessionType === 'blob' &&
+      self._dataTransfers[transferId].sessionChunkType === 'binary') {
+      self._dataTransfers[transferId].chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
+    }
+
+    self._dataChannels[peerId][channelProp].transferId = transferId;
+    self._dataTransfers[transferId].sessions[peerId] = {
+      timer: null,
+      ackN: 0,
+      receivedSize: 0
+    };
+
+    self._trigger('incomingDataRequest', transferId, senderPeerId,
+      self._getTransferInfo(transferId, peerId, false, false, false), false);
+
+    self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_REQUEST, transferId, senderPeerId,
+      self._getTransferInfo(transferId, peerId, true, false, false), null);
   }
-
-  self._dataChannels[peerId][channelProp].transferId = transferId;
-  self._dataTransfers[transferId].sessions[peerId] = {
-    timer: null,
-    ackN: 0,
-    receivedSize: 0
-  };
-
-  self._trigger('incomingDataRequest', transferId, senderPeerId,
-    self._getTransferInfo(transferId, peerId, false, false, false), false);
-
-  self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.UPLOAD_REQUEST, transferId, senderPeerId,
-    self._getTransferInfo(transferId, peerId, true, false, false), null);
 };
 
 /**
@@ -3733,12 +4400,30 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
   var transferId = channelProp;
   var senderPeerId = peerId;
 
-  if (channelProp === 'main') {
-    transferId = self._dataChannels[peerId].main.transferId;
+  if (!(self._dataChannels[peerId] && self._dataChannels[peerId][channelProp])) {
+    return;
   }
 
-  if (!transferId) {
+  var streamId = self._dataChannels[peerId][channelProp].streamId;
+
+  if (streamId && self._dataStreams[streamId] && ((typeof chunk === 'string' &&
+    self._dataStreams[streamId].sessionChunkType === 'string') || (chunk instanceof Blob &&
+    self._dataStreams[streamId].sessionChunkType === 'binary'))) {
+    senderPeerId = self._dataStreams[streamId].senderPeerId || peerId;
+
+    self._trigger('dataStreamState', self.DATA_STREAM_STATE.RECEIVED, streamId, senderPeerId, {
+      chunk: chunk,
+      chunkSize: chunkSize,
+      chunkType: chunkType,
+      isPrivate: self._dataStreams[streamId].sessionChunkType.isPrivate,
+      isStringStream: self._dataStreams[streamId].sessionChunkType === 'string',
+      senderPeerId: senderPeerId
+    }, null);
     return;
+  }
+
+  if (channelProp === 'main') {
+    transferId = self._dataChannels[peerId].main.transferId;
   }
 
   if (self._dataTransfers[transferId].senderPeerId) {
@@ -9805,12 +10490,59 @@ var _eventsDocs = {
    * @param {String} peerId The Peer ID.
    * @param {String} transferInfo The data transfer information.
    *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
-   *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+   *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+   *   except without the <code>data</code> property.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.6.1
    */
   incomingDataRequest: [],
+
+  /**
+   * Event triggered when data streaming session has been started from Peer to User.
+   * @event incomingDataStreamStarted
+   * @param {String} streamId The data streaming session ID.
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} streamInfo The data streaming session information.
+   *   <small>Object signature matches the <code>streamInfo</code> parameter payload received in the
+   *   <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+   *   except without the <code>chunk</code> property.</small>
+   * @param {Boolean} isSelf The flag if Peer is User.
+   * @for Skylink
+   * @since 0.6.18
+   */
+  incomingDataStreamStarted: [],
+
+  /**
+   * Event triggered when data streaming session has been stopped from Peer to User.
+   * @event incomingDataStreamStopped
+   * @param {String} streamId The data streaming session ID.
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} streamInfo The data streaming session information.
+   *   <small>Object signature matches the <code>streamInfo</code> parameter payload received in the
+   *   <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+   *   except without the <code>chunk</code> property.</small>
+   * @param {Boolean} isSelf The flag if Peer is User.
+   * @for Skylink
+   * @since 0.6.18
+   */
+  incomingDataStreamStopped: [],
+
+  /**
+   * Event triggered when data streaming session has been stopped from Peer to User.
+   * @event incomingDataStream
+   * @param {Blob|String} chunk The data chunk received.
+   * @param {String} streamId The data streaming session ID.
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} streamInfo The data streaming session information.
+   *   <small>Object signature matches the <code>streamInfo</code> parameter payload received in the
+   *   <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+   *   except without the <code>chunk</code> property.</small>
+   * @param {Boolean} isSelf The flag if Peer is User.
+   * @for Skylink
+   * @since 0.6.18
+   */
+  incomingDataStream: [],
 
   /**
    * Event triggered when Room locked status has changed.
@@ -9851,9 +10583,9 @@ var _eventsDocs = {
    * @param {String} state The current data transfer state.
    *   [Rel: Skylink.DATA_TRANSFER_STATE]
    * @param {String} transferId The data transfer ID.
-   *   <small>Note that this is defined <code>null</code> when <code>state</code> payload is <code>START_ERROR</code>.</small>
+   *   <small>Note that this is defined as <code>null</code> when <code>state</code> payload is <code>START_ERROR</code>.</small>
    * @param {String} peerId The Peer ID.
-   *   <small>Note that this could be defined <code>null</code> when <code>state</code> payload is
+   *   <small>Note that this could be defined as <code>null</code> when <code>state</code> payload is
    *   <code>START_ERROR</code> and there is no Peers to start data transfer with.</small>
    * @param {JSON} transferInfo The data transfer information.
    * @param {Blob|String} [transferInfo.data] The data object.
@@ -9875,7 +10607,7 @@ var _eventsDocs = {
    *   data object sent MIME type information is defined.</small>
    * @param {Number} transferInfo.chunkSize The data transfer data chunk size.
    * @param {Number} transferInfo.percentage The data transfer percentage of completion progress.
-   * @param {Number} transferInfo.timeout The flag if message is targeted or not, basing
+   * @param {Number} transferInfo.timeout The flag if data transfer is targeted or not, basing
    *   off the <code>targetPeerId</code> parameter being defined in
    *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> or
    *   <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>.
@@ -9887,7 +10619,7 @@ var _eventsDocs = {
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
    * @param {JSON} [error] The error result.
    *   <small>Defined only when <code>state</code> payload is <code>ERROR</code>, <code>CANCEL</code>,
-   *   <code>REJECTED</code> or <code>USER_REJECTED</code>.</small>
+   *   <code>REJECTED</code>, <code>START_ERROR</code> or <code>USER_REJECTED</code>.</small>
    * @param {Error|String} error.message The error object.
    * @param {String} error.transferType The data transfer direction from where the error occurred.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
@@ -9895,6 +10627,36 @@ var _eventsDocs = {
    * @since 0.4.1
    */
   dataTransferState: [],
+
+  /**
+   * Event triggered when a data streaming state has changed.
+   * @event dataStreamState
+   * @param {String} state The current data streaming state.
+   *   [Rel: Skylink.DATA_STREAM_STATE]
+   * @param {String} streamId The data streaming session ID.
+   *   <small>Note that this is defined as <code>null</code> when <code>state</code> payload is <code>START_ERROR</code>.</small>
+   * @param {String} peerId The Peer ID.
+   *   <small>Note that this could be defined as <code>null</code> when <code>state</code> payload is
+   *   <code>START_ERROR</code> and there is no Peers to start data streaming with.</small>
+   * @param {JSON} streamInfo The data streaming information.
+   * @param {Blob|String} [streamInfo.chunk] The data chunk received.
+   *   <small>Defined only when <code>state</code> payload is <code>RECEIVED</code> or <code>SENT</code>.</small>
+   * @param {Number} streamInfo.chunkSize The data streaming data chunk size received.
+   * @param {String} streamInfo.chunkType The data streaming data chunk type received.
+   *   <small>The initial data chunks value may change depending on the currently received data chunk type or the
+   *   agent supported sending type of data chunks.</small>
+   *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
+   * @param {String} streamInfo.isStringStream The flag if data streaming data chunks are strings.
+   * @param {Boolean} streamInfo.isPrivate The flag if data streaming is targeted or not, basing
+   *   off the <code>targetPeerId</code> parameter being defined in
+   *   <a href="#method_startStreamingData"><code>startStreamingData()</code> method</a>.
+   * @param {String} streamInfo.senderPeerId The sender Peer ID.
+   * @param {Error} [error] The error object.
+   *   <small>Defined only when <code>state</code> payload is <code>ERROR</code> or <code>START_ERROR</code>,.</small>
+   * @for Skylink
+   * @since 0.6.18
+   */
+  dataStreamState: [],
 
   /**
    * Event triggered when Signaling server reaction state has changed.
@@ -10173,7 +10935,7 @@ var _eventsDocs = {
    * @param {Number} [stats.video.sending.frameRateMean] The Peer connection sending video streaming fps mean.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.frameRateStdDev] The Peer connection sending video streaming fps standard deviation.
-   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small> 
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.framesPerSecond] The Peer connection sending video streaming fps.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.framesDecoded] The Peer connection sending video streaming frames decoded.
@@ -10293,7 +11055,6 @@ var _eventsDocs = {
    *   remote ICE candidate IP transport type.
    * @param {String} stats.selectedCandidate.remote.candidateType The Peer connection selected
    *   remote ICE candidate type.
-   
    * @param {Boolean} [stats.selectedCandidate.writable] The flag if Peer has gotten ACK to an ICE request.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Boolean} [stats.selectedCandidate.readable] The flag if Peer has gotten a valid incoming ICE request.
@@ -10519,7 +11280,7 @@ var _eventsDocs = {
    * @param {JSON} length The remote ICE candidates length.
    * @param {Number} length.expected The expected total number of remote ICE candidates to be received.
    * @param {Number} length.received The actual total number of remote ICE candidates received.
-   * @param {Number} length.processed The total number of remote ICE candidates processed. 
+   * @param {Number} length.processed The total number of remote ICE candidates processed.
    * @for Skylink
    * @since 0.6.18
    */

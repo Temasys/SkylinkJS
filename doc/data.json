@@ -277,6 +277,25 @@
         {
             "file": "source/template/header.js",
             "line": 243,
+            "description": "Stores the list of sending data streaming sessions to Peers.",
+            "itemtype": "attribute",
+            "name": "_dataStreams",
+            "params": [
+                {
+                    "name": "#streamId",
+                    "description": "The data stream session.",
+                    "type": "JSON"
+                }
+            ],
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 254,
             "description": "Stores the list of buffered ICE candidates that is received before\n  remote session description is received and set.",
             "itemtype": "attribute",
             "name": "_peerCandidatesQueue",
@@ -302,7 +321,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 256,
+            "line": 267,
             "description": "Stores the list of ICE candidates received before signaling end.",
             "itemtype": "attribute",
             "name": "_peerEndOfCandidatesCounter",
@@ -314,7 +333,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 266,
+            "line": 277,
             "description": "Stores the list of Peer connection ICE candidates.",
             "itemtype": "attribute",
             "name": "_gatheredCandidates",
@@ -345,7 +364,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 279,
+            "line": 290,
             "description": "Stores the flags for ICE candidate filtering.",
             "itemtype": "attribute",
             "name": "_filterCandidatesType",
@@ -357,7 +376,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 293,
+            "line": 304,
             "description": "Stores the flag that indicates if Peer connections should trickle ICE.",
             "itemtype": "attribute",
             "name": "_enableIceTrickle",
@@ -370,7 +389,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 304,
+            "line": 315,
             "description": "Stores the flag that indicates if STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableSTUN",
@@ -383,7 +402,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 315,
+            "line": 326,
             "description": "Stores the flag that indicates if TURN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_enableTURN",
@@ -396,7 +415,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 326,
+            "line": 337,
             "description": "Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.",
             "itemtype": "attribute",
             "name": "_usePublicSTUN",
@@ -409,7 +428,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 337,
+            "line": 348,
             "description": "Stores the global number of Peer connection retries that would increase the wait-for-response timeout\n  for the Peer connection health timer.",
             "itemtype": "attribute",
             "name": "_retryCounters",
@@ -421,7 +440,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 348,
+            "line": 359,
             "description": "Stores the list of the Peer connections.",
             "itemtype": "attribute",
             "name": "_peerConnections",
@@ -440,7 +459,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 359,
+            "line": 370,
             "description": "Stores the list of the Peer connections stats.",
             "itemtype": "attribute",
             "name": "_peerStats",
@@ -459,7 +478,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 370,
+            "line": 381,
             "description": "The flag if User is using plugin.",
             "itemtype": "attribute",
             "name": "_isUsingPlugin",
@@ -471,7 +490,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 380,
+            "line": 391,
             "description": "Stores the option for the TURN protocols to use.\nThis should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.",
             "itemtype": "attribute",
             "name": "_TURNTransport",
@@ -485,7 +504,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 393,
+            "line": 404,
             "description": "Stores the list of Peers session information.",
             "itemtype": "attribute",
             "name": "_peerInformations",
@@ -526,7 +545,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 408,
+            "line": 419,
             "description": "Stores the Signaling user credentials from the API response required for connecting to the Signaling server.",
             "itemtype": "attribute",
             "name": "_user",
@@ -560,7 +579,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 422,
+            "line": 433,
             "description": "Stores the User custom data.\nBy default, if no custom user data is set, it is an empty string <code>\"\"</code>.",
             "itemtype": "attribute",
             "name": "_userData",
@@ -573,7 +592,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 434,
+            "line": 445,
             "description": "Stores the User connection priority weight.\nIf Peer has a higher connection weight, it will do the offer from its Peer connection first.",
             "itemtype": "attribute",
             "name": "_peerPriorityWeight",
@@ -585,7 +604,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 445,
+            "line": 456,
             "description": "Stores the flag that indicates if \"autoIntroduce\" is enabled.\nIf enabled, the Peers connecting the same Room will receive each others \"enter\" message ping.",
             "itemtype": "attribute",
             "name": "_autoIntroduce",
@@ -598,7 +617,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 457,
+            "line": 468,
             "description": "Stores the flag that indicates if \"isPrivileged\" is enabled.\nIf enabled, the User has Privileged features which has the ability to retrieve the list of\n  Peers in the same App space with <code>getPeers()</code> method\n  and introduce Peers to each other with <code>introducePeer</code> method.",
             "itemtype": "attribute",
             "name": "isPrivileged",
@@ -611,7 +630,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 471,
+            "line": 482,
             "description": "Stores the list of Peers retrieved from the Signaling from <code>getPeers()</code> method.",
             "itemtype": "attribute",
             "name": "_peerList",
@@ -623,7 +642,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 481,
+            "line": 492,
             "description": "Stores the current Room name that User is connected to.",
             "itemtype": "attribute",
             "name": "_selectedRoom",
@@ -635,7 +654,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 491,
+            "line": 502,
             "description": "Stores the flag that indicates if Room is locked.",
             "itemtype": "attribute",
             "name": "_roomLocked",
@@ -647,7 +666,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 501,
+            "line": 512,
             "description": "Stores the flag that indicates if User is connected to the Room.",
             "itemtype": "attribute",
             "name": "_inRoom",
@@ -659,7 +678,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 511,
+            "line": 522,
             "description": "Stores the list of <code>on()</code> event handlers.",
             "itemtype": "attribute",
             "name": "_EVENTS",
@@ -685,7 +704,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 523,
+            "line": 534,
             "description": "Stores the list of <code>once()</code> event handlers.\nThese events are only triggered once.",
             "itemtype": "attribute",
             "name": "_onceEvents",
@@ -711,7 +730,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 536,
+            "line": 547,
             "description": "Stores the timestamps data used for throttling.",
             "itemtype": "attribute",
             "name": "_timestamp",
@@ -723,7 +742,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 552,
+            "line": 563,
             "description": "Stores the throttling interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingTimeouts",
@@ -735,7 +754,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 566,
+            "line": 577,
             "description": "Stores the flag if throttling should throw when called less than the interval timeout.",
             "itemtype": "attribute",
             "name": "_throttlingShouldThrowError",
@@ -747,7 +766,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 576,
+            "line": 587,
             "description": "Stores the current socket connection information.",
             "itemtype": "attribute",
             "name": "_socketSession",
@@ -759,7 +778,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 586,
+            "line": 597,
             "description": "Stores the queued socket messages.\nThis is to prevent too many sent over less than a second interval that might cause dropped messages\n  or jams to the Signaling connection.",
             "itemtype": "attribute",
             "name": "_socketMessageQueue",
@@ -771,7 +790,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 598,
+            "line": 609,
             "description": "Stores the <code>setTimeout</code> to sent queued socket messages.",
             "itemtype": "attribute",
             "name": "_socketMessageTimeout",
@@ -783,7 +802,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 608,
+            "line": 619,
             "description": "Stores the list of socket ports to use to connect to the Signaling.\nThese ports are defined by default which is commonly used currently by the Signaling.\nShould re-evaluate this sometime.",
             "itemtype": "attribute",
             "name": "_socketPorts",
@@ -807,7 +826,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 625,
+            "line": 636,
             "description": "Stores the flag that indicates if socket connection to the Signaling has opened.",
             "itemtype": "attribute",
             "name": "_channelOpen",
@@ -819,7 +838,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 635,
+            "line": 646,
             "description": "Stores the Signaling server url.",
             "itemtype": "attribute",
             "name": "_signalingServer",
@@ -831,7 +850,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 645,
+            "line": 656,
             "description": "Stores the Signaling server protocol.",
             "itemtype": "attribute",
             "name": "_signalingServerProtocol",
@@ -843,7 +862,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 655,
+            "line": 666,
             "description": "Stores the Signaling server port.",
             "itemtype": "attribute",
             "name": "_signalingServerPort",
@@ -855,7 +874,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 665,
+            "line": 676,
             "description": "Stores the Signaling socket connection object.",
             "itemtype": "attribute",
             "name": "_socket",
@@ -867,7 +886,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 675,
+            "line": 686,
             "description": "Stores the socket connection timeout when establishing connection to the Signaling.",
             "itemtype": "attribute",
             "name": "_socketTimeout",
@@ -879,7 +898,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 685,
+            "line": 696,
             "description": "Stores the flag that indicates if XDomainRequest is used for IE 8/9.",
             "itemtype": "attribute",
             "name": "_socketUseXDR",
@@ -891,7 +910,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 695,
+            "line": 706,
             "description": "Stores the value if ICE restart is supported.",
             "itemtype": "attribute",
             "name": "_enableIceRestart",
@@ -903,7 +922,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 706,
+            "line": 717,
             "description": "Stores the flag if MCU environment is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -915,7 +934,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 716,
+            "line": 727,
             "description": "Stores the flag if HTTPS connections should be enforced when connecting to\n  the API or Signaling server if App is accessing from HTTP domain.\nHTTPS connections are enforced if App is accessing from HTTPS domains.",
             "itemtype": "attribute",
             "name": "_forceSSL",
@@ -928,7 +947,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 729,
+            "line": 740,
             "description": "Stores the flag if TURNS connections should be enforced when connecting to\n  the TURN server if App is accessing from HTTP domain.\nTURNS connections are enforced if App is accessing from HTTPS domains.",
             "itemtype": "attribute",
             "name": "_forceTURNSSL",
@@ -941,7 +960,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 742,
+            "line": 753,
             "description": "Stores the flag if TURN connections should be enforced when connecting to Peers.\nThis filters all non \"relay\" ICE candidates to enforce connections via the TURN server.",
             "itemtype": "attribute",
             "name": "_forceTURN",
@@ -954,7 +973,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 754,
+            "line": 765,
             "description": "Stores the construct API REST path to obtain Room credentials.",
             "itemtype": "attribute",
             "name": "_path",
@@ -966,7 +985,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 764,
+            "line": 775,
             "description": "Stores the API server url.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -978,7 +997,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 774,
+            "line": 785,
             "description": "Stores the App Key configured in <code>init()</code>.",
             "itemtype": "attribute",
             "name": "_appKey",
@@ -990,7 +1009,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 784,
+            "line": 795,
             "description": "Stores the default Room name to connect to when <code>joinRoom()</code> does not provide a Room name.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -1002,7 +1021,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 794,
+            "line": 805,
             "description": "Stores the <code>init()</code> credentials starting DateTime stamp in ISO 8601.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -1014,7 +1033,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 804,
+            "line": 815,
             "description": "Stores the <code>init()</code> credentials duration counted in hours.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -1026,7 +1045,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 814,
+            "line": 825,
             "description": "Stores the <code>init()</code> generated credentials string.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -1038,7 +1057,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 824,
+            "line": 835,
             "description": "Stores the current <code>init()</code> readyState.",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -1050,7 +1069,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 834,
+            "line": 845,
             "description": "Stores the \"cid\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_key",
@@ -1062,7 +1081,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 844,
+            "line": 855,
             "description": "Stores the \"apiOwner\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_appKeyOwner",
@@ -1074,7 +1093,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 854,
+            "line": 865,
             "description": "Stores the Room credentials information for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_room",
@@ -1113,7 +1132,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 870,
+            "line": 881,
             "description": "Stores the list of Peer messages timestamp.",
             "itemtype": "attribute",
             "name": "_peerMessagesStamps",
@@ -1125,7 +1144,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 880,
+            "line": 891,
             "description": "Stores the flag that indicates if <code>getUserMedia()</code> should fallback to retrieve\n  audio only Stream after retrieval of audio and video Stream had failed.",
             "itemtype": "attribute",
             "name": "_audioFallback",
@@ -1138,7 +1157,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 892,
+            "line": 903,
             "description": "Stores the Streams.",
             "itemtype": "attribute",
             "name": "_streams",
@@ -1150,7 +1169,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 905,
+            "line": 916,
             "description": "Stores the default camera Stream settings.",
             "itemtype": "attribute",
             "name": "_streamsDefaultSettings",
@@ -1162,7 +1181,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 931,
+            "line": 942,
             "description": "Stores all the Stream required muted settings.",
             "itemtype": "attribute",
             "name": "_streamsMutedSettings",
@@ -1174,7 +1193,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 944,
+            "line": 955,
             "description": "Stores all the Stream sending maximum bandwidth settings.",
             "itemtype": "attribute",
             "name": "_streamsBandwidthSettings",
@@ -1186,7 +1205,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 957,
+            "line": 968,
             "description": "Stores all the Stream stopped callbacks.",
             "itemtype": "attribute",
             "name": "_streamsStoppedCbs",
@@ -1198,7 +1217,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 967,
+            "line": 978,
             "description": "Stores all the Stream sessions.\nDefined as <code>false</code> when Stream has already ended.",
             "itemtype": "attribute",
             "name": "_streamsSession",
@@ -1210,7 +1229,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 978,
+            "line": 989,
             "description": "Stores the preferred sending Peer connection streaming audio codec.",
             "itemtype": "attribute",
             "name": "_selectedAudioCodec",
@@ -1223,7 +1242,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 989,
+            "line": 1000,
             "description": "Stores the preferred sending Peer connection streaming video codec.",
             "itemtype": "attribute",
             "name": "_selectedVideoCodec",
@@ -1236,7 +1255,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1000,
+            "line": 1011,
             "description": "Stores the flag if ulpfec and red codecs should be removed.",
             "itemtype": "attribute",
             "name": "_disableVideoFecCodecs",
@@ -1249,7 +1268,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1011,
+            "line": 1022,
             "description": "Stores the flag if CN (Comfort Noise) codec should be removed.",
             "itemtype": "attribute",
             "name": "_disableComfortNoiseCodec",
@@ -1262,7 +1281,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1022,
+            "line": 1033,
             "description": "Stores the flag if REMB feedback packets should be removed.",
             "itemtype": "attribute",
             "name": "_disableREMB",
@@ -1275,7 +1294,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1033,
+            "line": 1044,
             "description": "Stores the session description settings.",
             "itemtype": "attribute",
             "name": "_sdpSettings",
@@ -1287,7 +1306,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1053,
+            "line": 1064,
             "description": "Stores the publish only settings.",
             "itemtype": "attribute",
             "name": "_publishOnly",
@@ -1299,7 +1318,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1063,
+            "line": 1074,
             "description": "Stores the parent ID.",
             "itemtype": "attribute",
             "name": "_parentId",
@@ -1311,7 +1330,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1073,
+            "line": 1084,
             "description": "Stores the list of recordings.",
             "itemtype": "attribute",
             "name": "_recordings",
@@ -1324,7 +1343,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1084,
+            "line": 1095,
             "description": "Stores the current active recording session ID.\nThere can only be 1 recording session at a time in a Room",
             "itemtype": "attribute",
             "name": "_currentRecordingId",
@@ -1337,7 +1356,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1096,
+            "line": 1107,
             "description": "Stores the recording session timeout to ensure 4 seconds has been recorded.",
             "itemtype": "attribute",
             "name": "_recordingStartInterval",
@@ -1350,7 +1369,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1107,
+            "line": 1118,
             "description": "Stores the flag if MCU should use renegotiation.",
             "itemtype": "attribute",
             "name": "_mcuUseRenegoRestart",
@@ -1362,7 +1381,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1117,
+            "line": 1128,
             "description": "Stores the debugging TURN/STUN ICE server.",
             "itemtype": "attribute",
             "name": "_turnServer",
@@ -1374,7 +1393,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1127,
+            "line": 1138,
             "description": "Stores the debugging Signaling server.",
             "itemtype": "attribute",
             "name": "_socketServer",
@@ -1386,7 +1405,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1137,
+            "line": 1148,
             "description": "Stores the currently supported codecs.",
             "itemtype": "attribute",
             "name": "_currentCodecSupport",
@@ -1398,7 +1417,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1147,
+            "line": 1158,
             "description": "Stores the session description orders and info.",
             "itemtype": "attribute",
             "name": "_sdpSessions",
@@ -1526,7 +1545,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 263,
+            "line": 264,
             "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
             "name": "_sendMessageToDataChannel",
@@ -1537,7 +1556,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 337,
+            "line": 338,
             "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -1837,6 +1856,59 @@
         {
             "file": "source/data-transfer.js",
             "line": 111,
+            "description": "The list of data streaming states.",
+            "itemtype": "attribute",
+            "name": "DATA_STREAM_STATE",
+            "params": [
+                {
+                    "name": "SENDING_STARTED",
+                    "description": "<small>Value <code>\"sendStart\"</code></small>\n  The value of the state when data streaming session has started from User to Peer.",
+                    "type": "String"
+                },
+                {
+                    "name": "RECEIVING_STARTED",
+                    "description": "<small>Value <code>\"receiveStart\"</code></small>\n  The value of the state when data streaming session has started from Peer to Peer.",
+                    "type": "String"
+                },
+                {
+                    "name": "RECEIVED",
+                    "description": "<small>Value <code>\"received\"</code></small>\n  The value of the state when data streaming session data chunk has been received from Peer to User.",
+                    "type": "String"
+                },
+                {
+                    "name": "SENT",
+                    "description": "<small>Value <code>\"sent\"</code></small>\n  The value of the state when data streaming session data chunk has been sent from User to Peer.",
+                    "type": "String"
+                },
+                {
+                    "name": "SENDING_STOPPED",
+                    "description": "<small>Value <code>\"sendStop\"</code></small>\n  The value of the state when data streaming session has stopped from User to Peer.",
+                    "type": "String"
+                },
+                {
+                    "name": "RECEIVING_STOPPED",
+                    "description": "<small>Value <code>\"receivingStop\"</code></small>\n  The value of the state when data streaming session has stopped from Peer to User.",
+                    "type": "String"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The value of the state when data streaming session has errors.",
+                    "type": "String"
+                },
+                {
+                    "name": "START_ERROR",
+                    "description": "<small>Value <code>\"startError\"</code></small>\n  The value of the state when data streaming session failed to start from User to Peer.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 146,
             "description": "Stores the list of data transfer protocols.",
             "itemtype": "attribute",
             "name": "_DC_PROTOCOL_TYPE",
@@ -1876,7 +1948,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 135,
+            "line": 170,
             "description": "Function that starts an uploading data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -1978,7 +2050,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 367,
+            "line": 402,
             "description": "Function that starts an uploading string data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -2073,7 +2145,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 502,
+            "line": 537,
             "description": "Function that accepts or rejects an upload data transfer request from Peer to User.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -2105,7 +2177,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 638,
+            "line": 673,
             "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the cancel data transfer functionality may differ, as it\n  will result in all Peers related to the data transfer ID to be terminated.\n</blockquote>\nFunction that terminates a currently uploading / downloading data transfer from / to Peer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -2130,13 +2202,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 693,
+            "line": 728,
             "description": "Emit data state event function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 766,
+            "line": 801,
             "description": "Function that sends a message to Peers via the Datachannel connection.\n<small>Consider using <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> if you are\nsending large strings to Peers.</small>",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -2162,7 +2234,80 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 901,
+            "line": 936,
+            "description": "Function that starts a data chunks streaming session from User to Peers.",
+            "itemtype": "method",
+            "name": "startStreamingData",
+            "params": [
+                {
+                    "name": "isStringStream",
+                    "description": "The flag if data streaming session sending data chunks\n  should be expected as string data chunks sent.\n  <small>By default, data chunks are expected to be sent in Blob or ArrayBuffer, and ArrayBuffer\n  data chunks will be converted to Blob.</small>",
+                    "type": "Boolean",
+                    "optional": true,
+                    "optdefault": "false"
+                },
+                {
+                    "name": "targetPeerId",
+                    "description": "The target Peer ID to send message to.\n- When provided as an Array, it will start streaming session to only Peers which IDs are in the list.\n- When not provided, it will start the streaming session to all connected Peers with Datachannel connection in the Room.",
+                    "type": "String|Array",
+                    "optional": true
+                }
+            ],
+            "trigger": "<ol class=\"desc-seq\"></ol>",
+            "example": [
+                ""
+            ],
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1212,
+            "description": "Function that sends a data chunk from User to Peers for an existing active data streaming session.",
+            "itemtype": "method",
+            "name": "streamData",
+            "params": [
+                {
+                    "name": "streamId",
+                    "description": "The data streaming session ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "The",
+                    "description": "data chunk.\n  <small>By default when it is not string data streaming, data chunks when is are expected to be\n  sent in Blob or ArrayBuffer, and ArrayBuffer data chunks will be converted to Blob.</small>\n  <small>For binary data chunks, the limit is <code>65456</code>.</small>\n  <small>For string data chunks, the limit is <code>1212</code>.</small>",
+                    "type": "Blob|ArrayBuffer"
+                }
+            ],
+            "trigger": "<ol class=\"desc-seq\"></ol>",
+            "example": [
+                ""
+            ],
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1328,
+            "description": "Function that stops a data chunks streaming session from User to Peers.",
+            "itemtype": "method",
+            "name": "stopStreamingData",
+            "params": [
+                {
+                    "name": "streamId",
+                    "description": "The data streaming session ID.",
+                    "type": "String"
+                }
+            ],
+            "trigger": "<ol class=\"desc-seq\"></ol>",
+            "example": [
+                ""
+            ],
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1425,
             "description": "Function that starts the data transfer to Peers.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -2173,13 +2318,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1100,
+            "line": 1624,
             "description": "Complete Peer function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1164,
+            "line": 1688,
             "description": "Function that starts or listens the data transfer status to Peer.\nThis reacts differently during MCU environment.",
             "itemtype": "method",
             "name": "_startDataTransferToPeer",
@@ -2194,25 +2339,25 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1179,
+            "line": 1703,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1189,
+            "line": 1713,
             "description": "Return error and trigger them if failed before or during data transfers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1205,
+            "line": 1729,
             "description": "Send WRQ protocol to start data transfers.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1426,
+            "line": 1962,
             "description": "Function that returns the data transfer session.",
             "itemtype": "method",
             "name": "_getTransferInfo",
@@ -2223,7 +2368,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1508,
+            "line": 2044,
             "description": "Function that returns the compiled data transfer data.",
             "itemtype": "method",
             "name": "_getTransferData",
@@ -2234,7 +2379,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1535,
+            "line": 2071,
             "description": "Function that handles the data transfers sessions timeouts.",
             "itemtype": "method",
             "name": "_handleDataTransferTimeoutForPeer",
@@ -2245,13 +2390,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1579,
+            "line": 2115,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1626,
+            "line": 2162,
             "description": "Function that handles the data received from Datachannel and\nroutes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_processDataChannelData",
@@ -2262,7 +2407,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1763,
+            "line": 2299,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -2273,7 +2418,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1816,
+            "line": 2471,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -2284,13 +2429,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1835,
+            "line": 2490,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1918,
+            "line": 2573,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -2301,7 +2446,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1939,
+            "line": 2594,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -2312,13 +2457,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1958,
+            "line": 2613,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1990,
+            "line": 2645,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -2329,13 +2474,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2007,
+            "line": 2662,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2039,
+            "line": 2694,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -5652,7 +5797,7 @@
                 },
                 {
                     "name": "transferInfo",
-                    "description": "The data transfer information.\n  <small>Object signature matches the <code>transferInfo</code> parameter payload received in the\n  <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>.</small>",
+                    "description": "The data transfer information.\n  <small>Object signature matches the <code>transferInfo</code> parameter payload received in the\n  <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  except without the <code>data</code> property.</small>",
                     "type": "String"
                 },
                 {
@@ -5666,7 +5811,105 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 494,
+            "line": 495,
+            "description": "Event triggered when data streaming session has been started from Peer to User.",
+            "itemtype": "event",
+            "name": "incomingDataStreamStarted",
+            "params": [
+                {
+                    "name": "streamId",
+                    "description": "The data streaming session ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "streamInfo",
+                    "description": "The data streaming session information.\n  <small>Object signature matches the <code>streamInfo</code> parameter payload received in the\n  <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  except without the <code>chunk</code> property.</small>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "isSelf",
+                    "description": "The flag if Peer is User.",
+                    "type": "Boolean"
+                }
+            ],
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 510,
+            "description": "Event triggered when data streaming session has been stopped from Peer to User.",
+            "itemtype": "event",
+            "name": "incomingDataStreamStopped",
+            "params": [
+                {
+                    "name": "streamId",
+                    "description": "The data streaming session ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "streamInfo",
+                    "description": "The data streaming session information.\n  <small>Object signature matches the <code>streamInfo</code> parameter payload received in the\n  <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  except without the <code>chunk</code> property.</small>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "isSelf",
+                    "description": "The flag if Peer is User.",
+                    "type": "Boolean"
+                }
+            ],
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 525,
+            "description": "Event triggered when data streaming session has been stopped from Peer to User.",
+            "itemtype": "event",
+            "name": "incomingDataStream",
+            "params": [
+                {
+                    "name": "chunk",
+                    "description": "The data chunk received.",
+                    "type": "Blob|String"
+                },
+                {
+                    "name": "streamId",
+                    "description": "The data streaming session ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "streamInfo",
+                    "description": "The data streaming session information.\n  <small>Object signature matches the <code>streamInfo</code> parameter payload received in the\n  <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  except without the <code>chunk</code> property.</small>",
+                    "type": "JSON"
+                },
+                {
+                    "name": "isSelf",
+                    "description": "The flag if Peer is User.",
+                    "type": "Boolean"
+                }
+            ],
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 541,
             "description": "Event triggered when Room locked status has changed.",
             "itemtype": "event",
             "name": "roomLock",
@@ -5697,7 +5940,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 508,
+            "line": 555,
             "description": "Event triggered when a Datachannel connection state has changed.",
             "itemtype": "event",
             "name": "dataChannelState",
@@ -5739,7 +5982,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 527,
+            "line": 574,
             "description": "Event triggered when a data transfer state has changed.",
             "itemtype": "event",
             "name": "dataTransferState",
@@ -5751,12 +5994,12 @@
                 },
                 {
                     "name": "transferId",
-                    "description": "The data transfer ID.\n  <small>Note that this is defined <code>null</code> when <code>state</code> payload is <code>START_ERROR</code>.</small>",
+                    "description": "The data transfer ID.\n  <small>Note that this is defined as <code>null</code> when <code>state</code> payload is <code>START_ERROR</code>.</small>",
                     "type": "String"
                 },
                 {
                     "name": "peerId",
-                    "description": "The Peer ID.\n  <small>Note that this could be defined <code>null</code> when <code>state</code> payload is\n  <code>START_ERROR</code> and there is no Peers to start data transfer with.</small>",
+                    "description": "The Peer ID.\n  <small>Note that this could be defined as <code>null</code> when <code>state</code> payload is\n  <code>START_ERROR</code> and there is no Peers to start data transfer with.</small>",
                     "type": "String"
                 },
                 {
@@ -5808,7 +6051,7 @@
                         },
                         {
                             "name": "timeout",
-                            "description": "The flag if message is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined in\n  <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> or\n  <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>.",
+                            "description": "The flag if data transfer is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined in\n  <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> or\n  <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>.",
                             "type": "Number"
                         },
                         {
@@ -5825,7 +6068,7 @@
                 },
                 {
                     "name": "error",
-                    "description": "The error result.\n  <small>Defined only when <code>state</code> payload is <code>ERROR</code>, <code>CANCEL</code>,\n  <code>REJECTED</code> or <code>USER_REJECTED</code>.</small>",
+                    "description": "The error result.\n  <small>Defined only when <code>state</code> payload is <code>ERROR</code>, <code>CANCEL</code>,\n  <code>REJECTED</code>, <code>START_ERROR</code> or <code>USER_REJECTED</code>.</small>",
                     "type": "JSON",
                     "optional": true,
                     "props": [
@@ -5847,7 +6090,77 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 578,
+            "line": 625,
+            "description": "Event triggered when a data streaming state has changed.",
+            "itemtype": "event",
+            "name": "dataStreamState",
+            "params": [
+                {
+                    "name": "state",
+                    "description": "The current data streaming state.\n  [Rel: Skylink.DATA_STREAM_STATE]",
+                    "type": "String"
+                },
+                {
+                    "name": "streamId",
+                    "description": "The data streaming session ID.\n  <small>Note that this is defined as <code>null</code> when <code>state</code> payload is <code>START_ERROR</code>.</small>",
+                    "type": "String"
+                },
+                {
+                    "name": "peerId",
+                    "description": "The Peer ID.\n  <small>Note that this could be defined as <code>null</code> when <code>state</code> payload is\n  <code>START_ERROR</code> and there is no Peers to start data streaming with.</small>",
+                    "type": "String"
+                },
+                {
+                    "name": "streamInfo",
+                    "description": "The data streaming information.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "chunk",
+                            "description": "The data chunk received.\n  <small>Defined only when <code>state</code> payload is <code>RECEIVED</code> or <code>SENT</code>.</small>",
+                            "type": "Blob|String",
+                            "optional": true
+                        },
+                        {
+                            "name": "chunkSize",
+                            "description": "The data streaming data chunk size received.",
+                            "type": "Number"
+                        },
+                        {
+                            "name": "chunkType",
+                            "description": "The data streaming data chunk type received.\n  <small>The initial data chunks value may change depending on the currently received data chunk type or the\n  agent supported sending type of data chunks.</small>\n  [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]",
+                            "type": "String"
+                        },
+                        {
+                            "name": "isStringStream",
+                            "description": "The flag if data streaming data chunks are strings.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "isPrivate",
+                            "description": "The flag if data streaming is targeted or not, basing\n  off the <code>targetPeerId</code> parameter being defined in\n  <a href=\"#method_startStreamingData\"><code>startStreamingData()</code> method</a>.",
+                            "type": "Boolean"
+                        },
+                        {
+                            "name": "senderPeerId",
+                            "description": "The sender Peer ID.",
+                            "type": "String"
+                        }
+                    ]
+                },
+                {
+                    "name": "error",
+                    "description": "The error object.\n  <small>Defined only when <code>state</code> payload is <code>ERROR</code> or <code>START_ERROR</code>,.</small>",
+                    "type": "Error",
+                    "optional": true
+                }
+            ],
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 655,
             "description": "Event triggered when Signaling server reaction state has changed.",
             "itemtype": "event",
             "name": "systemAction",
@@ -5873,7 +6186,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 591,
+            "line": 668,
             "description": "Event triggered when a server Peer joins the room.",
             "itemtype": "event",
             "name": "serverPeerJoined",
@@ -5894,7 +6207,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 602,
+            "line": 679,
             "description": "Event triggered when a server Peer leaves the room.",
             "itemtype": "event",
             "name": "serverPeerLeft",
@@ -5915,7 +6228,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 613,
+            "line": 690,
             "description": "Event triggered when a server Peer connection has been refreshed.",
             "itemtype": "event",
             "name": "serverPeerRestart",
@@ -5936,7 +6249,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 624,
+            "line": 701,
             "description": "Event triggered when a Peer Stream streaming has stopped.\n<small>Note that it may not be the currently sent Stream to User, and it also triggers\nwhen User leaves the Room for any currently sent Stream to User from Peer.</small>",
             "itemtype": "event",
             "name": "streamEnded",
@@ -5972,7 +6285,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 641,
+            "line": 718,
             "description": "Event triggered when Peer Stream audio or video tracks has been muted / unmuted.",
             "itemtype": "event",
             "name": "streamMuted",
@@ -6003,7 +6316,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 655,
+            "line": 732,
             "description": "Event triggered when <a href=\"#method_getPeers\"><code>getPeers()</code> method</a> retrieval state changes.",
             "itemtype": "event",
             "name": "getPeersStateChange",
@@ -6036,7 +6349,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 668,
+            "line": 745,
             "description": "Event triggered when <a href=\"#method_introducePeer\"><code>introducePeer()</code> method</a>\nintroduction request state changes.",
             "itemtype": "event",
             "name": "introduceStateChange",
@@ -6073,7 +6386,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 684,
+            "line": 761,
             "description": "Event triggered when recording session state has changed.",
             "itemtype": "event",
             "name": "recordingState",
@@ -6112,7 +6425,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 705,
+            "line": 782,
             "description": "Event triggered when <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code> method</a>\nretrieval state changes.",
             "itemtype": "event",
             "name": "getConnectionStatusStateChange",
@@ -7330,7 +7643,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1143,
+            "line": 1219,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -7358,7 +7671,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1160,
+            "line": 1236,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -7417,7 +7730,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1188,
+            "line": 1264,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when all remote ICE candidates gathering has completed and been processed.",
             "itemtype": "event",
             "name": "candidatesGathered",
@@ -7455,7 +7768,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1208,
+            "line": 1284,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -7479,7 +7792,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1232,
+            "line": 1308,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -7516,7 +7829,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1290,
+            "line": 1366,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -7541,7 +7854,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1339,
+            "line": 1415,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -7552,7 +7865,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1393,
+            "line": 1469,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -7563,7 +7876,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1419,
+            "line": 1495,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -7574,7 +7887,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1457,
+            "line": 1533,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -9024,23 +9337,35 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:135"
+            "line": " source/data-transfer.js:170"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:367"
+            "line": " source/data-transfer.js:402"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:502"
+            "line": " source/data-transfer.js:537"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:638"
+            "line": " source/data-transfer.js:673"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:766"
+            "line": " source/data-transfer.js:801"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/data-transfer.js:936"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/data-transfer.js:1212"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/data-transfer.js:1328"
         },
         {
             "message": "unknown tag: trigger",
@@ -9216,39 +9541,39 @@
         },
         {
             "message": "Missing item type\nEmit data state event function.",
-            "line": " source/data-transfer.js:693"
+            "line": " source/data-transfer.js:728"
         },
         {
             "message": "Missing item type\nComplete Peer function.",
-            "line": " source/data-transfer.js:1100"
+            "line": " source/data-transfer.js:1624"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1179"
+            "line": " source/data-transfer.js:1703"
         },
         {
             "message": "Missing item type\nReturn error and trigger them if failed before or during data transfers function.",
-            "line": " source/data-transfer.js:1189"
+            "line": " source/data-transfer.js:1713"
         },
         {
             "message": "Missing item type\nSend WRQ protocol to start data transfers.",
-            "line": " source/data-transfer.js:1205"
+            "line": " source/data-transfer.js:1729"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1579"
+            "line": " source/data-transfer.js:2115"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1835"
+            "line": " source/data-transfer.js:2490"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1958"
+            "line": " source/data-transfer.js:2613"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2007"
+            "line": " source/data-transfer.js:2662"
         }
     ]
 }

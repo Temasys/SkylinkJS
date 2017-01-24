@@ -484,12 +484,59 @@ var _eventsDocs = {
    * @param {String} peerId The Peer ID.
    * @param {String} transferInfo The data transfer information.
    *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
-   *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>.</small>
+   *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+   *   except without the <code>data</code> property.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.6.1
    */
   incomingDataRequest: [],
+
+  /**
+   * Event triggered when data streaming session has been started from Peer to User.
+   * @event incomingDataStreamStarted
+   * @param {String} streamId The data streaming session ID.
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} streamInfo The data streaming session information.
+   *   <small>Object signature matches the <code>streamInfo</code> parameter payload received in the
+   *   <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+   *   except without the <code>chunk</code> property.</small>
+   * @param {Boolean} isSelf The flag if Peer is User.
+   * @for Skylink
+   * @since 0.6.18
+   */
+  incomingDataStreamStarted: [],
+
+  /**
+   * Event triggered when data streaming session has been stopped from Peer to User.
+   * @event incomingDataStreamStopped
+   * @param {String} streamId The data streaming session ID.
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} streamInfo The data streaming session information.
+   *   <small>Object signature matches the <code>streamInfo</code> parameter payload received in the
+   *   <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+   *   except without the <code>chunk</code> property.</small>
+   * @param {Boolean} isSelf The flag if Peer is User.
+   * @for Skylink
+   * @since 0.6.18
+   */
+  incomingDataStreamStopped: [],
+
+  /**
+   * Event triggered when data streaming session has been stopped from Peer to User.
+   * @event incomingDataStream
+   * @param {Blob|String} chunk The data chunk received.
+   * @param {String} streamId The data streaming session ID.
+   * @param {String} peerId The Peer ID.
+   * @param {JSON} streamInfo The data streaming session information.
+   *   <small>Object signature matches the <code>streamInfo</code> parameter payload received in the
+   *   <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+   *   except without the <code>chunk</code> property.</small>
+   * @param {Boolean} isSelf The flag if Peer is User.
+   * @for Skylink
+   * @since 0.6.18
+   */
+  incomingDataStream: [],
 
   /**
    * Event triggered when Room locked status has changed.
@@ -530,9 +577,9 @@ var _eventsDocs = {
    * @param {String} state The current data transfer state.
    *   [Rel: Skylink.DATA_TRANSFER_STATE]
    * @param {String} transferId The data transfer ID.
-   *   <small>Note that this is defined <code>null</code> when <code>state</code> payload is <code>START_ERROR</code>.</small>
+   *   <small>Note that this is defined as <code>null</code> when <code>state</code> payload is <code>START_ERROR</code>.</small>
    * @param {String} peerId The Peer ID.
-   *   <small>Note that this could be defined <code>null</code> when <code>state</code> payload is
+   *   <small>Note that this could be defined as <code>null</code> when <code>state</code> payload is
    *   <code>START_ERROR</code> and there is no Peers to start data transfer with.</small>
    * @param {JSON} transferInfo The data transfer information.
    * @param {Blob|String} [transferInfo.data] The data object.
@@ -554,7 +601,7 @@ var _eventsDocs = {
    *   data object sent MIME type information is defined.</small>
    * @param {Number} transferInfo.chunkSize The data transfer data chunk size.
    * @param {Number} transferInfo.percentage The data transfer percentage of completion progress.
-   * @param {Number} transferInfo.timeout The flag if message is targeted or not, basing
+   * @param {Number} transferInfo.timeout The flag if data transfer is targeted or not, basing
    *   off the <code>targetPeerId</code> parameter being defined in
    *   <a href="#method_sendURLData"><code>sendURLData()</code> method</a> or
    *   <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>.
@@ -566,7 +613,7 @@ var _eventsDocs = {
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
    * @param {JSON} [error] The error result.
    *   <small>Defined only when <code>state</code> payload is <code>ERROR</code>, <code>CANCEL</code>,
-   *   <code>REJECTED</code> or <code>USER_REJECTED</code>.</small>
+   *   <code>REJECTED</code>, <code>START_ERROR</code> or <code>USER_REJECTED</code>.</small>
    * @param {Error|String} error.message The error object.
    * @param {String} error.transferType The data transfer direction from where the error occurred.
    *   [Rel: Skylink.DATA_TRANSFER_TYPE]
@@ -574,6 +621,36 @@ var _eventsDocs = {
    * @since 0.4.1
    */
   dataTransferState: [],
+
+  /**
+   * Event triggered when a data streaming state has changed.
+   * @event dataStreamState
+   * @param {String} state The current data streaming state.
+   *   [Rel: Skylink.DATA_STREAM_STATE]
+   * @param {String} streamId The data streaming session ID.
+   *   <small>Note that this is defined as <code>null</code> when <code>state</code> payload is <code>START_ERROR</code>.</small>
+   * @param {String} peerId The Peer ID.
+   *   <small>Note that this could be defined as <code>null</code> when <code>state</code> payload is
+   *   <code>START_ERROR</code> and there is no Peers to start data streaming with.</small>
+   * @param {JSON} streamInfo The data streaming information.
+   * @param {Blob|String} [streamInfo.chunk] The data chunk received.
+   *   <small>Defined only when <code>state</code> payload is <code>RECEIVED</code> or <code>SENT</code>.</small>
+   * @param {Number} streamInfo.chunkSize The data streaming data chunk size received.
+   * @param {String} streamInfo.chunkType The data streaming data chunk type received.
+   *   <small>The initial data chunks value may change depending on the currently received data chunk type or the
+   *   agent supported sending type of data chunks.</small>
+   *   [Rel: Skylink.DATA_TRANSFER_DATA_TYPE]
+   * @param {String} streamInfo.isStringStream The flag if data streaming data chunks are strings.
+   * @param {Boolean} streamInfo.isPrivate The flag if data streaming is targeted or not, basing
+   *   off the <code>targetPeerId</code> parameter being defined in
+   *   <a href="#method_startStreamingData"><code>startStreamingData()</code> method</a>.
+   * @param {String} streamInfo.senderPeerId The sender Peer ID.
+   * @param {Error} [error] The error object.
+   *   <small>Defined only when <code>state</code> payload is <code>ERROR</code> or <code>START_ERROR</code>,.</small>
+   * @for Skylink
+   * @since 0.6.18
+   */
+  dataStreamState: [],
 
   /**
    * Event triggered when Signaling server reaction state has changed.
@@ -852,7 +929,7 @@ var _eventsDocs = {
    * @param {Number} [stats.video.sending.frameRateMean] The Peer connection sending video streaming fps mean.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.frameRateStdDev] The Peer connection sending video streaming fps standard deviation.
-   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small> 
+   *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.framesPerSecond] The Peer connection sending video streaming fps.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Number} [stats.video.sending.framesDecoded] The Peer connection sending video streaming frames decoded.
@@ -972,7 +1049,6 @@ var _eventsDocs = {
    *   remote ICE candidate IP transport type.
    * @param {String} stats.selectedCandidate.remote.candidateType The Peer connection selected
    *   remote ICE candidate type.
-   
    * @param {Boolean} [stats.selectedCandidate.writable] The flag if Peer has gotten ACK to an ICE request.
    *   <small>Defined as <code>null</code> if it's not available in original raw stats before parsing.</small>
    * @param {Boolean} [stats.selectedCandidate.readable] The flag if Peer has gotten a valid incoming ICE request.
@@ -1198,7 +1274,7 @@ var _eventsDocs = {
    * @param {JSON} length The remote ICE candidates length.
    * @param {Number} length.expected The expected total number of remote ICE candidates to be received.
    * @param {Number} length.received The actual total number of remote ICE candidates received.
-   * @param {Number} length.processed The total number of remote ICE candidates processed. 
+   * @param {Number} length.processed The total number of remote ICE candidates processed.
    * @for Skylink
    * @since 0.6.18
    */
