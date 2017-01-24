@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Fri Jan 20 2017 18:43:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Tue Jan 24 2017 11:23:41 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -2519,7 +2519,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     isPrivate = true;
   }
 
-  if (!this._inRoom || !this._user) {
+  if (!this._inRoom || !(this._user && this._user.sid)) {
     log.error('Unable to send message as User is not in Room. ->', message);
     return;
   }
@@ -2728,7 +2728,7 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
     chunks = self._chunkDataURL(data, transferInfo.chunkSize);
   }
 
-  if (!self._user) {
+  if (!(self._user && self._user.sid)) {
     emitErrorBeforeDataTransferFn('Unable to send any ' +
       sessionType.replace('data', 'dataURL') + ' data. User is not in Room.');
     return;
@@ -3249,7 +3249,7 @@ Skylink.prototype._handleDataTransferTimeoutForPeer = function (transferId, peer
         return;
       }
 
-      if (!self._user) {
+      if (!(self._user && self._user.sid)) {
         log.debug([peerId, 'RTCDataChannel', transferId, 'User is not in Room. Ignoring expired timeout.']);
         return;
       }
