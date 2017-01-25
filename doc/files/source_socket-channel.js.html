@@ -167,7 +167,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
   var throughput = 16;
 
   if (!self._channelOpen || !self._user || !self._socket) {
-    log.warn([null, &#x27;Socket&#x27;, null, &#x27;Dropping of message as Socket connection is not opened or is at &#x27; +
+    log.warn([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, message.type, &#x27;Dropping of message as Socket connection is not opened or is at &#x27; +
       &#x27;incorrect step -&gt;&#x27;], message);
     return;
   }
@@ -240,7 +240,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
     self._socketMessageTimeout = null;
 
     if (!self._channelOpen || !(self._user &amp;&amp; self._user.sid) || !self._socket) {
-      log.warn([null, &#x27;Socket&#x27;, null, &#x27;Dropping of group messages as Socket connection is not opened or is at &#x27; +
+      log.warn([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, null, &#x27;Dropping of group messages as Socket connection is not opened or is at &#x27; +
         &#x27;incorrect step -&gt;&#x27;], groupMessageList);
       return;
     }
@@ -277,7 +277,8 @@ Skylink.prototype._sendChannelMessage = function(message) {
           groupMessageList[i].stamp &lt; stamps.audioMuted) ||
           (groupMessageList[i].type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO &amp;&amp;
           groupMessageList[i].stamp &lt; stamps.videoMuted)) {
-        log.warn([null, &#x27;Socket&#x27;, null, &#x27;Dropping of outdated status message -&gt;&#x27;], clone(groupMessageList[i]));
+        log.warn([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, groupMessageList[i], &#x27;Dropping of outdated status message -&gt;&#x27;],
+          clone(groupMessageList[i]));
         groupMessageList.splice(i, 1);
         i--;
         continue;
@@ -293,7 +294,8 @@ Skylink.prototype._sendChannelMessage = function(message) {
         rid: self._room.id
       };
 
-      log.debug([null, &#x27;Socket&#x27;, groupMessage.type, &#x27;Sending queued grouped message (max: 16 per group) -&gt;&#x27;], groupMessage);
+      log.debug([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, groupMessage.type,
+        &#x27;Sending queued grouped message (max: 16 per group) -&gt;&#x27;], clone(groupMessage));
 
       self._socket.send(JSON.stringify(groupMessage));
       self._timestamp.socketMessage = (new Date()).getTime();
@@ -319,13 +321,13 @@ Skylink.prototype._sendChannelMessage = function(message) {
   if (self._groupMessageList.indexOf(message.type) &gt; -1) {
     if (!(self._timestamp.socketMessage &amp;&amp; ((new Date ()).getTime() - self._timestamp.socketMessage) &lt;= interval)) {
       if (!checkStampFn(message)) {
-        log.warn([null, &#x27;Socket&#x27;, message.type, &#x27;Dropping of outdated status message -&gt;&#x27;], message);
+        log.warn([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, message.type, &#x27;Dropping of outdated status message -&gt;&#x27;], clone(message));
         return;
       }
       if (self._socketMessageTimeout) {
         clearTimeout(self._socketMessageTimeout);
       }
-      log.warn([null, &#x27;Socket&#x27;, message.type, &#x27;Sending message -&gt;&#x27;], message);
+      log.warn([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, message.type, &#x27;Sending message -&gt;&#x27;], clone(message));
       self._socket.send(JSON.stringify(message));
       setStampFn(message);
       triggerEventFn(message);
@@ -333,7 +335,8 @@ Skylink.prototype._sendChannelMessage = function(message) {
       self._timestamp.socketMessage = (new Date()).getTime();
 
     } else {
-      log.warn([null, &#x27;Socket&#x27;, message.type, &#x27;Queueing socket message to prevent message drop -&gt;&#x27;], message);
+      log.warn([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, message.type,
+        &#x27;Queueing socket message to prevent message drop -&gt;&#x27;], clone(message));
 
       self._socketMessageQueue.push(message);
 
@@ -342,7 +345,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       }
     }
   } else {
-    log.debug([message.target || null, &#x27;Socket&#x27;, message.type, &#x27;Sending message -&gt;&#x27;], message);
+    log.debug([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, message.type, &#x27;Sending message -&gt;&#x27;], clone(message));
     self._socket.send(JSON.stringify(message));
 
     // If Peer sends &quot;bye&quot; on its own, we trigger it as session disconnected abruptly

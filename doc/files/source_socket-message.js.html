@@ -533,11 +533,11 @@ Skylink.prototype._processSigMessage = function(message, session) {
   if (!origin || origin === this._user.sid) {
     origin = &#x27;Server&#x27;;
   }
-  log.debug([origin, null, null, &#x27;Received from peer -&gt;&#x27;], message.type);
+  log.debug([origin, &#x27;Socket&#x27;, message.type, &#x27;Received from peer -&gt;&#x27;], clone(message));
   if (message.mid === this._user.sid &amp;&amp;
     message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &amp;&amp;
     message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
-    log.debug([origin, null, null, &#x27;Ignoring message -&gt;&#x27;], message.type);
+    log.debug([origin, &#x27;Socket&#x27;, message.type, &#x27;Ignoring message -&gt;&#x27;], clone(message));
     return;
   }
   switch (message.type) {
@@ -607,7 +607,7 @@ Skylink.prototype._processSigMessage = function(message, session) {
     this._endOfCandidatesHandler(message);
     break;
   default:
-    log.error([message.mid, null, null, &#x27;Unsupported message -&gt;&#x27;], message.type);
+    log.error([message.mid, &#x27;Socket&#x27;, message.type, &#x27;Unsupported message -&gt;&#x27;], clone(message));
     break;
   }
 };

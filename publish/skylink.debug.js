@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 20:10:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 21:20:40 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -1910,6 +1910,18 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a> except without the
  *   <code>percentage</code> property and <code>data</code>.</small>
  * @trigger <ol class="desc-seq">
+ *   <li>Checks if User is in Room. <ol>
+ *   <li>If User is not in Room: <ol><li><a href="#event_dataTransferState">
+ *   <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>
+ *   <li>Checks if there is any available Datachannel connections. <ol>
+ *   <li>If User is not in Room: <ol><li><a href="#event_dataTransferState">
+ *   <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>
+ *   <li>Checks if provided <code>data</code> parameter is valid. <ol>
+ *   <li>If it is invalid: <ol><li><a href="#event_dataTransferState">
+ *   <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>
  *   <li>Checks if Peer connection and Datachannel connection are in correct states. <ol>
  *   <li>If Peer connection or session does not exists: <ol><li><a href="#event_dataTransferState">
  *   <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code>
@@ -1958,6 +1970,14 @@ Skylink.prototype._DC_PROTOCOL_TYPE = {
  *   simultaneous data transfers targeted for the data transfer session instead of using the messaging Datachannels
  *   with all Peers targeted for the data transfer session.</small> <ol><li>If messaging Datachannel connection has a
  *   data transfer in-progress: <ol><li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and
+ *   return error.</li></ol></li><li>If there is any conflicting <a href="#method_streamData"><code>streamData()</code>
+ *   method</a> data streaming session: <small>If <code>sendChunksAsBinary</code> is provided as <code>true</code>,
+ *   it cannot start if existing data streaming session is expected binary data chunks, and if provided as
+ *   <code>false</code>, or method invoked is <a href="#method_sendURLData"><code>sendURLData()</code> method</a>,
+ *   or Peer is using string data chunks fallback due to its support despite provided as <code>true</code>,
+ *   it cannot start if existing data streaming session is expected string data chunks.</small><ol>
+ *   <li><a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and
  *   return error.</li></ol></li></li></ol></ol></li></ol></li>
  *   <li>Starts the data transfer to Peer. <ol>
@@ -2635,6 +2655,10 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 };
 
 /**
+ * <blockquote class="info">
+ *   To start streaming data, see the <a href="#method_streamData"><code>streamData()</code>
+ *   method</a>. To stop data streaming session, see the <a href="#method_stopStreamingData"><code>stopStreamingData()</code> method</a>
+ * </blockquote>
  * Function that starts a data chunks streaming session from User to Peers.
  * @method startStreamingData
  * @param {Boolean} [isStringStream=false] The flag if data streaming session sending data chunks
@@ -2644,8 +2668,106 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
  * @param {String|Array} [targetPeerId] The target Peer ID to send message to.
  * - When provided as an Array, it will start streaming session to only Peers which IDs are in the list.
  * - When not provided, it will start the streaming session to all connected Peers with Datachannel connection in the Room.
- * @trigger <ol class="desc-seq"></ol>
+ * @trigger <ol class="desc-seq">
+ * @trigger <ol class="desc-seq">
+ *   <li>Checks if User is in Room. <ol>
+ *   <li>If User is not in Room: <ol><li><a href="#event_dataStreamState">
+ *   <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>
+ *   <li>Checks if there is any available Datachannel connections. <ol>
+ *   <li>If User is not in Room: <ol><li><a href="#event_dataStreamState">
+ *   <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>
+ *   <li>Checks if Peer connection and Datachannel connection are in correct states. <ol>
+ *   <li>If Peer connection or session does not exists: <ol><li><a href="#event_dataStreamState">
+ *   <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code>
+ *   as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If Peer connection messaging Datachannel has not been opened: <small>This can be checked with
+ *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggering parameter
+ *   payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as
+ *   <code>MESSAGING</code> for Peer.</small> <ol><li><a href="#event_dataStreamState">
+ *   <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code> as <code>START_ERROR</code>.</li>
+ *   <li><b>ABORT</b> step and return error.</li></ol></li>
+ *   <li>If MCU is enabled for the App Key provided in <a href="#method_init"><code>init()</code>method</a> and connected: <ol>
+ *   <li>If MCU Peer connection messaging Datachannel has not been opened: <small>This can be checked with
+ *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggering parameter
+ *   payload <code>state</code> as <code>OPEN</code>, <code>peerId</code> value as <code>"MCU"</code>
+ *   and <code>channelType</code> as <code>MESSAGING</code> for MCU Peer.</small>
+ *   <ol><li><a href="#event_dataStreamState"><code>dataStreamState</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>START_ERROR</code>.</li>
+ *   <li><b>ABORT</b> step and return error.</li></ol></li></ol></li>
+ *   <li>Checks if should open a new data Datachannel.<ol>
+ *   <li>If Peer supports simultaneous data streaming, open new data Datachannel: <small>If MCU is connected,
+ *   this opens a new data Datachannel with MCU Peer with all the Peers IDs information that supports
+ *   simultaneous data transfers targeted for the data streaming session instead of opening new data Datachannel
+ *   with all Peers targeted for the data streaming session.</small> <ol>
+ *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter
+ *   payload <code>state</code> as <code>CONNECTING</code> and <code>channelType</code> as <code>DATA</code>.
+ *   <small>Note that there is no timeout to wait for parameter payload <code>state</code> to be
+ *   <code>OPEN</code>.</small></li>
+ *   <li>If Datachannel has been created and opened successfully: <ol>
+ *   <li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggers parameter payload
+ *   <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol></li>
+ *   <li>Else: <ol><li><a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>CREATE_ERROR</code> and <code>channelType</code> as
+ *   <code>DATA</code>.</li><li><a href="#event_dataStreamState"><code>dataStreamState</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and
+ *   return error.</li></ol></li></ol></li><li>Else: <small>If MCU is connected,
+ *   this uses the messaging Datachannel with MCU Peer with all the Peers IDs information that supports
+ *   simultaneous data transfers targeted for the data streaming session instead of using the messaging Datachannels
+ *   with all Peers targeted for the data streaming session.</small> <ol><li>If messaging Datachannel connection has a
+ *   data streaming in-progress: <ol><li><a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and
+ *   return error.</li></ol></li><li>If there is any conflicting <a href="#method_streamData"><code>streamData()</code>
+ *   method</a> data streaming session: <small>If <code>isStringStream</code> is provided as <code>true</code> and
+ *   <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a> or <a href="#method_sendURLData">
+ *   <code>sendURLData()</code> method</a> has an existing binary string transfer, it cannot start string data
+ *   streaming session. Else if <a href="#method_sendBlobData"><code>sendBlobData()</code> method</a>
+ *   has an existing binary data transfer, it cannot start binary data streaming session.</small><ol>
+ *   <li><a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and
+ *   return error.</li></ol></li></li></ol></ol></li></ol></li>
+ *   <li>Starts the data streaming session with Peer. <ol>
+ *   <li><a href="#event_incomingDataStreamStarted"><code>incomingDataStreamStarted</code> event</a> triggers.</li>
+ *   <li><em>For User only</em> <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>SENDING_STARTED</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RECEIVING_STARTED</code>.</li></ol></li></ol>
  * @example
+ *   // Example 1: Start streaming to all Peers
+ *   skylinkDemo.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
+ *      if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&
+ *        channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {
+ *        skylinkDemo.startStreamingData(false);
+ *      }
+ *   });
+ *
+ *   // Example 2: Start streaming to specific Peers
+ *   var peersInExclusiveParty = [];
+ *
+ *   skylinkDemo.on("peerJoined", function (peerId, peerInfo, isSelf) {
+ *     if (isSelf) return;
+ *     if (peerInfo.userData.exclusive) {
+ *       peersInExclusiveParty[peerId] = false;
+ *     }
+ *   });
+ *
+ *   skylinkDemo.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
+ *      if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&
+ *        channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {
+ *        peersInExclusiveParty[peerId] = true;
+ *      }
+ *   });
+ *
+ *   function updateExclusivePartyStatus (message) {
+ *     var readyToSend = [];
+ *     for (var p in peersInExclusiveParty) {
+ *       if (peersInExclusiveParty.hasOwnProperty(p)) {
+ *         readyToSend.push(p);
+ *       }
+ *     }
+ *     skylinkDemo.startStreamingData(message, readyToSend);
+ *   }
  * @for Skylink
  * @since 0.6.18
  */
@@ -2925,16 +3047,72 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
 };
 
 /**
+ * <blockquote class="info">
+ *   To start data streaming session, see the <a href="#method_startStreamingData"><code>startStreamingData()</code>
+ *   method</a>. To stop data streaming session, see the <a href="#method_stopStreamingData"><code>stopStreamingData()</code> method</a>
+ * </blockquote>
  * Function that sends a data chunk from User to Peers for an existing active data streaming session.
  * @method streamData
  * @param {String} streamId The data streaming session ID.
- * @param {Blob|ArrayBuffer} The data chunk.
+ * @param {Blob|ArrayBuffer} chunk The data chunk.
  *   <small>By default when it is not string data streaming, data chunks when is are expected to be
  *   sent in Blob or ArrayBuffer, and ArrayBuffer data chunks will be converted to Blob.</small>
  *   <small>For binary data chunks, the limit is <code>65456</code>.</small>
  *   <small>For string data chunks, the limit is <code>1212</code>.</small>
- * @trigger <ol class="desc-seq"></ol>
+ * @trigger <ol class="desc-seq">
+ *   <li>Checks if Peer connection and Datachannel connection are in correct states. <ol>
+ *   <li>If Peer connection (or MCU Peer connection if enabled)
+ *   data streaming Datachannel has not been opened: <small>This can be checked with
+ *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggering parameter
+ *   payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as
+ *   <code>MESSAGING</code> for Peer.</small> <ol><li><a href="#event_dataStreamState">
+ *   <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code> as <code>ERROR</code>.</li>
+ *   <li><b>ABORT</b> step and return error.</li></ol></li></ol></li>
+ *   <li>Starts sending the data chunk to Peer. <ol>
+ *   <li><a href="#event_incomingDataStream"><code>incomingDataStream</code> event</a> triggers.</li>
+ *   <li><em>For User only</em> <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>SENT</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RECEIVED</code>.</li></ol></li></ol>
  * @example
+ *   // Example 1: Start streaming
+ *   var currentStreamId = null
+ *   if (file.size > chunkLimit) {
+ *     while ((file.size - 1) > endCount) {
+ *       endCount = startCount + chunkLimit;
+ *       chunks.push(file.slice(startCount, endCount));
+ *       startCount += chunkLimit;
+ *     }
+ *     if ((file.size - (startCount + 1)) > 0) {
+ *       chunks.push(file.slice(startCount, file.size - 1));
+ *     }
+ *   } else {
+ *     chunks.push(file);
+ *   }
+ *   var processNextFn = function () {
+ *     if (chunks.length > 0) {
+ *       skylinkDemo.once("incomingDataStream", function () {
+ *         setTimeout(processNextFn, 1);
+ *       }, function (data, evtStreamId, evtPeerId, streamInfo, isSelf) {
+ *         return isSelf && evtStreamId === currentStreamId;
+ *       });
+ *       var chunk = chunks[0];
+ *       chunks.splice(0, 1);
+ *       skylinkDemo.streamData(currentStreamId, chunk);
+ *     } else {
+ *       skylinkDemo.stopStreamingData(currentStreamId);
+ *     }
+ *   };
+ *   skylinkDemo.once("incomingDataStreamStarted", processNextFn, function (streamId, peerId, streamInfo, isSelf) {
+ *     currentStreamId = streamId;
+ *     return isSelf;
+ *   });
+ *   skylinkDemo.once("incomingDataStreamStopped", function () {
+ *     // Render file
+ *   }, function (streamId, peerId, streamInfo, isSelf) {
+ *     return currentStreamId === streamId && isSelf;
+ *   });
+ *   skylinkDemo.startStreamingData(false);
  * @for Skylink
  * @since 0.6.18
  */
@@ -3059,11 +3237,31 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
 };
 
 /**
+ * <blockquote class="info">
+ *   To start data streaming session, see the <a href="#method_startStreamingData"><code>startStreamingData()</code>
+ *   method</a> To start streaming data, see the <a href="#method_streamData"><code>streamData()</code>
+ *   method</a>.
+ * </blockquote>
  * Function that stops a data chunks streaming session from User to Peers.
  * @method stopStreamingData
  * @param {String} streamId The data streaming session ID.
- * @trigger <ol class="desc-seq"></ol>
+ * @trigger <ol class="desc-seq">
+ *   <li>Checks if Peer connection and Datachannel connection are in correct states. <ol>
+ *   <li>If Peer connection (or MCU Peer connection if enabled)
+ *   data streaming Datachannel has not been opened: <small>This can be checked with
+ *   <a href="#event_dataChannelState"><code>dataChannelState</code> event</a> triggering parameter
+ *   payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as
+ *   <code>MESSAGING</code> for Peer.</small> <ol><li><a href="#event_dataStreamState">
+ *   <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code> as <code>ERROR</code>.</li>
+ *   <li><b>ABORT</b> step and return error.</li></ol></li></ol></li>
+ *   <li>Stops the data streaming session to Peer. <ol>
+ *   <li><a href="#event_incomingDataStreamStopped"><code>incomingDataStreamStopped</code> event</a> triggers.</li>
+ *   <li><em>For User only</em> <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>SENDING_STOPPED</code>.</li>
+ *   <li><em>For Peer only</em> <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+ *   triggers parameter payload <code>state</code> as <code>RECEIVING_STOPPED</code>.</li></ol></li></ol>
  * @example
+ *   skylinkDemo.stopStreamData(streamId);
  * @for Skylink
  * @since 0.6.18
  */

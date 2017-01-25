@@ -1545,7 +1545,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 264,
+            "line": 265,
             "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
             "name": "_sendMessageToDataChannel",
@@ -1556,7 +1556,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 338,
+            "line": 340,
             "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -1892,7 +1892,7 @@
                 },
                 {
                     "name": "ERROR",
-                    "description": "<small>Value <code>\"error\"</code></small>\n  The value of the state when data streaming session has errors.",
+                    "description": "<small>Value <code>\"error\"</code></small>\n  The value of the state when data streaming session has errors.\n  <small>At this stage, the data streaming state is considered <code>SENDING_STOPPED</code> or\n  <code>RECEIVING_STOPPED</code>.</small>",
                     "type": "String"
                 },
                 {
@@ -1908,7 +1908,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 146,
+            "line": 148,
             "description": "Stores the list of data transfer protocols.",
             "itemtype": "attribute",
             "name": "_DC_PROTOCOL_TYPE",
@@ -1948,7 +1948,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 170,
+            "line": 172,
             "description": "Function that starts an uploading data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendBlobData",
@@ -2041,7 +2041,7 @@
                     ]
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if Peer connection and Datachannel connection are in correct states. <ol>\n  <li>If Peer connection or session does not exists: <ol><li><a href=\"#event_dataTransferState\">\n  <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code>\n  as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If Peer connection is not stable: <small>The stable state can be checked with <a href=\"#event_peerConnectionState\">\n  <code>peerConnectionState</code> event</a> triggering parameter payload <code>state</code> as <code>STABLE</code>\n  for Peer.</small> <ol><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If Peer connection messaging Datachannel has not been opened: <small>This can be checked with\n  <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggering parameter\n  payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as\n  <code>MESSAGING</code> for Peer.</small> <ol><li><a href=\"#event_dataTransferState\">\n  <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code> as <code>ERROR</code>.</li>\n  <li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If MCU is enabled for the App Key provided in <a href=\"#method_init\"><code>init()</code>method</a> and connected: <ol>\n  <li>If MCU Peer connection is not stable: <small>The stable state can be checked with <a href=\"#event_peerConnectionState\">\n  <code>peerConnectionState</code> event</a> triggering parameter payload <code>state</code> as <code>STABLE</code>\n  and <code>peerId</code> value as <code>\"MCU\"</code> for MCU Peer.</small>\n  <ol><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If MCU Peer connection messaging Datachannel has not been opened: <small>This can be checked with\n  <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggering parameter\n  payload <code>state</code> as <code>OPEN</code>, <code>peerId</code> value as <code>\"MCU\"</code>\n  and <code>channelType</code> as <code>MESSAGING</code> for MCU Peer.</small>\n  <ol><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code>.</li>\n  <li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>Checks if should open a new data Datachannel.<ol>\n  <li>If Peer supports simultaneous data transfer, open new data Datachannel: <small>If MCU is connected,\n  this opens a new data Datachannel with MCU Peer with all the Peers IDs information that supports\n  simultaneous data transfers targeted for the data transfer session instead of opening new data Datachannel\n  with all Peers targeted for the data transfer session.</small> <ol>\n  <li><a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggers parameter\n  payload <code>state</code> as <code>CONNECTING</code> and <code>channelType</code> as <code>DATA</code>.\n  <small>Note that there is no timeout to wait for parameter payload <code>state</code> to be\n  <code>OPEN</code>.</small></li>\n  <li>If Datachannel has been created and opened successfully: <ol>\n  <li><a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggers parameter payload\n  <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol></li>\n  <li>Else: <ol><li><a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>CREATE_ERROR</code> and <code>channelType</code> as\n  <code>DATA</code>.</li><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and\n  return error.</li></ol></li></ol></li><li>Else: <small>If MCU is connected,\n  this uses the messaging Datachannel with MCU Peer with all the Peers IDs information that supports\n  simultaneous data transfers targeted for the data transfer session instead of using the messaging Datachannels\n  with all Peers targeted for the data transfer session.</small> <ol><li>If messaging Datachannel connection has a\n  data transfer in-progress: <ol><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and\n  return error.</li></ol></li></li></ol></ol></li></ol></li>\n  <li>Starts the data transfer to Peer. <ol>\n  <li><a href=\"#event_incomingDataRequest\"><code>incomingDataRequest</code> event</a> triggers.</li>\n  <li><em>For User only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>USER_UPLOAD_REQUEST</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>UPLOAD_REQUEST</code>.</li>\n  <li>Peer invokes <a href=\"#method_acceptDataTransfer\"><code>acceptDataTransfer()</code> method</a>. <ol>\n  <li>If parameter <code>accept</code> value is <code>true</code>: <ol>\n  <li>User starts upload data transfer to Peer. <ol>\n  <li><em>For User only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>UPLOAD_STARTED</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>DOWNLOAD_STARTED</code>.</li></ol></li>\n  <li>If Peer / User invokes <a href=\"#method_cancelDataTransfer\"><code>cancelDataTransfer()</code> method</a>: <ol>\n  <li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>CANCEL</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If data transfer has timeout errors: <ol>\n  <li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>Checks for Peer connection and Datachannel connection during data transfer: <ol>\n  <li>If MCU is enabled for the App Key provided in <a href=\"#method_init\"><code>init()</code>\n  method</a> and connected: <ol>\n  <li>If MCU Datachannel has closed abruptly during data transfer: <ol>\n  <small>This can be checked with <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a>\n  triggering parameter payload <code>state</code> as <code>CLOSED</code>, <code>peerId</code> value as\n  <code>\"MCU\"</code> and <code>channelType</code> as <code>DATA</code> for targeted Peers that supports simultaneous\n  data transfer or <code>MESSAGING</code> for targeted Peers that do not support it.</small> <ol>\n  <li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>If MCU Peer connection has changed from not being stable: <ol>\n  <small>This can be checked with <a href=\"#event_peerConnectionState\"><code>peerConnection</code> event</a>\n  triggering parameter payload <code>state</code> as not <code>STABLE</code>, <code>peerId</code> value as\n  <code>\"MCU\"</code>.</small> <ol><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>If Peer connection has changed from not being stable: <ol>\n  <small>This can be checked with <a href=\"#event_peerConnectionState\"><code>peerConnection</code> event</a>\n  triggering parameter payload <code>state</code> as not <code>STABLE</code>.</small> <ol>\n  <li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li></ol></li>\n  <li>Else: <ol><li>If Datachannel has closed abruptly during data transfer:\n  <small>This can be checked with <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a>\n  triggering parameter payload <code>state</code> as <code>CLOSED</code> and <code>channelType</code>\n  as <code>DATA</code> for Peer that supports simultaneous data transfer or <code>MESSAGING</code>\n  for Peer that do not support it.</small> <ol>\n  <li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li></ol></li>\n  <li>If data transfer is still progressing: <ol>\n  <li><em>For User only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>UPLOADING</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>DOWNLOADING</code>.</li></ol></li>\n  <li>If data transfer has completed <ol>\n  <li><a href=\"#event_incomingData\"><code>incomingData</code> event</a> triggers.</li>\n  <li><em>For User only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>DOWNLOAD_COMPLETED</code>.</li></ol></li></ol></li>\n  <li>If parameter <code>accept</code> value is <code>false</code>: <ol>\n  <li><em>For User only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>REJECTED</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>USER_REJECTED</code>.</li>\n  <li><b>ABORT</b> step and return error.</li></ol></li></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if User is in Room. <ol>\n  <li>If User is not in Room: <ol><li><a href=\"#event_dataTransferState\">\n  <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code>\n  as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>Checks if there is any available Datachannel connections. <ol>\n  <li>If User is not in Room: <ol><li><a href=\"#event_dataTransferState\">\n  <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code>\n  as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>Checks if provided <code>data</code> parameter is valid. <ol>\n  <li>If it is invalid: <ol><li><a href=\"#event_dataTransferState\">\n  <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code>\n  as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>Checks if Peer connection and Datachannel connection are in correct states. <ol>\n  <li>If Peer connection or session does not exists: <ol><li><a href=\"#event_dataTransferState\">\n  <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code>\n  as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If Peer connection is not stable: <small>The stable state can be checked with <a href=\"#event_peerConnectionState\">\n  <code>peerConnectionState</code> event</a> triggering parameter payload <code>state</code> as <code>STABLE</code>\n  for Peer.</small> <ol><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If Peer connection messaging Datachannel has not been opened: <small>This can be checked with\n  <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggering parameter\n  payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as\n  <code>MESSAGING</code> for Peer.</small> <ol><li><a href=\"#event_dataTransferState\">\n  <code>dataTransferState</code> event</a> triggers parameter payload <code>state</code> as <code>ERROR</code>.</li>\n  <li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If MCU is enabled for the App Key provided in <a href=\"#method_init\"><code>init()</code>method</a> and connected: <ol>\n  <li>If MCU Peer connection is not stable: <small>The stable state can be checked with <a href=\"#event_peerConnectionState\">\n  <code>peerConnectionState</code> event</a> triggering parameter payload <code>state</code> as <code>STABLE</code>\n  and <code>peerId</code> value as <code>\"MCU\"</code> for MCU Peer.</small>\n  <ol><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If MCU Peer connection messaging Datachannel has not been opened: <small>This can be checked with\n  <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggering parameter\n  payload <code>state</code> as <code>OPEN</code>, <code>peerId</code> value as <code>\"MCU\"</code>\n  and <code>channelType</code> as <code>MESSAGING</code> for MCU Peer.</small>\n  <ol><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code>.</li>\n  <li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>Checks if should open a new data Datachannel.<ol>\n  <li>If Peer supports simultaneous data transfer, open new data Datachannel: <small>If MCU is connected,\n  this opens a new data Datachannel with MCU Peer with all the Peers IDs information that supports\n  simultaneous data transfers targeted for the data transfer session instead of opening new data Datachannel\n  with all Peers targeted for the data transfer session.</small> <ol>\n  <li><a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggers parameter\n  payload <code>state</code> as <code>CONNECTING</code> and <code>channelType</code> as <code>DATA</code>.\n  <small>Note that there is no timeout to wait for parameter payload <code>state</code> to be\n  <code>OPEN</code>.</small></li>\n  <li>If Datachannel has been created and opened successfully: <ol>\n  <li><a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggers parameter payload\n  <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol></li>\n  <li>Else: <ol><li><a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>CREATE_ERROR</code> and <code>channelType</code> as\n  <code>DATA</code>.</li><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and\n  return error.</li></ol></li></ol></li><li>Else: <small>If MCU is connected,\n  this uses the messaging Datachannel with MCU Peer with all the Peers IDs information that supports\n  simultaneous data transfers targeted for the data transfer session instead of using the messaging Datachannels\n  with all Peers targeted for the data transfer session.</small> <ol><li>If messaging Datachannel connection has a\n  data transfer in-progress: <ol><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and\n  return error.</li></ol></li><li>If there is any conflicting <a href=\"#method_streamData\"><code>streamData()</code>\n  method</a> data streaming session: <small>If <code>sendChunksAsBinary</code> is provided as <code>true</code>,\n  it cannot start if existing data streaming session is expected binary data chunks, and if provided as\n  <code>false</code>, or method invoked is <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a>,\n  or Peer is using string data chunks fallback due to its support despite provided as <code>true</code>,\n  it cannot start if existing data streaming session is expected string data chunks.</small><ol>\n  <li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and\n  return error.</li></ol></li></li></ol></ol></li></ol></li>\n  <li>Starts the data transfer to Peer. <ol>\n  <li><a href=\"#event_incomingDataRequest\"><code>incomingDataRequest</code> event</a> triggers.</li>\n  <li><em>For User only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>USER_UPLOAD_REQUEST</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>UPLOAD_REQUEST</code>.</li>\n  <li>Peer invokes <a href=\"#method_acceptDataTransfer\"><code>acceptDataTransfer()</code> method</a>. <ol>\n  <li>If parameter <code>accept</code> value is <code>true</code>: <ol>\n  <li>User starts upload data transfer to Peer. <ol>\n  <li><em>For User only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>UPLOAD_STARTED</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>DOWNLOAD_STARTED</code>.</li></ol></li>\n  <li>If Peer / User invokes <a href=\"#method_cancelDataTransfer\"><code>cancelDataTransfer()</code> method</a>: <ol>\n  <li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>CANCEL</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If data transfer has timeout errors: <ol>\n  <li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>Checks for Peer connection and Datachannel connection during data transfer: <ol>\n  <li>If MCU is enabled for the App Key provided in <a href=\"#method_init\"><code>init()</code>\n  method</a> and connected: <ol>\n  <li>If MCU Datachannel has closed abruptly during data transfer: <ol>\n  <small>This can be checked with <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a>\n  triggering parameter payload <code>state</code> as <code>CLOSED</code>, <code>peerId</code> value as\n  <code>\"MCU\"</code> and <code>channelType</code> as <code>DATA</code> for targeted Peers that supports simultaneous\n  data transfer or <code>MESSAGING</code> for targeted Peers that do not support it.</small> <ol>\n  <li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>If MCU Peer connection has changed from not being stable: <ol>\n  <small>This can be checked with <a href=\"#event_peerConnectionState\"><code>peerConnection</code> event</a>\n  triggering parameter payload <code>state</code> as not <code>STABLE</code>, <code>peerId</code> value as\n  <code>\"MCU\"</code>.</small> <ol><li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>If Peer connection has changed from not being stable: <ol>\n  <small>This can be checked with <a href=\"#event_peerConnectionState\"><code>peerConnection</code> event</a>\n  triggering parameter payload <code>state</code> as not <code>STABLE</code>.</small> <ol>\n  <li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li></ol></li>\n  <li>Else: <ol><li>If Datachannel has closed abruptly during data transfer:\n  <small>This can be checked with <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a>\n  triggering parameter payload <code>state</code> as <code>CLOSED</code> and <code>channelType</code>\n  as <code>DATA</code> for Peer that supports simultaneous data transfer or <code>MESSAGING</code>\n  for Peer that do not support it.</small> <ol>\n  <li><a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a> triggers parameter\n  <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li></ol></li>\n  <li>If data transfer is still progressing: <ol>\n  <li><em>For User only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>UPLOADING</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>DOWNLOADING</code>.</li></ol></li>\n  <li>If data transfer has completed <ol>\n  <li><a href=\"#event_incomingData\"><code>incomingData</code> event</a> triggers.</li>\n  <li><em>For User only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>UPLOAD_COMPLETED</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>DOWNLOAD_COMPLETED</code>.</li></ol></li></ol></li>\n  <li>If parameter <code>accept</code> value is <code>false</code>: <ol>\n  <li><em>For User only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>REJECTED</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>USER_REJECTED</code>.</li>\n  <li><b>ABORT</b> step and return error.</li></ol></li></ol>",
             "example": [
                 "\n&lt;body&gt;\n &lt;input type=\"radio\" name=\"timeout\" onchange=\"setTransferTimeout(0)\"&gt; 1s timeout (Default)\n &lt;input type=\"radio\" name=\"timeout\" onchange=\"setTransferTimeout(120)\"&gt; 2s timeout\n &lt;input type=\"radio\" name=\"timeout\" onchange=\"setTransferTimeout(300)\"&gt; 5s timeout\n &lt;hr&gt;\n &lt;input type=\"file\" onchange=\"uploadFile(this.files[0], this.getAttribute('data'))\" data=\"peerId\"&gt;\n &lt;input type=\"file\" onchange=\"uploadFileGroup(this.files[0], this.getAttribute('data').split(',')))\" data=\"peerIdA,peerIdB\"&gt;\n &lt;input type=\"file\" onchange=\"uploadFileAll(this.files[0])\" data=\"\"&gt;\n &lt;script&gt;\n   var transferTimeout = 0;\n\n   function setTransferTimeout (timeout) {\n     transferTimeout = timeout;\n   }\n\n   // Example 1: Upload data to a Peer\n   function uploadFile (file, peerId) {\n     var cb = function (error, success) {\n       if (error) return;\n       console.info(\"File has been transferred to '\" + peerId + \"' successfully\");\n     };\n     if (transferTimeout > 0) {\n       skylinkDemo.sendBlobData(file, peerId, transferTimeout, cb);\n     } else {\n       skylinkDemo.sendBlobData(file, peerId, cb);\n     }\n   }\n\n   // Example 2: Upload data to a list of Peers\n   function uploadFileGroup (file, peerIds) {\n     var cb = function (error, success) {\n       var listOfPeers = error ? error.listOfPeers : success.listOfPeers;\n       var listOfPeersErrors = error ? error.transferErrors : {};\n       for (var i = 0; i < listOfPeers.length; i++) {\n         if (listOfPeersErrors[listOfPeers[i]]) {\n           console.error(\"Failed file transfer to '\" + listOfPeers[i] + \"'\");\n         } else {\n           console.info(\"File has been transferred to '\" + listOfPeers[i] + \"' successfully\");\n         }\n       }\n     };\n     if (transferTimeout > 0) {\n       skylinkDemo.sendBlobData(file, peerIds, transferTimeout, cb);\n     } else {\n       skylinkDemo.sendBlobData(file, peerIds, cb);\n     }\n   }\n\n   // Example 2: Upload data to a list of Peers\n   function uploadFileAll (file) {\n     var cb = function (error, success) {\n       var listOfPeers = error ? error.listOfPeers : success.listOfPeers;\n       var listOfPeersErrors = error ? error.transferErrors : {};\n       for (var i = 0; i < listOfPeers.length; i++) {\n         if (listOfPeersErrors[listOfPeers[i]]) {\n           console.error(\"Failed file transfer to '\" + listOfPeers[i] + \"'\");\n         } else {\n           console.info(\"File has been transferred to '\" + listOfPeers[i] + \"' successfully\");\n         }\n       }\n     };\n     if (transferTimeout > 0) {\n       skylinkDemo.sendBlobData(file, transferTimeout, cb);\n     } else {\n       skylinkDemo.sendBlobData(file, cb);\n     }\n   }\n&lt;/script&gt;\n&lt;/body&gt;"
             ],
@@ -2050,7 +2050,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 402,
+            "line": 424,
             "description": "Function that starts an uploading string data transfer from User to Peers.",
             "itemtype": "method",
             "name": "sendURLData",
@@ -2145,7 +2145,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 537,
+            "line": 559,
             "description": "Function that accepts or rejects an upload data transfer request from Peer to User.",
             "itemtype": "method",
             "name": "acceptDataTransfer",
@@ -2177,7 +2177,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 673,
+            "line": 695,
             "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, the cancel data transfer functionality may differ, as it\n  will result in all Peers related to the data transfer ID to be terminated.\n</blockquote>\nFunction that terminates a currently uploading / downloading data transfer from / to Peer.",
             "itemtype": "method",
             "name": "cancelDataTransfer",
@@ -2202,13 +2202,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 728,
+            "line": 750,
             "description": "Emit data state event function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 801,
+            "line": 823,
             "description": "Function that sends a message to Peers via the Datachannel connection.\n<small>Consider using <a href=\"#method_sendURLData\"><code>sendURLData()</code> method</a> if you are\nsending large strings to Peers.</small>",
             "itemtype": "method",
             "name": "sendP2PMessage",
@@ -2234,8 +2234,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 936,
-            "description": "Function that starts a data chunks streaming session from User to Peers.",
+            "line": 958,
+            "description": "<blockquote class=\"info\">\n  To start streaming data, see the <a href=\"#method_streamData\"><code>streamData()</code>\n  method</a>. To stop data streaming session, see the <a href=\"#method_stopStreamingData\"><code>stopStreamingData()</code> method</a>\n</blockquote>\nFunction that starts a data chunks streaming session from User to Peers.",
             "itemtype": "method",
             "name": "startStreamingData",
             "params": [
@@ -2253,17 +2253,17 @@
                     "optional": true
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\"></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if User is in Room. <ol>\n  <li>If User is not in Room: <ol><li><a href=\"#event_dataStreamState\">\n  <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code>\n  as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>Checks if there is any available Datachannel connections. <ol>\n  <li>If User is not in Room: <ol><li><a href=\"#event_dataStreamState\">\n  <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code>\n  as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>Checks if Peer connection and Datachannel connection are in correct states. <ol>\n  <li>If Peer connection or session does not exists: <ol><li><a href=\"#event_dataStreamState\">\n  <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code>\n  as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If Peer connection messaging Datachannel has not been opened: <small>This can be checked with\n  <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggering parameter\n  payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as\n  <code>MESSAGING</code> for Peer.</small> <ol><li><a href=\"#event_dataStreamState\">\n  <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code> as <code>START_ERROR</code>.</li>\n  <li><b>ABORT</b> step and return error.</li></ol></li>\n  <li>If MCU is enabled for the App Key provided in <a href=\"#method_init\"><code>init()</code>method</a> and connected: <ol>\n  <li>If MCU Peer connection messaging Datachannel has not been opened: <small>This can be checked with\n  <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggering parameter\n  payload <code>state</code> as <code>OPEN</code>, <code>peerId</code> value as <code>\"MCU\"</code>\n  and <code>channelType</code> as <code>MESSAGING</code> for MCU Peer.</small>\n  <ol><li><a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>START_ERROR</code>.</li>\n  <li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>Checks if should open a new data Datachannel.<ol>\n  <li>If Peer supports simultaneous data streaming, open new data Datachannel: <small>If MCU is connected,\n  this opens a new data Datachannel with MCU Peer with all the Peers IDs information that supports\n  simultaneous data transfers targeted for the data streaming session instead of opening new data Datachannel\n  with all Peers targeted for the data streaming session.</small> <ol>\n  <li><a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggers parameter\n  payload <code>state</code> as <code>CONNECTING</code> and <code>channelType</code> as <code>DATA</code>.\n  <small>Note that there is no timeout to wait for parameter payload <code>state</code> to be\n  <code>OPEN</code>.</small></li>\n  <li>If Datachannel has been created and opened successfully: <ol>\n  <li><a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggers parameter payload\n  <code>state</code> as <code>OPEN</code> and <code>channelType</code> as <code>DATA</code>.</li></ol></li>\n  <li>Else: <ol><li><a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>CREATE_ERROR</code> and <code>channelType</code> as\n  <code>DATA</code>.</li><li><a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and\n  return error.</li></ol></li></ol></li><li>Else: <small>If MCU is connected,\n  this uses the messaging Datachannel with MCU Peer with all the Peers IDs information that supports\n  simultaneous data transfers targeted for the data streaming session instead of using the messaging Datachannels\n  with all Peers targeted for the data streaming session.</small> <ol><li>If messaging Datachannel connection has a\n  data streaming in-progress: <ol><li><a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and\n  return error.</li></ol></li><li>If there is any conflicting <a href=\"#method_streamData\"><code>streamData()</code>\n  method</a> data streaming session: <small>If <code>isStringStream</code> is provided as <code>true</code> and\n  <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a> or <a href=\"#method_sendURLData\">\n  <code>sendURLData()</code> method</a> has an existing binary string transfer, it cannot start string data\n  streaming session. Else if <a href=\"#method_sendBlobData\"><code>sendBlobData()</code> method</a>\n  has an existing binary data transfer, it cannot start binary data streaming session.</small><ol>\n  <li><a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>START_ERROR</code>.</li><li><b>ABORT</b> step and\n  return error.</li></ol></li></li></ol></ol></li></ol></li>\n  <li>Starts the data streaming session with Peer. <ol>\n  <li><a href=\"#event_incomingDataStreamStarted\"><code>incomingDataStreamStarted</code> event</a> triggers.</li>\n  <li><em>For User only</em> <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>SENDING_STARTED</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RECEIVING_STARTED</code>.</li></ol></li></ol>",
             "example": [
-                ""
+                "\n  // Example 1: Start streaming to all Peers\n  skylinkDemo.on(\"dataChannelState\", function (state, peerId, error, channelName, channelType) {\n     if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&\n       channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {\n       skylinkDemo.startStreamingData(false);\n     }\n  });\n\n  // Example 2: Start streaming to specific Peers\n  var peersInExclusiveParty = [];\n\n  skylinkDemo.on(\"peerJoined\", function (peerId, peerInfo, isSelf) {\n    if (isSelf) return;\n    if (peerInfo.userData.exclusive) {\n      peersInExclusiveParty[peerId] = false;\n    }\n  });\n\n  skylinkDemo.on(\"dataChannelState\", function (state, peerId, error, channelName, channelType) {\n     if (state === skylinkDemo.DATA_CHANNEL_STATE.OPEN &&\n       channelType === skylinkDemo.DATA_CHANNEL_TYPE.MESSAGING) {\n       peersInExclusiveParty[peerId] = true;\n     }\n  });\n\n  function updateExclusivePartyStatus (message) {\n    var readyToSend = [];\n    for (var p in peersInExclusiveParty) {\n      if (peersInExclusiveParty.hasOwnProperty(p)) {\n        readyToSend.push(p);\n      }\n    }\n    skylinkDemo.startStreamingData(message, readyToSend);\n  }"
             ],
             "since": "0.6.18",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1212,
-            "description": "Function that sends a data chunk from User to Peers for an existing active data streaming session.",
+            "line": 1350,
+            "description": "<blockquote class=\"info\">\n  To start data streaming session, see the <a href=\"#method_startStreamingData\"><code>startStreamingData()</code>\n  method</a>. To stop data streaming session, see the <a href=\"#method_stopStreamingData\"><code>stopStreamingData()</code> method</a>\n</blockquote>\nFunction that sends a data chunk from User to Peers for an existing active data streaming session.",
             "itemtype": "method",
             "name": "streamData",
             "params": [
@@ -2273,22 +2273,22 @@
                     "type": "String"
                 },
                 {
-                    "name": "The",
-                    "description": "data chunk.\n  <small>By default when it is not string data streaming, data chunks when is are expected to be\n  sent in Blob or ArrayBuffer, and ArrayBuffer data chunks will be converted to Blob.</small>\n  <small>For binary data chunks, the limit is <code>65456</code>.</small>\n  <small>For string data chunks, the limit is <code>1212</code>.</small>",
+                    "name": "chunk",
+                    "description": "The data chunk.\n  <small>By default when it is not string data streaming, data chunks when is are expected to be\n  sent in Blob or ArrayBuffer, and ArrayBuffer data chunks will be converted to Blob.</small>\n  <small>For binary data chunks, the limit is <code>65456</code>.</small>\n  <small>For string data chunks, the limit is <code>1212</code>.</small>",
                     "type": "Blob|ArrayBuffer"
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\"></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if Peer connection and Datachannel connection are in correct states. <ol>\n  <li>If Peer connection (or MCU Peer connection if enabled)\n  data streaming Datachannel has not been opened: <small>This can be checked with\n  <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggering parameter\n  payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as\n  <code>MESSAGING</code> for Peer.</small> <ol><li><a href=\"#event_dataStreamState\">\n  <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code> as <code>ERROR</code>.</li>\n  <li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>Starts sending the data chunk to Peer. <ol>\n  <li><a href=\"#event_incomingDataStream\"><code>incomingDataStream</code> event</a> triggers.</li>\n  <li><em>For User only</em> <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>SENT</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RECEIVED</code>.</li></ol></li></ol>",
             "example": [
-                ""
+                "\n  // Example 1: Start streaming\n  var currentStreamId = null\n  if (file.size > chunkLimit) {\n    while ((file.size - 1) > endCount) {\n      endCount = startCount + chunkLimit;\n      chunks.push(file.slice(startCount, endCount));\n      startCount += chunkLimit;\n    }\n    if ((file.size - (startCount + 1)) > 0) {\n      chunks.push(file.slice(startCount, file.size - 1));\n    }\n  } else {\n    chunks.push(file);\n  }\n  var processNextFn = function () {\n    if (chunks.length > 0) {\n      skylinkDemo.once(\"incomingDataStream\", function () {\n        setTimeout(processNextFn, 1);\n      }, function (data, evtStreamId, evtPeerId, streamInfo, isSelf) {\n        return isSelf && evtStreamId === currentStreamId;\n      });\n      var chunk = chunks[0];\n      chunks.splice(0, 1);\n      skylinkDemo.streamData(currentStreamId, chunk);\n    } else {\n      skylinkDemo.stopStreamingData(currentStreamId);\n    }\n  };\n  skylinkDemo.once(\"incomingDataStreamStarted\", processNextFn, function (streamId, peerId, streamInfo, isSelf) {\n    currentStreamId = streamId;\n    return isSelf;\n  });\n  skylinkDemo.once(\"incomingDataStreamStopped\", function () {\n    // Render file\n  }, function (streamId, peerId, streamInfo, isSelf) {\n    return currentStreamId === streamId && isSelf;\n  });\n  skylinkDemo.startStreamingData(false);"
             ],
             "since": "0.6.18",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1328,
-            "description": "Function that stops a data chunks streaming session from User to Peers.",
+            "line": 1540,
+            "description": "<blockquote class=\"info\">\n  To start data streaming session, see the <a href=\"#method_startStreamingData\"><code>startStreamingData()</code>\n  method</a> To start streaming data, see the <a href=\"#method_streamData\"><code>streamData()</code>\n  method</a>.\n</blockquote>\nFunction that stops a data chunks streaming session from User to Peers.",
             "itemtype": "method",
             "name": "stopStreamingData",
             "params": [
@@ -2298,16 +2298,16 @@
                     "type": "String"
                 }
             ],
-            "trigger": "<ol class=\"desc-seq\"></ol>",
+            "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if Peer connection and Datachannel connection are in correct states. <ol>\n  <li>If Peer connection (or MCU Peer connection if enabled)\n  data streaming Datachannel has not been opened: <small>This can be checked with\n  <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggering parameter\n  payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as\n  <code>MESSAGING</code> for Peer.</small> <ol><li><a href=\"#event_dataStreamState\">\n  <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code> as <code>ERROR</code>.</li>\n  <li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>Stops the data streaming session to Peer. <ol>\n  <li><a href=\"#event_incomingDataStreamStopped\"><code>incomingDataStreamStopped</code> event</a> triggers.</li>\n  <li><em>For User only</em> <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>SENDING_STOPPED</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RECEIVING_STOPPED</code>.</li></ol></li></ol>",
             "example": [
-                ""
+                "\n  skylinkDemo.stopStreamData(streamId);"
             ],
             "since": "0.6.18",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1425,
+            "line": 1673,
             "description": "Function that starts the data transfer to Peers.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -2318,13 +2318,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1624,
+            "line": 1872,
             "description": "Complete Peer function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1688,
+            "line": 1936,
             "description": "Function that starts or listens the data transfer status to Peer.\nThis reacts differently during MCU environment.",
             "itemtype": "method",
             "name": "_startDataTransferToPeer",
@@ -2339,25 +2339,25 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1703,
+            "line": 1951,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1713,
+            "line": 1961,
             "description": "Return error and trigger them if failed before or during data transfers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1729,
+            "line": 1977,
             "description": "Send WRQ protocol to start data transfers.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1962,
+            "line": 2212,
             "description": "Function that returns the data transfer session.",
             "itemtype": "method",
             "name": "_getTransferInfo",
@@ -2368,7 +2368,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2044,
+            "line": 2294,
             "description": "Function that returns the compiled data transfer data.",
             "itemtype": "method",
             "name": "_getTransferData",
@@ -2379,7 +2379,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2071,
+            "line": 2321,
             "description": "Function that handles the data transfers sessions timeouts.",
             "itemtype": "method",
             "name": "_handleDataTransferTimeoutForPeer",
@@ -2390,13 +2390,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2115,
+            "line": 2365,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2162,
+            "line": 2412,
             "description": "Function that handles the data received from Datachannel and\nroutes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_processDataChannelData",
@@ -2407,7 +2407,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2299,
+            "line": 2577,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -2418,7 +2418,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2471,
+            "line": 2720,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -2429,13 +2429,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2490,
+            "line": 2739,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2573,
+            "line": 2822,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -2446,7 +2446,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2594,
+            "line": 2843,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -2457,13 +2457,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2613,
+            "line": 2862,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2645,
+            "line": 2894,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -2474,13 +2474,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2662,
+            "line": 2911,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2694,
+            "line": 2943,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -7985,7 +7985,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 266,
+            "line": 269,
             "description": "Function that creates and opens a socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_createSocket",
@@ -7996,7 +7996,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 425,
+            "line": 428,
             "description": "Function that starts the socket connection to the Signaling.\nThis starts creating the socket connection and called at first not when requiring to fallback.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -8007,7 +8007,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 467,
+            "line": 470,
             "description": "Function that stops the socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -9337,35 +9337,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:170"
+            "line": " source/data-transfer.js:172"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:402"
+            "line": " source/data-transfer.js:424"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:537"
+            "line": " source/data-transfer.js:559"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:673"
+            "line": " source/data-transfer.js:695"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:801"
+            "line": " source/data-transfer.js:823"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:936"
+            "line": " source/data-transfer.js:958"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1212"
+            "line": " source/data-transfer.js:958"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1328"
+            "line": " source/data-transfer.js:1350"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/data-transfer.js:1540"
         },
         {
             "message": "unknown tag: trigger",
@@ -9541,39 +9545,39 @@
         },
         {
             "message": "Missing item type\nEmit data state event function.",
-            "line": " source/data-transfer.js:728"
+            "line": " source/data-transfer.js:750"
         },
         {
             "message": "Missing item type\nComplete Peer function.",
-            "line": " source/data-transfer.js:1624"
+            "line": " source/data-transfer.js:1872"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1703"
+            "line": " source/data-transfer.js:1951"
         },
         {
             "message": "Missing item type\nReturn error and trigger them if failed before or during data transfers function.",
-            "line": " source/data-transfer.js:1713"
+            "line": " source/data-transfer.js:1961"
         },
         {
             "message": "Missing item type\nSend WRQ protocol to start data transfers.",
-            "line": " source/data-transfer.js:1729"
+            "line": " source/data-transfer.js:1977"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2115"
+            "line": " source/data-transfer.js:2365"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2490"
+            "line": " source/data-transfer.js:2739"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2613"
+            "line": " source/data-transfer.js:2862"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2662"
+            "line": " source/data-transfer.js:2911"
         }
     ]
 }
