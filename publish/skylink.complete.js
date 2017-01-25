@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 14:58:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 20:10:14 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 14:58:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 20:10:14 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -13358,6 +13358,8 @@ Skylink.prototype.DATA_TRANSFER_STATE = {
  *   The value of the state when data streaming session has stopped from Peer to User.
  * @param {String} ERROR             <small>Value <code>"error"</code></small>
  *   The value of the state when data streaming session has errors.
+ *   <small>At this stage, the data streaming state is considered <code>SENDING_STOPPED</code> or
+ *   <code>RECEIVING_STOPPED</code>.</small>
  * @param {String} START_ERROR       <small>Value <code>"startError"</code></small>
  *   The value of the state when data streaming session failed to start from User to Peer.
  * @type JSON
@@ -14267,41 +14269,28 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
 
       if (state === self.DATA_STREAM_STATE.SENDING_STARTED) {
         hasStarted = true;
-        self._trigger('incomingDataStreamStarted', transferId, peerId, updatedSessionInfo, true);
         return;
       }
 
-      if (hasStarted) {
-        if (state === self.DATA_STREAM_STATE.SENT) {
-          self._trigger('incomingDataStream', dataChunk, transferId, peerId, updatedSessionInfo, true);
-          return;
-        } else if ([self.DATA_STREAM_STATE.ERROR, self.DATA_STREAM_STATE.SENDING_STOPPED].indexOf(state) > -1) {
-          if (state === self.DATA_STREAM_STATE.ERROR) {
-            self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENDING_STOPPED, transferId, peerId, sessionInfo, null);
-          }
-
-          self._trigger('incomingDataStreamStopped', transferId, peerId, updatedSessionInfo, true);
-
-          if (channelProp === transferId) {
-            self._closeDataChannel(peerId, transferId);
-          }
-
-          if (self._dataStreams[transferId] && self._dataStreams[transferId].sessions[peerId]) {
-            delete self._dataStreams[transferId].sessions[peerId];
-
-            if (Object.keys(self._dataStreams[transferId].sessions).length === 0) {
-              delete self._dataStreams[transferId];
-            }
-          }
-          return true;
+      if (hasStarted && [self.DATA_STREAM_STATE.ERROR, self.DATA_STREAM_STATE.SENDING_STOPPED].indexOf(state) > -1) {
+        if (channelProp === transferId) {
+          self._closeDataChannel(peerId, transferId);
         }
+
+        if (self._dataStreams[transferId] && self._dataStreams[transferId].sessions[peerId]) {
+          delete self._dataStreams[transferId].sessions[peerId];
+
+          if (Object.keys(self._dataStreams[transferId].sessions).length === 0) {
+            delete self._dataStreams[transferId];
+          }
+        }
+        return true;
       }
     });
   };
-  var i;
 
   // Loop out unwanted Peers
-  for (i = 0; i < listOfPeers.length; i++) {
+  for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
     var error = null;
     var dtProtocolVersion = ((self._peerInformations[peerId] || {}).agent || {}).DTProtocolVersion || '';
@@ -14346,7 +14335,6 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
   }
 
   self._dataStreams[transferId] = {
-    started: true,
     sessions: sessions,
     chunkType: sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING :
       self.DATA_TRANSFER_DATA_TYPE.BLOB,
@@ -14358,27 +14346,6 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
   };
 
   var startDataSessionFn = function (peerId, channelProp, targetPeers) {
-    var sendWRQFn = function () {
-      self._sendMessageToDataChannel(peerId, {
-        type: self._DC_PROTOCOL_TYPE.WRQ,
-        transferId: transferId,
-        name: transferId,
-        size: 0,
-        originalSize: 0,
-        dataType: 'start',
-        mimeType: null,
-        chunkType: sessionChunkType,
-        chunkSize: sessionChunkType === 'string' ? self._CHUNK_DATAURL_SIZE : self._BINARY_FILE_SIZE,
-        timeout: 0,
-        isPrivate: isPrivate,
-        sender: self._user.sid,
-        agent: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        target: peerId === 'MCU' ? targetPeers : peerId
-      }, channelProp);
-      self._dataChannels[peerId][channelProp].streamId = transferId;
-    };
-
     self.once('dataChannelState', function () {}, function (state, evtPeerId, channelName, channelType, error) {
       if (!self._dataStreams[transferId]) {
         return true;
@@ -14389,17 +14356,13 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
         return;
       }
 
-      if (channelProp !== 'main' && state === self.DATA_CHANNEL_STATE.OPEN) {
-        sendWRQFn();
-      }
-
       if ([self.DATA_CHANNEL_STATE.ERROR, self.DATA_CHANNEL_STATE.CLOSED].indexOf(state) > -1) {
         var updatedError = new Error(error && error.message ? error.message :
           'Failed data transfer as datachannel state is "' + state + '".');
 
         if (peerId === 'MCU') {
-          for (var i = 0; i < targetPeers.length; i++) {
-            self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, targetPeers[i], sessionInfo, updatedError);
+          for (var mp = 0; mp < targetPeers.length; mp++) {
+            self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, targetPeers[mp], sessionInfo, updatedError);
           }
         } else {
           self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, peerId, sessionInfo, updatedError);
@@ -14408,35 +14371,88 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
       }
     });
 
-    if (channelProp === 'main') {
-      sendWRQFn();
+    if (!(self._dataChannels[peerId][channelProp] &&
+      self._dataChannels[peerId][channelProp].channel.readyState === self.DATA_CHANNEL_STATE.OPEN)) {
+      var notOpenError = new Error('Failed starting data streaming session as channel is not opened.');
+      if (peerId === 'MCU') {
+        for (i = 0; i < targetPeers.length; i++) {
+          self._trigger('dataStreamState', self.DATA_STREAM_STATE.START_ERROR, transferId, targetPeers[i], sessionInfo, notOpenError);
+        }
+      } else {
+        self._trigger('dataStreamState', self.DATA_STREAM_STATE.START_ERROR, transferId, peerId, sessionInfo, notOpenError);
+      }
     }
 
+    self._sendMessageToDataChannel(peerId, {
+      type: self._DC_PROTOCOL_TYPE.WRQ,
+      transferId: transferId,
+      name: transferId,
+      size: 0,
+      originalSize: 0,
+      dataType: 'start',
+      mimeType: null,
+      chunkType: sessionChunkType,
+      chunkSize: 0,
+      timeout: 0,
+      isPrivate: isPrivate,
+      sender: self._user.sid,
+      agent: window.webrtcDetectedBrowser,
+      version: window.webrtcDetectedVersion,
+      target: peerId === 'MCU' ? targetPeers : peerId
+    }, channelProp);
+    self._dataChannels[peerId][channelProp].streamId = transferId;
+
+    var updatedSessionInfo = clone(sessionInfo);
+    delete updatedSessionInfo.chunk;
+
     if (peerId === 'MCU') {
-      for (var i = 0; i < targetPeers.length; i++) {
-        self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENDING_STARTED, transferId, targetPeers[i], sessionInfo, null);
+      for (var tp = 0; tp < targetPeers.length; tp++) {
+        self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENDING_STARTED, transferId, targetPeers[tp], sessionInfo, null);
+        self._trigger('incomingDataStreamStarted', transferId, targetPeers[tp], updatedSessionInfo, true);
       }
     } else {
       self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENDING_STARTED, transferId, peerId, sessionInfo, null);
+      self._trigger('incomingDataStreamStarted', transferId, peerId, updatedSessionInfo, true);
     }
+  };
+
+  var waitForChannelOpenFn = function (peerId, targetPeers) {
+    self.once('dataChannelState', function (state, evtPeerId, error) {
+      if (state === self.DATA_CHANNEL_STATE.CREATE_ERROR) {
+        if (peerId === 'MCU') {
+          for (var mp = 0; mp < targetPeers.length; mp++) {
+            self._trigger('dataStreamState', self.DATA_STREAM_STATE.START_ERROR, transferId, targetPeers[mp], sessionInfo, error);
+          }
+        } else {
+          self._trigger('dataStreamState', self.DATA_STREAM_STATE.START_ERROR, transferId, peerId, sessionInfo, error);
+        }
+        return;
+      }
+      startDataSessionFn(peerId, transferId, targetPeers);
+    }, function (state, evtPeerId, error, channelName, channelType) {
+      if (evtPeerId === peerId && channelName === transferId && channelType === self.DATA_CHANNEL_TYPE.DATA) {
+        return [self.DATA_CHANNEL_STATE.CREATE_ERROR, self.DATA_CHANNEL_STATE.OPEN].indexOf(state) > -1;
+      }
+    });
+    self._createDataChannel(peerId, transferId);
   };
 
   if (peersNonInterop.length > 0) {
     if (self._hasMCU) {
-      startDataSessionFn('MCU', transferId, peersNonInterop);
+      waitForChannelOpenFn('MCU', peersNonInterop);
     } else {
-      for (i = 0; i < peersNonInterop.length; i++) {
-        startDataSessionFn(peersNonInterop[i], transferId, null);
+      for (var pni = 0; pni < peersNonInterop.length; pni++) {
+        waitForChannelOpenFn(peersNonInterop[pni], null);
       }
     }
   }
 
   if (peersInterop.length > 0) {
     if (self._hasMCU) {
-      startDataSessionFn('MCU', transferId, peersInterop);
+      startDataSessionFn('MCU', 'main', peersInterop);
     } else {
-      for (i = 0; i < peersInterop.length; i++) {
-        startDataSessionFn(peersInterop[i], 'main', null);
+      for (var pi = 0; pi < peersInterop.length; pi++) {
+        startDataSessionFn(peersInterop[pi], 'main', null);
       }
     }
   }
@@ -14479,7 +14495,7 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
     return;
   }
 
-  if (self._dataStreams[transferId].isUpload) {
+  if (!self._dataStreams[transferId].isUpload) {
     log.error('Failed streaming data chunk as session is not sending.');
     return;
   }
@@ -14511,15 +14527,20 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
   var peersInterop = [];
   var peersNonInterop = [];
   var sendDataFn = function (peerId, channelProp, targetPeers) {
+    var updatedSessionInfo = clone(sessionInfo);
+    delete updatedSessionInfo.chunk;
+
     if (dataChunk instanceof Blob) {
-      self._blobToArrayBuffer(self._dataTransfers[transferId].chunks[data.ackN], function (buffer) {
+      self._blobToArrayBuffer(dataChunk, function (buffer) {
         self._sendMessageToDataChannel(peerId, buffer, channelProp, true);
         if (targetPeers) {
           for (var i = 0; i < targetPeers.length; i++) {
             self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENT, transferId, targetPeers[i], sessionInfo, null);
+            self._trigger('incomingDataStream', dataChunk, transferId, targetPeers[i], updatedSessionInfo, true);
           }
         } else {
           self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENT, transferId, peerId, sessionInfo, null);
+          self._trigger('incomingDataStream', dataChunk, transferId, peerId, updatedSessionInfo, true);
         }
       });
     } else {
@@ -14527,23 +14548,36 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
       if (targetPeers) {
         for (var i = 0; i < targetPeers.length; i++) {
           self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENT, transferId, targetPeers[i], sessionInfo, null);
+          self._trigger('incomingDataStream', updatedDataChunk, transferId, targetPeers[i], updatedSessionInfo, true);
         }
       } else {
         self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENT, transferId, peerId, sessionInfo, null);
+        self._trigger('incomingDataStream', updatedDataChunk, transferId, peerId, updatedSessionInfo, true);
       }
     }
   };
 
   for (var peerId in self._dataStreams[transferId].sessions) {
     if (self._dataStreams[transferId].sessions.hasOwnProperty(peerId) && self._dataStreams[transferId].sessions[peerId]) {
+      var channelProp = self._dataStreams[transferId].sessions[peerId];
+
+      if (!(self._dataChannels[self._hasMCU ? 'MCU' : peerId] && self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp] &&
+        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].channel.readyState === self.DATA_CHANNEL_STATE.OPEN &&
+        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].streamId === transferId)) {
+        log.error([peerId, 'RTCDataChannel', transferId, 'Failed streaming data as it has not started or is ready.']);
+        self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, peerId, sessionInfo,
+          new Error('Streaming as it has not started or Datachannel connection is not open.'));
+        return;
+      }
+
       if (self._hasMCU) {
-        if (self._dataStreams[transferId].sessions[peerId] === 'main') {
+        if (channelProp === 'main') {
           peersInterop.push(peerId);
         } else {
           peersNonInterop.push(peerId);
         }
       } else {
-        sendDataFn(peerId, self._dataStreams[transferId].sessions[peerId]);
+        sendDataFn(peerId, channelProp);
       }
     }
   }
@@ -14581,17 +14615,17 @@ Skylink.prototype.stopStreamingData = function(transferId) {
   }
 
   if (!self._dataStreams[transferId]) {
-    log.error('Failed streaming data chunk as session does not exists.');
+    log.error('Failed stopping data streaming session as it does not exists.');
     return;
   }
 
-  if (self._dataStreams[transferId].isUpload) {
-    log.error('Failed streaming data chunk as session is not sending.');
+  if (!self._dataStreams[transferId].isUpload) {
+    log.error('Failed stopping data streaming session as it is not sending.');
     return;
   }
 
   var sessionInfo = {
-    chunk: dataChunk instanceof ArrayBuffer ? new Blob(dataChunk) : dataChunk,
+    chunk: null,
     chunkSize: 0,
     chunkType: self._dataStreams[transferId].sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING :
       self.DATA_TRANSFER_DATA_TYPE.BLOB,
@@ -14612,26 +14646,42 @@ Skylink.prototype.stopStreamingData = function(transferId) {
       dataType: 'stop',
       mimeType: null,
       chunkType: self._dataStreams[transferId].sessionChunkType,
-      chunkSize: self._dataStreams[transferId].sessionChunkType === 'string' ? self._CHUNK_DATAURL_SIZE : self._BINARY_FILE_SIZE,
+      chunkSize: 0,
       timeout: 0,
-      isPrivate: isPrivate,
+      isPrivate: self._dataStreams[transferId].isPrivate,
       sender: self._user.sid,
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       target: targetPeers ? targetPeers : peerId
     }, channelProp);
 
+    var updatedSessionInfo = clone(sessionInfo);
+    delete updatedSessionInfo.chunk;
+
     if (targetPeers) {
       for (var i = 0; i < targetPeers.length; i++) {
         self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENDING_STOPPED, transferId, targetPeers[i], sessionInfo, null);
+        self._trigger('incomingDataStreamStopped', transferId, targetPeers[i], updatedSessionInfo, true);
       }
     } else {
       self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENDING_STOPPED, transferId, peerId, sessionInfo, null);
+      self._trigger('incomingDataStreamStopped', transferId, peerId, updatedSessionInfo, true);
     }
   };
 
   for (var peerId in self._dataStreams[transferId].sessions) {
     if (self._dataStreams[transferId].sessions.hasOwnProperty(peerId) && self._dataStreams[transferId].sessions[peerId]) {
+      var channelProp = self._dataStreams[transferId].sessions[peerId];
+
+      if (!(self._dataChannels[self._hasMCU ? 'MCU' : peerId] && self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp] &&
+        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].channel.readyState === self.DATA_CHANNEL_STATE.OPEN &&
+        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].streamId === transferId)) {
+        log.error([peerId, 'RTCDataChannel', transferId, 'Failed stopping data streaming session as channel is closed.']);
+        self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, peerId, sessionInfo,
+          new Error('Failed stopping data streaming session as Datachannel connection is not open or is active.'));
+        return;
+      }
+
       if (self._hasMCU) {
         if (self._dataStreams[transferId].sessions[peerId] === 'main') {
           peersInterop.push(peerId);
@@ -14639,7 +14689,7 @@ Skylink.prototype.stopStreamingData = function(transferId) {
           peersNonInterop.push(peerId);
         }
       } else {
-        sendDataFn(peerId, self._dataStreams[transferId].sessions[peerId]);
+        sendDataFn(peerId, channelProp);
       }
     }
   }
@@ -15406,7 +15456,16 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
   var self = this;
 
   var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
-  var transferId = channelProp === 'main' ? self._dataChannels[peerId].main.transferId : channelName;
+  var transferId = self._dataChannels[peerId][channelProp].transferId || null;
+  var streamId = self._dataChannels[peerId][channelProp].streamId || null;
+  var isStreamChunk = false;
+
+  console.info(streamId, self._dataStreams, typeof rawData);
+
+  if (streamId && self._dataStreams[streamId]) {
+    isStreamChunk = self._dataStreams[streamId].sessionChunkType === 'string' ? typeof rawData === 'string' :
+      typeof rawData === 'object';
+  }
 
   if (!self._peerConnections[peerId]) {
     log.warn([peerId, 'RTCDataChannel', channelProp, 'Dropping data received from Peer ' +
@@ -15424,6 +15483,7 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
   if (typeof rawData === 'string') {
     try {
       var protocolData = JSON.parse(rawData);
+      isStreamChunk = false;
 
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Received protocol "' + protocolData.type + '" message ->'], protocolData);
 
@@ -15478,22 +15538,24 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
         throw error;
       }
 
-      if (!(transferId && self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
-        log.warn([peerId, 'RTCDataChannel', channelProp, 'Discarded data chunk is not present ->'], rawData);
+      if (!isStreamChunk && !(transferId && self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
+        log.warn([peerId, 'RTCDataChannel', channelProp, 'Discarded data chunk without session ->'], rawData);
         return;
       }
 
-      if (self._dataTransfers[transferId].chunks[self._dataTransfers[transferId].sessions[peerId].ackN]) {
-        log.warn([peerId, 'RTCDataChannel', transferId, 'Dropping data chunk @' +
-          self._dataTransfers[transferId].sessions[peerId].ackN + ' as it has already been added ->'], rawData);
-        return;
+      if (!isStreamChunk && transferId) {
+        if (self._dataTransfers[transferId].chunks[self._dataTransfers[transferId].sessions[peerId].ackN]) {
+          log.warn([peerId, 'RTCDataChannel', transferId, 'Dropping data chunk ' + (!isStreamChunk ? '@' +
+            self._dataTransfers[transferId].sessions[peerId].ackN : '') + ' as it has already been added ->'], rawData);
+          return;
+        }
       }
 
       var chunkType = self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING;
 
-      if (self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL) {
-        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received string data chunk @' +
-          self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], rawData.length || rawData.size);
+      if (!isStreamChunk ? self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL : true) {
+        log.debug([peerId, 'RTCDataChannel', channelProp, 'Received string data chunk ' + (!isStreamChunk ? '@' +
+          self._dataTransfers[transferId].sessions[peerId].ackN : '') + ' with size ->'], rawData.length || rawData.size);
 
         self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.STRING,
           rawData.length || rawData.size || 0, channelProp);
@@ -15510,9 +15572,22 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
       }
     }
   } else {
+    if (!isStreamChunk && !(transferId && self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
+      log.warn([peerId, 'RTCDataChannel', channelProp, 'Discarded data chunk without session ->'], rawData);
+      return;
+    }
+
+    if (!isStreamChunk && transferId) {
+      if (self._dataTransfers[transferId].chunks[self._dataTransfers[transferId].sessions[peerId].ackN]) {
+        log.warn([peerId, 'RTCDataChannel', transferId, 'Dropping data chunk ' + (!isStreamChunk ? '@' +
+          self._dataTransfers[transferId].sessions[peerId].ackN : '') + ' as it has already been added ->'], rawData);
+        return;
+      }
+    }
+
     if (rawData instanceof Blob) {
-      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob data chunk @' +
-        self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], rawData.size);
+      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received blob data chunk ' + (isStreamChunk ? '' :
+        '@' + self._dataTransfers[transferId].sessions[peerId].ackN) + ' with size ->'], rawData.size);
 
       self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.BLOB, rawData.size, channelProp);
 
@@ -15526,8 +15601,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
 
       var blob = new Blob([byteArray]);
 
-      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk @' +
-        self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'], blob.size);
+      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk ' + (isStreamChunk ? '' : 
+        '@' + self._dataTransfers[transferId].sessions[peerId].ackN) + ' with size ->'], blob.size);
 
       self._DATAProtocolHandler(peerId, blob, self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, blob.size, channelProp);
     }
@@ -15562,51 +15637,6 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
       };
       self._dataChannels[peerId][channelProp].streamId = transferId;
       var hasStarted = false;
-      self.once('dataStreamState', function () {}, function (state, evtTransferId, evtPeerId, evtSessionInfo) {
-        if (!self._dataStreams[transferId]) {
-          return;
-        }
-
-        if (!(evtPeerId === senderPeerId && evtTransferId === transferId)) {
-          return;
-        }
-
-        var dataChunk = evtSessionInfo.chunk;
-        var updatedSessionInfo = clone(evtSessionInfo);
-        delete updatedSessionInfo.chunk;
-
-        if (state === self.DATA_STREAM_STATE.RECEIVING_STARTED) {
-          hasStarted = true;
-          self._trigger('incomingDataStreamStarted', transferId, peerId, updatedSessionInfo, false);
-          return;
-        }
-
-        if (hasStarted) {
-          if (state === self.DATA_STREAM_STATE.RECEIVED) {
-            self._trigger('incomingDataStream', dataChunk, transferId, peerId, updatedSessionInfo, false);
-            return;
-          } else if ([self.DATA_STREAM_STATE.ERROR, self.DATA_STREAM_STATE.RECEIVING_STOPPED].indexOf(state) > -1) {
-            if (state === self.DATA_STREAM_STATE.ERROR) {
-              self._trigger('dataStreamState', self.DATA_STREAM_STATE.RECEIVING_STOPPED, transferId, peerId, evtSessionInfo, null);
-            }
-
-            self._trigger('incomingDataStreamStopped', transferId, peerId, updatedSessionInfo, false);
-
-            if (channelProp === transferId) {
-              self._closeDataChannel(peerId, transferId);
-            }
-
-            if (self._dataStreams[transferId] && self._dataStreams[transferId].sessions[peerId]) {
-              delete self._dataStreams[transferId].sessions[peerId];
-
-              if (Object.keys(self._dataStreams[transferId].sessions).length === 0) {
-                delete self._dataStreams[transferId];
-              }
-            }
-            return true;
-          }
-        }
-      });
       self.once('dataChannelState', function () {}, function (state, evtPeerId, channelName, channelType, error) {
         if (!self._dataStreams[transferId]) {
           return true;
@@ -15641,6 +15671,13 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
         isStringStream: self._dataStreams[transferId].sessionChunkType === 'string',
         senderPeerId: senderPeerId
       }, null);
+      self._trigger('incomingDataStreamStarted', transferId, senderPeerId, {
+        chunkSize: 0,
+        chunkType: self._dataStreams[transferId].chunkType,
+        isPrivate: self._dataStreams[transferId].isPrivate,
+        isStringStream: self._dataStreams[transferId].sessionChunkType === 'string',
+        senderPeerId: senderPeerId
+      }, false);
 
     } else {
       transferId = self._dataChannels[peerId][channelProp].streamId;
@@ -15653,10 +15690,19 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
           isStringStream: self._dataStreams[transferId].sessionChunkType === 'string',
           senderPeerId: senderPeerId
         }, null);
+        self._trigger('incomingDataStreamStopped', transferId, senderPeerId, {
+          chunkSize: 0,
+          chunkType: self._dataStreams[transferId].chunkType,
+          isPrivate: self._dataStreams[transferId].isPrivate,
+          isStringStream: self._dataStreams[transferId].sessionChunkType === 'string',
+          senderPeerId: senderPeerId
+        }, false);
         self._dataChannels[peerId][channelProp].streamId = null;
         if (channelProp !== 'main') {
           self._closeDataChannel(peerId, channelProp);
         }
+
+        delete self._dataStreams[transferId];
       }
     }
   } else {
@@ -15951,7 +15997,6 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
     self._dataStreams[streamId].sessionChunkType === 'string') || (chunk instanceof Blob &&
     self._dataStreams[streamId].sessionChunkType === 'binary'))) {
     senderPeerId = self._dataStreams[streamId].senderPeerId || peerId;
-
     self._trigger('dataStreamState', self.DATA_STREAM_STATE.RECEIVED, streamId, senderPeerId, {
       chunk: chunk,
       chunkSize: chunkSize,
@@ -15960,6 +16005,13 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
       isStringStream: self._dataStreams[streamId].sessionChunkType === 'string',
       senderPeerId: senderPeerId
     }, null);
+    self._trigger('incomingDataStream', chunk, transferId, senderPeerId, {
+      chunkSize: chunkSize,
+      chunkType: chunkType,
+      isPrivate: self._dataStreams[streamId].sessionChunkType.isPrivate,
+      isStringStream: self._dataStreams[streamId].sessionChunkType === 'string',
+      senderPeerId: senderPeerId
+    }, false);    
     return;
   }
 

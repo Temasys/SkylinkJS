@@ -56,7 +56,9 @@
 	<script src="../../publish/skylink.complete.js"></script>
 	<script>
 		var skylink = new Skylink();
+		skylink.setLogLevel(4);
 		var streams = {};
+		var currentStreamId = null;
 
 		function streamVideo (file) {
 			var chunks = [];
@@ -81,43 +83,45 @@
 
 		  var processNextFn = function () {
 		  	if (chunks.length > 0) {
-		  		var c = chunks[0];
-		  		chunks.splice(0, 1);
 		  		skylink.once('incomingDataStream', function () {
 		  			setTimeout(processNextFn, 1);
-		  		}, function (a,b,c,isSelf) {
-		  			return isSelf;
+		  		}, function (data, evtStreamId, evtPeerId, streamInfo, isSelf) {
+		  			return isSelf && evtStreamId === currentStreamId;
 		  		});
-		  		skylink.streamData(c);
+		  		var chunk = chunks[0];
+	  			chunks.splice(0, 1);
+	  			skylink.streamData(currentStreamId, chunk);
 		  	} else {
-		  		skylink.sendP2PMessage('END');
+		  		skylink.stopStreamingData(currentStreamId);
 		  		document.getElementById('source').disabled = false;
 		  	}
 		  };
 
-		  skylink.once('incomingMessage', processNextFn, function (a,b,c,isSelf) {
+		  skylink.once('incomingDataStreamStarted', processNextFn, function (streamId, peerId, streamInfo, isSelf) {
+		  	currentStreamId = streamId;
 		  	return isSelf;
 		  });
-		  skylink.sendP2PMessage('START');
+		  skylink.startStreamingData(false);
 		}
 
-		skylink.on('incomingDataStream', function (data, peerId, peerInfo) {
-			if (!streams[peerId]) {
-				streams[peerId] = [];
-			}
-			streams[peerId].push(data.content);
+		skylink.on('incomingDataStream', function (chunk, streamId, peerId) {
+			if (!streams[streamId]) return;
+			streams[streamId].push(chunk);
 		});
 
-		skylink.on('incomingMessage', function (message, peerId) {
-			if (message.content === 'START') {
+		skylink.on('incomingDataStreamStarted', function (streamId) {
+			if (!streams[streamId]) {
+				currentStreamId = streamId;
 				document.getElementById('source').disabled = true;
-				streams[peerId] = [];
+				streams[streamId] = [];
+			}
+		});
 
-			} else {
+		skylink.on('incomingDataStreamStopped', function (streamId) {
+			if (streams[streamId]) {
+				currentStreamId = null;
 				document.getElementById('source').disabled = false;
-				if (message.content === 'END' && streams[peerId]) {
-					document.getElementById('video').src = URL.createObjectURL(new Blob(streams[peerId]));
-				}
+				document.getElementById('video').src = URL.createObjectURL(new Blob(streams[streamId]));
 			}
 		});
 
@@ -126,10 +130,6 @@
 			document.getElementById('loading').innerHTML = 'READY';
 		}, function (state) {
 			return state === skylink.DATA_CHANNEL_STATE.OPEN;
-		});
-
-		skylink.on('peerLeft', function (peerId) {
-			delete streams[peerId];
 		});
 
 		skylink.init(config, function (ierr) {
