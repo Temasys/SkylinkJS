@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 21:20:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 21:21:56 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -1316,7 +1316,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
   };
 
   if (dataChannel.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-    setTimeout(onOpenHandlerFn, 500);
+    setTimeout(onOpenHandlerFn, 1); // 500);
 
   } else {
     self._trigger('dataChannelState', dataChannel.readyState, peerId, null, channelName, channelType, null);

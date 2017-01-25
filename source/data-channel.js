@@ -178,7 +178,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
   };
 
   if (dataChannel.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-    setTimeout(onOpenHandlerFn, 500);
+    setTimeout(onOpenHandlerFn, 1); // 500);
 
   } else {
     self._trigger('dataChannelState', dataChannel.readyState, peerId, null, channelName, channelType, null);
