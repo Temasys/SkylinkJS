@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 02:24:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 11:51:00 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -1386,6 +1386,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
       channelName: channelName,
       channelType: channelType,
       transferId: null,
+      streamId: null,
       channel: dataChannel
     };
   } else {
@@ -3562,13 +3563,15 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
 
   var streamId = self._dataChannels[peerId].main.streamId;
 
-  if (channelProp === 'main' && self._dataStreams[streamId] &&
-    (self._dataStreams[streamId].sessionChunkType === 'string' &&
+  if (streamId && channelProp === 'main' && self._dataStreams[streamId] &&
+  // Check if session chunk streaming is string and sending is string for Peer
+    ((self._dataStreams[streamId].sessionChunkType === 'string' &&
     (self._dataTransfers[transferId].sessionChunkType === 'string' ||
     self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1)) ||
+  // Check if session chunk streaming is binary and sending is binary for Peer
     (self._dataStreams[streamId].sessionChunkType === 'binary' &&
     self._dataStreams[streamId].sessionChunkType === 'binary' &&
-    self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) === -1)) {
+    self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) === -1))) {
     returnErrorBeforeTransferFn('Unable to start data transfer as Peer Datachannel currently has an active ' +
       self._dataStreams[streamId].sessionChunkType + ' data streaming session.');
     return;

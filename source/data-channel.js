@@ -248,6 +248,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
       channelName: channelName,
       channelType: channelType,
       transferId: null,
+      streamId: null,
       channel: dataChannel
     };
   } else {

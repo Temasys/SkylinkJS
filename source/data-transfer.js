@@ -1865,13 +1865,15 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
 
   var streamId = self._dataChannels[peerId].main.streamId;
 
-  if (channelProp === 'main' && self._dataStreams[streamId] &&
-    (self._dataStreams[streamId].sessionChunkType === 'string' &&
+  if (streamId && channelProp === 'main' && self._dataStreams[streamId] &&
+  // Check if session chunk streaming is string and sending is string for Peer
+    ((self._dataStreams[streamId].sessionChunkType === 'string' &&
     (self._dataTransfers[transferId].sessionChunkType === 'string' ||
     self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) > -1)) ||
+  // Check if session chunk streaming is binary and sending is binary for Peer
     (self._dataStreams[streamId].sessionChunkType === 'binary' &&
     self._dataStreams[streamId].sessionChunkType === 'binary' &&
-    self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) === -1)) {
+    self._dataTransfers[transferId].enforceBSPeers.indexOf(peerId) === -1))) {
     returnErrorBeforeTransferFn('Unable to start data transfer as Peer Datachannel currently has an active ' +
       self._dataStreams[streamId].sessionChunkType + ' data streaming session.');
     return;
