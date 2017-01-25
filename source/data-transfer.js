@@ -2176,13 +2176,13 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
   var transferId = channelProp === 'main' ? self._dataChannels[peerId].main.transferId : channelName;
 
   if (!self._peerConnections[peerId]) {
-    log.warn([peerId, 'RTCDataChannel', channelName, 'Dropping data received from Peer ' +
+    log.warn([peerId, 'RTCDataChannel', channelProp, 'Dropping data received from Peer ' +
       'as connection is not present ->'], rawData);
     return;
   }
 
   if (!(self._dataChannels[peerId] && self._dataChannels[peerId][channelProp])) {
-    log.warn([peerId, 'RTCDataChannel', channelName, 'Dropping data received from Peer ' +
+    log.warn([peerId, 'RTCDataChannel', channelProp, 'Dropping data received from Peer ' +
       'as Datachannel connection is not present ->'], rawData);
     return;
   }
@@ -2192,7 +2192,7 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
     try {
       var protocolData = JSON.parse(rawData);
 
-      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received protocol message ->'], protocolData);
+      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received protocol "' + protocolData.type + '" message ->'], protocolData);
 
       // Ignore ACK, ERROR and CANCEL if there is no data transfer session in-progress
       if ([self._DC_PROTOCOL_TYPE.ACK, self._DC_PROTOCOL_TYPE.ERROR, self._DC_PROTOCOL_TYPE.CANCEL].indexOf(protocolData.type) > -1 &&
@@ -2207,7 +2207,7 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
           // Discard iOS bidirectional upload when Datachannel is in-progress for data transfers
           if (transferId && self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId]) {
             log.warn([peerId, 'RTCDataChannel', channelProp, 'Rejecting bidirectional data transfer request as ' +
-              'it is currently not supported in the SDK']);
+              'it is currently not supported in the SDK ->'], protocolData);
 
             self._sendMessageToDataChannel(peerId, {
               type: self._DC_PROTOCOL_TYPE.ACK,
@@ -2231,25 +2231,28 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
           self._MESSAGEProtocolHandler(peerId, protocolData, channelProp);
           break;
         default:
-          log.warn([peerId, 'RTCDataChannel', channelProp, 'Discarded unknown protocol message ->'], protocolData);
+          log.warn([peerId, 'RTCDataChannel', channelProp, 'Discarded unknown "' + protocolData.type + '" message ->'], protocolData);
       }
 
     } catch (error) {
       if (rawData.indexOf('{') > -1 && rawData.indexOf('}') > 0) {
-        log.error([peerId, 'RTCDataChannel', channelProp, 'Received error ->'], error);
+        log.error([peerId, 'RTCDataChannel', channelProp, 'Failed parsing protocol step data error ->'], {
+          data: rawData,
+          error: error
+        });
 
         self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error, channelName, channelType, null);
         throw error;
       }
 
       if (!(transferId && self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
-        log.warn([peerId, 'RTCDataChannel', channelProp, 'Discarded data chunk as data transfer session ' +
-          'is not present ->'], rawData);
+        log.warn([peerId, 'RTCDataChannel', channelProp, 'Discarded data chunk is not present ->'], rawData);
         return;
       }
 
       if (self._dataTransfers[transferId].chunks[self._dataTransfers[transferId].sessions[peerId].ackN]) {
-        log.warn([peerId, 'RTCDataChannel', transferId, 'Dropping data chunk as it has already been added ->'], rawData);
+        log.warn([peerId, 'RTCDataChannel', transferId, 'Dropping data chunk @' +
+          self._dataTransfers[transferId].sessions[peerId].ackN + ' as it has already been added ->'], rawData);
         return;
       }
 
