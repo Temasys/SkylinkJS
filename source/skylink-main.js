@@ -1074,16 +1074,3 @@ function Skylink() {
    */
   this._sdpSessions = {};
 }
-
-if(typeof exports !== 'undefined') {
-  // Prevent breaking code
-  module.exports = {
-    Skylink: Skylink
-  };
-}
-
-if (globals) {
-  globals.Skylink = Skylink;
-} else if (window) {
-  window.Skylink = Skylink;
-}
