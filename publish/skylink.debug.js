@@ -1,106 +1,15 @@
-/*! skylinkjs - v0.6.17 - Fri Feb 03 2017 15:18:41 GMT+0800 (SGT) */
-
-(function(refThis) {
-
-'use strict';
-
-/**
- * Polyfill for Object.keys() from Mozilla
- * From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
- */
-if (!Object.keys) {
-  Object.keys = (function() {
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
-      hasDontEnumBug = !({
-        toString: null
-      }).propertyIsEnumerable('toString'),
-      dontEnums = [
-        'toString',
-        'toLocaleString',
-        'valueOf',
-        'hasOwnProperty',
-        'isPrototypeOf',
-        'propertyIsEnumerable',
-        'constructor'
-      ],
-      dontEnumsLength = dontEnums.length;
-
-    return function(obj) {
-      if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object');
-
-      var result = [];
-
-      for (var prop in obj) {
-        if (hasOwnProperty.call(obj, prop)) result.push(prop);
-      }
-
-      if (hasDontEnumBug) {
-        for (var i = 0; i < dontEnumsLength; i++) {
-          if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i]);
-        }
-      }
-      return result;
-    }
-  })()
-}
-
-/**
- * Polyfill for Date.getISOString() from Mozilla
- * From https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
- */
-(function() {
-  function pad(number) {
-    if (number < 10) {
-      return '0' + number;
-    }
-    return number;
-  }
-
-  Date.prototype.toISOString = function() {
-    return this.getUTCFullYear() +
-      '-' + pad(this.getUTCMonth() + 1) +
-      '-' + pad(this.getUTCDate()) +
-      'T' + pad(this.getUTCHours()) +
-      ':' + pad(this.getUTCMinutes()) +
-      ':' + pad(this.getUTCSeconds()) +
-      '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
-      'Z';
-  };
-})();
-
-/**
- * Polyfill for addEventListener() from Eirik Backer @eirikbacker (github.com).
- * From https://gist.github.com/eirikbacker/2864711
- * MIT Licensed
- */
-(function(win, doc){
-  if(win.addEventListener) return; //No need to polyfill
-
-  function docHijack(p){var old = doc[p];doc[p] = function(v){ return addListen(old(v)) }}
-  function addEvent(on, fn, self){
-    return (self = this).attachEvent('on' + on, function(e){
-      var e = e || win.event;
-      e.preventDefault  = e.preventDefault  || function(){e.returnValue = false}
-      e.stopPropagation = e.stopPropagation || function(){e.cancelBubble = true}
-      fn.call(self, e);
-    });
-  }
-  function addListen(obj, i){
-    if(i = obj.length)while(i--)obj[i].addEventListener = addEvent;
-    else obj.addEventListener = addEvent;
-    return obj;
-  }
-
-  addListen([doc, win]);
-  if('Element' in win)win.Element.prototype.addEventListener = addEvent; //IE8
-  else{                                     //IE < 8
-    doc.attachEvent('onreadystatechange', function(){addListen(doc.all)}); //Make sure we also init at domReady
-    docHijack('getElementsByTagName');
-    docHijack('getElementById');
-    docHijack('createElement');
-    addListen(doc.all);
-  }
-})(window, document);
+/*! skylinkjs - v0.6.17 - Fri Feb 03 2017 17:50:14 GMT+0800 (SGT) */
+(function (globals) {
+'use strict'
+// Object.keys() polyfill - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+!function(){Object.keys||(Object.keys=function(){var t=Object.prototype.hasOwnProperty,r=!{toString:null}.propertyIsEnumerable("toString"),e=["toString","toLocaleString","valueOf","hasOwnProperty","isPrototypeOf","propertyIsEnumerable","constructor"],o=e.length;return function(n){if("object"!=typeof n&&"function"!=typeof n||null===n)throw new TypeError("Object.keys called on non-object");var c=[];for(var l in n)t.call(n,l)&&c.push(l);if(r)for(var p=0;o>p;p++)t.call(n,e[p])&&c.push(e[p]);return c}}())}();
+// Date.getISOString() polyfill - https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+!function(){function t(t){return 10>t?"0"+t:t}Date.prototype.toISOString=function(){return this.getUTCFullYear()+"-"+t(this.getUTCMonth()+1)+"-"+t(this.getUTCDate())+"T"+t(this.getUTCHours())+":"+t(this.getUTCMinutes())+":"+t(this.getUTCSeconds())+"."+(this.getUTCMilliseconds()/1e3).toFixed(3).slice(2,5)+"Z"}}();
+// Date.now() polyfill
+!function(){"function"!=typeof Date.now&&(Date.now=function(){return(new Date).getTime()})}();
+// addEventListener() polyfill - https://gist.github.com/eirikbacker/2864711
+!function(e,t){function n(e){var n=t[e];t[e]=function(e){return o(n(e))}}function a(t,n,a){return(a=this).attachEvent("on"+t,function(t){var t=t||e.event;t.preventDefault=t.preventDefault||function(){t.returnValue=!1},t.stopPropagation=t.stopPropagation||function(){t.cancelBubble=!0},n.call(a,t)})}function o(e,t){if(t=e.length)for(;t--;)e[t].addEventListener=a;else e.addEventListener=a;return e}e.addEventListener||(o([t,e]),"Element"in e?e.Element.prototype.addEventListener=a:(t.attachEvent("onreadystatechange",function(){o(t.all)}),n("getElementsByTagName"),n("getElementById"),n("createElement"),o(t.all)))}(window,document);
+/* jshint ignore:end */
 
 /**
  * Global function that clones an object.
@@ -1166,6 +1075,19 @@ function Skylink() {
    * @since 0.6.18
    */
   this._sdpSessions = {};
+}
+
+if(typeof exports !== 'undefined') {
+  // Prevent breaking code
+  module.exports = {
+    Skylink: Skylink
+  };
+}
+
+if (globals) {
+  globals.Skylink = Skylink;
+} else if (window) {
+  window.Skylink = Skylink;
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -11814,72 +11736,6 @@ Skylink.prototype._throttle = function(func, prop, wait){
     func(false);
   }
 };
-var SkylinkLogs = (function () {
-  return {
-    // Store the local logs
-    logs: [],
-
-    /**
-     * Function that gets the current stored SDK <code>console</code> logs.
-     * @property SkylinkLogs.getLogs
-     * @param {Number} [logLevel] The specific log level of logs to return.
-     * - When not provided or that the level does not exists, it will return all logs of all levels.
-     *  [Rel: Skylink.LOG_LEVEL]
-     * @return {Array} The array of stored logs.<ul>
-     *   <li><code><#index></code><var><b>{</b>Array<b>}</b></var><p>The stored log item.</p><ul>
-     *   <li><code>0</code><var><b>{</b>Date<b>}</b></var><p>The DateTime of when the log was stored.</p></li>
-     *   <li><code>1</code><var><b>{</b>String<b>}</b></var><p>The log level. [Rel: Skylink.LOG_LEVEL]</p></li>
-     *   <li><code>2</code><var><b>{</b>String<b>}</b></var><p>The log message.</p></li>
-     *   <li><code>3</code><var><b>{</b>Any<b>}</b></var><span class="label">Optional</span><p>The log message object.
-     *   </p></li></ul></li></ul>
-     * @example
-     *  // Example 1: Get logs of specific level
-     *  var debugLogs = SkylinkLogs.getLogs(skylinkDemo.LOG_LEVEL.DEBUG);
-     *
-     *  // Example 2: Get all the logs
-     *  var allLogs = SkylinkLogs.getLogs();
-     * @type Function
-     * @global true
-     * @triggerForPropHackNone true
-     * @for Skylink
-     * @since 0.5.5
-     */
-    getLogs: function () {
-    },
-
-    /**
-     * Function that clears all the current stored SDK <code>console</code> logs.
-     * @property SkylinkLogs.clearAllLogs
-     * @type Function
-     * @example
-     *   // Example 1: Clear all the logs
-     *   SkylinkLogs.clearAllLogs();
-     * @global true
-     * @triggerForPropHackNone true
-     * @for Skylink
-     * @since 0.5.5
-     */
-    clearAllLogs: function () {
-    },
-
-    /**
-     * Function that prints all the current stored SDK <code>console</code> logs into the
-     * <a href="https://developer.mozilla.org/en/docs/Web/API/console">Javascript Web Console</a>.
-     * @property SkylinkLogs.printAllLogs
-     * @type Function
-     * @example
-     *   // Example 1: Print all the logs
-     *   SkylinkLogs.printAllLogs();
-     * @global true
-     * @triggerForPropHackNone true
-     * @for Skylink
-     * @since 0.5.5
-     */
-    printAllLogs: function () {
-
-    }
-  };
-})();
 Skylink.prototype.SOCKET_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
@@ -17028,20 +16884,4 @@ Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription) 
   return fingerprint;
 };
 
-
-  if(typeof exports !== 'undefined') {
-    // Prevent breaking code
-    module.exports = {
-      Skylink: Skylink
-    };
-  }
-
-  if (refThis) {
-    refThis.Skylink = Skylink;
-  }
-
-  if (window) {
-    window.Skylink = Skylink;
-  }
-
-})(this);
+})(window);
