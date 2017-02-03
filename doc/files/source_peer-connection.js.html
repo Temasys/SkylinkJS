@@ -91,81 +91,6 @@
     <pre class="code prettyprint linenums">
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
- *   Learn more about how ICE works in this
- *   &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
- * &lt;/blockquote&gt;
- * The list of Peer connection session description exchanging states.
- * @attribute PEER_CONNECTION_STATE
- * @param {String} STABLE            &lt;small&gt;Value &lt;code&gt;&quot;stable&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when there is no session description being exchanged between Peer connection.
- * @param {String} HAVE_LOCAL_OFFER  &lt;small&gt;Value &lt;code&gt;&quot;have-local-offer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; session description is set.
- *   &lt;small&gt;This should transition to &lt;code&gt;STABLE&lt;/code&gt; state after remote &lt;code&gt;&quot;answer&quot;&lt;/code&gt;
- *   session description is set.&lt;/small&gt;
- *   &lt;small&gt;See &lt;a href=&quot;#event_handshakeProgress&quot;&gt;&lt;code&gt;handshakeProgress&lt;/code&gt; event&lt;/a&gt; for a more
- *   detailed exchanging of session description states.&lt;/small&gt;
- * @param {String} HAVE_REMOTE_OFFER &lt;small&gt;Value &lt;code&gt;&quot;have-remote-offer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when remote &lt;code&gt;&quot;offer&quot;&lt;/code&gt; session description is set.
- *   &lt;small&gt;This should transition to &lt;code&gt;STABLE&lt;/code&gt; state after local &lt;code&gt;&quot;answer&quot;&lt;/code&gt;
- *   session description is set.&lt;/small&gt;
- *   &lt;small&gt;See &lt;a href=&quot;#event_handshakeProgress&quot;&gt;&lt;code&gt;handshakeProgress&lt;/code&gt; event&lt;/a&gt; for a more
- *   detailed exchanging of session description states.&lt;/small&gt;
- * @param {String} CLOSED            &lt;small&gt;Value &lt;code&gt;&quot;closed&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Peer connection is closed and no session description can be exchanged and set.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype.PEER_CONNECTION_STATE = {
-  STABLE: &#x27;stable&#x27;,
-  HAVE_LOCAL_OFFER: &#x27;have-local-offer&#x27;,
-  HAVE_REMOTE_OFFER: &#x27;have-remote-offer&#x27;,
-  CLOSED: &#x27;closed&#x27;
-};
-
-/**
- * The list of &lt;a href=&quot;#method_getConnectionStatus&quot;&gt;&lt;code&gt;getConnectionStatus()&lt;/code&gt;
- * method&lt;/a&gt; retrieval states.
- * @attribute GET_CONNECTION_STATUS_STATE
- * @param {Number} RETRIEVING &lt;small&gt;Value &lt;code&gt;0&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when &lt;code&gt;getConnectionStatus()&lt;/code&gt; is retrieving the Peer connection stats.
- * @param {Number} RETRIEVE_SUCCESS &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when &lt;code&gt;getConnectionStatus()&lt;/code&gt; has retrieved the Peer connection stats successfully.
- * @param {Number} RETRIEVE_ERROR &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when &lt;code&gt;getConnectionStatus()&lt;/code&gt; has failed retrieving the Peer connection stats.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.GET_CONNECTION_STATUS_STATE = {
-  RETRIEVING: 0,
-  RETRIEVE_SUCCESS: 1,
-  RETRIEVE_ERROR: -1
-};
-
-/**
- * &lt;blockquote class=&quot;info&quot;&gt;
- *  As there are more features getting implemented, there will be eventually more different types of
- *  server Peers.
- * &lt;/blockquote&gt;
- * The list of available types of server Peer connections.
- * @attribute SERVER_PEER_TYPE
- * @param {String} MCU &lt;small&gt;Value &lt;code&gt;&quot;mcu&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the server Peer type that is used for MCU connection.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: &#x27;mcu&#x27;
-  //SIP: &#x27;sip&#x27;
-};
-
-/**
- * &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that Edge browser does not support renegotiation.
  *   For MCU enabled Peer connections with &lt;code&gt;options.mcuUseRenegoRestart&lt;/code&gt; set to &lt;code&gt;false&lt;/code&gt;
  *   in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;, the restart functionality may differ, you
@@ -310,7 +235,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
   }
 
   var emitErrorForPeersFn = function (error) {
-    log.error(error);
+    self._log.error(error);
 
     if (typeof callback === &#x27;function&#x27;) {
       var listOfPeerErrors = {};
@@ -370,7 +295,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
     return function (error) {
       if (listOfPeerRestarts.indexOf(peerId) === -1) {
         if (error) {
-          log.error([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Failed restarting for peer&#x27;], error);
+          self._log.error([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Failed restarting for peer&#x27;], error);
           listOfPeerRestartErrors[peerId] = error;
         }
         listOfPeerRestarts.push(peerId);
@@ -378,7 +303,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
 
       if (listOfPeerRestarts.length === listOfPeers.length) {
         if (typeof callback === &#x27;function&#x27;) {
-          log.log([null, &#x27;PeerConnection&#x27;, null, &#x27;Invoked all peers to restart. Firing callback&#x27;]);
+          self._log.log([null, &#x27;PeerConnection&#x27;, null, &#x27;Invoked all peers to restart. Firing callback&#x27;]);
 
           if (Object.keys(listOfPeerRestartErrors).length &gt; 0) {
             callback({
@@ -399,12 +324,12 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
     if (!self._peerConnections[peerId]) {
       error = &#x27;There is currently no existing peer connection made &#x27; +
         &#x27;with the peer. Unable to restart connection&#x27;;
-      log.error([peerId, null, null, error]);
+      self._log.error([peerId, null, null, error]);
       peerCallback(error);
       return;
     }
 
-    log.log([peerId, &#x27;PeerConnection&#x27;, null, &#x27;Restarting peer connection&#x27;]);
+    self._log.log([peerId, &#x27;PeerConnection&#x27;, null, &#x27;Restarting peer connection&#x27;]);
 
     // do a hard reset on variable object
     self._restartPeerConnection(peerId, doIceRestart, peerCallback);
@@ -420,7 +345,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
         refreshSinglePeer(peerId, refreshSinglePeerCallback(peerId));
       } else {
         error = &#x27;Peer connection with peer does not exists. Unable to restart&#x27;;
-        log.error([peerId, &#x27;PeerConnection&#x27;, null, error]);
+        self._log.error([peerId, &#x27;PeerConnection&#x27;, null, error]);
         refreshSinglePeerCallback(peerId)(error);
       }
     }
@@ -594,7 +519,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
   if (listOfPeers.length === 0) {
     listOfPeerErrors.self = new Error(&#x27;There is currently no peer connections to retrieve connection status&#x27;);
 
-    log.error([null, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieving request failure -&gt;&#x27;], listOfPeerErrors.self);
+    self._log.error([null, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieving request failure -&gt;&#x27;], listOfPeerErrors.self);
 
     if (typeof callback === &#x27;function&#x27;) {
       callback({
@@ -607,7 +532,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
   }
 
   if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
-    log.warn(&#x27;Edge browser does not have well support for stats.&#x27;);
+    self._log.warn(&#x27;Edge browser does not have well support for stats.&#x27;);
   }
 
   var completedTaskCounter = [];
@@ -640,7 +565,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
     var retrieveFn = function (firstRetrieval, nextCb) {
       return function (err, result) {
         if (err) {
-          log.error([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieval failure -&gt;&#x27;], error);
+          self._log.error([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieval failure -&gt;&#x27;], error);
           listOfPeerErrors[peerId] = error;
           self._trigger(&#x27;getConnectionStatusStateChange&#x27;, self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
             peerId, null, error);
@@ -665,7 +590,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
     if (!self._peerStats[peerId]) {
       self._peerStats[peerId] = {};
 
-      log.debug([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieving first report to tabulate results&#x27;]);
+      self._log.debug([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieving first report to tabulate results&#x27;]);
 
       self._retrieveStats(peerId, retrieveFn(true, function () {
         self._retrieveStats(peerId, retrieveFn());
@@ -690,7 +615,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
     } else {
       listOfPeerErrors[peerId] = new Error(&#x27;The peer connection object does not exists&#x27;);
 
-      log.error([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieval failure -&gt;&#x27;], listOfPeerErrors[peerId]);
+      self._log.error([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieval failure -&gt;&#x27;], listOfPeerErrors[peerId]);
 
       self._trigger(&#x27;getConnectionStatusStateChange&#x27;, self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
         peerId, null, listOfPeerErrors[peerId]);
@@ -710,7 +635,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 Skylink.prototype._retrieveStats = function (peerId, callback) {
   var self = this;
 
-  log.debug([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieivng connection status&#x27;]);
+  self._log.debug([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieivng connection status&#x27;]);
 
   var pc = self._peerConnections[peerId];
   var result = {
@@ -923,7 +848,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback) {
   };
 
   pc.getStats(null, function (stats) {
-    log.debug([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieval success -&gt;&#x27;], stats);
+    self._log.debug([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieval success -&gt;&#x27;], stats);
 
     result.raw = stats;
 
@@ -1163,7 +1088,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback) {
               }
             }
           } catch (error) {
-            log.warn([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Failed retrieving e2e delay -&gt;&#x27;], error);
+            self._log.warn([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Failed retrieving e2e delay -&gt;&#x27;], error);
           }
 
           // Receiving/Sending RTP packets
@@ -1386,24 +1311,24 @@ Skylink.prototype._retrieveStats = function (peerId, callback) {
 Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
   var self = this;
   if (self._peerConnections[targetMid] &amp;&amp; !restartConn) {
-    log.error([targetMid, null, null, &#x27;Connection to peer has already been made&#x27;]);
+    self._log.error([targetMid, null, null, &#x27;Connection to peer has already been made&#x27;]);
     return;
   }
-  log.log([targetMid, null, null, &#x27;Starting the connection to peer. Options provided:&#x27;], {
+  self._log.log([targetMid, null, null, &#x27;Starting the connection to peer. Options provided:&#x27;], {
     peerBrowser: peerBrowser,
     toOffer: toOffer,
     receiveOnly: receiveOnly,
     enableDataChannel: self._enableDataChannel
   });
 
-  log.info(&#x27;Adding peer&#x27;, isSS);
+  self._log.info(&#x27;Adding peer&#x27;, isSS);
 
   if (!restartConn) {
     self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
   }
 
   if (!self._peerConnections[targetMid]) {
-    log.error([targetMid, null, null, &#x27;Failed creating the connection to peer&#x27;]);
+    self._log.error([targetMid, null, null, &#x27;Failed creating the connection to peer&#x27;]);
     return;
   }
 
@@ -1422,7 +1347,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   var self = this;
 
   if (!self._peerConnections[peerId]) {
-    log.error([peerId, null, null, &#x27;Peer does not have an existing &#x27; +
+    self._log.error([peerId, null, null, &#x27;Peer does not have an existing &#x27; +
       &#x27;connection. Unable to restart&#x27;]);
     return;
   }
@@ -1435,11 +1360,11 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
     var notSupportedError = new Error(&#x27;Failed restarting with other agents connecting from other SDKs as &#x27; +
       &#x27;re-negotiation is not supported by other SDKs&#x27;);
 
-    log.warn([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Ignoring restart request as agent\&#x27;s SDK does not support it&#x27;],
+    self._log.warn([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Ignoring restart request as agent\&#x27;s SDK does not support it&#x27;],
         notSupportedError);
 
     if (typeof callback === &#x27;function&#x27;) {
-      log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
+      self._log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
       callback(notSupportedError);
     }
     return;
@@ -1448,7 +1373,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   // This is when the state is stable and re-handshaking is possible
   // This could be due to previous connection handshaking that is already done
   if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE &amp;&amp; self._peerConnections[peerId]) {
-    log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
+    self._log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
 
     var restartMsg = {
       type: self._SIG_MESSAGE_TYPE.RESTART,
@@ -1488,7 +1413,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
     self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === &#x27;function&#x27;) {
-      log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart callback&#x27;]);
+      self._log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart callback&#x27;]);
       callback(null);
     }
 
@@ -1512,21 +1437,21 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       } else {
         var noLocalDescriptionError = &#x27;Failed re-sending localDescription as there is &#x27; +
           &#x27;no localDescription set to connection. There could be a handshaking step error&#x27;;
-        log.error([peerId, &#x27;RTCPeerConnection&#x27;, null, noLocalDescriptionError], {
+        self._log.error([peerId, &#x27;RTCPeerConnection&#x27;, null, noLocalDescriptionError], {
             localDescription: pc.localDescription,
             remoteDescription: pc.remoteDescription
         });
         if (typeof callback === &#x27;function&#x27;) {
-          log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
+          self._log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
           callback(new Error(noLocalDescriptionError));
         }
       }
     // It could have connection state closed
     } else {
       var unableToRestartError = &#x27;Failed restarting as peer connection state is &#x27; + pc.signalingState;
-      log.warn([peerId, &#x27;RTCPeerConnection&#x27;, null, unableToRestartError]);
+      self._log.warn([peerId, &#x27;RTCPeerConnection&#x27;, null, unableToRestartError]);
       if (typeof callback === &#x27;function&#x27;) {
-        log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
+        self._log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart failure callback&#x27;]);
         callback(new Error(unableToRestartError));
       }
     }
@@ -1542,7 +1467,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
  */
 Skylink.prototype._removePeer = function(peerId) {
   if (!this._peerConnections[peerId] &amp;&amp; !this._peerInformations[peerId]) {
-    log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Dropping the hangup from Peer as not connected to Peer at all.&#x27;]);
+    this._log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Dropping the hangup from Peer as not connected to Peer at all.&#x27;]);
     return;
   }
 
@@ -1559,7 +1484,7 @@ Skylink.prototype._removePeer = function(peerId) {
     this._trigger(&#x27;peerLeft&#x27;, peerId, peerInfo, false);
   } else {
     this._hasMCU = false;
-    log.log([peerId, null, null, &#x27;MCU has stopped listening and left&#x27;]);
+    this._log.log([peerId, null, null, &#x27;MCU has stopped listening and left&#x27;]);
     this._trigger(&#x27;serverPeerLeft&#x27;, peerId, this.SERVER_PEER_TYPE.MCU);
   }
 
@@ -1601,7 +1526,7 @@ Skylink.prototype._removePeer = function(peerId) {
     this._closeDataChannel(peerId);
   }
 
-  log.log([peerId, null, null, &#x27;Successfully removed peer&#x27;]);
+  this._log.log([peerId, null, null, &#x27;Successfully removed peer&#x27;]);
 };
 
 /**
@@ -1632,11 +1557,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
         { googIPv6: true }
       ]
     });
-    log.info([targetMid, null, null, &#x27;Created peer connection&#x27;]);
-    log.debug([targetMid, null, null, &#x27;Peer connection config:&#x27;], self._room.connection.peerConfig);
-    log.debug([targetMid, null, null, &#x27;Peer connection constraints:&#x27;], self._room.connection.peerConstraints);
+    self._log.info([targetMid, null, null, &#x27;Created peer connection&#x27;]);
+    self._log.debug([targetMid, null, null, &#x27;Peer connection config:&#x27;], self._room.connection.peerConfig);
+    self._log.debug([targetMid, null, null, &#x27;Peer connection constraints:&#x27;], self._room.connection.peerConstraints);
   } catch (error) {
-    log.error([targetMid, null, null, &#x27;Failed creating peer connection:&#x27;], error);
+    self._log.error([targetMid, null, null, &#x27;Failed creating peer connection:&#x27;], error);
     return null;
   }
   // attributes (added on by Temasys)
@@ -1665,7 +1590,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
     var dc = event.channel || event;
-    log.debug([targetMid, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Received datachannel -&gt;&#x27;], dc);
+    self._log.debug([targetMid, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Received datachannel -&gt;&#x27;], dc);
     if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
       self._peerInformations[targetMid].config.enableDataChannel) {
       var channelType = self.DATA_CHANNEL_TYPE.DATA;
@@ -1681,7 +1606,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
       self._createDataChannel(targetMid, dc);
 
     } else {
-      log.warn([targetMid, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Not adding datachannel as enable datachannel &#x27; +
+      self._log.warn([targetMid, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Not adding datachannel as enable datachannel &#x27; +
         &#x27;is set to false&#x27;]);
     }
   };
@@ -1695,10 +1620,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     var streamId = stream.id || stream.label;
 
     if (targetMid === &#x27;MCU&#x27;) {
-      log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
+      self._log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
       return;
     } else if (!self._sdpSettings.direction.audio.receive &amp;&amp; !self._sdpSettings.direction.video.receive) {
-      log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
+      self._log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
       return;
     }
 
@@ -1708,7 +1633,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
       pc.getRemoteStreams().length &gt; 1 &amp;&amp; pc.remoteDescription &amp;&amp; pc.remoteDescription.sdp) {
 
       if (pc.remoteDescription.sdp.indexOf(&#x27; msid:&#x27; + streamId + &#x27; &#x27;) === -1) {
-        log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
+        self._log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
         return;
       }
     }
@@ -1730,7 +1655,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   pc.oniceconnectionstatechange = function(evt) {
     var iceConnectionState = pc.iceConnectionState;
 
-    log.debug([targetMid, &#x27;RTCIceConnectionState&#x27;, null, &#x27;Ice connection state changed -&gt;&#x27;], iceConnectionState);
+    self._log.debug([targetMid, &#x27;RTCIceConnectionState&#x27;, null, &#x27;Ice connection state changed -&gt;&#x27;], iceConnectionState);
 
     if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
       if (iceConnectionState === &#x27;connecting&#x27;) {
@@ -1748,11 +1673,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
   };
 
   pc.onsignalingstatechange = function() {
-    log.debug([targetMid, &#x27;RTCSignalingState&#x27;, null, &#x27;Peer connection state changed -&gt;&#x27;], pc.signalingState);
+    self._log.debug([targetMid, &#x27;RTCSignalingState&#x27;, null, &#x27;Peer connection state changed -&gt;&#x27;], pc.signalingState);
     self._trigger(&#x27;peerConnectionState&#x27;, pc.signalingState, targetMid);
   };
   pc.onicegatheringstatechange = function() {
-    log.log([targetMid, &#x27;RTCIceGatheringState&#x27;, null, &#x27;Ice gathering state changed -&gt;&#x27;], pc.iceGatheringState);
+    self._log.log([targetMid, &#x27;RTCIceGatheringState&#x27;, null, &#x27;Ice gathering state changed -&gt;&#x27;], pc.iceGatheringState);
     self._trigger(&#x27;candidateGenerationState&#x27;, pc.iceGatheringState, targetMid);
   };
 
@@ -1821,7 +1746,7 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
       restartMsg.parentId = self._parentId;
     }
 
-    log.log([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Sending restart message to signaling server -&gt;&#x27;], restartMsg);
+    self._log.log([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Sending restart message to signaling server -&gt;&#x27;], restartMsg);
 
     self._sendChannelMessage(restartMsg);
   };
@@ -1829,7 +1754,7 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
   for (var i = 0; i &lt; listOfPeers.length; i++) {
     if (!self._peerConnections[listOfPeers[i]]) {
       var error = &#x27;Peer connection with peer does not exists. Unable to restart&#x27;;
-      log.error([listOfPeers[i], &#x27;PeerConnection&#x27;, null, error]);
+      self._log.error([listOfPeers[i], &#x27;PeerConnection&#x27;, null, error]);
       listOfPeerRestartErrors[listOfPeers[i]] = new Error(error);
       continue;
     }
@@ -1852,7 +1777,7 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
   } else {
     // Restart with MCU = peer leaves then rejoins room
     var peerJoinedFn = function (peerId, peerInfo, isSelf) {
-      log.log([null, &#x27;PeerConnection&#x27;, null, &#x27;Invoked all peers to restart with MCU. Firing callback&#x27;]);
+      self._log.log([null, &#x27;PeerConnection&#x27;, null, &#x27;Invoked all peers to restart with MCU. Firing callback&#x27;]);
 
       if (typeof callback === &#x27;function&#x27;) {
         if (Object.keys(listOfPeerRestartErrors).length &gt; 0) {
@@ -1935,7 +1860,7 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     (self._peerCandidatesQueue[targetMid] ? self._peerCandidatesQueue[targetMid].length === 0 : true) &amp;&amp;
   // If it has not been set yet
     !self._peerEndOfCandidatesCounter[targetMid].hasSet) {
-    log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Signaling of end-of-candidates remote ICE gathering.&#x27;]);
+    self._log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Signaling of end-of-candidates remote ICE gathering.&#x27;]);
     self._peerEndOfCandidatesCounter[targetMid].hasSet = true;
     try {
       if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
@@ -1974,7 +1899,7 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
       }
 
     } catch (error) {
-      log.error([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Failed signaling end-of-candidates -&gt;&#x27;], error);
+      self._log.error([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Failed signaling end-of-candidates -&gt;&#x27;], error);
     }
   }
 };

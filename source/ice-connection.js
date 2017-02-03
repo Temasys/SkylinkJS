@@ -28,7 +28,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     }
   }
 
-  log.log('TURN server connections SSL configuration', {
+  self._log.log('TURN server connections SSL configuration', {
     useTURNSSLProtocol: useTURNSSLProtocol,
     useTURNSSLPort: useTURNSSLPort
   });
@@ -65,29 +65,29 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     var server = givenIceServers[i];
 
     if (typeof server.url !== 'string') {
-      log.warn('Ignoring ICE server provided at index ' + i, clone(server));
+      self._log.warn('Ignoring ICE server provided at index ' + i, clone(server));
       continue;
     }
 
     if (server.url.indexOf('stun') === 0) {
       if (!self._enableSTUN) {
-        log.warn('Ignoring STUN server provided at index ' + i, clone(server));
+        self._log.warn('Ignoring STUN server provided at index ' + i, clone(server));
         continue;
       }
 
       if (!self._usePublicSTUN && server.url.indexOf('temasys') === -1) {
-        log.warn('Ignoring public STUN server provided at index ' + i, clone(server));
+        self._log.warn('Ignoring public STUN server provided at index ' + i, clone(server));
         continue;
       }
 
     } else if (server.url.indexOf('turn') === 0) {
       if (!self._enableTURN) {
-        log.warn('Ignoring TURN server provided at index ' + i, clone(server));
+        self._log.warn('Ignoring TURN server provided at index ' + i, clone(server));
         continue;
       }
 
       if (server.url.indexOf(':443') === -1 && useTURNSSLPort) {
-        log.log('Ignoring TURN Server (non-SSL port) provided at index ' + i, clone(server));
+        self._log.log('Ignoring TURN Server (non-SSL port) provided at index ' + i, clone(server));
         continue;
       }
 
@@ -138,7 +138,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
           pushIceServer(username, credential, rawUrl + '?transport=tcp');
           pushIceServer(username, credential, rawUrl + '?transport=udp');
         } else {
-          log.warn('Invalid TURN transport option "' + self._TURNTransport +
+          self._log.warn('Invalid TURN transport option "' + self._TURNTransport +
             '". Ignoring TURN server at index' + i, clone(server));
           continue;
         }
@@ -221,7 +221,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     }
   }
 
-  log.log('Output iceServers configuration:', newIceServers);
+  self._log.log('Output iceServers configuration:', newIceServers);
 
   return {
     iceServers: newIceServers

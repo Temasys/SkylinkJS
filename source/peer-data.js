@@ -41,10 +41,10 @@ Skylink.prototype.setUserData = function(userData) {
     updatedUserData = userData;
   }
 
-  this._userData = updatedUserData;
+  self._userData = updatedUserData;
 
   if (self._inRoom) {
-    log.log('Updated userData -> ', updatedUserData);
+    self._log.log('Updated userData -> ', updatedUserData);
     self._sendChannelMessage({
       type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
       mid: self._user.sid,
@@ -54,7 +54,7 @@ Skylink.prototype.setUserData = function(userData) {
     });
     self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
   } else {
-    log.warn('User is not in the room. Broadcast of updated information will be dropped');
+    self._log.warn('User is not in the room. Broadcast of updated information will be dropped');
   }
 };
 

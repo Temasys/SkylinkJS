@@ -90,40 +90,6 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * The list of Peer connection states.
- * @attribute HANDSHAKE_PROGRESS
- * @param {String} ENTER   &lt;small&gt;Value &lt;code&gt;&quot;enter&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when Peer has just entered the Room.
- *   &lt;small&gt;At this stage, &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;
- *   is triggered.&lt;/small&gt;
- * @param {String} WELCOME &lt;small&gt;Value &lt;code&gt;&quot;welcome&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when Peer is aware that User has entered the Room.
- *   &lt;small&gt;At this stage, &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;
- *   is triggered and Peer connection may commence.&lt;/small&gt;
- * @param {String} OFFER   &lt;small&gt;Value &lt;code&gt;&quot;offer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;offer&quot;&lt;/code&gt;
- *   session description to start streaming connection.
- * @param {String} ANSWER  &lt;small&gt;Value &lt;code&gt;&quot;answer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;answer&quot;&lt;/code&gt;
- *   session description to establish streaming connection.
- * @param {String} ERROR   &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when Peer connection has failed to establish streaming connection.
- *   &lt;small&gt;This happens when there are errors that occurs in creating local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; /
- *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt;, or when setting remote / local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; / &lt;code&gt;&quot;answer&quot;&lt;/code&gt;.&lt;/small&gt;
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.HANDSHAKE_PROGRESS = {
-  ENTER: &#x27;enter&#x27;,
-  WELCOME: &#x27;welcome&#x27;,
-  OFFER: &#x27;offer&#x27;,
-  ANSWER: &#x27;answer&#x27;,
-  ERROR: &#x27;error&#x27;
-};
-
-/**
  * Function that creates the Peer connection offer session description.
  * @method _doOffer
  * @private
@@ -134,18 +100,18 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var self = this;
   var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser);
 
-  log.log([targetMid, null, null, &#x27;Checking caller status&#x27;], peerBrowser);
+  self._log.log([targetMid, null, null, &#x27;Checking caller status&#x27;], peerBrowser);
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;offer&#x27;, &#x27;Dropping of creating of offer &#x27; +
+    self._log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;offer&#x27;, &#x27;Dropping of creating of offer &#x27; +
       &#x27;as connection does not exists&#x27;]);
     return;
   }
 
   // Added checks to ensure that state is &quot;stable&quot; if setting local &quot;offer&quot;
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;offer&#x27;,
+    self._log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;offer&#x27;,
       &#x27;Dropping of creating of offer as signalingState is not &quot;&#x27; +
       self.PEER_CONNECTION_STATE.STABLE + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
     return;
@@ -195,19 +161,19 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     }
   }
 
-  log.debug([targetMid, null, null, &#x27;Creating offer with config:&#x27;], offerConstraints);
+  self._log.debug([targetMid, null, null, &#x27;Creating offer with config:&#x27;], offerConstraints);
 
   pc.endOfCandidates = false;
 
   pc.createOffer(function(offer) {
-    log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
+    self._log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
 
     self._setLocalAndSendMessage(targetMid, offer);
 
   }, function(error) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
-    log.error([targetMid, null, null, &#x27;Failed creating an offer:&#x27;], error);
+    self._log.error([targetMid, null, null, &#x27;Failed creating an offer:&#x27;], error);
 
   }, offerConstraints);
 };
@@ -222,20 +188,20 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
  */
 Skylink.prototype._doAnswer = function(targetMid) {
   var self = this;
-  log.log([targetMid, null, null, &#x27;Creating answer with config:&#x27;],
+  self._log.log([targetMid, null, null, &#x27;Creating answer with config:&#x27;],
     self._room.connection.sdpConstraints);
   var pc = self._peerConnections[targetMid];
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;answer&#x27;, &#x27;Dropping of creating of answer &#x27; +
+    self._log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;answer&#x27;, &#x27;Dropping of creating of answer &#x27; +
       &#x27;as connection does not exists&#x27;]);
     return;
   }
 
   // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
   if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;answer&#x27;,
+    self._log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;answer&#x27;,
       &#x27;Dropping of creating of answer as signalingState is not &quot;&#x27; +
       self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
     return;
@@ -249,10 +215,10 @@ Skylink.prototype._doAnswer = function(targetMid) {
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
   pc.createAnswer(function(answer) {
-    log.debug([targetMid, null, null, &#x27;Created answer&#x27;], answer);
+    self._log.debug([targetMid, null, null, &#x27;Created answer&#x27;], answer);
     self._setLocalAndSendMessage(targetMid, answer);
   }, function(error) {
-    log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
+    self._log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   });
 };
@@ -272,32 +238,32 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   // Added checks to ensure that sessionDescription is defined first
   if (!(!!sessionDescription &amp;&amp; !!sessionDescription.sdp)) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, null, &#x27;Local session description is undefined -&gt;&#x27;], sessionDescription);
+    self._log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, null, &#x27;Local session description is undefined -&gt;&#x27;], sessionDescription);
     return;
   }
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+    self._log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
       &#x27;Local session description will not be set as connection does not exists -&gt;&#x27;], sessionDescription);
     return;
 
   } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
     pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local session description &#x27; +
+    self._log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local session description &#x27; +
       &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], sessionDescription);
     return;
 
   // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
   } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp;
     pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local session description &#x27; +
+    self._log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local session description &#x27; +
       &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], sessionDescription);
     return;
 
   // Added checks if there is a current local sessionDescription being processing before processing this one
   } else if (pc.processingLocalSDP) {
-    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+    self._log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
       &#x27;Local session description will not be set as another is being processed -&gt;&#x27;], sessionDescription);
     return;
   }
@@ -314,11 +280,11 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   //sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
 
-  log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+  self._log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
     &#x27;Local session description updated -&gt;&#x27;], sessionDescription.sdp);
 
   pc.setLocalDescription(sessionDescription, function() {
-    log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+    self._log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
       &#x27;Local session description has been set -&gt;&#x27;], sessionDescription);
 
     pc.processingLocalSDP = false;
@@ -332,7 +298,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     }
 
     if (!self._enableIceTrickle &amp;&amp; !pc.gathered) {
-      log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+      self._log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
         &#x27;Local session description sending is halted to complete ICE gathering.&#x27;]);
       return;
     }
@@ -347,7 +313,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
     });
 
   }, function(error) {
-    log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local description failed setting -&gt;&#x27;], error);
+    self._log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local description failed setting -&gt;&#x27;], error);
 
     pc.processingLocalSDP = false;
 

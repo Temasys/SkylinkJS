@@ -11,7 +11,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
   var throughput = 16;
 
   if (!self._channelOpen || !self._user || !self._socket) {
-    log.warn([message.target || 'Server', 'Socket', message.type, 'Dropping of message as Socket connection is not opened or is at ' +
+    self._log.warn([message.target || 'Server', 'Socket', message.type, 'Dropping of message as Socket connection is not opened or is at ' +
       'incorrect step ->'], message);
     return;
   }
@@ -55,11 +55,11 @@ Skylink.prototype._sendChannelMessage = function(message) {
   };
 
   var setQueueFn = function () {
-    log.debug([null, 'Socket', null, 'Starting queue timeout']);
+    self._log.debug([null, 'Socket', null, 'Starting queue timeout']);
 
     self._socketMessageTimeout = setTimeout(function () {
       if (((new Date ()).getTime() - self._timestamp.socketMessage) <= interval) {
-        log.debug([null, 'Socket', null, 'Restarting queue timeout']);
+        self._log.debug([null, 'Socket', null, 'Restarting queue timeout']);
         setQueueFn();
         return;
       }
@@ -84,7 +84,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
     self._socketMessageTimeout = null;
 
     if (!self._channelOpen || !(self._user && self._user.sid) || !self._socket) {
-      log.warn([message.target || 'Server', 'Socket', null, 'Dropping of group messages as Socket connection is not opened or is at ' +
+      self._log.warn([message.target || 'Server', 'Socket', null, 'Dropping of group messages as Socket connection is not opened or is at ' +
         'incorrect step ->'], groupMessageList);
       return;
     }
@@ -121,7 +121,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
           groupMessageList[i].stamp < stamps.audioMuted) ||
           (groupMessageList[i].type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO &&
           groupMessageList[i].stamp < stamps.videoMuted)) {
-        log.warn([message.target || 'Server', 'Socket', groupMessageList[i], 'Dropping of outdated status message ->'],
+        self._log.warn([message.target || 'Server', 'Socket', groupMessageList[i], 'Dropping of outdated status message ->'],
           clone(groupMessageList[i]));
         groupMessageList.splice(i, 1);
         i--;
@@ -138,7 +138,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
         rid: self._room.id
       };
 
-      log.debug([message.target || 'Server', 'Socket', groupMessage.type,
+      self._log.debug([message.target || 'Server', 'Socket', groupMessage.type,
         'Sending queued grouped message (max: 16 per group) ->'], clone(groupMessage));
 
       self._socket.send(JSON.stringify(groupMessage));
@@ -165,13 +165,13 @@ Skylink.prototype._sendChannelMessage = function(message) {
   if (self._groupMessageList.indexOf(message.type) > -1) {
     if (!(self._timestamp.socketMessage && ((new Date ()).getTime() - self._timestamp.socketMessage) <= interval)) {
       if (!checkStampFn(message)) {
-        log.warn([message.target || 'Server', 'Socket', message.type, 'Dropping of outdated status message ->'], clone(message));
+        self._log.warn([message.target || 'Server', 'Socket', message.type, 'Dropping of outdated status message ->'], clone(message));
         return;
       }
       if (self._socketMessageTimeout) {
         clearTimeout(self._socketMessageTimeout);
       }
-      log.warn([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
+      self._log.warn([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
       self._socket.send(JSON.stringify(message));
       setStampFn(message);
       triggerEventFn(message);
@@ -179,7 +179,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       self._timestamp.socketMessage = (new Date()).getTime();
 
     } else {
-      log.warn([message.target || 'Server', 'Socket', message.type,
+      self._log.warn([message.target || 'Server', 'Socket', message.type,
         'Queueing socket message to prevent message drop ->'], clone(message));
 
       self._socketMessageQueue.push(message);
@@ -189,7 +189,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       }
     }
   } else {
-    log.debug([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
+    self._log.debug([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
     self._socket.send(JSON.stringify(message));
 
     // If Peer sends "bye" on its own, we trigger it as session disconnected abruptly
@@ -283,7 +283,7 @@ Skylink.prototype._createSocket = function (type) {
 
   self._channelOpen = false;
 
-  log.log('Opening channel with signaling server url:', clone(self._socketSession));
+  self._log.log('Opening channel with signaling server url:', clone(self._socketSession));
 
   self._socket = io.connect(url, options);
 
@@ -311,7 +311,7 @@ Skylink.prototype._createSocket = function (type) {
 
   self._socket.on('connect', function () {
     if (!self._channelOpen) {
-      log.log([null, 'Socket', null, 'Channel opened']);
+      self._log.log([null, 'Socket', null, 'Channel opened']);
       self._channelOpen = true;
       self._trigger('channelOpen', clone(self._socketSession));
     }
@@ -319,21 +319,21 @@ Skylink.prototype._createSocket = function (type) {
 
   self._socket.on('reconnect', function () {
     if (!self._channelOpen) {
-      log.log([null, 'Socket', null, 'Channel opened']);
+      self._log.log([null, 'Socket', null, 'Channel opened']);
       self._channelOpen = true;
       self._trigger('channelOpen', clone(self._socketSession));
     }
   });
 
   self._socket.on('error', function(error) {
-    log.error([null, 'Socket', null, 'Exception occurred ->'], error);
+    self._log.error([null, 'Socket', null, 'Exception occurred ->'], error);
     self._trigger('channelError', error, clone(self._socketSession));
   });
 
   self._socket.on('disconnect', function() {
     self._channelOpen = false;
     self._trigger('channelClose', clone(self._socketSession));
-    log.log([null, 'Socket', null, 'Channel closed']);
+    self._log.log([null, 'Socket', null, 'Channel closed']);
 
     if (self._inRoom && self._user && self._user.sid) {
       self.leaveRoom(false);
@@ -344,10 +344,10 @@ Skylink.prototype._createSocket = function (type) {
   self._socket.on('message', function(messageStr) {
     var message = JSON.parse(messageStr);
 
-    log.log([null, 'Socket', null, 'Received message ->'], message);
+    self._log.log([null, 'Socket', null, 'Received message ->'], message);
 
     if (message.type === self._SIG_MESSAGE_TYPE.GROUP) {
-      log.debug('Bundle of ' + message.lists.length + ' messages');
+      self._log.debug('Bundle of ' + message.lists.length + ' messages');
       for (var i = 0; i < message.lists.length; i++) {
         var indiMessage = JSON.parse(message.lists[i]);
         self._processSigMessage(indiMessage);
@@ -371,13 +371,13 @@ Skylink.prototype._createSocket = function (type) {
 Skylink.prototype._openChannel = function() {
   var self = this;
   if (self._channelOpen) {
-    log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
+    self._log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
       'as there is already an ongoing channel connection']);
     return;
   }
 
   if (self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
-    log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
+    self._log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
       'as readyState is not ready']);
     return;
   }
@@ -427,7 +427,7 @@ Skylink.prototype._closeChannel = function() {
       this._socket.disconnect();
     }
 
-    log.log([null, 'Socket', null, 'Channel closed']);
+    this._log.log([null, 'Socket', null, 'Channel closed']);
 
     this._channelOpen = false;
     this._trigger('channelClose', clone(this._socketSession));

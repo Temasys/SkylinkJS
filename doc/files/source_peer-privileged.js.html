@@ -98,59 +98,6 @@
  *   &lt;a href=&quot;http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-&quot;&gt;
  *   Read more about privileged App Key feature here&lt;/a&gt;.
  * &lt;/blockquote&gt;
- * The list of &lt;a href=&quot;#method_getPeers&quot;&gt;&lt;code&gt;getPeers()&lt;/code&gt; method&lt;/a&gt; retrieval states.
- * @attribute GET_PEERS_STATE
- * @param {String} ENQUIRED &lt;small&gt;Value &lt;code&gt;&quot;enquired&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when &lt;code&gt;getPeers()&lt;/code&gt; is retrieving the list of Peer IDs
- *   from Rooms within the same App space from the Signaling server.
- * @param {String} RECEIVED &lt;small&gt;Value &lt;code&gt;&quot;received&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when &lt;code&gt;getPeers()&lt;/code&gt; has retrieved the list of Peer IDs
- *   from Rooms within the same App space from the Signaling server successfully.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype.GET_PEERS_STATE = {
-	ENQUIRED: &#x27;enquired&#x27;,
-	RECEIVED: &#x27;received&#x27;
-};
-
-/**
- * &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature requires &lt;code&gt;&quot;isPrivileged&quot;&lt;/code&gt; flag to be enabled and
- *   &lt;code&gt;&quot;autoIntroduce&quot;&lt;/code&gt; flag to be disabled for the App Key provided in the
- *   &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;, as only Users connecting using
- *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
- *   Peer IDs from Rooms within the same App space.
- *   &lt;a href=&quot;http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-&quot;&gt;
- *   Read more about privileged App Key feature here&lt;/a&gt;.
- * &lt;/blockquote&gt;
- * The list of &lt;a href=&quot;#method_introducePeer&quot;&gt;&lt;code&gt;introducePeer&lt;/code&gt; method&lt;/a&gt; Peer introduction request states.
- * @attribute INTRODUCE_STATE
- * @param {String} INTRODUCING &lt;small&gt;Value &lt;code&gt;&quot;enquired&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when introduction request for the selected pair of Peers has been made to the Signaling server.
- * @param {String} ERROR       &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when introduction request made to the Signaling server
- *   for the selected pair of Peers has failed.
- * @readOnly
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype.INTRODUCE_STATE = {
-	INTRODUCING: &#x27;introducing&#x27;,
-	ERROR: &#x27;error&#x27;
-};
-
-/**
- * &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature requires &lt;code&gt;&quot;isPrivileged&quot;&lt;/code&gt; flag to be enabled for the App Key
- *   provided in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;, as only Users connecting using
- *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
- *   Peer IDs from Rooms within the same App space.
- *   &lt;a href=&quot;http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-&quot;&gt;
- *   Read more about privileged App Key feature here&lt;/a&gt;.
- * &lt;/blockquote&gt;
  * Function that retrieves the list of Peer IDs from Rooms within the same App space.
  * @method getPeers
  * @param {Boolean} [showAll=false] The flag if Signaling server should also return the list of privileged Peer IDs.
@@ -202,11 +149,11 @@ Skylink.prototype.INTRODUCE_STATE = {
 Skylink.prototype.getPeers = function(showAll, callback){
 	var self = this;
 	if (!self._isPrivileged){
-		log.warn(&#x27;Please upgrade your key to privileged to use this function&#x27;);
+		self._log.warn(&#x27;Please upgrade your key to privileged to use this function&#x27;);
 		return;
 	}
 	if (!self._appKey){
-		log.warn(&#x27;App key is not defined. Please authenticate again.&#x27;);
+		self._log.warn(&#x27;App key is not defined. Please authenticate again.&#x27;);
 		return;
 	}
 
@@ -223,7 +170,7 @@ Skylink.prototype.getPeers = function(showAll, callback){
 
 	self._trigger(&#x27;getPeersStateChange&#x27;,self.GET_PEERS_STATE.ENQUIRED, self._user.sid, null);
 
-	log.log(&#x27;Enquired server for peers within the realm&#x27;);
+	self._log.log(&#x27;Enquired server for peers within the realm&#x27;);
 
 	if (typeof callback === &#x27;function&#x27;){
 		self.once(&#x27;getPeersStateChange&#x27;, function(state, privilegedPeerId, peerList){
@@ -279,7 +226,7 @@ Skylink.prototype.getPeers = function(showAll, callback){
 Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
 	var self = this;
 	if (!self._isPrivileged){
-		log.warn(&#x27;Please upgrade your key to privileged to use this function&#x27;);
+		self._log.warn(&#x27;Please upgrade your key to privileged to use this function&#x27;);
 		self._trigger(&#x27;introduceStateChange&#x27;, self.INTRODUCE_STATE.ERROR, self._user.sid, sendingPeerId, receivingPeerId, &#x27;notPrivileged&#x27;);
 		return;
 	}
@@ -289,7 +236,7 @@ Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
 		receivingPeerId: receivingPeerId
 	});
 	self._trigger(&#x27;introduceStateChange&#x27;, self.INTRODUCE_STATE.INTRODUCING, self._user.sid, sendingPeerId, receivingPeerId, null);
-	log.log(&#x27;Introducing&#x27;,sendingPeerId,&#x27;to&#x27;,receivingPeerId);
+	self._log.log(&#x27;Introducing&#x27;,sendingPeerId,&#x27;to&#x27;,receivingPeerId);
 };
 
 

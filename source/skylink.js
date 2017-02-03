@@ -1,201 +1,19 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="utf-8">
-    <title>SkylinkJS 0.6.17</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <!-- font and icon -->
-    <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
-    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
-    <!-- styling -->
-    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
-    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
-    <link rel="stylesheet" href="../assets/css/style.css">
-    <!-- scripts -->
-    <script src="../assets/vendor/js/jquery.min.js"></script>
-    <script src="../assets/vendor/js/bootstrap.min.js"></script>
-    <script src="../assets/js/script.js"></script>
-    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
-</head>
-<body>
-
-<div id="doc">
-  <nav id="hd" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-    <div class="container">
-      <div class="navbar-header">
-        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
-          <span class="sr-only">Toggle navigation</span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-          <span class="icon-bar"></span>
-        </button>
-        <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.17</small>
-        </a>
-      </div>
-      <div id="navbar" class="navbar-collapse collapse">
-        <ul id="api-list" class="nav navbar-nav navbar-right">
-  <li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
-    <ul class="dropdown-menu" role="menu">
-      <li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
-      <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
-      <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
-    </ul>
-  </li>
-  
-    <li><a href="../classes/Skylink.html">Documentation</a></li>
-  
-  <!--<li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
-    <ul class="dropdown-menu" role="menu">
-      
-        <li><a href="../classes/Skylink.html">Skylink</a></li>
-      
-    </ul>
-  </li>-->
-  <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
-  <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
-  <!--<li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
-    <ul class="dropdown-menu" role="menu">
-      <li><a href="#api-modules">View all Modules</a></li>
-      
-    </ul>
-  </li>-->
-</ul>
-<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
-  <div id="api-tabview-filter" class="form-group">
-    <input type="search" id="api-filter" placeholder="Type to filter APIs">
-  </div>
-</form>-->
-      </div><!--/.navbar-collapse -->
-    </div>
-  </nav>
-  <div id="bd" class="yui3-g">
-
-      <div class="yui3-u-1-4">
-
-      </div>
-      <div class="yui3-u-3-4">
-          
-          <div class="apidocs">
-              <div id="docs-main">
-                  <div class="content content-main">
-                      <h1 class="file-heading">File: source/template/header.js</h1>
-
-<div class="file">
-    <pre class="code prettyprint linenums">
-(function(refThis) {
-
-&#x27;use strict&#x27;;
-
-/**
- * Polyfill for Object.keys() from Mozilla
- * From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
- */
-if (!Object.keys) {
-  Object.keys = (function() {
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
-      hasDontEnumBug = !({
-        toString: null
-      }).propertyIsEnumerable(&#x27;toString&#x27;),
-      dontEnums = [
-        &#x27;toString&#x27;,
-        &#x27;toLocaleString&#x27;,
-        &#x27;valueOf&#x27;,
-        &#x27;hasOwnProperty&#x27;,
-        &#x27;isPrototypeOf&#x27;,
-        &#x27;propertyIsEnumerable&#x27;,
-        &#x27;constructor&#x27;
-      ],
-      dontEnumsLength = dontEnums.length;
-
-    return function(obj) {
-      if (typeof obj !== &#x27;object&#x27; &amp;&amp; typeof obj !== &#x27;function&#x27; || obj === null) throw new TypeError(&#x27;Object.keys called on non-object&#x27;);
-
-      var result = [];
-
-      for (var prop in obj) {
-        if (hasOwnProperty.call(obj, prop)) result.push(prop);
-      }
-
-      if (hasDontEnumBug) {
-        for (var i = 0; i &lt; dontEnumsLength; i++) {
-          if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i]);
-        }
-      }
-      return result;
-    }
-  })()
-}
-
-/**
- * Polyfill for Date.getISOString() from Mozilla
- * From https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
- */
-(function() {
-  function pad(number) {
-    if (number &lt; 10) {
-      return &#x27;0&#x27; + number;
-    }
-    return number;
-  }
-
-  Date.prototype.toISOString = function() {
-    return this.getUTCFullYear() +
-      &#x27;-&#x27; + pad(this.getUTCMonth() + 1) +
-      &#x27;-&#x27; + pad(this.getUTCDate()) +
-      &#x27;T&#x27; + pad(this.getUTCHours()) +
-      &#x27;:&#x27; + pad(this.getUTCMinutes()) +
-      &#x27;:&#x27; + pad(this.getUTCSeconds()) +
-      &#x27;.&#x27; + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
-      &#x27;Z&#x27;;
-  };
-})();
-
-/**
- * Polyfill for addEventListener() from Eirik Backer @eirikbacker (github.com).
- * From https://gist.github.com/eirikbacker/2864711
- * MIT Licensed
- */
-(function(win, doc){
-  if(win.addEventListener) return; //No need to polyfill
-
-  function docHijack(p){var old = doc[p];doc[p] = function(v){ return addListen(old(v)) }}
-  function addEvent(on, fn, self){
-    return (self = this).attachEvent(&#x27;on&#x27; + on, function(e){
-      var e = e || win.event;
-      e.preventDefault  = e.preventDefault  || function(){e.returnValue = false}
-      e.stopPropagation = e.stopPropagation || function(){e.cancelBubble = true}
-      fn.call(self, e);
-    });
-  }
-  function addListen(obj, i){
-    if(i = obj.length)while(i--)obj[i].addEventListener = addEvent;
-    else obj.addEventListener = addEvent;
-    return obj;
-  }
-
-  addListen([doc, win]);
-  if(&#x27;Element&#x27; in win)win.Element.prototype.addEventListener = addEvent; //IE8
-  else{                                     //IE &lt; 8
-    doc.attachEvent(&#x27;onreadystatechange&#x27;, function(){addListen(doc.all)}); //Make sure we also init at domReady
-    docHijack(&#x27;getElementsByTagName&#x27;);
-    docHijack(&#x27;getElementById&#x27;);
-    docHijack(&#x27;createElement&#x27;);
-    addListen(doc.all);
-  }
-})(window, document);
+/* jshint ignore:start */
+// Object.keys() polyfill - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+!function(){Object.keys||(Object.keys=function(){var t=Object.prototype.hasOwnProperty,r=!{toString:null}.propertyIsEnumerable("toString"),e=["toString","toLocaleString","valueOf","hasOwnProperty","isPrototypeOf","propertyIsEnumerable","constructor"],o=e.length;return function(n){if("object"!=typeof n&&"function"!=typeof n||null===n)throw new TypeError("Object.keys called on non-object");var c=[];for(var l in n)t.call(n,l)&&c.push(l);if(r)for(var p=0;o>p;p++)t.call(n,e[p])&&c.push(e[p]);return c}}())}();
+// Date.getISOString() polyfill - https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+!function(){function t(t){return 10>t?"0"+t:t}Date.prototype.toISOString=function(){return this.getUTCFullYear()+"-"+t(this.getUTCMonth()+1)+"-"+t(this.getUTCDate())+"T"+t(this.getUTCHours())+":"+t(this.getUTCMinutes())+":"+t(this.getUTCSeconds())+"."+(this.getUTCMilliseconds()/1e3).toFixed(3).slice(2,5)+"Z"}}();
+// Date.now() polyfill
+!function(){"function"!=typeof Date.now&&(Date.now=function(){return(new Date).getTime()})}();
+// addEventListener() polyfill - https://gist.github.com/eirikbacker/2864711
+!function(e,t){function n(e){var n=t[e];t[e]=function(e){return o(n(e))}}function a(t,n,a){return(a=this).attachEvent("on"+t,function(t){var t=t||e.event;t.preventDefault=t.preventDefault||function(){t.returnValue=!1},t.stopPropagation=t.stopPropagation||function(){t.cancelBubble=!0},n.call(a,t)})}function o(e,t){if(t=e.length)for(;t--;)e[t].addEventListener=a;else e.addEventListener=a;return e}e.addEventListener||(o([t,e]),"Element"in e?e.Element.prototype.addEventListener=a:(t.attachEvent("onreadystatechange",function(){o(t.all)}),n("getElementsByTagName"),n("getElementById"),n("createElement"),o(t.all)))}(window,document);
+/* jshint ignore:end */
 
 /**
  * Global function that clones an object.
  */
 var clone = function (obj) {
-  if (obj === null || typeof obj !== &#x27;object&#x27;) {
+  if (obj === null || typeof obj !== 'object') {
     return obj;
   }
 
@@ -209,7 +27,7 @@ var clone = function (obj) {
     return copy;
   };
 
-  if (typeof obj === &#x27;object&#x27; &amp;&amp; !Array.isArray(obj)) {
+  if (typeof obj === 'object' && !Array.isArray(obj)) {
     try {
       return JSON.parse( JSON.stringify(obj) );
     } catch (err) {
@@ -221,9 +39,30 @@ var clone = function (obj) {
 };
 
 /**
- * &lt;h2&gt;Prerequisites on using Skylink&lt;/h2&gt;
+ * Global function that loops an object.
+ */
+var forEach = function (obj, fn) {
+  if (Array.isArray(obj)) {
+    if (typeof obj.forEach === 'function') {
+      obj.forEach(fn);
+    } else {
+      for (var i = 0; i < obj.length; i++) {
+        fn(obj[i], i);
+      }
+    }
+  } else if (obj && typeof obj === 'object') {
+    for (var prop in obj) {
+      if (obj.hasOwnProperty(prop)) {
+        fn(obj[prop], prop);
+      }
+    }
+  }
+};
+
+/**
+ * <h2>Prerequisites on using Skylink</h2>
  * Before using any Skylink functionalities, you will need to authenticate your App Key using
- *   the &lt;a href=&quot;#method_init&quot;&gt;&#x60;init()&#x60; method&lt;/a&gt;.
+ *   the <a href="#method_init">`init()` method</a>.
  *
  * To manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).
  *
@@ -239,9 +78,9 @@ var clone = function (obj) {
  * - Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]
  * - Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]
  *
- * You may see the example below in the &lt;a href=&quot;#&quot;&gt;Constructor tab&lt;/a&gt; to have a general idea how event subscription
- *   and the ordering of &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt;&lt;/a&gt; and
- *   &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt;&lt;/a&gt; methods should be called.
+ * You may see the example below in the <a href="#">Constructor tab</a> to have a general idea how event subscription
+ *   and the ordering of <a href="#method_init"><code>init()</code></a> and
+ *   <a href="#method_joinRoom"><code>joinRoom()</code></a> methods should be called.
  *
  * If you have any issues, you may find answers to your questions in the FAQ section on [our support portal](
  * http://support.temasys.io), asks questions, request features or raise bug tickets as well.
@@ -252,41 +91,44 @@ var clone = function (obj) {
  * [See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)
  *
  * @class Skylink
+ * @param {String} [instanceLabel] The Skylink object instance label ID for identification.
+ * - When not provided, an instance label ID would be generated.
+ *   <small>It is recommended to provide an unique instance label ID.</small>
  * @constructor
  * @example
- *   // Here&#x27;s a simple example on how you can start using Skylink.
+ *   // Here's a simple example on how you can start using Skylink.
  *   var skylinkDemo = new Skylink();
  *
  *   // Subscribe all events first as a general guideline
- *   skylinkDemo.on(&quot;incomingStream&quot;, function (peerId, stream, peerInfo, isSelf) {
+ *   skylinkDemo.on("incomingStream", function (peerId, stream, peerInfo, isSelf) {
  *     if (isSelf) {
- *       attachMediaStream(document.getElementById(&quot;selfVideo&quot;), stream);
+ *       attachMediaStream(document.getElementById("selfVideo"), stream);
  *     } else {
- *       var peerVideo = document.createElement(&quot;video&quot;);
+ *       var peerVideo = document.createElement("video");
  *       peerVideo.id = peerId;
- *       peerVideo.autoplay = &quot;autoplay&quot;;
- *       document.getElementById(&quot;peersVideo&quot;).appendChild(peerVideo);
+ *       peerVideo.autoplay = "autoplay";
+ *       document.getElementById("peersVideo").appendChild(peerVideo);
  *       attachMediaStream(peerVideo, stream);
  *     }
  *   });
  *
- *   skylinkDemo.on(&quot;peerLeft&quot;, function (peerId, peerInfo, isSelf) {
+ *   skylinkDemo.on("peerLeft", function (peerId, peerInfo, isSelf) {
  *     if (!isSelf) {
  *       var peerVideo = document.getElementById(peerId);
  *       // do a check if peerVideo exists first
  *       if (peerVideo) {
- *         document.getElementById(&quot;peersVideo&quot;).removeChild(peerVideo);
+ *         document.getElementById("peersVideo").removeChild(peerVideo);
  *       } else {
- *         console.error(&quot;Peer video for &quot; + peerId + &quot; is not found.&quot;);
+ *         console.error("Peer video for " + peerId + " is not found.");
  *       }
  *     }
  *   });
  *
  *  // init() should always be called first before other methods other than event methods like on() or off().
- *  skylinkDemo.init(&quot;YOUR_APP_KEY_HERE&quot;, function (error, success) {
+ *  skylinkDemo.init("YOUR_APP_KEY_HERE", function (error, success) {
  *    if (success) {
- *      skylinkDemo.joinRoom(&quot;my_room&quot;, {
- *        userData: &quot;My Username&quot;,
+ *      skylinkDemo.joinRoom("my_room", {
+ *        userData: "My Username",
  *        audio: true,
  *        video: true
  *      });
@@ -295,7 +137,23 @@ var clone = function (obj) {
  * @for Skylink
  * @since 0.5.0
  */
-function Skylink() {
+function Skylink(instanceLabel) {
+  /**
+   * The Skylink object instance label ID.
+   * @attribute INSTANCE_LABEL
+   * @type String
+   * @readOnly
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this.INSTANCE_LABEL = typeof instanceLabel === 'string' && instanceLabel && instanceLabel !== '_' ?
+    instanceLabel : 'in_' + Date.now() + Math.floor(Math.random() * 10000);
+
+  /**
+   * - Stores the logging function.
+   */
+  this._log = LogFactory(this.INSTANCE_LABEL);
+
   /**
    * Stores the flag if Peers should have any Datachannel connections.
    * @attribute _enableDataChannel
@@ -312,7 +170,7 @@ function Skylink() {
    * @attribute _dataChannels
    * @param {JSON} #peerId The list of Datachannels associated with Peer ID.
    * @param {RTCDataChannel} #peerId.#channelLabel The Datachannel connection.
-   *   The property name &lt;code&gt;&quot;main&quot;&lt;/code&gt; is reserved for messaging Datachannel type.
+   *   The property name <code>"main"</code> is reserved for messaging Datachannel type.
    * @type JSON
    * @private
    * @for Skylink
@@ -346,8 +204,8 @@ function Skylink() {
    * Stores the list of buffered ICE candidates that is received before
    *   remote session description is received and set.
    * @attribute _peerCandidatesQueue
-   * @param {Array} &lt;#peerId&gt; The list of the Peer connection buffered ICE candidates received.
-   * @param {Object} &lt;#peerId&gt;.&lt;#index&gt; The Peer connection buffered ICE candidate received.
+   * @param {Array} <#peerId> The list of the Peer connection buffered ICE candidates received.
+   * @param {Object} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
    * @type JSON
    * @private
    * @for Skylink
@@ -368,9 +226,9 @@ function Skylink() {
   /**
    * Stores the list of Peer connection ICE candidates.
    * @attribute _gatheredCandidates
-   * @param {JSON} &lt;#peerId&gt; The list of the Peer connection ICE candidates.
-   * @param {JSON} &lt;#peerId&gt;.sending The list of the Peer connection ICE candidates sent.
-   * @param {JSON} &lt;#peerId&gt;.receiving The list of the Peer connection ICE candidates received.
+   * @param {JSON} <#peerId> The list of the Peer connection ICE candidates.
+   * @param {JSON} <#peerId>.sending The list of the Peer connection ICE candidates sent.
+   * @param {JSON} <#peerId>.receiving The list of the Peer connection ICE candidates received.
    * @type JSON
    * @private
    * @for Skylink
@@ -450,7 +308,7 @@ function Skylink() {
   /**
    * Stores the list of the Peer connections.
    * @attribute _peerConnections
-   * @param {Object} &lt;#peerId&gt; The Peer connection.
+   * @param {Object} <#peerId> The Peer connection.
    * @type JSON
    * @private
    * @for Skylink
@@ -461,7 +319,7 @@ function Skylink() {
   /**
    * Stores the list of the Peer connections stats.
    * @attribute _peerStats
-   * @param {Object} &lt;#peerId&gt; The Peer connection stats.
+   * @param {Object} <#peerId> The Peer connection stats.
    * @type JSON
    * @private
    * @for Skylink
@@ -481,25 +339,25 @@ function Skylink() {
 
   /**
    * Stores the option for the TURN protocols to use.
-   * This should configure the TURN ICE servers urls &lt;code&gt;?transport=protocol&lt;/code&gt; flag.
+   * This should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.
    * @attribute _TURNTransport
    * @type String
-   * @default &quot;any&quot;
+   * @default "any"
    * @private
    * @required
    * @for Skylink
    * @since 0.5.4
    */
-  this._TURNTransport = &#x27;any&#x27;;
+  this._TURNTransport = 'any';
 
   /**
    * Stores the list of Peers session information.
    * @attribute _peerInformations
-   * @param {JSON} &lt;#peerId&gt; The Peer session information.
-   * @param {JSON|String} &lt;#peerId&gt;.userData The Peer custom data.
-   * @param {JSON} &lt;#peerId&gt;.settings The Peer streaming information.
-   * @param {JSON} &lt;#peerId&gt;.mediaStatus The Peer streaming muted status.
-   * @param {JSON} &lt;#peerId&gt;.agent The Peer agent information.
+   * @param {JSON} <#peerId> The Peer session information.
+   * @param {JSON|String} <#peerId>.userData The Peer custom data.
+   * @param {JSON} <#peerId>.settings The Peer streaming information.
+   * @param {JSON} <#peerId>.mediaStatus The Peer streaming muted status.
+   * @param {JSON} <#peerId>.agent The Peer agent information.
    * @type JSON
    * @private
    * @for Skylink
@@ -510,9 +368,9 @@ function Skylink() {
   /**
    * Stores the Signaling user credentials from the API response required for connecting to the Signaling server.
    * @attribute _user
-   * @param {String} uid The API result &quot;username&quot;.
-   * @param {String} token The API result &quot;userCred&quot;.
-   * @param {String} timeStamp The API result &quot;timeStamp&quot;.
+   * @param {String} uid The API result "username".
+   * @param {String} token The API result "userCred".
+   * @param {String} timeStamp The API result "timeStamp".
    * @param {String} sid The Signaling server receive user Peer ID.
    * @type JSON
    * @private
@@ -523,15 +381,15 @@ function Skylink() {
 
   /**
    * Stores the User custom data.
-   * By default, if no custom user data is set, it is an empty string &lt;code&gt;&quot;&quot;&lt;/code&gt;.
+   * By default, if no custom user data is set, it is an empty string <code>""</code>.
    * @attribute _userData
    * @type JSON|String
-   * @default &quot;&quot;
+   * @default ""
    * @private
    * @for Skylink
    * @since 0.5.6
    */
-  this._userData = &#x27;&#x27;;
+  this._userData = '';
 
   /**
    * Stores the User connection priority weight.
@@ -545,8 +403,8 @@ function Skylink() {
   this._peerPriorityWeight = 0;
 
   /**
-   * Stores the flag that indicates if &quot;autoIntroduce&quot; is enabled.
-   * If enabled, the Peers connecting the same Room will receive each others &quot;enter&quot; message ping.
+   * Stores the flag that indicates if "autoIntroduce" is enabled.
+   * If enabled, the Peers connecting the same Room will receive each others "enter" message ping.
    * @attribute _autoIntroduce
    * @type Boolean
    * @default true
@@ -557,10 +415,10 @@ function Skylink() {
   this._autoIntroduce = true;
 
   /**
-   * Stores the flag that indicates if &quot;isPrivileged&quot; is enabled.
+   * Stores the flag that indicates if "isPrivileged" is enabled.
    * If enabled, the User has Privileged features which has the ability to retrieve the list of
-   *   Peers in the same App space with &lt;code&gt;getPeers()&lt;/code&gt; method
-   *   and introduce Peers to each other with &lt;code&gt;introducePeer&lt;/code&gt; method.
+   *   Peers in the same App space with <code>getPeers()</code> method
+   *   and introduce Peers to each other with <code>introducePeer</code> method.
    * @attribute isPrivileged
    * @type Boolean
    * @default false
@@ -571,7 +429,7 @@ function Skylink() {
   this._isPrivileged = false;
 
   /**
-   * Stores the list of Peers retrieved from the Signaling from &lt;code&gt;getPeers()&lt;/code&gt; method.
+   * Stores the list of Peers retrieved from the Signaling from <code>getPeers()</code> method.
    * @attribute _peerList
    * @type JSON
    * @private
@@ -611,10 +469,10 @@ function Skylink() {
   this._inRoom = false;
 
   /**
-   * Stores the list of &lt;code&gt;on()&lt;/code&gt; event handlers.
+   * Stores the list of <code>on()</code> event handlers.
    * @attribute _EVENTS
-   * @param {Array} &lt;#event&gt; The list of event handlers associated with the event.
-   * @param {Function} &lt;#event&gt;.&lt;#index&gt; The event handler function.
+   * @param {Array} <#event> The list of event handlers associated with the event.
+   * @param {Function} <#event>.<#index> The event handler function.
    * @type JSON
    * @private
    * @for Skylink
@@ -623,11 +481,11 @@ function Skylink() {
   this._EVENTS = {};
 
   /**
-   * Stores the list of &lt;code&gt;once()&lt;/code&gt; event handlers.
+   * Stores the list of <code>once()</code> event handlers.
    * These events are only triggered once.
    * @attribute _onceEvents
-   * @param {Array} &lt;#event&gt; The list of event handlers associated with the event.
-   * @param {Array} &lt;#event&gt;.&lt;#index&gt; The array of event handler function and its condition function.
+   * @param {Array} <#event> The list of event handlers associated with the event.
+   * @param {Array} <#event>.<#index> The array of event handler function and its condition function.
    * @type JSON
    * @private
    * @for Skylink
@@ -698,7 +556,7 @@ function Skylink() {
   this._socketMessageQueue = [];
 
   /**
-   * Stores the &lt;code&gt;setTimeout&lt;/code&gt; to sent queued socket messages.
+   * Stores the <code>setTimeout</code> to sent queued socket messages.
    * @attribute _socketMessageTimeout
    * @type Object
    * @private
@@ -720,8 +578,8 @@ function Skylink() {
    * @since 0.5.8
    */
   this._socketPorts = {
-    &#x27;http:&#x27;: [80, 3000],
-    &#x27;https:&#x27;: [443, 3443]
+    'http:': [80, 3000],
+    'https:': [443, 3443]
   };
 
   /**
@@ -802,8 +660,8 @@ function Skylink() {
    * @for Skylink
    * @since 0.6.16
    */
-  this._enableIceRestart = window.webrtcDetectedBrowser === &#x27;firefox&#x27; ?
-    window.webrtcDetectedVersion &gt;= 48 : true;
+  this._enableIceRestart = window.webrtcDetectedBrowser === 'firefox' ?
+    window.webrtcDetectedVersion >= 48 : true;
 
   /**
    * Stores the flag if MCU environment is enabled.
@@ -843,7 +701,7 @@ function Skylink() {
 
   /**
    * Stores the flag if TURN connections should be enforced when connecting to Peers.
-   * This filters all non &quot;relay&quot; ICE candidates to enforce connections via the TURN server.
+   * This filters all non "relay" ICE candidates to enforce connections via the TURN server.
    * @attribute _forceTURN
    * @type Boolean
    * @default false
@@ -871,10 +729,10 @@ function Skylink() {
    * @for Skylink
    * @since 0.5.2
    */
-  this._roomServer = &#x27;//api.temasys.io&#x27;;
+  this._roomServer = '//api.temasys.io';
 
   /**
-   * Stores the App Key configured in &lt;code&gt;init()&lt;/code&gt;.
+   * Stores the App Key configured in <code>init()</code>.
    * @attribute _appKey
    * @type String
    * @private
@@ -884,7 +742,7 @@ function Skylink() {
   this._appKey = null;
 
   /**
-   * Stores the default Room name to connect to when &lt;code&gt;joinRoom()&lt;/code&gt; does not provide a Room name.
+   * Stores the default Room name to connect to when <code>joinRoom()</code> does not provide a Room name.
    * @attribute _defaultRoom
    * @type String
    * @private
@@ -894,7 +752,7 @@ function Skylink() {
   this._defaultRoom = null;
 
   /**
-   * Stores the &lt;code&gt;init()&lt;/code&gt; credentials starting DateTime stamp in ISO 8601.
+   * Stores the <code>init()</code> credentials starting DateTime stamp in ISO 8601.
    * @attribute _roomStart
    * @type String
    * @private
@@ -904,7 +762,7 @@ function Skylink() {
   this._roomStart = null;
 
   /**
-   * Stores the &lt;code&gt;init()&lt;/code&gt; credentials duration counted in hours.
+   * Stores the <code>init()</code> credentials duration counted in hours.
    * @attribute _roomDuration
    * @type Number
    * @private
@@ -914,7 +772,7 @@ function Skylink() {
   this._roomDuration = null;
 
   /**
-   * Stores the &lt;code&gt;init()&lt;/code&gt; generated credentials string.
+   * Stores the <code>init()</code> generated credentials string.
    * @attribute _roomCredentials
    * @type String
    * @private
@@ -924,7 +782,7 @@ function Skylink() {
   this._roomCredentials = null;
 
   /**
-   * Stores the current &lt;code&gt;init()&lt;/code&gt; readyState.
+   * Stores the current <code>init()</code> readyState.
    * @attribute _readyState
    * @type Number
    * @private
@@ -934,7 +792,7 @@ function Skylink() {
   this._readyState = 0;
 
   /**
-   * Stores the &quot;cid&quot; used for &lt;code&gt;joinRoom()&lt;/code&gt;.
+   * Stores the "cid" used for <code>joinRoom()</code>.
    * @attribute _key
    * @type String
    * @private
@@ -944,7 +802,7 @@ function Skylink() {
   this._key = null;
 
   /**
-   * Stores the &quot;apiOwner&quot; used for &lt;code&gt;joinRoom()&lt;/code&gt;.
+   * Stores the "apiOwner" used for <code>joinRoom()</code>.
    * @attribute _appKeyOwner
    * @type String
    * @private
@@ -954,14 +812,14 @@ function Skylink() {
   this._appKeyOwner = null;
 
   /**
-   * Stores the Room credentials information for &lt;code&gt;joinRoom()&lt;/code&gt;.
+   * Stores the Room credentials information for <code>joinRoom()</code>.
    * @attribute _room
-   * @param {String} id The &quot;rid&quot; for &lt;code&gt;joinRoom()&lt;/code&gt;.
-   * @param {String} token The &quot;roomCred&quot; for &lt;code&gt;joinRoom()&lt;/code&gt;.
-   * @param {String} startDateTime The &quot;start&quot; for &lt;code&gt;joinRoom()&lt;/code&gt;.
-   * @param {String} duration The &quot;len&quot; for &lt;code&gt;joinRoom()&lt;/code&gt;.
+   * @param {String} id The "rid" for <code>joinRoom()</code>.
+   * @param {String} token The "roomCred" for <code>joinRoom()</code>.
+   * @param {String} startDateTime The "start" for <code>joinRoom()</code>.
+   * @param {String} duration The "len" for <code>joinRoom()</code>.
    * @param {String} connection The RTCPeerConnection constraints and configuration. This is not used in the SDK
-   *   except for the &quot;mediaConstraints&quot; property that sets the default &lt;code&gt;getUserMedia()&lt;/code&gt; settings.
+   *   except for the "mediaConstraints" property that sets the default <code>getUserMedia()</code> settings.
    * @type JSON
    * @private
    * @for Skylink
@@ -980,7 +838,7 @@ function Skylink() {
   this._peerMessagesStamps = {};
 
   /**
-   * Stores the flag that indicates if &lt;code&gt;getUserMedia()&lt;/code&gt; should fallback to retrieve
+   * Stores the flag that indicates if <code>getUserMedia()</code> should fallback to retrieve
    *   audio only Stream after retrieval of audio and video Stream had failed.
    * @attribute _audioFallback
    * @type Boolean
@@ -1068,7 +926,7 @@ function Skylink() {
 
   /**
    * Stores all the Stream sessions.
-   * Defined as &lt;code&gt;false&lt;/code&gt; when Stream has already ended.
+   * Defined as <code>false</code> when Stream has already ended.
    * @attribute _streamsSession
    * @type JSON
    * @private
@@ -1081,23 +939,23 @@ function Skylink() {
    * Stores the preferred sending Peer connection streaming audio codec.
    * @attribute _selectedAudioCodec
    * @type String
-   * @default &quot;auto&quot;
+   * @default "auto"
    * @private
    * @for Skylink
    * @since 0.5.10
    */
-  this._selectedAudioCodec = &#x27;auto&#x27;;
+  this._selectedAudioCodec = 'auto';
 
   /**
    * Stores the preferred sending Peer connection streaming video codec.
    * @attribute _selectedVideoCodec
    * @type String
-   * @default &quot;auto&quot;
+   * @default "auto"
    * @private
    * @for Skylink
    * @since 0.5.10
    */
-  this._selectedVideoCodec = &#x27;auto&#x27;;
+  this._selectedVideoCodec = 'auto';
 
   /**
    * Stores the flag if ulpfec and red codecs should be removed.
@@ -1256,22 +1114,13 @@ function Skylink() {
    */
   this._sdpSessions = {};
 }
-    </pre>
-</div>
 
-                  </div>
-              </div>
-          </div>
-      </div>
-  </div>
-</div>
-<script src="../assets/vendor/prettify/prettify-min.js"></script>
-<script>prettyPrint();</script>
-<script src="../assets/js/yui-prettify.js"></script>
-<script src="../assets/../api.js"></script>
-<script src="../assets/js/api-filter.js"></script>
-<script src="../assets/js/api-list.js"></script>
-<script src="../assets/js/api-search.js"></script>
-<script src="../assets/js/apidocs.js"></script>
-</body>
-</html>
+// Exports
+if(typeof exports !== 'undefined') {
+  module.exports = module.exports || {};
+  module.exports.Skylink = Skylink;
+} else if (globals) {
+  globals.Skylink = Skylink;
+} else if (window) {
+  window.Skylink = Skylink;
+}

@@ -295,7 +295,7 @@ Skylink.prototype.init = function(options, callback) {
 
   if (!options) {
     var error = 'No API key provided';
-    log.error(error);
+    self._log.error(error);
     if (typeof callback === 'function'){
       callback(error,null);
     }
@@ -338,7 +338,7 @@ Skylink.prototype.init = function(options, callback) {
   var iceServer = null;
   var socketServer = null;
 
-  log.log('Provided init options:', options);
+  self._log.log('Provided init options:', options);
 
   if (typeof options === 'string') {
     // set all the default api key, default room and room
@@ -527,7 +527,7 @@ Skylink.prototype.init = function(options, callback) {
   self._turnServer = iceServer;
   self._socketServer = socketServer;
 
-  log.log('Init configuration:', {
+  self._log.log('Init configuration:', {
     serverUrl: self._path,
     readyState: self._readyState,
     appKey: self._appKey,
@@ -567,7 +567,7 @@ Skylink.prototype.init = function(options, callback) {
     var readyStateChangeFn = function (readyState, error) {
       if (!hasTriggered) {
         if (readyState === self.READY_STATE_CHANGE.COMPLETED) {
-          log.log([null, 'Socket', null, 'Firing callback. ' +
+          self._log.log([null, 'Socket', null, 'Firing callback. ' +
           'Ready state change has met provided state ->'], readyState);
           hasTriggered = true;
           self.off('readyStateChange', readyStateChangeFn);
@@ -602,9 +602,9 @@ Skylink.prototype.init = function(options, callback) {
             socketServer: self._socketServer
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
-          log.log([null, 'Socket', null, 'Firing callback. ' +
+          self._log.log([null, 'Socket', null, 'Firing callback. ' +
             'Ready state change has met provided state ->'], readyState);
-          log.debug([null, 'Socket', null, 'Ready state met failure'], error);
+          self._log.debug([null, 'Socket', null, 'Ready state met failure'], error);
           hasTriggered = true;
           self.off('readyStateChange', readyStateChangeFn);
           callback({
@@ -642,7 +642,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   url = (self._forceSSL) ? 'https:' + url : url;
 
   if (useXDomainRequest) {
-    log.debug([null, 'XMLHttpRequest', method, 'Using XDomainRequest. ' +
+    self._log.debug([null, 'XMLHttpRequest', method, 'Using XDomainRequest. ' +
       'XMLHttpRequest is now XDomainRequest'], {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion
@@ -652,7 +652,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       xhr.contentType = contentType;
     };
   } else {
-    log.debug([null, 'XMLHttpRequest', method, 'Using XMLHttpRequest'], {
+    self._log.debug([null, 'XMLHttpRequest', method, 'Using XMLHttpRequest'], {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion
     });
@@ -665,13 +665,13 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   xhr.onload = function () {
     var response = xhr.responseText || xhr.response;
     var status = xhr.status || 200;
-    log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters'],
+    self._log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters'],
       JSON.parse(response || '{}'));
     callback(status, JSON.parse(response || '{}'));
   };
 
   xhr.onerror = function (error) {
-    log.error([null, 'XMLHttpRequest', method, 'Failed retrieving information:'],
+    self._log.error([null, 'XMLHttpRequest', method, 'Failed retrieving information:'],
       { status: xhr.status });
     self._readyState = -1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
@@ -682,9 +682,9 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   };
 
   xhr.onprogress = function () {
-    log.debug([null, 'XMLHttpRequest', method,
+    self._log.debug([null, 'XMLHttpRequest', method,
       'Retrieving information and config from webserver. Url:'], url);
-    log.debug([null, 'XMLHttpRequest', method, 'Provided parameters:'], params);
+    self._log.debug([null, 'XMLHttpRequest', method, 'Provided parameters:'], params);
   };
 
   xhr.open(method, url, true);
@@ -704,7 +704,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
  * @since 0.5.2
  */
 Skylink.prototype._parseInfo = function(info) {
-  log.log('Parsing parameter from server', info);
+  this._log.log('Parsing parameter from server', info);
   if (!info.pc_constraints && !info.offer_constraints) {
     this._trigger('readyStateChange', this.READY_STATE_CHANGE.ERROR, {
       status: 200,
@@ -714,8 +714,8 @@ Skylink.prototype._parseInfo = function(info) {
     return;
   }
 
-  log.debug('Peer connection constraints:', info.pc_constraints);
-  log.debug('Offer constraints:', info.offer_constraints);
+  this._log.debug('Peer connection constraints:', info.pc_constraints);
+  this._log.debug('Offer constraints:', info.offer_constraints);
 
   this._key = info.cid;
   this._appKeyOwner = info.apiOwner;
@@ -764,7 +764,7 @@ Skylink.prototype._parseInfo = function(info) {
   //this._streamSettings.video = info.video;
   this._readyState = 2;
   this._trigger('readyStateChange', this.READY_STATE_CHANGE.COMPLETED, null, this._selectedRoom);
-  log.info('Parsed parameters from webserver. ' +
+  this._log.info('Parsed parameters from webserver. ' +
     'Ready for web-realtime communication');
 
 };
@@ -798,7 +798,7 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   if (!window.io) {
-    log.error('Socket.io not loaded. Please load socket.io');
+    self._log.error('Socket.io not loaded. Please load socket.io');
     self._readyState = -1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
       status: null,
@@ -808,7 +808,7 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   if (!window.XMLHttpRequest) {
-    log.error('XMLHttpRequest not supported. Please upgrade your browser');
+    self._log.error('XMLHttpRequest not supported. Please upgrade your browser');
     self._readyState = -1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
       status: null,
@@ -818,7 +818,7 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   if (!self._path) {
-    log.error('Skylink is not initialised. Please call init() first');
+    self._log.error('Skylink is not initialised. Please call init() first');
     self._readyState = -1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
       status: null,
@@ -831,7 +831,7 @@ Skylink.prototype._loadInfo = function() {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
 
     if (!window.RTCPeerConnection) {
-      log.error('WebRTC not supported. Please upgrade your browser');
+      self._log.error('WebRTC not supported. Please upgrade your browser');
       self._readyState = -1;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
@@ -843,7 +843,7 @@ Skylink.prototype._loadInfo = function() {
 
     self._getCodecsSupport(function (error) {
       if (error) {
-        log.error(error);
+        self._log.error(error);
         self._readyState = -1;
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: null,
@@ -854,7 +854,7 @@ Skylink.prototype._loadInfo = function() {
       }
 
       if (Object.keys(self._currentCodecSupport.audio).length === 0 && Object.keys(self._currentCodecSupport.video).length === 0) {
-        log.error('No audio/video codecs available to start connection.');
+        self._log.error('No audio/video codecs available to start connection.');
         self._readyState = -1;
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: null,
@@ -897,7 +897,7 @@ Skylink.prototype._loadInfo = function() {
 Skylink.prototype._initSelectedRoom = function(room, callback) {
   var self = this;
   if (typeof room === 'function' || typeof room === 'undefined') {
-    log.error('Invalid room provided. Room:', room);
+    self._log.error('Invalid room provided. Room:', room);
     return;
   }
   var defaultRoom = self._defaultRoom;
