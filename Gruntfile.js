@@ -64,15 +64,21 @@ module.exports = function(grunt) {
             production: {
                 files: {
                     '<%= production %>/skylink.debug.js': [
-                        '<%= source %>/skylink-main.js',
-                        '<%= source %>/skylink-debug.js',
+                        '<%= source %>/factories.*.js',
+                        '<%= source %>/skylink.js',
+                        '<%= source %>/skylinklogs.js',
+                        '<%= source %>/constants/*.js',
+                        '<%= source %>/methods/*.js',
                         '<%= source %>/*.js'
                     ],
                     '<%= production %>/skylink.complete.js': [
                         'node_modules/socket.io-client/socket.io.js',
                         'node_modules/adapterjs/publish/adapter.screenshare.js',
-                        '<%= source %>/skylink-main.js',
-                        '<%= source %>/skylink-debug.js',
+                        '<%= source %>/factories.*.js',
+                        '<%= source %>/skylink.js',
+                        '<%= source %>/skylinklogs.js',
+                        '<%= source %>/constants/*.js',
+                        '<%= source %>/methods/*.js',
                         '<%= source %>/*.js'
                     ]
                 }

@@ -768,7 +768,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   var bundleLineIndex = -1;
   var bundleLineMids = [];
   var mLineIndex = -1;
-  var settings = clone(self._sdpSettings);
+  var settings = UtilsFactory.clone(self._sdpSettings);
 
   if (targetMid === 'MCU') {
     settings.connection.audio = true;

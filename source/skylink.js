@@ -1,64 +1,3 @@
-/* jshint ignore:start */
-// Object.keys() polyfill - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
-!function(){Object.keys||(Object.keys=function(){var t=Object.prototype.hasOwnProperty,r=!{toString:null}.propertyIsEnumerable("toString"),e=["toString","toLocaleString","valueOf","hasOwnProperty","isPrototypeOf","propertyIsEnumerable","constructor"],o=e.length;return function(n){if("object"!=typeof n&&"function"!=typeof n||null===n)throw new TypeError("Object.keys called on non-object");var c=[];for(var l in n)t.call(n,l)&&c.push(l);if(r)for(var p=0;o>p;p++)t.call(n,e[p])&&c.push(e[p]);return c}}())}();
-// Date.getISOString() polyfill - https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
-!function(){function t(t){return 10>t?"0"+t:t}Date.prototype.toISOString=function(){return this.getUTCFullYear()+"-"+t(this.getUTCMonth()+1)+"-"+t(this.getUTCDate())+"T"+t(this.getUTCHours())+":"+t(this.getUTCMinutes())+":"+t(this.getUTCSeconds())+"."+(this.getUTCMilliseconds()/1e3).toFixed(3).slice(2,5)+"Z"}}();
-// Date.now() polyfill
-!function(){"function"!=typeof Date.now&&(Date.now=function(){return(new Date).getTime()})}();
-// addEventListener() polyfill - https://gist.github.com/eirikbacker/2864711
-!function(e,t){function n(e){var n=t[e];t[e]=function(e){return o(n(e))}}function a(t,n,a){return(a=this).attachEvent("on"+t,function(t){var t=t||e.event;t.preventDefault=t.preventDefault||function(){t.returnValue=!1},t.stopPropagation=t.stopPropagation||function(){t.cancelBubble=!0},n.call(a,t)})}function o(e,t){if(t=e.length)for(;t--;)e[t].addEventListener=a;else e.addEventListener=a;return e}e.addEventListener||(o([t,e]),"Element"in e?e.Element.prototype.addEventListener=a:(t.attachEvent("onreadystatechange",function(){o(t.all)}),n("getElementsByTagName"),n("getElementById"),n("createElement"),o(t.all)))}(window,document);
-/* jshint ignore:end */
-
-/**
- * Global function that clones an object.
- */
-var clone = function (obj) {
-  if (obj === null || typeof obj !== 'object') {
-    return obj;
-  }
-
-  var copy = function (data) {
-    var copy = data.constructor();
-    for (var attr in data) {
-      if (data.hasOwnProperty(attr)) {
-        copy[attr] = data[attr];
-      }
-    }
-    return copy;
-  };
-
-  if (typeof obj === 'object' && !Array.isArray(obj)) {
-    try {
-      return JSON.parse( JSON.stringify(obj) );
-    } catch (err) {
-      return copy(obj);
-    }
-  }
-
-  return copy(obj);
-};
-
-/**
- * Global function that loops an object.
- */
-var forEach = function (obj, fn) {
-  if (Array.isArray(obj)) {
-    if (typeof obj.forEach === 'function') {
-      obj.forEach(fn);
-    } else {
-      for (var i = 0; i < obj.length; i++) {
-        fn(obj[i], i);
-      }
-    }
-  } else if (obj && typeof obj === 'object') {
-    for (var prop in obj) {
-      if (obj.hasOwnProperty(prop)) {
-        fn(obj[prop], prop);
-      }
-    }
-  }
-};
-
 /**
  * <h2>Prerequisites on using Skylink</h2>
  * Before using any Skylink functionalities, you will need to authenticate your App Key using
@@ -1115,12 +1054,138 @@ function Skylink(instanceLabel) {
   this._sdpSessions = {};
 }
 
-// Exports
-if(typeof exports !== 'undefined') {
-  module.exports = module.exports || {};
-  module.exports.Skylink = Skylink;
-} else if (globals) {
-  globals.Skylink = Skylink;
-} else if (window) {
-  window.Skylink = Skylink;
-}
+/**
+ * Stores the data chunk size for Blob transfers.
+ * @attribute _CHUNK_FILE_SIZE
+ * @type Number
+ * @private
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._CHUNK_FILE_SIZE = 49152;
+
+/**
+ * Stores the data chunk size for Blob transfers transferring from/to
+ *   Firefox browsers due to limitation tested in the past in some PCs (linx predominatly).
+ * @attribute _MOZ_CHUNK_FILE_SIZE
+ * @type Number
+ * @private
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
+
+/**
+ * Stores the data chunk size for binary Blob transfers.
+ * @attribute _BINARY_FILE_SIZE
+ * @type Number
+ * @private
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._BINARY_FILE_SIZE = 65456;
+
+/**
+ * Stores the data chunk size for binary Blob transfers.
+ * @attribute _MOZ_BINARY_FILE_SIZE
+ * @type Number
+ * @private
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.16
+ */
+Skylink.prototype._MOZ_BINARY_FILE_SIZE = 16384;
+
+/**
+ * Stores the data chunk size for data URI string transfers.
+ * @attribute _CHUNK_DATAURL_SIZE
+ * @type Number
+ * @private
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
+
+/**
+ * Stores the list of data transfer protocols.
+ * @attribute _DC_PROTOCOL_TYPE
+ * @param {String} WRQ The protocol to initiate data transfer.
+ * @param {String} ACK The protocol to request for data transfer chunk.
+ *   Give <code>-1</code> to reject the request at the beginning and <code>0</code> to accept
+ *   the data transfer request.
+ * @param {String} CANCEL The protocol to terminate data transfer.
+ * @param {String} ERROR The protocol when data transfer has errors and has to be terminated.
+ * @param {String} MESSAGE The protocol that is used to send P2P messages.
+ * @type JSON
+ * @readOnly
+ * @private
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._DC_PROTOCOL_TYPE = {
+  WRQ: 'WRQ',
+  ACK: 'ACK',
+  ERROR: 'ERROR',
+  CANCEL: 'CANCEL',
+  MESSAGE: 'MESSAGE'
+};
+
+/**
+ * Stores the list of socket messaging protocol types.
+ * See confluence docs for the list based on the current <code>SM_PROTOCOL_VERSION</code>.
+ * @attribute _SIG_MESSAGE_TYPE
+ * @type JSON
+ * @readOnly
+ * @private
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype._SIG_MESSAGE_TYPE = {
+  JOIN_ROOM: 'joinRoom',
+  IN_ROOM: 'inRoom',
+  ENTER: 'enter',
+  WELCOME: 'welcome',
+  RESTART: 'restart',
+  OFFER: 'offer',
+  ANSWER: 'answer',
+  CANDIDATE: 'candidate',
+  BYE: 'bye',
+  REDIRECT: 'redirect',
+  UPDATE_USER: 'updateUserEvent',
+  ROOM_LOCK: 'roomLockEvent',
+  MUTE_VIDEO: 'muteVideoEvent',
+  MUTE_AUDIO: 'muteAudioEvent',
+  PUBLIC_MESSAGE: 'public',
+  PRIVATE_MESSAGE: 'private',
+  STREAM: 'stream',
+  GROUP: 'group',
+  GET_PEERS: 'getPeers',
+  PEER_LIST: 'peerList',
+  INTRODUCE: 'introduce',
+  INTRODUCE_ERROR: 'introduceError',
+  APPROACH: 'approach',
+  START_RECORDING: 'startRecordingRoom',
+  STOP_RECORDING: 'stopRecordingRoom',
+  RECORDING: 'recordingEvent',
+  END_OF_CANDIDATES: 'endOfCandidates'
+};
+
+/**
+ * Stores the list of socket messaging protocol types to queue when sent less than a second interval.
+ * @attribute _groupMessageList
+ * @type Array
+ * @private
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype._groupMessageList = [
+  Skylink.prototype._SIG_MESSAGE_TYPE.STREAM,
+  Skylink.prototype._SIG_MESSAGE_TYPE.UPDATE_USER,
+  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
+  Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+];

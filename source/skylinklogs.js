@@ -94,13 +94,3 @@ var SkylinkLogs = {
     });
   }
 };
-
-// Exports
-if(typeof exports !== 'undefined') {
-  module.exports = module.exports || {};
-  module.exports.SkylinkLogs = SkylinkLogs;
-} else if (globals) {
-  globals.SkylinkLogs = SkylinkLogs;
-} else if (window) {
-  window.SkylinkLogs = SkylinkLogs;
-}

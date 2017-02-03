@@ -1,365 +1,6 @@
-/**
- * <blockquote class="info">
- *   Note that broadcasted events from <a href="#method_muteStream"><code>muteStream()</code> method</a>,
- *   <a href="#method_stopStream"><code>stopStream()</code> method</a>,
- *   <a href="#method_stopScreen"><code>stopScreen()</code> method</a>,
- *   <a href="#method_sendMessage"><code>sendMessage()</code> method</a>,
- *   <a href="#method_unlockRoom"><code>unlockRoom()</code> method</a> and
- *   <a href="#method_lockRoom"><code>lockRoom()</code> method</a> may be queued when
- *   sent within less than an interval.
- * </blockquote>
- * Function that sends a message to Peers via the Signaling socket connection.
- * @method sendMessage
- * @param {String|JSON} message The message.
- * @param {String|Array} [targetPeerId] The target Peer ID to send message to.
- * - When provided as an Array, it will send the message to only Peers which IDs are in the list.
- * - When not provided, it will broadcast the message to all connected Peers in the Room.
- * @example
- *   // Example 1: Broadcasting to all Peers
- *   skylinkDemo.sendMessage("Hi all!");
- *
- *   // Example 2: Sending to specific Peers
- *   var peersInExclusiveParty = [];
- *
- *   skylinkDemo.on("peerJoined", function (peerId, peerInfo, isSelf) {
- *     if (isSelf) return;
- *     if (peerInfo.userData.exclusive) {
- *       peersInExclusiveParty.push(peerId);
- *     }
- *   });
- *
- *   function updateExclusivePartyStatus (message) {
- *     skylinkDemo.sendMessage(message, peersInExclusiveParty);
- *   }
- * @trigger <ol class="desc-seq">
- *   <li>Sends socket connection message to all targeted Peers via Signaling server. <ol>
- *   <li><a href="#event_incomingMessage"><code>incomingMessage</code> event</a> triggers parameter payload
- *   <code>message.isDataChannel</code> value as <code>false</code>.</li></ol></li></ol>
- * @for Skylink
- * @since 0.4.0
- */
-Skylink.prototype.sendMessage = function(message, targetPeerId) {
-  var listOfPeers = Object.keys(this._peerInformations);
-  var isPrivate = false;
 
-  if (Array.isArray(targetPeerId)) {
-    listOfPeers = targetPeerId;
-    isPrivate = true;
-  } else if (targetPeerId && typeof targetPeerId === 'string') {
-    listOfPeers = [targetPeerId];
-    isPrivate = true;
-  }
 
-  if (!this._inRoom || !this._socket || !this._user) {
-    this._log.error('Unable to send message as User is not in Room. ->', message);
-    return;
-  }
 
-  // Loop out unwanted Peers
-  for (var i = 0; i < listOfPeers.length; i++) {
-    var peerId = listOfPeers[i];
-
-    if (!this._peerInformations[peerId]) {
-      this._log.error([peerId, 'Socket', null, 'Dropping of sending message to Peer as ' +
-        'Peer session does not exists']);
-      listOfPeers.splice(i, 1);
-      i--;
-    } else if (peerId === 'MCU') {
-      listOfPeers.splice(i, 1);
-      i--;
-    } else if (isPrivate) {
-      this._log.debug([peerId, 'Socket', null, 'Sending private message to Peer']);
-
-      this._sendChannelMessage({
-        cid: this._key,
-        data: message,
-        mid: this._user.sid,
-        rid: this._room.id,
-        target: peerId,
-        type: this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE
-      });
-    }
-  }
-
-  if (listOfPeers.length === 0) {
-    this._log.warn('Currently there are no Peers to send message to (unless the message is queued and ' +
-      'there are Peer connected by then).');
-  }
-
-  if (!isPrivate) {
-    this._log.debug([null, 'Socket', null, 'Broadcasting message to Peers']);
-
-    this._sendChannelMessage({
-      cid: this._key,
-      data: message,
-      mid: this._user.sid,
-      rid: this._room.id,
-      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-    });
-  } else {
-    this._trigger('incomingMessage', {
-      content: message,
-      isPrivate: isPrivate,
-      targetPeerId: targetPeerId || null,
-      listOfPeers: listOfPeers,
-      isDataChannel: false,
-      senderPeerId: this._user.sid
-    }, this._user.sid, this.getPeerInfo(), true);
-  }
-};
-
-/**
- * <blockquote class="info">
- *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
- *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
- *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
- *   <a href="http://support.temasys.io">contact us on our support portal</a>.
- * </blockquote>
- * Starts a recording session.
- * @method startRecording
- * @param {Function} [callback] The callback function fired when request has completed.
- *   <small>Function parameters signature is <code>function (error, success)</code></small>
- *   <small>Function request completion is determined by the <a href="#event_recordingState">
- *   <code>recordingState</code> event</a> triggering <code>state</code> parameter payload as <code>START</code>.</small>
- * @param {Error|String} callback.error The error result in request.
- *   <small>Defined as <code>null</code> when there are no errors in request</small>
- *   <small>Object signature is the <code>startRecording()</code> error when starting a new recording session.</small>
- * @param {String|JSON} callback.success The success result in request.
- *   <small>Defined as <code>null</code> when there are errors in request</small>
- *   <small>Object signature is the <a href="#event_recordingState">
- *   <code>recordingState</code> event</a> triggered <code>recordingId</code> parameter payload.</small>
- * @example
- *   // Example 1: Start recording session
- *   skylinkDemo.startRecording(function (error, success) {
- *     if (error) return;
- *     console.info("Recording session has started. ID ->", success);
- *   });
- * @trigger <ol class="desc-seq">
- *   <li>If MCU is not connected: <ol><li><b>ABORT</b> and return error.</li></ol></li>
- *   <li>If there is an existing recording session currently going on: <ol>
- *   <li><b>ABORT</b> and return error.</li></ol></li>
- *   <li>Sends to MCU via Signaling server to start recording session. <ol>
- *   <li>If recording session has been started successfully: <ol>
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers
- *   parameter payload <code>state</code> as <code>START</code>.</li></ol></li></ol></li></ol>
- * @beta
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype.startRecording = function (callback) {
-  var self = this;
-
-  if (!self._hasMCU) {
-    var noMCUError = 'Unable to start recording as MCU is not connected';
-    self._log.error(noMCUError);
-    if (typeof callback === 'function') {
-      callback(new Error(noMCUError), null);
-    }
-    return;
-  }
-
-  if (self._currentRecordingId) {
-    var hasRecordingSessionError = 'Unable to start recording as there is an existing recording in-progress';
-    self._log.error(hasRecordingSessionError);
-    if (typeof callback === 'function') {
-      callback(new Error(hasRecordingSessionError), null);
-    }
-    return;
-  }
-
-  if (typeof callback === 'function') {
-    self.once('recordingState', function (state, recordingId) {
-      callback(null, recordingId);
-    }, function (state) {
-      return state === self.RECORDING_STATE.START;
-    });
-  }
-
-  self._sendChannelMessage({
-    type: self._SIG_MESSAGE_TYPE.START_RECORDING,
-    rid: self._room.id,
-    target: 'MCU'
-  });
-
-  self._log.debug(['MCU', 'Recording', null, 'Starting recording']);
-};
-
-/**
- * <blockquote class="info">
- *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
- *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
- *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
- *   <a href="http://support.temasys.io">contact us on our support portal</a>.
- * </blockquote>
- * Stops a recording session.
- * @param {Function} [callback] The callback function fired when request has completed.
- *   <small>Function parameters signature is <code>function (error, success)</code></small>
- *   <small>Function request completion is determined by the <a href="#event_recordingState">
- *   <code>recordingState</code> event</a> triggering <code>state</code> parameter payload as <code>STOP</code>
- *   or as <code>LINK</code> when the value of <code>callbackSuccessWhenLink</code> is <code>true</code>.</small>
- * @param {Error|String} callback.error The error result in request.
- *   <small>Defined as <code>null</code> when there are no errors in request</small>
- *   <small>Object signature is the <code>stopRecording()</code> error when stopping current recording session.</small>
- * @param {String|JSON} callback.success The success result in request.
- * - When <code>callbackSuccessWhenLink</code> value is <code>false</code>, it is defined as string as
- *   the recording session ID.
- * - when <code>callbackSuccessWhenLink</code> value is <code>true</code>, it is defined as an object as
- *   the recording session information.
- *   <small>Defined as <code>null</code> when there are errors in request</small>
- * @param {JSON} callback.success.recordingId The recording session ID.
- * @param {JSON} callback.success.link The recording session mixin videos link in
- *   <a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">MP4</a> format.
- *   <small>Object signature matches the <code>link</code> parameter payload received in the
- *   <a href="#event_recordingState"><code>recordingState</code> event</a>.</small>
- * @param {Boolean} [callbackSuccessWhenLink=false] The flag if <code>callback</code> function provided
- *   should result in success only when <a href="#event_recordingState"><code>recordingState</code> event</a>
- *   triggering <code>state</code> parameter payload as <code>LINK</code>.
- * @method stopRecording
- * @example
- *   // Example 1: Stop recording session
- *   skylinkDemo.stopRecording(function (error, success) {
- *     if (error) return;
- *     console.info("Recording session has stopped. ID ->", success);
- *   });
- *
- *   // Example 2: Stop recording session with mixin videos link
- *   skylinkDemo.stopRecording(function (error, success) {
- *     if (error) return;
- *     console.info("Recording session has compiled with links ->", success.link);
- *   }, true);
- * @trigger <ol class="desc-seq">
- *   <li>If MCU is not connected: <ol><li><b>ABORT</b> and return error.</li></ol></li>
- *   <li>If there is no existing recording session currently going on: <ol>
- *   <li><b>ABORT</b> and return error.</li></ol></li>
- *   <li>If existing recording session recording time has not elapsed more than 4 seconds:
- *   <small>4 seconds is mandatory for recording session to ensure better recording
- *   experience and stability.</small> <ol><li><b>ABORT</b> and return error.</li></ol></li>
- *   <li>Sends to MCU via Signaling server to stop recording session: <ol>
- *   <li>If recording session has been stopped successfully: <ol>
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a>
- *   triggers parameter payload <code>state</code> as <code>START</code>.
- *   <li>MCU starts mixin recorded session videos: <ol>
- *   <li>If recording session has been mixin successfully with links: <ol>
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers
- *   parameter payload <code>state</code> as <code>LINK</code>.<li>Else: <ol>
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers
- *   parameter payload <code>state</code> as <code>ERROR</code>.<li><b>ABORT</b> and return error.</ol></li>
- *   </ol></li></ol></li><li>Else: <ol>
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a>
- *   triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li>
- *   </ol></li></ol></li></ol>
- * @beta
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
-  var self = this;
-
-  if (!self._hasMCU) {
-    var noMCUError = 'Unable to stop recording as MCU is not connected';
-    self._log.error(noMCUError);
-    if (typeof callback === 'function') {
-      callback(new Error(noMCUError), null);
-    }
-    return;
-  }
-
-  if (!self._currentRecordingId) {
-    var noRecordingSessionError = 'Unable to stop recording as there is no recording in-progress';
-    self._log.error(noRecordingSessionError);
-    if (typeof callback === 'function') {
-      callback(new Error(noRecordingSessionError), null);
-    }
-    return;
-  }
-
-  if (self._recordingStartInterval) {
-    var recordingSecsRequiredError = 'Unable to stop recording as 4 seconds has not been recorded yet';
-    self._log.error(recordingSecsRequiredError);
-    if (typeof callback === 'function') {
-      callback(new Error(recordingSecsRequiredError), null);
-    }
-    return;
-  }
-
-  if (typeof callback === 'function') {
-    var expectedRecordingId = self._currentRecordingId;
-
-    self.once('recordingState', function (state, recordingId, link, error) {
-      if (callbackSuccessWhenLink) {
-        if (error) {
-          callback(error, null);
-          return;
-        }
-
-        callback(null, {
-          link: link,
-          recordingId: recordingId
-        });
-        return;
-      }
-
-      callback(null, recordingId);
-
-    }, function (state, recordingId) {
-      if (expectedRecordingId === recordingId) {
-        if (callbackSuccessWhenLink) {
-          return [self.RECORDING_STATE.LINK, self.RECORDING_STATE.ERROR].indexOf(state) > -1;
-        }
-        return state === self.RECORDING_STATE.STOP;
-      }
-    });
-  }
-
-  self._sendChannelMessage({
-    type: self._SIG_MESSAGE_TYPE.STOP_RECORDING,
-    rid: self._room.id,
-    target: 'MCU'
-  });
-
-  self._log.debug(['MCU', 'Recording', null, 'Stopping recording']);
-};
-
-/**
- * <blockquote class="info">
- *   Note that this feature requires MCU and recording to be enabled for the App Key provided in the
- *   <a href="#method_init"><code>init()</code> method</a>. If recording feature is not available to
- *   be enabled in the <a href="https://console.temasys.io">Developer Console</a>, please
- *   <a href="http://support.temasys.io">contact us on our support portal</a>.
- * </blockquote>
- * Gets the list of current recording sessions since User has connected to the Room.
- * @method getRecordings
- * @return {JSON} The list of recording sessions.<ul>
- *   <li><code>#recordingId</code><var><b>{</b>JSON<b>}</b></var><p>The recording session.</p><ul>
- *   <li><code>active</code><var><b>{</b>Boolean<b>}</b></var><p>The flag that indicates if the recording session is currently active.</p></li>
- *   <li><code>state</code><var><b>{</b>Number<b>}</b></var><p>The current recording state. [Rel: Skylink.RECORDING_STATE]</p></li>
- *   <li><code>startedDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session started DateTime in
- *   <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.<small>Note that this value may not be
- *   very accurate as this value is recorded when the start event is received.</small></p></li>
- *   <li><code>endedDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session ended DateTime in
- *   <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.<small>Note that this value may not be
- *   very accurate as this value is recorded when the stop event is received.</small>
- *   <small>Defined only after <code>state</code> has triggered <code>STOP</code>.</small></p></li>
- *   <li><code>mixingDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session mixing completed DateTime in
- *   <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.<small>Note that this value may not be
- *   very accurate as this value is recorded when the mixing completed event is received.</small>
- *   <small>Defined only when <code>state</code> is <code>LINK</code>.</small></p></li>
- *   <li><code>links</code><var><b>{</b>JSON<b>}</b></var><p>The recording session links.
- *   <small>Object signature matches the <code>link</code> parameter payload received in the
- *   <a href="#event_recordingState"><code>recordingState</code> event</a>.</small>
- *   <small>Defined only when <code>state</code> is <code>LINK</code>.</small></p></li>
- *   <li><code>error</code><var><b>{</b>Error<b>}</b></var><p>The recording session error.
- *   <small>Defined only when <code>state</code> is <code>ERROR</code>.</small></p></li></ul></li></ul>
- * @example
- *   // Example 1: Get recording sessions
- *   skylinkDemo.getRecordings();
- * @beta
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype.getRecordings = function () {
-  return clone(this._recordings);
-};
 
 /**
  * Function that handles and processes the socket message received.
@@ -373,11 +14,11 @@ Skylink.prototype._processSigMessage = function(message, session) {
   if (!origin || origin === this._user.sid) {
     origin = 'Server';
   }
-  this._log.debug([origin, 'Socket', message.type, 'Received from peer ->'], clone(message));
+  this._log.debug([origin, 'Socket', message.type, 'Received from peer ->'], UtilsFactory.clone(message));
   if (message.mid === this._user.sid &&
     message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &&
     message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
-    this._log.debug([origin, 'Socket', message.type, 'Ignoring message ->'], clone(message));
+    this._log.debug([origin, 'Socket', message.type, 'Ignoring message ->'], UtilsFactory.clone(message));
     return;
   }
   switch (message.type) {
@@ -447,7 +88,7 @@ Skylink.prototype._processSigMessage = function(message, session) {
     this._endOfCandidatesHandler(message);
     break;
   default:
-    this._log.error([message.mid, 'Socket', message.type, 'Unsupported message ->'], clone(message));
+    this._log.error([message.mid, 'Socket', message.type, 'Unsupported message ->'], UtilsFactory.clone(message));
     break;
   }
 };
@@ -1398,7 +1039,7 @@ Skylink.prototype._offerHandler = function(message) {
   }
 
   self._log.log([targetMid, null, message.type, 'Received offer from peer. ' +
-    'Session description:'], clone(message));
+    'Session description:'], UtilsFactory.clone(message));
 
   var offer = new RTCSessionDescription({
     type: message.type,
@@ -1568,7 +1209,7 @@ Skylink.prototype._answerHandler = function(message) {
   var targetMid = message.mid;
 
   self._log.log([targetMid, null, message.type,
-    'Received answer from peer. Session description:'], clone(message));
+    'Received answer from peer. Session description:'], UtilsFactory.clone(message));
 
   var pc = self._peerConnections[targetMid];
 
