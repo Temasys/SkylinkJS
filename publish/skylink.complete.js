@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 21:21:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Fri Feb 03 2017 14:12:18 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Wed Jan 25 2017 21:21:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Fri Feb 03 2017 14:12:18 GMT+0800 (SGT) */
 
 (function(refThis) {
 
@@ -23149,9 +23149,6 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
   } : condition;
 
   if (typeof callback === 'function') {
-
-    this._EVENTS[eventName] = this._EVENTS[eventName] || [];
-    // prevent undefined error
     this._onceEvents[eventName] = this._onceEvents[eventName] || [];
     this._onceEvents[eventName].push([callback, condition, fireAlways]);
     log.log([null, 'Event', eventName, 'Event is subscribed on condition']);
@@ -23163,7 +23160,8 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
 /**
  * Function that unsubscribes listeners from an event.
  * @method off
- * @param {String} eventName The event.
+ * @param {String} [eventName] The event.
+ * - When not provided, all listeners to all events will be unsubscribed.
  * @param {Function} [callback] The listener to unsubscribe.
  * - When not provided, all listeners associated to the event will be unsubscribed.
  * @example
@@ -23180,30 +23178,35 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
  * @since 0.5.5
  */
 Skylink.prototype.off = function(eventName, callback) {
-  if (callback === undefined) {
-    this._EVENTS[eventName] = [];
-    this._onceEvents[eventName] = [];
-    log.log([null, 'Event', eventName, 'All events are unsubscribed']);
-    return;
-  }
-  var arr = this._EVENTS[eventName];
-  var once = this._onceEvents[eventName];
-
-  // unsubscribe events that is triggered always
-  for (var i = 0; i < arr.length; i++) {
-    if (arr[i] === callback) {
-      log.log([null, 'Event', eventName, 'Event is unsubscribed']);
-      arr.splice(i, 1);
-      break;
+  if (!(eventName && typeof eventName === 'string')) {
+    this._EVENTS = {};
+    this._onceEvents = {};
+  } else {
+    if (callback === undefined) {
+      this._EVENTS[eventName] = [];
+      this._onceEvents[eventName] = [];
+      log.log([null, 'Event', eventName, 'All events are unsubscribed']);
+      return;
     }
-  }
-  // unsubscribe events fired only once
-  if(once !== undefined) {
-    for (var j = 0; j < once.length; j++) {
-      if (once[j][0] === callback) {
-        log.log([null, 'Event', eventName, 'One-time Event is unsubscribed']);
-        once.splice(j, 1);
+    var arr = this._EVENTS[eventName];
+    var once = this._onceEvents[eventName];
+
+    // unsubscribe events that is triggered always
+    for (var i = 0; i < arr.length; i++) {
+      if (arr[i] === callback) {
+        log.log([null, 'Event', eventName, 'Event is unsubscribed']);
+        arr.splice(i, 1);
         break;
+      }
+    }
+    // unsubscribe events fired only once
+    if(once !== undefined) {
+      for (var j = 0; j < once.length; j++) {
+        if (once[j][0] === callback) {
+          log.log([null, 'Event', eventName, 'One-time Event is unsubscribed']);
+          once.splice(j, 1);
+          break;
+        }
       }
     }
   }
@@ -23257,7 +23260,6 @@ Skylink.prototype._trigger = function(eventName) {
       }
     }
   }
-
   log.log([null, 'Event', eventName, 'Event is triggered']);
 };
 
@@ -23346,6 +23348,72 @@ Skylink.prototype._throttle = function(func, prop, wait){
     func(false);
   }
 };
+var SkylinkLogs = (function () {
+  return {
+    // Store the local logs
+    logs: [],
+
+    /**
+     * Function that gets the current stored SDK <code>console</code> logs.
+     * @property SkylinkLogs.getLogs
+     * @param {Number} [logLevel] The specific log level of logs to return.
+     * - When not provided or that the level does not exists, it will return all logs of all levels.
+     *  [Rel: Skylink.LOG_LEVEL]
+     * @return {Array} The array of stored logs.<ul>
+     *   <li><code><#index></code><var><b>{</b>Array<b>}</b></var><p>The stored log item.</p><ul>
+     *   <li><code>0</code><var><b>{</b>Date<b>}</b></var><p>The DateTime of when the log was stored.</p></li>
+     *   <li><code>1</code><var><b>{</b>String<b>}</b></var><p>The log level. [Rel: Skylink.LOG_LEVEL]</p></li>
+     *   <li><code>2</code><var><b>{</b>String<b>}</b></var><p>The log message.</p></li>
+     *   <li><code>3</code><var><b>{</b>Any<b>}</b></var><span class="label">Optional</span><p>The log message object.
+     *   </p></li></ul></li></ul>
+     * @example
+     *  // Example 1: Get logs of specific level
+     *  var debugLogs = SkylinkLogs.getLogs(skylinkDemo.LOG_LEVEL.DEBUG);
+     *
+     *  // Example 2: Get all the logs
+     *  var allLogs = SkylinkLogs.getLogs();
+     * @type Function
+     * @global true
+     * @triggerForPropHackNone true
+     * @for Skylink
+     * @since 0.5.5
+     */
+    getLogs: function () {
+    },
+
+    /**
+     * Function that clears all the current stored SDK <code>console</code> logs.
+     * @property SkylinkLogs.clearAllLogs
+     * @type Function
+     * @example
+     *   // Example 1: Clear all the logs
+     *   SkylinkLogs.clearAllLogs();
+     * @global true
+     * @triggerForPropHackNone true
+     * @for Skylink
+     * @since 0.5.5
+     */
+    clearAllLogs: function () {
+    },
+
+    /**
+     * Function that prints all the current stored SDK <code>console</code> logs into the
+     * <a href="https://developer.mozilla.org/en/docs/Web/API/console">Javascript Web Console</a>.
+     * @property SkylinkLogs.printAllLogs
+     * @type Function
+     * @example
+     *   // Example 1: Print all the logs
+     *   SkylinkLogs.printAllLogs();
+     * @global true
+     * @triggerForPropHackNone true
+     * @for Skylink
+     * @since 0.5.5
+     */
+    printAllLogs: function () {
+
+    }
+  };
+})();
 Skylink.prototype.SOCKET_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,

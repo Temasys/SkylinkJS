@@ -134,6 +134,15 @@
             },
             "namespaces": {}
         },
+        "source/skylinklogs.js": {
+            "name": "source/skylinklogs.js",
+            "modules": {},
+            "classes": {},
+            "fors": {
+                "Skylink": 1
+            },
+            "namespaces": {}
+        },
         "source/socket-channel.js": {
             "name": "source/socket-channel.js",
             "modules": {},
@@ -7829,15 +7838,16 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1366,
+            "line": 1363,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
             "params": [
                 {
                     "name": "eventName",
-                    "description": "The event.",
-                    "type": "String"
+                    "description": "The event.\n- When not provided, all listeners to all events will be unsubscribed.",
+                    "type": "String",
+                    "optional": true
                 },
                 {
                     "name": "callback",
@@ -7854,7 +7864,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1415,
+            "line": 1418,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -7865,7 +7875,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1469,
+            "line": 1471,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -7876,7 +7886,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1495,
+            "line": 1497,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -7887,13 +7897,81 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1533,
+            "line": 1535,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
             "access": "private",
             "tagname": "",
             "since": "0.5.8",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylinklogs.js",
+            "line": 1,
+            "description": "<blockquote class=\"info\">\n  To utilise and enable the <code>SkylinkLogs</code> API functionalities, the\n  <a href=\"#method_setDebugMode\"><code>setDebugMode()</code> method</a>\n  <code>options.storeLogs</code> parameter has to be enabled.\n</blockquote>\nThe object interface to manage the SDK <a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">\nJavascript Web Console</a> logs.",
+            "itemtype": "property",
+            "name": "SkylinkLogs",
+            "type": "JSON",
+            "global": "true",
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylinklogs.js",
+            "line": 20,
+            "description": "Function that gets the current stored SDK <code>console</code> logs.",
+            "itemtype": "property",
+            "name": "SkylinkLogs.getLogs",
+            "return": {
+                "description": "The array of stored logs.<ul>\n  <li><code><#index></code><var><b>{</b>Array<b>}</b></var><p>The stored log item.</p><ul>\n  <li><code>0</code><var><b>{</b>Date<b>}</b></var><p>The DateTime of when the log was stored.</p></li>\n  <li><code>1</code><var><b>{</b>String<b>}</b></var><p>The log level. [Rel: Skylink.LOG_LEVEL]</p></li>\n  <li><code>2</code><var><b>{</b>String<b>}</b></var><p>The log message.</p></li>\n  <li><code>3</code><var><b>{</b>Any<b>}</b></var><span class=\"label\">Optional</span><p>The log message object.\n  </p></li></ul></li></ul>",
+                "type": "Array"
+            },
+            "example": [
+                "\n // Example 1: Get logs of specific level\n var debugLogs = SkylinkLogs.getLogs(skylinkDemo.LOG_LEVEL.DEBUG);\n\n // Example 2: Get all the logs\n var allLogs = SkylinkLogs.getLogs();"
+            ],
+            "type": "Function",
+            "global": "true",
+            "triggerforprophacknone": "true",
+            "since": "0.5.5",
+            "class": "Skylink",
+            "subprops": [
+                {
+                    "name": "logLevel",
+                    "description": "The specific log level of logs to return.\n- When not provided or that the level does not exists, it will return all logs of all levels.\n [Rel: Skylink.LOG_LEVEL]",
+                    "type": "Number",
+                    "optional": true
+                }
+            ]
+        },
+        {
+            "file": "source/skylinklogs.js",
+            "line": 48,
+            "description": "Function that clears all the current stored SDK <code>console</code> logs.",
+            "itemtype": "property",
+            "name": "SkylinkLogs.clearAllLogs",
+            "type": "Function",
+            "example": [
+                "\n  // Example 1: Clear all the logs\n  SkylinkLogs.clearAllLogs();"
+            ],
+            "global": "true",
+            "triggerforprophacknone": "true",
+            "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylinklogs.js",
+            "line": 63,
+            "description": "Function that prints all the current stored SDK <code>console</code> logs into the\n<a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">Javascript Web Console</a>.",
+            "itemtype": "property",
+            "name": "SkylinkLogs.printAllLogs",
+            "type": "Function",
+            "example": [
+                "\n  // Example 1: Print all the logs\n  SkylinkLogs.printAllLogs();"
+            ],
+            "global": "true",
+            "triggerforprophacknone": "true",
+            "since": "0.5.5",
             "class": "Skylink"
         },
         {
@@ -9470,6 +9548,18 @@
         {
             "message": "unknown tag: scoped",
             "line": " source/skylink-debug.js:317"
+        },
+        {
+            "message": "unknown tag: triggerforprophacknone",
+            "line": " source/skylinklogs.js:20"
+        },
+        {
+            "message": "unknown tag: triggerforprophacknone",
+            "line": " source/skylinklogs.js:48"
+        },
+        {
+            "message": "unknown tag: triggerforprophacknone",
+            "line": " source/skylinklogs.js:63"
         },
         {
             "message": "unknown tag: trigger",

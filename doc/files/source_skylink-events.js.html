@@ -1443,9 +1443,6 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
   } : condition;
 
   if (typeof callback === &#x27;function&#x27;) {
-
-    this._EVENTS[eventName] = this._EVENTS[eventName] || [];
-    // prevent undefined error
     this._onceEvents[eventName] = this._onceEvents[eventName] || [];
     this._onceEvents[eventName].push([callback, condition, fireAlways]);
     log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is subscribed on condition&#x27;]);
@@ -1457,7 +1454,8 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
 /**
  * Function that unsubscribes listeners from an event.
  * @method off
- * @param {String} eventName The event.
+ * @param {String} [eventName] The event.
+ * - When not provided, all listeners to all events will be unsubscribed.
  * @param {Function} [callback] The listener to unsubscribe.
  * - When not provided, all listeners associated to the event will be unsubscribed.
  * @example
@@ -1474,30 +1472,35 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
  * @since 0.5.5
  */
 Skylink.prototype.off = function(eventName, callback) {
-  if (callback === undefined) {
-    this._EVENTS[eventName] = [];
-    this._onceEvents[eventName] = [];
-    log.log([null, &#x27;Event&#x27;, eventName, &#x27;All events are unsubscribed&#x27;]);
-    return;
-  }
-  var arr = this._EVENTS[eventName];
-  var once = this._onceEvents[eventName];
-
-  // unsubscribe events that is triggered always
-  for (var i = 0; i &lt; arr.length; i++) {
-    if (arr[i] === callback) {
-      log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is unsubscribed&#x27;]);
-      arr.splice(i, 1);
-      break;
+  if (!(eventName &amp;&amp; typeof eventName === &#x27;string&#x27;)) {
+    this._EVENTS = {};
+    this._onceEvents = {};
+  } else {
+    if (callback === undefined) {
+      this._EVENTS[eventName] = [];
+      this._onceEvents[eventName] = [];
+      log.log([null, &#x27;Event&#x27;, eventName, &#x27;All events are unsubscribed&#x27;]);
+      return;
     }
-  }
-  // unsubscribe events fired only once
-  if(once !== undefined) {
-    for (var j = 0; j &lt; once.length; j++) {
-      if (once[j][0] === callback) {
-        log.log([null, &#x27;Event&#x27;, eventName, &#x27;One-time Event is unsubscribed&#x27;]);
-        once.splice(j, 1);
+    var arr = this._EVENTS[eventName];
+    var once = this._onceEvents[eventName];
+
+    // unsubscribe events that is triggered always
+    for (var i = 0; i &lt; arr.length; i++) {
+      if (arr[i] === callback) {
+        log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is unsubscribed&#x27;]);
+        arr.splice(i, 1);
         break;
+      }
+    }
+    // unsubscribe events fired only once
+    if(once !== undefined) {
+      for (var j = 0; j &lt; once.length; j++) {
+        if (once[j][0] === callback) {
+          log.log([null, &#x27;Event&#x27;, eventName, &#x27;One-time Event is unsubscribed&#x27;]);
+          once.splice(j, 1);
+          break;
+        }
       }
     }
   }
@@ -1551,7 +1554,6 @@ Skylink.prototype._trigger = function(eventName) {
       }
     }
   }
-
   log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is triggered&#x27;]);
 };
 

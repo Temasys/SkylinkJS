@@ -1476,6 +1476,22 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
+                  <a href="#property_SkylinkLogs" class="list-group-item code-menu-item property-item ">
+                    &nbsp;&nbsp;SkylinkLogs
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#property_SkylinkLogs.clearAllLogs" class="list-group-item code-menu-item property-item ">
+                    &nbsp;&nbsp;SkylinkLogs.clearAllLogs
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#property_SkylinkLogs.clearAllLogs" class="list-group-item code-menu-item property-item ">
                     &nbsp;&nbsp;SkylinkLogs.clearAllLogs
                     <span class="settings">
@@ -1486,6 +1502,22 @@ Before using any Skylink functionalities, you will need to authenticate your App
                 
                   <a href="#property_SkylinkLogs.getLogs" class="list-group-item code-menu-item property-item ">
                     &nbsp;&nbsp;SkylinkLogs.getLogs
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#property_SkylinkLogs.getLogs" class="list-group-item code-menu-item property-item ">
+                    &nbsp;&nbsp;SkylinkLogs.getLogs
+                    <span class="settings">
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#property_SkylinkLogs.printAllLogs" class="list-group-item code-menu-item property-item ">
+                    &nbsp;&nbsp;SkylinkLogs.printAllLogs
                     <span class="settings">
                       
                       
@@ -5029,7 +5061,7 @@ If provided string length is lesser than or equals to the chunk size, it should 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1469"><code>source&#x2F;skylink-events.js:1469</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1471"><code>source&#x2F;skylink-events.js:1471</code></a>
       </small>
     
 
@@ -11303,7 +11335,7 @@ See confluence docs for the &quot;stream&quot; expected properties to be receive
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1533"><code>source&#x2F;skylink-events.js:1533</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1535"><code>source&#x2F;skylink-events.js:1535</code></a>
       </small>
     
 
@@ -11389,7 +11421,7 @@ Returns a function to be invoked <code>._throttle(fn, 1000)()</code> to make thr
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1415"><code>source&#x2F;skylink-events.js:1415</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1418"><code>source&#x2F;skylink-events.js:1418</code></a>
       </small>
     
 
@@ -11562,7 +11594,7 @@ See confluence docs for the &quot;updateUserEvent&quot; expected properties to b
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1495"><code>source&#x2F;skylink-events.js:1495</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1497"><code>source&#x2F;skylink-events.js:1497</code></a>
       </small>
     
 
@@ -17759,7 +17791,7 @@ Function that mutes both <a href="#method_getUserMedia"><code>getUserMedia()</co
       <span class="paren">(</span>
       
         
-          <code>eventName</code>
+          <code class="optional">[eventName]</code>
         
         <i class="seperator">,&nbsp;&nbsp;</i>
       
@@ -17813,7 +17845,7 @@ Function that mutes both <a href="#method_getUserMedia"><code>getUserMedia()</co
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1366"><code>source&#x2F;skylink-events.js:1366</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-events.js.html#l1363"><code>source&#x2F;skylink-events.js:1363</code></a>
       </small>
     
 
@@ -17866,12 +17898,15 @@ Function that mutes both <a href="#method_getUserMedia"><code>getUserMedia()</co
             <code class="param-name">eventName</code>
             <span class="type"><b>{</b>String<b>}</b></span>
 
-            
+            <span class="label">Optional</span>
             
 
             <div class="param-description">
               
               <p>The event.</p>
+<ul>
+<li>When not provided, all listeners to all events will be unsubscribed.</li>
+</ul>
 
             </div>
 
@@ -22564,6 +22599,81 @@ Javascript Web Console</a> logs.</p>
   <hr>
 </div>
             
+              <div id="property_SkylinkLogs" class="code-item property item property-item ">
+  <h3 class="code-item-name"><code>SkylinkLogs</code></h3>
+
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info label-global" title="This property is placed in the global class namespace.">global</span>
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylinklogs.js.html#l1"><code>source&#x2F;skylinklogs.js:1</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p><blockquote class="info">
+  To utilise and enable the <code>SkylinkLogs</code> API functionalities, the
+  <a href="#method_setDebugMode"><code>setDebugMode()</code> method</a>
+  <code>options.storeLogs</code> parameter has to be enabled.
+</blockquote>
+The object interface to manage the SDK <a href="https://developer.mozilla.org/en/docs/Web/API/console">
+Javascript Web Console</a> logs.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  
+  <hr>
+</div>
+            
               <div id="property_SkylinkLogs.clearAllLogs" class="code-item property item property-item ">
   <h3 class="code-item-name"><code>SkylinkLogs.clearAllLogs</code></h3>
 
@@ -22607,6 +22717,84 @@ Javascript Web Console</a> logs.</p>
     
       <small>
         <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l218"><code>source&#x2F;skylink-debug.js:218</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that clears all the current stored SDK <code>console</code> logs.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p>  // Example 1: Clear all the logs
+  SkylinkLogs.clearAllLogs();</p>
+
+      </pre>
+    </div>
+  
+
+  
+  
+  <hr>
+</div>
+            
+              <div id="property_SkylinkLogs.clearAllLogs" class="code-item property item property-item ">
+  <h3 class="code-item-name"><code>SkylinkLogs.clearAllLogs</code></h3>
+
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info label-global" title="This property is placed in the global class namespace.">global</span>
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylinklogs.js.html#l48"><code>source&#x2F;skylinklogs.js:48</code></a>
       </small>
     
 
@@ -22769,6 +22957,133 @@ Javascript Web Console</a> logs.</p>
   <hr>
 </div>
             
+              <div id="property_SkylinkLogs.getLogs" class="code-item property item property-item ">
+  <h3 class="code-item-name"><code>SkylinkLogs.getLogs</code></h3>
+
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info label-global" title="This property is placed in the global class namespace.">global</span>
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylinklogs.js.html#l20"><code>source&#x2F;skylinklogs.js:20</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that gets the current stored SDK <code>console</code> logs.</p>
+
+  </div>
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">logLevel</code>
+            <span class="type"><b>{</b>Number<b>}</b></span>
+
+            <span class="label">Optional</span>
+            
+
+            <div class="param-description">
+                <p>The specific log level of logs to return.</p>
+<ul>
+<li>When not provided or that the level does not exists, it will return all logs of all levels.
+[Rel: Skylink.LOG_LEVEL]</li>
+</ul>
+
+            </div>
+
+            
+          </li>
+        
+      </ul>
+    </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>Array<b>}</b></span>:
+          
+          <p>The array of stored logs.<ul>
+  <li><code>&lt;#index&gt;</code><var><b>{</b>Array<b>}</b></var><p>The stored log item.</p><ul>
+  <li><code>0</code><var><b>{</b>Date<b>}</b></var><p>The DateTime of when the log was stored.</p></li>
+  <li><code>1</code><var><b>{</b>String<b>}</b></var><p>The log level. [Rel: Skylink.LOG_LEVEL]</p></li>
+  <li><code>2</code><var><b>{</b>String<b>}</b></var><p>The log message.</p></li>
+  <li><code>3</code><var><b>{</b>Any<b>}</b></var><span class="label">Optional</span><p>The log message object.
+  </p></li></ul></li></ul></p>
+
+        
+      </div>
+    </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p> // Example 1: Get logs of specific level
+ var debugLogs = SkylinkLogs.getLogs(skylinkDemo.LOG_LEVEL.DEBUG);</p>
+<p> // Example 2: Get all the logs
+ var allLogs = SkylinkLogs.getLogs();</p>
+
+      </pre>
+    </div>
+  
+
+  
+  
+  <hr>
+</div>
+            
               <div id="property_SkylinkLogs.printAllLogs" class="code-item property item property-item ">
   <h3 class="code-item-name"><code>SkylinkLogs.printAllLogs</code></h3>
 
@@ -22812,6 +23127,85 @@ Javascript Web Console</a> logs.</p>
     
       <small>
         <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylink-debug.js.html#l232"><code>source&#x2F;skylink-debug.js:232</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.5.5</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that prints all the current stored SDK <code>console</code> logs into the
+<a href="https://developer.mozilla.org/en/docs/Web/API/console">Javascript Web Console</a>.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p>  // Example 1: Print all the logs
+  SkylinkLogs.printAllLogs();</p>
+
+      </pre>
+    </div>
+  
+
+  
+  
+  <hr>
+</div>
+            
+              <div id="property_SkylinkLogs.printAllLogs" class="code-item property item property-item ">
+  <h3 class="code-item-name"><code>SkylinkLogs.printAllLogs</code></h3>
+
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-info label-global" title="This property is placed in the global class namespace.">global</span>
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_skylinklogs.js.html#l63"><code>source&#x2F;skylinklogs.js:63</code></a>
       </small>
     
 
