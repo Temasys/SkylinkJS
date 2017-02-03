@@ -1278,7 +1278,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
       name: transferId,
       size: 0,
       originalSize: 0,
-      dataType: 'start',
+      dataType: 'fastBinaryStart',
       mimeType: null,
       chunkType: sessionChunkType,
       chunkSize: 0,
@@ -1608,7 +1608,7 @@ Skylink.prototype.stopStreamingData = function(transferId) {
       name: transferId,
       size: 0,
       originalSize: 0,
-      dataType: 'stop',
+      dataType: 'fastBinaryStop',
       mimeType: null,
       chunkType: self._dataStreams[transferId].sessionChunkType,
       chunkSize: 0,
@@ -2586,8 +2586,8 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
   var transferId = channelProp === 'main' ? data.transferId || null : channelProp;
   var senderPeerId = data.sender || peerId;
 
-  if (['start', 'stop'].indexOf(data.dataType) > -1) {
-    if (data.dataType === 'start') {
+  if (['fastBinaryStart', 'fastBinaryStop'].indexOf(data.dataType) > -1) {
+    if (data.dataType === 'fastBinaryStart') {
       if (!transferId) {
         transferId = 'stream_' + peerId + '_' + (new Date()).getTime();
       }
