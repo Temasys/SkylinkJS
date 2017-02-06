@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 14:17:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 14:35:53 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -9646,12 +9646,25 @@ Skylink.prototype._loadInfo = function() {
   adapter.webRTCReady(function () {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
 
-    if (!window.RTCPeerConnection) {
-      log.error('WebRTC not supported. Please upgrade your browser');
+    // Prevent empty object returned when constructing the RTCPeerConnection object
+    if (!(function () {
+      try {
+        var p = new window.RTCPeerConnection(null);
+        // IE returns as typeof object
+        return ['object', 'function'].indexOf(typeof p.createOffer) > -1 && p.createOffer !== null;
+      } catch (e) {
+        return false;
+      }
+    })()) {
+      if (window.RTCPeerConnection && self._isUsingPlugin) {
+        log.error('Plugin is not available. Please check plugin status.');
+      } else {
+        log.error('WebRTC not supported. Please upgrade your browser');
+      }
       self._readyState = -1;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
-        content: 'WebRTC not available',
+        content: self._isUsingPlugin && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available',
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
       }, self._selectedRoom);
       return;

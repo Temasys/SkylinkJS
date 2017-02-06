@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 14:17:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 14:35:53 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 14:17:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 14:35:53 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -21180,12 +21180,25 @@ Skylink.prototype._loadInfo = function() {
   adapter.webRTCReady(function () {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
 
-    if (!window.RTCPeerConnection) {
-      log.error('WebRTC not supported. Please upgrade your browser');
+    // Prevent empty object returned when constructing the RTCPeerConnection object
+    if (!(function () {
+      try {
+        var p = new window.RTCPeerConnection(null);
+        // IE returns as typeof object
+        return ['object', 'function'].indexOf(typeof p.createOffer) > -1 && p.createOffer !== null;
+      } catch (e) {
+        return false;
+      }
+    })()) {
+      if (window.RTCPeerConnection && self._isUsingPlugin) {
+        log.error('Plugin is not available. Please check plugin status.');
+      } else {
+        log.error('WebRTC not supported. Please upgrade your browser');
+      }
       self._readyState = -1;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
-        content: 'WebRTC not available',
+        content: self._isUsingPlugin && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available',
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
       }, self._selectedRoom);
       return;
