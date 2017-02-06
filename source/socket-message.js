@@ -1523,7 +1523,11 @@ Skylink.prototype._offerHandler = function(message) {
 
     pc.processingRemoteSDP = false;
 
-    log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
+    log.error([targetMid, null, message.type, 'Failed setting remote description:'], {
+      error: error,
+      state: pc.signalingState,
+      offer: offer
+    });
   });
 };
 

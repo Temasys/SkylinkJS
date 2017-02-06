@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 17:11:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 17:14:42 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -13734,7 +13734,11 @@ Skylink.prototype._offerHandler = function(message) {
 
     pc.processingRemoteSDP = false;
 
-    log.error([targetMid, null, message.type, 'Failed setting remote description:'], error);
+    log.error([targetMid, null, message.type, 'Failed setting remote description:'], {
+      error: error,
+      state: pc.signalingState,
+      offer: offer
+    });
   });
 };
 
