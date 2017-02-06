@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 17:15:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 21:05:09 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 17:15:58 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 21:05:09 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -21067,10 +21067,7 @@ Skylink.prototype._parseInfo = function(info) {
 
   this._key = info.cid;
   this._appKeyOwner = info.apiOwner;
-
   this._signalingServer = info.ipSigserver;
-  this._signalingServerPort = null;
-
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
 
@@ -23542,8 +23539,6 @@ Skylink.prototype._createSocket = function (type) {
   // just beginning
   if (self._signalingServerPort === null) {
     self._signalingServerPort = ports[0];
-    self._socketSession.finalAttempts = 0;
-    self._socketSession.attempts = 0;
     fallbackType = self.SOCKET_FALLBACK.NON_FALLBACK;
 
   // reached the end of the last port for the protocol type
@@ -23567,7 +23562,7 @@ Skylink.prototype._createSocket = function (type) {
   }
 
   var url = self._signalingServerProtocol + '//' + (self._socketServer || self._signalingServer) + ':' + self._signalingServerPort;
-    //'http://ec2-52-8-93-170.us-west-1.compute.amazonaws.com:6001';
+  var retries = 0;
 
   self._socketSession.transportType = type;
   self._socketSession.socketOptions = options;
@@ -23585,17 +23580,7 @@ Skylink.prototype._createSocket = function (type) {
 
   // if socket instance already exists, exit
   if (self._socket) {
-    self._socket.removeAllListeners('connect_error');
-    self._socket.removeAllListeners('reconnect_attempt');
-    self._socket.removeAllListeners('reconnect_error');
-    self._socket.removeAllListeners('reconnect_failed');
-    self._socket.removeAllListeners('connect');
-    self._socket.removeAllListeners('reconnect');
-    self._socket.removeAllListeners('error');
-    self._socket.removeAllListeners('disconnect');
-    self._socket.removeAllListeners('message');
-    self._socket.disconnect();
-    self._socket = null;
+    self._closeChannel();
   }
 
   self._channelOpen = false;
@@ -23605,6 +23590,7 @@ Skylink.prototype._createSocket = function (type) {
   self._socket = io.connect(url, options);
 
   self._socket.on('reconnect_attempt', function (attempt) {
+    retries++;
     self._socketSession.attempts++;
     self._trigger('channelRetry', fallbackType, self._socketSession.attempts, clone(self._socketSession));
   });
@@ -23643,18 +23629,25 @@ Skylink.prototype._createSocket = function (type) {
   });
 
   self._socket.on('error', function(error) {
+    if (error ? error.message.indexOf('xhr poll error') > -1 : false) {
+      log.error([null, 'Socket', null, 'XHR poll connection unstable. Disconnecting.. ->'], error);
+      self._closeChannel();
+      return;
+    }
     log.error([null, 'Socket', null, 'Exception occurred ->'], error);
     self._trigger('channelError', error, clone(self._socketSession));
   });
 
   self._socket.on('disconnect', function() {
-    self._channelOpen = false;
-    self._trigger('channelClose', clone(self._socketSession));
-    log.log([null, 'Socket', null, 'Channel closed']);
+    if (self._channelOpen) {
+      self._channelOpen = false;
+      self._trigger('channelClose', clone(self._socketSession));
+      log.log([null, 'Socket', null, 'Channel closed']);
 
-    if (self._inRoom && self._user && self._user.sid) {
-      self.leaveRoom(false);
-      self._trigger('sessionDisconnect', self._user.sid, self.getPeerInfo());
+      if (self._inRoom && self._user && self._user.sid) {
+        self.leaveRoom(false);
+        self._trigger('sessionDisconnect', self._user.sid, self.getPeerInfo());
+      }
     }
   });
 
@@ -23713,6 +23706,8 @@ Skylink.prototype._openChannel = function() {
     socketType = 'Polling';
   }
 
+  self._socketSession.finalAttempts = 0;
+  self._socketSession.attempts = 0;
   self._signalingServerPort = null;
 
   // Begin with a websocket connection
@@ -23748,6 +23743,11 @@ Skylink.prototype._closeChannel = function() {
 
     this._channelOpen = false;
     this._trigger('channelClose', clone(this._socketSession));
+
+    if (this._inRoom && this._user && this._user.sid) {
+      this.leaveRoom(false);
+      this._trigger('sessionDisconnect', this._user.sid, this.getPeerInfo());
+    }
   }
 
   this._socket = null;
