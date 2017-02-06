@@ -12,8 +12,4 @@
     window.Skylink = Skylink;
     window.SkylinkLogs = SkylinkLogs;
   }
-
-  if (refThis) {
-    refThis.Skylink = Skylink;
-  }
 })(this);
