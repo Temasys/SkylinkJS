@@ -1,6 +1,6 @@
-/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 10:58:37 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 11:02:02 GMT+0800 (SGT) */
 
-(function(refThis) {
+(function(globals) {
 
 'use strict';
 
@@ -1254,7 +1254,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     return;
   }
 
-  
+
   if (dataChannel && typeof dataChannel === 'object') {
     channelName = dataChannel.label;
 
@@ -10010,7 +10010,7 @@ var _printAllStoredLogsFn = function () {
  * @for Skylink
  * @since 0.5.5
  */
-window.SkylinkLogs = {
+var SkylinkLogs = {
   /**
    * Function that gets the current stored SDK <code>console</code> logs.
    * @property SkylinkLogs.getLogs
@@ -16827,12 +16827,12 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       mLineIndex++;
 
       self._sdpSessions[targetMid][direction].mLines[mLineIndex] = sdpLines[i];
-      
+
       // Check if there is missing unsupported video codecs support and reject it regardles of MCU Peer or not
       if (!settings.connection[mediaType]) {
         log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
           'Removing rejected m=' + mediaType + ' line ->'], sdpLines[i]);
-        
+
         // Check if answerer and we do not have the power to remove the m line if index is 0
         // Set as a=inactive because we do not have that power to reject it somehow..
         // first m= line cannot be rejected for BUNDLE
@@ -16874,11 +16874,11 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       if (!settings.connection[mediaType]) {
         sdpLines.splice(i, 1);
         i--;
-      
+
       // Store the mids session description
       } else if (sdpLines[i].indexOf('a=mid:') === 0) {
         bundleLineMids.push(sdpLines[i].split('a=mid:')[1] || '');
-      
+
       // Configure direction a=sendonly etc for local sessiondescription
       }  else if (direction === 'local' && mediaType && ['audio', 'video'].indexOf(mediaType) > -1 &&
         ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
@@ -16966,16 +16966,18 @@ Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription) 
   if(typeof exports !== 'undefined') {
     // Prevent breaking code
     module.exports = {
-      Skylink: Skylink
+      Skylink: Skylink,
+      SkylinkLogs: SkylinkLogs
     };
+  } else if (globals) {
+    globals.Skylink = Skylink;
+    globals.SkylinkLogs = SkylinkLogs;
+  } else if (window) {
+    window.Skylink = Skylink;
+    window.SkylinkLogs = SkylinkLogs;
   }
 
   if (refThis) {
     refThis.Skylink = Skylink;
   }
-
-  if (window) {
-    window.Skylink = Skylink;
-  }
-
 })(this);

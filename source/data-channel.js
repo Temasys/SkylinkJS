@@ -116,7 +116,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
     return;
   }
 
-  
+
   if (dataChannel && typeof dataChannel === 'object') {
     channelName = dataChannel.label;
 

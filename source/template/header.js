@@ -1,4 +1,4 @@
-(function(refThis) {
+(function(globals) {
 
 'use strict';
 

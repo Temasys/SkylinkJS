@@ -798,12 +798,12 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       mLineIndex++;
 
       self._sdpSessions[targetMid][direction].mLines[mLineIndex] = sdpLines[i];
-      
+
       // Check if there is missing unsupported video codecs support and reject it regardles of MCU Peer or not
       if (!settings.connection[mediaType]) {
         log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
           'Removing rejected m=' + mediaType + ' line ->'], sdpLines[i]);
-        
+
         // Check if answerer and we do not have the power to remove the m line if index is 0
         // Set as a=inactive because we do not have that power to reject it somehow..
         // first m= line cannot be rejected for BUNDLE
@@ -845,11 +845,11 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       if (!settings.connection[mediaType]) {
         sdpLines.splice(i, 1);
         i--;
-      
+
       // Store the mids session description
       } else if (sdpLines[i].indexOf('a=mid:') === 0) {
         bundleLineMids.push(sdpLines[i].split('a=mid:')[1] || '');
-      
+
       // Configure direction a=sendonly etc for local sessiondescription
       }  else if (direction === 'local' && mediaType && ['audio', 'video'].indexOf(mediaType) > -1 &&
         ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
