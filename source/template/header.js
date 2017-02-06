@@ -1,3 +1,134 @@
+(function(refThis) {
+
+'use strict';
+
+/**
+ * Polyfill for Object.keys() from Mozilla
+ * From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+ */
+if (!Object.keys) {
+  Object.keys = (function() {
+    var hasOwnProperty = Object.prototype.hasOwnProperty,
+      hasDontEnumBug = !({
+        toString: null
+      }).propertyIsEnumerable('toString'),
+      dontEnums = [
+        'toString',
+        'toLocaleString',
+        'valueOf',
+        'hasOwnProperty',
+        'isPrototypeOf',
+        'propertyIsEnumerable',
+        'constructor'
+      ],
+      dontEnumsLength = dontEnums.length;
+
+    return function(obj) {
+      if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object');
+
+      var result = [];
+
+      for (var prop in obj) {
+        if (hasOwnProperty.call(obj, prop)) result.push(prop);
+      }
+
+      if (hasDontEnumBug) {
+        for (var i = 0; i < dontEnumsLength; i++) {
+          if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i]);
+        }
+      }
+      return result;
+    }
+  })()
+}
+
+/**
+ * Polyfill for Date.getISOString() from Mozilla
+ * From https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+ */
+(function() {
+  function pad(number) {
+    if (number < 10) {
+      return '0' + number;
+    }
+    return number;
+  }
+
+  Date.prototype.toISOString = function() {
+    return this.getUTCFullYear() +
+      '-' + pad(this.getUTCMonth() + 1) +
+      '-' + pad(this.getUTCDate()) +
+      'T' + pad(this.getUTCHours()) +
+      ':' + pad(this.getUTCMinutes()) +
+      ':' + pad(this.getUTCSeconds()) +
+      '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
+      'Z';
+  };
+})();
+
+/**
+ * Polyfill for addEventListener() from Eirik Backer @eirikbacker (github.com).
+ * From https://gist.github.com/eirikbacker/2864711
+ * MIT Licensed
+ */
+(function(win, doc){
+  if(win.addEventListener) return; //No need to polyfill
+
+  function docHijack(p){var old = doc[p];doc[p] = function(v){ return addListen(old(v)) }}
+  function addEvent(on, fn, self){
+    return (self = this).attachEvent('on' + on, function(e){
+      var e = e || win.event;
+      e.preventDefault  = e.preventDefault  || function(){e.returnValue = false}
+      e.stopPropagation = e.stopPropagation || function(){e.cancelBubble = true}
+      fn.call(self, e);
+    });
+  }
+  function addListen(obj, i){
+    if(i = obj.length)while(i--)obj[i].addEventListener = addEvent;
+    else obj.addEventListener = addEvent;
+    return obj;
+  }
+
+  addListen([doc, win]);
+  if('Element' in win)win.Element.prototype.addEventListener = addEvent; //IE8
+  else{                                     //IE < 8
+    doc.attachEvent('onreadystatechange', function(){addListen(doc.all)}); //Make sure we also init at domReady
+    docHijack('getElementsByTagName');
+    docHijack('getElementById');
+    docHijack('createElement');
+    addListen(doc.all);
+  }
+})(window, document);
+
+/**
+ * Global function that clones an object.
+ */
+var clone = function (obj) {
+  if (obj === null || typeof obj !== 'object') {
+    return obj;
+  }
+
+  var copy = function (data) {
+    var copy = data.constructor();
+    for (var attr in data) {
+      if (data.hasOwnProperty(attr)) {
+        copy[attr] = data[attr];
+      }
+    }
+    return copy;
+  };
+
+  if (typeof obj === 'object' && !Array.isArray(obj)) {
+    try {
+      return JSON.parse( JSON.stringify(obj) );
+    } catch (err) {
+      return copy(obj);
+    }
+  }
+
+  return copy(obj);
+};
+
 /**
  * <h2>Prerequisites on using Skylink</h2>
  * Before using any Skylink functionalities, you will need to authenticate your App Key using
@@ -30,9 +161,6 @@
  * [See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)
  *
  * @class Skylink
- * @param {String} [instanceLabel] The Skylink object instance label ID for identification.
- * - When not provided, an instance label ID would be generated.
- *   <small>It is recommended to provide an unique instance label ID.</small>
  * @constructor
  * @example
  *   // Here's a simple example on how you can start using Skylink.
@@ -76,23 +204,7 @@
  * @for Skylink
  * @since 0.5.0
  */
-function Skylink(instanceLabel) {
-  /**
-   * The Skylink object instance label ID.
-   * @attribute INSTANCE_LABEL
-   * @type String
-   * @readOnly
-   * @for Skylink
-   * @since 0.6.18
-   */
-  this.INSTANCE_LABEL = typeof instanceLabel === 'string' && instanceLabel && instanceLabel !== '_' ?
-    instanceLabel : 'in_' + Date.now() + Math.floor(Math.random() * 10000);
-
-  /**
-   * - Stores the logging function.
-   */
-  this._log = LogFactory(this.INSTANCE_LABEL);
-
+function Skylink() {
   /**
    * Stores the flag if Peers should have any Datachannel connections.
    * @attribute _enableDataChannel
@@ -1053,139 +1165,3 @@ function Skylink(instanceLabel) {
    */
   this._sdpSessions = {};
 }
-
-/**
- * Stores the data chunk size for Blob transfers.
- * @attribute _CHUNK_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._CHUNK_FILE_SIZE = 49152;
-
-/**
- * Stores the data chunk size for Blob transfers transferring from/to
- *   Firefox browsers due to limitation tested in the past in some PCs (linx predominatly).
- * @attribute _MOZ_CHUNK_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
-
-/**
- * Stores the data chunk size for binary Blob transfers.
- * @attribute _BINARY_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._BINARY_FILE_SIZE = 65456;
-
-/**
- * Stores the data chunk size for binary Blob transfers.
- * @attribute _MOZ_BINARY_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._MOZ_BINARY_FILE_SIZE = 16384;
-
-/**
- * Stores the data chunk size for data URI string transfers.
- * @attribute _CHUNK_DATAURL_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
-
-/**
- * Stores the list of data transfer protocols.
- * @attribute _DC_PROTOCOL_TYPE
- * @param {String} WRQ The protocol to initiate data transfer.
- * @param {String} ACK The protocol to request for data transfer chunk.
- *   Give <code>-1</code> to reject the request at the beginning and <code>0</code> to accept
- *   the data transfer request.
- * @param {String} CANCEL The protocol to terminate data transfer.
- * @param {String} ERROR The protocol when data transfer has errors and has to be terminated.
- * @param {String} MESSAGE The protocol that is used to send P2P messages.
- * @type JSON
- * @readOnly
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._DC_PROTOCOL_TYPE = {
-  WRQ: 'WRQ',
-  ACK: 'ACK',
-  ERROR: 'ERROR',
-  CANCEL: 'CANCEL',
-  MESSAGE: 'MESSAGE'
-};
-
-/**
- * Stores the list of socket messaging protocol types.
- * See confluence docs for the list based on the current <code>SM_PROTOCOL_VERSION</code>.
- * @attribute _SIG_MESSAGE_TYPE
- * @type JSON
- * @readOnly
- * @private
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype._SIG_MESSAGE_TYPE = {
-  JOIN_ROOM: 'joinRoom',
-  IN_ROOM: 'inRoom',
-  ENTER: 'enter',
-  WELCOME: 'welcome',
-  RESTART: 'restart',
-  OFFER: 'offer',
-  ANSWER: 'answer',
-  CANDIDATE: 'candidate',
-  BYE: 'bye',
-  REDIRECT: 'redirect',
-  UPDATE_USER: 'updateUserEvent',
-  ROOM_LOCK: 'roomLockEvent',
-  MUTE_VIDEO: 'muteVideoEvent',
-  MUTE_AUDIO: 'muteAudioEvent',
-  PUBLIC_MESSAGE: 'public',
-  PRIVATE_MESSAGE: 'private',
-  STREAM: 'stream',
-  GROUP: 'group',
-  GET_PEERS: 'getPeers',
-  PEER_LIST: 'peerList',
-  INTRODUCE: 'introduce',
-  INTRODUCE_ERROR: 'introduceError',
-  APPROACH: 'approach',
-  START_RECORDING: 'startRecordingRoom',
-  STOP_RECORDING: 'stopRecordingRoom',
-  RECORDING: 'recordingEvent',
-  END_OF_CANDIDATES: 'endOfCandidates'
-};
-
-/**
- * Stores the list of socket messaging protocol types to queue when sent less than a second interval.
- * @attribute _groupMessageList
- * @type Array
- * @private
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype._groupMessageList = [
-  Skylink.prototype._SIG_MESSAGE_TYPE.STREAM,
-  Skylink.prototype._SIG_MESSAGE_TYPE.UPDATE_USER,
-  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_AUDIO,
-  Skylink.prototype._SIG_MESSAGE_TYPE.MUTE_VIDEO,
-  Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-];

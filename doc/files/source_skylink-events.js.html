@@ -1390,9 +1390,9 @@ Skylink.prototype.on = function(eventName, callback) {
   if (&#x27;function&#x27; === typeof callback) {
     this._EVENTS[eventName] = this._EVENTS[eventName] || [];
     this._EVENTS[eventName].push(callback);
-    this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is subscribed&#x27;]);
+    log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is subscribed&#x27;]);
   } else {
-    this._log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided parameter is not a function&#x27;]);
+    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided parameter is not a function&#x27;]);
   }
 };
 
@@ -1445,9 +1445,9 @@ Skylink.prototype.once = function(eventName, callback, condition, fireAlways) {
   if (typeof callback === &#x27;function&#x27;) {
     this._onceEvents[eventName] = this._onceEvents[eventName] || [];
     this._onceEvents[eventName].push([callback, condition, fireAlways]);
-    this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is subscribed on condition&#x27;]);
+    log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is subscribed on condition&#x27;]);
   } else {
-    this._log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided callback is not a function&#x27;]);
+    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided callback is not a function&#x27;]);
   }
 };
 
@@ -1479,7 +1479,7 @@ Skylink.prototype.off = function(eventName, callback) {
     if (callback === undefined) {
       this._EVENTS[eventName] = [];
       this._onceEvents[eventName] = [];
-      this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;All events are unsubscribed&#x27;]);
+      log.log([null, &#x27;Event&#x27;, eventName, &#x27;All events are unsubscribed&#x27;]);
       return;
     }
     var arr = this._EVENTS[eventName];
@@ -1488,7 +1488,7 @@ Skylink.prototype.off = function(eventName, callback) {
     // unsubscribe events that is triggered always
     for (var i = 0; i &lt; arr.length; i++) {
       if (arr[i] === callback) {
-        this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is unsubscribed&#x27;]);
+        log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is unsubscribed&#x27;]);
         arr.splice(i, 1);
         break;
       }
@@ -1497,7 +1497,7 @@ Skylink.prototype.off = function(eventName, callback) {
     if(once !== undefined) {
       for (var j = 0; j &lt; once.length; j++) {
         if (once[j][0] === callback) {
-          this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;One-time Event is unsubscribed&#x27;]);
+          log.log([null, &#x27;Event&#x27;, eventName, &#x27;One-time Event is unsubscribed&#x27;]);
           once.splice(j, 1);
           break;
         }
@@ -1524,12 +1524,12 @@ Skylink.prototype._trigger = function(eventName) {
     // for events subscribed forever
     for (var i = 0; i &lt; arr.length; i++) {
       try {
-        this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is fired&#x27;]);
+        log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is fired&#x27;]);
         if(arr[i].apply(this, args) === false) {
           break;
         }
       } catch(error) {
-        this._log.error([null, &#x27;Event&#x27;, eventName, &#x27;Exception occurred in event:&#x27;], error);
+        log.error([null, &#x27;Event&#x27;, eventName, &#x27;Exception occurred in event:&#x27;], error);
         throw error;
       }
     }
@@ -1538,23 +1538,23 @@ Skylink.prototype._trigger = function(eventName) {
     // for events subscribed on once
     for (var j = 0; j &lt; once.length; j++) {
       if (once[j][1].apply(this, args) === true) {
-        this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;Condition is met. Firing event&#x27;]);
+        log.log([null, &#x27;Event&#x27;, eventName, &#x27;Condition is met. Firing event&#x27;]);
         if(once[j][0].apply(this, args) === false) {
           break;
         }
         if (once[j] &amp;&amp; !once[j][2]) {
-          this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;Removing event after firing once&#x27;]);
+          log.log([null, &#x27;Event&#x27;, eventName, &#x27;Removing event after firing once&#x27;]);
           once.splice(j, 1);
           //After removing current element, the next element should be element of the same index
           j--;
         }
       } else {
-        this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;Condition is still not met. &#x27; +
+        log.log([null, &#x27;Event&#x27;, eventName, &#x27;Condition is still not met. &#x27; +
           &#x27;Holding event from being fired&#x27;]);
       }
     }
   }
-  this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is triggered&#x27;]);
+  log.log([null, &#x27;Event&#x27;, eventName, &#x27;Event is triggered&#x27;]);
 };
 
 
@@ -1574,14 +1574,14 @@ Skylink.prototype._condition = function(eventName, callback, checkFirst, conditi
   }
   if (typeof callback === &#x27;function&#x27; &amp;&amp; typeof checkFirst === &#x27;function&#x27;) {
     if (checkFirst()) {
-      this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;First condition is met. Firing callback&#x27;]);
+      log.log([null, &#x27;Event&#x27;, eventName, &#x27;First condition is met. Firing callback&#x27;]);
       callback();
       return;
     }
-    this._log.log([null, &#x27;Event&#x27;, eventName, &#x27;First condition is not met. Subscribing to event&#x27;]);
+    log.log([null, &#x27;Event&#x27;, eventName, &#x27;First condition is not met. Subscribing to event&#x27;]);
     this.once(eventName, callback, condition, fireAlways);
   } else {
-    this._log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided callback or checkFirst is not a function&#x27;]);
+    log.error([null, &#x27;Event&#x27;, eventName, &#x27;Provided callback or checkFirst is not a function&#x27;]);
   }
 };
 
@@ -1596,17 +1596,17 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
   fireAlways = (typeof fireAlways === &#x27;undefined&#x27; ? false : fireAlways);
   if (typeof callback === &#x27;function&#x27; &amp;&amp; typeof condition === &#x27;function&#x27;) {
     if (condition()) {
-      this._log.log([null, &#x27;Event&#x27;, null, &#x27;Condition is met. Firing callback&#x27;]);
+      log.log([null, &#x27;Event&#x27;, null, &#x27;Condition is met. Firing callback&#x27;]);
       callback();
       return;
     }
-    this._log.log([null, &#x27;Event&#x27;, null, &#x27;Condition is not met. Doing a check.&#x27;]);
+    log.log([null, &#x27;Event&#x27;, null, &#x27;Condition is not met. Doing a check.&#x27;]);
 
     intervalTime = (typeof intervalTime === &#x27;number&#x27;) ? intervalTime : 50;
 
     var doWait = setInterval(function () {
       if (condition()) {
-        this._log.log([null, &#x27;Event&#x27;, null, &#x27;Condition is met after waiting. Firing callback&#x27;]);
+        log.log([null, &#x27;Event&#x27;, null, &#x27;Condition is met after waiting. Firing callback&#x27;]);
         if (!fireAlways){
           clearInterval(doWait);
         }
@@ -1615,10 +1615,10 @@ Skylink.prototype._wait = function(callback, condition, intervalTime, fireAlways
     }, intervalTime);
   } else {
     if (typeof callback !== &#x27;function&#x27;){
-      this._log.error([null, &#x27;Event&#x27;, null, &#x27;Provided callback is not a function&#x27;]);
+      log.error([null, &#x27;Event&#x27;, null, &#x27;Provided callback is not a function&#x27;]);
     }
     if (typeof condition !== &#x27;function&#x27;){
-      this._log.error([null, &#x27;Event&#x27;, null, &#x27;Provided condition is not a function&#x27;]);
+      log.error([null, &#x27;Event&#x27;, null, &#x27;Provided condition is not a function&#x27;]);
     }
   }
 };

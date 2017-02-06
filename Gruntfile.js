@@ -9,6 +9,8 @@ module.exports = function(grunt) {
 
         source: 'source',
 
+        template: '<%= source %>/template',
+
         production: 'publish',
 
         bamboo: 'bamboo',
@@ -57,29 +59,20 @@ module.exports = function(grunt) {
                 separator: '\n',
                 stripBanners: true,
                 banner: '/*! <%= pkg.name %> - v<%= pkg.version %> - ' +
-                    (new Date()).toString() + ' */\r\n(function (globals) {\r\n',
-                footer: '\r\n})(this);'
+                    (new Date()).toString() + ' */\n\n'
             },
 
             production: {
                 files: {
                     '<%= production %>/skylink.debug.js': [
-                        '<%= source %>/factories.*.js',
-                        '<%= source %>/skylink.js',
-                        '<%= source %>/skylinklogs.js',
-                        '<%= source %>/constants/*.js',
-                        '<%= source %>/methods/*.js',
-                        '<%= source %>/*.js'
+                        '<%= template %>/header.js',
+                        '<%= source %>/*.js',
+                        '<%= template %>/footer.js'
                     ],
                     '<%= production %>/skylink.complete.js': [
                         'node_modules/socket.io-client/socket.io.js',
                         'node_modules/adapterjs/publish/adapter.screenshare.js',
-                        '<%= source %>/factories.*.js',
-                        '<%= source %>/skylink.js',
-                        '<%= source %>/skylinklogs.js',
-                        '<%= source %>/constants/*.js',
-                        '<%= source %>/methods/*.js',
-                        '<%= source %>/*.js'
+                        '<%= production %>/skylink.debug.js'
                     ]
                 }
             },

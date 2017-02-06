@@ -1,4 +1,69 @@
 /**
+ * The list of <a href="#method_joinRoom"><code>joinRoom()</code> method</a> socket connection failure states.
+ * @attribute SOCKET_ERROR
+ * @param {Number} CONNECTION_FAILED    <small>Value <code>0</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection failed to establish with
+ *   the Signaling server at the first attempt.
+ * @param {Number} RECONNECTION_FAILED  <small>Value <code>-1</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection failed to establish
+ *   the Signaling server after the first attempt.
+ * @param {Number} CONNECTION_ABORTED   <small>Value <code>-2</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection will not attempt
+ *   to reconnect after the failure of the first attempt in <code>CONNECTION_FAILED</code> as there
+ *   are no more ports or transports to attempt for reconnection.
+ * @param {Number} RECONNECTION_ABORTED <small>Value <code>-3</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection will not attempt
+ *   to reconnect after the failure of several attempts in <code>RECONNECTION_FAILED</code> as there
+ *   are no more ports or transports to attempt for reconnection.
+ * @param {Number} RECONNECTION_ATTEMPT <small>Value <code>-4</code></small>
+ *   The value of the failure state when <code>joinRoom()</code> socket connection is attempting
+ *   to reconnect with a new port or transport after the failure of attempts in
+ *   <code>CONNECTION_FAILED</code> or <code>RECONNECTED_FAILED</code>.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.SOCKET_ERROR = {
+  CONNECTION_FAILED: 0,
+  RECONNECTION_FAILED: -1,
+  CONNECTION_ABORTED: -2,
+  RECONNECTION_ABORTED: -3,
+  RECONNECTION_ATTEMPT: -4
+};
+
+/**
+ * The list of <a href="#method_joinRoom"><code>joinRoom()</code> method</a> socket connection reconnection states.
+ * @attribute SOCKET_FALLBACK
+ * @param {String} NON_FALLBACK      <small>Value <code>"nonfallback"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is at its initial state
+ *   without transitioning to any new socket port or transports yet.
+ * @param {String} FALLBACK_PORT     <small>Value <code>"fallbackPortNonSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTP port using WebSocket transports to attempt to establish connection with Signaling server.
+ * @param {String} FALLBACK_PORT_SSL <small>Value <code>"fallbackPortSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTPS port using WebSocket transports to attempt to establish connection with Signaling server.
+ * @param {String} LONG_POLLING      <small>Value <code>"fallbackLongPollingNonSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTP port using Polling transports to attempt to establish connection with Signaling server.
+ * @param {String} LONG_POLLING_SSL  <small>Value <code>"fallbackLongPollingSSL"</code></small>
+ *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   another new HTTPS port using Polling transports to attempt to establish connection with Signaling server.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.6
+ */
+Skylink.prototype.SOCKET_FALLBACK = {
+  NON_FALLBACK: 'nonfallback',
+  FALLBACK_PORT: 'fallbackPortNonSSL',
+  FALLBACK_SSL_PORT: 'fallbackPortSSL',
+  LONG_POLLING: 'fallbackLongPollingNonSSL',
+  LONG_POLLING_SSL: 'fallbackLongPollingSSL'
+};
+
+/**
  * Function that sends a socket message over the socket connection to the Signaling.
  * @method _sendChannelMessage
  * @private
@@ -11,7 +76,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
   var throughput = 16;
 
   if (!self._channelOpen || !self._user || !self._socket) {
-    self._log.warn([message.target || 'Server', 'Socket', message.type, 'Dropping of message as Socket connection is not opened or is at ' +
+    log.warn([message.target || 'Server', 'Socket', message.type, 'Dropping of message as Socket connection is not opened or is at ' +
       'incorrect step ->'], message);
     return;
   }
@@ -55,11 +120,11 @@ Skylink.prototype._sendChannelMessage = function(message) {
   };
 
   var setQueueFn = function () {
-    self._log.debug([null, 'Socket', null, 'Starting queue timeout']);
+    log.debug([null, 'Socket', null, 'Starting queue timeout']);
 
     self._socketMessageTimeout = setTimeout(function () {
       if (((new Date ()).getTime() - self._timestamp.socketMessage) <= interval) {
-        self._log.debug([null, 'Socket', null, 'Restarting queue timeout']);
+        log.debug([null, 'Socket', null, 'Restarting queue timeout']);
         setQueueFn();
         return;
       }
@@ -84,7 +149,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
     self._socketMessageTimeout = null;
 
     if (!self._channelOpen || !(self._user && self._user.sid) || !self._socket) {
-      self._log.warn([message.target || 'Server', 'Socket', null, 'Dropping of group messages as Socket connection is not opened or is at ' +
+      log.warn([message.target || 'Server', 'Socket', null, 'Dropping of group messages as Socket connection is not opened or is at ' +
         'incorrect step ->'], groupMessageList);
       return;
     }
@@ -121,8 +186,8 @@ Skylink.prototype._sendChannelMessage = function(message) {
           groupMessageList[i].stamp < stamps.audioMuted) ||
           (groupMessageList[i].type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO &&
           groupMessageList[i].stamp < stamps.videoMuted)) {
-        self._log.warn([message.target || 'Server', 'Socket', groupMessageList[i], 'Dropping of outdated status message ->'],
-          UtilsFactory.clone(groupMessageList[i]));
+        log.warn([message.target || 'Server', 'Socket', groupMessageList[i], 'Dropping of outdated status message ->'],
+          clone(groupMessageList[i]));
         groupMessageList.splice(i, 1);
         i--;
         continue;
@@ -138,8 +203,8 @@ Skylink.prototype._sendChannelMessage = function(message) {
         rid: self._room.id
       };
 
-      self._log.debug([message.target || 'Server', 'Socket', groupMessage.type,
-        'Sending queued grouped message (max: 16 per group) ->'], UtilsFactory.clone(groupMessage));
+      log.debug([message.target || 'Server', 'Socket', groupMessage.type,
+        'Sending queued grouped message (max: 16 per group) ->'], clone(groupMessage));
 
       self._socket.send(JSON.stringify(groupMessage));
       self._timestamp.socketMessage = (new Date()).getTime();
@@ -165,13 +230,13 @@ Skylink.prototype._sendChannelMessage = function(message) {
   if (self._groupMessageList.indexOf(message.type) > -1) {
     if (!(self._timestamp.socketMessage && ((new Date ()).getTime() - self._timestamp.socketMessage) <= interval)) {
       if (!checkStampFn(message)) {
-        self._log.warn([message.target || 'Server', 'Socket', message.type, 'Dropping of outdated status message ->'], UtilsFactory.clone(message));
+        log.warn([message.target || 'Server', 'Socket', message.type, 'Dropping of outdated status message ->'], clone(message));
         return;
       }
       if (self._socketMessageTimeout) {
         clearTimeout(self._socketMessageTimeout);
       }
-      self._log.warn([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], UtilsFactory.clone(message));
+      log.warn([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
       self._socket.send(JSON.stringify(message));
       setStampFn(message);
       triggerEventFn(message);
@@ -179,8 +244,8 @@ Skylink.prototype._sendChannelMessage = function(message) {
       self._timestamp.socketMessage = (new Date()).getTime();
 
     } else {
-      self._log.warn([message.target || 'Server', 'Socket', message.type,
-        'Queueing socket message to prevent message drop ->'], UtilsFactory.clone(message));
+      log.warn([message.target || 'Server', 'Socket', message.type,
+        'Queueing socket message to prevent message drop ->'], clone(message));
 
       self._socketMessageQueue.push(message);
 
@@ -189,7 +254,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       }
     }
   } else {
-    self._log.debug([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], UtilsFactory.clone(message));
+    log.debug([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
     self._socket.send(JSON.stringify(message));
 
     // If Peer sends "bye" on its own, we trigger it as session disconnected abruptly
@@ -262,8 +327,8 @@ Skylink.prototype._createSocket = function (type) {
       (type === 'Polling' ? self.SOCKET_FALLBACK.LONG_POLLING_SSL : self.SOCKET_FALLBACK.FALLBACK_SSL_PORT);
 
     self._socketSession.attempts++;
-    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT, null, fallbackType, UtilsFactory.clone(self._socketSession));
-    self._trigger('channelRetry', fallbackType, self._socketSession.attempts, UtilsFactory.clone(self._socketSession));
+    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ATTEMPT, null, fallbackType, clone(self._socketSession));
+    self._trigger('channelRetry', fallbackType, self._socketSession.attempts, clone(self._socketSession));
   }
 
   // if socket instance already exists, exit
@@ -283,57 +348,57 @@ Skylink.prototype._createSocket = function (type) {
 
   self._channelOpen = false;
 
-  self._log.log('Opening channel with signaling server url:', UtilsFactory.clone(self._socketSession));
+  log.log('Opening channel with signaling server url:', clone(self._socketSession));
 
   self._socket = io.connect(url, options);
 
   self._socket.on('reconnect_attempt', function (attempt) {
     self._socketSession.attempts++;
-    self._trigger('channelRetry', fallbackType, self._socketSession.attempts, UtilsFactory.clone(self._socketSession));
+    self._trigger('channelRetry', fallbackType, self._socketSession.attempts, clone(self._socketSession));
   });
 
   self._socket.on('reconnect_failed', function () {
     if (fallbackType === self.SOCKET_FALLBACK.NON_FALLBACK) {
       self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED, new Error('Failed connection with transport "' +
-        type + '" and port ' + self._signalingServerPort + '.'), fallbackType, UtilsFactory.clone(self._socketSession));
+        type + '" and port ' + self._signalingServerPort + '.'), fallbackType, clone(self._socketSession));
     } else {
       self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED, new Error('Failed reconnection with transport "' +
-        type + '" and port ' + self._signalingServerPort + '.'), fallbackType, UtilsFactory.clone(self._socketSession));
+        type + '" and port ' + self._signalingServerPort + '.'), fallbackType, clone(self._socketSession));
     }
 
     if (self._socketSession.finalAttempts < 4) {
       self._createSocket(type);
     } else {
       self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED, new Error('Reconnection aborted as ' +
-        'there no more available ports, transports and final attempts left.'), fallbackType, UtilsFactory.clone(self._socketSession));
+        'there no more available ports, transports and final attempts left.'), fallbackType, clone(self._socketSession));
     }
   });
 
   self._socket.on('connect', function () {
     if (!self._channelOpen) {
-      self._log.log([null, 'Socket', null, 'Channel opened']);
+      log.log([null, 'Socket', null, 'Channel opened']);
       self._channelOpen = true;
-      self._trigger('channelOpen', UtilsFactory.clone(self._socketSession));
+      self._trigger('channelOpen', clone(self._socketSession));
     }
   });
 
   self._socket.on('reconnect', function () {
     if (!self._channelOpen) {
-      self._log.log([null, 'Socket', null, 'Channel opened']);
+      log.log([null, 'Socket', null, 'Channel opened']);
       self._channelOpen = true;
-      self._trigger('channelOpen', UtilsFactory.clone(self._socketSession));
+      self._trigger('channelOpen', clone(self._socketSession));
     }
   });
 
   self._socket.on('error', function(error) {
-    self._log.error([null, 'Socket', null, 'Exception occurred ->'], error);
-    self._trigger('channelError', error, UtilsFactory.clone(self._socketSession));
+    log.error([null, 'Socket', null, 'Exception occurred ->'], error);
+    self._trigger('channelError', error, clone(self._socketSession));
   });
 
   self._socket.on('disconnect', function() {
     self._channelOpen = false;
-    self._trigger('channelClose', UtilsFactory.clone(self._socketSession));
-    self._log.log([null, 'Socket', null, 'Channel closed']);
+    self._trigger('channelClose', clone(self._socketSession));
+    log.log([null, 'Socket', null, 'Channel closed']);
 
     if (self._inRoom && self._user && self._user.sid) {
       self.leaveRoom(false);
@@ -344,18 +409,18 @@ Skylink.prototype._createSocket = function (type) {
   self._socket.on('message', function(messageStr) {
     var message = JSON.parse(messageStr);
 
-    self._log.log([null, 'Socket', null, 'Received message ->'], message);
+    log.log([null, 'Socket', null, 'Received message ->'], message);
 
     if (message.type === self._SIG_MESSAGE_TYPE.GROUP) {
-      self._log.debug('Bundle of ' + message.lists.length + ' messages');
+      log.debug('Bundle of ' + message.lists.length + ' messages');
       for (var i = 0; i < message.lists.length; i++) {
         var indiMessage = JSON.parse(message.lists[i]);
         self._processSigMessage(indiMessage);
-        self._trigger('channelMessage', indiMessage, UtilsFactory.clone(self._socketSession));
+        self._trigger('channelMessage', indiMessage, clone(self._socketSession));
       }
     } else {
       self._processSigMessage(message);
-      self._trigger('channelMessage', message, UtilsFactory.clone(self._socketSession));
+      self._trigger('channelMessage', message, clone(self._socketSession));
     }
   });
 };
@@ -371,13 +436,13 @@ Skylink.prototype._createSocket = function (type) {
 Skylink.prototype._openChannel = function() {
   var self = this;
   if (self._channelOpen) {
-    self._log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
+    log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
       'as there is already an ongoing channel connection']);
     return;
   }
 
   if (self._readyState !== self.READY_STATE_CHANGE.COMPLETED) {
-    self._log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
+    log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
       'as readyState is not ready']);
     return;
   }
@@ -427,10 +492,10 @@ Skylink.prototype._closeChannel = function() {
       this._socket.disconnect();
     }
 
-    this._log.log([null, 'Socket', null, 'Channel closed']);
+    log.log([null, 'Socket', null, 'Channel closed']);
 
     this._channelOpen = false;
-    this._trigger('channelClose', UtilsFactory.clone(this._socketSession));
+    this._trigger('channelClose', clone(this._socketSession));
   }
 
   this._socket = null;

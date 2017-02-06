@@ -126,8 +126,7 @@ Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
   }
 
   if (!payload) {
-    this._log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
-      &#x27;Failed to find OPUS payload. Not configuring options.&#x27;]);
+    log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Failed to find OPUS payload. Not configuring options.&#x27;]);
     return sessionDescription.sdp;
   }
 
@@ -147,20 +146,17 @@ Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
         if ([&#x27;useinbandfec&#x27;, &#x27;usedtx&#x27;, &#x27;sprop-stereo&#x27;, &#x27;stereo&#x27;, &#x27;maxplaybackrate&#x27;].indexOf(params[0]) &gt; -1) {
           // Get default OPUS useinbandfec
           if (params[0] === &#x27;useinbandfec&#x27; &amp;&amp; params[1] === &#x27;1&#x27; &amp;&amp; opusSettings.useinbandfec === null) {
-            this._log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
-              &#x27;Received OPUS useinbandfec as true by default.&#x27;]);
+            log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Received OPUS useinbandfec as true by default.&#x27;]);
             opusSettings.useinbandfec = true;
 
           // Get default OPUS usedtx
           } else if (params[0] === &#x27;usedtx&#x27; &amp;&amp; params[1] === &#x27;1&#x27; &amp;&amp; opusSettings.usedtx === null) {
-            this._log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
-              &#x27;Received OPUS usedtx as true by default.&#x27;]);
+            log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Received OPUS usedtx as true by default.&#x27;]);
             opusSettings.usedtx = true;
 
           // Get default OPUS maxplaybackrate
           } else if (params[0] === &#x27;maxplaybackrate&#x27; &amp;&amp; parseInt(params[1] || &#x27;0&#x27;, 10) &gt; 0 &amp;&amp; opusSettings.maxplaybackrate === null) {
-            this._log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
-              &#x27;Received OPUS maxplaybackrate as &#x27; + params[1] + &#x27; by default.&#x27;]);
+            log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Received OPUS maxplaybackrate as &#x27; + params[1] + &#x27; by default.&#x27;]);
             opusSettings.maxplaybackrate = params[1];
           }
         } else {
@@ -184,8 +180,7 @@ Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
         updatedOpusParams += &#x27;maxplaybackrate=&#x27; + opusSettings.maxplaybackrate + &#x27;;&#x27;;
       }
 
-      this._log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
-        &#x27;Updated OPUS parameters -&gt;&#x27;], updatedOpusParams);
+      log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Updated OPUS parameters -&gt;&#x27;], updatedOpusParams);
 
       sdpLines[j] = &#x27;a=fmtp:&#x27; + payload + &#x27; &#x27; + updatedOpusParams;
       appendFmtpLineAtIndex = -1;
@@ -212,8 +207,7 @@ Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
       newFmtpLine += &#x27;maxplaybackrate=&#x27; + opusSettings.maxplaybackrate + &#x27;;&#x27;;
     }
 
-    this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
-      &#x27;Created OPUS parameters -&gt;&#x27;], newFmtpLine);
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Created OPUS parameters -&gt;&#x27;], newFmtpLine);
 
     sdpLines.splice(appendFmtpLineAtIndex + 1, 0, newFmtpLine);
   }
@@ -230,7 +224,6 @@ Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
  * @since 0.5.10
  */
 Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
-  var self = this;
   var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
   var parseFn = function (type, bw) {
     var mLineType = type;
@@ -260,18 +253,18 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
     }
 
     if (!(typeof bw === &#x27;number&#x27; &amp;&amp; bw &gt; 0)) {
-      self._log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not limiting &quot;&#x27; + type + &#x27;&quot; bandwidth&#x27;]);
+      log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not limiting &quot;&#x27; + type + &#x27;&quot; bandwidth&#x27;]);
       return;
     }
 
     if (cLineIndex === -1) {
-      self._log.error([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Failed setting &quot;&#x27; +
+      log.error([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Failed setting &quot;&#x27; +
         type + &#x27;&quot; bandwidth as c-line is missing.&#x27;]);
       return;
     }
 
     // Follow RFC 4566, that the b-line should follow after c-line.
-    self._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Limiting maximum sending &quot;&#x27; + type + &#x27;&quot; bandwidth -&gt;&#x27;], bw);
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Limiting maximum sending &quot;&#x27; + type + &#x27;&quot; bandwidth -&gt;&#x27;], bw);
     sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ? &#x27;b=TIAS:&#x27; + (bw * 1024) : &#x27;b=AS:&#x27; + bw);
   };
 
@@ -314,7 +307,7 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
         xGoogleParams += &#x27;x-google-max-bitrate=&#x27; + this._streamsBandwidthSettings.googleX.max + &#x27;;&#x27;;
       }
 
-      this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Limiting x-google-bitrate -&gt;&#x27;], xGoogleParams);
+      log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Limiting x-google-bitrate -&gt;&#x27;], xGoogleParams);
 
       if (codecFmtpLineIndex &gt; -1) {
         sdpLines[codecFmtpLineIndex] += (sdpLines[codecFmtpLineIndex].split(&#x27; &#x27;)[1] ? &#x27;;&#x27; : &#x27;&#x27;) + xGoogleParams;
@@ -335,11 +328,10 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
  * @since 0.6.16
  */
 Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
-  var self = this;
   var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
   var parseFn = function (type, codec) {
     if (codec === &#x27;auto&#x27;) {
-      self._log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+      log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
         &#x27;Not preferring any codec for &quot;&#x27; + type + &#x27;&quot; streaming. Using browser selection.&#x27;]);
       return;
     }
@@ -350,14 +342,14 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
         var payload = sdpLines[i].split(&#x27;:&#x27;)[1].split(&#x27; &#x27;)[0] || null;
 
         if (!payload) {
-          self._log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not preferring &quot;&#x27; +
+          log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not preferring &quot;&#x27; +
             codec + &#x27;&quot; for &quot;&#x27; + type + &#x27;&quot; streaming as payload is not found.&#x27;]);
           return;
         }
 
         for (var j = 0; j &lt; sdpLines.length; j++) {
           if (sdpLines[j].indexOf(&#x27;m=&#x27; + type) === 0) {
-            self._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Preferring &quot;&#x27; +
+            log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Preferring &quot;&#x27; +
               codec + &#x27;&quot; for &quot;&#x27; + type + &#x27;&quot; streaming.&#x27;]);
 
             var parts = sdpLines[j].split(&#x27; &#x27;);
@@ -392,7 +384,7 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
  * @since 0.5.2
  */
 Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescription) {
-  this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+  log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
     &#x27;Removing Firefox experimental H264 flag to ensure interopability reliability&#x27;]);
 
   return sessionDescription.sdp.replace(/a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1\r\n/g, &#x27;&#x27;);
@@ -407,9 +399,8 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
  * @since 0.6.16
  */
 Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescription) {
-  var self = this;
   if (!(this._peerConnections[targetMid] &amp;&amp; this._peerConnections[targetMid].getLocalStreams().length &gt; 0)) {
-    this._log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+    log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
       &#x27;Not enforcing MediaStream IDs as no Streams is sent.&#x27;]);
     return sessionDescription.sdp;
   }
@@ -427,7 +418,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 
   var parseFn = function (type, tracks) {
     if (tracks.length === 0) {
-      self._log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+      log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
         &#x27;Not enforcing &quot;&#x27; + type + &#x27;&quot; MediaStreamTrack IDs as no Stream &quot;&#x27; + type + &#x27;&quot; tracks is sent.&#x27;]);
       return;
     }
@@ -470,7 +461,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
           i++;
         }
 
-        self._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Updating MediaStreamTrack ssrc (&#x27; +
+        log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Updating MediaStreamTrack ssrc (&#x27; +
           ssrcId + &#x27;) for &quot;&#x27; + localStreamId + &#x27;&quot; stream and &quot;&#x27; + trackId + &#x27;&quot; (label:&quot;&#x27; + trackLabel + &#x27;&quot;)&#x27;]);
 
         break;
@@ -483,7 +474,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 
   // Append signaling of end-of-candidates
   if (!this._enableIceTrickle){
-    this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
       &#x27;Appending end-of-candidates signal for non-trickle ICE connection.&#x27;]);
     for (var i = 0; i &lt; sdpLines.length; i++) {
       if (sdpLines[i].indexOf(&#x27;a=candidate:&#x27;) === 0) {
@@ -510,7 +501,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 
         if (compareA[0] &amp;&amp; compareB[0] &amp;&amp; compareA[0] !== compareB[0]) {
           compareB[1] = 0;
-          this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+          log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
             &#x27;Appending middle rejected m= line -&gt;&#x27;], compareB.join(&#x27; &#x27;));
           sdpLines.splice(j, 0, compareB.join(&#x27; &#x27;));
           j++;
@@ -527,7 +518,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
       }
       var parts = (this._sdpSessions[targetMid].remote.mLines[mLineIndex] || &#x27;&#x27;).split(&#x27; &#x27;);
       parts[1] = 0;
-      this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+      log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
         &#x27;Appending later rejected m= line -&gt;&#x27;], parts.join(&#x27; &#x27;));
       sdpLines.splice(appendIndex, 0, parts.join(&#x27; &#x27;));
     }
@@ -535,7 +526,7 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 
   if (window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
     !sdpLines[sdpLines.length - 1].replace(/\s/gi, &#x27;&#x27;)) {
-    this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing last empty space for Edge browsers&#x27;]);
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing last empty space for Edge browsers&#x27;]);
     sdpLines.splice(sdpLines.length - 1, 1);
   }
 
@@ -563,7 +554,7 @@ Skylink.prototype._removeSDPH264VP9AptRtxForOlderPlugin = function (targetMid, s
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
   if ([&#x27;chrome&#x27;, &#x27;opera&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; removeVP9AptRtxPayload) {
-    this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
       &#x27;Removing VP9/H264 apt= and rtx payload lines causing connectivity issues&#x27;]);
 
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, &#x27;&#x27;);
@@ -581,14 +572,13 @@ Skylink.prototype._removeSDPH264VP9AptRtxForOlderPlugin = function (targetMid, s
  * @since 0.6.16
  */
 Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
-  var self = this;
   var audioSettings = this.getPeerInfo().settings.audio;
 
   var parseFn = function (type, codec) {
     var payloadList = sessionDescription.sdp.match(new RegExp(&#x27;a=rtpmap:(\\d*)\\ &#x27; + codec + &#x27;.*&#x27;, &#x27;gi&#x27;));
 
     if (!(Array.isArray(payloadList) &amp;&amp; payloadList.length &gt; 0)) {
-      self._log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+      log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
         &#x27;Not removing &quot;&#x27; + codec + &#x27;&quot; as it does not exists.&#x27;]);
       return;
     }
@@ -596,7 +586,7 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
     for (var i = 0; i &lt; payloadList.length; i++) {
       var payload = payloadList[i].split(&#x27; &#x27;)[0].split(&#x27;:&#x27;)[1];
 
-      self._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+      log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
         &#x27;Removing &quot;&#x27; + codec + &#x27;&quot; payload -&gt;&#x27;], payload);
 
       sessionDescription.sdp = sessionDescription.sdp.replace(
@@ -628,7 +618,7 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
 
   if (this._disableVideoFecCodecs) {
     if (this._hasMCU) {
-      this._log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+      log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
         &#x27;Not removing &quot;ulpfec&quot; or &quot;red&quot; codecs as connected to MCU to prevent connectivity issues.&#x27;]);
     } else {
       parseFn(&#x27;video&#x27;, &#x27;red&#x27;);
@@ -655,7 +645,7 @@ Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescriptio
     return sessionDescription.sdp;
   }
 
-  this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing REMB packets.&#x27;]);
+  log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing REMB packets.&#x27;]);
   return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ goog-remb\r\n/g, &#x27;&#x27;);
 };
 
@@ -708,7 +698,7 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
     }
   }
 
-  this._log.debug([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+  log.debug([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
     &#x27;Parsing session description &quot;&#x27; + type + &#x27;&quot; codecs -&gt;&#x27;], selectedCodecInfo);
 
   return selectedCodecInfo;
@@ -730,24 +720,24 @@ Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDes
   }
 
   if (this._forceTURN &amp;&amp; this._hasMCU) {
-    this._log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not filtering ICE candidates as &#x27; +
+    log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not filtering ICE candidates as &#x27; +
       &#x27;TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate &#x27; +
       &#x27;flags are not honoured&#x27;]);
     return sessionDescription.sdp;
   }
 
   if (this._filterCandidatesType.host) {
-    this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;host&quot; ICE candidates.&#x27;]);
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;host&quot; ICE candidates.&#x27;]);
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*host.*\r\n/g, &#x27;&#x27;);
   }
 
   if (this._filterCandidatesType.srflx) {
-    this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;srflx&quot; ICE candidates.&#x27;]);
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;srflx&quot; ICE candidates.&#x27;]);
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*srflx.*\r\n/g, &#x27;&#x27;);
   }
 
   if (this._filterCandidatesType.relay) {
-    this._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;relay&quot; ICE candidates.&#x27;]);
+    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;relay&quot; ICE candidates.&#x27;]);
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*relay.*\r\n/g, &#x27;&#x27;);
   }
 
@@ -902,7 +892,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       
       // Check if there is missing unsupported video codecs support and reject it regardles of MCU Peer or not
       if (!settings.connection[mediaType]) {
-        self._log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+        log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
           &#x27;Removing rejected m=&#x27; + mediaType + &#x27; line -&gt;&#x27;], sdpLines[i]);
         
         // Check if answerer and we do not have the power to remove the m line if index is 0
@@ -911,7 +901,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
         if (bundleLineIndex &gt; -1 &amp;&amp; mLineIndex === 0 &amp;&amp; (direction === &#x27;remote&#x27; ?
           sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER :
           sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER)) {
-          self._log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+          log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
             &#x27;Not removing rejected m=&#x27; + mediaType + &#x27; line -&gt;&#x27;], sdpLines[i]);
           settings.connection[mediaType] = true;
           if ([&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) &gt; -1) {
@@ -934,7 +924,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       !self.getPeerInfo(targetMid).config.enableIceTrickle) {
       if (sdpLines[i + 1] ? !(sdpLines[i + 1].indexOf(&#x27;a=candidate:&#x27;) === 0 ||
         sdpLines[i + 1].indexOf(&#x27;a=end-of-candidates&#x27;) === 0) : true) {
-        self._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+        log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
           &#x27;Appending end-of-candidates signal for non-trickle ICE connection.&#x27;]);
         sdpLines.splice(i + 1, 0, &#x27;a=end-of-candidates&#x27;);
         i++;
@@ -967,7 +957,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
         // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
         if (!self._hasMCU &amp;&amp; window.webrtcDetectedBrowser !== &#x27;firefox&#x27; &amp;&amp; peerAgent === &#x27;firefox&#x27; &amp;&amp;
           sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp; sdpLines[i] === &#x27;a=recvonly&#x27;) {
-          self._log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Overriding any original settings &#x27; +
+          log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Overriding any original settings &#x27; +
             &#x27;to receive only to send and receive to resolve chrome BUNDLE errors.&#x27;]);
           sdpLines[i] = &#x27;a=sendrecv&#x27;;
           settings.direction[mediaType].send = true;
@@ -997,7 +987,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     }
   }
 
-  self._log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Handling connection lines and direction -&gt;&#x27;], settings);
+  log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Handling connection lines and direction -&gt;&#x27;], settings);
 
   return sdpLines.join(&#x27;\r\n&#x27;);
 };
