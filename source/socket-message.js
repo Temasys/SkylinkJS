@@ -1470,7 +1470,7 @@ Skylink.prototype._offerHandler = function(message) {
     'Session description:'], clone(message));
 
   var offer = new RTCSessionDescription({
-    type: message.type,
+    type: 'offer',
     sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
   });
   log.log([targetMid, 'RTCSessionDescription', message.type,
@@ -1657,7 +1657,7 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   var answer = new RTCSessionDescription({
-    type: message.type,
+    type: 'answer',
     sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
   });
 
@@ -1731,7 +1731,8 @@ Skylink.prototype._answerHandler = function(message) {
 
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], {
       error: error,
-      state: pc.signalingState
+      state: pc.signalingState,
+      answer: answer
     });
   });
 };

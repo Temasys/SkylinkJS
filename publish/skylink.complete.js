@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 14:35:53 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 17:11:57 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 14:35:53 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 17:11:57 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -25215,7 +25215,7 @@ Skylink.prototype._offerHandler = function(message) {
     'Session description:'], clone(message));
 
   var offer = new RTCSessionDescription({
-    type: message.type,
+    type: 'offer',
     sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
   });
   log.log([targetMid, 'RTCSessionDescription', message.type,
@@ -25402,7 +25402,7 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   var answer = new RTCSessionDescription({
-    type: message.type,
+    type: 'answer',
     sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
   });
 
@@ -25476,7 +25476,8 @@ Skylink.prototype._answerHandler = function(message) {
 
     log.error([targetMid, null, message.type, 'Failed setting remote description:'], {
       error: error,
-      state: pc.signalingState
+      state: pc.signalingState,
+      answer: answer
     });
   });
 };
@@ -27842,30 +27843,24 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
       }
 
       if (hasReachedType && sdpLines[i].indexOf('a=ssrc:') === 0) {
-        ssrcId = (sdpLines[i].split(':')[1] || '').split(' ')[0] || null;
-
-        var msidLine = 'a=ssrc:' + ssrcId + ' msid:' + localStreamId + ' ' + trackId;
-        var mslabelLine = 'a=ssrc:' + ssrcId + ' mslabel:' + trackLabel;
-        var labelLine = 'a=ssrc:' + ssrcId + ' label:' + trackLabel;
-
-        if (sdpLines.indexOf(msidLine) === -1) {
-          sdpLines.splice(i + 1, 0, msidLine);
-          i++;
+        if (!ssrcId) {
+          ssrcId = (sdpLines[i].split(':')[1] || '').split(' ')[0] || null;
         }
 
-        if (sdpLines.indexOf(mslabelLine) === -1) {
-          sdpLines.splice(i + 1, 0, mslabelLine);
-          i++;
+        if (ssrcId && sdpLines[i].indexOf('a=ssrc:' + ssrcId + ' ') === 0) {
+          if (sdpLines[i].indexOf(' cname:') > 0) {
+            log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Updating MediaStreamTrack ssrc (' +
+              ssrcId + ') for "' + localStreamId + '" stream and "' + trackId + '" (label:"' + trackLabel + '")']);
+            sdpLines.splice(i + 1, 0,
+              'a=ssrc:' + ssrcId + ' msid:' + localStreamId + ' ' + trackId,
+              'a=ssrc:' + ssrcId + ' mslabel:' + trackId,
+              'a=ssrc:' + ssrcId + ' label:' + trackId);
+            i += 3;
+          } else {
+            sdpLines.splice(i, 1);
+            i--;
+          }
         }
-
-        if (sdpLines.indexOf(labelLine) === -1) {
-          sdpLines.splice(i + 1, 0, labelLine);
-          i++;
-        }
-
-        log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Updating MediaStreamTrack ssrc (' +
-          ssrcId + ') for "' + localStreamId + '" stream and "' + trackId + '" (label:"' + trackLabel + '")']);
-
         break;
       }
     }
@@ -27943,24 +27938,24 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
  * @since 0.6.16
  */
 Skylink.prototype._removeSDPH264VP9AptRtxForOlderPlugin = function (targetMid, sessionDescription) {
-  var removeVP9AptRtxPayload = false;
   var agent = (this._peerInformations[targetMid] || {}).agent || {};
-
-  if (agent.pluginVersion) {
-    // 0.8.870 supports
-    var parts = agent.pluginVersion.split('.');
-    removeVP9AptRtxPayload = parseInt(parts[0], 10) >= 0 && parseInt(parts[1], 10) >= 8 &&
-      parseInt(parts[2], 10) >= 870;
-  }
 
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
-  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1 && removeVP9AptRtxPayload) {
-    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
-      'Removing VP9/H264 apt= and rtx payload lines causing connectivity issues']);
+  if (agent.pluginVersion && ['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
+    var parts = agent.pluginVersion.split('.');
 
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, '');
-    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, '');
+    if (parseInt(parts[0], 10) === 0 && parseInt(parts[1], 10) <= 8) {
+      // Remove all RTX codecs because there's a problem with the later versions of Chrome answer. See ESS-772
+      if (sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER && parseInt(parts[2], 10) < 884) {
+        sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\n/gi, '');
+        sessionDescription.sdp = sessionDescription.sdp.replace(/a=fmtp:\d+ apt=\d+\r\n/gi, '');
+      // 0.8.870 supports
+      } else if (sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER && parseInt(parts[2], 10) < 870) {
+        sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, '');
+        sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, '');
+      }
+    }
   }
 
   return sessionDescription.sdp;
