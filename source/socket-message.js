@@ -1471,7 +1471,7 @@ Skylink.prototype._offerHandler = function(message) {
 
   var offer = new RTCSessionDescription({
     type: 'offer',
-    sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
+    sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : message.sdp
   });
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
@@ -1662,7 +1662,7 @@ Skylink.prototype._answerHandler = function(message) {
 
   var answer = new RTCSessionDescription({
     type: 'answer',
-    sdp: self._hasMCU ? message.sdp.split('\n').join('\r\n') : message.sdp
+    sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : message.sdp
   });
 
   log.log([targetMid, 'RTCSessionDescription', message.type,
