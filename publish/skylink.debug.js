@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Mon Feb 06 2017 21:05:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Fri Feb 10 2017 19:08:40 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -7667,7 +7667,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   //sessionDescription.sdp = self._setSDPOpusConfig(targetMid, sessionDescription);
   //sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
-  sessionDescription.sdp = self._removeSDPH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   //sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
@@ -16399,34 +16399,58 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 };
 
 /**
- * Function that modifies the session description to remove VP9 and H264 apt/rtx lines to prevent plugin connection breaks.
- * @method _removeSDPH264VP9AptRtxForOlderPlugin
+ * Function that modifies the session description to remove apt/rtx lines that does exists.
+ * @method _removeSDPUnknownAptRtx
  * @private
  * @for Skylink
- * @since 0.6.16
+ * @since 0.6.18
  */
-Skylink.prototype._removeSDPH264VP9AptRtxForOlderPlugin = function (targetMid, sessionDescription) {
-  var agent = (this._peerInformations[targetMid] || {}).agent || {};
+Skylink.prototype._removeSDPUnknownAptRtx = function (targetMid, sessionDescription) {
+  var codecsPayload = []; // Payload numbers as the keys
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var hasVideo = false;
+  var rtxs = {};
+  var parts = [];
 
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
-  if (agent.pluginVersion && ['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
-    var parts = agent.pluginVersion.split('.');
-
-    if (parseInt(parts[0], 10) === 0 && parseInt(parts[1], 10) <= 8) {
-      // Remove all RTX codecs because there's a problem with the later versions of Chrome answer. See ESS-772
-      if (sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER && parseInt(parts[2], 10) < 884) {
-        sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\n/gi, '');
-        sessionDescription.sdp = sessionDescription.sdp.replace(/a=fmtp:\d+ apt=\d+\r\n/gi, '');
-      // 0.8.870 supports
-      } else if (sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER && parseInt(parts[2], 10) < 870) {
-        sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=101\r\n/g, '');
-        sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtpmap:\d+ rtx\/\d+\r\na=fmtp:\d+ apt=107\r\n/g, '');
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].indexOf('m=') === 0) {
+      if (hasVideo) {
+        for (var r in rtxs) {
+          if (rtxs.hasOwnProperty(r) && rtxs[r] && codecsPayload.indexOf(rtxs[r].codec) === -1) {
+            for (var l = 0; l < rtxs[r].lines.length; l++) {
+              sdpLines.splice(sdpLines.indexOf(rtxs[r].lines[l]), 1);
+              i--;
+            }
+          }
+        }
       }
+      hasVideo = sdpLines[i].indexOf('m=video ') === 0;
+      codecsPayload = [];
+      rtxs = {};
+    }
+    if (sdpLines[i].toLowerCase().indexOf('a=rtpmap:') === 0) {
+      parts = (sdpLines[i].split('a=rtpmap:')[1] || '').split(' ');
+      if (parts[1].toLowerCase().indexOf('rtx') === 0) {
+        if (!rtxs[parts[0]]) {
+          rtxs[parts[0]] = { lines:[], codec: null };
+        }
+        rtxs[parts[0]].lines.push(sdpLines[i]);
+      } else {
+        codecsPayload.push(parts[0]);
+      }
+    } else if (sdpLines[i].indexOf('a=fmtp:') === 0 && sdpLines[i].indexOf(' apt=') > 0) {
+      parts = (sdpLines[i].split('a=fmtp:')[1] || '').split(' ');
+      if (parts[0] && !rtxs[parts[0]]) {
+        rtxs[parts[0]] = { lines:[], codec: null };
+      }
+      rtxs[parts[0]].codec = parts[1].split('apt=')[1];
+      rtxs[parts[0]].lines.push(sdpLines[i]);
     }
   }
-
-  return sessionDescription.sdp;
+  
+  return sdpLines.join('\r\n');
 };
 
 /**
