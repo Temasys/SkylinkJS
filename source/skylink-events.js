@@ -1391,8 +1391,8 @@ Skylink.prototype.off = function(eventName, callback) {
       log.log([null, 'Event', eventName, 'All events are unsubscribed']);
       return;
     }
-    var arr = this._EVENTS[eventName];
-    var once = this._onceEvents[eventName];
+    var arr = this._EVENTS[eventName] || [];
+    var once = this._onceEvents[eventName] || [];
 
     // unsubscribe events that is triggered always
     for (var i = 0; i < arr.length; i++) {

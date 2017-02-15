@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Fri Feb 10 2017 19:38:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Feb 15 2017 21:58:28 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -11579,8 +11579,8 @@ Skylink.prototype.off = function(eventName, callback) {
       log.log([null, 'Event', eventName, 'All events are unsubscribed']);
       return;
     }
-    var arr = this._EVENTS[eventName];
-    var once = this._onceEvents[eventName];
+    var arr = this._EVENTS[eventName] || [];
+    var once = this._onceEvents[eventName] || [];
 
     // unsubscribe events that is triggered always
     for (var i = 0; i < arr.length; i++) {
