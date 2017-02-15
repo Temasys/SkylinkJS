@@ -810,7 +810,8 @@ Skylink.prototype._retrieveStats = function (peerId, callback) {
         label: self._dataChannels[peerId][channelProp].channel.label,
         readyState: self._dataChannels[peerId][channelProp].channel.readyState,
         channelType: channelProp === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA,
-        currentTransferId: self._dataChannels[peerId][channelProp].transferId || null
+        currentTransferId: self._dataChannels[peerId][channelProp].transferId || null,
+        currentStreamId: self._dataChannels[peerId][channelProp].streamId || null
       };
     }
   }

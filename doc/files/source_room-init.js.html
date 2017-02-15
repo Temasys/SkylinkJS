@@ -964,10 +964,7 @@ Skylink.prototype._parseInfo = function(info) {
 
   this._key = info.cid;
   this._appKeyOwner = info.apiOwner;
-
   this._signalingServer = info.ipSigserver;
-  this._signalingServerPort = null;
-
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
 
@@ -1075,12 +1072,25 @@ Skylink.prototype._loadInfo = function() {
   adapter.webRTCReady(function () {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin &amp;&amp; !!adapter.WebRTCPlugin.plugin.VERSION;
 
-    if (!window.RTCPeerConnection) {
-      log.error(&#x27;WebRTC not supported. Please upgrade your browser&#x27;);
+    // Prevent empty object returned when constructing the RTCPeerConnection object
+    if (!(function () {
+      try {
+        var p = new window.RTCPeerConnection(null);
+        // IE returns as typeof object
+        return [&#x27;object&#x27;, &#x27;function&#x27;].indexOf(typeof p.createOffer) &gt; -1 &amp;&amp; p.createOffer !== null;
+      } catch (e) {
+        return false;
+      }
+    })()) {
+      if (window.RTCPeerConnection &amp;&amp; self._isUsingPlugin) {
+        log.error(&#x27;Plugin is not available. Please check plugin status.&#x27;);
+      } else {
+        log.error(&#x27;WebRTC not supported. Please upgrade your browser&#x27;);
+      }
       self._readyState = -1;
       self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
         status: null,
-        content: &#x27;WebRTC not available&#x27;,
+        content: self._isUsingPlugin &amp;&amp; window.RTCPeerConnection ? &#x27;Plugin is not available&#x27; : &#x27;WebRTC not available&#x27;,
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
       }, self._selectedRoom);
       return;

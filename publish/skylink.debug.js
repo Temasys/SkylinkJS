@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Feb 15 2017 21:58:28 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Feb 15 2017 22:22:10 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -5988,7 +5988,8 @@ Skylink.prototype._retrieveStats = function (peerId, callback) {
         label: self._dataChannels[peerId][channelProp].channel.label,
         readyState: self._dataChannels[peerId][channelProp].channel.readyState,
         channelType: channelProp === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA,
-        currentTransferId: self._dataChannels[peerId][channelProp].transferId || null
+        currentTransferId: self._dataChannels[peerId][channelProp].transferId || null,
+        currentStreamId: self._dataChannels[peerId][channelProp].streamId || null
       };
     }
   }
@@ -11397,6 +11398,9 @@ var _eventsDocs = {
    * @param {String} stats.connection.dataChannels.#channelName.currentTransferId The Peer connection
    *   Datachannel connection current progressing transfer session ID.
    *   <small>Defined as <code>null</code> when there is currently no transfer session progressing on the Datachannel connection.</small>
+   * @param {String} stats.connection.dataChannels.#channelName.currentStreamId The Peer connection
+   *   Datachannel connection current data streaming session ID.
+   *   <small>Defined as <code>null</code> when there is currently no data streaming session on the Datachannel connection.</small>
    * @param {Error} error The error object received.
    *   <small>Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</small>
    * @for Skylink

@@ -1209,6 +1209,9 @@ var _eventsDocs = {
    * @param {String} stats.connection.dataChannels.#channelName.currentTransferId The Peer connection
    *   Datachannel connection current progressing transfer session ID.
    *   <small>Defined as <code>null</code> when there is currently no transfer session progressing on the Datachannel connection.</small>
+   * @param {String} stats.connection.dataChannels.#channelName.currentStreamId The Peer connection
+   *   Datachannel connection current data streaming session ID.
+   *   <small>Defined as <code>null</code> when there is currently no data streaming session on the Datachannel connection.</small>
    * @param {Error} error The error object received.
    *   <small>Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</small>
    * @for Skylink

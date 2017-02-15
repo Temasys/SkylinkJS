@@ -1300,6 +1300,9 @@ var _eventsDocs = {
    * @param {String} stats.connection.dataChannels.#channelName.currentTransferId The Peer connection
    *   Datachannel connection current progressing transfer session ID.
    *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there is currently no transfer session progressing on the Datachannel connection.&lt;/small&gt;
+   * @param {String} stats.connection.dataChannels.#channelName.currentStreamId The Peer connection
+   *   Datachannel connection current data streaming session ID.
+   *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there is currently no data streaming session on the Datachannel connection.&lt;/small&gt;
    * @param {Error} error The error object received.
    *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;RETRIEVE_ERROR&lt;/code&gt;.&lt;/small&gt;
    * @for Skylink
@@ -1482,8 +1485,8 @@ Skylink.prototype.off = function(eventName, callback) {
       log.log([null, &#x27;Event&#x27;, eventName, &#x27;All events are unsubscribed&#x27;]);
       return;
     }
-    var arr = this._EVENTS[eventName];
-    var once = this._onceEvents[eventName];
+    var arr = this._EVENTS[eventName] || [];
+    var once = this._onceEvents[eventName] || [];
 
     // unsubscribe events that is triggered always
     for (var i = 0; i &lt; arr.length; i++) {

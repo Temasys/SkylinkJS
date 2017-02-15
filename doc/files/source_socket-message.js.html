@@ -1561,8 +1561,8 @@ Skylink.prototype._offerHandler = function(message) {
     &#x27;Session description:&#x27;], clone(message));
 
   var offer = new RTCSessionDescription({
-    type: message.type,
-    sdp: self._hasMCU ? message.sdp.split(&#x27;\n&#x27;).join(&#x27;\r\n&#x27;) : message.sdp
+    type: &#x27;offer&#x27;,
+    sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, &#x27;\n&#x27;).split(&#x27;\n&#x27;).join(&#x27;\r\n&#x27;) : message.sdp
   });
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type,
     &#x27;Session description object created&#x27;], offer);
@@ -1614,7 +1614,11 @@ Skylink.prototype._offerHandler = function(message) {
 
     pc.processingRemoteSDP = false;
 
-    log.error([targetMid, null, message.type, &#x27;Failed setting remote description:&#x27;], error);
+    log.error([targetMid, null, message.type, &#x27;Failed setting remote description:&#x27;], {
+      error: error,
+      state: pc.signalingState,
+      offer: offer
+    });
   });
 };
 
@@ -1748,8 +1752,8 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   var answer = new RTCSessionDescription({
-    type: message.type,
-    sdp: self._hasMCU ? message.sdp.split(&#x27;\n&#x27;).join(&#x27;\r\n&#x27;) : message.sdp
+    type: &#x27;answer&#x27;,
+    sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, &#x27;\n&#x27;).split(&#x27;\n&#x27;).join(&#x27;\r\n&#x27;) : message.sdp
   });
 
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type,
@@ -1822,7 +1826,8 @@ Skylink.prototype._answerHandler = function(message) {
 
     log.error([targetMid, null, message.type, &#x27;Failed setting remote description:&#x27;], {
       error: error,
-      state: pc.signalingState
+      state: pc.signalingState,
+      answer: answer
     });
   });
 };
