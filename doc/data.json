@@ -3116,7 +3116,7 @@
             "itemtype": "method",
             "name": "getCurrentDataTransfers",
             "return": {
-                "description": "The list of Peers Stream. <ul>\n  <li><code>#transferId</code><var><b>{</b>JSON<b>}</b></var><p>The data transfer session.</p><ul>\n  <li><code>transferInfo</code><var><b>{</b>JSON<b>}</b></var><p>The Stream object.\n  <small>Object signature matches the <code>transferInfo</code> parameter payload received in the\n  <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  except without the <code>data</code> property.</small></p></li>\n  <li><code>peerId</code><var><b>{</b>String<b>}</b></var><p>The sender Peer ID.</p></li>\n  <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>\n  </p></li></ul></li></ul>",
+                "description": "The list of Peers Stream. <ul>\n  <li><code>#transferId</code><var><b>{</b>JSON<b>}</b></var><p>The data transfer session.</p><ul>\n  <li><code>transferInfo</code><var><b>{</b>JSON<b>}</b></var><p>The data transfer information.\n  <small>Object signature matches the <code>transferInfo</code> parameter payload received in the\n  <a href=\"#event_dataTransferState\"><code>dataTransferState</code> event</a>\n  except without the <code>data</code> property.</small></p></li>\n  <li><code>peerId</code><var><b>{</b>String<b>}</b></var><p>The sender Peer ID.</p></li>\n  <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>\n  </p></li></ul></li></ul>",
                 "type": "JSON"
             },
             "example": [
@@ -3128,6 +3128,22 @@
         {
             "file": "source/peer-data.js",
             "line": 380,
+            "description": "Function that gets the list of current data streaming sessions.",
+            "itemtype": "method",
+            "name": "getCurrentDataStreamsSession",
+            "return": {
+                "description": "The list of Peers Stream. <ul>\n  <li><code>#streamId</code><var><b>{</b>JSON<b>}</b></var><p>The data streaming session.</p><ul>\n  <li><code>streamInfo</code><var><b>{</b>JSON<b>}</b></var><p>The data streaming information.\n  <small>Object signature matches the <code>streamInfo</code> parameter payload received in the\n  <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  except without the <code>chunk</code> amd <code>chunkSize</code> property.</small></p></li>\n  <li><code>peerId</code><var><b>{</b>String<b>}</b></var><p>The sender Peer ID.</p></li>\n  <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>\n  </p></li></ul></li></ul>",
+                "type": "JSON"
+            },
+            "example": [
+                "\n  // Example 1: Get the list of current data streaming sessions in the same Room\n  var currentDataStreams = skylinkDemo.getCurrentDataStreamsSession();"
+            ],
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-data.js",
+            "line": 424,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",

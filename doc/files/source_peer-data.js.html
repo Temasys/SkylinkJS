@@ -435,7 +435,7 @@ Skylink.prototype.getPeersStream = function() {
  * @method getCurrentDataTransfers
  * @return {JSON} The list of Peers Stream. &lt;ul&gt;
  *   &lt;li&gt;&lt;code&gt;#transferId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data transfer session.&lt;/p&gt;&lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;transferInfo&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Stream object.
+ *   &lt;li&gt;&lt;code&gt;transferInfo&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data transfer information.
  *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
  *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;
  *   except without the &lt;code&gt;data&lt;/code&gt; property.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
@@ -466,6 +466,50 @@ Skylink.prototype.getCurrentDataTransfers = function() {
   }
 
   return listOfDataTransfers;
+};
+
+/**
+ * Function that gets the list of current data streaming sessions.
+ * @method getCurrentDataStreamsSession
+ * @return {JSON} The list of Peers Stream. &lt;ul&gt;
+ *   &lt;li&gt;&lt;code&gt;#streamId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data streaming session.&lt;/p&gt;&lt;ul&gt;
+ *   &lt;li&gt;&lt;code&gt;streamInfo&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data streaming information.
+ *   &lt;small&gt;Object signature matches the &lt;code&gt;streamInfo&lt;/code&gt; parameter payload received in the
+ *   &lt;a href=&quot;#event_dataStreamState&quot;&gt;&lt;code&gt;dataStreamState&lt;/code&gt; event&lt;/a&gt;
+ *   except without the &lt;code&gt;chunk&lt;/code&gt; amd &lt;code&gt;chunkSize&lt;/code&gt; property.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The sender Peer ID.&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Boolean&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The flag if Peer is User.&lt;/p&gt;&lt;/li&gt;
+ *   &lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
+ * @example
+ *   // Example 1: Get the list of current data streaming sessions in the same Room
+ *   var currentDataStreams = skylinkDemo.getCurrentDataStreamsSession();
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.getCurrentDataStreamsSession = function() {
+  var listOfDataStreams = {};
+
+  if (!(this._user &amp;&amp; this._user.sid)) {
+    return {};
+  }
+
+  for (var prop in this._dataStreams) {
+    if (this._dataStreams.hasOwnProperty(prop) &amp;&amp; this._dataStreams[prop]) {
+      listOfDataStreams[prop] = {
+        streamInfo: {
+          chunkType: this._dataStreams[prop].sessionChunkType === &#x27;string&#x27; ? this.DATA_TRANSFER_DATA_TYPE.STRING :
+            this.DATA_TRANSFER_DATA_TYPE.BLOB,
+          isPrivate: this._dataStreams[prop].isPrivate,
+          isStringStream: this._dataStreams[prop].sessionChunkType === &#x27;string&#x27;,
+          senderPeerId: this._dataStreams[prop].senderPeerId
+        },
+        isSelf: this._dataStreams[prop].senderPeerId === this._user.sid,
+        peerId: this._dataStreams[prop].senderPeerId || this._user.sid
+      };
+    }
+  }
+
+  return listOfDataStreams;
 };
 
 /**

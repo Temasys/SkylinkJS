@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Feb 15 2017 22:22:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Wed Feb 15 2017 22:31:51 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -7380,7 +7380,7 @@ Skylink.prototype.getPeersStream = function() {
  * @method getCurrentDataTransfers
  * @return {JSON} The list of Peers Stream. <ul>
  *   <li><code>#transferId</code><var><b>{</b>JSON<b>}</b></var><p>The data transfer session.</p><ul>
- *   <li><code>transferInfo</code><var><b>{</b>JSON<b>}</b></var><p>The Stream object.
+ *   <li><code>transferInfo</code><var><b>{</b>JSON<b>}</b></var><p>The data transfer information.
  *   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
  *   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
  *   except without the <code>data</code> property.</small></p></li>
@@ -7411,6 +7411,50 @@ Skylink.prototype.getCurrentDataTransfers = function() {
   }
 
   return listOfDataTransfers;
+};
+
+/**
+ * Function that gets the list of current data streaming sessions.
+ * @method getCurrentDataStreamsSession
+ * @return {JSON} The list of Peers Stream. <ul>
+ *   <li><code>#streamId</code><var><b>{</b>JSON<b>}</b></var><p>The data streaming session.</p><ul>
+ *   <li><code>streamInfo</code><var><b>{</b>JSON<b>}</b></var><p>The data streaming information.
+ *   <small>Object signature matches the <code>streamInfo</code> parameter payload received in the
+ *   <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+ *   except without the <code>chunk</code> amd <code>chunkSize</code> property.</small></p></li>
+ *   <li><code>peerId</code><var><b>{</b>String<b>}</b></var><p>The sender Peer ID.</p></li>
+ *   <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
+ *   </p></li></ul></li></ul>
+ * @example
+ *   // Example 1: Get the list of current data streaming sessions in the same Room
+ *   var currentDataStreams = skylinkDemo.getCurrentDataStreamsSession();
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.getCurrentDataStreamsSession = function() {
+  var listOfDataStreams = {};
+
+  if (!(this._user && this._user.sid)) {
+    return {};
+  }
+
+  for (var prop in this._dataStreams) {
+    if (this._dataStreams.hasOwnProperty(prop) && this._dataStreams[prop]) {
+      listOfDataStreams[prop] = {
+        streamInfo: {
+          chunkType: this._dataStreams[prop].sessionChunkType === 'string' ? this.DATA_TRANSFER_DATA_TYPE.STRING :
+            this.DATA_TRANSFER_DATA_TYPE.BLOB,
+          isPrivate: this._dataStreams[prop].isPrivate,
+          isStringStream: this._dataStreams[prop].sessionChunkType === 'string',
+          senderPeerId: this._dataStreams[prop].senderPeerId
+        },
+        isSelf: this._dataStreams[prop].senderPeerId === this._user.sid,
+        peerId: this._dataStreams[prop].senderPeerId || this._user.sid
+      };
+    }
+  }
+
+  return listOfDataStreams;
 };
 
 /**

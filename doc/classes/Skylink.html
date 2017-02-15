@@ -1144,6 +1144,15 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
+                  <a href="#method_getCurrentDataStreamsSession" class="list-group-item code-menu-item method-item ">
+                    &nbsp;&nbsp;getCurrentDataStreamsSession
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method_getCurrentDataTransfers" class="list-group-item code-menu-item method-item ">
                     &nbsp;&nbsp;getCurrentDataTransfers
                     <span class="settings">
@@ -6397,7 +6406,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l380"><code>source&#x2F;peer-data.js:380</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l424"><code>source&#x2F;peer-data.js:424</code></a>
       </small>
     
 
@@ -13126,6 +13135,120 @@ Function that retrieves Peer connection bandwidth and ICE connection stats.</p>
   <hr>
 </div>
             
+              <div id="method_getCurrentDataStreamsSession" class="code-item method item method-item ">
+  <h3 class="code-item-name"><code>getCurrentDataStreamsSession</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-data.js.html#l380"><code>source&#x2F;peer-data.js:380</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.18</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that gets the list of current data streaming sessions.</p>
+
+  </div>
+
+  
+    <div class="code-item-section">
+      <h4>Example:</h4>
+      <pre class="example-content prettyprint">
+        <p>  // Example 1: Get the list of current data streaming sessions in the same Room
+  var currentDataStreams = skylinkDemo.getCurrentDataStreamsSession();</p>
+
+      </pre>
+    </div>
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+    <div class="code-item-section">
+      <h4>Returns:</h4>
+
+      <div class="returns-description">
+        
+          
+            <span class="type"><b>{</b>JSON<b>}</b></span>
+          
+          <p>The list of Peers Stream. <ul>
+  <li><code>#streamId</code><var><b>{</b>JSON<b>}</b></var><p>The data streaming session.</p><ul>
+  <li><code>streamInfo</code><var><b>{</b>JSON<b>}</b></var><p>The data streaming information.
+  <small>Object signature matches the <code>streamInfo</code> parameter payload received in the
+  <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
+  except without the <code>chunk</code> amd <code>chunkSize</code> property.</small></p></li>
+  <li><code>peerId</code><var><b>{</b>String<b>}</b></var><p>The sender Peer ID.</p></li>
+  <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
+  </p></li></ul></li></ul></p>
+
+        
+      </div>
+    </div>
+  
+
+  <hr>
+</div>
+            
               <div id="method_getCurrentDataTransfers" class="code-item method item method-item ">
   <h3 class="code-item-name"><code>getCurrentDataTransfers</code></h3>
   
@@ -13224,7 +13347,7 @@ Function that retrieves Peer connection bandwidth and ICE connection stats.</p>
           
           <p>The list of Peers Stream. <ul>
   <li><code>#transferId</code><var><b>{</b>JSON<b>}</b></var><p>The data transfer session.</p><ul>
-  <li><code>transferInfo</code><var><b>{</b>JSON<b>}</b></var><p>The Stream object.
+  <li><code>transferInfo</code><var><b>{</b>JSON<b>}</b></var><p>The data transfer information.
   <small>Object signature matches the <code>transferInfo</code> parameter payload received in the
   <a href="#event_dataTransferState"><code>dataTransferState</code> event</a>
   except without the <code>data</code> property.</small></p></li>
