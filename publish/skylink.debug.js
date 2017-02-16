@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 15:47:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 16:12:01 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -7232,6 +7232,26 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.mediaStatus.videoMuted = true;
     }
 
+    if (!this._sdpSettings.direction.audio.receive) {
+      peerInfo.settings.audio = false;
+      peerInfo.mediaStatus.audioMuted = true;
+    }
+
+    if (!this._sdpSettings.direction.video.receive) {
+      peerInfo.settings.video = false;
+      peerInfo.mediaStatus.videoMuted = true;
+    }
+
+    if (!this._sdpSettings.connection.audio) {
+      peerInfo.settings.audio = false;
+      peerInfo.mediaStatus.audioMuted = true;
+    }
+
+    if (!this._sdpSettings.connection.video) {
+      peerInfo.settings.video = false;
+      peerInfo.mediaStatus.videoMuted = true;
+    }
+
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -7628,6 +7648,16 @@ Skylink.prototype._getUserInfo = function(peerId) {
     window.webrtcDetectedBrowser === 'edge' && peerInfo.agent.name !== 'edge' && !this._currentCodecSupport.video.h264) :
   // If broadcast ENTER message and User is Edge and has no H264 support
     window.webrtcDetectedBrowser === 'edge' && !this._currentCodecSupport.video.h264) {
+    userInfo.settings.video = false;
+    userInfo.mediaStatus.videoMuted = true;
+  }
+
+  if (!this._sdpSettings.connection.audio) {
+    userInfo.settings.audio = false;
+    userInfo.mediaStatus.audioMuted = true;
+  }
+
+  if (!this._sdpSettings.connection.video) {
     userInfo.settings.video = false;
     userInfo.mediaStatus.videoMuted = true;
   }
