@@ -507,22 +507,22 @@ Skylink.prototype.getPeersCustomSettings = function () {
         if (self._peerCustomConfigs[peerId].bandwidth &&
           typeof self._peerCustomConfigs[peerId].bandwidth === 'object') {
           if (typeof self._peerCustomConfigs[peerId].bandwidth.audio === 'number') {
-            customSettingsList[peerId].bandwidth.audio = self._peerCustomConfigs[peerId].bandwidth.audio;
+            customSettingsList[peerId].settings.bandwidth.audio = self._peerCustomConfigs[peerId].bandwidth.audio;
           }
           if (typeof self._peerCustomConfigs[peerId].bandwidth.video === 'number') {
-            customSettingsList[peerId].bandwidth.video = self._peerCustomConfigs[peerId].bandwidth.video;
+            customSettingsList[peerId].settings.bandwidth.video = self._peerCustomConfigs[peerId].bandwidth.video;
           }
           if (typeof self._peerCustomConfigs[peerId].bandwidth.data === 'number') {
-            customSettingsList[peerId].bandwidth.data = self._peerCustomConfigs[peerId].bandwidth.data;
+            customSettingsList[peerId].settings.bandwidth.data = self._peerCustomConfigs[peerId].bandwidth.data;
           }
         }
         if (self._peerCustomConfigs[peerId].googleXBandwidth &&
           typeof self._peerCustomConfigs[peerId].googleXBandwidth === 'object') {
           if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.min === 'number') {
-            customSettingsList[peerId].googleXBandwidth.min = self._peerCustomConfigs[peerId].googleXBandwidth.min;
+            customSettingsList[peerId].settings.googleXBandwidth.min = self._peerCustomConfigs[peerId].googleXBandwidth.min;
           }
           if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.max === 'number') {
-            customSettingsList[peerId].googleXBandwidth.max = self._peerCustomConfigs[peerId].googleXBandwidth.max;
+            customSettingsList[peerId].settings.googleXBandwidth.max = self._peerCustomConfigs[peerId].googleXBandwidth.max;
           }
         }
       }

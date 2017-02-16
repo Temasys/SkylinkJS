@@ -598,22 +598,22 @@ Skylink.prototype.getPeersCustomSettings = function () {
         if (self._peerCustomConfigs[peerId].bandwidth &amp;&amp;
           typeof self._peerCustomConfigs[peerId].bandwidth === &#x27;object&#x27;) {
           if (typeof self._peerCustomConfigs[peerId].bandwidth.audio === &#x27;number&#x27;) {
-            customSettingsList[peerId].bandwidth.audio = self._peerCustomConfigs[peerId].bandwidth.audio;
+            customSettingsList[peerId].settings.bandwidth.audio = self._peerCustomConfigs[peerId].bandwidth.audio;
           }
           if (typeof self._peerCustomConfigs[peerId].bandwidth.video === &#x27;number&#x27;) {
-            customSettingsList[peerId].bandwidth.video = self._peerCustomConfigs[peerId].bandwidth.video;
+            customSettingsList[peerId].settings.bandwidth.video = self._peerCustomConfigs[peerId].bandwidth.video;
           }
           if (typeof self._peerCustomConfigs[peerId].bandwidth.data === &#x27;number&#x27;) {
-            customSettingsList[peerId].bandwidth.data = self._peerCustomConfigs[peerId].bandwidth.data;
+            customSettingsList[peerId].settings.bandwidth.data = self._peerCustomConfigs[peerId].bandwidth.data;
           }
         }
         if (self._peerCustomConfigs[peerId].googleXBandwidth &amp;&amp;
           typeof self._peerCustomConfigs[peerId].googleXBandwidth === &#x27;object&#x27;) {
           if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.min === &#x27;number&#x27;) {
-            customSettingsList[peerId].googleXBandwidth.min = self._peerCustomConfigs[peerId].googleXBandwidth.min;
+            customSettingsList[peerId].settings.googleXBandwidth.min = self._peerCustomConfigs[peerId].googleXBandwidth.min;
           }
           if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.max === &#x27;number&#x27;) {
-            customSettingsList[peerId].googleXBandwidth.max = self._peerCustomConfigs[peerId].googleXBandwidth.max;
+            customSettingsList[peerId].settings.googleXBandwidth.max = self._peerCustomConfigs[peerId].googleXBandwidth.max;
           }
         }
       }

@@ -177,12 +177,42 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
     sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1024) : 'b=AS:' + bw);
   };
 
-  parseFn('audio', this._streamsBandwidthSettings.bAS.audio);
-  parseFn('video', this._streamsBandwidthSettings.bAS.video);
-  parseFn('data', this._streamsBandwidthSettings.bAS.data);
+  var bASAudioBw = this._streamsBandwidthSettings.bAS.audio;
+  var bASVideoBw = this._streamsBandwidthSettings.bAS.video;
+  var bASDataBw = this._streamsBandwidthSettings.bAS.data;
+  var googleXMinBw = this._streamsBandwidthSettings.googleX.min;
+  var googleXMaxBw = this._streamsBandwidthSettings.googleX.max;
+
+  if (this._peerCustomConfigs[targetMid]) {
+    if (this._peerCustomConfigs[targetMid].bandwidth &&
+      typeof this._peerCustomConfigs[targetMid].bandwidth === 'object') {
+      if (typeof this._peerCustomConfigs[targetMid].bandwidth.audio === 'number') {
+        bASAudioBw = this._peerCustomConfigs[targetMid].bandwidth.audio;
+      }
+      if (typeof this._peerCustomConfigs[targetMid].bandwidth.video === 'number') {
+        bASVideoBw = this._peerCustomConfigs[targetMid].bandwidth.video;
+      }
+      if (typeof this._peerCustomConfigs[targetMid].bandwidth.data === 'number') {
+        bASDataBw = this._peerCustomConfigs[targetMid].bandwidth.data;
+      }
+    }
+    if (this._peerCustomConfigs[targetMid].googleXBandwidth &&
+      typeof this._peerCustomConfigs[targetMid].googleXBandwidth === 'object') {
+      if (typeof this._peerCustomConfigs[targetMid].googleXBandwidth.min === 'number') {
+        googleXMinBw = this._peerCustomConfigs[targetMid].googleXBandwidth.min;
+      }
+      if (typeof this._peerCustomConfigs[targetMid].googleXBandwidth.max === 'number') {
+        googleXMaxBw = this._peerCustomConfigs[targetMid].googleXBandwidth.max;
+      }
+    }
+  }
+
+  parseFn('audio', bASAudioBw);
+  parseFn('video', bASVideoBw);
+  parseFn('data', bASDataBw);
 
   // Sets the experimental google bandwidth
-  if ((typeof this._streamsBandwidthSettings.googleX.min === 'number') || (typeof this._streamsBandwidthSettings.googleX.max === 'number')) {
+  if ((typeof googleXMinBw === 'number') || (typeof googleXMaxBw === 'number')) {
     var codec = null;
     var codecRtpMapLineIndex = -1;
     var codecFmtpLineIndex = -1;
@@ -208,12 +238,12 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
     if (codecRtpMapLineIndex > -1) {
       var xGoogleParams = '';
 
-      if (typeof this._streamsBandwidthSettings.googleX.min === 'number') {
-        xGoogleParams += 'x-google-min-bitrate=' + this._streamsBandwidthSettings.googleX.min + ';';
+      if (typeof googleXMinBw === 'number') {
+        xGoogleParams += 'x-google-min-bitrate=' + googleXMinBw + ';';
       }
 
-      if (typeof this._streamsBandwidthSettings.googleX.max === 'number') {
-        xGoogleParams += 'x-google-max-bitrate=' + this._streamsBandwidthSettings.googleX.max + ';';
+      if (typeof googleXMaxBw === 'number') {
+        xGoogleParams += 'x-google-max-bitrate=' + googleXMaxBw + ';';
       }
 
       log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Limiting x-google-bitrate ->'], xGoogleParams);

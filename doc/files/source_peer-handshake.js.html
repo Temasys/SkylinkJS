@@ -343,7 +343,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
-      userInfo: self._getUserInfo()
+      userInfo: self._getUserInfo(targetMid)
     });
 
   }, function(error) {

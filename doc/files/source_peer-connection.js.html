@@ -194,6 +194,14 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  *   The flag if ICE connections should restart when refreshing Peer connections.
  *   &lt;small&gt;This is used when ICE connection state is &lt;code&gt;FAILED&lt;/code&gt; or &lt;code&gt;DISCONNECTED&lt;/code&gt;, which state
  *   can be retrieved with the &lt;a href=&quot;#event_iceConnectionState&quot;&gt;&lt;code&gt;iceConnectionState&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+ * @param {JSON} [options] The custom Peer configuration settings.
+ * @param {JSON} [options.bandwidth] The configuration to set the maximum streaming bandwidth to send to Peers.
+ *   &lt;small&gt;Object signature follows &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;
+ *   &lt;code&gt;options.bandwidth&lt;/code&gt; settings.&lt;/small&gt;
+ * @param {JSON} [options.googleXBandwidth] The configuration to set the experimental google
+ *   video streaming bandwidth sent to Peers.
+ *   &lt;small&gt;Object signature follows &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;
+ *   &lt;code&gt;options.googleXBandwidth&lt;/code&gt; settings.&lt;/small&gt;
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_peerRestart&quot;&gt;
@@ -207,9 +215,25 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  *   with the Peer ID defined in &lt;code&gt;#peerId&lt;/code&gt; property.
  *   &lt;small&gt;If &lt;code&gt;#peerId&lt;/code&gt; value is &lt;code&gt;&quot;self&quot;&lt;/code&gt;, it means that it is the error when there
  *   is no Peer connections to refresh with.&lt;/small&gt;
+ * @param {JSON} callback.error.refreshSettings The list of Peer connection refresh settings.
+ * @param {JSON} callback.error.refreshSettings.#peerId The Peer connection refresh settings associated
+ *   with the Peer ID defined in &lt;code&gt;#peerId&lt;/code&gt; property.
+ * @param {Boolean} callback.error.refreshSettings.#peerId.iceRestart The flag if ICE restart is enabled for
+ *   this Peer connection refresh session.
+ * @param {JSON} callback.error.refreshSettings.#peerId.customSettings The Peer connection custom settings.
+ *   &lt;small&gt;Object signature follows &lt;a href=&quot;#method_getPeersCustomSettings&quot;&gt;&lt;code&gt;getPeersCustomSettings&lt;/code&gt;
+ *   method&lt;/a&gt; returned per &lt;code&gt;#peerId&lt;/code&gt; object.&lt;/small&gt;
  * @param {JSON} callback.success The success result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
  * @param {Array} callback.success.listOfPeers The list of Peer IDs targeted.
+ * @param {JSON} callback.success.refreshSettings The list of Peer connection refresh settings.
+ * @param {JSON} callback.success.refreshSettings.#peerId The Peer connection refresh settings associated
+ *   with the Peer ID defined in &lt;code&gt;#peerId&lt;/code&gt; property.
+ * @param {Boolean} callback.success.refreshSettings.#peerId.iceRestart The flag if ICE restart is enabled for
+ *   this Peer connection refresh session.
+ * @param {JSON} callback.success.refreshSettings.#peerId.customSettings The Peer connection custom settings.
+ *   &lt;small&gt;Object signature follows &lt;a href=&quot;#method_getPeersCustomSettings&quot;&gt;&lt;code&gt;getPeersCustomSettings&lt;/code&gt;
+ *   method&lt;/a&gt; returned per &lt;code&gt;#peerId&lt;/code&gt; object.&lt;/small&gt;
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;Checks if MCU is enabled for App Key provided in &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;&lt;ol&gt;
  *   &lt;li&gt;If MCU is enabled: &lt;ol&gt;&lt;li&gt;If there are connected Peers in the Room: &lt;ol&gt;
@@ -287,11 +311,12 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callback) {
+Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, options, callback) {
   var self = this;
 
   var listOfPeers = Object.keys(self._peerConnections);
   var doIceRestart = false;
+  var bwOptions = {};
 
   if(Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
@@ -299,14 +324,24 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
     listOfPeers = [targetPeerId];
   } else if (typeof targetPeerId === &#x27;boolean&#x27;) {
     doIceRestart = targetPeerId;
+  } else if (targetPeerId &amp;&amp; typeof targetPeerId === &#x27;object&#x27;) {
+    bwOptions = targetPeerId;
   } else if (typeof targetPeerId === &#x27;function&#x27;) {
     callback = targetPeerId;
   }
 
   if (typeof iceRestart === &#x27;boolean&#x27;) {
     doIceRestart = iceRestart;
+  } else if (iceRestart &amp;&amp; typeof iceRestart === &#x27;object&#x27;) {
+    bwOptions = iceRestart;
   } else if (typeof iceRestart === &#x27;function&#x27;) {
     callback = iceRestart;
+  }
+
+  if (options &amp;&amp; typeof options === &#x27;object&#x27;) {
+    bwOptions = options;
+  } else if (typeof options === &#x27;function&#x27;) {
+    callback = options;
   }
 
   var emitErrorForPeersFn = function (error) {
@@ -347,7 +382,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
       }
       return;
     }
-    self._refreshPeerConnection(listOfPeers, doIceRestart, callback);
+    self._refreshPeerConnection(listOfPeers, doIceRestart, bwOptions, callback);
   }, &#x27;refreshConnection&#x27;, self._throttlingTimeouts.refreshConnection);
 
 };
@@ -359,11 +394,12 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, callbac
  * @for Skylink
  * @since 0.6.15
  */
-Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, callback) {
+Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, bwOptions, callback) {
   var self = this;
   var listOfPeerRestarts = [];
   var error = &#x27;&#x27;;
   var listOfPeerRestartErrors = {};
+  var listOfPeersSettings = {};
 
   // To fix jshint dont put functions within a loop
   var refreshSinglePeerCallback = function (peerId) {
@@ -372,6 +408,12 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
         if (error) {
           log.error([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Failed restarting for peer&#x27;], error);
           listOfPeerRestartErrors[peerId] = error;
+        } else {
+          listOfPeersSettings[peerId] = {
+            iceRestart: !self._hasMCU &amp;&amp; self._peerInformations[peerId] &amp;&amp; self._peerInformations[peerId].config &amp;&amp;
+              self._peerInformations[peerId].config.enableIceRestart &amp;&amp; self._enableIceRestart &amp;&amp; doIceRestart,
+            customSettings: self.getPeersCustomSettings()[peerId] || {}
+          };
         }
         listOfPeerRestarts.push(peerId);
       }
@@ -383,11 +425,13 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
           if (Object.keys(listOfPeerRestartErrors).length &gt; 0) {
             callback({
               refreshErrors: listOfPeerRestartErrors,
-              listOfPeers: listOfPeers
+              listOfPeers: listOfPeers,
+              refreshSettings: listOfPeersSettings
             }, null);
           } else {
             callback(null, {
-              listOfPeers: listOfPeers
+              listOfPeers: listOfPeers,
+              refreshSettings: listOfPeersSettings
             });
           }
         }
@@ -407,7 +451,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
     log.log([peerId, &#x27;PeerConnection&#x27;, null, &#x27;Restarting peer connection&#x27;]);
 
     // do a hard reset on variable object
-    self._restartPeerConnection(peerId, doIceRestart, peerCallback);
+    self._restartPeerConnection(peerId, doIceRestart, bwOptions, peerCallback);
   };
 
   if(!self._hasMCU) {
@@ -425,7 +469,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, c
       }
     }
   } else {
-    self._restartMCUConnection(callback, doIceRestart);
+    self._restartMCUConnection(callback, doIceRestart, bwOptions);
   }
 };
 
@@ -1419,7 +1463,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callback) {
+Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOptions, callback) {
   var self = this;
 
   if (!self._peerConnections[peerId]) {
@@ -1449,7 +1493,35 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
   // This is when the state is stable and re-handshaking is possible
   // This could be due to previous connection handshaking that is already done
   if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE &amp;&amp; self._peerConnections[peerId]) {
-    log.log([peerId, null, null, &#x27;Sending restart message to signaling server&#x27;]);
+    log.log([peerId, null, null, &#x27;Sending restart message to signaling server -&gt;&#x27;], {
+      iceRestart: doIceRestart,
+      options: bwOptions
+    });
+
+    self._peerCustomConfigs[peerId] = self._peerCustomConfigs[peerId] || {};
+    self._peerCustomConfigs[peerId].bandwidth = self._peerCustomConfigs[peerId].bandwidth || {};
+    self._peerCustomConfigs[peerId].googleXBandwidth = self._peerCustomConfigs[peerId].googleXBandwidth || {};
+
+    if (bwOptions.bandwidth &amp;&amp; typeof bwOptions.bandwidth === &#x27;object&#x27;) {
+      if (typeof bwOptions.bandwidth.audio === &#x27;number&#x27;) {
+        self._peerCustomConfigs[peerId].bandwidth.audio = bwOptions.bandwidth.audio;
+      }
+      if (typeof bwOptions.bandwidth.video === &#x27;number&#x27;) {
+        self._peerCustomConfigs[peerId].bandwidth.video = bwOptions.bandwidth.video;
+      }
+      if (typeof bwOptions.bandwidth.data === &#x27;number&#x27;) {
+        self._peerCustomConfigs[peerId].bandwidth.data = bwOptions.bandwidth.data;
+      }
+    }
+
+    if (bwOptions.googleXBandwidth &amp;&amp; typeof bwOptions.googleXBandwidth === &#x27;object&#x27;) {
+      if (typeof bwOptions.googleXBandwidth.min === &#x27;number&#x27;) {
+        self._peerCustomConfigs[peerId].googleXBandwidth.min = bwOptions.googleXBandwidth.min;
+      }
+      if (typeof bwOptions.googleXBandwidth.max === &#x27;number&#x27;) {
+        self._peerCustomConfigs[peerId].googleXBandwidth.max = bwOptions.googleXBandwidth.max;
+      }
+    }
 
     var restartMsg = {
       type: self._SIG_MESSAGE_TYPE.RESTART,
@@ -1458,7 +1530,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, callb
       agent: window.webrtcDetectedBrowser,
       version: (window.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,
-      userInfo: self._getUserInfo(),
+      userInfo: self._getUserInfo(peerId),
       target: peerId,
       weight: self._peerPriorityWeight,
       receiveOnly: self.getPeerInfo().config.receiveOnly,
@@ -1784,7 +1856,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
  * @for Skylink
  * @since 0.6.1
  */
-Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
+Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOptions) {
   var self = this;
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestartErrors = {};
@@ -1796,7 +1868,7 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart) {
       agent: window.webrtcDetectedBrowser,
       version: (window.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,
-      userInfo: self._getUserInfo(),
+      userInfo: self._getUserInfo(peerId),
       target: peerId,
       weight: self._peerPriorityWeight,
       receiveOnly: self.getPeerInfo().config.receiveOnly,

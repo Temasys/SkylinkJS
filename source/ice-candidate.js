@@ -164,7 +164,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         type: sessionDescription.type,
         sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
         mid: self._user.sid,
-        userInfo: self._getUserInfo(),
+        userInfo: self._getUserInfo(targetMid),
         target: targetMid,
         rid: self._room.id
       });

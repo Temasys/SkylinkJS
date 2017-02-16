@@ -2790,6 +2790,26 @@
                     "optdefault": "false"
                 },
                 {
+                    "name": "options",
+                    "description": "The custom Peer configuration settings.",
+                    "type": "JSON",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "bandwidth",
+                            "description": "The configuration to set the maximum streaming bandwidth to send to Peers.\n  <small>Object signature follows <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>\n  <code>options.bandwidth</code> settings.</small>",
+                            "type": "JSON",
+                            "optional": true
+                        },
+                        {
+                            "name": "googleXBandwidth",
+                            "description": "The configuration to set the experimental google\n  video streaming bandwidth sent to Peers.\n  <small>Object signature follows <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>\n  <code>options.googleXBandwidth</code> settings.</small>",
+                            "type": "JSON",
+                            "optional": true
+                        }
+                    ]
+                },
+                {
                     "name": "callback",
                     "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_peerRestart\">\n  <code>peerRestart</code> event</a> triggering <code>isSelfInitiateRestart</code> parameter payload\n  value as <code>true</code> for all Peers targeted for request success.</small>",
                     "type": "Function",
@@ -2814,6 +2834,26 @@
                                     "name": "refreshErrors.#peerId",
                                     "description": "The Peer connection refresh error associated\n  with the Peer ID defined in <code>#peerId</code> property.\n  <small>If <code>#peerId</code> value is <code>\"self\"</code>, it means that it is the error when there\n  is no Peer connections to refresh with.</small>",
                                     "type": "Error|String"
+                                },
+                                {
+                                    "name": "refreshSettings",
+                                    "description": "The list of Peer connection refresh settings.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "refreshSettings.#peerId",
+                                    "description": "The Peer connection refresh settings associated\n  with the Peer ID defined in <code>#peerId</code> property.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "refreshSettings.#peerId.iceRestart",
+                                    "description": "The flag if ICE restart is enabled for\n  this Peer connection refresh session.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "refreshSettings.#peerId.customSettings",
+                                    "description": "The Peer connection custom settings.\n  <small>Object signature follows <a href=\"#method_getPeersCustomSettings\"><code>getPeersCustomSettings</code>\n  method</a> returned per <code>#peerId</code> object.</small>",
+                                    "type": "JSON"
                                 }
                             ]
                         },
@@ -2826,6 +2866,26 @@
                                     "name": "listOfPeers",
                                     "description": "The list of Peer IDs targeted.",
                                     "type": "Array"
+                                },
+                                {
+                                    "name": "refreshSettings",
+                                    "description": "The list of Peer connection refresh settings.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "refreshSettings.#peerId",
+                                    "description": "The Peer connection refresh settings associated\n  with the Peer ID defined in <code>#peerId</code> property.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "refreshSettings.#peerId.iceRestart",
+                                    "description": "The flag if ICE restart is enabled for\n  this Peer connection refresh session.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "refreshSettings.#peerId.customSettings",
+                                    "description": "The Peer connection custom settings.\n  <small>Object signature follows <a href=\"#method_getPeersCustomSettings\"><code>getPeersCustomSettings</code>\n  method</a> returned per <code>#peerId</code> object.</small>",
+                                    "type": "JSON"
                                 }
                             ]
                         }
@@ -2841,7 +2901,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 264,
+            "line": 299,
             "description": "Function that refresh connections.",
             "itemtype": "method",
             "name": "_refreshPeerConnection",
@@ -2852,7 +2912,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 341,
+            "line": 385,
             "description": "<blockquote class=\"info\">\nNote that this is not well supported in the Edge browser.\n</blockquote>\nFunction that retrieves Peer connection bandwidth and ICE connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -2935,7 +2995,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 612,
+            "line": 656,
             "description": "Function that retrieves Peer connection stats.",
             "itemtype": "method",
             "name": "_retrieveStats",
@@ -2946,7 +3006,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1288,
+            "line": 1332,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -2957,7 +3017,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1323,
+            "line": 1367,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -2968,7 +3028,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1446,
+            "line": 1518,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -2979,7 +3039,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1517,
+            "line": 1589,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -2990,7 +3050,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1686,
+            "line": 1758,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3001,7 +3061,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1804,
+            "line": 1876,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3012,7 +3072,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1824,
+            "line": 1896,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -9247,7 +9307,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 232,
+            "line": 262,
             "description": "Function that modifies the session description to set the preferred audio/video codec.",
             "itemtype": "method",
             "name": "_setSDPCodec",
@@ -9258,7 +9318,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 286,
+            "line": 316,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -9269,7 +9329,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 302,
+            "line": 332,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -9280,7 +9340,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 439,
+            "line": 469,
             "description": "Function that modifies the session description to remove apt/rtx lines that does exists.",
             "itemtype": "method",
             "name": "_removeSDPUnknownAptRtx",
@@ -9291,7 +9351,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 494,
+            "line": 524,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -9302,7 +9362,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 563,
+            "line": 593,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -9313,7 +9373,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 579,
+            "line": 609,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -9324,7 +9384,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 634,
+            "line": 664,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -9335,7 +9395,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 676,
+            "line": 706,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -9346,7 +9406,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 752,
+            "line": 782,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -9357,7 +9417,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 922,
+            "line": 952,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
@@ -9414,7 +9474,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:341"
+            "line": " source/peer-connection.js:385"
         },
         {
             "message": "unknown tag: trigger",
