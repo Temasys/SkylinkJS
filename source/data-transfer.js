@@ -2558,13 +2558,25 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
 
     } else {
       var byteArray = rawData;
+      var blob = null;
 
+      // Plugin binary handling
       if (rawData.constructor && rawData.constructor.name === 'Array') {
         // Need to re-parse on some browsers
         byteArray = new Int8Array(rawData);
       }
 
-      var blob = new Blob([byteArray]);
+      // Fallback for older IE versions
+      if (window.webrtcDetectedBrowser === 'IE') {
+        if (window.BlobBuilder) {
+          var bb = new BlobBuilder();
+          bb.append(rawData.constructor && rawData.constructor.name === 'ArrayBuffer' ?
+            byteArray : (new Uint8Array(byteArray)).buffer);
+          blob = bb.getBlob();
+        }
+      } else {
+        blob = new Blob([byteArray]);
+      }
 
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk ' + (isStreamChunk ? '' : 
         '@' + self._dataTransfers[transferId].sessions[peerId].ackN) + ' with size ->'], blob.size);

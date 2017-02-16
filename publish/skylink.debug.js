@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 17:37:56 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 19:12:47 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -15,6 +15,8 @@
 !function(e,t){function n(e){var n=t[e];t[e]=function(e){return o(n(e))}}function a(t,n,a){return(a=this).attachEvent("on"+t,function(t){var t=t||e.event;t.preventDefault=t.preventDefault||function(){t.returnValue=!1},t.stopPropagation=t.stopPropagation||function(){t.cancelBubble=!0},n.call(a,t)})}function o(e,t){if(t=e.length)for(;t--;)e[t].addEventListener=a;else e.addEventListener=a;return e}e.addEventListener||(o([t,e]),"Element"in e?e.Element.prototype.addEventListener=a:(t.attachEvent("onreadystatechange",function(){o(t.all)}),n("getElementsByTagName"),n("getElementById"),n("createElement"),o(t.all)))}(window,document);
 // performance.now() polyfill - https://gist.github.com/paulirish/5438650
 !function(){if("performance"in window==0&&(window.performance={}),Date.now=Date.now||function(){return(new Date).getTime()},"now"in window.performance==0){var a=Date.now();performance.timing&&performance.timing.navigationStart&&(a=performance.timing.navigationStart),window.performance.now=function(){return Date.now()-a}}}();
+// BlobBuilder polyfill
+window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
 /* jshint ignore:end */
 
 /**
@@ -4182,13 +4184,25 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
 
     } else {
       var byteArray = rawData;
+      var blob = null;
 
+      // Plugin binary handling
       if (rawData.constructor && rawData.constructor.name === 'Array') {
         // Need to re-parse on some browsers
         byteArray = new Int8Array(rawData);
       }
 
-      var blob = new Blob([byteArray]);
+      // Fallback for older IE versions
+      if (window.webrtcDetectedBrowser === 'IE') {
+        if (window.BlobBuilder) {
+          var bb = new BlobBuilder();
+          bb.append(rawData.constructor && rawData.constructor.name === 'ArrayBuffer' ?
+            byteArray : (new Uint8Array(byteArray)).buffer);
+          blob = bb.getBlob();
+        }
+      } else {
+        blob = new Blob([byteArray]);
+      }
 
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk ' + (isStreamChunk ? '' : 
         '@' + self._dataTransfers[transferId].sessions[peerId].ackN) + ' with size ->'], blob.size);
