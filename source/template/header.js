@@ -294,6 +294,16 @@ function Skylink() {
   this._peerStats = {};
 
   /**
+   * Stores the list of the Peer custom configs.
+   * @attribute _peerCustomConfigs
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._peerCustomConfigs = {};
+
+  /**
    * The flag if User is using plugin.
    * @attribute _isUsingPlugin
    * @type Boolean

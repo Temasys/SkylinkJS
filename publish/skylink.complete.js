@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Wed Feb 15 2017 22:31:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 15:47:06 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Wed Feb 15 2017 22:31:51 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 15:47:06 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -11828,6 +11828,16 @@ function Skylink() {
    * @since 0.6.16
    */
   this._peerStats = {};
+
+  /**
+   * Stores the list of the Peer custom configs.
+   * @attribute _peerCustomConfigs
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._peerCustomConfigs = {};
 
   /**
    * The flag if User is using plugin.
@@ -18989,6 +18999,116 @@ Skylink.prototype.getCurrentDataStreamsSession = function() {
   }
 
   return listOfDataStreams;
+};
+
+/**
+ * Function that gets the list of current custom Peer settings sent and set.
+ * @method getPeerCustomSettings
+ * @return {JSON} The list of Peers custom settings sent and set. <ul>
+ *   <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer settings sent and set.</p><ul>
+ *   <li><code>settings</code><var><b>{</b>JSON<b>}</b></var><p>The custom Peer settings.
+ *   <small>Object signature matches the <code>peerInfo.settings</code> parameter payload received in the
+ *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small></p></li>
+ *   <li><code>mediaStatus</code><var><b>{</b>JSON<b>}</b></var><p>The custom Peer Stream muted settings.
+ *   <small>Object signature matches the <code>peerInfo.mediaStatus</code> parameter payload received in the
+ *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small></p></li></ul></li></ul>
+ * @example
+ *   // Example 1: Get the list of current Peer custom settings
+ *   var currentPeerSettings = skylinkDemo.getPeersCustomSettings();
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.getPeersCustomSettings = function () {
+  var self = this;
+  var customSettingsList = {};
+
+  for (var peerId in self._peerInformations) {
+    if (self._peerInformations.hasOwnProperty(peerId) && self._peerInformations[peerId]) {
+      customSettingsList[peerId] = {
+        settings: {
+          audio: false,
+          video: false,
+          bandwidth: clone(self._streamsBandwidthSettings.bAS),
+          googleXBandwidth: clone(self._streamsBandwidthSettings.googleX)
+        },
+        mediaStatus: {
+          audioMuted: true,
+          videoMuted: true
+        }
+      };
+
+      if (self._peerConnections[peerId] && self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+        var streams = self._peerConnections[peerId].getLocalStreams();
+
+        for (var s = 0; s < streams.length; s++) {
+          if (self._streams.screenshare && self._streams.screenshare.stream && (streams[s].id ||
+            streams[s].label) === (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
+            customSettingsList[peerId].settings.audio = clone(self._streams.screenshare.settings.audio);
+            customSettingsList[peerId].settings.video = clone(self._streams.screenshare.settings.video);
+            customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
+            break;
+          } else if (self._streams.userMedia && self._streams.userMedia.stream && (streams[s].id ||
+            streams[s].label) === (self._streams.userMedia.stream.id ||
+            self._streams.userMedia.stream.label)) {
+            customSettingsList[peerId].settings.audio = clone(self._streams.userMedia.settings.audio);
+            customSettingsList[peerId].settings.video = clone(self._streams.userMedia.settings.video);
+            customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
+            break;
+          }
+        }
+      }
+
+      if (self._peerCustomConfigs[peerId]) {
+        if (self._peerCustomConfigs[peerId].bandwidth &&
+          typeof self._peerCustomConfigs[peerId].bandwidth === 'object') {
+          if (typeof self._peerCustomConfigs[peerId].bandwidth.audio === 'number') {
+            customSettingsList[peerId].bandwidth.audio = self._peerCustomConfigs[peerId].bandwidth.audio;
+          }
+          if (typeof self._peerCustomConfigs[peerId].bandwidth.video === 'number') {
+            customSettingsList[peerId].bandwidth.video = self._peerCustomConfigs[peerId].bandwidth.video;
+          }
+          if (typeof self._peerCustomConfigs[peerId].bandwidth.data === 'number') {
+            customSettingsList[peerId].bandwidth.data = self._peerCustomConfigs[peerId].bandwidth.data;
+          }
+        }
+        if (self._peerCustomConfigs[peerId].googleXBandwidth &&
+          typeof self._peerCustomConfigs[peerId].googleXBandwidth === 'object') {
+          if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.min === 'number') {
+            customSettingsList[peerId].googleXBandwidth.min = self._peerCustomConfigs[peerId].googleXBandwidth.min;
+          }
+          if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.max === 'number') {
+            customSettingsList[peerId].googleXBandwidth.max = self._peerCustomConfigs[peerId].googleXBandwidth.max;
+          }
+        }
+      }
+
+      var agent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
+
+      // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
+      if (customSettingsList[peerId].settings.video && (peerId ?
+        (window.webrtcDetectedBrowser !== 'edge' && agent.name === 'edge' ?
+      // If User is IE/safari and does not have H264 support, remove video support
+        ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && !self._currentCodecSupport.video.h264 :
+      // If User is Edge and Peer is not and no H264 support, remove video support
+        window.webrtcDetectedBrowser === 'edge' && agent.name !== 'edge' && !self._currentCodecSupport.video.h264) :
+      // If broadcast ENTER message and User is Edge and has no H264 support
+        window.webrtcDetectedBrowser === 'edge' && !self._currentCodecSupport.video.h264)) {
+        customSettingsList[peerId].settings.video = false;
+        customSettingsList[peerId].mediaStatus.videoMuted = true;
+      }
+
+      customSettingsList[peerId].settings.audio = !self._sdpSettings.connection.audio ? false :
+        customSettingsList[peerId].settings.audio;
+      customSettingsList[peerId].settings.video = !self._sdpSettings.connection.video ? false :
+        customSettingsList[peerId].settings.video;
+      customSettingsList[peerId].mediaStatus.audioMuted = !self._sdpSettings.connection.audio ? true :
+        customSettingsList[peerId].mediaStatus.audioMuted;
+      customSettingsList[peerId].mediaStatus.videoMuted = !self._sdpSettings.connection.video ? true :
+        customSettingsList[peerId].mediaStatus.videoMuted;
+    }
+  }
+
+  return customSettingsList;
 };
 
 /**
