@@ -206,6 +206,10 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.mediaStatus.videoMuted = true;
     }
 
+    peerInfo.settings.data = !!(this._dataChannels[peerId] && this._dataChannels[peerId].main &&
+      this._dataChannels[peerId].main.channel &&
+      this._dataChannels[peerId].main.channel.readyState === this.DATA_CHANNEL_STATE.OPEN);
+
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -247,6 +251,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
     peerInfo.parentId = this._parentId ? this._parentId : null;
     peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
+    peerInfo.settings.data = this._enableDataChannel && this._sdpSettings.connection.data;
   }
 
   if (!peerInfo.settings.audio) {
@@ -620,5 +625,6 @@ Skylink.prototype._getUserInfo = function(peerId) {
   delete userInfo.room;
   delete userInfo.config;
   delete userInfo.parentId;
+  delete userInfo.settings.data;
   return userInfo;
 };

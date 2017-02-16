@@ -277,6 +277,30 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.mediaStatus.videoMuted = true;
     }
 
+    if (!this._sdpSettings.direction.audio.receive) {
+      peerInfo.settings.audio = false;
+      peerInfo.mediaStatus.audioMuted = true;
+    }
+
+    if (!this._sdpSettings.direction.video.receive) {
+      peerInfo.settings.video = false;
+      peerInfo.mediaStatus.videoMuted = true;
+    }
+
+    if (!this._sdpSettings.connection.audio) {
+      peerInfo.settings.audio = false;
+      peerInfo.mediaStatus.audioMuted = true;
+    }
+
+    if (!this._sdpSettings.connection.video) {
+      peerInfo.settings.video = false;
+      peerInfo.mediaStatus.videoMuted = true;
+    }
+
+    peerInfo.settings.data = !!(this._dataChannels[peerId] &amp;&amp; this._dataChannels[peerId].main &amp;&amp;
+      this._dataChannels[peerId].main.channel &amp;&amp;
+      this._dataChannels[peerId].main.channel.readyState === this.DATA_CHANNEL_STATE.OPEN);
+
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -318,6 +342,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
     peerInfo.parentId = this._parentId ? this._parentId : null;
     peerInfo.config.receiveOnly = !peerInfo.settings.video &amp;&amp; !peerInfo.settings.audio;
+    peerInfo.settings.data = this._enableDataChannel &amp;&amp; this._sdpSettings.connection.data;
   }
 
   if (!peerInfo.settings.audio) {
@@ -677,10 +702,21 @@ Skylink.prototype._getUserInfo = function(peerId) {
     userInfo.mediaStatus.videoMuted = true;
   }
 
+  if (!this._sdpSettings.connection.audio) {
+    userInfo.settings.audio = false;
+    userInfo.mediaStatus.audioMuted = true;
+  }
+
+  if (!this._sdpSettings.connection.video) {
+    userInfo.settings.video = false;
+    userInfo.mediaStatus.videoMuted = true;
+  }
+
   delete userInfo.agent;
   delete userInfo.room;
   delete userInfo.config;
   delete userInfo.parentId;
+  delete userInfo.settings.data;
   return userInfo;
 };
 

@@ -344,6 +344,12 @@ var _eventsDocs = {
    * @param {JSON} peerInfo The Peer session information.
    * @param {JSON|String} peerInfo.userData The Peer current custom data.
    * @param {JSON} peerInfo.settings The Peer sending Stream settings.
+   * @param {Boolean|JSON} peerInfo.settings.data The flag if Peer has any Datachannel connections enabled.
+   *   &lt;small&gt;If &lt;code&gt;isSelf&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;, this determines if User allows
+   *   Datachannel connections, else if value is &lt;code&gt;false&lt;/code&gt;, this determines if Peer has any active
+   *   Datachannel connections (where &lt;a href=&quot;#event_dataChannelState&quot;&gt;&lt;code&gt;dataChannelState&lt;/code&gt; event&lt;/a&gt;
+   *   triggers &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;OPEN&lt;/code&gt; and &lt;code&gt;channelType&lt;/code&gt; as
+   *   &lt;code&gt;MESSAGING&lt;/code&gt; for Peer) with Peer.&lt;/small&gt;
    * @param {Boolean|JSON} peerInfo.settings.audio The Peer Stream audio settings.
    *   &lt;small&gt;When defined as &lt;code&gt;false&lt;/code&gt;, it means there is no audio being sent from Peer.&lt;/small&gt;
    *   &lt;small&gt;When defined as &lt;code&gt;true&lt;/code&gt;, the &lt;code&gt;peerInfo.settings.audio.stereo&lt;/code&gt; value is

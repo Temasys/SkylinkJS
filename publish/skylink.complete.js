@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 16:12:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 16:41:58 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 16:12:01 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 16:41:58 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -18786,6 +18786,10 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.mediaStatus.videoMuted = true;
     }
 
+    peerInfo.settings.data = !!(this._dataChannels[peerId] && this._dataChannels[peerId].main &&
+      this._dataChannels[peerId].main.channel &&
+      this._dataChannels[peerId].main.channel.readyState === this.DATA_CHANNEL_STATE.OPEN);
+
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -18827,6 +18831,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
     peerInfo.parentId = this._parentId ? this._parentId : null;
     peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
+    peerInfo.settings.data = this._enableDataChannel && this._sdpSettings.connection.data;
   }
 
   if (!peerInfo.settings.audio) {
@@ -19200,6 +19205,7 @@ Skylink.prototype._getUserInfo = function(peerId) {
   delete userInfo.room;
   delete userInfo.config;
   delete userInfo.parentId;
+  delete userInfo.settings.data;
   return userInfo;
 };
 
@@ -22170,6 +22176,12 @@ var _eventsDocs = {
    * @param {JSON} peerInfo The Peer session information.
    * @param {JSON|String} peerInfo.userData The Peer current custom data.
    * @param {JSON} peerInfo.settings The Peer sending Stream settings.
+   * @param {Boolean|JSON} peerInfo.settings.data The flag if Peer has any Datachannel connections enabled.
+   *   <small>If <code>isSelf</code> value is <code>true</code>, this determines if User allows
+   *   Datachannel connections, else if value is <code>false</code>, this determines if Peer has any active
+   *   Datachannel connections (where <a href="#event_dataChannelState"><code>dataChannelState</code> event</a>
+   *   triggers <code>state</code> as <code>OPEN</code> and <code>channelType</code> as
+   *   <code>MESSAGING</code> for Peer) with Peer.</small>
    * @param {Boolean|JSON} peerInfo.settings.audio The Peer Stream audio settings.
    *   <small>When defined as <code>false</code>, it means there is no audio being sent from Peer.</small>
    *   <small>When defined as <code>true</code>, the <code>peerInfo.settings.audio.stereo</code> value is
