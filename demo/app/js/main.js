@@ -11,6 +11,7 @@ Demo.Methods = {};
 Demo.Skylink = new Skylink();
 Demo.ShowStats = {};
 Demo.TransfersDone = {};
+Demo.Downloads = {};
 
 var _peerId = null;
 
@@ -27,7 +28,9 @@ Demo.Methods.displayFileItemHTML = function(content) {
     '<div id="' + content.transferId + '" class="progress-bar ' +
     '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
     ' style="width: 0%"><span>Downloading...</span></div></div>')) +
-    '<p><a id="'  + content.transferId + '_btn" class="btn btn-default" ' +
+    '<p><a id="'  + content.transferId + '_btn" class="btn btn-default ' +
+    (window.webrtcDetectedBrowser === 'IE' ? ' downloadfile' : '') + '" ' +
+    (window.webrtcDetectedBrowser === 'safari' ? 'target="_blank" ' : '') +
     'href="#" style="display: block;" download="' + content.name +
     '"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a>' +
     (content.direction === Demo.Skylink.DATA_TRANSFER_TYPE.DOWNLOAD ?
@@ -153,7 +156,15 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
       $('#' + transferId + ' .' + peerId).length === 0) {
       $('#' + transferId + ' .' + peerId).append('<tbody class="' + peerId + '"></tbody>');
       if (transferInfo.data) {
-        $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+        if (window.webrtcDetectedBrowser !== 'IE') {
+          $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+        } else {
+          $('#' + transferId + '_btn').attr('fileid', transferId);
+          Demo.Downloads[transferId] = {
+            name: transferInfo.name,
+            blob: transferInfo.data
+          };
+        }
       }
       return;
     }
@@ -164,7 +175,15 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
 
     if (transferInfo.data) {
-      $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+      if (window.webrtcDetectedBrowser !== 'IE') {
+        $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+      } else {
+        $('#' + transferId + '_btn').attr('fileid', transferId);
+        Demo.Downloads[transferId] = {
+          name: transferInfo.name,
+          blob: transferInfo.data
+        };
+      }
     }
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOADING :
@@ -201,7 +220,15 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     // If completed, display download button
     var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
     $('#' + transferId).parent().remove();
-    $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+    if (window.webrtcDetectedBrowser !== 'IE') {
+      $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+    } else {
+      $('#' + transferId + '_btn').attr('fileid', transferId);
+      Demo.Downloads[transferId] = {
+        name: transferInfo.name,
+        blob: transferInfo.data
+      };
+    }
     $('#' + transferId + '_btn').css('display', 'block');
     Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
     $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
@@ -665,7 +692,8 @@ Demo.Skylink.on('recordingState', function(state, recordingId, url, error) {
       for (var prop in url) {
         if (url.hasOwnProperty(prop) && url[prop]) {
           $('#recording_' + recordingId + '_btn').append(
-            '<a class="btn btn-default" href="' + url[prop] + '" style="width:100%;margin:7px 0;display:block;" download="' + recordingId + '_' + prop + '.mp4">' +
+            '<a class="btn btn-default" ' + (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 ? 'target="_blank" ' : '') +
+            'href="' + url[prop] + '" style="width:100%;margin:7px 0;display:block;" download="' + recordingId + '_' + prop + '.mp4">' +
             '<span class="glyphicon glyphicon-cloud-download"></span> <b>Download Recording (' + (prop !== 'mixin' ? 'Peer ' : '') + prop + ')</b></a>');
         }
       }
@@ -1062,4 +1090,17 @@ $(document).ready(function() {
     $('#selected_users_panel .all').show();
     selectedPeers = [];
   });
+
+  if (window.webrtcDetectedBrowser === 'IE') {
+    $('#file_list_panel').on('click', '.downloadfile', function () {
+      var fileid = $(this).attr('fileid');
+      window.navigator.msSaveBlob(Demo.Downloads[fileid].blob, Demo.Downloads[fileid].name);
+    });
+  }
+
+  if (window.webrtcDetectedBrowser === 'safari') {
+    $('#file_list_panel .panel-heading').html( $('#file_list_panel .panel-heading').html() +
+      '<small>For Safari, click to open a new tab. Note that only ' +
+      'media and document files can be downloaded in the new tab.</small>');
+  }
 });
