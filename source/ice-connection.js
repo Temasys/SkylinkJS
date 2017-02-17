@@ -142,14 +142,6 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       iceServersList[username][credential] = [];
     }
 
-    if (self._turnServer && url.indexOf('temasys') > 0) {
-      var parts = url.split(':');
-      var subparts = (parts[1] || '').split('?');
-      subparts[0] = self._turnServer;
-      parts[1] = subparts.join('?');
-      url = parts.join(':');
-    }
-
     if (iceServersList[username][credential].indexOf(url) === -1) {
       if (typeof index === 'number') {
         iceServersList[username][credential].splice(index, 0, url);
@@ -319,6 +311,23 @@ Skylink.prototype._setIceServers = function(givenConfig) {
         }
       }
     }
+  }
+
+  if (self._iceServer) {
+    var username = null, credential = null;
+    for (i = 0; i < newIceServers.length; i++) {
+      if (newIceServers[i].username) {
+        username = newIceServers[i].username;
+      }
+      if (newIceServers[i].credential) {
+        credential = newIceServers[i].credential;
+      }
+    }
+    newIceServers = [{
+      urls: self._iceServer.urls,
+      username: username,
+      credential: credential
+    }];
   }
 
   log.log('Output iceServers configuration:', newIceServers);

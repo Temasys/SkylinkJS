@@ -1378,8 +1378,8 @@
             "line": 1055,
             "description": "Stores the debugging TURN/STUN ICE server.",
             "itemtype": "attribute",
-            "name": "_turnServer",
-            "type": "String",
+            "name": "_iceServer",
+            "type": "JSON",
             "access": "private",
             "tagname": "",
             "since": "0.6.18",
@@ -1391,7 +1391,7 @@
             "description": "Stores the debugging Signaling server.",
             "itemtype": "attribute",
             "name": "_socketServer",
-            "type": "String",
+            "type": "JSON",
             "access": "private",
             "tagname": "",
             "since": "0.6.18",
@@ -4060,7 +4060,7 @@
                         },
                         {
                             "name": "roomServer",
-                            "description": "The Auth server.\n<small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
+                            "description": "The Auth server for debugging purposes to use.\n  <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
                             "type": "String",
                             "optional": true
                         },
@@ -4270,15 +4270,47 @@
                         },
                         {
                             "name": "iceServer",
-                            "description": "The ICE server.\n  <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
-                            "type": "String",
-                            "optional": true
+                            "description": "The ICE servers for debugging purposes to use.\n  - When defined as string, the value is considered as <code>[options.iceServer]</code>.\n  <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
+                            "type": "String|Array",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "#index",
+                                    "description": "The ICE server url for debugging purposes to use.",
+                                    "type": "String",
+                                    "optional": true
+                                }
+                            ]
                         },
                         {
                             "name": "socketServer",
-                            "description": "The Signaling server.\n  <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
-                            "type": "String",
-                            "optional": true
+                            "description": "The Signaling server for debugging purposes to use.\n  - When defined as string, the value is considered as <code>{ url: options.socketServer }</code>.\n  <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
+                            "type": "String|JSON",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "url",
+                                    "description": "The Signaling server URL for debugging purposes to use.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "ports",
+                                    "description": "The list of Signaling server ports for debugging purposes to use.\n  <small>If not defined, it will use the default list of ports specified.</small>",
+                                    "type": "Array",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "ports.#index",
+                                    "description": "The Signaling server port to fallback and use for debugging purposes.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "protocol",
+                                    "description": "The Signaling server protocol for debugging purposes to use.\n  <small>If not defined, it will use the default protocol specified.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                }
+                            ]
                         }
                     ]
                 },
@@ -4301,7 +4333,7 @@
                                 {
                                     "name": "error",
                                     "description": "The <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> <code>error.content</code> parameter payload value.",
-                                    "type": "Object"
+                                    "type": "Error|String"
                                 },
                                 {
                                     "name": "status",
@@ -4323,7 +4355,7 @@
                                 {
                                     "name": "readyState",
                                     "description": "The current ready state.\n  [Rel: Skylink.READY_STATE_CHANGE]",
-                                    "type": "String"
+                                    "type": "Number"
                                 },
                                 {
                                     "name": "selectedRoom",
@@ -4433,27 +4465,27 @@
                                 {
                                     "name": "throttleIntervals",
                                     "description": "The configured value of the <code>options.throttleIntervals</code>.",
-                                    "type": "Number"
+                                    "type": "JSON"
                                 },
                                 {
                                     "name": "throttleShouldThrowError",
                                     "description": "The configured value of the <code>options.throttleShouldThrowError</code>.",
-                                    "type": "Number"
+                                    "type": "Boolean"
                                 },
                                 {
                                     "name": "mcuUseRenegoRestart",
                                     "description": "The configured value of the <code>options.mcuUseRenegoRestart</code>.",
-                                    "type": "Number"
+                                    "type": "JSON"
                                 },
                                 {
                                     "name": "iceServer",
-                                    "description": "The configured value of the <code>options.iceServer</code>.",
-                                    "type": "Number"
+                                    "description": "The configured value of the <code>options.iceServer</code>.\n  <small>See the <code>.urls</code> property in this object for configured value if defined.</small>",
+                                    "type": "JSON"
                                 },
                                 {
                                     "name": "socketServer",
                                     "description": "The configured value of the <code>options.socketServer</code>.",
-                                    "type": "Number"
+                                    "type": "JSON"
                                 }
                             ]
                         }
@@ -4469,7 +4501,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 779,
+            "line": 810,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4480,7 +4512,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 853,
+            "line": 884,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4491,7 +4523,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 923,
+            "line": 954,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4502,7 +4534,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1054,
+            "line": 1085,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -8093,7 +8125,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 424,
+            "line": 432,
             "description": "Function that starts the socket connection to the Signaling.\nThis starts creating the socket connection and called at first not when requiring to fallback.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -8104,7 +8136,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 468,
+            "line": 476,
             "description": "Function that stops the socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_closeChannel",

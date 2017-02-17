@@ -1054,18 +1054,18 @@ function Skylink() {
 
   /**
    * Stores the debugging TURN/STUN ICE server.
-   * @attribute _turnServer
-   * @type String
+   * @attribute _iceServer
+   * @type JSON
    * @private
    * @for Skylink
    * @since 0.6.18
    */
-  this._turnServer = null;
+  this._iceServer = null;
 
   /**
    * Stores the debugging Signaling server.
    * @attribute _socketServer
-   * @type String
+   * @type JSON
    * @private
    * @for Skylink
    * @since 0.6.18

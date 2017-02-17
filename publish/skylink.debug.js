@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Fri Feb 17 2017 14:09:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Fri Feb 17 2017 16:59:29 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -1056,18 +1056,18 @@ function Skylink() {
 
   /**
    * Stores the debugging TURN/STUN ICE server.
-   * @attribute _turnServer
-   * @type String
+   * @attribute _iceServer
+   * @type JSON
    * @private
    * @for Skylink
    * @since 0.6.18
    */
-  this._turnServer = null;
+  this._iceServer = null;
 
   /**
    * Stores the debugging Signaling server.
    * @attribute _socketServer
-   * @type String
+   * @type JSON
    * @private
    * @for Skylink
    * @since 0.6.18
@@ -5043,14 +5043,6 @@ Skylink.prototype._setIceServers = function(givenConfig) {
       iceServersList[username][credential] = [];
     }
 
-    if (self._turnServer && url.indexOf('temasys') > 0) {
-      var parts = url.split(':');
-      var subparts = (parts[1] || '').split('?');
-      subparts[0] = self._turnServer;
-      parts[1] = subparts.join('?');
-      url = parts.join(':');
-    }
-
     if (iceServersList[username][credential].indexOf(url) === -1) {
       if (typeof index === 'number') {
         iceServersList[username][credential].splice(index, 0, url);
@@ -5220,6 +5212,23 @@ Skylink.prototype._setIceServers = function(givenConfig) {
         }
       }
     }
+  }
+
+  if (self._iceServer) {
+    var username = null, credential = null;
+    for (i = 0; i < newIceServers.length; i++) {
+      if (newIceServers[i].username) {
+        username = newIceServers[i].username;
+      }
+      if (newIceServers[i].credential) {
+        credential = newIceServers[i].credential;
+      }
+    }
+    newIceServers = [{
+      urls: self._iceServer.urls,
+      username: username,
+      credential: credential
+    }];
   }
 
   log.log('Output iceServers configuration:', newIceServers);
@@ -9171,8 +9180,8 @@ Skylink.prototype.generateUUID = function() {
  * - When not provided or is provided as an empty string, its value is <code>options.appKey</code>.
  *   <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.
  *   The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>
- * @param {String} [options.roomServer] The Auth server.
- * <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
+ * @param {String} [options.roomServer] The Auth server for debugging purposes to use.
+ *   <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
  * @param {Boolean} [options.enableDataChannel=true] <blockquote class="info">
@@ -9309,10 +9318,19 @@ Skylink.prototype.generateUUID = function() {
  *   The flag if <a href="#method_refreshConnection"><code>
  *   refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU
  *   enabled Peer connections instead of invoking <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.
- * @param {String} [options.iceServer] The ICE server.
+ * @param {String|Array} [options.iceServer] The ICE servers for debugging purposes to use.
+ *   - When defined as string, the value is considered as <code>[options.iceServer]</code>.
  *   <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
- * @param {String} [options.socketServer] The Signaling server.
+ * @param {String} [options.iceServer.#index] The ICE server url for debugging purposes to use.
+ * @param {String|JSON} [options.socketServer] The Signaling server for debugging purposes to use.
+ *   - When defined as string, the value is considered as <code>{ url: options.socketServer }</code>.
  *   <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
+ * @param {String} options.socketServer.url The Signaling server URL for debugging purposes to use.
+ * @param {Array} [options.socketServer.ports] The list of Signaling server ports for debugging purposes to use.
+ *   <small>If not defined, it will use the default list of ports specified.</small>
+ * @param {Number} options.socketServer.ports.#index The Signaling server port to fallback and use for debugging purposes.
+ * @param {String} [options.socketServer.protocol] The Signaling server protocol for debugging purposes to use.
+ *   <small>If not defined, it will use the default protocol specified.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -9325,14 +9343,14 @@ Skylink.prototype.generateUUID = function() {
  * @param {Number} callback.error.errorCode The <a href="#event_readyStateChange"><code>readyStateChange</code>
  *   event</a> <code>error.errorCode</code> parameter payload value.
  *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
- * @param {Object} callback.error.error The <a href="#event_readyStateChange"><code>readyStateChange</code>
+ * @param {Error|String} callback.error.error The <a href="#event_readyStateChange"><code>readyStateChange</code>
  *   event</a> <code>error.content</code> parameter payload value.
  * @param {Number} callback.error.status The <a href="#event_readyStateChange"><code>readyStateChange</code>
  *   event</a> <code>error.status</code> parameter payload value.
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {String} callback.success.serverUrl The constructed REST URL requested to Auth server.
- * @param {String} callback.success.readyState The current ready state.
+ * @param {Number} callback.success.readyState The current ready state.
  *   [Rel: Skylink.READY_STATE_CHANGE]
  * @param {String} callback.success.selectedRoom The Room based on the current Room session token retrieved for.
  * @param {String} callback.success.appKey The configured value of the <code>options.appKey</code>.
@@ -9355,11 +9373,12 @@ Skylink.prototype.generateUUID = function() {
  * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the <code>options.disableComfortNoiseCodec</code>.
  * @param {Boolean} callback.success.disableREMB The configured value of the <code>options.disableREMB</code>.
  * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
- * @param {Number} callback.success.throttleIntervals The configured value of the <code>options.throttleIntervals</code>.
- * @param {Number} callback.success.throttleShouldThrowError The configured value of the <code>options.throttleShouldThrowError</code>.
- * @param {Number} callback.success.mcuUseRenegoRestart The configured value of the <code>options.mcuUseRenegoRestart</code>.
- * @param {Number} callback.success.iceServer The configured value of the <code>options.iceServer</code>.
- * @param {Number} callback.success.socketServer The configured value of the <code>options.socketServer</code>.
+ * @param {JSON} callback.success.throttleIntervals The configured value of the <code>options.throttleIntervals</code>.
+ * @param {Boolean} callback.success.throttleShouldThrowError The configured value of the <code>options.throttleShouldThrowError</code>.
+ * @param {JSON} callback.success.mcuUseRenegoRestart The configured value of the <code>options.mcuUseRenegoRestart</code>.
+ * @param {JSON} callback.success.iceServer The configured value of the <code>options.iceServer</code>.
+ *   <small>See the <code>.urls</code> property in this object for configured value if defined.</small>
+ * @param {JSON} callback.success.socketServer The configured value of the <code>options.socketServer</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -9544,12 +9563,6 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if MCU refreshConnection() should use renegotiation
     mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
       options.mcuUseRenegoRestart : mcuUseRenegoRestart;
-    // set the TURN/STUN ICE server url for debugging purposes
-    iceServer = (options.iceServer && typeof options.iceServer === 'string') ?
-      options.iceServer : iceServer;
-    // set the Signaling server url for debugging purposes
-    socketServer = (options.socketServer && typeof options.socketServer === 'string') ?
-      options.socketServer : socketServer;
     // set the flag if MCU refreshConnection() should use renegotiation
     mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
       options.mcuUseRenegoRestart : mcuUseRenegoRestart;
@@ -9570,6 +9583,33 @@ Skylink.prototype.init = function(options, callback) {
         options.throttleIntervals.refreshConnection : throttleIntervals.refreshConnection;
       throttleIntervals.getUserMedia = (typeof options.throttleIntervals.getUserMedia === 'number') ?
         options.throttleIntervals.getUserMedia : throttleIntervals.getUserMedia;
+    }
+
+    // set the Signaling server url for debugging purposes
+    if (options.socketServer) {
+      if (typeof options.socketServer === 'string') {
+        socketServer = {
+          url: options.socketServer,
+          ports: null,
+          protocol: null
+        };
+      } else if (typeof options.socketServer === 'object' && options.socketServer.url &&
+        typeof options.socketServer.url === 'string') {
+        socketServer = {
+          url: options.socketServer.url,
+          ports: Array.isArray(options.socketServer.ports) && options.socketServer.ports.length > 0 ?
+            options.socketServer.ports : [],
+          protocol: options.socketServer.protocol && typeof options.socketServer.protocol === 'string' ?
+            options.socketServer.protocol : null
+        };
+      }
+    }
+
+    // set the Signaling server url for debugging purposes
+    if (options.iceServer) {
+      iceServer = typeof options.iceServer === 'string' ? { urls: [options.iceServer] } :
+        (Array.isArray(options.iceServer) && options.iceServer.length > 0 &&
+        options.iceServer[0] && typeof options.iceServer[0] === 'string' ? { urls: options.iceServer } : null);
     }
 
     // set turn transport option
@@ -9658,7 +9698,7 @@ Skylink.prototype.init = function(options, callback) {
   self._throttlingShouldThrowError = throttleShouldThrowError;
   self._disableREMB = disableREMB;
   self._mcuUseRenegoRestart = mcuUseRenegoRestart;
-  self._turnServer = iceServer;
+  self._iceServer = iceServer;
   self._socketServer = socketServer;
 
   log.log('Init configuration:', {
@@ -9688,7 +9728,7 @@ Skylink.prototype.init = function(options, callback) {
     throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError,
     mcuUseRenegoRestart: self._mcuUseRenegoRestart,
-    iceServer: self._turnServer,
+    iceServer: self._iceServer,
     socketServer: self._socketServer
   });
   // trigger the readystate
@@ -9732,7 +9772,7 @@ Skylink.prototype.init = function(options, callback) {
             throttleIntervals: self._throttlingTimeouts,
             throttleShouldThrowError: self._throttlingShouldThrowError,
             mcuUseRenegoRestart: self._mcuUseRenegoRestart,
-            iceServer: self._turnServer,
+            iceServer: self._iceServer,
             socketServer: self._socketServer
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
@@ -10069,8 +10109,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError,
     mcuUseRenegoRestart: self._mcuUseRenegoRestart,
-    iceServer: self._turnServer,
-    socketServer: self._socketServer
+    iceServer: self._iceServer ? self._iceServer.urls : null,
+    socketServer: self._socketServer ? (!self._socketServer.ports ? self._socketServer.url : self._socketServer) : null
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -12328,7 +12368,8 @@ Skylink.prototype._createSocket = function (type) {
     reconnectionDelay: 1000,
     transports: ['websocket']
   };
-  var ports = self._socketPorts[self._signalingServerProtocol];
+  var ports = self._socketServer && Array.isArray(self._socketServer.ports) &&
+    self._socketServer.ports.length > 0 ? self._socketServer.ports : self._socketPorts[self._signalingServerProtocol];
   var fallbackType = null;
 
   // just beginning
@@ -12356,8 +12397,15 @@ Skylink.prototype._createSocket = function (type) {
     options.transports = ['xhr-polling', 'jsonp-polling', 'polling'];
   }
 
-  var url = self._signalingServerProtocol + '//' + (self._socketServer || self._signalingServer) + ':' + self._signalingServerPort;
+  var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
   var retries = 0;
+
+  if (self._socketServer) {
+    // Provided as string, make it as just the fixed server
+    url = !Array.isArray(self._socketServer.ports) && !self._socketServer.protocol ? self._socketServer.url :
+      (self._socketServer.protocol ? self._socketServer.protocol : self._signalingServerProtocol) + '//' +
+      self._socketServer.url + ':' + self._signalingServerPort;
+  }
 
   self._socketSession.transportType = type;
   self._socketSession.socketOptions = options;
