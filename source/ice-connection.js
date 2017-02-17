@@ -314,19 +314,19 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   }
 
   if (self._iceServer) {
-    var username = null, credential = null;
+    var nUsername = null, nCredential = null;
     for (i = 0; i < newIceServers.length; i++) {
       if (newIceServers[i].username) {
-        username = newIceServers[i].username;
+        nUsername = newIceServers[i].username;
       }
       if (newIceServers[i].credential) {
-        credential = newIceServers[i].credential;
+        nCredential = newIceServers[i].credential;
       }
     }
     newIceServers = [{
       urls: self._iceServer.urls,
-      username: username,
-      credential: credential
+      username: nUsername,
+      credential: nCredential
     }];
   }
 

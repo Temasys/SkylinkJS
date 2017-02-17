@@ -1091,4 +1091,15 @@ function Skylink() {
    * @since 0.6.18
    */
   this._sdpSessions = {};
+
+  /**
+   * Stores the datachannel binary data chunk type.
+   * @attribute _binaryChunkType
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._binaryChunkType = window.webrtcDetectedBrowser === 'firefox' ?
+    this.DATA_TRANSFER_DATA_TYPE.BLOB : this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
 }

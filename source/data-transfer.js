@@ -1101,8 +1101,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
   var sessionInfo = {
     chunk: null,
     chunkSize: 0,
-    chunkType: sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING :
-      self.DATA_TRANSFER_DATA_TYPE.BLOB,
+    chunkType: sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING : self._binaryChunkType,
     isPrivate: isPrivate,
     isStringStream: sessionChunkType === 'string',
     senderPeerId: self._user && self._user.sid ? self._user.sid : null
@@ -1225,8 +1224,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
 
   self._dataStreams[transferId] = {
     sessions: sessions,
-    chunkType: sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING :
-      self.DATA_TRANSFER_DATA_TYPE.BLOB,
+    chunkType: sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING : self._binaryChunkType,
     sessionChunkType: sessionChunkType,
     isPrivate: isPrivate,
     isStringStream: sessionChunkType === 'string',
@@ -1462,8 +1460,8 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
   var sessionInfo = {
     chunk: updatedDataChunk,
     chunkSize: updatedDataChunk.size || updatedDataChunk.length || updatedDataChunk.byteLength,
-    chunkType: self._dataStreams[transferId].sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING :
-      self.DATA_TRANSFER_DATA_TYPE.BLOB,
+    chunkType: self._dataStreams[transferId].sessionChunkType === 'string' ?
+      self.DATA_TRANSFER_DATA_TYPE.STRING : self._binaryChunkType,
     isPrivate: self._dataStreams[transferId].sessionChunkType.isPrivate,
     isStringStream: self._dataStreams[transferId].sessionChunkType === 'string',
     senderPeerId: self._user && self._user.sid ? self._user.sid : null
@@ -1592,8 +1590,8 @@ Skylink.prototype.stopStreamingData = function(transferId) {
   var sessionInfo = {
     chunk: null,
     chunkSize: 0,
-    chunkType: self._dataStreams[transferId].sessionChunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING :
-      self.DATA_TRANSFER_DATA_TYPE.BLOB,
+    chunkType: self._dataStreams[transferId].sessionChunkType === 'string' ?
+      self.DATA_TRANSFER_DATA_TYPE.STRING : self._binaryChunkType,
     isPrivate: self._dataStreams[transferId].sessionChunkType.isPrivate,
     isStringStream: self._dataStreams[transferId].sessionChunkType === 'string',
     senderPeerId: self._user && self._user.sid ? self._user.sid : null
@@ -1779,9 +1777,7 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
 
     transferInfo.dataType = self.DATA_TRANSFER_SESSION_TYPE.BLOB;
     transferInfo.chunkSize = sessionChunkType === 'string' ? 4 * Math.ceil(chunkSize / 3) : chunkSize;
-    transferInfo.chunkType = sessionChunkType === 'binary' ? (window.webrtcDetectedBrowser === 'firefox' ?
-      self.DATA_TRANSFER_DATA_TYPE.BLOB : self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER) :
-      self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING;
+    transferInfo.chunkType = sessionChunkType === 'binary' ? self._binaryChunkType : self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING;
 
     // Start checking if data transfer can start
     if (!(data && typeof data === 'object' && data instanceof Blob)) {
@@ -2578,7 +2574,7 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
         blob = new Blob([byteArray]);
       }
 
-      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk ' + (isStreamChunk ? '' : 
+      log.debug([peerId, 'RTCDataChannel', channelProp, 'Received arraybuffer data chunk ' + (isStreamChunk ? '' :
         '@' + self._dataTransfers[transferId].sessions[peerId].ackN) + ' with size ->'], blob.size);
 
       self._DATAProtocolHandler(peerId, blob, self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER, blob.size, channelProp);
@@ -2605,7 +2601,7 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
       }
       self._dataStreams[transferId] = {
         chunkSize: 0,
-        chunkType: data.chunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING : self.DATA_TRANSFER_DATA_TYPE.BLOB,
+        chunkType: data.chunkType === 'string' ? self.DATA_TRANSFER_DATA_TYPE.STRING : self._binaryChunkType,
         sessionChunkType: data.chunkType,
         isPrivate: !!data.isPrivate,
         isStringStream: data.chunkType === 'string',
@@ -2711,7 +2707,7 @@ Skylink.prototype._WRQProtocolHandler = function(peerId, data, channelProp) {
       self._dataTransfers[transferId].chunkType = self.DATA_TRANSFER_DATA_TYPE.STRING;
     } else if (self._dataTransfers[transferId].sessionType === 'blob' &&
       self._dataTransfers[transferId].sessionChunkType === 'binary') {
-      self._dataTransfers[transferId].chunkType = self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
+      self._dataTransfers[transferId].chunkType = self._binaryChunkType;
     }
 
     self._dataChannels[peerId][channelProp].transferId = transferId;
@@ -2988,7 +2984,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
       isPrivate: self._dataStreams[streamId].sessionChunkType.isPrivate,
       isStringStream: self._dataStreams[streamId].sessionChunkType === 'string',
       senderPeerId: senderPeerId
-    }, false);    
+    }, false);
     return;
   }
 

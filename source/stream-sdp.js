@@ -749,6 +749,22 @@ Skylink.prototype._getCodecsSupport = function (callback) {
         };
       }
 
+      // Prevent errors and proceed with create offer still...
+      try {
+        var channel = pc.createDataChannel('test');
+        self._binaryChunkType = channel.binaryType || self._binaryChunkType;
+        self._binaryChunkType = self._binaryChunkType.toLowerCase().indexOf('array') > -1 ?
+          self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER : self._binaryChunkType;
+        // Set the value according to the property
+        for (var prop in self.DATA_TRANSFER_DATA_TYPE) {
+          if (self.DATA_TRANSFER_DATA_TYPE.hasOwnProperty(prop) &&
+            self._binaryChunkType.toLowerCase() === self.DATA_TRANSFER_DATA_TYPE[prop].toLowerCase()) {
+            self._binaryChunkType = self.DATA_TRANSFER_DATA_TYPE[prop];
+            break;
+          }
+        }
+      } catch (e) {}
+
       pc.createOffer(function (offer) {
         var sdpLines = offer.sdp.split('\r\n');
         var mediaType = '';
