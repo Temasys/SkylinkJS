@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 19:12:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Fri Feb 17 2017 14:09:00 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.17 - Thu Feb 16 2017 19:12:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Fri Feb 17 2017 14:09:00 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -16839,7 +16839,10 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  *   The flag if ICE connections should restart when refreshing Peer connections.
  *   <small>This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which state
  *   can be retrieved with the <a href="#event_iceConnectionState"><code>iceConnectionState</code> event</a>.</small>
- * @param {JSON} [options] The custom Peer configuration settings.
+ * @param {JSON} [options] <blockquote class="info">
+ *   Note that for MCU connections, the <code>bandwidth</code> or <code>googleXBandwidth</code>
+ *   settings will override for all Peers or the current Room connection session settings.</blockquote>
+ *   The custom Peer configuration settings.
  * @param {JSON} [options.bandwidth] The configuration to set the maximum streaming bandwidth to send to Peers.
  *   <small>Object signature follows <a href="#method_joinRoom"><code>joinRoom()</code> method</a>
  *   <code>options.bandwidth</code> settings.</small>
@@ -18544,6 +18547,30 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
     self._sendChannelMessage(restartMsg);
   };
 
+  console.info('test', callback, doIceRestart, bwOptions);
+
+  // Toggle the main bandwidth options.
+  if (bwOptions.bandwidth && typeof bwOptions.bandwidth === 'object') {
+    if (typeof bwOptions.bandwidth.audio === 'number') {
+      self._streamsBandwidthSettings.bAS.audio = bwOptions.bandwidth.audio;
+    }
+    if (typeof bwOptions.bandwidth.video === 'number') {
+      self._streamsBandwidthSettings.bAS.video = bwOptions.bandwidth.video;
+    }
+    if (typeof bwOptions.bandwidth.data === 'number') {
+      self._streamsBandwidthSettings.bAS.data = bwOptions.bandwidth.data;
+    }
+  }
+
+  if (bwOptions.googleXBandwidth && typeof bwOptions.googleXBandwidth === 'object') {
+    if (typeof bwOptions.googleXBandwidth.min === 'number') {
+      self._streamsBandwidthSettings.googleX.min = bwOptions.googleXBandwidth.min;
+    }
+    if (typeof bwOptions.googleXBandwidth.max === 'number') {
+      self._streamsBandwidthSettings.googleX.max = bwOptions.googleXBandwidth.max;
+    }
+  }
+
   for (var i = 0; i < listOfPeers.length; i++) {
     if (!self._peerConnections[listOfPeers[i]]) {
       var error = 'Peer connection with peer does not exists. Unable to restart';
@@ -18603,7 +18630,13 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
         }
       } else {
         //self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
-        self.joinRoom(self._selectedRoom);
+        self.joinRoom(self._selectedRoom, {
+          bandwidth: bwOptions.bandwidth || {},
+          googleXBandwidth: bwOptions.googleXBandwidth || {},
+          sdpSettings: clone(self._sdpSettings),
+          publishOnly: !!self._publishOnly,
+          parentId: self._parentId || null
+        });
       }
     });
   }

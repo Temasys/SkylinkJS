@@ -103,7 +103,10 @@ Skylink.prototype.SERVER_PEER_TYPE = {
  *   The flag if ICE connections should restart when refreshing Peer connections.
  *   <small>This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which state
  *   can be retrieved with the <a href="#event_iceConnectionState"><code>iceConnectionState</code> event</a>.</small>
- * @param {JSON} [options] The custom Peer configuration settings.
+ * @param {JSON} [options] <blockquote class="info">
+ *   Note that for MCU connections, the <code>bandwidth</code> or <code>googleXBandwidth</code>
+ *   settings will override for all Peers or the current Room connection session settings.</blockquote>
+ *   The custom Peer configuration settings.
  * @param {JSON} [options.bandwidth] The configuration to set the maximum streaming bandwidth to send to Peers.
  *   <small>Object signature follows <a href="#method_joinRoom"><code>joinRoom()</code> method</a>
  *   <code>options.bandwidth</code> settings.</small>
@@ -1808,6 +1811,30 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
     self._sendChannelMessage(restartMsg);
   };
 
+  console.info('test', callback, doIceRestart, bwOptions);
+
+  // Toggle the main bandwidth options.
+  if (bwOptions.bandwidth && typeof bwOptions.bandwidth === 'object') {
+    if (typeof bwOptions.bandwidth.audio === 'number') {
+      self._streamsBandwidthSettings.bAS.audio = bwOptions.bandwidth.audio;
+    }
+    if (typeof bwOptions.bandwidth.video === 'number') {
+      self._streamsBandwidthSettings.bAS.video = bwOptions.bandwidth.video;
+    }
+    if (typeof bwOptions.bandwidth.data === 'number') {
+      self._streamsBandwidthSettings.bAS.data = bwOptions.bandwidth.data;
+    }
+  }
+
+  if (bwOptions.googleXBandwidth && typeof bwOptions.googleXBandwidth === 'object') {
+    if (typeof bwOptions.googleXBandwidth.min === 'number') {
+      self._streamsBandwidthSettings.googleX.min = bwOptions.googleXBandwidth.min;
+    }
+    if (typeof bwOptions.googleXBandwidth.max === 'number') {
+      self._streamsBandwidthSettings.googleX.max = bwOptions.googleXBandwidth.max;
+    }
+  }
+
   for (var i = 0; i < listOfPeers.length; i++) {
     if (!self._peerConnections[listOfPeers[i]]) {
       var error = 'Peer connection with peer does not exists. Unable to restart';
@@ -1867,7 +1894,13 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
         }
       } else {
         //self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
-        self.joinRoom(self._selectedRoom);
+        self.joinRoom(self._selectedRoom, {
+          bandwidth: bwOptions.bandwidth || {},
+          googleXBandwidth: bwOptions.googleXBandwidth || {},
+          sdpSettings: clone(self._sdpSettings),
+          publishOnly: !!self._publishOnly,
+          parentId: self._parentId || null
+        });
       }
     });
   }
