@@ -33,22 +33,22 @@ var duration = 2; // 2 hours. Default is 24 for CORS auth
 var startDateTimeStamp = (new Date ()).toISOString();
 
 // Setup App Key for Privileged User Feature (for Privileged App Key + Auto Introduce Enabled)
-if (window.location.pathname === '/demo/privileged/auto-priv/') {
+if (window.location.pathname.indexOf('/demo/privileged/auto-priv/') === 0) {
   config.appKey = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
   secret = null; // 'xxxxx' Use App Key secret
 
 // Setup App Key for Privileged User Feature (for non-Privileged App Key + Auto Introduce Enabled)
-} else if (window.location.pathname === '/demo/privileged/auto-unpriv/') {
+} else if (window.location.pathname.indexOf('/demo/privileged/auto-unpriv/') === 0) {
   config.appKey = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
   secret = null; // 'xxxxx' Use App Key secret
 
 // Setup App Key for Privileged User Feature (for Privileged App Key + Auto Introduce Disabled)
-} else if (window.location.pathname === '/demo/privileged/unauto-priv/') {
+} else if (window.location.pathname.indexOf('/demo/privileged/unauto-priv/') === 0) {
   config.appKey = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
   secret = null; // 'xxxxx' Use App Key secret
 
 // Setup App Key for Privileged User Feature (for non-Privileged App Key + Auto Introduce Disabled)
-} else if (window.location.pathname === '/demo/privileged/unauto-unpriv/') {
+} else if (window.location.pathname.indexOf('/demo/privileged/unauto-unpriv/') === 0) {
   config.appKey = 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX';
   secret = null; // 'xxxxx' Use App Key secret
 }
