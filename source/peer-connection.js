@@ -1974,7 +1974,7 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
           }
         }
 
-      } else {
+      } else if (AdapterJS && !self._isLowerThanVersion(AdapterJS.VERSION, '0.14.0')) {
         self._peerConnections[targetMid].addIceCandidate(null);
       }
 
