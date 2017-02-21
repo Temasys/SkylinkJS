@@ -1622,6 +1622,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     log.debug([targetMid, null, null, 'Peer connection constraints:'], self._room.connection.peerConstraints);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
     return null;
   }
   // attributes (added on by Temasys)
