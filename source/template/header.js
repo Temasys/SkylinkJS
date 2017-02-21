@@ -1093,6 +1093,17 @@ function Skylink() {
   this._sdpSessions = {};
 
   /**
+   * Stores the flag if voice activity detection should be enabled.
+   * @attribute _voiceActivityDetection
+   * @type Boolean
+   * @default true
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._voiceActivityDetection = true;
+
+  /**
    * Stores the datachannel binary data chunk type.
    * @attribute _binaryChunkType
    * @type JSON

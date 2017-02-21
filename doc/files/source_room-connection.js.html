@@ -213,6 +213,17 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   &lt;code&gt;options.audio&lt;/code&gt; is not defined, it will be defined as &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
  *   &lt;small&gt;Object signature matches the &lt;code&gt;options.video&lt;/code&gt; parameter in the
  *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
+ * @param {Boolean} [options.voiceActivityDetection=true] The flag if voice activity detection should be enabled.
+ *   &lt;small&gt;This can only be toggled if User is and for the offerer, which is determined if User&#x27;s
+ *   &lt;code&gt;peerInfo.config.priorityWeight&lt;/code&gt; is higher than Peer&#x27;s.&lt;/small&gt;
+ *   &lt;blockquote class=&quot;details&quot;&gt;
+ *   This works hand-in-hand with the &lt;code&gt;options.disableComfortNoiseCodec&lt;/code&gt; flag in the
+ *   &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; and the &lt;code&gt;options.audio.usedtx&lt;/code&gt; setting in
+ *   &lt;a href=&quot;#method_getUserMedia&quot;&gt;&lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt;. VAD (voice activity detection)
+ *   detects if there is an active voice in the Stream, and if there is no active voice in the Stream, the
+ *   &lt;code&gt;options.audio.usedtx&lt;/code&gt; (if enabled) would prevent sending these empty bits. To prevent huge differences
+ *   when there is a silence and an active voice later, the CN codec would produce an empty voice to
+ *   make it sound better.&lt;/blockquote&gt;
  * @param {JSON} [options.bandwidth] &lt;blockquote class=&quot;info&quot;&gt;Note that this is currently not supported
  *   with Firefox browsers versions 48 and below as noted in an existing
  *   &lt;a href=&quot;https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21&quot;&gt;bugzilla ticket here&lt;/a&gt;.&lt;/blockquote&gt;
@@ -743,6 +754,8 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
           video: { send: true, receive: true }
         }
       };
+      self._voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === &#x27;boolean&#x27; ?
+        mediaOptions.voiceActivityDetection : true;
 
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === &#x27;number&#x27;) {

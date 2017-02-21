@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.17 - Tue Feb 21 2017 16:11:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.17 - Tue Feb 21 2017 17:53:53 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -1093,6 +1093,17 @@ function Skylink() {
    * @since 0.6.18
    */
   this._sdpSessions = {};
+
+  /**
+   * Stores the flag if voice activity detection should be enabled.
+   * @attribute _voiceActivityDetection
+   * @type Boolean
+   * @default true
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._voiceActivityDetection = true;
 
   /**
    * Stores the datachannel binary data chunk type.
@@ -7860,7 +7871,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var offerConstraints = {
     offerToReceiveAudio: offerToReceiveAudio,
     offerToReceiveVideo: offerToReceiveVideo,
-    iceRestart: doIceRestart
+    iceRestart: doIceRestart,
+    voiceActivityDetection: self._voiceActivityDetection
   };
 
   // Prevent undefined OS errors
@@ -7872,7 +7884,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
       mandatory: {
         OfferToReceiveAudio: offerToReceiveAudio,
         OfferToReceiveVideo: offerToReceiveVideo,
-        iceRestart: doIceRestart
+        iceRestart: doIceRestart,
+        voiceActivityDetection: self._voiceActivityDetection
       }
     };
   }
@@ -8346,6 +8359,17 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   <code>options.audio</code> is not defined, it will be defined as <code>false</code>.</small>
  *   <small>Object signature matches the <code>options.video</code> parameter in the
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
+ * @param {Boolean} [options.voiceActivityDetection=true] The flag if voice activity detection should be enabled.
+ *   <small>This can only be toggled if User is and for the offerer, which is determined if User's
+ *   <code>peerInfo.config.priorityWeight</code> is higher than Peer's.</small>
+ *   <blockquote class="details">
+ *   This works hand-in-hand with the <code>options.disableComfortNoiseCodec</code> flag in the
+ *   <a href="#method_init"><code>init()</code> method</a> and the <code>options.audio.usedtx</code> setting in
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>. VAD (voice activity detection)
+ *   detects if there is an active voice in the Stream, and if there is no active voice in the Stream, the
+ *   <code>options.audio.usedtx</code> (if enabled) would prevent sending these empty bits. To prevent huge differences
+ *   when there is a silence and an active voice later, the CN codec would produce an empty voice to
+ *   make it sound better.</blockquote>
  * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this is currently not supported
  *   with Firefox browsers versions 48 and below as noted in an existing
  *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
@@ -8876,6 +8900,8 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
           video: { send: true, receive: true }
         }
       };
+      self._voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === 'boolean' ?
+        mediaOptions.voiceActivityDetection : true;
 
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === 'number') {

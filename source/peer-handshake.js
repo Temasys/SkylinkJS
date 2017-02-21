@@ -72,7 +72,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var offerConstraints = {
     offerToReceiveAudio: offerToReceiveAudio,
     offerToReceiveVideo: offerToReceiveVideo,
-    iceRestart: doIceRestart
+    iceRestart: doIceRestart,
+    voiceActivityDetection: self._voiceActivityDetection
   };
 
   // Prevent undefined OS errors
@@ -84,7 +85,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
       mandatory: {
         OfferToReceiveAudio: offerToReceiveAudio,
         OfferToReceiveVideo: offerToReceiveVideo,
-        iceRestart: doIceRestart
+        iceRestart: doIceRestart,
+        voiceActivityDetection: self._voiceActivityDetection
       }
     };
   }

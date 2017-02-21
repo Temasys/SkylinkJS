@@ -1713,6 +1713,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
     log.debug([targetMid, null, null, &#x27;Peer connection constraints:&#x27;], self._room.connection.peerConstraints);
   } catch (error) {
     log.error([targetMid, null, null, &#x27;Failed creating peer connection:&#x27;], error);
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
     return null;
   }
   // attributes (added on by Temasys)
@@ -2065,7 +2066,7 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
           }
         }
 
-      } else {
+      } else if (AdapterJS &amp;&amp; !self._isLowerThanVersion(AdapterJS.VERSION, &#x27;0.14.0&#x27;)) {
         self._peerConnections[targetMid].addIceCandidate(null);
       }
 
