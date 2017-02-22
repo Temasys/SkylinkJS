@@ -294,7 +294,7 @@ Skylink.prototype._createSocket = function (type) {
     fallbackType = self.SOCKET_FALLBACK.NON_FALLBACK;
 
   // reached the end of the last port for the protocol type
-  } else if (ports.indexOf(self._signalingServerPort) === ports.length - 1) {
+  } else if (ports.indexOf(self._signalingServerPort) === ports.length - 1 || typeof self._socketServer === 'string') {
     // re-refresh to long-polling port
     if (type === 'WebSocket') {
       type = 'Polling';
@@ -346,7 +346,19 @@ Skylink.prototype._createSocket = function (type) {
 
   log.log('Opening channel with signaling server url:', clone(self._socketSession));
 
-  self._socket = io.connect(url, options);
+  try {
+    self._socket = io.connect(url, options);
+  } catch (error){
+    log.error('Failed creating socket connection object ->', error);
+    if (fallbackType === self.SOCKET_FALLBACK.NON_FALLBACK) {
+      self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED, error, fallbackType, clone(self._socketSession));
+    } else {
+      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED, error, fallbackType, clone(self._socketSession));
+    }
+    self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED, new Error('Reconnection aborted as ' +
+      'there no more available ports, transports and final attempts left.'), fallbackType, clone(self._socketSession));
+    return;
+  }
 
   self._socket.on('reconnect_attempt', function (attempt) {
     retries++;
