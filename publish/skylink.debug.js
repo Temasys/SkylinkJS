@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Tue Feb 21 2017 18:03:21 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Wed Feb 22 2017 18:58:26 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -175,7 +175,7 @@ function Skylink() {
    *   remote session description is received and set.
    * @attribute _peerCandidatesQueue
    * @param {Array} <#peerId> The list of the Peer connection buffered ICE candidates received.
-   * @param {Object} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
+   * @param {RTCIceCandidate} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
    * @type JSON
    * @private
    * @for Skylink
@@ -278,7 +278,7 @@ function Skylink() {
   /**
    * Stores the list of the Peer connections.
    * @attribute _peerConnections
-   * @param {Object} <#peerId> The Peer connection.
+   * @param {RTCPeerConnection} <#peerId> The Peer connection.
    * @type JSON
    * @private
    * @for Skylink
@@ -289,7 +289,7 @@ function Skylink() {
   /**
    * Stores the list of the Peer connections stats.
    * @attribute _peerStats
-   * @param {Object} <#peerId> The Peer connection stats.
+   * @param {JSON} <#peerId> The Peer connection stats.
    * @type JSON
    * @private
    * @for Skylink
@@ -9413,7 +9413,7 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} callback.success.mcuUseRenegoRestart The configured value of the <code>options.mcuUseRenegoRestart</code>.
  * @param {JSON} callback.success.iceServer The configured value of the <code>options.iceServer</code>.
  *   <small>See the <code>.urls</code> property in this object for configured value if defined.</small>
- * @param {JSON} callback.success.socketServer The configured value of the <code>options.socketServer</code>.
+ * @param {JSON|String} callback.success.socketServer The configured value of the <code>options.socketServer</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -9571,12 +9571,6 @@ Skylink.prototype.init = function(options, callback) {
     // set the force turn ssl always option
     forceTURNSSL = (typeof options.forceTURNSSL === 'boolean') ?
       options.forceTURNSSL : forceTURNSSL;
-    // set the preferred audio codec
-    audioCodec = typeof options.audioCodec === 'string' ?
-      options.audioCodec : audioCodec;
-    // set the preferred video codec
-    videoCodec = typeof options.videoCodec === 'string' ?
-      options.videoCodec : videoCodec;
     // set the force turn server option
     forceTURN = (typeof options.forceTURN === 'boolean') ?
       options.forceTURN : forceTURN;
@@ -9623,11 +9617,7 @@ Skylink.prototype.init = function(options, callback) {
     // set the Signaling server url for debugging purposes
     if (options.socketServer) {
       if (typeof options.socketServer === 'string') {
-        socketServer = {
-          url: options.socketServer,
-          ports: null,
-          protocol: null
-        };
+        socketServer = options.socketServer;
       } else if (typeof options.socketServer === 'object' && options.socketServer.url &&
         typeof options.socketServer.url === 'string') {
         socketServer = {
@@ -9650,16 +9640,39 @@ Skylink.prototype.init = function(options, callback) {
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
       // loop out for every transport option
-      for (var type in self.TURN_TRANSPORT) {
-        if (self.TURN_TRANSPORT.hasOwnProperty(type)) {
-          // do a check if the transport option is valid
-          if (self.TURN_TRANSPORT[type] === options.TURNServerTransport) {
-            TURNTransport = options.TURNServerTransport;
-            break;
-          }
+      for (var ttType in self.TURN_TRANSPORT) {
+        // do a check if the transport option is valid
+        if (self.TURN_TRANSPORT.hasOwnProperty(ttType) && self.TURN_TRANSPORT[ttType] === options.TURNServerTransport) {
+          TURNTransport = options.TURNServerTransport;
+          break;
         }
       }
     }
+
+    // set the preferred audio codec
+    if (typeof options.audioCodec === 'string') {
+      // loop out for every audio codec option
+      for (var acType in self.AUDIO_CODEC) {
+        // do a check if the audio codec option is valid
+        if (self.AUDIO_CODEC.hasOwnProperty(acType) && self.AUDIO_CODEC[acType] === options.audioCodec) {
+          audioCodec = options.audioCodec;
+          break;
+        }
+      }
+    }
+
+    // set the preferred video codec
+    if (typeof options.videoCodec === 'string') {
+      // loop out for every video codec option
+      for (var vcType in self.VIDEO_CODEC) {
+        // do a check if the audio codec option is valid
+        if (self.VIDEO_CODEC.hasOwnProperty(vcType) && self.VIDEO_CODEC[vcType] === options.videoCodec) {
+          videoCodec = options.videoCodec;
+          break;
+        }
+      }
+    }
+    
     // set audio fallback option
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
@@ -10145,7 +10158,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     throttleShouldThrowError: self._throttlingShouldThrowError,
     mcuUseRenegoRestart: self._mcuUseRenegoRestart,
     iceServer: self._iceServer ? self._iceServer.urls : null,
-    socketServer: self._socketServer ? (!self._socketServer.ports ? self._socketServer.url : self._socketServer) : null
+    socketServer: self._socketServer ? self._socketServer : null
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -12403,7 +12416,7 @@ Skylink.prototype._createSocket = function (type) {
     reconnectionDelay: 1000,
     transports: ['websocket']
   };
-  var ports = self._socketServer && Array.isArray(self._socketServer.ports) &&
+  var ports = self._socketServer && typeof self._socketServer === 'object' && Array.isArray(self._socketServer.ports) &&
     self._socketServer.ports.length > 0 ? self._socketServer.ports : self._socketPorts[self._signalingServerProtocol];
   var fallbackType = null;
 
@@ -12437,7 +12450,7 @@ Skylink.prototype._createSocket = function (type) {
 
   if (self._socketServer) {
     // Provided as string, make it as just the fixed server
-    url = !Array.isArray(self._socketServer.ports) && !self._socketServer.protocol ? self._socketServer.url :
+    url = typeof self._socketServer === 'string' ? self._socketServer :
       (self._socketServer.protocol ? self._socketServer.protocol : self._signalingServerProtocol) + '//' +
       self._socketServer.url + ':' + self._signalingServerPort;
   }

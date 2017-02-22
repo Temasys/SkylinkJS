@@ -173,7 +173,7 @@ function Skylink() {
    *   remote session description is received and set.
    * @attribute _peerCandidatesQueue
    * @param {Array} <#peerId> The list of the Peer connection buffered ICE candidates received.
-   * @param {Object} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
+   * @param {RTCIceCandidate} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
    * @type JSON
    * @private
    * @for Skylink
@@ -276,7 +276,7 @@ function Skylink() {
   /**
    * Stores the list of the Peer connections.
    * @attribute _peerConnections
-   * @param {Object} <#peerId> The Peer connection.
+   * @param {RTCPeerConnection} <#peerId> The Peer connection.
    * @type JSON
    * @private
    * @for Skylink
@@ -287,7 +287,7 @@ function Skylink() {
   /**
    * Stores the list of the Peer connections stats.
    * @attribute _peerStats
-   * @param {Object} <#peerId> The Peer connection stats.
+   * @param {JSON} <#peerId> The Peer connection stats.
    * @type JSON
    * @private
    * @for Skylink

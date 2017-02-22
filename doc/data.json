@@ -290,7 +290,7 @@
                         {
                             "name": "<#index>",
                             "description": "The Peer connection buffered ICE candidate received.",
-                            "type": "Object"
+                            "type": "RTCIceCandidate"
                         }
                     ]
                 }
@@ -430,7 +430,7 @@
                 {
                     "name": "<#peerId>",
                     "description": "The Peer connection.",
-                    "type": "Object"
+                    "type": "RTCPeerConnection"
                 }
             ],
             "type": "JSON",
@@ -449,7 +449,7 @@
                 {
                     "name": "<#peerId>",
                     "description": "The Peer connection stats.",
-                    "type": "Object"
+                    "type": "JSON"
                 }
             ],
             "type": "JSON",
@@ -4517,7 +4517,7 @@
                                 {
                                     "name": "socketServer",
                                     "description": "The configured value of the <code>options.socketServer</code>.",
-                                    "type": "JSON"
+                                    "type": "JSON|String"
                                 }
                             ]
                         }
@@ -4533,7 +4533,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 810,
+            "line": 823,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4544,7 +4544,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 884,
+            "line": 897,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4555,7 +4555,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 954,
+            "line": 967,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4566,7 +4566,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1085,
+            "line": 1098,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",

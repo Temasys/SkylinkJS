@@ -284,7 +284,7 @@ Skylink.prototype._createSocket = function (type) {
     reconnectionDelay: 1000,
     transports: ['websocket']
   };
-  var ports = self._socketServer && Array.isArray(self._socketServer.ports) &&
+  var ports = self._socketServer && typeof self._socketServer === 'object' && Array.isArray(self._socketServer.ports) &&
     self._socketServer.ports.length > 0 ? self._socketServer.ports : self._socketPorts[self._signalingServerProtocol];
   var fallbackType = null;
 
@@ -318,7 +318,7 @@ Skylink.prototype._createSocket = function (type) {
 
   if (self._socketServer) {
     // Provided as string, make it as just the fixed server
-    url = !Array.isArray(self._socketServer.ports) && !self._socketServer.protocol ? self._socketServer.url :
+    url = typeof self._socketServer === 'string' ? self._socketServer :
       (self._socketServer.protocol ? self._socketServer.protocol : self._signalingServerProtocol) + '//' +
       self._socketServer.url + ':' + self._signalingServerPort;
   }
