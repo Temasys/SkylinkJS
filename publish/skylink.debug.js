@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Wed Feb 22 2017 19:45:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Wed Feb 22 2017 19:49:09 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -12507,7 +12507,7 @@ Skylink.prototype._createSocket = function (type) {
         type + '" and port ' + self._signalingServerPort + '.'), fallbackType, clone(self._socketSession));
     }
 
-    if (self._socketSession.finalAttempts < 4) {
+    if (self._socketSession.finalAttempts < 2) {
       self._createSocket(type);
     } else {
       self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED, new Error('Reconnection aborted as ' +
