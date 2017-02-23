@@ -1113,4 +1113,18 @@ function Skylink() {
    */
   this._binaryChunkType = window.webrtcDetectedBrowser === 'firefox' ?
     this.DATA_TRANSFER_DATA_TYPE.BLOB : this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
+
+  /**
+   * Stores the RTCPeerConnection configuration.
+   * @attribute _peerConnectionConfig
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._peerConnectionConfig = {
+    bundlePolicy: this.BUNDLE_POLICY.BALANCED,
+    rtcpMuxPolicy: this.RTCP_MUX_POLICY.REQUIRE,
+    iceCandidatePoolSize: 0
+  };
 }

@@ -166,6 +166,58 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
+ *  Learn more about how ICE works in this
+ *  &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
+ * &lt;/blockquote&gt;
+ * The list of available Peer connection bundle policies.
+ * @attribute BUNDLE_POLICY
+ * @param {String} MAX_COMPAT &lt;small&gt;Value &lt;code&gt;&quot;max-compat&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the bundle policy to generate ICE candidates for each media type
+ *   so each media type flows through different transports.
+ * @param {String} MAX_BUNDLE &lt;small&gt;Value &lt;code&gt;&quot;max-bundle&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the bundle policy to generate ICE candidates for one media type
+ *   so all media type flows through a single transport.
+ * @param {String} BALANCED   &lt;small&gt;Value &lt;code&gt;&quot;balanced&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the bundle policy to use &lt;code&gt;MAX_BUNDLE&lt;/code&gt; if Peer supports it,
+ *   else fallback to &lt;code&gt;MAX_COMPAT&lt;/code&gt;.
+ * @param {String} NONE       &lt;small&gt;Value &lt;code&gt;&quot;none&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the bundle policy to not use any media bundle.
+ *   &lt;small&gt;This removes the &lt;code&gt;a=group:BUNDLE&lt;/code&gt; line from session descriptions.&lt;/small&gt;
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.BUNDLE_POLICY = {
+  MAX_COMPAT: &#x27;max-compat&#x27;,
+  BALANCED: &#x27;balanced&#x27;,
+  MAX_BUNDLE: &#x27;max-bundle&#x27;,
+  NONE: &#x27;none&#x27;
+};
+
+/**
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *  Learn more about how ICE works in this
+ *  &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
+ * &lt;/blockquote&gt;
+ * The list of available Peer connection RTCP mux policies.
+ * @attribute RTCP_MUX_POLICY
+ * @param {String} REQUIRE   &lt;small&gt;Value &lt;code&gt;&quot;require&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the RTCP mux policy to generate ICE candidates for RTP only and RTCP shares the same ICE candidates.
+ * @param {String} NEGOTIATE &lt;small&gt;Value &lt;code&gt;&quot;negotiate&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the RTCP mux policy to generate ICE candidates for both RTP and RTCP each.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.RTCP_MUX_POLICY = {
+  REQUIRE: &#x27;require&#x27;,
+  NEGOTIATE: &#x27;negotiate&#x27;
+};
+
+/**
+ * &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that Edge browser does not support renegotiation.
  *   For MCU enabled Peer connections with &lt;code&gt;options.mcuUseRenegoRestart&lt;/code&gt; set to &lt;code&gt;false&lt;/code&gt;
  *   in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;, the restart functionality may differ, you
@@ -1700,8 +1752,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
       iceServers: self._room.connection.peerConfig.iceServers,
       iceTransportPolicy: self._filterCandidatesType.host &amp;&amp; self._filterCandidatesType.srflx &amp;&amp;
         !self._filterCandidatesType.relay ? &#x27;relay&#x27; : &#x27;all&#x27;,
-      bundlePolicy: &#x27;max-bundle&#x27;,
-      rtcpMuxPolicy: &#x27;require&#x27;
+      bundlePolicy: self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.NONE ?
+        self.BUNDLE_POLICY.BALANCED : self._peerConnectionConfig.bundlePolicy,
+      rtcpMuxPolicy: self._peerConnectionConfig.rtcpMuxPolicy,
+      iceCandidatePoolSize: self._peerConnectionConfig.iceCandidatePoolSize
     }, {
       optional: [
         { DtlsSrtpKeyAgreement: true },

@@ -210,6 +210,17 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
  *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ * @param {JSON} [options.peerConnection] <blockquote class="info">
+ *   Note that this is mainly used for debugging purposes, so it may cause disruptions in connections or
+ *   connectivity issues when configured. </blockquote> The Peer connection constraints settings.
+ * @param {String} [options.peerConnection.bundlePolicy] The Peer connection media bundle policy.
+ * - When not provided, its value is <code>BALANCED</code>.
+ *   [Rel: Skylink.BUNDLE_POLICY]
+ * @param {String} [options.peerConnection.rtcpMuxPolicy] The Peer connection RTP and RTCP ICE candidates mux policy.
+ * - When not provided, its value is <code>REQUIRE</code>.
+ *   [Rel: Skylink.RTCP_MUX_POLICY]
+ * @param {Number} [options.peerConnection.iceCandidatePoolSize=0] The number of ICE candidates to gather before
+ *   gathering it when setting local offer / answer session description.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
@@ -665,6 +676,11 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       };
       self._voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === 'boolean' ?
         mediaOptions.voiceActivityDetection : true;
+      self._peerConnectionConfig = {
+        bundlePolicy: self.BUNDLE_POLICY.BALANCED,
+        rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
+        iceCandidatePoolSize: 0
+      };
 
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === 'number') {
@@ -731,6 +747,29 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
       if (mediaOptions.parentId) {
         self._parentId = mediaOptions.parentId;
+      }
+
+      if (mediaOptions.peerConnection && typeof mediaOptions.peerConnection === 'object') {
+        if (typeof mediaOptions.peerConnection.bundlePolicy === 'string') {
+          for (var bpProp in self.BUNDLE_POLICY) {
+            if (self.BUNDLE_POLICY.hasOwnProperty(bpProp) &&
+              self.BUNDLE_POLICY[bpProp] === mediaOptions.peerConnection.bundlePolicy) {
+              self._peerConnectionConfig.bundlePolicy = mediaOptions.peerConnection.bundlePolicy;
+            }
+          }
+        }
+        if (typeof mediaOptions.peerConnection.rtcpMuxPolicy === 'string') {
+          for (var rmpProp in self.RTCP_MUX_POLICY) {
+            if (self.RTCP_MUX_POLICY.hasOwnProperty(rmpProp) &&
+              self.RTCP_MUX_POLICY[rmpProp] === mediaOptions.peerConnection.rtcpMuxPolicy) {
+              self._peerConnectionConfig.rtcpMuxPolicy = mediaOptions.peerConnection.rtcpMuxPolicy;
+            }
+          }
+        }
+        if (typeof mediaOptions.peerConnection.iceCandidatePoolSize === 'number' &&
+          mediaOptions.peerConnection.iceCandidatePoolSize > 0) {
+          self._peerConnectionConfig.iceCandidatePoolSize = mediaOptions.peerConnection.iceCandidatePoolSize;
+        }
       }
 
       // get the stream

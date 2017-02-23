@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Wed Feb 22 2017 19:49:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Fri Feb 24 2017 00:58:50 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -1115,6 +1115,20 @@ function Skylink() {
    */
   this._binaryChunkType = window.webrtcDetectedBrowser === 'firefox' ?
     this.DATA_TRANSFER_DATA_TYPE.BLOB : this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
+
+  /**
+   * Stores the RTCPeerConnection configuration.
+   * @attribute _peerConnectionConfig
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._peerConnectionConfig = {
+    bundlePolicy: this.BUNDLE_POLICY.BALANCED,
+    rtcpMuxPolicy: this.RTCP_MUX_POLICY.REQUIRE,
+    iceCandidatePoolSize: 0
+  };
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -5305,6 +5319,58 @@ Skylink.prototype.SERVER_PEER_TYPE = {
 
 /**
  * <blockquote class="info">
+ *  Learn more about how ICE works in this
+ *  <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ * </blockquote>
+ * The list of available Peer connection bundle policies.
+ * @attribute BUNDLE_POLICY
+ * @param {String} MAX_COMPAT <small>Value <code>"max-compat"</code></small>
+ *   The value of the bundle policy to generate ICE candidates for each media type
+ *   so each media type flows through different transports.
+ * @param {String} MAX_BUNDLE <small>Value <code>"max-bundle"</code></small>
+ *   The value of the bundle policy to generate ICE candidates for one media type
+ *   so all media type flows through a single transport.
+ * @param {String} BALANCED   <small>Value <code>"balanced"</code></small>
+ *   The value of the bundle policy to use <code>MAX_BUNDLE</code> if Peer supports it,
+ *   else fallback to <code>MAX_COMPAT</code>.
+ * @param {String} NONE       <small>Value <code>"none"</code></small>
+ *   The value of the bundle policy to not use any media bundle.
+ *   <small>This removes the <code>a=group:BUNDLE</code> line from session descriptions.</small>
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.BUNDLE_POLICY = {
+  MAX_COMPAT: 'max-compat',
+  BALANCED: 'balanced',
+  MAX_BUNDLE: 'max-bundle',
+  NONE: 'none'
+};
+
+/**
+ * <blockquote class="info">
+ *  Learn more about how ICE works in this
+ *  <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ * </blockquote>
+ * The list of available Peer connection RTCP mux policies.
+ * @attribute RTCP_MUX_POLICY
+ * @param {String} REQUIRE   <small>Value <code>"require"</code></small>
+ *   The value of the RTCP mux policy to generate ICE candidates for RTP only and RTCP shares the same ICE candidates.
+ * @param {String} NEGOTIATE <small>Value <code>"negotiate"</code></small>
+ *   The value of the RTCP mux policy to generate ICE candidates for both RTP and RTCP each.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.RTCP_MUX_POLICY = {
+  REQUIRE: 'require',
+  NEGOTIATE: 'negotiate'
+};
+
+/**
+ * <blockquote class="info">
  *   Note that Edge browser does not support renegotiation.
  *   For MCU enabled Peer connections with <code>options.mcuUseRenegoRestart</code> set to <code>false</code>
  *   in the <a href="#method_init"><code>init()</code> method</a>, the restart functionality may differ, you
@@ -6839,8 +6905,10 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
       iceServers: self._room.connection.peerConfig.iceServers,
       iceTransportPolicy: self._filterCandidatesType.host && self._filterCandidatesType.srflx &&
         !self._filterCandidatesType.relay ? 'relay' : 'all',
-      bundlePolicy: 'max-bundle',
-      rtcpMuxPolicy: 'require'
+      bundlePolicy: self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.NONE ?
+        self.BUNDLE_POLICY.BALANCED : self._peerConnectionConfig.bundlePolicy,
+      rtcpMuxPolicy: self._peerConnectionConfig.rtcpMuxPolicy,
+      iceCandidatePoolSize: self._peerConnectionConfig.iceCandidatePoolSize
     }, {
       optional: [
         { DtlsSrtpKeyAgreement: true },
@@ -8447,6 +8515,17 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
  *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ * @param {JSON} [options.peerConnection] <blockquote class="info">
+ *   Note that this is mainly used for debugging purposes, so it may cause disruptions in connections or
+ *   connectivity issues when configured. </blockquote> The Peer connection constraints settings.
+ * @param {String} [options.peerConnection.bundlePolicy] The Peer connection media bundle policy.
+ * - When not provided, its value is <code>BALANCED</code>.
+ *   [Rel: Skylink.BUNDLE_POLICY]
+ * @param {String} [options.peerConnection.rtcpMuxPolicy] The Peer connection RTP and RTCP ICE candidates mux policy.
+ * - When not provided, its value is <code>REQUIRE</code>.
+ *   [Rel: Skylink.RTCP_MUX_POLICY]
+ * @param {Number} [options.peerConnection.iceCandidatePoolSize=0] The number of ICE candidates to gather before
+ *   gathering it when setting local offer / answer session description.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
@@ -8902,6 +8981,11 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       };
       self._voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === 'boolean' ?
         mediaOptions.voiceActivityDetection : true;
+      self._peerConnectionConfig = {
+        bundlePolicy: self.BUNDLE_POLICY.BALANCED,
+        rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
+        iceCandidatePoolSize: 0
+      };
 
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === 'number') {
@@ -8968,6 +9052,29 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
       if (mediaOptions.parentId) {
         self._parentId = mediaOptions.parentId;
+      }
+
+      if (mediaOptions.peerConnection && typeof mediaOptions.peerConnection === 'object') {
+        if (typeof mediaOptions.peerConnection.bundlePolicy === 'string') {
+          for (var bpProp in self.BUNDLE_POLICY) {
+            if (self.BUNDLE_POLICY.hasOwnProperty(bpProp) &&
+              self.BUNDLE_POLICY[bpProp] === mediaOptions.peerConnection.bundlePolicy) {
+              self._peerConnectionConfig.bundlePolicy = mediaOptions.peerConnection.bundlePolicy;
+            }
+          }
+        }
+        if (typeof mediaOptions.peerConnection.rtcpMuxPolicy === 'string') {
+          for (var rmpProp in self.RTCP_MUX_POLICY) {
+            if (self.RTCP_MUX_POLICY.hasOwnProperty(rmpProp) &&
+              self.RTCP_MUX_POLICY[rmpProp] === mediaOptions.peerConnection.rtcpMuxPolicy) {
+              self._peerConnectionConfig.rtcpMuxPolicy = mediaOptions.peerConnection.rtcpMuxPolicy;
+            }
+          }
+        }
+        if (typeof mediaOptions.peerConnection.iceCandidatePoolSize === 'number' &&
+          mediaOptions.peerConnection.iceCandidatePoolSize > 0) {
+          self._peerConnectionConfig.iceCandidatePoolSize = mediaOptions.peerConnection.iceCandidatePoolSize;
+        }
       }
 
       // get the stream
@@ -16824,7 +16931,8 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     var mLineIndex = -1;
 
     for (var j = 0; j < sdpLines.length; j++) {
-      if (sdpLines[j].indexOf('a=group:BUNDLE') === 0 && this._sdpSessions[targetMid].remote.bundleLine) {
+      if (sdpLines[j].indexOf('a=group:BUNDLE') === 0 && this._sdpSessions[targetMid].remote.bundleLine &&
+        this._peerConnectionConfig.bundlePolicy === this.BUNDLE_POLICY.MAX_BUNDLE) {
         sdpLines[j] = this._sdpSessions[targetMid].remote.bundleLine;
       } else if (sdpLines[j].indexOf('m=') === 0) {
         mLineIndex++;
@@ -17223,11 +17331,11 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   var mLineIndex = -1;
   var settings = clone(self._sdpSettings);
 
-  if (targetMid === 'MCU') {
+  /*if (targetMid === 'MCU') {
     settings.connection.audio = true;
     settings.connection.video = true;
     settings.connection.data = true;
-  }
+  }*/
 
   if (settings.video) {
     settings.connection.video = (window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
@@ -17270,7 +17378,8 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
         // Check if answerer and we do not have the power to remove the m line if index is 0
         // Set as a=inactive because we do not have that power to reject it somehow..
         // first m= line cannot be rejected for BUNDLE
-        if (bundleLineIndex > -1 && mLineIndex === 0 && (direction === 'remote' ?
+        if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.MAX_BUNDLE &&
+          bundleLineIndex > -1 && mLineIndex === 0 && (direction === 'remote' ?
           sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER :
           sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER)) {
           log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
@@ -17347,7 +17456,12 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
 
   // Fix chrome "offerToReceiveAudio" local offer not removing audio BUNDLE
   if (bundleLineIndex > -1) {
-    sdpLines[bundleLineIndex] = 'a=group:BUNDLE ' + bundleLineMids.join(' ');
+    if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.MAX_BUNDLE) {
+      sdpLines[bundleLineIndex] = 'a=group:BUNDLE ' + bundleLineMids.join(' ');
+    // Remove a=group:BUNDLE line
+    } else if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.NONE) {
+      sdpLines.splice(bundleLineIndex, 1);
+    }
   }
 
   // Append empty space below

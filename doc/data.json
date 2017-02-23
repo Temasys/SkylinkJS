@@ -1447,6 +1447,18 @@
             "class": "Skylink"
         },
         {
+            "file": "source/template/header.js",
+            "line": 1117,
+            "description": "Stores the RTCPeerConnection configuration.",
+            "itemtype": "attribute",
+            "name": "_peerConnectionConfig",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
             "file": "source/data-channel.js",
             "line": 1,
             "description": "The list of Datachannel connection states.",
@@ -2797,6 +2809,62 @@
         {
             "file": "source/peer-connection.js",
             "line": 76,
+            "description": "<blockquote class=\"info\">\n Learn more about how ICE works in this\n <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.\n</blockquote>\nThe list of available Peer connection bundle policies.",
+            "itemtype": "attribute",
+            "name": "BUNDLE_POLICY",
+            "params": [
+                {
+                    "name": "MAX_COMPAT",
+                    "description": "<small>Value <code>\"max-compat\"</code></small>\n  The value of the bundle policy to generate ICE candidates for each media type\n  so each media type flows through different transports.",
+                    "type": "String"
+                },
+                {
+                    "name": "MAX_BUNDLE",
+                    "description": "<small>Value <code>\"max-bundle\"</code></small>\n  The value of the bundle policy to generate ICE candidates for one media type\n  so all media type flows through a single transport.",
+                    "type": "String"
+                },
+                {
+                    "name": "BALANCED",
+                    "description": "<small>Value <code>\"balanced\"</code></small>\n  The value of the bundle policy to use <code>MAX_BUNDLE</code> if Peer supports it,\n  else fallback to <code>MAX_COMPAT</code>.",
+                    "type": "String"
+                },
+                {
+                    "name": "NONE",
+                    "description": "<small>Value <code>\"none\"</code></small>\n  The value of the bundle policy to not use any media bundle.\n  <small>This removes the <code>a=group:BUNDLE</code> line from session descriptions.</small>",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 107,
+            "description": "<blockquote class=\"info\">\n Learn more about how ICE works in this\n <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.\n</blockquote>\nThe list of available Peer connection RTCP mux policies.",
+            "itemtype": "attribute",
+            "name": "RTCP_MUX_POLICY",
+            "params": [
+                {
+                    "name": "REQUIRE",
+                    "description": "<small>Value <code>\"require\"</code></small>\n  The value of the RTCP mux policy to generate ICE candidates for RTP only and RTCP shares the same ICE candidates.",
+                    "type": "String"
+                },
+                {
+                    "name": "NEGOTIATE",
+                    "description": "<small>Value <code>\"negotiate\"</code></small>\n  The value of the RTCP mux policy to generate ICE candidates for both RTP and RTCP each.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 128,
             "description": "<blockquote class=\"info\">\n  Note that Edge browser does not support renegotiation.\n  For MCU enabled Peer connections with <code>options.mcuUseRenegoRestart</code> set to <code>false</code>\n  in the <a href=\"#method_init\"><code>init()</code> method</a>, the restart functionality may differ, you\n  may learn more about how to workaround it\n  <a href=\"http://support.temasys.io/support/discussions/topics/12000002853\">in this article here</a>.\n  For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in\n  <a href=\"http://support.temasys.io/support/discussions/topics/12000005188\">in this article here</a>.\n  Note that this functionality should be used when Peer connection stream freezes during a connection.\n  For a better user experience for only MCU enabled Peer connections, the functionality is throttled when invoked many\n  times in less than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nFunction that refreshes Peer connections to update with the current streaming.",
             "itemtype": "method",
             "name": "refreshConnection",
@@ -2926,7 +2994,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 302,
+            "line": 354,
             "description": "Function that refresh connections.",
             "itemtype": "method",
             "name": "_refreshPeerConnection",
@@ -2937,7 +3005,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 388,
+            "line": 440,
             "description": "<blockquote class=\"info\">\nNote that this is not well supported in the Edge browser.\n</blockquote>\nFunction that retrieves Peer connection bandwidth and ICE connection stats.",
             "itemtype": "method",
             "name": "getConnectionStatus",
@@ -3020,7 +3088,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 659,
+            "line": 711,
             "description": "Function that retrieves Peer connection stats.",
             "itemtype": "method",
             "name": "_retrieveStats",
@@ -3031,7 +3099,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1335,
+            "line": 1387,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -3042,7 +3110,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1370,
+            "line": 1422,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -3053,7 +3121,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1521,
+            "line": 1573,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -3064,7 +3132,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1592,
+            "line": 1644,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -3075,7 +3143,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1762,
+            "line": 1816,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3086,7 +3154,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1910,
+            "line": 1964,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3097,7 +3165,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1930,
+            "line": 1984,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -3739,6 +3807,33 @@
                             "description": "The parent Peer ID to match to when Peer is connected.\n  <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>\n  <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>",
                             "type": "String",
                             "optional": true
+                        },
+                        {
+                            "name": "peerConnection",
+                            "description": "<blockquote class=\"info\">\n  Note that this is mainly used for debugging purposes, so it may cause disruptions in connections or\n  connectivity issues when configured. </blockquote> The Peer connection constraints settings.",
+                            "type": "JSON",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "bundlePolicy",
+                                    "description": "The Peer connection media bundle policy.\n- When not provided, its value is <code>BALANCED</code>.\n  [Rel: Skylink.BUNDLE_POLICY]",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "rtcpMuxPolicy",
+                                    "description": "The Peer connection RTP and RTCP ICE candidates mux policy.\n- When not provided, its value is <code>REQUIRE</code>.\n  [Rel: Skylink.RTCP_MUX_POLICY]",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "iceCandidatePoolSize",
+                                    "description": "The number of ICE candidates to gather before\n  gathering it when setting local offer / answer session description.",
+                                    "type": "Number",
+                                    "optional": true,
+                                    "optdefault": "0"
+                                }
+                            ]
                         }
                     ]
                 },
@@ -3805,7 +3900,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 448,
+            "line": 459,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -3870,7 +3965,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 564,
+            "line": 575,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -3880,7 +3975,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 598,
+            "line": 609,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -3890,7 +3985,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 632,
+            "line": 643,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -8157,7 +8252,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 432,
+            "line": 444,
             "description": "Function that starts the socket connection to the Signaling.\nThis starts creating the socket connection and called at first not when requiring to fallback.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -8168,7 +8263,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 476,
+            "line": 488,
             "description": "Function that stops the socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -9404,7 +9499,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 469,
+            "line": 470,
             "description": "Function that modifies the session description to remove apt/rtx lines that does exists.",
             "itemtype": "method",
             "name": "_removeSDPUnknownAptRtx",
@@ -9415,7 +9510,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 524,
+            "line": 525,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -9426,7 +9521,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 593,
+            "line": 594,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -9437,7 +9532,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 609,
+            "line": 610,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -9448,7 +9543,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 664,
+            "line": 665,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -9459,7 +9554,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 706,
+            "line": 707,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -9470,7 +9565,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 798,
+            "line": 799,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -9481,7 +9576,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 968,
+            "line": 975,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
@@ -9534,11 +9629,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:76"
+            "line": " source/peer-connection.js:128"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/peer-connection.js:388"
+            "line": " source/peer-connection.js:440"
         },
         {
             "message": "unknown tag: trigger",
@@ -9558,15 +9653,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:448"
+            "line": " source/room-connection.js:459"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:564"
+            "line": " source/room-connection.js:575"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:598"
+            "line": " source/room-connection.js:609"
         },
         {
             "message": "unknown tag: trigger",

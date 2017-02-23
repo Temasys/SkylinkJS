@@ -425,7 +425,8 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     var mLineIndex = -1;
 
     for (var j = 0; j < sdpLines.length; j++) {
-      if (sdpLines[j].indexOf('a=group:BUNDLE') === 0 && this._sdpSessions[targetMid].remote.bundleLine) {
+      if (sdpLines[j].indexOf('a=group:BUNDLE') === 0 && this._sdpSessions[targetMid].remote.bundleLine &&
+        this._peerConnectionConfig.bundlePolicy === this.BUNDLE_POLICY.MAX_BUNDLE) {
         sdpLines[j] = this._sdpSessions[targetMid].remote.bundleLine;
       } else if (sdpLines[j].indexOf('m=') === 0) {
         mLineIndex++;
@@ -824,11 +825,11 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   var mLineIndex = -1;
   var settings = clone(self._sdpSettings);
 
-  if (targetMid === 'MCU') {
+  /*if (targetMid === 'MCU') {
     settings.connection.audio = true;
     settings.connection.video = true;
     settings.connection.data = true;
-  }
+  }*/
 
   if (settings.video) {
     settings.connection.video = (window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
@@ -871,7 +872,8 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
         // Check if answerer and we do not have the power to remove the m line if index is 0
         // Set as a=inactive because we do not have that power to reject it somehow..
         // first m= line cannot be rejected for BUNDLE
-        if (bundleLineIndex > -1 && mLineIndex === 0 && (direction === 'remote' ?
+        if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.MAX_BUNDLE &&
+          bundleLineIndex > -1 && mLineIndex === 0 && (direction === 'remote' ?
           sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER :
           sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER)) {
           log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
@@ -948,7 +950,12 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
 
   // Fix chrome "offerToReceiveAudio" local offer not removing audio BUNDLE
   if (bundleLineIndex > -1) {
-    sdpLines[bundleLineIndex] = 'a=group:BUNDLE ' + bundleLineMids.join(' ');
+    if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.MAX_BUNDLE) {
+      sdpLines[bundleLineIndex] = 'a=group:BUNDLE ' + bundleLineMids.join(' ');
+    // Remove a=group:BUNDLE line
+    } else if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.NONE) {
+      sdpLines.splice(bundleLineIndex, 1);
+    }
   }
 
   // Append empty space below

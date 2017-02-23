@@ -516,7 +516,8 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     var mLineIndex = -1;
 
     for (var j = 0; j &lt; sdpLines.length; j++) {
-      if (sdpLines[j].indexOf(&#x27;a=group:BUNDLE&#x27;) === 0 &amp;&amp; this._sdpSessions[targetMid].remote.bundleLine) {
+      if (sdpLines[j].indexOf(&#x27;a=group:BUNDLE&#x27;) === 0 &amp;&amp; this._sdpSessions[targetMid].remote.bundleLine &amp;&amp;
+        this._peerConnectionConfig.bundlePolicy === this.BUNDLE_POLICY.MAX_BUNDLE) {
         sdpLines[j] = this._sdpSessions[targetMid].remote.bundleLine;
       } else if (sdpLines[j].indexOf(&#x27;m=&#x27;) === 0) {
         mLineIndex++;
@@ -915,11 +916,11 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   var mLineIndex = -1;
   var settings = clone(self._sdpSettings);
 
-  if (targetMid === &#x27;MCU&#x27;) {
+  /*if (targetMid === &#x27;MCU&#x27;) {
     settings.connection.audio = true;
     settings.connection.video = true;
     settings.connection.data = true;
-  }
+  }*/
 
   if (settings.video) {
     settings.connection.video = (window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
@@ -962,7 +963,8 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
         // Check if answerer and we do not have the power to remove the m line if index is 0
         // Set as a=inactive because we do not have that power to reject it somehow..
         // first m= line cannot be rejected for BUNDLE
-        if (bundleLineIndex &gt; -1 &amp;&amp; mLineIndex === 0 &amp;&amp; (direction === &#x27;remote&#x27; ?
+        if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.MAX_BUNDLE &amp;&amp;
+          bundleLineIndex &gt; -1 &amp;&amp; mLineIndex === 0 &amp;&amp; (direction === &#x27;remote&#x27; ?
           sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER :
           sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER)) {
           log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
@@ -1039,7 +1041,12 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
 
   // Fix chrome &quot;offerToReceiveAudio&quot; local offer not removing audio BUNDLE
   if (bundleLineIndex &gt; -1) {
-    sdpLines[bundleLineIndex] = &#x27;a=group:BUNDLE &#x27; + bundleLineMids.join(&#x27; &#x27;);
+    if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.MAX_BUNDLE) {
+      sdpLines[bundleLineIndex] = &#x27;a=group:BUNDLE &#x27; + bundleLineMids.join(&#x27; &#x27;);
+    // Remove a=group:BUNDLE line
+    } else if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.NONE) {
+      sdpLines.splice(bundleLineIndex, 1);
+    }
   }
 
   // Append empty space below
