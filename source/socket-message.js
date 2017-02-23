@@ -1082,72 +1082,99 @@ Skylink.prototype._enterHandler = function(message) {
     return;
   }
 
-  if (!self._peerInformations[targetMid]) {
-    isNewPeer = true;
+  var processPeerFn = function (cert) {
+    if (!self._peerInformations[targetMid]) {
+      isNewPeer = true;
 
-    self._peerInformations[targetMid] = userInfo;
+      self._peerInformations[targetMid] = userInfo;
 
-    var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
-      !!userInfo.settings.video.screenshare;
+      var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
+        !!userInfo.settings.video.screenshare;
 
-    self._addPeer(targetMid, {
-      agent: userInfo.agent.name,
-      version: userInfo.agent.version,
-      os: userInfo.agent.os
-    }, false, false, message.receiveOnly, hasScreenshare);
+      self._addPeer(targetMid, cert || null, {
+        agent: userInfo.agent.name,
+        version: userInfo.agent.version,
+        os: userInfo.agent.os
+      }, false, false, message.receiveOnly, hasScreenshare);
 
-    if (targetMid === 'MCU') {
-      log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
+      if (targetMid === 'MCU') {
+        log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
 
-      self._hasMCU = true;
-      self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
+        self._hasMCU = true;
+        self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
 
-    } else {
-      self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
+      } else {
+        self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
+      }
+
+      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     }
 
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
-  }
-
-  self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
-    userData: 0,
-    audioMuted: 0,
-    videoMuted: 0
-  };
-
-  var welcomeMsg = {
-    type: self._SIG_MESSAGE_TYPE.WELCOME,
-    mid: self._user.sid,
-    rid: self._room.id,
-    enableIceTrickle: self._enableIceTrickle,
-    enableDataChannel: self._enableDataChannel,
-    enableIceRestart: self._enableIceRestart,
-    agent: window.webrtcDetectedBrowser,
-    version: (window.webrtcDetectedVersion || 0).toString(),
-    receiveOnly: self.getPeerInfo().config.receiveOnly,
-    os: window.navigator.platform,
-    userInfo: self._getUserInfo(targetMid),
-    target: targetMid,
-    weight: self._peerPriorityWeight,
-    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-    SMProtocolVersion: self.SM_PROTOCOL_VERSION,
-    DTProtocolVersion: self.DT_PROTOCOL_VERSION
-  };
-
-  if (self._publishOnly) {
-    welcomeMsg.publishOnly = {
-      type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0
     };
-  }
 
-  if (self._parentId) {
-    welcomeMsg.parentId = self._parentId;
-  }
+    var welcomeMsg = {
+      type: self._SIG_MESSAGE_TYPE.WELCOME,
+      mid: self._user.sid,
+      rid: self._room.id,
+      enableIceTrickle: self._enableIceTrickle,
+      enableDataChannel: self._enableDataChannel,
+      enableIceRestart: self._enableIceRestart,
+      agent: window.webrtcDetectedBrowser,
+      version: (window.webrtcDetectedVersion || 0).toString(),
+      receiveOnly: self.getPeerInfo().config.receiveOnly,
+      os: window.navigator.platform,
+      userInfo: self._getUserInfo(targetMid),
+      target: targetMid,
+      weight: self._peerPriorityWeight,
+      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+      DTProtocolVersion: self.DT_PROTOCOL_VERSION
+    };
 
-  self._sendChannelMessage(welcomeMsg);
+    if (self._publishOnly) {
+      welcomeMsg.publishOnly = {
+        type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+      };
+    }
 
-  if (isNewPeer) {
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    if (self._parentId) {
+      welcomeMsg.parentId = self._parentId;
+    }
+
+    self._sendChannelMessage(welcomeMsg);
+
+    if (isNewPeer) {
+      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    }
+  };
+
+  if (self._peerConnectionConfig.certificate !== self.PEER_CERTIFICATE.AUTO &&
+    typeof RTCPeerConnection.generateCertificate === 'function') {
+    var certOptions = {};
+    if (self._peerConnectionConfig.certificate === self.PEER_CERTIFICATE.ECDSA) {
+      certOptions = {
+        name: 'ECDSA',
+        namedCurve: 'P-256'
+      };
+    } else {
+      certOptions = {
+        name: 'RSASSA-PKCS1-v1_5',
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: 'SHA-256'
+      };
+    }
+    RTCPeerConnection.generateCertificate(certOptions).then(function (cert) {
+      processPeerFn(cert);
+    }, function () {
+      processPeerFn();
+    });
+  } else {
+    processPeerFn();
   }
 };
 
@@ -1345,89 +1372,116 @@ Skylink.prototype._welcomeHandler = function(message) {
     return;
   }
 
-  if (!self._peerInformations[targetMid]) {
-    isNewPeer = true;
+  var processPeerFn = function (cert) {
+    if (!self._peerInformations[targetMid]) {
+      isNewPeer = true;
 
-    self._peerInformations[targetMid] = userInfo;
+      self._peerInformations[targetMid] = userInfo;
 
-    var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
-      !!userInfo.settings.video.screenshare;
+      var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
+        !!userInfo.settings.video.screenshare;
 
-    self._addPeer(targetMid, {
-      agent: userInfo.agent.name,
-      version: userInfo.agent.version,
-      os: userInfo.agent.os
-    }, false, false, message.receiveOnly, hasScreenshare);
+      self._addPeer(targetMid, cert || null, {
+        agent: userInfo.agent.name,
+        version: userInfo.agent.version,
+        os: userInfo.agent.os
+      }, false, false, message.receiveOnly, hasScreenshare);
 
-    if (targetMid === 'MCU') {
-      log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
+      if (targetMid === 'MCU') {
+        log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
 
-      self._hasMCU = true;
-      self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
+        self._hasMCU = true;
+        self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
 
-    } else {
-      self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
+      } else {
+        self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
+      }
+
+      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
     }
 
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-  }
-
-  self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
-    userData: 0,
-    audioMuted: 0,
-    videoMuted: 0,
-    hasWelcome: false
-  };
-
-  if (self._hasMCU || self._peerPriorityWeight > message.weight) {
-    if (self._peerMessagesStamps[targetMid].hasWelcome) {
-      log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding extra "welcome" received.']);
-      return;
-    }
-
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Starting negotiation']);
-
-    self._peerMessagesStamps[targetMid].hasWelcome = true;
-    self._doOffer(targetMid, false, {
-      agent: userInfo.agent.name,
-      version: userInfo.agent.version,
-      os: userInfo.agent.os
-    }, true);
-
-  } else {
-    log.debug([targetMid, 'RTCPeerConnection', null, 'Waiting for peer to start negotiation.']);
-
-    var welcomeMsg = {
-      type: self._SIG_MESSAGE_TYPE.WELCOME,
-      mid: self._user.sid,
-      rid: self._room.id,
-      enableIceTrickle: self._enableIceTrickle,
-      enableDataChannel: self._enableDataChannel,
-      enableIceRestart: self._enableIceRestart,
-      receiveOnly: self.getPeerInfo().config.receiveOnly,
-      agent: window.webrtcDetectedBrowser,
-      version: (window.webrtcDetectedVersion || 0).toString(),
-      os: window.navigator.platform,
-      userInfo: self._getUserInfo(targetMid),
-      target: targetMid,
-      weight: self._peerPriorityWeight,
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
-      DTProtocolVersion: self.DT_PROTOCOL_VERSION
+    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+      userData: 0,
+      audioMuted: 0,
+      videoMuted: 0,
+      hasWelcome: false
     };
 
-    if (self._publishOnly) {
-      welcomeMsg.publishOnly = {
-        type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+    if (self._hasMCU || self._peerPriorityWeight > message.weight) {
+      if (self._peerMessagesStamps[targetMid].hasWelcome) {
+        log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding extra "welcome" received.']);
+        return;
+      }
+
+      log.debug([targetMid, 'RTCPeerConnection', null, 'Starting negotiation']);
+
+      self._peerMessagesStamps[targetMid].hasWelcome = true;
+      self._doOffer(targetMid, false, {
+        agent: userInfo.agent.name,
+        version: userInfo.agent.version,
+        os: userInfo.agent.os
+      }, true);
+
+    } else {
+      log.debug([targetMid, 'RTCPeerConnection', null, 'Waiting for peer to start negotiation.']);
+
+      var welcomeMsg = {
+        type: self._SIG_MESSAGE_TYPE.WELCOME,
+        mid: self._user.sid,
+        rid: self._room.id,
+        enableIceTrickle: self._enableIceTrickle,
+        enableDataChannel: self._enableDataChannel,
+        enableIceRestart: self._enableIceRestart,
+        receiveOnly: self.getPeerInfo().config.receiveOnly,
+        agent: window.webrtcDetectedBrowser,
+        version: (window.webrtcDetectedVersion || 0).toString(),
+        os: window.navigator.platform,
+        userInfo: self._getUserInfo(targetMid),
+        target: targetMid,
+        weight: self._peerPriorityWeight,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+        DTProtocolVersion: self.DT_PROTOCOL_VERSION
+      };
+
+      if (self._publishOnly) {
+        welcomeMsg.publishOnly = {
+          type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+        };
+      }
+
+      if (self._parentId) {
+        welcomeMsg.parentId = self._parentId;
+      }
+
+      self._sendChannelMessage(welcomeMsg);
+    }
+  };
+
+  if (self._peerConnectionConfig.certificate !== self.PEER_CERTIFICATE.AUTO &&
+    typeof RTCPeerConnection.generateCertificate === 'function') {
+    var certOptions = {};
+    if (self._peerConnectionConfig.certificate === self.PEER_CERTIFICATE.ECDSA) {
+      certOptions = {
+        name: 'ECDSA',
+        namedCurve: 'P-256'
+      };
+    } else {
+      certOptions = {
+        name: 'RSASSA-PKCS1-v1_5',
+        modulusLength: 2048,
+        publicExponent: new Uint8Array([1, 0, 1]),
+        hash: 'SHA-256'
       };
     }
-
-    if (self._parentId) {
-      welcomeMsg.parentId = self._parentId;
-    }
-
-    self._sendChannelMessage(welcomeMsg);
+    RTCPeerConnection.generateCertificate(certOptions).then(function (cert) {
+      processPeerFn(cert);
+    }, function () {
+      processPeerFn();
+    });
+  } else {
+    processPeerFn();
   }
 };
 

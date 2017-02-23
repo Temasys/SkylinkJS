@@ -312,6 +312,10 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   [Rel: Skylink.RTCP_MUX_POLICY]
  * @param {Number} [options.peerConnection.iceCandidatePoolSize=0] The number of ICE candidates to gather before
  *   gathering it when setting local offer / answer session description.
+ * @param {String} [options.peerConnection.certificate] The type of certificate that Peer connection should
+ *   generate and use when available.
+ * - When not provided, its value is &lt;code&gt;AUTO&lt;/code&gt;.
+ *   [Rel: Skylink.PEER_CERTIFICATE]
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_peerJoined&quot;&gt;
@@ -770,7 +774,8 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       self._peerConnectionConfig = {
         bundlePolicy: self.BUNDLE_POLICY.BALANCED,
         rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
-        iceCandidatePoolSize: 0
+        iceCandidatePoolSize: 0,
+        certificate: self.PEER_CERTIFICATE.AUTO
       };
 
       if (mediaOptions.bandwidth) {
@@ -860,6 +865,14 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         if (typeof mediaOptions.peerConnection.iceCandidatePoolSize === &#x27;number&#x27; &amp;&amp;
           mediaOptions.peerConnection.iceCandidatePoolSize &gt; 0) {
           self._peerConnectionConfig.iceCandidatePoolSize = mediaOptions.peerConnection.iceCandidatePoolSize;
+        }
+        if (typeof mediaOptions.peerConnection.certificate === &#x27;string&#x27;) {
+          for (var pcProp in self.PEER_CERTIFICATE) {
+            if (self.PEER_CERTIFICATE.hasOwnProperty(pcProp) &amp;&amp;
+              self.PEER_CERTIFICATE[pcProp] === mediaOptions.peerConnection.certificate) {
+              self._peerConnectionConfig.certificate = mediaOptions.peerConnection.certificate;
+            }
+          }
         }
       }
 

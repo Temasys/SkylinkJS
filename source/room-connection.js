@@ -221,6 +221,10 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   [Rel: Skylink.RTCP_MUX_POLICY]
  * @param {Number} [options.peerConnection.iceCandidatePoolSize=0] The number of ICE candidates to gather before
  *   gathering it when setting local offer / answer session description.
+ * @param {String} [options.peerConnection.certificate] The type of certificate that Peer connection should
+ *   generate and use when available.
+ * - When not provided, its value is <code>AUTO</code>.
+ *   [Rel: Skylink.PEER_CERTIFICATE]
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
@@ -679,7 +683,8 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       self._peerConnectionConfig = {
         bundlePolicy: self.BUNDLE_POLICY.BALANCED,
         rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
-        iceCandidatePoolSize: 0
+        iceCandidatePoolSize: 0,
+        certificate: self.PEER_CERTIFICATE.AUTO
       };
 
       if (mediaOptions.bandwidth) {
@@ -769,6 +774,14 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         if (typeof mediaOptions.peerConnection.iceCandidatePoolSize === 'number' &&
           mediaOptions.peerConnection.iceCandidatePoolSize > 0) {
           self._peerConnectionConfig.iceCandidatePoolSize = mediaOptions.peerConnection.iceCandidatePoolSize;
+        }
+        if (typeof mediaOptions.peerConnection.certificate === 'string') {
+          for (var pcProp in self.PEER_CERTIFICATE) {
+            if (self.PEER_CERTIFICATE.hasOwnProperty(pcProp) &&
+              self.PEER_CERTIFICATE[pcProp] === mediaOptions.peerConnection.certificate) {
+              self._peerConnectionConfig.certificate = mediaOptions.peerConnection.certificate;
+            }
+          }
         }
       }
 

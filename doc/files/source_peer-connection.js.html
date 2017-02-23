@@ -218,6 +218,30 @@ Skylink.prototype.RTCP_MUX_POLICY = {
 
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
+ *  Learn more about how ICE works in this
+ *  &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
+ * &lt;/blockquote&gt;
+ * The list of available Peer connection certificates cryptographic algorithm to use.
+ * @attribute PEER_CERTIFICATE
+ * @param {String} RSA   &lt;small&gt;Value &lt;code&gt;&quot;RSA&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the Peer connection certificate algorithm to use RSA-1024.
+ * @param {String} ECDSA &lt;small&gt;Value &lt;code&gt;&quot;ECDSA&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the Peer connection certificate algorithm to use ECDSA.
+ * @param {String} AUTO  &lt;small&gt;Value &lt;code&gt;&quot;AUTO&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the Peer connection to use the default certificate generated.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.PEER_CERTIFICATE = {
+  RSA: &#x27;RSA&#x27;,
+  ECDSA: &#x27;ECDSA&#x27;,
+  AUTO: &#x27;AUTO&#x27;
+};
+
+/**
+ * &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that Edge browser does not support renegotiation.
  *   For MCU enabled Peer connections with &lt;code&gt;options.mcuUseRenegoRestart&lt;/code&gt; set to &lt;code&gt;false&lt;/code&gt;
  *   in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;, the restart functionality may differ, you
@@ -952,7 +976,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback) {
         ipAddress: null,
         candidateType: null,
         portNumber: null,
-        transport: null, 
+        transport: null,
         turnMediaTransport: null
       },
       remote: {
@@ -1048,7 +1072,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback) {
           result[obj.mediaType][dirType].totalPackets = parseInt(
             (dirType === &#x27;receiving&#x27; ? obj.packetsReceived : obj.packetsSent) || &#x27;0&#x27;, 10);
           result[obj.mediaType][dirType].ssrc = obj.ssrc;
-          
+
           if (obj.mediaType === &#x27;video&#x27;) {
             result.video[dirType].frameRateMean = obj.framerateMean || 0;
             result.video[dirType].frameRateStdDev = obj.framerateStdDev || 0;
@@ -1309,7 +1333,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback) {
             result.video[dirType].framesCorrupted = obj.framesCorrupted ? parseInt(obj.framesCorrupted, 10) : null;
             result.video[dirType].framesPerSecond = obj.framesPerSecond ? parseFloat(obj.framesPerSecond, 10) : null;
             result.video[dirType].framesDropped = obj.framesDropped ? parseInt(obj.framesDropped, 10) : null;
-            
+
             if (dirType === &#x27;sending&#x27;) {
               result.video[dirType].frameWidth = obj.googFrameWidthSent ?
                 parseInt(obj.googFrameWidthSent, 10) : null;
@@ -1412,7 +1436,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback) {
                     totalReceived: canObj.consentResponsesReceived ? parseInt(canObj.consentResponsesReceived, 10) : null,
                     totalSent: canObj.consentResponsesSent ? parseInt(canObj.consentResponsesSent, 10) : null
                   };
-  
+
                   self._peerStats[peerId][canProp] = canObj;
                   reportedCandidate = true;
                 }
@@ -1483,7 +1507,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback) {
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
+Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
   var self = this;
   if (self._peerConnections[targetMid] &amp;&amp; !restartConn) {
     log.error([targetMid, null, null, &#x27;Connection to peer has already been made&#x27;]);
@@ -1499,7 +1523,7 @@ Skylink.prototype._addPeer = function(targetMid, peerBrowser, toOffer, restartCo
   log.info(&#x27;Adding peer&#x27;, isSS);
 
   if (!restartConn) {
-    self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS);
+    self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS, cert);
   }
 
   if (!self._peerConnections[targetMid]) {
@@ -1739,32 +1763,41 @@ Skylink.prototype._removePeer = function(peerId) {
  * @for Skylink
  * @since 0.5.1
  */
-Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing) {
+Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, cert) {
   var pc, self = this;
   if (!self._inRoom || !(self._room &amp;&amp; self._room.connection &amp;&amp;
     self._room.connection.peerConfig &amp;&amp; Array.isArray(self._room.connection.peerConfig.iceServers))) {
     return;
   }
+
+  var constraints = {
+    iceServers: self._room.connection.peerConfig.iceServers,
+    iceTransportPolicy: self._filterCandidatesType.host &amp;&amp; self._filterCandidatesType.srflx &amp;&amp;
+      !self._filterCandidatesType.relay ? &#x27;relay&#x27; : &#x27;all&#x27;,
+    bundlePolicy: self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.NONE ?
+      self.BUNDLE_POLICY.BALANCED : self._peerConnectionConfig.bundlePolicy,
+    rtcpMuxPolicy: self._peerConnectionConfig.rtcpMuxPolicy,
+    iceCandidatePoolSize: self._peerConnectionConfig.iceCandidatePoolSize
+  };
+  var optional = {
+    optional: [
+      { DtlsSrtpKeyAgreement: true },
+      { googIPv6: true }
+    ]
+  };
+
+  if (cert) {
+    constraints.certificates = [cert];
+  }
+
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
-    pc = new RTCPeerConnection({
-      iceServers: self._room.connection.peerConfig.iceServers,
-      iceTransportPolicy: self._filterCandidatesType.host &amp;&amp; self._filterCandidatesType.srflx &amp;&amp;
-        !self._filterCandidatesType.relay ? &#x27;relay&#x27; : &#x27;all&#x27;,
-      bundlePolicy: self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.NONE ?
-        self.BUNDLE_POLICY.BALANCED : self._peerConnectionConfig.bundlePolicy,
-      rtcpMuxPolicy: self._peerConnectionConfig.rtcpMuxPolicy,
-      iceCandidatePoolSize: self._peerConnectionConfig.iceCandidatePoolSize
-    }, {
-      optional: [
-        { DtlsSrtpKeyAgreement: true },
-        { googIPv6: true }
-      ]
+    pc = new RTCPeerConnection(constraints, optional);
+    log.info([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Created peer connection -&gt;&#x27;], {
+      constraints: constraints,
+      optional: optional
     });
-    log.info([targetMid, null, null, &#x27;Created peer connection&#x27;]);
-    log.debug([targetMid, null, null, &#x27;Peer connection config:&#x27;], self._room.connection.peerConfig);
-    log.debug([targetMid, null, null, &#x27;Peer connection constraints:&#x27;], self._room.connection.peerConstraints);
   } catch (error) {
     log.error([targetMid, null, null, &#x27;Failed creating peer connection:&#x27;], error);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);

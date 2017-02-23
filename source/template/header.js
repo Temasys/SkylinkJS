@@ -1122,9 +1122,5 @@ function Skylink() {
    * @for Skylink
    * @since 0.6.18
    */
-  this._peerConnectionConfig = {
-    bundlePolicy: this.BUNDLE_POLICY.BALANCED,
-    rtcpMuxPolicy: this.RTCP_MUX_POLICY.REQUIRE,
-    iceCandidatePoolSize: 0
-  };
+  this._peerConnectionConfig = {};
 }
