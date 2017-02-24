@@ -1123,17 +1123,4 @@ function Skylink() {
    * @since 0.6.18
    */
   this._peerConnectionConfig = {};
-
-  /**
-   * Stores the codec settings.
-   * @attribute _codecParamsSettings
-   * @type JSON
-   * @private
-   * @for Skylink
-   * @since 0.6.18
-   */
-  this._codecParamsSettings = {
-    video: { h264: {}, vp8: {}, vp9: {} },
-    audio: { opus: {} }
-  };
 }

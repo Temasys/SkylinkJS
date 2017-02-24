@@ -58,7 +58,7 @@ Skylink.prototype.AUDIO_CODEC = {
   OPUS: 'opus',
   //ILBC: 'ILBC',
   //G711: 'G711',
-  G722: 'G722'
+  G722: 'G722',
   //SILK: 'SILK'
 };
 

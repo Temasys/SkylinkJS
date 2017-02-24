@@ -3182,7 +3182,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1997,
+            "line": 1998,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3193,7 +3193,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2017,
+            "line": 2018,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -4334,14 +4334,46 @@
                         {
                             "name": "audioCodec",
                             "description": "<blockquote class=\"info\">\n  Note that if the audio codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.<br>\n  Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>\n  The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.AUDIO_CODEC]",
-                            "type": "String",
-                            "optional": true
+                            "type": "String|JSON",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "codec",
+                                    "description": "The audio codec to prefer to encode sending audio data when available.\n  <small>The value must not be <code>AUTO</code>.</small>\n  [Rel: Skylink.AUDIO_CODEC]",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "samplingRate",
+                                    "description": "The audio codec sampling to prefer to encode sending audio data when available.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "channels",
+                                    "description": "The audio codec channels to prefer to encode sending audio data when available.",
+                                    "type": "Number",
+                                    "optional": true
+                                }
+                            ]
                         },
                         {
                             "name": "videoCodec",
                             "description": "<blockquote class=\"info\">\n  Note that if the video codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.<br>\n  Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>\n  The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.VIDEO_CODEC]",
-                            "type": "String",
-                            "optional": true
+                            "type": "String|JSON",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "codec",
+                                    "description": "The video codec to prefer to encode sending audio data when available.\n  <small>The value must not be <code>AUTO</code>.</small>\n  [Rel: Skylink.VIDEO_CODEC]",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "samplingRate",
+                                    "description": "The video codec sampling to prefer to encode sending video data when available.",
+                                    "type": "Number",
+                                    "optional": true
+                                }
+                            ]
                         },
                         {
                             "name": "socketTimeout",
@@ -4576,12 +4608,12 @@
                                 {
                                     "name": "audioCodec",
                                     "description": "The configured value of the <code>options.audioCodec</code>.",
-                                    "type": "String"
+                                    "type": "String|JSON"
                                 },
                                 {
                                     "name": "videoCodec",
                                     "description": "The configured value of the <code>options.videoCodec</code>.",
-                                    "type": "String"
+                                    "type": "String|JSON"
                                 },
                                 {
                                     "name": "socketTimeout",
@@ -4662,7 +4694,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 823,
+            "line": 858,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4673,7 +4705,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 897,
+            "line": 932,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4684,7 +4716,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 967,
+            "line": 1002,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4695,7 +4727,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1098,
+            "line": 1133,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -9511,7 +9543,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 316,
+            "line": 357,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -9522,7 +9554,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 332,
+            "line": 373,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -9533,7 +9565,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 470,
+            "line": 511,
             "description": "Function that modifies the session description to remove apt/rtx lines that does exists.",
             "itemtype": "method",
             "name": "_removeSDPUnknownAptRtx",
@@ -9544,7 +9576,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 525,
+            "line": 566,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -9555,7 +9587,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 594,
+            "line": 635,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -9566,7 +9598,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 610,
+            "line": 651,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -9577,7 +9609,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 665,
+            "line": 706,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -9588,7 +9620,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 707,
+            "line": 748,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -9599,7 +9631,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 799,
+            "line": 840,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -9610,7 +9642,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 975,
+            "line": 1016,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",

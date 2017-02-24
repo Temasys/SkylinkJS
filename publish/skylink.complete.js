@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Fri Feb 24 2017 12:27:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Sat Feb 25 2017 02:58:26 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.18 - Fri Feb 24 2017 12:27:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Sat Feb 25 2017 02:58:26 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -12659,19 +12659,6 @@ function Skylink() {
    * @since 0.6.18
    */
   this._peerConnectionConfig = {};
-
-  /**
-   * Stores the codec settings.
-   * @attribute _codecParamsSettings
-   * @type JSON
-   * @private
-   * @for Skylink
-   * @since 0.6.18
-   */
-  this._codecParamsSettings = {
-    video: { h264: {}, vp8: {}, vp9: {} },
-    audio: { opus: {} }
-  };
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -20999,20 +20986,29 @@ Skylink.prototype.generateUUID = function() {
  *   during request to Auth server and socket connections to Signaling server
  *   when accessing <code>window.location.protocol</code> value is <code>"http:"</code>.
  *   <small>By default, <code>"https:"</code> protocol connections uses HTTPS connections.</small>
- * @param {String} [options.audioCodec] <blockquote class="info">
+ * @param {String|JSON} [options.audioCodec] <blockquote class="info">
  *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.<br>
  *   Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>
  *   The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.AUDIO_CODEC]
- * @param {String} [options.videoCodec] <blockquote class="info">
+ * @param {String} options.audioCodec.codec The audio codec to prefer to encode sending audio data when available.
+ *   <small>The value must not be <code>AUTO</code>.</small>
+ *   [Rel: Skylink.AUDIO_CODEC]
+ * @param {Number} [options.audioCodec.samplingRate] The audio codec sampling to prefer to encode sending audio data when available.
+ * @param {Number} [options.audioCodec.channels] The audio codec channels to prefer to encode sending audio data when available.
+ * @param {String|JSON} [options.videoCodec] <blockquote class="info">
  *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.<br>
  *   Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>
  *   The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.VIDEO_CODEC]
+ * @param {String} options.videoCodec.codec The video codec to prefer to encode sending audio data when available.
+ *   <small>The value must not be <code>AUTO</code>.</small>
+ *   [Rel: Skylink.VIDEO_CODEC]
+ * @param {Number} [options.videoCodec.samplingRate] The video codec sampling to prefer to encode sending video data when available.
  * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
  *   <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>
@@ -21095,8 +21091,8 @@ Skylink.prototype.generateUUID = function() {
  * @param {Boolean} callback.success.TURNTransport The configured value of the <code>options.TURNServerTransport</code>.
  * @param {Boolean} callback.success.audioFallback The configured value of the <code>options.audioFallback</code>.
  * @param {Boolean} callback.success.forceSSL The configured value of the <code>options.forceSSL</code>.
- * @param {String} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.
- * @param {String} callback.success.videoCodec The configured value of the <code>options.videoCodec</code>.
+ * @param {String|JSON} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.
+ * @param {String|JSON} callback.success.videoCodec The configured value of the <code>options.videoCodec</code>.
  * @param {Number} callback.success.socketTimeout The configured value of the <code>options.socketTimeout</code>.
  * @param {Boolean} callback.success.forceTURNSSL The configured value of the <code>options.forceTURNSSL</code>.
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
@@ -21347,29 +21343,55 @@ Skylink.prototype.init = function(options, callback) {
     }
 
     // set the preferred audio codec
-    if (typeof options.audioCodec === 'string') {
+    if (options.audioCodec && ((typeof options.audioCodec === 'string' &&
+      options.audioCodec !== self.AUDIO_CODEC.AUTO) || (typeof options.audioCodec === 'object' &&
+      options.audioCodec.codec && typeof options.audioCodec.codec === 'string' &&
+      options.audioCodec.codec !== self.AUDIO_CODEC.AUTO))) {
       // loop out for every audio codec option
       for (var acType in self.AUDIO_CODEC) {
         // do a check if the audio codec option is valid
-        if (self.AUDIO_CODEC.hasOwnProperty(acType) && self.AUDIO_CODEC[acType] === options.audioCodec) {
-          audioCodec = options.audioCodec;
-          break;
+        if (self.AUDIO_CODEC.hasOwnProperty(acType)) {
+          if (typeof options.audioCodec === 'string' && self.AUDIO_CODEC[acType] === options.audioCodec) {
+            audioCodec = options.audioCodec;
+            break;
+          } else if (typeof options.audioCodec === 'object' && self.AUDIO_CODEC[acType] === options.audioCodec.codec) {
+            audioCodec = {
+              codec: options.audioCodec.codec,
+              samplingRate: typeof options.audioCodec.samplingRate === 'number' &&
+                options.audioCodec.samplingRate > 0 ? options.audioCodec.samplingRate : null,
+              channels: typeof options.audioCodec.channels === 'number' &&
+                options.audioCodec.channels > 0 ? options.audioCodec.channels : null
+            };
+            break;
+          }
         }
       }
     }
 
     // set the preferred video codec
-    if (typeof options.videoCodec === 'string') {
+    if (options.videoCodec && ((typeof options.videoCodec === 'string' &&
+      options.videoCodec !== self.VIDEO_CODEC.AUTO) || (typeof options.videoCodec === 'object' &&
+      options.videoCodec.codec && typeof options.videoCodec.codec === 'string' &&
+      options.videoCodec.codec !== self.VIDEO_CODEC.AUTO))) {
       // loop out for every video codec option
       for (var vcType in self.VIDEO_CODEC) {
-        // do a check if the audio codec option is valid
-        if (self.VIDEO_CODEC.hasOwnProperty(vcType) && self.VIDEO_CODEC[vcType] === options.videoCodec) {
-          videoCodec = options.videoCodec;
-          break;
+        // do a check if the video codec option is valid
+        if (self.VIDEO_CODEC.hasOwnProperty(vcType)) {
+          if (typeof options.videoCodec === 'string' && self.VIDEO_CODEC[vcType] === options.videoCodec) {
+            videoCodec = options.videoCodec;
+            break;
+          } else if (typeof options.videoCodec === 'object' && self.VIDEO_CODEC[vcType] === options.videoCodec.codec) {
+            videoCodec = {
+              codec: options.videoCodec.codec,
+              samplingRate: typeof options.videoCodec.samplingRate === 'number' &&
+                options.videoCodec.samplingRate > 0 ? options.videoCodec.samplingRate : null
+            };
+            break;
+          }
         }
       }
     }
-    
+
     // set audio fallback option
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
@@ -26195,7 +26217,7 @@ Skylink.prototype.AUDIO_CODEC = {
   OPUS: 'opus',
   //ILBC: 'ILBC',
   //G711: 'G711',
-  G722: 'G722'
+  G722: 'G722',
   //SILK: 'SILK'
 };
 
@@ -28417,50 +28439,91 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
  * @since 0.6.16
  */
 Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
-  var sdpLines = sessionDescription.sdp.split('\r\n');
-  var parseFn = function (type, codec) {
-    if (codec === 'auto') {
+  var self = this;
+  var parseFn = function (type, codecSettings) {
+    var codec = typeof codecSettings === 'object' ? codecSettings.codec : codecSettings;
+    var samplingRate = typeof codecSettings === 'object' ? codecSettings.samplingRate : null;
+    var channels = typeof codecSettings === 'object' ? codecSettings.channels : null;
+
+    if (codec === self[type === 'audio' ? 'AUDIO_CODEC' : 'VIDEO_CODEC'].AUTO) {
       log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
         'Not preferring any codec for "' + type + '" streaming. Using browser selection.']);
       return;
     }
 
-    // Find the codec first
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('a=rtpmap:') === 0 && (sdpLines[i].toLowerCase()).indexOf(codec.toLowerCase()) > 0) {
-        var payload = sdpLines[i].split(':')[1].split(' ')[0] || null;
+    var mLine = sessionDescription.sdp.match(new RegExp('m=' + type + ' .*\r\n', 'gi'));
 
-        if (!payload) {
-          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not preferring "' +
-            codec + '" for "' + type + '" streaming as payload is not found.']);
-          return;
+    if (!(Array.isArray(mLine) && mLine.length > 0)) {
+      log.error([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not preferring any codec for "' + type + '" streaming as m= line is not found.']);
+      return;
+    }
+
+    var setLineFn = function (codecsList, isSROk, isChnlsOk) {
+      if (Array.isArray(codecsList) && codecsList.length > 0) {
+        if (!isSROk) {
+          samplingRate = null;
         }
+        if (!isChnlsOk) {
+          channels = null;
+        }
+        log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Preferring "' +
+          codec + '" (samplingRate: ' + (samplingRate || 'n/a') + ', channels: ' +
+          (channels || 'n/a') + ') for "' + type + '" streaming.']);
 
-        for (var j = 0; j < sdpLines.length; j++) {
-          if (sdpLines[j].indexOf('m=' + type) === 0) {
-            log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Preferring "' +
-              codec + '" for "' + type + '" streaming.']);
-
-            var parts = sdpLines[j].split(' ');
-
-            if (parts.indexOf(payload) >= 3) {
-              parts.splice(parts.indexOf(payload), 1);
-            }
-
-            // Example: m=audio 9 UDP/TLS/RTP/SAVPF 111
-            parts.splice(3, 0, payload);
-            sdpLines[j] = parts.join(' ');
-            break;
+        var line = mLine[0];
+        var lineParts = line.split(' ');
+        // Set the m=x x UDP/xxx
+        line = lineParts[0] + ' ' + lineParts[1] + ' ' + lineParts[2] + ' ';
+        // Remove them to leave the codecs only
+        lineParts.splice(0, 3);
+        // Loop for the codecs list to append first
+        for (var i = 0; i < codecsList.length; i++) {
+          var parts = (codecsList[i].split('a=rtpmap:')[1] || '').split(' ');
+          if (parts.length < 2) {
+            continue;
+          }
+          line += parts[0] + ' ';
+        }
+        // Loop for later fallback codecs to append
+        for (var j = 0; j < lineParts.length; j++) {
+          if (line.indexOf(' ' + lineParts[j]) > 0) {
+            lineParts.splice(j, 1);
+          } else if (sessionDescription.sdp.match(new RegExp('a=rtpmap:' + lineParts[j] +
+            '\ ' + codec + '/.*\r\n', 'gi'))) {
+            line += lineParts[j] + ' ';
+            lineParts.splice(j, 1);
           }
         }
+        // Append the rest of the codecs
+        line += lineParts.join(' ') + '\r\n';
+        sessionDescription.sdp = sessionDescription.sdp.replace(mLine[0], line);
+        return true;
+      }
+    };
+
+    // If samplingRate & channels
+    if (samplingRate) {
+      if (type === 'audio' && channels && setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' +
+        codec + '\/' + samplingRate + (channels === 1 ? '[\/1]*' : '\/' + channels) + '\r\n', 'gi')), true, true)) {
+        return;
+      } else if (setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/' +
+        samplingRate + '[\/]*.*\r\n', 'gi')), true)) {
+        return;
       }
     }
+    if (type === 'audio' && channels && setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' +
+      codec + '\/.*\/' + channels + '\r\n', 'gi')), false, true)) {
+      return;
+    }
+
+    setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/.*\r\n', 'gi')));
   };
 
-  parseFn('audio', this._selectedAudioCodec);
-  parseFn('video', this._selectedVideoCodec);
+  parseFn('audio', self._selectedAudioCodec);
+  parseFn('video', self._selectedVideoCodec);
 
-  return sdpLines.join('\r\n');
+  return sessionDescription.sdp;
 };
 
 /**
@@ -28668,7 +28731,7 @@ Skylink.prototype._removeSDPUnknownAptRtx = function (targetMid, sessionDescript
       rtxs[parts[0]].lines.push(sdpLines[i]);
     }
   }
-  
+
   return sdpLines.join('\r\n');
 };
 

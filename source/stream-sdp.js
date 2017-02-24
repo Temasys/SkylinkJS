@@ -267,50 +267,91 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
  * @since 0.6.16
  */
 Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
-  var sdpLines = sessionDescription.sdp.split('\r\n');
-  var parseFn = function (type, codec) {
-    if (codec === 'auto') {
+  var self = this;
+  var parseFn = function (type, codecSettings) {
+    var codec = typeof codecSettings === 'object' ? codecSettings.codec : codecSettings;
+    var samplingRate = typeof codecSettings === 'object' ? codecSettings.samplingRate : null;
+    var channels = typeof codecSettings === 'object' ? codecSettings.channels : null;
+
+    if (codec === self[type === 'audio' ? 'AUDIO_CODEC' : 'VIDEO_CODEC'].AUTO) {
       log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
         'Not preferring any codec for "' + type + '" streaming. Using browser selection.']);
       return;
     }
 
-    // Find the codec first
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('a=rtpmap:') === 0 && (sdpLines[i].toLowerCase()).indexOf(codec.toLowerCase()) > 0) {
-        var payload = sdpLines[i].split(':')[1].split(' ')[0] || null;
+    var mLine = sessionDescription.sdp.match(new RegExp('m=' + type + ' .*\r\n', 'gi'));
 
-        if (!payload) {
-          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not preferring "' +
-            codec + '" for "' + type + '" streaming as payload is not found.']);
-          return;
+    if (!(Array.isArray(mLine) && mLine.length > 0)) {
+      log.error([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not preferring any codec for "' + type + '" streaming as m= line is not found.']);
+      return;
+    }
+
+    var setLineFn = function (codecsList, isSROk, isChnlsOk) {
+      if (Array.isArray(codecsList) && codecsList.length > 0) {
+        if (!isSROk) {
+          samplingRate = null;
         }
+        if (!isChnlsOk) {
+          channels = null;
+        }
+        log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Preferring "' +
+          codec + '" (samplingRate: ' + (samplingRate || 'n/a') + ', channels: ' +
+          (channels || 'n/a') + ') for "' + type + '" streaming.']);
 
-        for (var j = 0; j < sdpLines.length; j++) {
-          if (sdpLines[j].indexOf('m=' + type) === 0) {
-            log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Preferring "' +
-              codec + '" for "' + type + '" streaming.']);
-
-            var parts = sdpLines[j].split(' ');
-
-            if (parts.indexOf(payload) >= 3) {
-              parts.splice(parts.indexOf(payload), 1);
-            }
-
-            // Example: m=audio 9 UDP/TLS/RTP/SAVPF 111
-            parts.splice(3, 0, payload);
-            sdpLines[j] = parts.join(' ');
-            break;
+        var line = mLine[0];
+        var lineParts = line.split(' ');
+        // Set the m=x x UDP/xxx
+        line = lineParts[0] + ' ' + lineParts[1] + ' ' + lineParts[2] + ' ';
+        // Remove them to leave the codecs only
+        lineParts.splice(0, 3);
+        // Loop for the codecs list to append first
+        for (var i = 0; i < codecsList.length; i++) {
+          var parts = (codecsList[i].split('a=rtpmap:')[1] || '').split(' ');
+          if (parts.length < 2) {
+            continue;
+          }
+          line += parts[0] + ' ';
+        }
+        // Loop for later fallback codecs to append
+        for (var j = 0; j < lineParts.length; j++) {
+          if (line.indexOf(' ' + lineParts[j]) > 0) {
+            lineParts.splice(j, 1);
+          } else if (sessionDescription.sdp.match(new RegExp('a=rtpmap:' + lineParts[j] +
+            '\ ' + codec + '/.*\r\n', 'gi'))) {
+            line += lineParts[j] + ' ';
+            lineParts.splice(j, 1);
           }
         }
+        // Append the rest of the codecs
+        line += lineParts.join(' ') + '\r\n';
+        sessionDescription.sdp = sessionDescription.sdp.replace(mLine[0], line);
+        return true;
+      }
+    };
+
+    // If samplingRate & channels
+    if (samplingRate) {
+      if (type === 'audio' && channels && setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' +
+        codec + '\/' + samplingRate + (channels === 1 ? '[\/1]*' : '\/' + channels) + '\r\n', 'gi')), true, true)) {
+        return;
+      } else if (setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/' +
+        samplingRate + '[\/]*.*\r\n', 'gi')), true)) {
+        return;
       }
     }
+    if (type === 'audio' && channels && setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' +
+      codec + '\/.*\/' + channels + '\r\n', 'gi')), false, true)) {
+      return;
+    }
+
+    setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/.*\r\n', 'gi')));
   };
 
-  parseFn('audio', this._selectedAudioCodec);
-  parseFn('video', this._selectedVideoCodec);
+  parseFn('audio', self._selectedAudioCodec);
+  parseFn('video', self._selectedVideoCodec);
 
-  return sdpLines.join('\r\n');
+  return sessionDescription.sdp;
 };
 
 /**
@@ -518,7 +559,7 @@ Skylink.prototype._removeSDPUnknownAptRtx = function (targetMid, sessionDescript
       rtxs[parts[0]].lines.push(sdpLines[i]);
     }
   }
-  
+
   return sdpLines.join('\r\n');
 };
 

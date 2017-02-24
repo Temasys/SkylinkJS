@@ -358,50 +358,91 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
  * @since 0.6.16
  */
 Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
-  var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
-  var parseFn = function (type, codec) {
-    if (codec === &#x27;auto&#x27;) {
+  var self = this;
+  var parseFn = function (type, codecSettings) {
+    var codec = typeof codecSettings === &#x27;object&#x27; ? codecSettings.codec : codecSettings;
+    var samplingRate = typeof codecSettings === &#x27;object&#x27; ? codecSettings.samplingRate : null;
+    var channels = typeof codecSettings === &#x27;object&#x27; ? codecSettings.channels : null;
+
+    if (codec === self[type === &#x27;audio&#x27; ? &#x27;AUDIO_CODEC&#x27; : &#x27;VIDEO_CODEC&#x27;].AUTO) {
       log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
         &#x27;Not preferring any codec for &quot;&#x27; + type + &#x27;&quot; streaming. Using browser selection.&#x27;]);
       return;
     }
 
-    // Find the codec first
-    for (var i = 0; i &lt; sdpLines.length; i++) {
-      if (sdpLines[i].indexOf(&#x27;a=rtpmap:&#x27;) === 0 &amp;&amp; (sdpLines[i].toLowerCase()).indexOf(codec.toLowerCase()) &gt; 0) {
-        var payload = sdpLines[i].split(&#x27;:&#x27;)[1].split(&#x27; &#x27;)[0] || null;
+    var mLine = sessionDescription.sdp.match(new RegExp(&#x27;m=&#x27; + type + &#x27; .*\r\n&#x27;, &#x27;gi&#x27;));
 
-        if (!payload) {
-          log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not preferring &quot;&#x27; +
-            codec + &#x27;&quot; for &quot;&#x27; + type + &#x27;&quot; streaming as payload is not found.&#x27;]);
-          return;
+    if (!(Array.isArray(mLine) &amp;&amp; mLine.length &gt; 0)) {
+      log.error([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+        &#x27;Not preferring any codec for &quot;&#x27; + type + &#x27;&quot; streaming as m= line is not found.&#x27;]);
+      return;
+    }
+
+    var setLineFn = function (codecsList, isSROk, isChnlsOk) {
+      if (Array.isArray(codecsList) &amp;&amp; codecsList.length &gt; 0) {
+        if (!isSROk) {
+          samplingRate = null;
         }
+        if (!isChnlsOk) {
+          channels = null;
+        }
+        log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Preferring &quot;&#x27; +
+          codec + &#x27;&quot; (samplingRate: &#x27; + (samplingRate || &#x27;n/a&#x27;) + &#x27;, channels: &#x27; +
+          (channels || &#x27;n/a&#x27;) + &#x27;) for &quot;&#x27; + type + &#x27;&quot; streaming.&#x27;]);
 
-        for (var j = 0; j &lt; sdpLines.length; j++) {
-          if (sdpLines[j].indexOf(&#x27;m=&#x27; + type) === 0) {
-            log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Preferring &quot;&#x27; +
-              codec + &#x27;&quot; for &quot;&#x27; + type + &#x27;&quot; streaming.&#x27;]);
-
-            var parts = sdpLines[j].split(&#x27; &#x27;);
-
-            if (parts.indexOf(payload) &gt;= 3) {
-              parts.splice(parts.indexOf(payload), 1);
-            }
-
-            // Example: m=audio 9 UDP/TLS/RTP/SAVPF 111
-            parts.splice(3, 0, payload);
-            sdpLines[j] = parts.join(&#x27; &#x27;);
-            break;
+        var line = mLine[0];
+        var lineParts = line.split(&#x27; &#x27;);
+        // Set the m=x x UDP/xxx
+        line = lineParts[0] + &#x27; &#x27; + lineParts[1] + &#x27; &#x27; + lineParts[2] + &#x27; &#x27;;
+        // Remove them to leave the codecs only
+        lineParts.splice(0, 3);
+        // Loop for the codecs list to append first
+        for (var i = 0; i &lt; codecsList.length; i++) {
+          var parts = (codecsList[i].split(&#x27;a=rtpmap:&#x27;)[1] || &#x27;&#x27;).split(&#x27; &#x27;);
+          if (parts.length &lt; 2) {
+            continue;
+          }
+          line += parts[0] + &#x27; &#x27;;
+        }
+        // Loop for later fallback codecs to append
+        for (var j = 0; j &lt; lineParts.length; j++) {
+          if (line.indexOf(&#x27; &#x27; + lineParts[j]) &gt; 0) {
+            lineParts.splice(j, 1);
+          } else if (sessionDescription.sdp.match(new RegExp(&#x27;a=rtpmap:&#x27; + lineParts[j] +
+            &#x27;\ &#x27; + codec + &#x27;/.*\r\n&#x27;, &#x27;gi&#x27;))) {
+            line += lineParts[j] + &#x27; &#x27;;
+            lineParts.splice(j, 1);
           }
         }
+        // Append the rest of the codecs
+        line += lineParts.join(&#x27; &#x27;) + &#x27;\r\n&#x27;;
+        sessionDescription.sdp = sessionDescription.sdp.replace(mLine[0], line);
+        return true;
+      }
+    };
+
+    // If samplingRate &amp; channels
+    if (samplingRate) {
+      if (type === &#x27;audio&#x27; &amp;&amp; channels &amp;&amp; setLineFn(sessionDescription.sdp.match(new RegExp(&#x27;a=rtpmap:.*\ &#x27; +
+        codec + &#x27;\/&#x27; + samplingRate + (channels === 1 ? &#x27;[\/1]*&#x27; : &#x27;\/&#x27; + channels) + &#x27;\r\n&#x27;, &#x27;gi&#x27;)), true, true)) {
+        return;
+      } else if (setLineFn(sessionDescription.sdp.match(new RegExp(&#x27;a=rtpmap:.*\ &#x27; + codec + &#x27;\/&#x27; +
+        samplingRate + &#x27;[\/]*.*\r\n&#x27;, &#x27;gi&#x27;)), true)) {
+        return;
       }
     }
+    if (type === &#x27;audio&#x27; &amp;&amp; channels &amp;&amp; setLineFn(sessionDescription.sdp.match(new RegExp(&#x27;a=rtpmap:.*\ &#x27; +
+      codec + &#x27;\/.*\/&#x27; + channels + &#x27;\r\n&#x27;, &#x27;gi&#x27;)), false, true)) {
+      return;
+    }
+
+    setLineFn(sessionDescription.sdp.match(new RegExp(&#x27;a=rtpmap:.*\ &#x27; + codec + &#x27;\/.*\r\n&#x27;, &#x27;gi&#x27;)));
   };
 
-  parseFn(&#x27;audio&#x27;, this._selectedAudioCodec);
-  parseFn(&#x27;video&#x27;, this._selectedVideoCodec);
+  parseFn(&#x27;audio&#x27;, self._selectedAudioCodec);
+  parseFn(&#x27;video&#x27;, self._selectedVideoCodec);
 
-  return sdpLines.join(&#x27;\r\n&#x27;);
+  return sessionDescription.sdp;
 };
 
 /**
@@ -609,7 +650,7 @@ Skylink.prototype._removeSDPUnknownAptRtx = function (targetMid, sessionDescript
       rtxs[parts[0]].lines.push(sdpLines[i]);
     }
   }
-  
+
   return sdpLines.join(&#x27;\r\n&#x27;);
 };
 

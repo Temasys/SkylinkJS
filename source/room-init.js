@@ -278,20 +278,29 @@ Skylink.prototype.generateUUID = function() {
  *   during request to Auth server and socket connections to Signaling server
  *   when accessing <code>window.location.protocol</code> value is <code>"http:"</code>.
  *   <small>By default, <code>"https:"</code> protocol connections uses HTTPS connections.</small>
- * @param {String} [options.audioCodec] <blockquote class="info">
+ * @param {String|JSON} [options.audioCodec] <blockquote class="info">
  *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.<br>
  *   Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>
  *   The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.AUDIO_CODEC]
- * @param {String} [options.videoCodec] <blockquote class="info">
+ * @param {String} options.audioCodec.codec The audio codec to prefer to encode sending audio data when available.
+ *   <small>The value must not be <code>AUTO</code>.</small>
+ *   [Rel: Skylink.AUDIO_CODEC]
+ * @param {Number} [options.audioCodec.samplingRate] The audio codec sampling to prefer to encode sending audio data when available.
+ * @param {Number} [options.audioCodec.channels] The audio codec channels to prefer to encode sending audio data when available.
+ * @param {String|JSON} [options.videoCodec] <blockquote class="info">
  *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.<br>
  *   Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>
  *   The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.VIDEO_CODEC]
+ * @param {String} options.videoCodec.codec The video codec to prefer to encode sending audio data when available.
+ *   <small>The value must not be <code>AUTO</code>.</small>
+ *   [Rel: Skylink.VIDEO_CODEC]
+ * @param {Number} [options.videoCodec.samplingRate] The video codec sampling to prefer to encode sending video data when available.
  * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
  *   <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>
@@ -374,8 +383,8 @@ Skylink.prototype.generateUUID = function() {
  * @param {Boolean} callback.success.TURNTransport The configured value of the <code>options.TURNServerTransport</code>.
  * @param {Boolean} callback.success.audioFallback The configured value of the <code>options.audioFallback</code>.
  * @param {Boolean} callback.success.forceSSL The configured value of the <code>options.forceSSL</code>.
- * @param {String} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.
- * @param {String} callback.success.videoCodec The configured value of the <code>options.videoCodec</code>.
+ * @param {String|JSON} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.
+ * @param {String|JSON} callback.success.videoCodec The configured value of the <code>options.videoCodec</code>.
  * @param {Number} callback.success.socketTimeout The configured value of the <code>options.socketTimeout</code>.
  * @param {Boolean} callback.success.forceTURNSSL The configured value of the <code>options.forceTURNSSL</code>.
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
@@ -626,29 +635,55 @@ Skylink.prototype.init = function(options, callback) {
     }
 
     // set the preferred audio codec
-    if (typeof options.audioCodec === 'string') {
+    if (options.audioCodec && ((typeof options.audioCodec === 'string' &&
+      options.audioCodec !== self.AUDIO_CODEC.AUTO) || (typeof options.audioCodec === 'object' &&
+      options.audioCodec.codec && typeof options.audioCodec.codec === 'string' &&
+      options.audioCodec.codec !== self.AUDIO_CODEC.AUTO))) {
       // loop out for every audio codec option
       for (var acType in self.AUDIO_CODEC) {
         // do a check if the audio codec option is valid
-        if (self.AUDIO_CODEC.hasOwnProperty(acType) && self.AUDIO_CODEC[acType] === options.audioCodec) {
-          audioCodec = options.audioCodec;
-          break;
+        if (self.AUDIO_CODEC.hasOwnProperty(acType)) {
+          if (typeof options.audioCodec === 'string' && self.AUDIO_CODEC[acType] === options.audioCodec) {
+            audioCodec = options.audioCodec;
+            break;
+          } else if (typeof options.audioCodec === 'object' && self.AUDIO_CODEC[acType] === options.audioCodec.codec) {
+            audioCodec = {
+              codec: options.audioCodec.codec,
+              samplingRate: typeof options.audioCodec.samplingRate === 'number' &&
+                options.audioCodec.samplingRate > 0 ? options.audioCodec.samplingRate : null,
+              channels: typeof options.audioCodec.channels === 'number' &&
+                options.audioCodec.channels > 0 ? options.audioCodec.channels : null
+            };
+            break;
+          }
         }
       }
     }
 
     // set the preferred video codec
-    if (typeof options.videoCodec === 'string') {
+    if (options.videoCodec && ((typeof options.videoCodec === 'string' &&
+      options.videoCodec !== self.VIDEO_CODEC.AUTO) || (typeof options.videoCodec === 'object' &&
+      options.videoCodec.codec && typeof options.videoCodec.codec === 'string' &&
+      options.videoCodec.codec !== self.VIDEO_CODEC.AUTO))) {
       // loop out for every video codec option
       for (var vcType in self.VIDEO_CODEC) {
-        // do a check if the audio codec option is valid
-        if (self.VIDEO_CODEC.hasOwnProperty(vcType) && self.VIDEO_CODEC[vcType] === options.videoCodec) {
-          videoCodec = options.videoCodec;
-          break;
+        // do a check if the video codec option is valid
+        if (self.VIDEO_CODEC.hasOwnProperty(vcType)) {
+          if (typeof options.videoCodec === 'string' && self.VIDEO_CODEC[vcType] === options.videoCodec) {
+            videoCodec = options.videoCodec;
+            break;
+          } else if (typeof options.videoCodec === 'object' && self.VIDEO_CODEC[vcType] === options.videoCodec.codec) {
+            videoCodec = {
+              codec: options.videoCodec.codec,
+              samplingRate: typeof options.videoCodec.samplingRate === 'number' &&
+                options.videoCodec.samplingRate > 0 ? options.videoCodec.samplingRate : null
+            };
+            break;
+          }
         }
       }
     }
-    
+
     // set audio fallback option
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
