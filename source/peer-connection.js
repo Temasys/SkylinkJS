@@ -1986,6 +1986,7 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
           bandwidth: bwOptions.bandwidth || {},
           googleXBandwidth: bwOptions.googleXBandwidth || {},
           sdpSettings: clone(self._sdpSettings),
+          voiceActivityDetection: self._voiceActivityDetection,
           publishOnly: !!self._publishOnly,
           parentId: self._parentId || null
         });
