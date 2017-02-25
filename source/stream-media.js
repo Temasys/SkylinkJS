@@ -45,8 +45,14 @@ Skylink.prototype.VIDEO_CODEC = {
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Opus_(audio_format)">OPUS</a> audio codec.
  * @param {String} ISAC <small>Value <code>"ISAC"</code></small>
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec">ISAC</a> audio codec.
+ * @param {String} ILBC <small>Value <code>"ILBC"</code></small>
+ *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Internet_Low_Bitrate_Codec">iLBC</a> audio codec.
  * @param {String} G722 <small>Value <code>"G722"</code></small>
  *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/G.722">G722</a> audio codec.
+ * @param {String} PCMA <small>Value <code>"PCMA"</code></small>
+ *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/G.711">G711u</a> audio codec.
+ * @param {String} PCMU <small>Value <code>"PCMU"</code></small>
+ *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/G.711">G711a</a> audio codec.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -56,9 +62,10 @@ Skylink.prototype.AUDIO_CODEC = {
   AUTO: 'auto',
   ISAC: 'ISAC',
   OPUS: 'opus',
-  //ILBC: 'ILBC',
-  //G711: 'G711',
+  ILBC: 'ILBC',
   G722: 'G722',
+  PCMU: 'PCMU',
+  PCMA: 'PCMA',
   //SILK: 'SILK'
 };
 

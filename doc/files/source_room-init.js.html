@@ -757,13 +757,13 @@ Skylink.prototype.init = function(options, callback) {
       options.videoCodec.codec &amp;&amp; typeof options.videoCodec.codec === &#x27;string&#x27; &amp;&amp;
       options.videoCodec.codec !== self.VIDEO_CODEC.AUTO))) {
       // loop out for every video codec option
-      for (var acType in self.VIDEO_CODEC) {
+      for (var vcType in self.VIDEO_CODEC) {
         // do a check if the video codec option is valid
-        if (self.VIDEO_CODEC.hasOwnProperty(acType)) {
-          if (typeof options.videoCodec === &#x27;string&#x27; &amp;&amp; self.VIDEO_CODEC[acType] === options.videoCodec) {
+        if (self.VIDEO_CODEC.hasOwnProperty(vcType)) {
+          if (typeof options.videoCodec === &#x27;string&#x27; &amp;&amp; self.VIDEO_CODEC[vcType] === options.videoCodec) {
             videoCodec = options.videoCodec;
             break;
-          } else if (typeof options.videoCodec === &#x27;object&#x27; &amp;&amp; self.VIDEO_CODEC[acType] === options.videoCodec.codec) {
+          } else if (typeof options.videoCodec === &#x27;object&#x27; &amp;&amp; self.VIDEO_CODEC[vcType] === options.videoCodec.codec) {
             videoCodec = {
               codec: options.videoCodec.codec,
               samplingRate: typeof options.videoCodec.samplingRate === &#x27;number&#x27; &amp;&amp;
