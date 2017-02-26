@@ -91,128 +91,158 @@
     <pre class="code prettyprint linenums">
 /**
  * Function that modifies the session description to configure settings for OPUS audio codec.
- * @method _setSDPOpusConfig
+ * @method _setSDPCodecParams
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
-  var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
-  var payload = null;
-  var appendFmtpLineAtIndex = -1;
-  var userAudioSettings = this.getPeerInfo().settings.audio;
-  var opusSettings = {
-    useinbandfec: null,
-    usedtx: null,
-    maxplaybackrate: null,
-    stereo: false
+Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
+  var self = this;
+
+  var parseFn = function (type, codecName, samplingRate, settings) {
+    var mLine = sessionDescription.sdp.match(new RegExp(&#x27;m=&#x27; + type + &#x27;\ .*\r\n&#x27;, &#x27;gi&#x27;));
+    // Find the m= line
+    if (Array.isArray(mLine) &amp;&amp; mLine.length &gt; 0) {
+      var codecsList = sessionDescription.sdp.match(new RegExp(&#x27;a=rtpmap:.*\ &#x27; + codecName + &#x27;\/&#x27; +
+        (samplingRate ? samplingRate + (type === &#x27;audio&#x27; ? &#x27;[\/]*.*&#x27; : &#x27;.*&#x27;) : &#x27;.*&#x27;) + &#x27;\r\n&#x27;, &#x27;gi&#x27;));
+      // Get the list of codecs related to it
+      if (Array.isArray(codecsList) &amp;&amp; codecsList.length &gt; 0) {
+        for (var i = 0; i &lt; codecsList.length; i++) {
+          var payload = (codecsList[i].split(&#x27;a=rtpmap:&#x27;)[1] || &#x27;&#x27;).split(&#x27; &#x27;)[0];
+          if (!payload) {
+            continue;
+          }
+          var fmtpLine = sessionDescription.sdp.match(new RegExp(&#x27;a=fmtp:&#x27; + payload + &#x27;\ .*\r\n&#x27;, &#x27;gi&#x27;));
+          var updatedFmtpLine = &#x27;a=fmtp:&#x27; + payload + &#x27; &#x27;;
+          var addedKeys = [];
+          // Check if a=fmtp: line exists
+          if (Array.isArray(fmtpLine) &amp;&amp; fmtpLine.length &gt; 0) {
+            var fmtpParts = (fmtpLine[0].split(&#x27;a=fmtp:&#x27; + payload + &#x27; &#x27;)[1] || &#x27;&#x27;).replace(
+              / /g, &#x27;&#x27;).replace(/\r\n/g, &#x27;&#x27;).split(&#x27;;&#x27;);
+            for (var j = 0; j &lt; fmtpParts.length; j++) {
+              if (!fmtpParts[j]) {
+                continue;
+              }
+              var keyAndValue = fmtpParts[j].split(&#x27;=&#x27;);
+              if (settings.hasOwnProperty(keyAndValue[0])) {
+                // Dont append parameter key+value if boolean and false
+                updatedFmtpLine += typeof settings[keyAndValue[0]] === &#x27;boolean&#x27; ? (settings[keyAndValue[0]] ?
+                  keyAndValue[0] + &#x27;=1;&#x27; : &#x27;&#x27;) : keyAndValue[0] + &#x27;=&#x27; + settings[keyAndValue[0]] + &#x27;;&#x27;;
+              } else {
+                updatedFmtpLine += fmtpParts[j] + &#x27;;&#x27;;
+              }
+              addedKeys.push(keyAndValue[0]);
+            }
+            sessionDescription.sdp = sessionDescription.sdp.replace(fmtpLine[0], &#x27;&#x27;);
+          }
+          for (var key in settings) {
+            if (settings.hasOwnProperty(key) &amp;&amp; addedKeys.indexOf(key) === -1) {
+              // Dont append parameter key+value if boolean and false
+              updatedFmtpLine += typeof settings[key] === &#x27;boolean&#x27; ? (settings[key] ? key + &#x27;=1;&#x27; : &#x27;&#x27;) :
+                key + &#x27;=&#x27; + settings[key] + &#x27;;&#x27;;
+              addedKeys.push(key);
+            }
+          }
+          if (updatedFmtpLine !== &#x27;a=fmtp:&#x27; + payload + &#x27; &#x27;) {
+            sessionDescription.sdp = sessionDescription.sdp.replace(codecsList[i], codecsList[i] + updatedFmtpLine + &#x27;\r\n&#x27;);
+          }
+        }
+      }
+    }
   };
 
-  if (userAudioSettings &amp;&amp; typeof userAudioSettings === &#x27;object&#x27;) {
-    opusSettings.stereo = userAudioSettings.stereo === true;
-    opusSettings.useinbandfec = typeof userAudioSettings.useinbandfec === &#x27;boolean&#x27; ? userAudioSettings.useinbandfec : null;
-    opusSettings.usedtx = typeof userAudioSettings.usedtx === &#x27;boolean&#x27; ? userAudioSettings.usedtx : null;
-    opusSettings.maxplaybackrate = typeof userAudioSettings.maxplaybackrate === &#x27;number&#x27; ? userAudioSettings.maxplaybackrate : null;
-  }
-
-
-  // Find OPUS RTPMAP line
-  for (var i = 0; i &lt; sdpLines.length; i++) {
-    if (sdpLines[i].indexOf(&#x27;a=rtpmap:&#x27;) === 0 &amp;&amp; (sdpLines[i].toLowerCase()).indexOf(&#x27;opus/48000&#x27;) &gt; 0) {
-      payload = (sdpLines[i].split(&#x27; &#x27;)[0] || &#x27;&#x27;).split(&#x27;:&#x27;)[1] || null;
-      appendFmtpLineAtIndex = i;
-      break;
+  // Set audio codecs -&gt; OPUS
+  // RFC: https://tools.ietf.org/html/draft-ietf-payload-rtp-opus-11
+  parseFn(&#x27;audio&#x27;, self.AUDIO_CODEC.OPUS, 48000, (function () {
+    var opusOptions = {};
+    var audioSettings = self.getPeerInfo().settings.audio;
+    audioSettings = audioSettings &amp;&amp; typeof audioSettings === &#x27;object&#x27; ? audioSettings : {};
+    if (typeof self._codecParams.audio.opus.stereo === &#x27;boolean&#x27;) {
+      opusOptions.stereo = self._codecParams.audio.opus.stereo;
+    } else if (typeof audioSettings.stereo === &#x27;boolean&#x27;) {
+      opusOptions.stereo = audioSettings.stereo;
     }
-  }
-
-  if (!payload) {
-    log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Failed to find OPUS payload. Not configuring options.&#x27;]);
-    return sessionDescription.sdp;
-  }
-
-  // Set OPUS FMTP line
-  for (var j = 0; j &lt; sdpLines.length; j++) {
-    if (sdpLines[j].indexOf(&#x27;a=fmtp:&#x27; + payload) === 0) {
-      var opusConfigs = (sdpLines[j].split(&#x27;a=fmtp:&#x27; + payload)[1] || &#x27;&#x27;).replace(/\s/g, &#x27;&#x27;).split(&#x27;;&#x27;);
-      var updatedOpusParams = &#x27;&#x27;;
-
-      for (var k = 0; k &lt; opusConfigs.length; k++) {
-        if (!(opusConfigs[k] &amp;&amp; opusConfigs[k].indexOf(&#x27;=&#x27;) &gt; 0)) {
-          continue;
-        }
-
-        var params = opusConfigs[k].split(&#x27;=&#x27;);
-
-        if ([&#x27;useinbandfec&#x27;, &#x27;usedtx&#x27;, &#x27;sprop-stereo&#x27;, &#x27;stereo&#x27;, &#x27;maxplaybackrate&#x27;].indexOf(params[0]) &gt; -1) {
-          // Get default OPUS useinbandfec
-          if (params[0] === &#x27;useinbandfec&#x27; &amp;&amp; params[1] === &#x27;1&#x27; &amp;&amp; opusSettings.useinbandfec === null) {
-            log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Received OPUS useinbandfec as true by default.&#x27;]);
-            opusSettings.useinbandfec = true;
-
-          // Get default OPUS usedtx
-          } else if (params[0] === &#x27;usedtx&#x27; &amp;&amp; params[1] === &#x27;1&#x27; &amp;&amp; opusSettings.usedtx === null) {
-            log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Received OPUS usedtx as true by default.&#x27;]);
-            opusSettings.usedtx = true;
-
-          // Get default OPUS maxplaybackrate
-          } else if (params[0] === &#x27;maxplaybackrate&#x27; &amp;&amp; parseInt(params[1] || &#x27;0&#x27;, 10) &gt; 0 &amp;&amp; opusSettings.maxplaybackrate === null) {
-            log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Received OPUS maxplaybackrate as &#x27; + params[1] + &#x27; by default.&#x27;]);
-            opusSettings.maxplaybackrate = params[1];
-          }
-        } else {
-          updatedOpusParams += opusConfigs[k] + &#x27;;&#x27;;
-        }
-      }
-
-      if (opusSettings.stereo === true) {
-        updatedOpusParams += &#x27;stereo=1;&#x27;;
-      }
-
-      if (opusSettings.useinbandfec === true) {
-        updatedOpusParams += &#x27;useinbandfec=1;&#x27;;
-      }
-
-      if (opusSettings.usedtx === true) {
-        updatedOpusParams += &#x27;usedtx=1;&#x27;;
-      }
-
-      if (opusSettings.maxplaybackrate) {
-        updatedOpusParams += &#x27;maxplaybackrate=&#x27; + opusSettings.maxplaybackrate + &#x27;;&#x27;;
-      }
-
-      log.log([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Updated OPUS parameters -&gt;&#x27;], updatedOpusParams);
-
-      sdpLines[j] = &#x27;a=fmtp:&#x27; + payload + &#x27; &#x27; + updatedOpusParams;
-      appendFmtpLineAtIndex = -1;
-      break;
+    if (typeof self._codecParams.audio.opus.usedtx === &#x27;boolean&#x27;) {
+      opusOptions.usedtx = self._codecParams.audio.opus.usedtx;
+    } else if (typeof audioSettings.usedtx === &#x27;boolean&#x27;) {
+      opusOptions.usedtx = audioSettings.usedtx;
     }
-  }
-
-  if (appendFmtpLineAtIndex &gt; 0) {
-    var newFmtpLine = &#x27;a=fmtp:&#x27; + payload + &#x27; &#x27;;
-
-    if (opusSettings.stereo === true) {
-      newFmtpLine += &#x27;stereo=1;&#x27;;
+    if (typeof self._codecParams.audio.opus.useinbandfec === &#x27;boolean&#x27;) {
+      opusOptions.useinbandfec = self._codecParams.audio.opus.useinbandfec;
+    } else if (typeof audioSettings.useinbandfec === &#x27;boolean&#x27;) {
+      opusOptions.useinbandfec = audioSettings.useinbandfec;
     }
-
-    if (opusSettings.useinbandfec === true) {
-      newFmtpLine += &#x27;useinbandfec=1;&#x27;;
+    if (typeof self._codecParams.audio.opus.maxplaybackrate === &#x27;number&#x27;) {
+      opusOptions.maxplaybackrate = self._codecParams.audio.opus.maxplaybackrate;
+    } else if (typeof audioSettings.maxplaybackrate === &#x27;number&#x27;) {
+      opusOptions.maxplaybackrate = audioSettings.maxplaybackrate;
     }
-
-    if (opusSettings.usedtx === true) {
-      newFmtpLine += &#x27;usedtx=1;&#x27;;
+    if (typeof self._codecParams.audio.opus.minptime === &#x27;number&#x27;) {
+      opusOptions.minptime = self._codecParams.audio.opus.minptime;
+    } else if (typeof audioSettings.minptime === &#x27;number&#x27;) {
+      opusOptions.minptime = audioSettings.minptime;
     }
+    // Possible future params: sprop-maxcapturerate, maxaveragebitrate, sprop-stereo, cbr
+    // NOT recommended: maxptime, ptime, rate, minptime
+    return opusOptions;
+  })());
 
-    if (opusSettings.maxplaybackrate) {
-      newFmtpLine += &#x27;maxplaybackrate=&#x27; + opusSettings.maxplaybackrate + &#x27;;&#x27;;
+  // RFC: https://tools.ietf.org/html/rfc4733
+  // Future: Set telephone-event: 100 0-15,66,70
+
+  // RFC: https://tools.ietf.org/html/draft-ietf-payload-vp8-17
+  // Set video codecs -&gt; VP8
+  parseFn(&#x27;video&#x27;, self.VIDEO_CODEC.VP8, null, (function () {
+    var vp8Options = {};
+    // NOT recommended: max-fr, max-fs (all are codec decoder capabilities)
+    if (typeof self._codecParams.video.vp8.maxFr === &#x27;number&#x27;) {
+      vp8Options[&#x27;max-fr&#x27;] = self._codecParams.video.vp8.maxFr;
     }
+    if (typeof self._codecParams.video.vp8.maxFs === &#x27;number&#x27;) {
+      vp8Options[&#x27;max-fs&#x27;] = self._codecParams.video.vp8.maxFs;
+    }
+    return vp8Options;
+  })());
 
-    log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Created OPUS parameters -&gt;&#x27;], newFmtpLine);
+  // RFC: https://tools.ietf.org/html/draft-ietf-payload-vp9-02
+  // Set video codecs -&gt; VP9
+  parseFn(&#x27;video&#x27;, self.VIDEO_CODEC.VP9, null, (function () {
+    var vp9Options = {};
+    // NOT recommended: max-fr, max-fs (all are codec decoder capabilities)
+    if (typeof self._codecParams.video.vp9.maxFr === &#x27;number&#x27;) {
+      vp9Options[&#x27;max-fr&#x27;] = self._codecParams.video.vp9.maxFr;
+    }
+    if (typeof self._codecParams.video.vp9.maxFs === &#x27;number&#x27;) {
+      vp9Options[&#x27;max-fs&#x27;] = self._codecParams.video.vp9.maxFs;
+    }
+    return vp9Options;
+  })());
 
-    sdpLines.splice(appendFmtpLineAtIndex + 1, 0, newFmtpLine);
-  }
+  // RFC: https://tools.ietf.org/html/rfc6184
+  // Set the video codecs -&gt; H264
+  parseFn(&#x27;video&#x27;, self.VIDEO_CODEC.H264, null, (function () {
+    var h264Options = {};
+    if (typeof self._codecParams.video.h264.levelAsymmetryAllowed === &#x27;string&#x27;) {
+      h264Options[&#x27;profile-level-id&#x27;] = self._codecParams.video.h264.profileLevelId;
+    }
+    if (typeof self._codecParams.video.h264.levelAsymmetryAllowed === &#x27;boolean&#x27;) {
+      h264Options[&#x27;level-asymmetry-allowed&#x27;] = self._codecParams.video.h264.levelAsymmetryAllowed;
+    }
+    if (typeof self._codecParams.video.h264.packetizationMode === &#x27;boolean&#x27;) {
+      h264Options[&#x27;packetization-mode&#x27;] = self._codecParams.video.h264.packetizationMode;
+    }
+    // Possible future params (remove if they are decoder/encoder capabilities or info):
+    //   max-recv-level, max-mbps, max-smbps, max-fs, max-cpb, max-dpb, max-br,
+    //   max-mbps, max-smbps, max-fs, max-cpb, max-dpb, max-br, redundant-pic-cap, sprop-parameter-sets,
+    //   sprop-level-parameter-sets, use-level-src-parameter-sets, in-band-parameter-sets,
+    //   sprop-interleaving-depth, sprop-deint-buf-req, deint-buf-cap, sprop-init-buf-time,
+    //   sprop-max-don-diff, max-rcmd-nalu-size, sar-understood, sar-supported
+    //   NOT recommended: profile-level-id (WebRTC uses &quot;42e00a&quot; for the moment)
+    //   https://bugs.chromium.org/p/chromium/issues/detail?id=645599
+    return h264Options;
+  })());
 
-  return sdpLines.join(&#x27;\r\n&#x27;);
+  return sessionDescription.sdp;
 };
 
 /**
@@ -391,7 +421,7 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
           (channels || &#x27;n/a&#x27;) + &#x27;) for &quot;&#x27; + type + &#x27;&quot; streaming.&#x27;]);
 
         var line = mLine[0];
-        var lineParts = line.split(&#x27; &#x27;);
+        var lineParts = line.replace(&#x27;\r\n&#x27;, &#x27;&#x27;).split(&#x27; &#x27;);
         // Set the m=x x UDP/xxx
         line = lineParts[0] + &#x27; &#x27; + lineParts[1] + &#x27; &#x27; + lineParts[2] + &#x27; &#x27;;
         // Remove them to leave the codecs only

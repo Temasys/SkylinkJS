@@ -1123,4 +1123,14 @@ function Skylink() {
    * @since 0.6.18
    */
   this._peerConnectionConfig = {};
+
+  /**
+   * Stores the RTCPeerConnection configuration.
+   * @attribute _peerConnectionConfig
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._codecParams = {};
 }

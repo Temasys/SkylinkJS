@@ -252,6 +252,25 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.parentId = this._parentId ? this._parentId : null;
     peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
     peerInfo.settings.data = this._enableDataChannel && this._sdpSettings.connection.data;
+
+    if (peerInfo.settings.audio && typeof peerInfo.settings.audio === 'object') {
+      // Override the settings.audio.usedtx
+      if (typeof this._codecParams.audio.opus.stereo === 'boolean') {
+        peerInfo.settings.audio.stereo = this._codecParams.audio.opus.stereo;
+      }
+      // Override the settings.audio.usedtx
+      if (typeof this._codecParams.audio.opus.usedtx === 'boolean') {
+        peerInfo.settings.audio.usedtx = this._codecParams.audio.opus.usedtx;
+      }
+      // Override the settings.audio.maxplaybackrate
+      if (typeof this._codecParams.audio.opus.maxplaybackrate === 'number') {
+        peerInfo.settings.audio.maxplaybackrate = this._codecParams.audio.opus.maxplaybackrate;
+      }
+      // Override the settings.audio.useinbandfec
+      if (typeof this._codecParams.audio.opus.useinbandfec === 'boolean') {
+        peerInfo.settings.audio.useinbandfec = this._codecParams.audio.opus.useinbandfec;
+      }
+    }
   }
 
   if (!peerInfo.settings.audio) {

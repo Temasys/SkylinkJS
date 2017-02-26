@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Sat Feb 25 2017 10:58:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Mon Feb 27 2017 01:07:39 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.18 - Sat Feb 25 2017 10:58:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Mon Feb 27 2017 01:07:39 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -12659,6 +12659,16 @@ function Skylink() {
    * @since 0.6.18
    */
   this._peerConnectionConfig = {};
+
+  /**
+   * Stores the RTCPeerConnection configuration.
+   * @attribute _peerConnectionConfig
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._codecParams = {};
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -19078,6 +19088,25 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.parentId = this._parentId ? this._parentId : null;
     peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
     peerInfo.settings.data = this._enableDataChannel && this._sdpSettings.connection.data;
+
+    if (peerInfo.settings.audio && typeof peerInfo.settings.audio === 'object') {
+      // Override the settings.audio.usedtx
+      if (typeof this._codecParams.audio.opus.stereo === 'boolean') {
+        peerInfo.settings.audio.stereo = this._codecParams.audio.opus.stereo;
+      }
+      // Override the settings.audio.usedtx
+      if (typeof this._codecParams.audio.opus.usedtx === 'boolean') {
+        peerInfo.settings.audio.usedtx = this._codecParams.audio.opus.usedtx;
+      }
+      // Override the settings.audio.maxplaybackrate
+      if (typeof this._codecParams.audio.opus.maxplaybackrate === 'number') {
+        peerInfo.settings.audio.maxplaybackrate = this._codecParams.audio.opus.maxplaybackrate;
+      }
+      // Override the settings.audio.useinbandfec
+      if (typeof this._codecParams.audio.opus.useinbandfec === 'boolean') {
+        peerInfo.settings.audio.useinbandfec = this._codecParams.audio.opus.useinbandfec;
+      }
+    }
   }
 
   if (!peerInfo.settings.audio) {
@@ -19647,13 +19676,11 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   pc.processingLocalSDP = true;
 
   // Sets and expected receiving codecs etc.
-  //sessionDescription.sdp = self._setSDPOpusConfig(targetMid, sessionDescription);
-  //sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
-  //sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
@@ -21059,6 +21086,93 @@ Skylink.prototype.generateUUID = function() {
  * @param {Number} options.socketServer.ports.#index The Signaling server port to fallback and use for debugging purposes.
  * @param {String} [options.socketServer.protocol] The Signaling server protocol for debugging purposes to use.
  *   <small>If not defined, it will use the default protocol specified.</small>
+ * @param {JSON} [options.codecParams] <blockquote class="info">
+ *   Note that some of these parameters are mainly used for experimental or debugging purposes. Toggling any of
+ *   these feature may result in disruptions in connectivity.</blockquote>
+ *   The audio and video codecs parameters to configure.
+ * @param {JSON} [options.codecParams.video] The video codecs parameters to configure.
+ * @param {JSON} [options.codecParams.video.h264] The H264 video codec parameters to configure.
+ * @param {String} [options.codecParams.video.h264.profileLevelId] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The H264 video codec base16 encoded string which indicates the H264 baseline, main, or the extended profiles.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.video.h264.levelAsymmetryAllowed] <blockquote class="info">
+ *   Note that this is an experimental parameter which may result in connectivity issues when toggled.</blockquote>
+ *   The flag if streaming H264 sending video data should be encoded at a different level
+ *   from receiving video data from Peer encoding to User when Peer is the offerer.
+ *   <small>If Peer is the offerer instead of the User, the Peer's <code>peerInfo.config.priorityWeight</code> will be
+ *   higher than User's <code>peerInfo.config.priorityWeight</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.video.h264.packetizationMode] <blockquote class="info">
+ *   Note that this is an experimental parameter which may result in connectivity issues when enabled. It is
+ *   advisable to turn off this feature off when receiving H264 decoders do not support the packetization mode,
+ *   which may result in a blank receiving video stream.</blockquote>
+ *   The flag to enable H264 video codec packetization mode, which splits video frames that are larger
+ *   for a RTP packet into RTP packet chunks.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {JSON} [options.codecParams.video.vp8] The VP8 video codec parameters to configure.
+ * @param {Number} [options.codecParams.video.vp8.maxFr] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of fps (frames per second) that the VP8 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.video.vp8.maxFs] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of frame size macroblocks that the VP8 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>The value has to have the width and height of the frame in macroblocks less than the value of
+ *   <code>parseInt(Math.sqrt(maxFs * 8))</code>. E.g. If the value is <code>1200</code>, it is capable of
+ *   support <code>640x480</code> frame width and height, which heights up to <code>1552px</code>
+ *   (<code>97</code> macroblocks value.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {JSON} [options.codecParams.video.vp9] The VP9 video codec parameters to configure.
+ * @param {Number} [options.codecParams.video.vp9.maxFr] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of fps (frames per second) that the VP9 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.video.vp9.maxFs] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of frame size macroblocks that the VP9 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>The value has to have the width and height of the frame in macroblocks less than the value of
+ *   <code>parseInt(Math.sqrt(maxFs * 8))</code>. E.g. If the value is <code>1200</code>, it is capable of
+ *   support <code>640x480</code> frame width and height, which heights up to <code>1552px</code>
+ *   (<code>97</code> macroblocks value.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {JSON} [options.codecParams.audio] The audio codecs parameters to configure.
+ * @param {JSON} [options.codecParams.audio.opus] <blockquote class="info">
+ *   Note that this is only applicable to OPUS audio codecs with a sampling rate of <code>48000</code> Hz (hertz).
+ *   </blockquote> The OPUS audio codec parameters to configure.
+ * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec stereo band
+ *   should be configured for sending encoded audio data.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.audio.opus.usedtx] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
+ *   <small>This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
+ *   goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href="#method_joinRoom">
+ *   <code>joinRoom()</code> method</a>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.audio.opus.useinbandfec] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
+ *   (Forward Error Correction) when sending encoded audio data.
+ *   <small>This helps to reduce the harm of packet loss by encoding information about the previous packet loss.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.audio.opus.maxplaybackrate] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only</blockquote>
+ *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
+ *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
+ *   would not encode at a higher sampling rate specified by this.
+ *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.minptime] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The OPUS audio codec receiving audio data decoder minimum length of time in milleseconds should be
+ *   encapsulated in a single received encoded audio data packet.
+ *   <small>This value must be between <code>3</code> to <code>120</code></small>
+ *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -21218,6 +21332,10 @@ Skylink.prototype.init = function(options, callback) {
   var mcuUseRenegoRestart = false;
   var iceServer = null;
   var socketServer = null;
+  var codecParams = {
+    audio: { opus: {} },
+    video: { h264: {}, vp8: {}, vp9: {} }
+  };
 
   log.log('Provided init options:', options);
 
@@ -21392,6 +21510,71 @@ Skylink.prototype.init = function(options, callback) {
       }
     }
 
+    // set the codec params
+    if (options.codecParams && typeof options.codecParams === 'object') {
+      // Set audio codecs params
+      if (options.codecParams.audio && typeof options.codecParams.audio === 'object') {
+        // Set the audio codec opus params
+        if (options.codecParams.audio.opus && typeof options.codecParams.audio.opus === 'object') {
+          codecParams.audio.opus = {
+            stereo: typeof options.codecParams.audio.opus.stereo === 'boolean' ?
+              options.codecParams.audio.opus.stereo : null,
+            usedtx: typeof options.codecParams.audio.opus.usedtx === 'boolean' ?
+              options.codecParams.audio.opus.usedtx : null,
+            useinbandfec: typeof options.codecParams.audio.opus.useinbandfec === 'boolean' ?
+              options.codecParams.audio.opus.useinbandfec : null,
+            maxplaybackrate: typeof options.codecParams.audio.opus.maxplaybackrate === 'number' &&
+              options.codecParams.audio.opus.maxplaybackrate >= 8000 &&
+              options.codecParams.audio.opus.maxplaybackrate <= 48000 ?
+              options.codecParams.audio.opus.maxplaybackrate : null,
+            minptime: typeof options.codecParams.audio.opus.minptime === 'number' &&
+              options.codecParams.audio.opus.minptime >= 3 ? options.codecParams.audio.opus.minptime : null
+          };
+        }
+      }
+      // Set video codecs params
+      if (options.codecParams.video && typeof options.codecParams.video === 'object') {
+        // Set the video codec H264 params
+        if (options.codecParams.video.h264 && typeof options.codecParams.video.h264 === 'object') {
+          codecParams.video.h264 = {
+            // Only allowing profile-level-id change for experimental fixes or changes incase..
+            // Strong NOT recommended, this is like an information
+            profileLevelId: options.codecParams.video.h264.profileLevelId &&
+              typeof options.codecParams.video.h264.profileLevelId === 'string' ?
+              options.codecParams.video.h264.profileLevelId : null,
+            levelAsymmetryAllowed: typeof options.codecParams.video.h264.levelAsymmetryAllowed === 'boolean' ?
+              options.codecParams.video.h264.levelAsymmetryAllowed : null,
+            packetizationMode: typeof options.codecParams.video.h264.packetizationMode === 'boolean' ?
+              options.codecParams.video.h264.packetizationMode : null
+          };
+        }
+        // Set the video codec VP8 params
+        if (options.codecParams.video.vp8 && typeof options.codecParams.video.vp8 === 'object') {
+          // Only allowing max-fs, max-fr change for experimental fixes or changes incase..
+          // (NOT used for any other purposes)!!!!
+          // Strong NOT recommended, this is like an information
+          codecParams.video.vp8 = {
+            maxFs: typeof options.codecParams.video.vp8.maxFs === 'number' ?
+              options.codecParams.video.vp8.maxFs : null,
+            maxFr: typeof options.codecParams.video.vp8.maxFr === 'number' ?
+              options.codecParams.video.vp8.maxFr : null
+          };
+        }
+        // Set the video codec VP9 params
+        if (options.codecParams.video.vp9 && typeof options.codecParams.video.vp9 === 'object') {
+          // Only allowing max-fs, max-fr change for experimental fixes or changes incase..
+          // (NOT used for any other purposes)!!!!
+          // Strong NOT recommended, this is like an information
+          codecParams.video.vp9 = {
+            maxFs: typeof options.codecParams.video.vp9.maxFs === 'number' ?
+              options.codecParams.video.vp9.maxFs : null,
+            maxFr: typeof options.codecParams.video.vp9.maxFr === 'number' ?
+              options.codecParams.video.vp9.maxFr : null
+          };
+        }
+      }
+    }
+
     // set audio fallback option
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
@@ -21467,6 +21650,7 @@ Skylink.prototype.init = function(options, callback) {
   self._mcuUseRenegoRestart = mcuUseRenegoRestart;
   self._iceServer = iceServer;
   self._socketServer = socketServer;
+  self._codecParams = codecParams;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -21496,7 +21680,8 @@ Skylink.prototype.init = function(options, callback) {
     throttleShouldThrowError: self._throttlingShouldThrowError,
     mcuUseRenegoRestart: self._mcuUseRenegoRestart,
     iceServer: self._iceServer,
-    socketServer: self._socketServer
+    socketServer: self._socketServer,
+    codecParams: self._codecParams
   });
   // trigger the readystate
   self._readyState = 0;
@@ -21540,7 +21725,8 @@ Skylink.prototype.init = function(options, callback) {
             throttleShouldThrowError: self._throttlingShouldThrowError,
             mcuUseRenegoRestart: self._mcuUseRenegoRestart,
             iceServer: self._iceServer,
-            socketServer: self._socketServer
+            socketServer: self._socketServer,
+            codecParams: self._codecParams
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -21877,7 +22063,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     throttleShouldThrowError: self._throttlingShouldThrowError,
     mcuUseRenegoRestart: self._mcuUseRenegoRestart,
     iceServer: self._iceServer ? self._iceServer.urls : null,
-    socketServer: self._socketServer ? self._socketServer : null
+    socketServer: self._socketServer ? self._socketServer : null,
+    codecParams: self._codecParams ? self._codecParams : null
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -25898,7 +26085,7 @@ Skylink.prototype._offerHandler = function(message) {
   offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
   offer.sdp = self._setSDPCodec(targetMid, offer);
   offer.sdp = self._setSDPBitrate(targetMid, offer);
-  offer.sdp = self._setSDPOpusConfig(targetMid, offer);
+  offer.sdp = self._setSDPCodecParams(targetMid, offer);
   offer.sdp = self._removeSDPCodecs(targetMid, offer);
   offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
   offer.sdp = self._handleSDPConnectionSettings(targetMid, offer, 'remote');
@@ -26102,7 +26289,7 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
   answer.sdp = self._setSDPCodec(targetMid, answer);
   answer.sdp = self._setSDPBitrate(targetMid, answer);
-  answer.sdp = self._setSDPOpusConfig(targetMid, answer);
+  answer.sdp = self._setSDPCodecParams(targetMid, answer);
   answer.sdp = self._removeSDPCodecs(targetMid, answer);
   answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
   answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
@@ -26416,30 +26603,46 @@ Skylink.prototype.RECORDING_STATE = {
  *    Note that the current Edge browser implementation does not support the <code>options.audio.optional</code>,
  *    <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.</blockquote>
  *    The audio configuration options.
- * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
- *   <small>Note that Peers may override the "receiving" <code>stereo</code> config depending on the Peers configuration.</small>
- * @param {Boolean} [options.audio.usedtx] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
- *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
- *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
+ * @param {Boolean} [options.audio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
+ *   <code>options.audio.stereo</code> setting.</blockquote>
+ *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
- *   <small>Note that Peers may override the "receiving" <code>usedtx</code> config depending on the Peers configuration.</small>
- * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
- *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
- *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
+ * @param {Boolean} [options.audio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
+ *   <code>options.audio.stereo</code> setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.</blockquote>
+ *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
+ *   <small>This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
+ *   goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href="#method_joinRoom">
+ *   <code>joinRoom()</code> method</a>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- *   <small>Note that Peers may override the "receiving" <code>useinbandfec</code> config depending on the Peers configuration.</small>
- * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
- *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
+ * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.useinbandfec</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.useinbandfec</code> is configured, this overrides the
+ *   <code>options.audio.useinbandfec</code> setting. Note that this parameter should only be used
+ *   for debugging purposes only.</blockquote>
+ *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
+ *   (Forward Error Correction) when sending encoded audio data.
+ *   <small>This helps to reduce the harm of packet loss by encoding information about the previous packet loss.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.maxplaybackrate</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.maxplaybackrate</code> is configured, this overrides the
+ *   <code>options.audio.maxplaybackrate</code> setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
+ *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
+ *   would not encode at a higher sampling rate specified by this.
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- *   <small>Note that Peers may override the "receiving" <code>maxplaybackrate</code> config depending on the Peers configuration.</small>
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
@@ -27262,24 +27465,44 @@ Skylink.prototype.disableVideo = function() {
  * Function that retrieves screensharing Stream.
  * @method shareScreen
  * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
- * @param {Boolean} [enableAudio.stereo=false] The flag if stereo band should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- * @param {Boolean} [enableAudio.usedtx] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
- *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
+ * @param {Boolean} [enableAudio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
+ *   <code>options.audio.stereo</code> setting.</blockquote>
+ *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Boolean} [enableAudio.useinbandfec] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
- *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
+ * @param {Boolean} [enableAudio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
+ *   <code>options.audio.stereo</code> setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.</blockquote>
+ *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
+ *   <small>This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
+ *   goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href="#method_joinRoom">
+ *   <code>joinRoom()</code> method</a>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Number} [enableAudio.maxplaybackrate] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
- *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [enableAudio.useinbandfec] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.useinbandfec</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.useinbandfec</code> is configured, this overrides the
+ *   <code>options.audio.useinbandfec</code> setting. Note that this parameter should only be used
+ *   for debugging purposes only.</blockquote>
+ *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
+ *   (Forward Error Correction) when sending encoded audio data.
+ *   <small>This helps to reduce the harm of packet loss by encoding information about the previous packet loss.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [enableAudio.maxplaybackrate] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.maxplaybackrate</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.maxplaybackrate</code> is configured, this overrides the
+ *   <code>options.audio.maxplaybackrate</code> setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
+ *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
+ *   would not encode at a higher sampling rate specified by this.
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [enableAudio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
@@ -28184,123 +28407,153 @@ Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
     }
   }
 };
-Skylink.prototype._setSDPOpusConfig = function(targetMid, sessionDescription) {
-  var sdpLines = sessionDescription.sdp.split('\r\n');
-  var payload = null;
-  var appendFmtpLineAtIndex = -1;
-  var userAudioSettings = this.getPeerInfo().settings.audio;
-  var opusSettings = {
-    useinbandfec: null,
-    usedtx: null,
-    maxplaybackrate: null,
-    stereo: false
+Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
+  var self = this;
+
+  var parseFn = function (type, codecName, samplingRate, settings) {
+    var mLine = sessionDescription.sdp.match(new RegExp('m=' + type + '\ .*\r\n', 'gi'));
+    // Find the m= line
+    if (Array.isArray(mLine) && mLine.length > 0) {
+      var codecsList = sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codecName + '\/' +
+        (samplingRate ? samplingRate + (type === 'audio' ? '[\/]*.*' : '.*') : '.*') + '\r\n', 'gi'));
+      // Get the list of codecs related to it
+      if (Array.isArray(codecsList) && codecsList.length > 0) {
+        for (var i = 0; i < codecsList.length; i++) {
+          var payload = (codecsList[i].split('a=rtpmap:')[1] || '').split(' ')[0];
+          if (!payload) {
+            continue;
+          }
+          var fmtpLine = sessionDescription.sdp.match(new RegExp('a=fmtp:' + payload + '\ .*\r\n', 'gi'));
+          var updatedFmtpLine = 'a=fmtp:' + payload + ' ';
+          var addedKeys = [];
+          // Check if a=fmtp: line exists
+          if (Array.isArray(fmtpLine) && fmtpLine.length > 0) {
+            var fmtpParts = (fmtpLine[0].split('a=fmtp:' + payload + ' ')[1] || '').replace(
+              / /g, '').replace(/\r\n/g, '').split(';');
+            for (var j = 0; j < fmtpParts.length; j++) {
+              if (!fmtpParts[j]) {
+                continue;
+              }
+              var keyAndValue = fmtpParts[j].split('=');
+              if (settings.hasOwnProperty(keyAndValue[0])) {
+                // Dont append parameter key+value if boolean and false
+                updatedFmtpLine += typeof settings[keyAndValue[0]] === 'boolean' ? (settings[keyAndValue[0]] ?
+                  keyAndValue[0] + '=1;' : '') : keyAndValue[0] + '=' + settings[keyAndValue[0]] + ';';
+              } else {
+                updatedFmtpLine += fmtpParts[j] + ';';
+              }
+              addedKeys.push(keyAndValue[0]);
+            }
+            sessionDescription.sdp = sessionDescription.sdp.replace(fmtpLine[0], '');
+          }
+          for (var key in settings) {
+            if (settings.hasOwnProperty(key) && addedKeys.indexOf(key) === -1) {
+              // Dont append parameter key+value if boolean and false
+              updatedFmtpLine += typeof settings[key] === 'boolean' ? (settings[key] ? key + '=1;' : '') :
+                key + '=' + settings[key] + ';';
+              addedKeys.push(key);
+            }
+          }
+          if (updatedFmtpLine !== 'a=fmtp:' + payload + ' ') {
+            sessionDescription.sdp = sessionDescription.sdp.replace(codecsList[i], codecsList[i] + updatedFmtpLine + '\r\n');
+          }
+        }
+      }
+    }
   };
 
-  if (userAudioSettings && typeof userAudioSettings === 'object') {
-    opusSettings.stereo = userAudioSettings.stereo === true;
-    opusSettings.useinbandfec = typeof userAudioSettings.useinbandfec === 'boolean' ? userAudioSettings.useinbandfec : null;
-    opusSettings.usedtx = typeof userAudioSettings.usedtx === 'boolean' ? userAudioSettings.usedtx : null;
-    opusSettings.maxplaybackrate = typeof userAudioSettings.maxplaybackrate === 'number' ? userAudioSettings.maxplaybackrate : null;
-  }
-
-
-  // Find OPUS RTPMAP line
-  for (var i = 0; i < sdpLines.length; i++) {
-    if (sdpLines[i].indexOf('a=rtpmap:') === 0 && (sdpLines[i].toLowerCase()).indexOf('opus/48000') > 0) {
-      payload = (sdpLines[i].split(' ')[0] || '').split(':')[1] || null;
-      appendFmtpLineAtIndex = i;
-      break;
+  // Set audio codecs -> OPUS
+  // RFC: https://tools.ietf.org/html/draft-ietf-payload-rtp-opus-11
+  parseFn('audio', self.AUDIO_CODEC.OPUS, 48000, (function () {
+    var opusOptions = {};
+    var audioSettings = self.getPeerInfo().settings.audio;
+    audioSettings = audioSettings && typeof audioSettings === 'object' ? audioSettings : {};
+    if (typeof self._codecParams.audio.opus.stereo === 'boolean') {
+      opusOptions.stereo = self._codecParams.audio.opus.stereo;
+    } else if (typeof audioSettings.stereo === 'boolean') {
+      opusOptions.stereo = audioSettings.stereo;
     }
-  }
-
-  if (!payload) {
-    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Failed to find OPUS payload. Not configuring options.']);
-    return sessionDescription.sdp;
-  }
-
-  // Set OPUS FMTP line
-  for (var j = 0; j < sdpLines.length; j++) {
-    if (sdpLines[j].indexOf('a=fmtp:' + payload) === 0) {
-      var opusConfigs = (sdpLines[j].split('a=fmtp:' + payload)[1] || '').replace(/\s/g, '').split(';');
-      var updatedOpusParams = '';
-
-      for (var k = 0; k < opusConfigs.length; k++) {
-        if (!(opusConfigs[k] && opusConfigs[k].indexOf('=') > 0)) {
-          continue;
-        }
-
-        var params = opusConfigs[k].split('=');
-
-        if (['useinbandfec', 'usedtx', 'sprop-stereo', 'stereo', 'maxplaybackrate'].indexOf(params[0]) > -1) {
-          // Get default OPUS useinbandfec
-          if (params[0] === 'useinbandfec' && params[1] === '1' && opusSettings.useinbandfec === null) {
-            log.log([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Received OPUS useinbandfec as true by default.']);
-            opusSettings.useinbandfec = true;
-
-          // Get default OPUS usedtx
-          } else if (params[0] === 'usedtx' && params[1] === '1' && opusSettings.usedtx === null) {
-            log.log([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Received OPUS usedtx as true by default.']);
-            opusSettings.usedtx = true;
-
-          // Get default OPUS maxplaybackrate
-          } else if (params[0] === 'maxplaybackrate' && parseInt(params[1] || '0', 10) > 0 && opusSettings.maxplaybackrate === null) {
-            log.log([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Received OPUS maxplaybackrate as ' + params[1] + ' by default.']);
-            opusSettings.maxplaybackrate = params[1];
-          }
-        } else {
-          updatedOpusParams += opusConfigs[k] + ';';
-        }
-      }
-
-      if (opusSettings.stereo === true) {
-        updatedOpusParams += 'stereo=1;';
-      }
-
-      if (opusSettings.useinbandfec === true) {
-        updatedOpusParams += 'useinbandfec=1;';
-      }
-
-      if (opusSettings.usedtx === true) {
-        updatedOpusParams += 'usedtx=1;';
-      }
-
-      if (opusSettings.maxplaybackrate) {
-        updatedOpusParams += 'maxplaybackrate=' + opusSettings.maxplaybackrate + ';';
-      }
-
-      log.log([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Updated OPUS parameters ->'], updatedOpusParams);
-
-      sdpLines[j] = 'a=fmtp:' + payload + ' ' + updatedOpusParams;
-      appendFmtpLineAtIndex = -1;
-      break;
+    if (typeof self._codecParams.audio.opus.usedtx === 'boolean') {
+      opusOptions.usedtx = self._codecParams.audio.opus.usedtx;
+    } else if (typeof audioSettings.usedtx === 'boolean') {
+      opusOptions.usedtx = audioSettings.usedtx;
     }
-  }
-
-  if (appendFmtpLineAtIndex > 0) {
-    var newFmtpLine = 'a=fmtp:' + payload + ' ';
-
-    if (opusSettings.stereo === true) {
-      newFmtpLine += 'stereo=1;';
+    if (typeof self._codecParams.audio.opus.useinbandfec === 'boolean') {
+      opusOptions.useinbandfec = self._codecParams.audio.opus.useinbandfec;
+    } else if (typeof audioSettings.useinbandfec === 'boolean') {
+      opusOptions.useinbandfec = audioSettings.useinbandfec;
     }
-
-    if (opusSettings.useinbandfec === true) {
-      newFmtpLine += 'useinbandfec=1;';
+    if (typeof self._codecParams.audio.opus.maxplaybackrate === 'number') {
+      opusOptions.maxplaybackrate = self._codecParams.audio.opus.maxplaybackrate;
+    } else if (typeof audioSettings.maxplaybackrate === 'number') {
+      opusOptions.maxplaybackrate = audioSettings.maxplaybackrate;
     }
-
-    if (opusSettings.usedtx === true) {
-      newFmtpLine += 'usedtx=1;';
+    if (typeof self._codecParams.audio.opus.minptime === 'number') {
+      opusOptions.minptime = self._codecParams.audio.opus.minptime;
+    } else if (typeof audioSettings.minptime === 'number') {
+      opusOptions.minptime = audioSettings.minptime;
     }
+    // Possible future params: sprop-maxcapturerate, maxaveragebitrate, sprop-stereo, cbr
+    // NOT recommended: maxptime, ptime, rate, minptime
+    return opusOptions;
+  })());
 
-    if (opusSettings.maxplaybackrate) {
-      newFmtpLine += 'maxplaybackrate=' + opusSettings.maxplaybackrate + ';';
+  // RFC: https://tools.ietf.org/html/rfc4733
+  // Future: Set telephone-event: 100 0-15,66,70
+
+  // RFC: https://tools.ietf.org/html/draft-ietf-payload-vp8-17
+  // Set video codecs -> VP8
+  parseFn('video', self.VIDEO_CODEC.VP8, null, (function () {
+    var vp8Options = {};
+    // NOT recommended: max-fr, max-fs (all are codec decoder capabilities)
+    if (typeof self._codecParams.video.vp8.maxFr === 'number') {
+      vp8Options['max-fr'] = self._codecParams.video.vp8.maxFr;
     }
+    if (typeof self._codecParams.video.vp8.maxFs === 'number') {
+      vp8Options['max-fs'] = self._codecParams.video.vp8.maxFs;
+    }
+    return vp8Options;
+  })());
 
-    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Created OPUS parameters ->'], newFmtpLine);
+  // RFC: https://tools.ietf.org/html/draft-ietf-payload-vp9-02
+  // Set video codecs -> VP9
+  parseFn('video', self.VIDEO_CODEC.VP9, null, (function () {
+    var vp9Options = {};
+    // NOT recommended: max-fr, max-fs (all are codec decoder capabilities)
+    if (typeof self._codecParams.video.vp9.maxFr === 'number') {
+      vp9Options['max-fr'] = self._codecParams.video.vp9.maxFr;
+    }
+    if (typeof self._codecParams.video.vp9.maxFs === 'number') {
+      vp9Options['max-fs'] = self._codecParams.video.vp9.maxFs;
+    }
+    return vp9Options;
+  })());
 
-    sdpLines.splice(appendFmtpLineAtIndex + 1, 0, newFmtpLine);
-  }
+  // RFC: https://tools.ietf.org/html/rfc6184
+  // Set the video codecs -> H264
+  parseFn('video', self.VIDEO_CODEC.H264, null, (function () {
+    var h264Options = {};
+    if (typeof self._codecParams.video.h264.levelAsymmetryAllowed === 'string') {
+      h264Options['profile-level-id'] = self._codecParams.video.h264.profileLevelId;
+    }
+    if (typeof self._codecParams.video.h264.levelAsymmetryAllowed === 'boolean') {
+      h264Options['level-asymmetry-allowed'] = self._codecParams.video.h264.levelAsymmetryAllowed;
+    }
+    if (typeof self._codecParams.video.h264.packetizationMode === 'boolean') {
+      h264Options['packetization-mode'] = self._codecParams.video.h264.packetizationMode;
+    }
+    // Possible future params (remove if they are decoder/encoder capabilities or info):
+    //   max-recv-level, max-mbps, max-smbps, max-fs, max-cpb, max-dpb, max-br,
+    //   max-mbps, max-smbps, max-fs, max-cpb, max-dpb, max-br, redundant-pic-cap, sprop-parameter-sets,
+    //   sprop-level-parameter-sets, use-level-src-parameter-sets, in-band-parameter-sets,
+    //   sprop-interleaving-depth, sprop-deint-buf-req, deint-buf-cap, sprop-init-buf-time,
+    //   sprop-max-don-diff, max-rcmd-nalu-size, sar-understood, sar-supported
+    //   NOT recommended: profile-level-id (WebRTC uses "42e00a" for the moment)
+    //   https://bugs.chromium.org/p/chromium/issues/detail?id=645599
+    return h264Options;
+  })());
 
-  return sdpLines.join('\r\n');
+  return sessionDescription.sdp;
 };
 
 /**
@@ -28479,7 +28732,7 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
           (channels || 'n/a') + ') for "' + type + '" streaming.']);
 
         var line = mLine[0];
-        var lineParts = line.split(' ');
+        var lineParts = line.replace('\r\n', '').split(' ');
         // Set the m=x x UDP/xxx
         line = lineParts[0] + ' ' + lineParts[1] + ' ' + lineParts[2] + ' ';
         // Remove them to leave the codecs only

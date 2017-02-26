@@ -257,30 +257,46 @@ Skylink.prototype.RECORDING_STATE = {
  *    Note that the current Edge browser implementation does not support the <code>options.audio.optional</code>,
  *    <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.</blockquote>
  *    The audio configuration options.
- * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
- *   <small>Note that Peers may override the "receiving" <code>stereo</code> config depending on the Peers configuration.</small>
- * @param {Boolean} [options.audio.usedtx] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
- *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
- *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
+ * @param {Boolean} [options.audio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
+ *   <code>options.audio.stereo</code> setting.</blockquote>
+ *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
- *   <small>Note that Peers may override the "receiving" <code>usedtx</code> config depending on the Peers configuration.</small>
- * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
- *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
- *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
+ * @param {Boolean} [options.audio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
+ *   <code>options.audio.stereo</code> setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.</blockquote>
+ *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
+ *   <small>This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
+ *   goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href="#method_joinRoom">
+ *   <code>joinRoom()</code> method</a>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- *   <small>Note that Peers may override the "receiving" <code>useinbandfec</code> config depending on the Peers configuration.</small>
- * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
- *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending / receiving audio data.
+ * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.useinbandfec</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.useinbandfec</code> is configured, this overrides the
+ *   <code>options.audio.useinbandfec</code> setting. Note that this parameter should only be used
+ *   for debugging purposes only.</blockquote>
+ *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
+ *   (Forward Error Correction) when sending encoded audio data.
+ *   <small>This helps to reduce the harm of packet loss by encoding information about the previous packet loss.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.maxplaybackrate</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.maxplaybackrate</code> is configured, this overrides the
+ *   <code>options.audio.maxplaybackrate</code> setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
+ *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
+ *   would not encode at a higher sampling rate specified by this.
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- *   <small>Note that Peers may override the "receiving" <code>maxplaybackrate</code> config depending on the Peers configuration.</small>
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
@@ -1103,24 +1119,44 @@ Skylink.prototype.disableVideo = function() {
  * Function that retrieves screensharing Stream.
  * @method shareScreen
  * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
- * @param {Boolean} [enableAudio.stereo=false] The flag if stereo band should be configured
- *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- * @param {Boolean} [enableAudio.usedtx] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
- *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- *   <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>
+ * @param {Boolean} [enableAudio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
+ *   <code>options.audio.stereo</code> setting.</blockquote>
+ *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Boolean} [enableAudio.useinbandfec] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
- *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
- *   <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>
+ * @param {Boolean} [enableAudio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
+ *   <code>options.audio.stereo</code> setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.</blockquote>
+ *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
+ *   <small>This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
+ *   goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href="#method_joinRoom">
+ *   <code>joinRoom()</code> method</a>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Number} [enableAudio.maxplaybackrate] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
- *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+ * @param {Boolean} [enableAudio.useinbandfec] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.useinbandfec</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.useinbandfec</code> is configured, this overrides the
+ *   <code>options.audio.useinbandfec</code> setting. Note that this parameter should only be used
+ *   for debugging purposes only.</blockquote>
+ *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
+ *   (Forward Error Correction) when sending encoded audio data.
+ *   <small>This helps to reduce the harm of packet loss by encoding information about the previous packet loss.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [enableAudio.maxplaybackrate] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.maxplaybackrate</code>
+ *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
+ *   <code>options.codecParams.audio.opus.maxplaybackrate</code> is configured, this overrides the
+ *   <code>options.audio.maxplaybackrate</code> setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
+ *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
+ *   would not encode at a higher sampling rate specified by this.
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [enableAudio.echoCancellation=false] The flag to enable audio tracks echo cancellation.

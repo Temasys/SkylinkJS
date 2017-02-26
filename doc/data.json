@@ -1459,6 +1459,18 @@
             "class": "Skylink"
         },
         {
+            "file": "source/template/header.js",
+            "line": 1127,
+            "description": "Stores the RTCPeerConnection configuration.",
+            "itemtype": "attribute",
+            "name": "_peerConnectionConfig",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
             "file": "source/data-channel.js",
             "line": 1,
             "description": "The list of Datachannel connection states.",
@@ -3272,7 +3284,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 273,
+            "line": 292,
             "description": "Function that gets the list of connected Peers in the Room.",
             "itemtype": "method",
             "name": "getPeersInRoom",
@@ -3288,7 +3300,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 304,
+            "line": 323,
             "description": "Function that gets the list of connected Peers Streams in the Room.",
             "itemtype": "method",
             "name": "getPeersStream",
@@ -3304,7 +3316,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 367,
+            "line": 386,
             "description": "Function that gets the list of current data transfers.",
             "itemtype": "method",
             "name": "getCurrentDataTransfers",
@@ -3320,7 +3332,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 405,
+            "line": 424,
             "description": "Function that gets the list of current data streaming sessions.",
             "itemtype": "method",
             "name": "getCurrentDataStreamsSession",
@@ -3336,7 +3348,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 449,
+            "line": 468,
             "description": "Function that gets the list of current custom Peer settings sent and set.",
             "itemtype": "method",
             "name": "getPeerCustomSettings",
@@ -3352,7 +3364,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 559,
+            "line": 578,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
@@ -4504,6 +4516,122 @@
                                     "optional": true
                                 }
                             ]
+                        },
+                        {
+                            "name": "codecParams",
+                            "description": "<blockquote class=\"info\">\n  Note that some of these parameters are mainly used for experimental or debugging purposes. Toggling any of\n  these feature may result in disruptions in connectivity.</blockquote>\n  The audio and video codecs parameters to configure.",
+                            "type": "JSON",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "video",
+                                    "description": "The video codecs parameters to configure.",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.h264",
+                                    "description": "The H264 video codec parameters to configure.",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.h264.profileLevelId",
+                                    "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only.</blockquote>\n  The H264 video codec base16 encoded string which indicates the H264 baseline, main, or the extended profiles.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.h264.levelAsymmetryAllowed",
+                                    "description": "<blockquote class=\"info\">\n  Note that this is an experimental parameter which may result in connectivity issues when toggled.</blockquote>\n  The flag if streaming H264 sending video data should be encoded at a different level\n  from receiving video data from Peer encoding to User when Peer is the offerer.\n  <small>If Peer is the offerer instead of the User, the Peer's <code>peerInfo.config.priorityWeight</code> will be\n  higher than User's <code>peerInfo.config.priorityWeight</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.h264.packetizationMode",
+                                    "description": "<blockquote class=\"info\">\n  Note that this is an experimental parameter which may result in connectivity issues when enabled. It is\n  advisable to turn off this feature off when receiving H264 decoders do not support the packetization mode,\n  which may result in a blank receiving video stream.</blockquote>\n  The flag to enable H264 video codec packetization mode, which splits video frames that are larger\n  for a RTP packet into RTP packet chunks.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.vp8",
+                                    "description": "The VP8 video codec parameters to configure.",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.vp8.maxFr",
+                                    "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>\n  The maximum number of fps (frames per second) that the VP8 video codec decoder is capable of\n  decoding when receiving encoded video data packets.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.vp8.maxFs",
+                                    "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>\n  The maximum number of frame size macroblocks that the VP8 video codec decoder is capable of\n  decoding when receiving encoded video data packets.\n  <small>The value has to have the width and height of the frame in macroblocks less than the value of\n  <code>parseInt(Math.sqrt(maxFs * 8))</code>. E.g. If the value is <code>1200</code>, it is capable of\n  support <code>640x480</code> frame width and height, which heights up to <code>1552px</code>\n  (<code>97</code> macroblocks value.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.vp9",
+                                    "description": "The VP9 video codec parameters to configure.",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.vp9.maxFr",
+                                    "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>\n  The maximum number of fps (frames per second) that the VP9 video codec decoder is capable of\n  decoding when receiving encoded video data packets.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "video.vp9.maxFs",
+                                    "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>\n  The maximum number of frame size macroblocks that the VP9 video codec decoder is capable of\n  decoding when receiving encoded video data packets.\n  <small>The value has to have the width and height of the frame in macroblocks less than the value of\n  <code>parseInt(Math.sqrt(maxFs * 8))</code>. E.g. If the value is <code>1200</code>, it is capable of\n  support <code>640x480</code> frame width and height, which heights up to <code>1552px</code>\n  (<code>97</code> macroblocks value.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "audio",
+                                    "description": "The audio codecs parameters to configure.",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "audio.opus",
+                                    "description": "<blockquote class=\"info\">\n  Note that this is only applicable to OPUS audio codecs with a sampling rate of <code>48000</code> Hz (hertz).\n  </blockquote> The OPUS audio codec parameters to configure.",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "audio.opus.stereo",
+                                    "description": "The flag if OPUS audio codec stereo band\n  should be configured for sending encoded audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "audio.opus.usedtx",
+                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.\n  <small>This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and\n  goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "audio.opus.useinbandfec",
+                                    "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only.</blockquote>\n  The flag if OPUS audio codec has the capability to take advantage of the in-band FEC\n  (Forward Error Correction) when sending encoded audio data.\n  <small>This helps to reduce the harm of packet loss by encoding information about the previous packet loss.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "audio.opus.maxplaybackrate",
+                                    "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only</blockquote>\n  The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving\n  decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data\n  would not encode at a higher sampling rate specified by this.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "minptime",
+                                    "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only.</blockquote>\n  The OPUS audio codec receiving audio data decoder minimum length of time in milleseconds should be\n  encapsulated in a single received encoded audio data packet.\n  <small>This value must be between <code>3</code> to <code>120</code></small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Number",
+                                    "optional": true
+                                }
+                            ]
                         }
                     ]
                 },
@@ -4694,7 +4822,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 858,
+            "line": 1017,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4705,7 +4833,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 932,
+            "line": 1091,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4716,7 +4844,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1002,
+            "line": 1161,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4727,7 +4855,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1133,
+            "line": 1292,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -9064,26 +9192,26 @@
                             "props": [
                                 {
                                     "name": "stereo",
-                                    "description": "The flag if stereo band should be configured\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending / receiving audio data.\n  <small>Note that Peers may override the \"receiving\" <code>stereo</code> config depending on the Peers configuration.</small>",
+                                    "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the\n  <code>options.audio.stereo</code> setting.</blockquote>\n  The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "false"
                                 },
                                 {
                                     "name": "usedtx",
-                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec\n  is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending / receiving audio data.\n  <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>\n  <small>When not provided, the default browser configuration is used.</small>\n  <small>Note that Peers may override the \"receiving\" <code>usedtx</code> config depending on the Peers configuration.</small>",
+                                    "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the\n  <code>options.audio.stereo</code> setting.  Note that this feature might\n  not work depending on the browser support and implementation.</blockquote>\n  The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.\n  <small>This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and\n  goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                                     "type": "Boolean",
                                     "optional": true
                                 },
                                 {
                                     "name": "useinbandfec",
-                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be\n  configured when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending / receiving audio data.\n  <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>\n  <small>When not provided, the default browser configuration is used.</small>\n  <small>Note that Peers may override the \"receiving\" <code>useinbandfec</code> config depending on the Peers configuration.</small>",
+                                    "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.useinbandfec</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.useinbandfec</code> is configured, this overrides the\n  <code>options.audio.useinbandfec</code> setting. Note that this parameter should only be used\n  for debugging purposes only.</blockquote>\n  The flag if OPUS audio codec has the capability to take advantage of the in-band FEC\n  (Forward Error Correction) when sending encoded audio data.\n  <small>This helps to reduce the harm of packet loss by encoding information about the previous packet loss.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                                     "type": "Boolean",
                                     "optional": true
                                 },
                                 {
                                     "name": "maxplaybackrate",
-                                    "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is\n  <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending / receiving audio data.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>\n  <small>Note that Peers may override the \"receiving\" <code>maxplaybackrate</code> config depending on the Peers configuration.</small>",
+                                    "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.maxplaybackrate</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.maxplaybackrate</code> is configured, this overrides the\n  <code>options.audio.maxplaybackrate</code> setting.  Note that this feature might\n  not work depending on the browser support and implementation.\n  Note that this parameter should only be used for debugging purposes only.</blockquote>\n  The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving\n  decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data\n  would not encode at a higher sampling rate specified by this.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
@@ -9203,7 +9331,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 589,
+            "line": 605,
             "description": "<blockquote class=\"info\">\n  Note that if <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is available despite having\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> available, the\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is sent instead of the\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> to Peers.\n</blockquote>\nFunction that sends a new <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>\nto all connected Peers in the Room.",
             "itemtype": "method",
             "name": "sendStream",
@@ -9241,7 +9369,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 810,
+            "line": 826,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -9254,7 +9382,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 849,
+            "line": 865,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -9290,7 +9418,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 987,
+            "line": 1003,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -9305,7 +9433,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1014,
+            "line": 1030,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -9320,7 +9448,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1041,
+            "line": 1057,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -9335,7 +9463,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1068,
+            "line": 1084,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -9350,7 +9478,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1095,
+            "line": 1111,
             "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n  Note that the Opera and Edge browser does not support screensharing, and as for IE / Safari browsers using\n  the Temasys Plugin screensharing support, check out the <a href=\"https://temasys.com.sg/plugin/#commercial-licensing\">\n  commercial licensing</a> for more options.\n</blockquote>\nFunction that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -9364,26 +9492,26 @@
                     "props": [
                         {
                             "name": "stereo",
-                            "description": "The flag if stereo band should be configured\n  when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.",
+                            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the\n  <code>options.audio.stereo</code> setting.</blockquote>\n  The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
                         },
                         {
                             "name": "usedtx",
-                            "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec\n  is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce bandwidth it reduces the bitrate during silence or background noise.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the\n  <code>options.audio.stereo</code> setting.  Note that this feature might\n  not work depending on the browser support and implementation.</blockquote>\n  The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.\n  <small>This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and\n  goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                             "type": "Boolean",
                             "optional": true
                         },
                         {
                             "name": "useinbandfec",
-                            "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be\n  configured when encoding audio codec is <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This might help to reduce the harm of packet loss by encoding information about the previous packet.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.useinbandfec</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.useinbandfec</code> is configured, this overrides the\n  <code>options.audio.useinbandfec</code> setting. Note that this parameter should only be used\n  for debugging purposes only.</blockquote>\n  The flag if OPUS audio codec has the capability to take advantage of the in-band FEC\n  (Forward Error Correction) when sending encoded audio data.\n  <small>This helps to reduce the harm of packet loss by encoding information about the previous packet loss.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                             "type": "Boolean",
                             "optional": true
                         },
                         {
                             "name": "maxplaybackrate",
-                            "description": "<blockquote class=\"info\">\n  Note that this feature might not work depending on the browser support and implementation.</blockquote>\n  The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is\n  <a href=\"#attr_AUDIO_CODEC\"><code>OPUS</code></a> for sending audio data.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.maxplaybackrate</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.maxplaybackrate</code> is configured, this overrides the\n  <code>options.audio.maxplaybackrate</code> setting.  Note that this feature might\n  not work depending on the browser support and implementation.\n  Note that this parameter should only be used for debugging purposes only.</blockquote>\n  The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving\n  decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data\n  would not encode at a higher sampling rate specified by this.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                             "type": "Number",
                             "optional": true
                         },
@@ -9424,7 +9552,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1339,
+            "line": 1375,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -9437,7 +9565,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1398,
+            "line": 1434,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -9448,7 +9576,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1445,
+            "line": 1481,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -9459,7 +9587,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1518,
+            "line": 1554,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -9470,7 +9598,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1697,
+            "line": 1733,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -9481,7 +9609,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1832,
+            "line": 1868,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -9492,7 +9620,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1872,
+            "line": 1908,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -9503,7 +9631,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1906,
+            "line": 1942,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -9514,7 +9642,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1981,
+            "line": 2017,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -9528,7 +9656,7 @@
             "line": 1,
             "description": "Function that modifies the session description to configure settings for OPUS audio codec.",
             "itemtype": "method",
-            "name": "_setSDPOpusConfig",
+            "name": "_setSDPCodecParams",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",
@@ -9536,7 +9664,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 127,
+            "line": 157,
             "description": "Function that modifies the session description to limit the maximum sending bandwidth.\nSetting this may not necessarily work in Firefox.",
             "itemtype": "method",
             "name": "_setSDPBitrate",
@@ -9547,7 +9675,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 262,
+            "line": 292,
             "description": "Function that modifies the session description to set the preferred audio/video codec.",
             "itemtype": "method",
             "name": "_setSDPCodec",
@@ -9558,7 +9686,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 357,
+            "line": 387,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -9569,7 +9697,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 373,
+            "line": 403,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -9580,7 +9708,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 511,
+            "line": 541,
             "description": "Function that modifies the session description to remove apt/rtx lines that does exists.",
             "itemtype": "method",
             "name": "_removeSDPUnknownAptRtx",
@@ -9591,7 +9719,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 566,
+            "line": 596,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -9602,7 +9730,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 635,
+            "line": 665,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -9613,7 +9741,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 651,
+            "line": 681,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -9624,7 +9752,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 706,
+            "line": 736,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -9635,7 +9763,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 748,
+            "line": 778,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -9646,7 +9774,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 840,
+            "line": 870,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -9657,7 +9785,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1016,
+            "line": 1046,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
@@ -9826,39 +9954,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:589"
+            "line": " source/stream-media.js:605"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:810"
+            "line": " source/stream-media.js:826"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:849"
+            "line": " source/stream-media.js:865"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:987"
+            "line": " source/stream-media.js:1003"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1014"
+            "line": " source/stream-media.js:1030"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1041"
+            "line": " source/stream-media.js:1057"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1068"
+            "line": " source/stream-media.js:1084"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1095"
+            "line": " source/stream-media.js:1111"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1339"
+            "line": " source/stream-media.js:1375"
         },
         {
             "message": "Missing item type\nGlobal function that clones an object.",

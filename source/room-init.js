@@ -351,6 +351,93 @@ Skylink.prototype.generateUUID = function() {
  * @param {Number} options.socketServer.ports.#index The Signaling server port to fallback and use for debugging purposes.
  * @param {String} [options.socketServer.protocol] The Signaling server protocol for debugging purposes to use.
  *   <small>If not defined, it will use the default protocol specified.</small>
+ * @param {JSON} [options.codecParams] <blockquote class="info">
+ *   Note that some of these parameters are mainly used for experimental or debugging purposes. Toggling any of
+ *   these feature may result in disruptions in connectivity.</blockquote>
+ *   The audio and video codecs parameters to configure.
+ * @param {JSON} [options.codecParams.video] The video codecs parameters to configure.
+ * @param {JSON} [options.codecParams.video.h264] The H264 video codec parameters to configure.
+ * @param {String} [options.codecParams.video.h264.profileLevelId] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The H264 video codec base16 encoded string which indicates the H264 baseline, main, or the extended profiles.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.video.h264.levelAsymmetryAllowed] <blockquote class="info">
+ *   Note that this is an experimental parameter which may result in connectivity issues when toggled.</blockquote>
+ *   The flag if streaming H264 sending video data should be encoded at a different level
+ *   from receiving video data from Peer encoding to User when Peer is the offerer.
+ *   <small>If Peer is the offerer instead of the User, the Peer's <code>peerInfo.config.priorityWeight</code> will be
+ *   higher than User's <code>peerInfo.config.priorityWeight</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.video.h264.packetizationMode] <blockquote class="info">
+ *   Note that this is an experimental parameter which may result in connectivity issues when enabled. It is
+ *   advisable to turn off this feature off when receiving H264 decoders do not support the packetization mode,
+ *   which may result in a blank receiving video stream.</blockquote>
+ *   The flag to enable H264 video codec packetization mode, which splits video frames that are larger
+ *   for a RTP packet into RTP packet chunks.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {JSON} [options.codecParams.video.vp8] The VP8 video codec parameters to configure.
+ * @param {Number} [options.codecParams.video.vp8.maxFr] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of fps (frames per second) that the VP8 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.video.vp8.maxFs] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of frame size macroblocks that the VP8 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>The value has to have the width and height of the frame in macroblocks less than the value of
+ *   <code>parseInt(Math.sqrt(maxFs * 8))</code>. E.g. If the value is <code>1200</code>, it is capable of
+ *   support <code>640x480</code> frame width and height, which heights up to <code>1552px</code>
+ *   (<code>97</code> macroblocks value.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {JSON} [options.codecParams.video.vp9] The VP9 video codec parameters to configure.
+ * @param {Number} [options.codecParams.video.vp9.maxFr] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of fps (frames per second) that the VP9 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.video.vp9.maxFs] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of frame size macroblocks that the VP9 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>The value has to have the width and height of the frame in macroblocks less than the value of
+ *   <code>parseInt(Math.sqrt(maxFs * 8))</code>. E.g. If the value is <code>1200</code>, it is capable of
+ *   support <code>640x480</code> frame width and height, which heights up to <code>1552px</code>
+ *   (<code>97</code> macroblocks value.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {JSON} [options.codecParams.audio] The audio codecs parameters to configure.
+ * @param {JSON} [options.codecParams.audio.opus] <blockquote class="info">
+ *   Note that this is only applicable to OPUS audio codecs with a sampling rate of <code>48000</code> Hz (hertz).
+ *   </blockquote> The OPUS audio codec parameters to configure.
+ * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec stereo band
+ *   should be configured for sending encoded audio data.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.audio.opus.usedtx] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
+ *   <small>This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
+ *   goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href="#method_joinRoom">
+ *   <code>joinRoom()</code> method</a>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.audio.opus.useinbandfec] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
+ *   (Forward Error Correction) when sending encoded audio data.
+ *   <small>This helps to reduce the harm of packet loss by encoding information about the previous packet loss.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.audio.opus.maxplaybackrate] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only</blockquote>
+ *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
+ *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
+ *   would not encode at a higher sampling rate specified by this.
+ *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.minptime] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The OPUS audio codec receiving audio data decoder minimum length of time in milleseconds should be
+ *   encapsulated in a single received encoded audio data packet.
+ *   <small>This value must be between <code>3</code> to <code>120</code></small>
+ *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -510,6 +597,10 @@ Skylink.prototype.init = function(options, callback) {
   var mcuUseRenegoRestart = false;
   var iceServer = null;
   var socketServer = null;
+  var codecParams = {
+    audio: { opus: {} },
+    video: { h264: {}, vp8: {}, vp9: {} }
+  };
 
   log.log('Provided init options:', options);
 
@@ -684,6 +775,71 @@ Skylink.prototype.init = function(options, callback) {
       }
     }
 
+    // set the codec params
+    if (options.codecParams && typeof options.codecParams === 'object') {
+      // Set audio codecs params
+      if (options.codecParams.audio && typeof options.codecParams.audio === 'object') {
+        // Set the audio codec opus params
+        if (options.codecParams.audio.opus && typeof options.codecParams.audio.opus === 'object') {
+          codecParams.audio.opus = {
+            stereo: typeof options.codecParams.audio.opus.stereo === 'boolean' ?
+              options.codecParams.audio.opus.stereo : null,
+            usedtx: typeof options.codecParams.audio.opus.usedtx === 'boolean' ?
+              options.codecParams.audio.opus.usedtx : null,
+            useinbandfec: typeof options.codecParams.audio.opus.useinbandfec === 'boolean' ?
+              options.codecParams.audio.opus.useinbandfec : null,
+            maxplaybackrate: typeof options.codecParams.audio.opus.maxplaybackrate === 'number' &&
+              options.codecParams.audio.opus.maxplaybackrate >= 8000 &&
+              options.codecParams.audio.opus.maxplaybackrate <= 48000 ?
+              options.codecParams.audio.opus.maxplaybackrate : null,
+            minptime: typeof options.codecParams.audio.opus.minptime === 'number' &&
+              options.codecParams.audio.opus.minptime >= 3 ? options.codecParams.audio.opus.minptime : null
+          };
+        }
+      }
+      // Set video codecs params
+      if (options.codecParams.video && typeof options.codecParams.video === 'object') {
+        // Set the video codec H264 params
+        if (options.codecParams.video.h264 && typeof options.codecParams.video.h264 === 'object') {
+          codecParams.video.h264 = {
+            // Only allowing profile-level-id change for experimental fixes or changes incase..
+            // Strong NOT recommended, this is like an information
+            profileLevelId: options.codecParams.video.h264.profileLevelId &&
+              typeof options.codecParams.video.h264.profileLevelId === 'string' ?
+              options.codecParams.video.h264.profileLevelId : null,
+            levelAsymmetryAllowed: typeof options.codecParams.video.h264.levelAsymmetryAllowed === 'boolean' ?
+              options.codecParams.video.h264.levelAsymmetryAllowed : null,
+            packetizationMode: typeof options.codecParams.video.h264.packetizationMode === 'boolean' ?
+              options.codecParams.video.h264.packetizationMode : null
+          };
+        }
+        // Set the video codec VP8 params
+        if (options.codecParams.video.vp8 && typeof options.codecParams.video.vp8 === 'object') {
+          // Only allowing max-fs, max-fr change for experimental fixes or changes incase..
+          // (NOT used for any other purposes)!!!!
+          // Strong NOT recommended, this is like an information
+          codecParams.video.vp8 = {
+            maxFs: typeof options.codecParams.video.vp8.maxFs === 'number' ?
+              options.codecParams.video.vp8.maxFs : null,
+            maxFr: typeof options.codecParams.video.vp8.maxFr === 'number' ?
+              options.codecParams.video.vp8.maxFr : null
+          };
+        }
+        // Set the video codec VP9 params
+        if (options.codecParams.video.vp9 && typeof options.codecParams.video.vp9 === 'object') {
+          // Only allowing max-fs, max-fr change for experimental fixes or changes incase..
+          // (NOT used for any other purposes)!!!!
+          // Strong NOT recommended, this is like an information
+          codecParams.video.vp9 = {
+            maxFs: typeof options.codecParams.video.vp9.maxFs === 'number' ?
+              options.codecParams.video.vp9.maxFs : null,
+            maxFr: typeof options.codecParams.video.vp9.maxFr === 'number' ?
+              options.codecParams.video.vp9.maxFr : null
+          };
+        }
+      }
+    }
+
     // set audio fallback option
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
@@ -759,6 +915,7 @@ Skylink.prototype.init = function(options, callback) {
   self._mcuUseRenegoRestart = mcuUseRenegoRestart;
   self._iceServer = iceServer;
   self._socketServer = socketServer;
+  self._codecParams = codecParams;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -788,7 +945,8 @@ Skylink.prototype.init = function(options, callback) {
     throttleShouldThrowError: self._throttlingShouldThrowError,
     mcuUseRenegoRestart: self._mcuUseRenegoRestart,
     iceServer: self._iceServer,
-    socketServer: self._socketServer
+    socketServer: self._socketServer,
+    codecParams: self._codecParams
   });
   // trigger the readystate
   self._readyState = 0;
@@ -832,7 +990,8 @@ Skylink.prototype.init = function(options, callback) {
             throttleShouldThrowError: self._throttlingShouldThrowError,
             mcuUseRenegoRestart: self._mcuUseRenegoRestart,
             iceServer: self._iceServer,
-            socketServer: self._socketServer
+            socketServer: self._socketServer,
+            codecParams: self._codecParams
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -1169,7 +1328,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     throttleShouldThrowError: self._throttlingShouldThrowError,
     mcuUseRenegoRestart: self._mcuUseRenegoRestart,
     iceServer: self._iceServer ? self._iceServer.urls : null,
-    socketServer: self._socketServer ? self._socketServer : null
+    socketServer: self._socketServer ? self._socketServer : null,
+    codecParams: self._codecParams ? self._codecParams : null
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
