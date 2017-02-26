@@ -1133,4 +1133,14 @@ function Skylink() {
    * @since 0.6.18
    */
   this._codecParams = {};
+
+  /**
+   * Stores the User's priority weight scheme to determine if User is offerer or answerer.
+   * @attribute _priorityWeightScheme
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._priorityWeightScheme = this.PRIORITY_WEIGHT_SCHEME.AUTO;
 }

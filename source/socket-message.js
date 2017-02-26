@@ -973,7 +973,8 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
-  self._peerPriorityWeight = message.tieBreaker;
+  self._peerPriorityWeight = message.tieBreaker + (self._priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.AUTO ?
+    0 : (self._priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.ENFORCE_OFFERER ? 2e+15 : -(2e+15)));
 
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);

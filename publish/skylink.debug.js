@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Mon Feb 27 2017 01:07:39 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Mon Feb 27 2017 01:35:47 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -1135,6 +1135,16 @@ function Skylink() {
    * @since 0.6.18
    */
   this._codecParams = {};
+
+  /**
+   * Stores the User's priority weight scheme to determine if User is offerer or answerer.
+   * @attribute _priorityWeightScheme
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._priorityWeightScheme = this.PRIORITY_WEIGHT_SCHEME.AUTO;
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -9354,6 +9364,27 @@ Skylink.prototype.REGIONAL_SERVER = {
 };
 
 /**
+ * The list of User's priority weight schemes for <a href="#method_joinRoom">
+ * <code>joinRoom()</code> method</a> connections.
+ * @attribute PRIORITY_WEIGHT_SCHEME
+ * @param {String} ENFORCE_OFFERER  <small>Value <code>"enforceOfferer"</code></small>
+ *   The value of the priority weight scheme to enforce User as the offerer.
+ * @param {String} ENFORCE_ANSWERER <small>Value <code>"enforceAnswerer"</code></small>
+ *   The value of the priority weight scheme to enforce User as the answerer.
+ * @param {String} AUTO             <small>Value <code>"auto"</code></small>
+ *   The value of the priority weight scheme to let User be offerer or answerer based on Signaling server selection.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.PRIORITY_WEIGHT_SCHEME = {
+  ENFORCE_OFFERER: 'enforceOfferer',
+  ENFORCE_ANSWERER: 'enforceAnswerer',
+  AUTO: 'auto'
+};
+
+/**
  * Function that generates an <a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID</a> (Unique ID).
  * @method generateUUID
  * @return {String} Returns a generated UUID (Unique ID).
@@ -9627,7 +9658,7 @@ Skylink.prototype.generateUUID = function() {
  *   <small>This helps to reduce the harm of packet loss by encoding information about the previous packet loss.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Number} [options.codecParams.audio.opus.maxplaybackrate] <blockquote class="info">
- *   Note that this parameter should only be used for debugging purposes only</blockquote>
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
  *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
  *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
  *   would not encode at a higher sampling rate specified by this.
@@ -9639,6 +9670,11 @@ Skylink.prototype.generateUUID = function() {
  *   encapsulated in a single received encoded audio data packet.
  *   <small>This value must be between <code>3</code> to <code>120</code></small>
  *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {String} [options.priorityWeightScheme] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only and may not work when
+ *   internals change.</blockquote> The User's priority weight to enforce User as offerer or answerer.
+ * - When not provided, its value is <code>AUTO</code>.
+ *   [Rel: Skylink.PRIORITY_WEIGHT_SCHEME]
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -9802,6 +9838,7 @@ Skylink.prototype.init = function(options, callback) {
     audio: { opus: {} },
     video: { h264: {}, vp8: {}, vp9: {} }
   };
+  var priorityWeightScheme = self.PRIORITY_WEIGHT_SCHEME.AUTO;
 
   log.log('Provided init options:', options);
 
@@ -9872,6 +9909,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if MCU refreshConnection() should use renegotiation
     mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
       options.mcuUseRenegoRestart : mcuUseRenegoRestart;
+    // set the priority weight scheme
+    priorityWeightScheme = (options.priorityWeightScheme && typeof options.priorityWeightScheme === 'string') ?
+      options.priorityWeightScheme : priorityWeightScheme;
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
@@ -10117,6 +10157,7 @@ Skylink.prototype.init = function(options, callback) {
   self._iceServer = iceServer;
   self._socketServer = socketServer;
   self._codecParams = codecParams;
+  self._priorityWeightScheme = priorityWeightScheme;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -10147,7 +10188,8 @@ Skylink.prototype.init = function(options, callback) {
     mcuUseRenegoRestart: self._mcuUseRenegoRestart,
     iceServer: self._iceServer,
     socketServer: self._socketServer,
-    codecParams: self._codecParams
+    codecParams: self._codecParams,
+    priorityWeightScheme: self._priorityWeightScheme
   });
   // trigger the readystate
   self._readyState = 0;
@@ -10192,7 +10234,8 @@ Skylink.prototype.init = function(options, callback) {
             mcuUseRenegoRestart: self._mcuUseRenegoRestart,
             iceServer: self._iceServer,
             socketServer: self._socketServer,
-            codecParams: self._codecParams
+            codecParams: self._codecParams,
+            priorityWeightScheme: self._priorityWeightScheme
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -10530,7 +10573,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     mcuUseRenegoRestart: self._mcuUseRenegoRestart,
     iceServer: self._iceServer ? self._iceServer.urls : null,
     socketServer: self._socketServer ? self._socketServer : null,
-    codecParams: self._codecParams ? self._codecParams : null
+    codecParams: self._codecParams ? self._codecParams : null,
+    priorityWeightScheme: self._priorityWeightScheme ? self._priorityWeightScheme : null
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -13991,7 +14035,8 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers(message.pc_config);
   self._inRoom = true;
   self._user.sid = message.sid;
-  self._peerPriorityWeight = message.tieBreaker;
+  self._peerPriorityWeight = message.tieBreaker + (self._priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.AUTO ?
+    0 : (self._priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.ENFORCE_OFFERER ? 2e+15 : -(2e+15)));
 
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);

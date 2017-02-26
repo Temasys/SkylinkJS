@@ -1471,6 +1471,18 @@
             "class": "Skylink"
         },
         {
+            "file": "source/template/header.js",
+            "line": 1137,
+            "description": "Stores the User's priority weight scheme to determine if User is offerer or answerer.",
+            "itemtype": "attribute",
+            "name": "_priorityWeightScheme",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
             "file": "source/data-channel.js",
             "line": 1,
             "description": "The list of Datachannel connection states.",
@@ -4198,6 +4210,34 @@
         {
             "file": "source/room-init.js",
             "line": 155,
+            "description": "The list of User's priority weight schemes for <a href=\"#method_joinRoom\">\n<code>joinRoom()</code> method</a> connections.",
+            "itemtype": "attribute",
+            "name": "PRIORITY_WEIGHT_SCHEME",
+            "params": [
+                {
+                    "name": "ENFORCE_OFFERER",
+                    "description": "<small>Value <code>\"enforceOfferer\"</code></small>\n  The value of the priority weight scheme to enforce User as the offerer.",
+                    "type": "String"
+                },
+                {
+                    "name": "ENFORCE_ANSWERER",
+                    "description": "<small>Value <code>\"enforceAnswerer\"</code></small>\n  The value of the priority weight scheme to enforce User as the answerer.",
+                    "type": "String"
+                },
+                {
+                    "name": "AUTO",
+                    "description": "<small>Value <code>\"auto\"</code></small>\n  The value of the priority weight scheme to let User be offerer or answerer based on Signaling server selection.",
+                    "type": "String"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/room-init.js",
+            "line": 176,
             "description": "Function that generates an <a href=\"https://en.wikipedia.org/wiki/Universally_unique_identifier\">UUID</a> (Unique ID).",
             "itemtype": "method",
             "name": "generateUUID",
@@ -4210,7 +4250,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 174,
+            "line": 195,
             "description": "Function that authenticates and initialises App Key used for Room connections.",
             "itemtype": "method",
             "name": "init",
@@ -4621,7 +4661,7 @@
                                 },
                                 {
                                     "name": "audio.opus.maxplaybackrate",
-                                    "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only</blockquote>\n  The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving\n  decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data\n  would not encode at a higher sampling rate specified by this.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only.</blockquote>\n  The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving\n  decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data\n  would not encode at a higher sampling rate specified by this.\n  <small>This value must be between <code>8000</code> to <code>48000</code>.</small>\n  <small>When not provided, the default browser configuration is used.</small>",
                                     "type": "Number",
                                     "optional": true
                                 },
@@ -4632,6 +4672,12 @@
                                     "optional": true
                                 }
                             ]
+                        },
+                        {
+                            "name": "priorityWeightScheme",
+                            "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only and may not work when\n  internals change.</blockquote> The User's priority weight to enforce User as offerer or answerer.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.PRIORITY_WEIGHT_SCHEME]",
+                            "type": "String",
+                            "optional": true
                         }
                     ]
                 },
@@ -4822,7 +4868,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1017,
+            "line": 1050,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4833,7 +4879,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1091,
+            "line": 1124,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4844,7 +4890,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1161,
+            "line": 1194,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4855,7 +4901,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1292,
+            "line": 1325,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -8834,7 +8880,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1026,
+            "line": 1027,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -8845,7 +8891,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1181,
+            "line": 1182,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -8856,7 +8902,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1316,
+            "line": 1317,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -8867,7 +8913,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1488,
+            "line": 1489,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -8878,7 +8924,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1589,
+            "line": 1590,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -8889,7 +8935,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1684,
+            "line": 1685,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -8900,7 +8946,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1798,
+            "line": 1799,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -9874,7 +9920,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:174"
+            "line": " source/room-init.js:195"
         },
         {
             "message": "unknown tag: scoped",
