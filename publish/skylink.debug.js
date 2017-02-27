@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Mon Feb 27 2017 19:06:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 01:00:45 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -1784,8 +1784,6 @@ Skylink.prototype.DATA_TRANSFER_SESSION_TYPE = {
  *   The value of the state when data transfer has been terminated from / to Peer.
  * @param {String} ERROR              <small>Value <code>"error"</code></small>
  *   The value of the state when data transfer has errors and has been terminated from / to Peer.
- * @param {String} START_ERROR        <small>Value <code>"startError"</code></small>
- *   The value of the state when data transfer failed to start to Peer.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -2814,7 +2812,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
   var emitErrorBeforeStreamingFn = function (error) {
     log.error(error);
 
-    if (listOfPeers.length > 0) {
+    /*if (listOfPeers.length > 0) {
       for (var i = 0; i < listOfPeers.length; i++) {
         self._trigger('dataStreamState', self.DATA_STREAM_STATE.START_ERROR, null,
           listOfPeers[i], sessionInfo, new Error(error));
@@ -2822,7 +2820,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     } else {
       self._trigger('dataStreamState', self.DATA_STREAM_STATE.START_ERROR, null,
         null, sessionInfo, new Error(error));
-    }
+    }*/
   };
 
   if (!this._inRoom || !(this._user && this._user.sid)) {
@@ -3440,17 +3438,17 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
 
       if (listOfPeers.length === 0) {
         transferErrors.self = new Error(error);
-        self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, null, transferInfo, {
+        /*self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, null, transferInfo, {
           transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
           message: new Error(error)
-        });
+        });*/
       } else {
         for (var i = 0; i < listOfPeers.length; i++) {
           transferErrors[listOfPeers[i]] = new Error(error);
-          self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, listOfPeers[i], transferInfo, {
+          /*self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.START_ERROR, null, listOfPeers[i], transferInfo, {
             transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
             message: new Error(error)
-          });
+          });*/
         }
       }
 
