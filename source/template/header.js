@@ -296,6 +296,17 @@ function Skylink() {
   this._peerStats = {};
 
   /**
+   * Stores the list of the Peer connections stats.
+   * @attribute _peerBandwidth
+   * @param {JSON} <#peerId> The Peer connection stats.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._peerBandwidth = {};
+
+  /**
    * Stores the list of the Peer custom configs.
    * @attribute _peerCustomConfigs
    * @type JSON
@@ -1143,4 +1154,14 @@ function Skylink() {
    * @since 0.6.18
    */
   this._priorityWeightScheme = this.PRIORITY_WEIGHT_SCHEME.AUTO;
+
+  /**
+   * Stores the auto bandwidth settings.
+   * @attribute _bandwidthAdjuster
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._bandwidthAdjuster = null;
 }

@@ -776,7 +776,7 @@ Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescriptio
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription, type) {
+Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription, type, beSilentOnLogs) {
   if (!(sessionDescription &amp;&amp; sessionDescription.sdp)) {
     return null;
   }
@@ -818,8 +818,10 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
     }
   }
 
-  log.debug([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
-    &#x27;Parsing session description &quot;&#x27; + type + &#x27;&quot; codecs -&gt;&#x27;], selectedCodecInfo);
+  if (!beSilentOnLogs) {
+    log.debug([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+      &#x27;Parsing session description &quot;&#x27; + type + &#x27;&quot; codecs -&gt;&#x27;], selectedCodecInfo);
+  }
 
   return selectedCodecInfo;
 };
@@ -1141,7 +1143,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
  * @for Skylink
  * @since 0.6.18
  */
-Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription) {
+Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription, beSilentOnLogs) {
   var fingerprint = {
     fingerprint: null,
     fingerprintAlgorithm: null,
@@ -1161,6 +1163,11 @@ Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription) 
       fingerprint.fingerprintAlgorithm = parts[0];
       break;
     }
+  }
+
+  if (!beSilentOnLogs) {
+    log.debug([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+      &#x27;Parsing session description fingerprint -&gt;&#x27;], fingerprint);
   }
 
   return fingerprint;

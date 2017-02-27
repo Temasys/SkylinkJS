@@ -316,6 +316,20 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   generate and use when available.
  * - When not provided, its value is &lt;code&gt;AUTO&lt;/code&gt;.
  *   [Rel: Skylink.PEER_CERTIFICATE]
+ * @param {Boolean|JSON} [options.autoBandwidthAdjustment=false] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this is an experimental feature which may be removed or changed in the future releases.
+ *   This feature is also only available for non-MCU enabled Peer connections.
+ *   &lt;/blockquote&gt; The flag if Peer connections uploading and downloading bandwidth should be automatically adjusted
+ *   each time based on a specified interval.
+ *   &lt;small&gt;Note this would cause &lt;a href=&quot;#event_peerRestart&quot;&gt;&lt;code&gt;peerRestart&lt;/code&gt; event&lt;/a&gt; to be triggered
+ *   for each specified interval.&lt;/small&gt;
+ * @param {Number} [options.autoBandwidthAdjustment.interval=10] The interval each time to adjust bandwidth
+ *   connections in seconds.
+ *   &lt;small&gt;Note that the minimum value is &lt;code&gt;10&lt;/code&gt;.&lt;/small&gt;
+ * @param {Number} [options.autoBandwidthAdjustment.limitAtPercentage=100] The percentage of the average bandwidth to adjust to.
+ *   &lt;small&gt;E.g. &lt;code&gt;avgBandwidth * (limitPercentage / 100)&lt;/code&gt;.&lt;/small&gt;
+ * @param {Boolean} [options.autoBandwidthAdjustment.useUploadBwOnly=false] The flag if average bandwidth computation
+ *   should only consist of the upload bandwidth.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_peerJoined&quot;&gt;
@@ -777,6 +791,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         iceCandidatePoolSize: 0,
         certificate: self.PEER_CERTIFICATE.AUTO
       };
+      self._bandwidthAdjuster = null;
 
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === &#x27;number&#x27;) {
@@ -872,6 +887,29 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
               self.PEER_CERTIFICATE[pcProp] === mediaOptions.peerConnection.certificate) {
               self._peerConnectionConfig.certificate = mediaOptions.peerConnection.certificate;
             }
+          }
+        }
+      }
+
+      if (mediaOptions.autoBandwidthAdjustment) {
+        self._bandwidthAdjuster = {
+          interval: 10,
+          limitAtPercentage: 100,
+          useUploadBwOnly: false
+        };
+
+        if (typeof mediaOptions.autoBandwidthAdjustment === &#x27;object&#x27;) {
+          if (typeof mediaOptions.autoBandwidthAdjustment.interval === &#x27;number&#x27; &amp;&amp;
+            mediaOptions.autoBandwidthAdjustment.interval &gt;= 10) {
+            self._bandwidthAdjuster.interval = mediaOptions.autoBandwidthAdjustment.interval;
+          }
+          if (typeof mediaOptions.autoBandwidthAdjustment.limitAtPercentage === &#x27;number&#x27; &amp;&amp;
+            (mediaOptions.autoBandwidthAdjustment.limitAtPercentage &gt;= 0 &amp;&amp;
+            mediaOptions.autoBandwidthAdjustment.limitAtPercentage &lt;= 100)) {
+            self._bandwidthAdjuster.limitAtPercentage = mediaOptions.autoBandwidthAdjustment.limitAtPercentage;
+          }
+          if (typeof mediaOptions.autoBandwidthAdjustment.useUploadBwOnly === &#x27;boolean&#x27;) {
+            self._bandwidthAdjuster.useUploadBwOnly = mediaOptions.autoBandwidthAdjustment.useUploadBwOnly;
           }
         }
       }
