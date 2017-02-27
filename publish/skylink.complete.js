@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Mon Feb 27 2017 01:35:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Mon Feb 27 2017 13:10:05 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11532,7 +11532,7 @@ if ( (navigator.mozGetUserMedia ||
   }
 })();
 
-/*! skylinkjs - v0.6.18 - Mon Feb 27 2017 01:35:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Mon Feb 27 2017 13:10:05 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -26704,7 +26704,10 @@ Skylink.prototype.RECORDING_STATE = {
  *   <small>The list of available audio source ID can be retrieved by the <a href="https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.</small>
- * @param {Boolean} [options.audio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
+ * @param {Boolean} [options.audio.echoCancellation=true] <blockquote class="info">
+ *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
+ *   feedback. It is recommended to use headphones or other microphone devices rather than the device
+ *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
  * @param {Boolean|JSON} [options.video=false] <blockquote class="info">
  *    Note that the current Edge browser implementation does not support the <code>options.video.optional</code>,
  *    <code>options.video.deviceId</code>, <code>options.video.resolution</code> and
@@ -27550,7 +27553,10 @@ Skylink.prototype.disableVideo = function() {
  *   would not encode at a higher sampling rate specified by this.
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
- * @param {Boolean} [enableAudio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
+ * @param {Boolean} [enableAudio.echoCancellation=true] <blockquote class="info">
+ *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
+ *   feedback. It is recommended to use headphones or other microphone devices rather than the device
+ *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -27632,18 +27638,19 @@ Skylink.prototype.disableVideo = function() {
 Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
   var enableAudioSettings = {
-    stereo: true
+    stereo: false,
+    echoCancellation: true
   };
 
   if (typeof enableAudio === 'function') {
     callback = enableAudio;
-    enableAudio = true;
+    enableAudio = false;
 
   } else if (enableAudio && typeof enableAudio === 'object') {
     enableAudioSettings.usedtx = typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null;
     enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null;
     enableAudioSettings.stereo = enableAudio.stereo === true;
-    enableAudioSettings.echoCancellation = enableAudio.echoCancellation === true;
+    enableAudioSettings.echoCancellation = enableAudio.echoCancellation !== false;
   }
 
   self._throttle(function (runFn) {
@@ -27661,7 +27668,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
     var settings = {
       settings: {
-        audio: enableAudio === true || (enableAudio && typeof enableAudio === 'object') ? enableAudioSettings : false,
+        audio: enableAudio ? enableAudioSettings : false,
         video: {
           screenshare: true,
           exactConstraints: false
@@ -27720,7 +27727,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
     try {
       if (enableAudio && window.webrtcDetectedBrowser === 'firefox') {
-        settings.getUserMediaSettings.audio = true;
+        settings.getUserMediaSettings.audio = { echoCancellation: enableAudioSettings.echoCancellation };
       }
 
       navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
@@ -27730,8 +27737,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         }
 
         navigator.getUserMedia({
-          audio: true
-
+          audio: { echoCancellation: enableAudioSettings.echoCancellation }
         }, function (audioStream) {
           try {
             audioStream.addTrack(stream.getVideoTracks()[0]);
@@ -27752,7 +27758,6 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
           log.error('Failed retrieving audio stream for screensharing stream', error);
           self._onStreamAccessSuccess(stream, settings, true, false);
         });
-
       }, function (error) {
         self._onStreamAccessError(error, settings, true, false);
       });
@@ -27961,10 +27966,10 @@ Skylink.prototype._parseStreamSettings = function(options) {
     settings.settings.audio = {
       stereo: false,
       exactConstraints: !!options.useExactConstraints,
-      echoCancellation: false
+      echoCancellation: true
     };
     settings.getUserMediaSettings.audio = {
-      echoCancellation: false
+      echoCancellation: true
     };
 
     if (typeof options.audio === 'object') {

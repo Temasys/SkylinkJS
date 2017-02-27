@@ -9282,10 +9282,10 @@
                                 },
                                 {
                                     "name": "echoCancellation",
-                                    "description": "The flag to enable audio tracks echo cancellation.",
+                                    "description": "<blockquote class=\"info\">\n  For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible\n  feedback. It is recommended to use headphones or other microphone devices rather than the device\n  in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.",
                                     "type": "Boolean",
                                     "optional": true,
-                                    "optdefault": "false"
+                                    "optdefault": "true"
                                 }
                             ]
                         },
@@ -9377,7 +9377,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 605,
+            "line": 608,
             "description": "<blockquote class=\"info\">\n  Note that if <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is available despite having\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> available, the\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is sent instead of the\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> to Peers.\n</blockquote>\nFunction that sends a new <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>\nto all connected Peers in the Room.",
             "itemtype": "method",
             "name": "sendStream",
@@ -9415,7 +9415,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 826,
+            "line": 829,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -9428,7 +9428,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 865,
+            "line": 868,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -9464,7 +9464,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1003,
+            "line": 1006,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -9479,7 +9479,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1030,
+            "line": 1033,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -9494,7 +9494,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1057,
+            "line": 1060,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -9509,7 +9509,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1084,
+            "line": 1087,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -9524,7 +9524,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1111,
+            "line": 1114,
             "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n  Note that the Opera and Edge browser does not support screensharing, and as for IE / Safari browsers using\n  the Temasys Plugin screensharing support, check out the <a href=\"https://temasys.com.sg/plugin/#commercial-licensing\">\n  commercial licensing</a> for more options.\n</blockquote>\nFunction that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -9563,10 +9563,10 @@
                         },
                         {
                             "name": "echoCancellation",
-                            "description": "The flag to enable audio tracks echo cancellation.",
+                            "description": "<blockquote class=\"info\">\n  For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible\n  feedback. It is recommended to use headphones or other microphone devices rather than the device\n  in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.",
                             "type": "Boolean",
                             "optional": true,
-                            "optdefault": "false"
+                            "optdefault": "true"
                         }
                     ]
                 },
@@ -9598,7 +9598,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1375,
+            "line": 1380,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -9611,7 +9611,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1434,
+            "line": 1439,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -9622,7 +9622,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1481,
+            "line": 1486,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -9633,7 +9633,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1554,
+            "line": 1559,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -9644,7 +9644,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1733,
+            "line": 1738,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -9655,7 +9655,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1868,
+            "line": 1873,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -9666,7 +9666,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1908,
+            "line": 1913,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -9677,7 +9677,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1942,
+            "line": 1947,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -9688,7 +9688,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2017,
+            "line": 2022,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -10000,39 +10000,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:605"
+            "line": " source/stream-media.js:608"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:826"
+            "line": " source/stream-media.js:829"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:865"
+            "line": " source/stream-media.js:868"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1003"
+            "line": " source/stream-media.js:1006"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1030"
+            "line": " source/stream-media.js:1033"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1057"
+            "line": " source/stream-media.js:1060"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1084"
+            "line": " source/stream-media.js:1087"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1111"
+            "line": " source/stream-media.js:1114"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1375"
+            "line": " source/stream-media.js:1380"
         },
         {
             "message": "Missing item type\nGlobal function that clones an object.",

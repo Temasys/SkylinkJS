@@ -404,7 +404,10 @@ Skylink.prototype.RECORDING_STATE = {
  *   &lt;small&gt;The list of available audio source ID can be retrieved by the &lt;a href=&quot;https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices&quot;&gt;&lt;code&gt;navigator.mediaDevices.enumerateDevices&lt;/code&gt;
  *   API&lt;/a&gt;.&lt;/small&gt;
- * @param {Boolean} [options.audio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
+ * @param {Boolean} [options.audio.echoCancellation=true] &lt;blockquote class=&quot;info&quot;&gt;
+ *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
+ *   feedback. It is recommended to use headphones or other microphone devices rather than the device
+ *   in-built microphones.&lt;/blockquote&gt; The flag to enable echo cancellation for audio track.
  * @param {Boolean|JSON} [options.video=false] &lt;blockquote class=&quot;info&quot;&gt;
  *    Note that the current Edge browser implementation does not support the &lt;code&gt;options.video.optional&lt;/code&gt;,
  *    &lt;code&gt;options.video.deviceId&lt;/code&gt;, &lt;code&gt;options.video.resolution&lt;/code&gt; and
@@ -1250,7 +1253,10 @@ Skylink.prototype.disableVideo = function() {
  *   would not encode at a higher sampling rate specified by this.
  *   &lt;small&gt;This value must be between &lt;code&gt;8000&lt;/code&gt; to &lt;code&gt;48000&lt;/code&gt;.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
- * @param {Boolean} [enableAudio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
+ * @param {Boolean} [enableAudio.echoCancellation=true] &lt;blockquote class=&quot;info&quot;&gt;
+ *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
+ *   feedback. It is recommended to use headphones or other microphone devices rather than the device
+ *   in-built microphones.&lt;/blockquote&gt; The flag to enable echo cancellation for audio track.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;
@@ -1332,18 +1338,19 @@ Skylink.prototype.disableVideo = function() {
 Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
   var enableAudioSettings = {
-    stereo: true
+    stereo: false,
+    echoCancellation: true
   };
 
   if (typeof enableAudio === &#x27;function&#x27;) {
     callback = enableAudio;
-    enableAudio = true;
+    enableAudio = false;
 
   } else if (enableAudio &amp;&amp; typeof enableAudio === &#x27;object&#x27;) {
     enableAudioSettings.usedtx = typeof enableAudio.usedtx === &#x27;boolean&#x27; ? enableAudio.usedtx : null;
     enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === &#x27;boolean&#x27; ? enableAudio.useinbandfec : null;
     enableAudioSettings.stereo = enableAudio.stereo === true;
-    enableAudioSettings.echoCancellation = enableAudio.echoCancellation === true;
+    enableAudioSettings.echoCancellation = enableAudio.echoCancellation !== false;
   }
 
   self._throttle(function (runFn) {
@@ -1361,7 +1368,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
     var settings = {
       settings: {
-        audio: enableAudio === true || (enableAudio &amp;&amp; typeof enableAudio === &#x27;object&#x27;) ? enableAudioSettings : false,
+        audio: enableAudio ? enableAudioSettings : false,
         video: {
           screenshare: true,
           exactConstraints: false
@@ -1420,7 +1427,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
     try {
       if (enableAudio &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-        settings.getUserMediaSettings.audio = true;
+        settings.getUserMediaSettings.audio = { echoCancellation: enableAudioSettings.echoCancellation };
       }
 
       navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
@@ -1430,8 +1437,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         }
 
         navigator.getUserMedia({
-          audio: true
-
+          audio: { echoCancellation: enableAudioSettings.echoCancellation }
         }, function (audioStream) {
           try {
             audioStream.addTrack(stream.getVideoTracks()[0]);
@@ -1452,7 +1458,6 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
           log.error(&#x27;Failed retrieving audio stream for screensharing stream&#x27;, error);
           self._onStreamAccessSuccess(stream, settings, true, false);
         });
-
       }, function (error) {
         self._onStreamAccessError(error, settings, true, false);
       });
@@ -1661,10 +1666,10 @@ Skylink.prototype._parseStreamSettings = function(options) {
     settings.settings.audio = {
       stereo: false,
       exactConstraints: !!options.useExactConstraints,
-      echoCancellation: false
+      echoCancellation: true
     };
     settings.getUserMediaSettings.audio = {
-      echoCancellation: false
+      echoCancellation: true
     };
 
     if (typeof options.audio === &#x27;object&#x27;) {
