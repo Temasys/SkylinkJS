@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 17:05:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 22:33:48 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11592,7 +11592,7 @@ if (typeof window.require !== 'function') {
   AdapterJS.defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 17:05:06 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 22:33:48 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -16398,9 +16398,11 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
     log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Generated ICE candidate ->'], candidate);
 
-    if (candidateType === 'endOfCandidates') {
+    if (candidateType === 'endOfCandidates' || !(self._peerConnections[targetMid] &&
+      self._peerConnections[targetMid].localDescription && self._peerConnections[targetMid].localDescription.sdp &&
+      self._peerConnections[targetMid].localDescription.sdp.indexOf('\r\na=mid:' + candidate.sdpMid + '\r\n') > -1)) {
       log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate ' +
-        'end-of-candidates signal to prevent errors ->'], candidate);
+        'end-of-candidates signal or unused ICE candidates to prevent errors ->'], candidate);
       return;
     }
 
@@ -16449,6 +16451,10 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
   } else {
     log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has completed.']);
+
+    if (pc.gathered) {
+      return;
+    }
 
     pc.gathering = false;
     pc.gathered = true;
@@ -16588,7 +16594,10 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     }, null);
 
   if (!(self._peerConnections[targetMid] &&
-    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
+    self._peerConnections[targetMid].remoteDescription &&
+    self._peerConnections[targetMid].remoteDescription.sdp &&
+    self._peerConnections[targetMid].remoteDescription.sdp.indexOf('\r\na=mid:' + candidate.sdpMid + '\r\n') > -1)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
       'as Peer connection does not exists or is closed']);
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.DROPPED,
@@ -18811,7 +18820,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
       iceConnectionState) > -1 && !!self._bandwidthAdjuster && !bandwidth && window.webrtcDetectedBrowser !== 'edge' &&
-      (((self._peerInformations[targetMid] || {}).agent || {}) || 'edge') !== 'edge') {
+      (((self._peerInformations[targetMid] || {}).agent || {}).name || 'edge') !== 'edge') {
       var currentBlock = 0;
       var formatTotalFn = function (arr) {
         var total = 0;
@@ -19098,11 +19107,13 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
         var mLineCounter = -1;
         var addedMids = [];
         var sdpLines = self._peerConnections[targetMid].remoteDescription.sdp.split('\r\n');
+        var rejected = false;
 
         for (var i = 0; i < sdpLines.length; i++) {
           if (sdpLines[i].indexOf('m=') === 0) {
+            rejected = sdpLines[i].split(' ')[1] === '0';
             mLineCounter++;
-          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
+          } else if (sdpLines[i].indexOf('a=mid:') === 0 && !rejected) {
             var mid = sdpLines[i].split('a=mid:')[1] || '';
             if (mid && addedMids.indexOf(mid) === -1) {
               addedMids.push(mid);
@@ -19111,6 +19122,10 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
                 sdpMLineIndex: mLineCounter,
                 candidate: 'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates'
               }));
+              // Start breaking after the first add because of max-bundle option
+              if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.MAX_BUNDLE) {
+                break;
+              }
             }
           }
         }
@@ -19881,9 +19896,16 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }
 
   // Add stream only at offer/answer end
-  if (!self._hasMCU || targetMid === 'MCU') {
+  if ((!self._hasMCU || targetMid === 'MCU') && window.webrtcDetectedBrowser !== 'edge') {
     self._addLocalMediaStreams(targetMid);
   }
+
+  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
+    ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
+    (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
+    !!self._currentCodecSupport.video.h264 : true);
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
@@ -19893,7 +19915,11 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }, function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  });
+  }, window.webrtcDetectedBrowser === 'edge' ? {
+    offerToReceiveVideo: offerToReceiveVideo,
+    offerToReceiveAudio: offerToReceiveAudio,
+    voiceActivityDetection: self._voiceActivityDetection
+  } : undefined);
 };
 
 /**
@@ -19942,6 +19968,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   pc.processingLocalSDP = true;
+
+  // Set them as first
+  if (window.webrtcDetectedBrowser === 'edge') {
+    sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription, {
+      audio: self.AUDIO_CODEC.OPUS,
+      video: self.VIDEO_CODEC.H264
+    });
+  }
 
   // Sets and expected receiving codecs etc.
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
@@ -21265,9 +21299,7 @@ Skylink.prototype.generateUUID = function() {
  *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small>
  * @param {Boolean} [options.enableTURNServer=true] The flag if TURN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.
- * @param {Boolean} [options.enableSTUNServer=true] <blockquote class="info">
- *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
- *   </blockquote> The flag if STUN ICE servers should
+ * @param {Boolean} [options.enableSTUNServer=true] The flag if STUN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
@@ -21846,7 +21878,7 @@ Skylink.prototype.init = function(options, callback) {
     // set the priority weight scheme
     if (typeof options.priorityWeightScheme === 'string') {
       // loop out for every transport option
-      for (var pwsType in self.TURN_TRANSPORT) {
+      for (var pwsType in self.PRIORITY_WEIGHT_SCHEME) {
         // do a check if the transport option is valid
         if (self.PRIORITY_WEIGHT_SCHEME.hasOwnProperty(pwsType) &&
           self.PRIORITY_WEIGHT_SCHEME[pwsType] === options.priorityWeightScheme) {
@@ -21948,11 +21980,8 @@ Skylink.prototype.init = function(options, callback) {
   }
 
   if (window.webrtcDetectedBrowser === 'edge') {
-    enableSTUNServer = false;
     forceTURNSSL = false;
     TURNTransport = self.TURN_TRANSPORT.UDP;
-    audioCodec = self.AUDIO_CODEC.OPUS;
-    videoCodec = self.VIDEO_CODEC.H264;
     enableDataChannel = false;
   }
 
@@ -28172,6 +28201,17 @@ Skylink.prototype._muteStreams = function () {
     muteFn(self._streams.screenshare.streamClone);
   }
 
+  if (window.webrtcDetectedBrowser === 'edge') {
+    for (var peerId in self._peerConnections) {
+      if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId]) {
+        var localStreams = self._peerConnections[peerId].getLocalStreams();
+        for (var s = 0; s < localStreams.length; s++) {
+          muteFn(localStreams[s]);
+        }
+      }
+    }
+  }
+
   log.debug('Updated Streams muted status ->', self._streamsMutedSettings);
 
   return {
@@ -28659,6 +28699,12 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     log.log([peerId, null, null, 'Adding local stream']);
 
     var pc = self._peerConnections[peerId];
+    var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
+    var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && peerId !== 'MCU');
+    var offerToReceiveVideo = !(!self._sdpSettings.connection.video && peerId !== 'MCU') &&
+      ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
+      (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
+      !!self._currentCodecSupport.video.h264 : true);
 
     if (pc) {
       if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
@@ -28678,7 +28724,26 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           }
 
           if (updatedStream !== null && !hasStream) {
-            pc.addStream(updatedStream);
+            if (window.webrtcDetectedBrowser === 'edge' && (!offerToReceiveVideo || !offerToReceiveAudio)) {
+              try {
+                var cloneStream = updatedStream.clone();
+                var tracks = cloneStream.getTracks();
+                for (var t = 0; t < tracks.length; t++) {
+                  if (tracks[t].kind === 'video' ? !offerToReceiveVideo : !offerToReceiveAudio) {
+                    cloneStream.removeTrack(tracks[t]);
+                  } else {
+                    tracks[t].enabled = tracks[t].kind === 'audio' ? !self._streamsMutedSettings.audioMuted :
+                      !self._streamsMutedSettings.videoMuted;
+                  }
+                }
+                pc.addStream(cloneStream);
+              } catch (e) {
+                pc.addStream(updatedStream);
+              }
+            } else {
+              pc.addStream(updatedStream);
+            }
+            pc.addStream(window.webrtcDetectedBrowser === 'edge' ? updatedStream.clone() : updatedStream);
           }
         };
 
@@ -29054,7 +29119,7 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
+Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription, overrideSettings) {
   var self = this;
   var parseFn = function (type, codecSettings) {
     var codec = typeof codecSettings === 'object' ? codecSettings.codec : codecSettings;
@@ -29105,10 +29170,12 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
         for (var j = 0; j < lineParts.length; j++) {
           if (line.indexOf(' ' + lineParts[j]) > 0) {
             lineParts.splice(j, 1);
+            j--;
           } else if (sessionDescription.sdp.match(new RegExp('a=rtpmap:' + lineParts[j] +
             '\ ' + codec + '/.*\r\n', 'gi'))) {
             line += lineParts[j] + ' ';
             lineParts.splice(j, 1);
+            j--;
           }
         }
         // Append the rest of the codecs
@@ -29136,8 +29203,8 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
     setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/.*\r\n', 'gi')));
   };
 
-  parseFn('audio', self._selectedAudioCodec);
-  parseFn('video', self._selectedVideoCodec);
+  parseFn('audio', overrideSettings ? overrideSettings.audio : self._selectedAudioCodec);
+  parseFn('video', overrideSettings ? overrideSettings.video : self._selectedVideoCodec);
 
   return sessionDescription.sdp;
 };
@@ -29293,7 +29360,15 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     sdpLines.splice(sdpLines.length - 1, 1);
   }
 
-  return sdpLines.join('\r\n');
+  var outputStr = sdpLines.join('\r\n');
+
+  /*if (window.webrtcDetectedBrowser === 'edge' && this._streams.userMedia && this._streams.userMedia.stream) {
+    var correctStreamId = this._streams.userMedia.stream.id || this._streams.userMedia.stream.label;
+    outputStr = outputStr.replace(new RegExp('a=msid:.*\ ', 'gi'), 'a=msid:' + correctStreamId + ' ');
+    outputStr = outputStr.replace(new RegExp('\ msid:.*\ ', 'gi'), ' msid:' + correctStreamId + ' ');
+  }*/
+
+  return outputStr;
 };
 
 /**
@@ -29415,6 +29490,11 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
 
   if (this._disableComfortNoiseCodec && audioSettings && typeof audioSettings === 'object' && audioSettings.stereo) {
     parseFn('audio', 'CN');
+  }
+
+  if (window.webrtcDetectedBrowser === 'edge' &&
+    (((this._peerInformations[targetMid] || {}).agent || {}).name || 'unknown').name !== 'edge') {
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-fb:.*\ x-message\ .*\r\n/gi, '');
   }
 
   return sessionDescription.sdp;
@@ -29656,16 +29736,16 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   var mLineIndex = -1;
   var settings = clone(self._sdpSettings);
 
-  /*if (targetMid === 'MCU') {
+  if (targetMid === 'MCU') {
     settings.connection.audio = true;
     settings.connection.video = true;
     settings.connection.data = true;
-  }*/
+  }
 
-  if (settings.video) {
+  if (settings.connection.video) {
     settings.connection.video = (window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-      (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge' ?
-      !!self._currentCodecSupport.video.h264 : true);
+      (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
+      !!self._currentCodecSupport.video.h264 : true;
   }
 
   if (self._hasMCU) {
@@ -29717,7 +29797,11 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
           continue;
         }
 
-        if (direction === 'remote' || sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER) {
+        if (window.webrtcDetectedBrowser === 'edge') {
+          sdpLines.splice(i, 1);
+          i--;
+          continue;
+        } else if (direction === 'remote' || sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER) {
           var parts = sdpLines[i].split(' ');
           parts[1] = 0;
           sdpLines[i] = parts.join(' ');

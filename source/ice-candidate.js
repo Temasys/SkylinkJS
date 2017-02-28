@@ -92,9 +92,11 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
     log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Generated ICE candidate ->'], candidate);
 
-    if (candidateType === 'endOfCandidates') {
+    if (candidateType === 'endOfCandidates' || !(self._peerConnections[targetMid] &&
+      self._peerConnections[targetMid].localDescription && self._peerConnections[targetMid].localDescription.sdp &&
+      self._peerConnections[targetMid].localDescription.sdp.indexOf('\r\na=mid:' + candidate.sdpMid + '\r\n') > -1)) {
       log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate ' +
-        'end-of-candidates signal to prevent errors ->'], candidate);
+        'end-of-candidates signal or unused ICE candidates to prevent errors ->'], candidate);
       return;
     }
 
@@ -143,6 +145,10 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
   } else {
     log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has completed.']);
+
+    if (pc.gathered) {
+      return;
+    }
 
     pc.gathering = false;
     pc.gathered = true;
@@ -282,7 +288,10 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     }, null);
 
   if (!(self._peerConnections[targetMid] &&
-    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
+    self._peerConnections[targetMid].remoteDescription &&
+    self._peerConnections[targetMid].remoteDescription.sdp &&
+    self._peerConnections[targetMid].remoteDescription.sdp.indexOf('\r\na=mid:' + candidate.sdpMid + '\r\n') > -1)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
       'as Peer connection does not exists or is closed']);
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.DROPPED,

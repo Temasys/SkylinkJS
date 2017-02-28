@@ -2029,7 +2029,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     if (!self._hasMCU &amp;&amp; [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
       iceConnectionState) &gt; -1 &amp;&amp; !!self._bandwidthAdjuster &amp;&amp; !bandwidth &amp;&amp; window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp;
-      (((self._peerInformations[targetMid] || {}).agent || {}) || &#x27;edge&#x27;) !== &#x27;edge&#x27;) {
+      (((self._peerInformations[targetMid] || {}).agent || {}).name || &#x27;edge&#x27;) !== &#x27;edge&#x27;) {
       var currentBlock = 0;
       var formatTotalFn = function (arr) {
         var total = 0;
@@ -2316,11 +2316,13 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
         var mLineCounter = -1;
         var addedMids = [];
         var sdpLines = self._peerConnections[targetMid].remoteDescription.sdp.split(&#x27;\r\n&#x27;);
+        var rejected = false;
 
         for (var i = 0; i &lt; sdpLines.length; i++) {
           if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
+            rejected = sdpLines[i].split(&#x27; &#x27;)[1] === &#x27;0&#x27;;
             mLineCounter++;
-          } else if (sdpLines[i].indexOf(&#x27;a=mid:&#x27;) === 0) {
+          } else if (sdpLines[i].indexOf(&#x27;a=mid:&#x27;) === 0 &amp;&amp; !rejected) {
             var mid = sdpLines[i].split(&#x27;a=mid:&#x27;)[1] || &#x27;&#x27;;
             if (mid &amp;&amp; addedMids.indexOf(mid) === -1) {
               addedMids.push(mid);
@@ -2329,6 +2331,10 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
                 sdpMLineIndex: mLineCounter,
                 candidate: &#x27;candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates&#x27;
               }));
+              // Start breaking after the first add because of max-bundle option
+              if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.MAX_BUNDLE) {
+                break;
+              }
             }
           }
         }

@@ -224,9 +224,7 @@ Skylink.prototype.generateUUID = function() {
  *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small>
  * @param {Boolean} [options.enableTURNServer=true] The flag if TURN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.
- * @param {Boolean} [options.enableSTUNServer=true] <blockquote class="info">
- *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
- *   </blockquote> The flag if STUN ICE servers should
+ * @param {Boolean} [options.enableSTUNServer=true] The flag if STUN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
@@ -805,7 +803,7 @@ Skylink.prototype.init = function(options, callback) {
     // set the priority weight scheme
     if (typeof options.priorityWeightScheme === 'string') {
       // loop out for every transport option
-      for (var pwsType in self.TURN_TRANSPORT) {
+      for (var pwsType in self.PRIORITY_WEIGHT_SCHEME) {
         // do a check if the transport option is valid
         if (self.PRIORITY_WEIGHT_SCHEME.hasOwnProperty(pwsType) &&
           self.PRIORITY_WEIGHT_SCHEME[pwsType] === options.priorityWeightScheme) {
@@ -907,11 +905,8 @@ Skylink.prototype.init = function(options, callback) {
   }
 
   if (window.webrtcDetectedBrowser === 'edge') {
-    enableSTUNServer = false;
     forceTURNSSL = false;
     TURNTransport = self.TURN_TRANSPORT.UDP;
-    audioCodec = self.AUDIO_CODEC.OPUS;
-    videoCodec = self.VIDEO_CODEC.H264;
     enableDataChannel = false;
   }
 

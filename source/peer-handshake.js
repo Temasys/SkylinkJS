@@ -153,9 +153,16 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }
 
   // Add stream only at offer/answer end
-  if (!self._hasMCU || targetMid === 'MCU') {
+  if ((!self._hasMCU || targetMid === 'MCU') && window.webrtcDetectedBrowser !== 'edge') {
     self._addLocalMediaStreams(targetMid);
   }
+
+  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
+    ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
+    (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
+    !!self._currentCodecSupport.video.h264 : true);
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
@@ -165,7 +172,11 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }, function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  });
+  }, window.webrtcDetectedBrowser === 'edge' ? {
+    offerToReceiveVideo: offerToReceiveVideo,
+    offerToReceiveAudio: offerToReceiveAudio,
+    voiceActivityDetection: self._voiceActivityDetection
+  } : undefined);
 };
 
 /**
@@ -214,6 +225,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   }
 
   pc.processingLocalSDP = true;
+
+  // Set them as first
+  if (window.webrtcDetectedBrowser === 'edge') {
+    sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription, {
+      audio: self.AUDIO_CODEC.OPUS,
+      video: self.VIDEO_CODEC.H264
+    });
+  }
 
   // Sets and expected receiving codecs etc.
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);

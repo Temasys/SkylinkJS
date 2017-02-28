@@ -1566,6 +1566,17 @@ Skylink.prototype._muteStreams = function () {
     muteFn(self._streams.screenshare.streamClone);
   }
 
+  if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+    for (var peerId in self._peerConnections) {
+      if (self._peerConnections.hasOwnProperty(peerId) &amp;&amp; self._peerConnections[peerId]) {
+        var localStreams = self._peerConnections[peerId].getLocalStreams();
+        for (var s = 0; s &lt; localStreams.length; s++) {
+          muteFn(localStreams[s]);
+        }
+      }
+    }
+  }
+
   log.debug(&#x27;Updated Streams muted status -&gt;&#x27;, self._streamsMutedSettings);
 
   return {
@@ -2053,6 +2064,12 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     log.log([peerId, null, null, &#x27;Adding local stream&#x27;]);
 
     var pc = self._peerConnections[peerId];
+    var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || &#x27;&#x27;;
+    var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; peerId !== &#x27;MCU&#x27;);
+    var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; peerId !== &#x27;MCU&#x27;) &amp;&amp;
+      ((window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
+      ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
+      !!self._currentCodecSupport.video.h264 : true);
 
     if (pc) {
       if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
@@ -2072,7 +2089,26 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           }
 
           if (updatedStream !== null &amp;&amp; !hasStream) {
-            pc.addStream(updatedStream);
+            if (window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; (!offerToReceiveVideo || !offerToReceiveAudio)) {
+              try {
+                var cloneStream = updatedStream.clone();
+                var tracks = cloneStream.getTracks();
+                for (var t = 0; t &lt; tracks.length; t++) {
+                  if (tracks[t].kind === &#x27;video&#x27; ? !offerToReceiveVideo : !offerToReceiveAudio) {
+                    cloneStream.removeTrack(tracks[t]);
+                  } else {
+                    tracks[t].enabled = tracks[t].kind === &#x27;audio&#x27; ? !self._streamsMutedSettings.audioMuted :
+                      !self._streamsMutedSettings.videoMuted;
+                  }
+                }
+                pc.addStream(cloneStream);
+              } catch (e) {
+                pc.addStream(updatedStream);
+              }
+            } else {
+              pc.addStream(updatedStream);
+            }
+            pc.addStream(window.webrtcDetectedBrowser === &#x27;edge&#x27; ? updatedStream.clone() : updatedStream);
           }
         };
 

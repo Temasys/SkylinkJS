@@ -1938,7 +1938,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
       iceConnectionState) > -1 && !!self._bandwidthAdjuster && !bandwidth && window.webrtcDetectedBrowser !== 'edge' &&
-      (((self._peerInformations[targetMid] || {}).agent || {}) || 'edge') !== 'edge') {
+      (((self._peerInformations[targetMid] || {}).agent || {}).name || 'edge') !== 'edge') {
       var currentBlock = 0;
       var formatTotalFn = function (arr) {
         var total = 0;
@@ -2225,11 +2225,13 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
         var mLineCounter = -1;
         var addedMids = [];
         var sdpLines = self._peerConnections[targetMid].remoteDescription.sdp.split('\r\n');
+        var rejected = false;
 
         for (var i = 0; i < sdpLines.length; i++) {
           if (sdpLines[i].indexOf('m=') === 0) {
+            rejected = sdpLines[i].split(' ')[1] === '0';
             mLineCounter++;
-          } else if (sdpLines[i].indexOf('a=mid:') === 0) {
+          } else if (sdpLines[i].indexOf('a=mid:') === 0 && !rejected) {
             var mid = sdpLines[i].split('a=mid:')[1] || '';
             if (mid && addedMids.indexOf(mid) === -1) {
               addedMids.push(mid);
@@ -2238,6 +2240,10 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
                 sdpMLineIndex: mLineCounter,
                 candidate: 'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates'
               }));
+              // Start breaking after the first add because of max-bundle option
+              if (self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.MAX_BUNDLE) {
+                break;
+              }
             }
           }
         }

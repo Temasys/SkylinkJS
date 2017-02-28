@@ -1,4 +1,3 @@
-
 /**
  * Workaround Edge fixes which is temporarily and works for now due to the audio track + video track rendering issue
  * And Edge current does not support re-negotiation for now in the SDK.

@@ -315,9 +315,7 @@ Skylink.prototype.generateUUID = function() {
  *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
  * @param {Boolean} [options.enableTURNServer=true] The flag if TURN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.
- * @param {Boolean} [options.enableSTUNServer=true] &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that for Edge browsers, this value is overriden as &lt;code&gt;false&lt;/code&gt; due to its supports.
- *   &lt;/blockquote&gt; The flag if STUN ICE servers should
+ * @param {Boolean} [options.enableSTUNServer=true] The flag if STUN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
@@ -789,9 +787,6 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if MCU refreshConnection() should use renegotiation
     mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === &#x27;boolean&#x27;) ?
       options.mcuUseRenegoRestart : mcuUseRenegoRestart;
-    // set the priority weight scheme
-    priorityWeightScheme = (options.priorityWeightScheme &amp;&amp; typeof options.priorityWeightScheme === &#x27;string&#x27;) ?
-      options.priorityWeightScheme : priorityWeightScheme;
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === &#x27;object&#x27; &amp;&amp; options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === &#x27;boolean&#x27;) ?
@@ -896,6 +891,19 @@ Skylink.prototype.init = function(options, callback) {
       }
     }
 
+    // set the priority weight scheme
+    if (typeof options.priorityWeightScheme === &#x27;string&#x27;) {
+      // loop out for every transport option
+      for (var pwsType in self.PRIORITY_WEIGHT_SCHEME) {
+        // do a check if the transport option is valid
+        if (self.PRIORITY_WEIGHT_SCHEME.hasOwnProperty(pwsType) &amp;&amp;
+          self.PRIORITY_WEIGHT_SCHEME[pwsType] === options.priorityWeightScheme) {
+          priorityWeightScheme = options.priorityWeightScheme;
+          break;
+        }
+      }
+    }
+
     // set the codec params
     if (options.codecParams &amp;&amp; typeof options.codecParams === &#x27;object&#x27;) {
       // Set audio codecs params
@@ -988,11 +996,8 @@ Skylink.prototype.init = function(options, callback) {
   }
 
   if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
-    enableSTUNServer = false;
     forceTURNSSL = false;
     TURNTransport = self.TURN_TRANSPORT.UDP;
-    audioCodec = self.AUDIO_CODEC.OPUS;
-    videoCodec = self.VIDEO_CODEC.H264;
     enableDataChannel = false;
   }
 

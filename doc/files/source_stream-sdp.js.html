@@ -387,7 +387,7 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
+Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription, overrideSettings) {
   var self = this;
   var parseFn = function (type, codecSettings) {
     var codec = typeof codecSettings === &#x27;object&#x27; ? codecSettings.codec : codecSettings;
@@ -438,10 +438,12 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
         for (var j = 0; j &lt; lineParts.length; j++) {
           if (line.indexOf(&#x27; &#x27; + lineParts[j]) &gt; 0) {
             lineParts.splice(j, 1);
+            j--;
           } else if (sessionDescription.sdp.match(new RegExp(&#x27;a=rtpmap:&#x27; + lineParts[j] +
             &#x27;\ &#x27; + codec + &#x27;/.*\r\n&#x27;, &#x27;gi&#x27;))) {
             line += lineParts[j] + &#x27; &#x27;;
             lineParts.splice(j, 1);
+            j--;
           }
         }
         // Append the rest of the codecs
@@ -469,8 +471,8 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
     setLineFn(sessionDescription.sdp.match(new RegExp(&#x27;a=rtpmap:.*\ &#x27; + codec + &#x27;\/.*\r\n&#x27;, &#x27;gi&#x27;)));
   };
 
-  parseFn(&#x27;audio&#x27;, self._selectedAudioCodec);
-  parseFn(&#x27;video&#x27;, self._selectedVideoCodec);
+  parseFn(&#x27;audio&#x27;, overrideSettings ? overrideSettings.audio : self._selectedAudioCodec);
+  parseFn(&#x27;video&#x27;, overrideSettings ? overrideSettings.video : self._selectedVideoCodec);
 
   return sessionDescription.sdp;
 };
@@ -626,7 +628,15 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     sdpLines.splice(sdpLines.length - 1, 1);
   }
 
-  return sdpLines.join(&#x27;\r\n&#x27;);
+  var outputStr = sdpLines.join(&#x27;\r\n&#x27;);
+
+  /*if (window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; this._streams.userMedia &amp;&amp; this._streams.userMedia.stream) {
+    var correctStreamId = this._streams.userMedia.stream.id || this._streams.userMedia.stream.label;
+    outputStr = outputStr.replace(new RegExp(&#x27;a=msid:.*\ &#x27;, &#x27;gi&#x27;), &#x27;a=msid:&#x27; + correctStreamId + &#x27; &#x27;);
+    outputStr = outputStr.replace(new RegExp(&#x27;\ msid:.*\ &#x27;, &#x27;gi&#x27;), &#x27; msid:&#x27; + correctStreamId + &#x27; &#x27;);
+  }*/
+
+  return outputStr;
 };
 
 /**
@@ -748,6 +758,11 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
 
   if (this._disableComfortNoiseCodec &amp;&amp; audioSettings &amp;&amp; typeof audioSettings === &#x27;object&#x27; &amp;&amp; audioSettings.stereo) {
     parseFn(&#x27;audio&#x27;, &#x27;CN&#x27;);
+  }
+
+  if (window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp;
+    (((this._peerInformations[targetMid] || {}).agent || {}).name || &#x27;unknown&#x27;).name !== &#x27;edge&#x27;) {
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-fb:.*\ x-message\ .*\r\n/gi, &#x27;&#x27;);
   }
 
   return sessionDescription.sdp;
@@ -989,16 +1004,16 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   var mLineIndex = -1;
   var settings = clone(self._sdpSettings);
 
-  /*if (targetMid === &#x27;MCU&#x27;) {
+  if (targetMid === &#x27;MCU&#x27;) {
     settings.connection.audio = true;
     settings.connection.video = true;
     settings.connection.data = true;
-  }*/
+  }
 
-  if (settings.video) {
+  if (settings.connection.video) {
     settings.connection.video = (window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
-      ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27; ?
-      !!self._currentCodecSupport.video.h264 : true);
+      ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
+      !!self._currentCodecSupport.video.h264 : true;
   }
 
   if (self._hasMCU) {
@@ -1050,7 +1065,11 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
           continue;
         }
 
-        if (direction === &#x27;remote&#x27; || sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER) {
+        if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+          sdpLines.splice(i, 1);
+          i--;
+          continue;
+        } else if (direction === &#x27;remote&#x27; || sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER) {
           var parts = sdpLines[i].split(&#x27; &#x27;);
           parts[1] = 0;
           sdpLines[i] = parts.join(&#x27; &#x27;);

@@ -183,9 +183,11 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
     log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, candidateType, &#x27;Generated ICE candidate -&gt;&#x27;], candidate);
 
-    if (candidateType === &#x27;endOfCandidates&#x27;) {
+    if (candidateType === &#x27;endOfCandidates&#x27; || !(self._peerConnections[targetMid] &amp;&amp;
+      self._peerConnections[targetMid].localDescription &amp;&amp; self._peerConnections[targetMid].localDescription.sdp &amp;&amp;
+      self._peerConnections[targetMid].localDescription.sdp.indexOf(&#x27;\r\na=mid:&#x27; + candidate.sdpMid + &#x27;\r\n&#x27;) &gt; -1)) {
       log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, candidateType, &#x27;Dropping of sending ICE candidate &#x27; +
-        &#x27;end-of-candidates signal to prevent errors -&gt;&#x27;], candidate);
+        &#x27;end-of-candidates signal or unused ICE candidates to prevent errors -&gt;&#x27;], candidate);
       return;
     }
 
@@ -234,6 +236,10 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
   } else {
     log.log([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;ICE gathering has completed.&#x27;]);
+
+    if (pc.gathered) {
+      return;
+    }
 
     pc.gathering = false;
     pc.gathered = true;
@@ -373,7 +379,10 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     }, null);
 
   if (!(self._peerConnections[targetMid] &amp;&amp;
-    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &amp;&amp;
+    self._peerConnections[targetMid].remoteDescription &amp;&amp;
+    self._peerConnections[targetMid].remoteDescription.sdp &amp;&amp;
+    self._peerConnections[targetMid].remoteDescription.sdp.indexOf(&#x27;\r\na=mid:&#x27; + candidate.sdpMid + &#x27;\r\n&#x27;) &gt; -1)) {
     log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Dropping ICE candidate &#x27; +
       &#x27;as Peer connection does not exists or is closed&#x27;]);
     self._trigger(&#x27;candidateProcessingState&#x27;, self.CANDIDATE_PROCESSING_STATE.DROPPED,

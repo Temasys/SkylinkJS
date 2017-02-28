@@ -852,7 +852,10 @@ Demo.Skylink.init(config, function (error, success) {
     Demo.Skylink.joinRoom(window.demoAppJoinRoomConfig || {
       userData: displayName,
       audio: { stereo: true },
-      video: true
+      video: true,
+      peerConnection: {
+        bundlePolicy: 'max-bundle'
+      }
     });
   }
 });

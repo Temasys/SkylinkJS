@@ -2649,7 +2649,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 185,
+            "line": 191,
             "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -2660,7 +2660,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 209,
+            "line": 215,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -2671,7 +2671,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 242,
+            "line": 248,
             "description": "Function that adds the ICE candidate to Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidate",
@@ -3473,7 +3473,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 171,
+            "line": 182,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -4356,7 +4356,7 @@
                         },
                         {
                             "name": "enableSTUNServer",
-                            "description": "<blockquote class=\"info\">\n  Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.\n  </blockquote> The flag if STUN ICE servers should\n  be used when constructing Peer connections to allow TURN connections when required.",
+                            "description": "The flag if STUN ICE servers should\n  be used when constructing Peer connections to allow TURN connections when required.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
@@ -4924,7 +4924,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1050,
+            "line": 1055,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4935,7 +4935,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1124,
+            "line": 1129,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -4946,7 +4946,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1194,
+            "line": 1199,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -4957,7 +4957,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1325,
+            "line": 1330,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -9678,7 +9678,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1486,
+            "line": 1497,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -9689,7 +9689,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1559,
+            "line": 1570,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -9700,7 +9700,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1738,
+            "line": 1749,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -9711,7 +9711,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1873,
+            "line": 1884,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -9722,7 +9722,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1913,
+            "line": 1924,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -9733,7 +9733,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1947,
+            "line": 1958,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -9744,7 +9744,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2022,
+            "line": 2058,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -9788,7 +9788,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 387,
+            "line": 389,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -9799,7 +9799,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 403,
+            "line": 405,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -9810,7 +9810,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 541,
+            "line": 551,
             "description": "Function that modifies the session description to remove apt/rtx lines that does exists.",
             "itemtype": "method",
             "name": "_removeSDPUnknownAptRtx",
@@ -9821,7 +9821,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 596,
+            "line": 606,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -9832,7 +9832,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 665,
+            "line": 680,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -9843,7 +9843,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 681,
+            "line": 696,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -9854,7 +9854,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 738,
+            "line": 753,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -9865,7 +9865,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 780,
+            "line": 795,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -9876,7 +9876,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 872,
+            "line": 887,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -9887,7 +9887,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1048,
+            "line": 1067,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",

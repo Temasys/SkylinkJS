@@ -296,7 +296,7 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
+Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription, overrideSettings) {
   var self = this;
   var parseFn = function (type, codecSettings) {
     var codec = typeof codecSettings === 'object' ? codecSettings.codec : codecSettings;
@@ -347,10 +347,12 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
         for (var j = 0; j < lineParts.length; j++) {
           if (line.indexOf(' ' + lineParts[j]) > 0) {
             lineParts.splice(j, 1);
+            j--;
           } else if (sessionDescription.sdp.match(new RegExp('a=rtpmap:' + lineParts[j] +
             '\ ' + codec + '/.*\r\n', 'gi'))) {
             line += lineParts[j] + ' ';
             lineParts.splice(j, 1);
+            j--;
           }
         }
         // Append the rest of the codecs
@@ -378,8 +380,8 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription) {
     setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/.*\r\n', 'gi')));
   };
 
-  parseFn('audio', self._selectedAudioCodec);
-  parseFn('video', self._selectedVideoCodec);
+  parseFn('audio', overrideSettings ? overrideSettings.audio : self._selectedAudioCodec);
+  parseFn('video', overrideSettings ? overrideSettings.video : self._selectedVideoCodec);
 
   return sessionDescription.sdp;
 };
@@ -535,7 +537,15 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     sdpLines.splice(sdpLines.length - 1, 1);
   }
 
-  return sdpLines.join('\r\n');
+  var outputStr = sdpLines.join('\r\n');
+
+  /*if (window.webrtcDetectedBrowser === 'edge' && this._streams.userMedia && this._streams.userMedia.stream) {
+    var correctStreamId = this._streams.userMedia.stream.id || this._streams.userMedia.stream.label;
+    outputStr = outputStr.replace(new RegExp('a=msid:.*\ ', 'gi'), 'a=msid:' + correctStreamId + ' ');
+    outputStr = outputStr.replace(new RegExp('\ msid:.*\ ', 'gi'), ' msid:' + correctStreamId + ' ');
+  }*/
+
+  return outputStr;
 };
 
 /**
@@ -657,6 +667,11 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
 
   if (this._disableComfortNoiseCodec && audioSettings && typeof audioSettings === 'object' && audioSettings.stereo) {
     parseFn('audio', 'CN');
+  }
+
+  if (window.webrtcDetectedBrowser === 'edge' &&
+    (((this._peerInformations[targetMid] || {}).agent || {}).name || 'unknown').name !== 'edge') {
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-fb:.*\ x-message\ .*\r\n/gi, '');
   }
 
   return sessionDescription.sdp;
@@ -898,16 +913,16 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   var mLineIndex = -1;
   var settings = clone(self._sdpSettings);
 
-  /*if (targetMid === 'MCU') {
+  if (targetMid === 'MCU') {
     settings.connection.audio = true;
     settings.connection.video = true;
     settings.connection.data = true;
-  }*/
+  }
 
-  if (settings.video) {
+  if (settings.connection.video) {
     settings.connection.video = (window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-      (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge' ?
-      !!self._currentCodecSupport.video.h264 : true);
+      (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
+      !!self._currentCodecSupport.video.h264 : true;
   }
 
   if (self._hasMCU) {
@@ -959,7 +974,11 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
           continue;
         }
 
-        if (direction === 'remote' || sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER) {
+        if (window.webrtcDetectedBrowser === 'edge') {
+          sdpLines.splice(i, 1);
+          i--;
+          continue;
+        } else if (direction === 'remote' || sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER) {
           var parts = sdpLines[i].split(' ');
           parts[1] = 0;
           sdpLines[i] = parts.join(' ');
