@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 22:33:48 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 23:49:05 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -8043,6 +8043,18 @@ Skylink.prototype.getPeersCustomSettings = function () {
             customSettingsList[peerId].settings.video = clone(self._streams.userMedia.settings.video);
             customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
             break;
+          } else if (window.webrtcDetectedBrowser === 'edge') {
+            customSettingsList[peerId].settings.audio = clone(self._streams.userMedia.settings.audio);
+            customSettingsList[peerId].settings.video = clone(self._streams.userMedia.settings.video);
+            customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
+            if (streams[s].getAudioTracks().length === 0) {
+              customSettingsList[peerId].settings.audio = false;
+              customSettingsList[peerId].mediaStatus.audioMuted = true;
+            }
+            if (streams[s].getVideoTracks().length === 0) {
+              customSettingsList[peerId].settings.video = false;
+              customSettingsList[peerId].mediaStatus.videoMuted = true;
+            }
           }
         }
       }
