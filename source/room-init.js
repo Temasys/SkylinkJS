@@ -698,9 +698,6 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if MCU refreshConnection() should use renegotiation
     mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
       options.mcuUseRenegoRestart : mcuUseRenegoRestart;
-    // set the priority weight scheme
-    priorityWeightScheme = (options.priorityWeightScheme && typeof options.priorityWeightScheme === 'string') ?
-      options.priorityWeightScheme : priorityWeightScheme;
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
@@ -801,6 +798,19 @@ Skylink.prototype.init = function(options, callback) {
             };
             break;
           }
+        }
+      }
+    }
+
+    // set the priority weight scheme
+    if (typeof options.priorityWeightScheme === 'string') {
+      // loop out for every transport option
+      for (var pwsType in self.TURN_TRANSPORT) {
+        // do a check if the transport option is valid
+        if (self.PRIORITY_WEIGHT_SCHEME.hasOwnProperty(pwsType) &&
+          self.PRIORITY_WEIGHT_SCHEME[pwsType] === options.priorityWeightScheme) {
+          priorityWeightScheme = options.priorityWeightScheme;
+          break;
         }
       }
     }

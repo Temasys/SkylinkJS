@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 16:55:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 17:05:06 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11592,7 +11592,7 @@ if (typeof window.require !== 'function') {
   AdapterJS.defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 16:55:26 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 17:05:06 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -21739,9 +21739,6 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if MCU refreshConnection() should use renegotiation
     mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
       options.mcuUseRenegoRestart : mcuUseRenegoRestart;
-    // set the priority weight scheme
-    priorityWeightScheme = (options.priorityWeightScheme && typeof options.priorityWeightScheme === 'string') ?
-      options.priorityWeightScheme : priorityWeightScheme;
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
@@ -21842,6 +21839,19 @@ Skylink.prototype.init = function(options, callback) {
             };
             break;
           }
+        }
+      }
+    }
+
+    // set the priority weight scheme
+    if (typeof options.priorityWeightScheme === 'string') {
+      // loop out for every transport option
+      for (var pwsType in self.TURN_TRANSPORT) {
+        // do a check if the transport option is valid
+        if (self.PRIORITY_WEIGHT_SCHEME.hasOwnProperty(pwsType) &&
+          self.PRIORITY_WEIGHT_SCHEME[pwsType] === options.priorityWeightScheme) {
+          priorityWeightScheme = options.priorityWeightScheme;
+          break;
         }
       }
     }
