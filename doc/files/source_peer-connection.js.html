@@ -2028,7 +2028,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
 
     if (!self._hasMCU &amp;&amp; [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
-      iceConnectionState) &gt; -1 &amp;&amp; !!self._bandwidthAdjuster &amp;&amp; !bandwidth) {
+      iceConnectionState) &gt; -1 &amp;&amp; !!self._bandwidthAdjuster &amp;&amp; !bandwidth &amp;&amp; window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp;
+      (((self._peerInformations[targetMid] || {}).agent || {}) || &#x27;edge&#x27;) !== &#x27;edge&#x27;) {
       var currentBlock = 0;
       var formatTotalFn = function (arr) {
         var total = 0;

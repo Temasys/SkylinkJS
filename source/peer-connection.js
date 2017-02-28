@@ -1937,7 +1937,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
 
     if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
-      iceConnectionState) > -1 && !!self._bandwidthAdjuster && !bandwidth) {
+      iceConnectionState) > -1 && !!self._bandwidthAdjuster && !bandwidth && window.webrtcDetectedBrowser !== 'edge' &&
+      (((self._peerInformations[targetMid] || {}).agent || {}) || 'edge') !== 'edge') {
       var currentBlock = 0;
       var formatTotalFn = function (arr) {
         var total = 0;

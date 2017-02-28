@@ -3221,7 +3221,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2028,
+            "line": 2029,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3232,7 +3232,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2176,
+            "line": 2177,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3243,7 +3243,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2196,
+            "line": 2197,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -3921,7 +3921,7 @@
                         },
                         {
                             "name": "autoBandwidthAdjustment",
-                            "description": "<blockquote class=\"info\">\n  Note that this is an experimental feature which may be removed or changed in the future releases.\n  This feature is also only available for non-MCU enabled Peer connections.\n  </blockquote> The flag if Peer connections uploading and downloading bandwidth should be automatically adjusted\n  each time based on a specified interval.\n  <small>Note this would cause <a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> to be triggered\n  for each specified interval.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that this is an experimental feature which may be removed or changed in the future releases.\n  This feature is also only available for non-MCU enabled Peer connections and Edge Peer connections.\n  </blockquote> The flag if Peer connections uploading and downloading bandwidth should be automatically adjusted\n  each time based on a specified interval.\n  <small>Note this would cause <a href=\"#event_peerRestart\"><code>peerRestart</code> event</a> to be triggered\n  for each specified interval.</small>",
                             "type": "Boolean|JSON",
                             "optional": true,
                             "optdefault": "false",

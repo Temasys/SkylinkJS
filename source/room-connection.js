@@ -227,7 +227,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   [Rel: Skylink.PEER_CERTIFICATE]
  * @param {Boolean|JSON} [options.autoBandwidthAdjustment=false] <blockquote class="info">
  *   Note that this is an experimental feature which may be removed or changed in the future releases.
- *   This feature is also only available for non-MCU enabled Peer connections.
+ *   This feature is also only available for non-MCU enabled Peer connections and Edge Peer connections.
  *   </blockquote> The flag if Peer connections uploading and downloading bandwidth should be automatically adjusted
  *   each time based on a specified interval.
  *   <small>Note this would cause <a href="#event_peerRestart"><code>peerRestart</code> event</a> to be triggered

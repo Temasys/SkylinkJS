@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 16:51:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 16:55:26 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11592,7 +11592,7 @@ if (typeof window.require !== 'function') {
   AdapterJS.defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 16:51:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 16:55:26 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -18810,7 +18810,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
 
     if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
-      iceConnectionState) > -1 && !!self._bandwidthAdjuster && !bandwidth) {
+      iceConnectionState) > -1 && !!self._bandwidthAdjuster && !bandwidth && window.webrtcDetectedBrowser !== 'edge' &&
+      (((self._peerInformations[targetMid] || {}).agent || {}) || 'edge') !== 'edge') {
       var currentBlock = 0;
       var formatTotalFn = function (arr) {
         var total = 0;
@@ -20390,7 +20391,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   [Rel: Skylink.PEER_CERTIFICATE]
  * @param {Boolean|JSON} [options.autoBandwidthAdjustment=false] <blockquote class="info">
  *   Note that this is an experimental feature which may be removed or changed in the future releases.
- *   This feature is also only available for non-MCU enabled Peer connections.
+ *   This feature is also only available for non-MCU enabled Peer connections and Edge Peer connections.
  *   </blockquote> The flag if Peer connections uploading and downloading bandwidth should be automatically adjusted
  *   each time based on a specified interval.
  *   <small>Note this would cause <a href="#event_peerRestart"><code>peerRestart</code> event</a> to be triggered

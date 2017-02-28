@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 16:51:57 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Feb 28 2017 16:55:26 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -7216,7 +7216,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
 
     if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
-      iceConnectionState) > -1 && !!self._bandwidthAdjuster && !bandwidth) {
+      iceConnectionState) > -1 && !!self._bandwidthAdjuster && !bandwidth && window.webrtcDetectedBrowser !== 'edge' &&
+      (((self._peerInformations[targetMid] || {}).agent || {}) || 'edge') !== 'edge') {
       var currentBlock = 0;
       var formatTotalFn = function (arr) {
         var total = 0;
@@ -8796,7 +8797,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   [Rel: Skylink.PEER_CERTIFICATE]
  * @param {Boolean|JSON} [options.autoBandwidthAdjustment=false] <blockquote class="info">
  *   Note that this is an experimental feature which may be removed or changed in the future releases.
- *   This feature is also only available for non-MCU enabled Peer connections.
+ *   This feature is also only available for non-MCU enabled Peer connections and Edge Peer connections.
  *   </blockquote> The flag if Peer connections uploading and downloading bandwidth should be automatically adjusted
  *   each time based on a specified interval.
  *   <small>Note this would cause <a href="#event_peerRestart"><code>peerRestart</code> event</a> to be triggered
