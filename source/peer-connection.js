@@ -929,15 +929,17 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     }
   };
 
-  for (var channelProp in self._dataChannels[peerId]) {
-    if (self._dataChannels[peerId].hasOwnProperty(channelProp) && self._dataChannels[peerId][channelProp]) {
-      result.connection.dataChannels[self._dataChannels[peerId][channelProp].channel.label] = {
-        label: self._dataChannels[peerId][channelProp].channel.label,
-        readyState: self._dataChannels[peerId][channelProp].channel.readyState,
-        channelType: channelProp === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA,
-        currentTransferId: self._dataChannels[peerId][channelProp].transferId || null,
-        currentStreamId: self._dataChannels[peerId][channelProp].streamId || null
-      };
+  if (self._dataChannels[peerId]) {
+    for (var channelProp in self._dataChannels[peerId]) {
+      if (self._dataChannels[peerId].hasOwnProperty(channelProp) && self._dataChannels[peerId][channelProp]) {
+        result.connection.dataChannels[self._dataChannels[peerId][channelProp].channel.label] = {
+          label: self._dataChannels[peerId][channelProp].channel.label,
+          readyState: self._dataChannels[peerId][channelProp].channel.readyState,
+          channelType: channelProp === 'main' ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA,
+          currentTransferId: self._dataChannels[peerId][channelProp].transferId || null,
+          currentStreamId: self._dataChannels[peerId][channelProp].streamId || null
+        };
+      }
     }
   }
 

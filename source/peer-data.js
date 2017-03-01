@@ -330,7 +330,7 @@ Skylink.prototype.getPeersInRoom = function() {
  *   <li><code>isSelf</code><var><b>{</b>Boolean<b>}</b></var><p>The flag if Peer is User.</p></li>
  *   </p></li></ul></li></ul>
  * @example
- *   // Example 1: Get the list of current Peer Streams in the same Room
+ *   // Example 1: Get the list of current Peers Streams in the same Room
  *   var streams = skylinkDemo.getPeersStream();
  * @for Skylink
  * @since 0.6.16
@@ -381,6 +381,62 @@ Skylink.prototype.getPeersStream = function() {
   }
 
   return listOfPeersStreams;
+};
+
+/**
+ * Function that gets the current list of connected Peers Datachannel connections in the Room.
+ * @method getPeersDatachannels
+ * @return {JSON} The list of Peers Stream. <ul>
+ *   <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer Datachannels information.</p><ul>
+ *   <li><code>#channelName</code><var><b>{</b>JSON<b>}</b></var><p>The Datachannel information.</p><ul>
+ *   <li><code>channelName</code><var><b>{</b>String<b>}</b></var><p>The Datachannel ID..</p><ul>
+ *   <li><code>channelType</code><var><b>{</b>String<b>}</b></var><p>The Datachannel type.
+ *   [Rel: Skylink.DATA_CHANNEL_TYPE]</p></li>
+ *   <li><code>channelProp</code><var><b>{</b>String<b>}</b></var><p>The Datachannel property.</p></li>
+ *   <li><code>currentTransferId</code><var><b>{</b>String<b>}</b></var><p>The Datachannel connection
+ *   current progressing transfer session. <small>Defined as <code>null</code> when there is
+ *   currently no transfer session progressing on the Datachannel connection.</small></p></li>
+ *   <li><code>currentStreamId</code><var><b>{</b>String<b>}</b></var><p>The Datachannel connection
+ *   current data streaming session ID. <small>Defined as <code>null</code> when there is currently
+ *   no data streaming session on the Datachannel connection.</small></p></li>
+ *   <li><code>readyState</code><var><b>{</b>String<b>}</b></var><p>The Datachannel connection readyState.
+ *   [Rel: Skylink.DATA_CHANNEL_STATE]</p></li>
+ *   <li><code>bufferedAmountLow</code><var><b>{</b>Number<b>}</b></var><p>The Datachannel buffered amount.</p></li>
+ *   <li><code>bufferedAmountLowThreshold</code><var><b>{</b>Number<b>}</b></var><p>The Datachannel
+ *   buffered amount threshold.</p></li>
+ *   </p></li></p></li></ul></li></ul></li></ul>
+ * @example
+ *   // Example 1: Get the list of current Peers Datachannels in the same Room
+ *   var channels = skylinkDemo.getPeersDatachannels();
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.getPeersDatachannels = function() {
+  var listOfPeersDatachannels = {};
+  var listOfPeers = Object.keys(this._peerConnections);
+
+  for (var i = 0; i < listOfPeers.length; i++) {
+    listOfPeersDatachannels[listOfPeers[i]] = {};
+
+    if (this._dataChannels[listOfPeers[i]]) {
+      for (var channelProp in this._dataChannels[listOfPeers[i]]) {
+        if (this._dataChannels[listOfPeers[i]].hasOwnProperty(channelProp) &&
+          this._dataChannels[listOfPeers[i]][channelProp]) {
+          var channel = this._dataChannels[listOfPeers[i]][channelProp];
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName] = this._getDataChannelBuffer(listOfPeers[i], channelProp);
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelName = channel.channelName;
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelType = channel.channelType;
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelProp = channelProp;
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].currentTransferId = channel.transferId;
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].currentStreamId = channel.streamId;
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].readyState = channel.channel ?
+            channel.channel.readyState : self.DATA_CHANNEL_STATE.CREATE_ERROR;
+        }
+      }
+    }
+  }
+
+  return listOfPeersDatachannels;
 };
 
 /**

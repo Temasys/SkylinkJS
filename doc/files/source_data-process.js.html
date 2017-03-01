@@ -241,6 +241,7 @@ Skylink.prototype._blobToArrayBuffer = function(data, callback) {
  * Function that chunks Blob object based on the data chunk size provided.
  * If provided Blob object size is lesser than or equals to the chunk size, it should return an array
  *   of length of &lt;code&gt;1&lt;/code&gt;.
+ * This also can be used for ArrayBuffer object.
  * @method _chunkBlobData
  * @private
  * @for Skylink
@@ -250,7 +251,7 @@ Skylink.prototype._chunkBlobData = function(blob, chunkSize) {
   var chunksArray = [];
   var startCount = 0;
   var endCount = 0;
-  var blobByteSize = blob.size;
+  var blobByteSize = blob instanceof Blob ? blob.size : blob.byteArray;
 
   if (blobByteSize &gt; chunkSize) {
     // File Size greater than Chunk size

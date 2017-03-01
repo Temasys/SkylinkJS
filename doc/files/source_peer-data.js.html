@@ -421,7 +421,7 @@ Skylink.prototype.getPeersInRoom = function() {
  *   &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Boolean&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The flag if Peer is User.&lt;/p&gt;&lt;/li&gt;
  *   &lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
  * @example
- *   // Example 1: Get the list of current Peer Streams in the same Room
+ *   // Example 1: Get the list of current Peers Streams in the same Room
  *   var streams = skylinkDemo.getPeersStream();
  * @for Skylink
  * @since 0.6.16
@@ -472,6 +472,62 @@ Skylink.prototype.getPeersStream = function() {
   }
 
   return listOfPeersStreams;
+};
+
+/**
+ * Function that gets the current list of connected Peers Datachannel connections in the Room.
+ * @method getPeersDatachannels
+ * @return {JSON} The list of Peers Stream. &lt;ul&gt;
+ *   &lt;li&gt;&lt;code&gt;#peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Peer Datachannels information.&lt;/p&gt;&lt;ul&gt;
+ *   &lt;li&gt;&lt;code&gt;#channelName&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel information.&lt;/p&gt;&lt;ul&gt;
+ *   &lt;li&gt;&lt;code&gt;channelName&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel ID..&lt;/p&gt;&lt;ul&gt;
+ *   &lt;li&gt;&lt;code&gt;channelType&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel type.
+ *   [Rel: Skylink.DATA_CHANNEL_TYPE]&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;channelProp&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel property.&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;currentTransferId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel connection
+ *   current progressing transfer session. &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there is
+ *   currently no transfer session progressing on the Datachannel connection.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;currentStreamId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel connection
+ *   current data streaming session ID. &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there is currently
+ *   no data streaming session on the Datachannel connection.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;readyState&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel connection readyState.
+ *   [Rel: Skylink.DATA_CHANNEL_STATE]&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;bufferedAmountLow&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Number&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel buffered amount.&lt;/p&gt;&lt;/li&gt;
+ *   &lt;li&gt;&lt;code&gt;bufferedAmountLowThreshold&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Number&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel
+ *   buffered amount threshold.&lt;/p&gt;&lt;/li&gt;
+ *   &lt;/p&gt;&lt;/li&gt;&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
+ * @example
+ *   // Example 1: Get the list of current Peers Datachannels in the same Room
+ *   var channels = skylinkDemo.getPeersDatachannels();
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.getPeersDatachannels = function() {
+  var listOfPeersDatachannels = {};
+  var listOfPeers = Object.keys(this._peerConnections);
+
+  for (var i = 0; i &lt; listOfPeers.length; i++) {
+    listOfPeersDatachannels[listOfPeers[i]] = {};
+
+    if (this._dataChannels[listOfPeers[i]]) {
+      for (var channelProp in this._dataChannels[listOfPeers[i]]) {
+        if (this._dataChannels[listOfPeers[i]].hasOwnProperty(channelProp) &amp;&amp;
+          this._dataChannels[listOfPeers[i]][channelProp]) {
+          var channel = this._dataChannels[listOfPeers[i]][channelProp];
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName] = this._getDataChannelBuffer(listOfPeers[i], channelProp);
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelName = channel.channelName;
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelType = channel.channelType;
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelProp = channelProp;
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].currentTransferId = channel.transferId;
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].currentStreamId = channel.streamId;
+          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].readyState = channel.channel ?
+            channel.channel.readyState : self.DATA_CHANNEL_STATE.CREATE_ERROR;
+        }
+      }
+    }
+  }
+
+  return listOfPeersDatachannels;
 };
 
 /**

@@ -1800,7 +1800,7 @@
         {
             "file": "source/data-process.js",
             "line": 149,
-            "description": "Function that chunks Blob object based on the data chunk size provided.\nIf provided Blob object size is lesser than or equals to the chunk size, it should return an array\n  of length of <code>1</code>.",
+            "description": "Function that chunks Blob object based on the data chunk size provided.\nIf provided Blob object size is lesser than or equals to the chunk size, it should return an array\n  of length of <code>1</code>.\nThis also can be used for ArrayBuffer object.",
             "itemtype": "method",
             "name": "_chunkBlobData",
             "access": "private",
@@ -1810,7 +1810,7 @@
         },
         {
             "file": "source/data-process.js",
-            "line": 181,
+            "line": 182,
             "description": "Function that chunks large string into string chunks based on the data chunk size provided.\nIf provided string length is lesser than or equals to the chunk size, it should return an array\n  of length of <code>1</code>.",
             "itemtype": "method",
             "name": "_chunkDataURL",
@@ -2358,7 +2358,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1347,
+            "line": 1350,
             "description": "<blockquote class=\"info\">\n  To start data streaming session, see the <a href=\"#method_startStreamingData\"><code>startStreamingData()</code>\n  method</a>. To stop data streaming session, see the <a href=\"#method_stopStreamingData\"><code>stopStreamingData()</code> method</a>\n</blockquote>\nFunction that sends a data chunk from User to Peers for an existing active data streaming session.",
             "itemtype": "method",
             "name": "streamData",
@@ -2371,7 +2371,65 @@
                 {
                     "name": "chunk",
                     "description": "The data chunk.\n  <small>By default when it is not string data streaming, data chunks when is are expected to be\n  sent in Blob or ArrayBuffer, and ArrayBuffer data chunks will be converted to Blob.</small>\n  <small>For binary data chunks, the limit is <code>65456</code>.</small>\n  <small>For string data chunks, the limit is <code>1212</code>.</small>",
-                    "type": "Blob|ArrayBuffer"
+                    "type": "Blob|ArrayBuffer|String"
+                },
+                {
+                    "name": "timeout",
+                    "description": "The timeout to indicate as data chunk has been sent successfully.",
+                    "type": "Number",
+                    "optional": true
+                },
+                {
+                    "name": "callback",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_incomingDataStream\">\n  <code>incomingDataStream</code> event</a> triggering <code>isSelf</code> parameter payload\n  value as <code>true</code> for all Peers targeted for request success.</small>",
+                    "type": "Function",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of Peer IDs targeted.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "sendErrors",
+                                    "description": "The list of sending data chunk errors.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "sendErrors.#peerId",
+                                    "description": "The Peer sending data chunk error associated\n  with the Peer ID defined in <code>#peerId</code> property.\n  <small>If <code>#peerId</code> value is <code>\"self\"</code>, it means that it is the error when there\n  is no Peers to send data chunk yet.</small>",
+                                    "type": "Error|String"
+                                },
+                                {
+                                    "name": "timeout",
+                                    "description": "The defined timeout to indicate that data chunk has been sent successfully.",
+                                    "type": "Number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of Peer IDs targeted.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "timeout",
+                                    "description": "The defined timeout to indicate that data chunk has been sent successfully.",
+                                    "type": "Number"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ],
             "trigger": "<ol class=\"desc-seq\">\n  <li>Checks if Peer connection and Datachannel connection are in correct states. <ol>\n  <li>If Peer connection (or MCU Peer connection if enabled)\n  data streaming Datachannel has not been opened: <small>This can be checked with\n  <a href=\"#event_dataChannelState\"><code>dataChannelState</code> event</a> triggering parameter\n  payload <code>state</code> as <code>OPEN</code> and <code>channelType</code> as\n  <code>MESSAGING</code> for Peer.</small> <ol><li><a href=\"#event_dataStreamState\">\n  <code>dataStreamState</code> event</a> triggers parameter payload <code>state</code> as <code>ERROR</code>.</li>\n  <li><b>ABORT</b> step and return error.</li></ol></li></ol></li>\n  <li>Starts sending the data chunk to Peer. <ol>\n  <li><a href=\"#event_incomingDataStream\"><code>incomingDataStream</code> event</a> triggers.</li>\n  <li><em>For User only</em> <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>SENT</code>.</li>\n  <li><em>For Peer only</em> <a href=\"#event_dataStreamState\"><code>dataStreamState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RECEIVED</code>.</li></ol></li></ol>",
@@ -2383,7 +2441,36 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1537,
+            "line": 1661,
+            "description": "Function that chunks data for <a href=#method_streamData\"><code>streamData()</code> method</a>.",
+            "itemtype": "method",
+            "name": "streamData",
+            "params": [
+                {
+                    "name": "data",
+                    "description": "The data object to chunk.",
+                    "type": "Blob|ArrayBuffer|String"
+                },
+                {
+                    "name": "chunkSize",
+                    "description": "The chunk size.\n  <small>For binary data chunks, the maximum is <code>65456</code>.</small>\n  <small>For string data chunks, the maximum is <code>1212</code>.</small>",
+                    "type": "Number",
+                    "optional": true
+                }
+            ],
+            "return": {
+                "description": "The array of data chunks.",
+                "type": "Array"
+            },
+            "example": [
+                "\n  // Example 1: Get the list of current Peers Datachannels in the same Room\n  var chunks = skylinkDemo.getDataChunks(file);"
+            ],
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-transfer.js",
+            "line": 1686,
             "description": "<blockquote class=\"info\">\n  To start data streaming session, see the <a href=\"#method_startStreamingData\"><code>startStreamingData()</code>\n  method</a> To start streaming data, see the <a href=\"#method_streamData\"><code>streamData()</code>\n  method</a>.\n</blockquote>\nFunction that stops a data chunks streaming session from User to Peers.",
             "itemtype": "method",
             "name": "stopStreamingData",
@@ -2403,7 +2490,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1670,
+            "line": 1818,
             "description": "Function that starts the data transfer to Peers.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -2414,13 +2501,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1867,
+            "line": 2015,
             "description": "Complete Peer function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1931,
+            "line": 2079,
             "description": "Function that starts or listens the data transfer status to Peer.\nThis reacts differently during MCU environment.",
             "itemtype": "method",
             "name": "_startDataTransferToPeer",
@@ -2435,25 +2522,25 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1946,
+            "line": 2094,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1956,
+            "line": 2104,
             "description": "Return error and trigger them if failed before or during data transfers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1972,
+            "line": 2120,
             "description": "Send WRQ protocol to start data transfers.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2210,
+            "line": 2358,
             "description": "Function that returns the data transfer session.",
             "itemtype": "method",
             "name": "_getTransferInfo",
@@ -2464,7 +2551,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2292,
+            "line": 2440,
             "description": "Function that returns the compiled data transfer data.",
             "itemtype": "method",
             "name": "_getTransferData",
@@ -2475,7 +2562,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2319,
+            "line": 2467,
             "description": "Function that handles the data transfers sessions timeouts.",
             "itemtype": "method",
             "name": "_handleDataTransferTimeoutForPeer",
@@ -2486,13 +2573,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2363,
+            "line": 2511,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2410,
+            "line": 2558,
             "description": "Function that handles the data received from Datachannel and\nroutes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_processDataChannelData",
@@ -2503,7 +2590,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2588,
+            "line": 2734,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -2514,7 +2601,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2731,
+            "line": 2877,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -2525,13 +2612,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2750,
+            "line": 2896,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2833,
+            "line": 2979,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -2542,7 +2629,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2854,
+            "line": 3000,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -2553,13 +2640,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2873,
+            "line": 3019,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2905,
+            "line": 3051,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -2570,13 +2657,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2922,
+            "line": 3068,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2954,
+            "line": 3100,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -3192,7 +3279,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1497,
+            "line": 1499,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -3203,7 +3290,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1532,
+            "line": 1534,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -3214,7 +3301,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1683,
+            "line": 1685,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -3225,7 +3312,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1783,
+            "line": 1785,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -3236,7 +3323,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2029,
+            "line": 2031,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3247,7 +3334,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2177,
+            "line": 2179,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3258,7 +3345,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2197,
+            "line": 2199,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -3362,7 +3449,7 @@
                 "type": "JSON"
             },
             "example": [
-                "\n  // Example 1: Get the list of current Peer Streams in the same Room\n  var streams = skylinkDemo.getPeersStream();"
+                "\n  // Example 1: Get the list of current Peers Streams in the same Room\n  var streams = skylinkDemo.getPeersStream();"
             ],
             "since": "0.6.16",
             "class": "Skylink"
@@ -3370,6 +3457,22 @@
         {
             "file": "source/peer-data.js",
             "line": 386,
+            "description": "Function that gets the current list of connected Peers Datachannel connections in the Room.",
+            "itemtype": "method",
+            "name": "getPeersDatachannels",
+            "return": {
+                "description": "The list of Peers Stream. <ul>\n  <li><code>#peerId</code><var><b>{</b>JSON<b>}</b></var><p>The Peer Datachannels information.</p><ul>\n  <li><code>#channelName</code><var><b>{</b>JSON<b>}</b></var><p>The Datachannel information.</p><ul>\n  <li><code>channelName</code><var><b>{</b>String<b>}</b></var><p>The Datachannel ID..</p><ul>\n  <li><code>channelType</code><var><b>{</b>String<b>}</b></var><p>The Datachannel type.\n  [Rel: Skylink.DATA_CHANNEL_TYPE]</p></li>\n  <li><code>channelProp</code><var><b>{</b>String<b>}</b></var><p>The Datachannel property.</p></li>\n  <li><code>currentTransferId</code><var><b>{</b>String<b>}</b></var><p>The Datachannel connection\n  current progressing transfer session. <small>Defined as <code>null</code> when there is\n  currently no transfer session progressing on the Datachannel connection.</small></p></li>\n  <li><code>currentStreamId</code><var><b>{</b>String<b>}</b></var><p>The Datachannel connection\n  current data streaming session ID. <small>Defined as <code>null</code> when there is currently\n  no data streaming session on the Datachannel connection.</small></p></li>\n  <li><code>readyState</code><var><b>{</b>String<b>}</b></var><p>The Datachannel connection readyState.\n  [Rel: Skylink.DATA_CHANNEL_STATE]</p></li>\n  <li><code>bufferedAmountLow</code><var><b>{</b>Number<b>}</b></var><p>The Datachannel buffered amount.</p></li>\n  <li><code>bufferedAmountLowThreshold</code><var><b>{</b>Number<b>}</b></var><p>The Datachannel\n  buffered amount threshold.</p></li>\n  </p></li></p></li></ul></li></ul></li></ul>",
+                "type": "JSON"
+            },
+            "example": [
+                "\n  // Example 1: Get the list of current Peers Datachannels in the same Room\n  var channels = skylinkDemo.getPeersDatachannels();"
+            ],
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-data.js",
+            "line": 442,
             "description": "Function that gets the list of current data transfers.",
             "itemtype": "method",
             "name": "getCurrentDataTransfers",
@@ -3385,7 +3488,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 424,
+            "line": 480,
             "description": "Function that gets the list of current data streaming sessions.",
             "itemtype": "method",
             "name": "getCurrentDataStreamsSession",
@@ -3401,7 +3504,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 468,
+            "line": 524,
             "description": "Function that gets the list of current custom Peer settings sent and set.",
             "itemtype": "method",
             "name": "getPeerCustomSettings",
@@ -3417,7 +3520,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 590,
+            "line": 646,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
@@ -9964,11 +10067,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1347"
+            "line": " source/data-transfer.js:1350"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1537"
+            "line": " source/data-transfer.js:1686"
         },
         {
             "message": "unknown tag: trigger",
@@ -10136,35 +10239,35 @@
         },
         {
             "message": "Missing item type\nComplete Peer function.",
-            "line": " source/data-transfer.js:1867"
+            "line": " source/data-transfer.js:2015"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1946"
+            "line": " source/data-transfer.js:2094"
         },
         {
             "message": "Missing item type\nReturn error and trigger them if failed before or during data transfers function.",
-            "line": " source/data-transfer.js:1956"
+            "line": " source/data-transfer.js:2104"
         },
         {
             "message": "Missing item type\nSend WRQ protocol to start data transfers.",
-            "line": " source/data-transfer.js:1972"
+            "line": " source/data-transfer.js:2120"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2363"
+            "line": " source/data-transfer.js:2511"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2750"
+            "line": " source/data-transfer.js:2896"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2873"
+            "line": " source/data-transfer.js:3019"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2922"
+            "line": " source/data-transfer.js:3068"
         }
     ]
 }
