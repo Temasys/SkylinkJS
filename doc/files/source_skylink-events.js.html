@@ -663,6 +663,9 @@ var _eventsDocs = {
    * @param {String} messageType The Datachannel sending Datachannel message error type.
    *   &lt;small&gt;Defined only when &lt;cod&gt;state&lt;/code&gt; payload is &lt;code&gt;SEND_MESSAGE_ERROR&lt;/code&gt;.&lt;/small&gt;
    *   [Rel: Skylink.DATA_CHANNEL_MESSAGE_ERROR]
+   * @param {JSON} bufferAmount The Datachannel buffered amount information.
+   * @param {Number} bufferAmount.bufferedAmountLow The size of currently queued data to send on the Datachannel connection.
+   * @param {Number} bufferAmount.bufferedAmountLowThreshold The current buffered amount low threshold configured.
    * @for Skylink
    * @since 0.1.0
    */

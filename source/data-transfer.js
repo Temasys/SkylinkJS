@@ -1319,7 +1319,8 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
         return [self.DATA_CHANNEL_STATE.CREATE_ERROR, self.DATA_CHANNEL_STATE.OPEN].indexOf(state) > -1;
       }
     });
-    self._createDataChannel(peerId, transferId);
+    self._createDataChannel(peerId, transferId, sessionChunkType === 'string' ? self._CHUNK_DATAURL_SIZE :
+      (window.webrtcDetectedBrowser === 'firefox' ? self._MOZ_BINARY_FILE_SIZE : self._BINARY_FILE_SIZE));
   };
 
   if (peersNonInterop.length > 0) {
@@ -2196,7 +2197,10 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   // Create new Datachannel for Peer to start data transfer
   if (!((requireInterop && peerId !== 'MCU') || channelProp === 'main')) {
     channelProp = transferId;
-    self._createDataChannel(peerId, transferId);
+    self._createDataChannel(peerId, transferId, self._dataTransfers[transferId].sessionType === 'data' ?
+      self._CHUNK_DATAURL_SIZE : (self._dataTransfers[transferId].sessionChunkType === 'string' ?
+      (window.webrtcDetectedBrowser === 'firefox' ? 16384 : 65546) : // After conversion to base64 string computed size
+      (window.webrtcDetectedBrowser === 'firefox' ? self._MOZ_BINARY_FILE_SIZE : self._BINARY_FILE_SIZE)));
   } else {
     self._dataChannels[peerId].main.transferId = transferId;
     sendWRQFn();
@@ -2419,8 +2423,6 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
   var streamId = self._dataChannels[peerId][channelProp].streamId || null;
   var isStreamChunk = false;
 
-  console.info(streamId, self._dataStreams, typeof rawData);
-
   if (streamId && self._dataStreams[streamId]) {
     isStreamChunk = self._dataStreams[streamId].sessionChunkType === 'string' ? typeof rawData === 'string' :
       typeof rawData === 'object';
@@ -2493,7 +2495,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
           error: error
         });
 
-        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error, channelName, channelType, null);
+        self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error, channelName,
+          channelType, null, self._getDataChannelBuffer(peerId, channelProp));
         throw error;
       }
 

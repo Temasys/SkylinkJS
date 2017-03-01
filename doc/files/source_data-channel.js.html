@@ -188,7 +188,7 @@ Skylink.prototype.DATA_CHANNEL_MESSAGE_ERROR = {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMessagingChannel) {
+Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThreshold, createAsMessagingChannel) {
   var self = this;
   var channelName = (self._user &amp;&amp; self._user.sid ? self._user.sid : &#x27;-&#x27;) + &#x27;_&#x27; + peerId;
   var channelType = createAsMessagingChannel ? self.DATA_CHANNEL_TYPE.MESSAGING : self.DATA_CHANNEL_TYPE.DATA;
@@ -225,7 +225,8 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
 
     } catch (error) {
       log.error([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Failed creating Datachannel -&gt;&#x27;], error);
-      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CREATE_ERROR, peerId, error, channelName, channelType, null);
+      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CREATE_ERROR, peerId, error, channelName,
+        channelType, null, self._getDataChannelBuffer(dataChannel));
       return;
     }
   }
@@ -248,14 +249,18 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
 
     log.error([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Datachannel has an exception -&gt;&#x27;], channelError);
 
-    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.ERROR, peerId, channelError, channelName, channelType, null);
+    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.ERROR, peerId, channelError, channelName,
+      channelType, null, self._getDataChannelBuffer(dataChannel));
   };
 
+  // State where we can start calling .send() to queue more buffered data to be sent
+  // RTCDataChannel has an internal mechanism to queue data to be sent over
+  // This event might not be even triggered at all
   dataChannel.onbufferedamountlow = function () {
     log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Datachannel buffering data transfer low&#x27;]);
 
-    // TODO: Should we add an event here
-    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW, peerId, null, channelName, channelType, null);
+    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW, peerId, null, channelName,
+      channelType, null, self._getDataChannelBuffer(dataChannel));
   };
 
   dataChannel.onmessage = function(event) {
@@ -265,14 +270,18 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
   var onOpenHandlerFn = function () {
     log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Datachannel has opened&#x27;]);
 
-    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.OPEN, peerId, null, channelName, channelType, null);
+    dataChannel.bufferedAmountLowThreshold = bufferThreshold || 0;
+
+    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.OPEN, peerId, null, channelName,
+      channelType, null, self._getDataChannelBuffer(dataChannel));
   };
 
   if (dataChannel.readyState === self.DATA_CHANNEL_STATE.OPEN) {
     setTimeout(onOpenHandlerFn, 1); // 500);
 
   } else {
-    self._trigger(&#x27;dataChannelState&#x27;, dataChannel.readyState, peerId, null, channelName, channelType, null);
+    self._trigger(&#x27;dataChannelState&#x27;, dataChannel.readyState, peerId, null, channelName,
+      channelType, null, self._getDataChannelBuffer(dataChannel));
 
     dataChannel.onopen = onOpenHandlerFn;
   }
@@ -280,7 +289,8 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
   var onCloseHandlerFn = function () {
     log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Datachannel has closed&#x27;]);
 
-    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName, channelType, null);
+    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName,
+      channelType, null, self._getDataChannelBuffer(dataChannel));
 
     if (self._peerConnections[peerId] &amp;&amp; self._peerConnections[peerId].remoteDescription &amp;&amp;
       self._peerConnections[peerId].remoteDescription.sdp &amp;&amp; (self._peerConnections[peerId].remoteDescription.sdp.indexOf(
@@ -295,7 +305,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
           (self._peerConnections[peerId].localDescription &amp;&amp;
           self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
           log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Reviving Datachannel connection&#x27;]);
-          self._createDataChannel(peerId, channelName, true);
+          self._createDataChannel(peerId, channelName, bufferThreshold, true);
         }
       }, 100);
     }
@@ -354,6 +364,40 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, createAsMes
 };
 
 /**
+ * Function that returns the Datachannel buffer threshold and amount.
+ * @method _getDataChannelBuffer
+ * @return {JSON} The buffered amount information.
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getDataChannelBuffer = function (peerId, channelProp) {
+  if (typeof peerId === &#x27;object&#x27;) {
+    return {
+      bufferedAmountLow: typeof peerId.bufferedAmountLow === &#x27;number&#x27; ?
+        peerId.bufferedAmountLow : parseInt(peerId.bufferedAmountLow, 10) || 0,
+      bufferedAmountLowThreshold: typeof peerId.bufferedAmountLowThreshold === &#x27;number&#x27; ?
+        peerId.bufferedAmountLowThreshold : parseInt(peerId.bufferedAmountLowThreshold, 10) || 0
+    };
+  } else if (!(this._dataChannels[peerId] &amp;&amp; this._dataChannels[peerId][channelProp] &amp;&amp;
+    this._dataChannels[peerId][channelProp].channel)) {
+    return {
+      bufferedAmountLow: 0,
+      bufferedAmountLowThreshold: 0
+    };
+  }
+
+  var channel = this._dataChannels[peerId][channelProp].channel;
+
+  return {
+    bufferedAmountLow: typeof channel.bufferedAmountLow === &#x27;number&#x27; ?
+      channel.bufferedAmountLow : parseInt(channel.bufferedAmountLow, 10) || 0,
+    bufferedAmountLowThreshold: typeof channel.bufferedAmountLowThreshold === &#x27;number&#x27; ?
+      channel.bufferedAmountLowThreshold : parseInt(channel.bufferedAmountLowThreshold, 10) || 0
+  };
+};
+
+/**
  * Function that sends data over the Datachannel connection.
  * @method _sendMessageToDataChannel
  * @private
@@ -399,8 +443,8 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
 
     log.error([peerId, &#x27;RTCDataChannel&#x27;, channelProp, notOpenError + &#x27; -&gt;&#x27;], data);
 
-    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR, peerId,
-      new Error(notOpenError), channelName, channelType, messageType);
+    self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR, peerId, new Error(notOpenError),
+      channelName, channelType, messageType, self._getDataChannelBuffer(peerId, channelProp));
 
     throw new Error(notOpenError);
   }
@@ -422,7 +466,7 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
       &#x27;&quot;&#x27; + data.type + &#x27;&quot; protocol message&#x27; : &#x27;data&#x27;) + &#x27; -&gt;&#x27;], error);
 
     self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR, peerId,
-      error, channelName, channelType, messageType);
+      error, channelName, channelType, messageType, self._getDataChannelBuffer(peerId, channelProp));
 
     throw error;
   }
@@ -451,7 +495,8 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
     if (self._dataChannels[peerId][rChannelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
       log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Closing Datachannel&#x27;]);
 
-      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName, channelType, null);
+      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName, channelType,
+        null, self._getDataChannelBuffer(peerId, rChannelProp));
 
       self._dataChannels[peerId][rChannelProp].channel.close();
 

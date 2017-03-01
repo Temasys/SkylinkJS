@@ -1410,7 +1410,8 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
         return [self.DATA_CHANNEL_STATE.CREATE_ERROR, self.DATA_CHANNEL_STATE.OPEN].indexOf(state) &gt; -1;
       }
     });
-    self._createDataChannel(peerId, transferId);
+    self._createDataChannel(peerId, transferId, sessionChunkType === &#x27;string&#x27; ? self._CHUNK_DATAURL_SIZE :
+      (window.webrtcDetectedBrowser === &#x27;firefox&#x27; ? self._MOZ_BINARY_FILE_SIZE : self._BINARY_FILE_SIZE));
   };
 
   if (peersNonInterop.length &gt; 0) {
@@ -2287,7 +2288,10 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   // Create new Datachannel for Peer to start data transfer
   if (!((requireInterop &amp;&amp; peerId !== &#x27;MCU&#x27;) || channelProp === &#x27;main&#x27;)) {
     channelProp = transferId;
-    self._createDataChannel(peerId, transferId);
+    self._createDataChannel(peerId, transferId, self._dataTransfers[transferId].sessionType === &#x27;data&#x27; ?
+      self._CHUNK_DATAURL_SIZE : (self._dataTransfers[transferId].sessionChunkType === &#x27;string&#x27; ?
+      (window.webrtcDetectedBrowser === &#x27;firefox&#x27; ? 16384 : 65546) : // After conversion to base64 string computed size
+      (window.webrtcDetectedBrowser === &#x27;firefox&#x27; ? self._MOZ_BINARY_FILE_SIZE : self._BINARY_FILE_SIZE)));
   } else {
     self._dataChannels[peerId].main.transferId = transferId;
     sendWRQFn();
@@ -2584,7 +2588,8 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
           error: error
         });
 
-        self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.ERROR, peerId, error, channelName, channelType, null);
+        self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.ERROR, peerId, error, channelName,
+          channelType, null, self._getDataChannelBuffer(peerId, channelProp));
         throw error;
       }
 
