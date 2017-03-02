@@ -64,24 +64,36 @@
 		var currentStreamId = null;
 
 		function streamVideo (file) {
-			// Chunk file
-		  var chunks = skylink.getDataChunks(file);
+			var chunks = [];
 			var chunkLimit = 65456;
 		  var startCount = 0, endCount = 0;
 
 		  document.getElementById('source').disabled = true;
 
+		  // Chunk file
+		  if (file.size > chunkLimit) {
+		    while ((file.size - 1) > endCount) {
+		      endCount = startCount + chunkLimit;
+		      chunks.push(file.slice(startCount, endCount));
+		      startCount += chunkLimit;
+		    }
+		    if ((file.size - (startCount + 1)) > 0) {
+		      chunks.push(file.slice(startCount, file.size - 1));
+		    }
+		  } else {
+		    chunks.push(file);
+		  }
+
 		  var processNextFn = function () {
 		  	if (chunks.length > 0) {
+		  		skylink.once('incomingDataStream', function () {
+		  			setTimeout(processNextFn, 1000);
+		  		}, function (data, evtStreamId, evtPeerId, streamInfo, isSelf) {
+		  			return isSelf && evtStreamId === currentStreamId;
+		  		});
 		  		var chunk = chunks[0];
-	  			chunks.splice(0, 1);
-	  			skylink.streamData(currentStreamId, chunk, ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 ?
-	  				1000 : 1, function (err) {
-	  				if (err) {
-	  					console.error('Encountered errors ->', err.listOfPeersErrors);
-	  				}
-	  				processNextFn();
-	  			});
+	  			chunks.splice(0, 1000);
+	  			skylink.streamData(currentStreamId, chunk);
 		  	} else {
 		  		skylink.stopStreamingData(currentStreamId);
 		  		document.getElementById('source').disabled = false;

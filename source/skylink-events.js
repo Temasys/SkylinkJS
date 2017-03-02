@@ -508,6 +508,7 @@ var _eventsDocs = {
    *   <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
    *   except without the <code>chunk</code> property.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
+   * @beta
    * @for Skylink
    * @since 0.6.18
    */
@@ -523,6 +524,7 @@ var _eventsDocs = {
    *   <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
    *   except without the <code>chunk</code> property.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
+   * @beta
    * @for Skylink
    * @since 0.6.18
    */
@@ -539,6 +541,7 @@ var _eventsDocs = {
    *   <a href="#event_dataStreamState"><code>dataStreamState</code> event</a>
    *   except without the <code>chunk</code> property.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
+   * @beta
    * @for Skylink
    * @since 0.6.18
    */
@@ -656,6 +659,7 @@ var _eventsDocs = {
    * @param {String} streamInfo.senderPeerId The sender Peer ID.
    * @param {Error} [error] The error object.
    *   <small>Defined only when <code>state</code> payload is <code>ERROR</code> or <code>START_ERROR</code>,.</small>
+   * @beta
    * @for Skylink
    * @since 0.6.18
    */
