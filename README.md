@@ -8,17 +8,17 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 
 #### Supported Browsers
 
-> ##### Current Beta supported browsers:
-> **Edge `14.14352`+** | **Bowser `0.2.1`+**<br><br>
+> ##### Browsers in Beta (Edge/Bowser):
 > _Do note that MCU connections, file transfers and P2P messages does not work in Edge browsers due to its current supports and beta phase. Earlier Edge browser versions might require you to toggle the H264 experimental flag to enable video connections from Edge to Chrome/Firefox browsers. Bowser browser is only officially supported by iOS versions `9.x` and below,_
 
-| Features       | Chrome<br>`52`-`55`+ | Firefox<br>`48`-`50`+ | Opera<br>`38`-`42`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  |
-| -------------- | ---------- | ----------- | --------- | ---------- | ---------- |
-| **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing)  | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing) |
-| **Video Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes [Temasys Plugin](http://skylink.io/plugin/)  |
-| **Audio Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/) | Yes with [Temasys Plugin](http://skylink.io/plugin/)  |
-| **File Transfers** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes with [Temasys Plugin](http://skylink.io/plugin/)  |
-| **Chat Messaging** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes with [Temasys Plugin](http://skylink.io/plugin/)  |
+| Features       | Chrome<br>`52`-`55`+ | Firefox<br>`48`-`50`+ | Opera<br>`38`-`42`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  | Edge<br>`14.14352` | Bowser<br>(iOS `9.x` and below) | 
+| -------------- | ---------- | ----------- | --------- | ---------- | ---------- | ---- | ----- |
+| **Platforms:** | Win/Mac/Ubuntu/Android | Win/Mac/Ubuntu/Android | Win/Mac/Ubuntu/Android | Win/Mac | Win | Mac | Win | iOS<br>(`9.x` and below) |
+| **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing)  | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing) | No | No |
+| **Video Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes [Temasys Plugin](http://skylink.io/plugin/)  | Yes (with H264 flag enabled) | Yes |
+| **Audio Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/) | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes (no MCU) | Yes (no MCU) |
+| **File Transfers** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | No | No |
+| **Chat Messaging** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes (Signaling only) | Yes (Signaling only) |
 
 - (+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.
 - (*) Custom Branded Temasys WebRTC Plugin incorporates additional features not available in the free plugin.
