@@ -1,3 +1,5 @@
+
+
 > Temasys Web SDK (formerly SkylinkJS) is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
 
 We've gone to great length to make this library work in as many browsers as possible. Temasys Web SDK is built on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://skylink.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
@@ -7,14 +9,14 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 #### Supported Browsers
 | Features       | Chrome<br>`45`-`51`+ | Firefox<br>`40`-`48`+ | Opera<br>`32`-`36`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  |
 | -------------- | ---------- | ----------- | --------- | ---------- | ---------- |
-| **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.com.sg/plugin/#commercial-licensing)  | Yes with [Commercial Temasys Plugin*](https://temasys.com.sg/plugin/#commercial-licensing) |
+| **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing)  | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing) |
 | **Video Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes [Temasys Plugin](http://skylink.io/plugin/)  |
 | **Audio Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/) | Yes with [Temasys Plugin](http://skylink.io/plugin/)  |
 | **File Transfers** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes with [Temasys Plugin](http://skylink.io/plugin/)  |
 | **Chat Messaging** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes with [Temasys Plugin](http://skylink.io/plugin/)  |
 
 - (+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.
-- (*) Commerical Temasys Plugin incorporates additional features from Temasys Free Plugin.
+- (*) Custom Branded Temasys WebRTC Plugin incorporates additional features not available in the free plugin.
 - (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.com.sg). For Firefox extensions source code, [you may download from your Application Key in console.temasys.io](https://console.temasys.io).
 
 ##### Installation
@@ -29,8 +31,8 @@ bower install skylinkjs
 
 
 #### Read more
-- [Getting started](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)
-- [API Docs](http://cdn.temasys.com.sg/skylink/skylinkjs/latest/doc/classes/Skylink.html)
+- [Getting started](https://temasys.io/getting-started-with-webrtc-and-skylinkjs/)
+- [API Docs](http://cdn.temasys.io/skylink/skylinkjs/latest/doc/classes/Skylink.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
 - [Developer Console  - Get your App key](https://console.temasys.io)
 - [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/master/demo)
@@ -48,23 +50,23 @@ We recommend that you always use the latest versions of the Temasys Web SDK as W
 
 #### Noted Issues and Solutions
 ##### Installing `0.6.3` - `0.6.10` versions in NPM
-Due to corrupted files being uploaded for `0.6.3` - `0.6.10` versions, we have removed these versions from the NPM repository.
+Due to corrupt files issues for versions `0.6.3` - `0.6.10`, we have removed these versions from the NPM repository.
 You may still install these versions using this command:
 ```
 npm install git://github.com/Temasys/SkylinkJS#<version_tag>
 ```
 
 ##### Encoding issues from AdapterJS dependency
-There is a [known issue](https://github.com/Temasys/AdapterJS/issues/240) caused by the AdapterJS `0.14.0` where it appears weird characters. To resolve this, it is recommend to set the charset of the HTML file:
+There is a [known issue](https://github.com/Temasys/AdapterJS/issues/240) caused by AdapterJS `0.14.0` which manifests as incorrectly encoded characters. To resolve this, it is recommended that charset is set the HTML file:
 
 ```
 <meta charset="utf-8">
 ```
 
 ##### Upgrading from `0.5.7` and below:
-It's now recommended to use the `init()` callback instead of using `readyStateChange` event state to go completed as this may result in an infinite loop.
+It's now recommended to use the `init()` callback instead of using `readyStateChange` complete state as this may result in an infinite loop.
 
-Ready state change triggers whenever the current room information is retrieved,  and joining another room instead of the default room will result in a re-retrieval to the API server, causing readyStateChange to trigger again and making Temasys Web SDK to re-join the room over and over again.
+readyStateChange triggers each time the current room information is recieved, and joining a room other than default room will result in a re-fetch from the API server. This can result in a endless re-join loop. 
 ```
 // Use this
 sw.init(data, function () {
