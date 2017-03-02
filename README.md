@@ -24,7 +24,7 @@ Install Temasys Web SDK (formerly SkylinkJS) with [npm](https://www.npmjs.com/):
 ```
 npm install skylinkjs@0.6.x
 ```
-Install Temasys WebSDK (formerly SkylinkJS) with [bower](http://bower.io/):
+Install Temasys Web SDK (formerly SkylinkJS) with [bower](http://bower.io/):
 ```
 bower install skylinkjs
 ```
