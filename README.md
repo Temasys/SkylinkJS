@@ -1,7 +1,6 @@
-# ![Temasys SkylinkJS](http://temasys.github.io/resources/img/skylinkjs.svg)
-> Temasys SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
+> Temasys Web SDK (formerly SkylinkJS) is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
 
-We've gone to great length to make this library work in as many browsers as possible. Temasys SkylinkJS is build on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://skylink.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
+We've gone to great length to make this library work in as many browsers as possible. Temasys Web SDK is built on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://skylink.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
 
 You'll need a Temasys Account and an App key to use this. [Register here to get your App key](https://console.temasys.io).
 
@@ -19,11 +18,11 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 - (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.com.sg). For Firefox extensions source code, [you may download from your Application Key in console.temasys.io](https://console.temasys.io).
 
 ##### Installation
-Install Temasys SkylinkJS with [npm](https://www.npmjs.com/):
+Install Temasys Web SDK (formerly SkylinkJS) with [npm](https://www.npmjs.com/):
 ```
 npm install skylinkjs@0.6.x
 ```
-Install Temasys SkylinkJS with [bower](http://bower.io/):
+Install Temasys WebSDK (formerly SkylinkJS) with [bower](http://bower.io/):
 ```
 bower install skylinkjs
 ```
@@ -40,12 +39,12 @@ bower install skylinkjs
 
 
 ##### Need help or want something changed?
-You can raise tickets on [our support portal](http://support.temasys.com.sg) or on [our Github Page](https://console.temasys.io/support).
+You can raise tickets on [our support portal](http://support.temasys.io) or on [our Github Page](https://console.temasys.io/support).
 
 ##### Current versions and stability
-Always use the latest versions of the Temasys SkylinkJS library as WebRTC is still evolving and we adapt to changes very frequently.
+We recommend that you always use the latest versions of the Temasys Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: `0.6.17`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.17).
+[Latest version: `0.6.18`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.18).
 
 #### Noted Issues and Solutions
 ##### Installing `0.6.3` - `0.6.10` versions in NPM
@@ -65,7 +64,7 @@ There is a [known issue](https://github.com/Temasys/AdapterJS/issues/240) caused
 ##### Upgrading from `0.5.7` and below:
 It's now recommended to use the `init()` callback instead of using `readyStateChange` event state to go completed as this may result in an infinite loop.
 
-Ready state change triggers whenever the current room information is retrieved,  and joining another room instead of the default room will result in a re-retrieval to the API server, causing readyStateChange to trigger again and making Temasys SkylinkJS to re-join the room over and over again.
+Ready state change triggers whenever the current room information is retrieved,  and joining another room instead of the default room will result in a re-retrieval to the API server, causing readyStateChange to trigger again and making Temasys Web SDK to re-join the room over and over again.
 ```
 // Use this
 sw.init(data, function () {
@@ -80,14 +79,14 @@ sw.on('readyStateChange', function (state) {
 });
 ```
 
-## How to build your own Temasys SkylinkJS
-In your [Git](http://git-scm.com/download) terminal, execute the following commands:
+## How to build your own Temasys Web SDK
+Using [Git](http://git-scm.com/download) command line tools, execute the following:
 ```
 # 1. Clone or download this repository via git terminal.
 
 git clone https://github.com/Temasys/SkylinkJS.git
 
-# 2. Install all required Temasys SkylinkJS dependencies. Use (sudo npm install) if required.
+# 2. Install all required dependencies. Use (sudo npm install) if required.
 
 npm install
 
@@ -108,21 +107,21 @@ npm install testling -g
 npm start # note that this runs in Chrome currently..
 ```
 
-After making edits, here are some commands to run and build Skylink:
+After making edits, here are some commands to run and build the Temasys Web SDK:
 
-- `grunt jshint` : To check for code formatting and syntax errors.
-- `grunt yuidoc` : To generate document from code.
-- `grunt dev` : To run and compile all the codes.
-- `grunt publish` : To run when code is ready for next release.
+- `grunt jshint` : Validate for formatting and syntax errors.
+- `grunt yuidoc` : To generate the SDK documentation.
+- `grunt dev` : Compile the SDK.
+- `grunt publish` : Publish a release.
 
 __What's included in the repository?__
 
-- `demo` : Contains the sample demos.
-- `doc` : Contains the generated YUI documentation for the Temasys SkylinkJS.
-- `doc-style` : Contains the template for our YUI documentation.
-- `publish` : Contains the production version of the library and a minified copy of it
-- `source` : Contains the skylink.js library development files
-- `tests` : Contains the list of test scripts.
+- `demo` : Reference Code Examples.
+- `doc` : Generated documentation for the Temasys Web SDK.
+- `doc-style` : Templates used documentation.
+- `publish` : Production version of the library as well as minified variants
+- `source` : Temasys Web SDK source
+- `tests` : Test suite.
 
 
 ## License
