@@ -41,7 +41,7 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  */
 Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var self = this;
-  var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser);
+  var pc = self._peerConnections[targetMid];// || self._addPeer(targetMid, peerBrowser);
 
   log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
 
@@ -60,46 +60,33 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
-  var peerIceRestartSupport = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart;
+  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+  var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &&
+    iceRestart && self._enableIceRestart;
+  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
+    ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
+    (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
+    !!self._currentCodecSupport.video.h264 : true);
 
   var offerConstraints = {
-    offerToReceiveAudio: true,
-    offerToReceiveVideo: true,
-    iceRestart: self._enableIceRestart && peerIceRestartSupport ? iceRestart === true : false
+    offerToReceiveAudio: offerToReceiveAudio,
+    offerToReceiveVideo: offerToReceiveVideo,
+    iceRestart: doIceRestart,
+    voiceActivityDetection: self._voiceActivityDetection
   };
-
-  // NOTE: Removing ICE restart functionality as of now since Firefox does not support it yet
-  // Check if ICE connection failed or disconnected, and if so, do an ICE restart
-  /*if ([self.ICE_CONNECTION_STATE.DISCONNECTED, self.ICE_CONNECTION_STATE.FAILED].indexOf(pc.iceConnectionState) > -1) {
-    offerConstraints.iceRestart = true;
-  }*/
 
   // Prevent undefined OS errors
   peerBrowser.os = peerBrowser.os || '';
-
-  /*
-    Ignoring these old codes as Firefox 39 and below is no longer supported
-    if (window.webrtcDetectedType === 'moz' && peerBrowser.agent === 'MCU') {
-      unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
-      unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
-      beOfferer = true;
-    }
-
-    if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion >= 32) {
-      unifiedOfferConstraints = {
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true
-      };
-    }
-  */
 
   // Fallback to use mandatory constraints for plugin based browsers
   if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
     offerConstraints = {
       mandatory: {
-        OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true,
-        iceRestart: self._enableIceRestart && peerIceRestartSupport ? iceRestart === true : false
+        OfferToReceiveAudio: offerToReceiveAudio,
+        OfferToReceiveVideo: offerToReceiveVideo,
+        iceRestart: doIceRestart,
+        voiceActivityDetection: self._voiceActivityDetection
       }
     };
   }
@@ -110,7 +97,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   }
 
   if (self._enableDataChannel && self._peerInformations[targetMid] &&
-    self._peerInformations[targetMid].config.enableDataChannel) {
+    self._peerInformations[targetMid].config.enableDataChannel &&
+    !(!self._sdpSettings.connection.data && targetMid !== 'MCU')) {
     // Edge doesn't support datachannels yet
     if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main)) {
       self._createDataChannel(targetMid);
@@ -165,9 +153,16 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }
 
   // Add stream only at offer/answer end
-  if (!self._hasMCU || targetMid === 'MCU') {
+  if ((!self._hasMCU || targetMid === 'MCU') && window.webrtcDetectedBrowser !== 'edge') {
     self._addLocalMediaStreams(targetMid);
   }
+
+  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
+    ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
+    (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
+    !!self._currentCodecSupport.video.h264 : true);
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
@@ -177,7 +172,11 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }, function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  });
+  }, window.webrtcDetectedBrowser === 'edge' ? {
+    offerToReceiveVideo: offerToReceiveVideo,
+    offerToReceiveAudio: offerToReceiveAudio,
+    voiceActivityDetection: self._voiceActivityDetection
+  } : undefined);
 };
 
 /**
@@ -227,14 +226,20 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   pc.processingLocalSDP = true;
 
+  // Set them as first
+  if (window.webrtcDetectedBrowser === 'edge') {
+    sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription, {
+      audio: self.AUDIO_CODEC.OPUS,
+      video: self.VIDEO_CODEC.H264
+    });
+  }
+
   // Sets and expected receiving codecs etc.
-  //sessionDescription.sdp = self._setSDPOpusConfig(targetMid, sessionDescription);
-  //sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
-  sessionDescription.sdp = self._removeSDPH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
-  sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription);
-  //sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
+  sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
@@ -266,7 +271,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
-      userInfo: self._getUserInfo()
+      userInfo: self._getUserInfo(targetMid)
     });
 
   }, function(error) {

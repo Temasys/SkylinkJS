@@ -92,9 +92,11 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
 
     log.debug([targetMid, 'RTCIceCandidate', candidateType, 'Generated ICE candidate ->'], candidate);
 
-    if (candidateType === 'endOfCandidates') {
+    if (candidateType === 'endOfCandidates' || !(self._peerConnections[targetMid] &&
+      self._peerConnections[targetMid].localDescription && self._peerConnections[targetMid].localDescription.sdp &&
+      self._peerConnections[targetMid].localDescription.sdp.indexOf('\r\na=mid:' + candidate.sdpMid + '\r\n') > -1)) {
       log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate ' +
-        'end-of-candidates signal to prevent errors ->'], candidate);
+        'end-of-candidates signal or unused ICE candidates to prevent errors ->'], candidate);
       return;
     }
 
@@ -144,6 +146,10 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
   } else {
     log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has completed.']);
 
+    if (pc.gathered) {
+      return;
+    }
+
     pc.gathering = false;
     pc.gathered = true;
 
@@ -164,7 +170,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         type: sessionDescription.type,
         sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
         mid: self._user.sid,
-        userInfo: self._getUserInfo(),
+        userInfo: self._getUserInfo(targetMid),
         target: targetMid,
         rid: self._room.id
       });
@@ -227,7 +233,8 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
 
       this._addIceCandidate(targetMid, canArray[0], canArray[1]);
     } else if (this._peerConnections[targetMid] &&
-      this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
+      this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED &&
+      AdapterJS && !this._isLowerThanVersion(AdapterJS.VERSION, '0.14.0')) {
       log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
       this._peerConnections[targetMid].addIceCandidate(null);
     }
@@ -281,7 +288,10 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     }, null);
 
   if (!(self._peerConnections[targetMid] &&
-    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
+    self._peerConnections[targetMid].remoteDescription &&
+    self._peerConnections[targetMid].remoteDescription.sdp &&
+    self._peerConnections[targetMid].remoteDescription.sdp.indexOf('\r\na=mid:' + candidate.sdpMid + '\r\n') > -1)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
       'as Peer connection does not exists or is closed']);
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.DROPPED,

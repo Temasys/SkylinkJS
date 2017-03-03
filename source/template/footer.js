@@ -2,16 +2,14 @@
   if(typeof exports !== 'undefined') {
     // Prevent breaking code
     module.exports = {
-      Skylink: Skylink
+      Skylink: Skylink,
+      SkylinkLogs: SkylinkLogs
     };
-  }
-
-  if (refThis) {
-    refThis.Skylink = Skylink;
-  }
-
-  if (window) {
+  } else if (globals) {
+    globals.Skylink = Skylink;
+    globals.SkylinkLogs = SkylinkLogs;
+  } else if (window) {
     window.Skylink = Skylink;
+    window.SkylinkLogs = SkylinkLogs;
   }
-
 })(this);

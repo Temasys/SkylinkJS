@@ -108,6 +108,7 @@ Skylink.prototype.TURN_TRANSPORT = {
  * @since 0.5.4
  */
 Skylink.prototype._setIceServers = function(givenConfig) {
+  var self = this;
   var givenIceServers = clone(givenConfig.iceServers);
   var iceServersList = {};
   var newIceServers = [];
@@ -117,7 +118,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
 
-  if (this._forceTURNSSL) {
+  if (self._forceTURNSSL) {
     if (window.webrtcDetectedBrowser === 'chrome' ||
       window.webrtcDetectedBrowser === 'safari' ||
       window.webrtcDetectedBrowser === 'IE') {
@@ -161,18 +162,18 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     }
 
     if (server.url.indexOf('stun') === 0) {
-      if (!this._enableSTUN) {
+      if (!self._enableSTUN) {
         log.warn('Ignoring STUN server provided at index ' + i, clone(server));
         continue;
       }
 
-      if (!this._usePublicSTUN && server.url.indexOf('temasys') === -1) {
+      if (!self._usePublicSTUN && server.url.indexOf('temasys') === -1) {
         log.warn('Ignoring public STUN server provided at index ' + i, clone(server));
         continue;
       }
 
     } else if (server.url.indexOf('turn') === 0) {
-      if (!this._enableTURN) {
+      if (!self._enableTURN) {
         log.warn('Ignoring TURN server provided at index ' + i, clone(server));
         continue;
       }
@@ -209,7 +210,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     var credential = typeof server.credential === 'string' ? server.credential : 'none';
 
     if (server.url.indexOf('turn') === 0) {
-      if (this._TURNTransport === this.TURN_TRANSPORT.ANY) {
+      if (self._TURNTransport === self.TURN_TRANSPORT.ANY) {
         pushIceServer(username, credential, server.url);
 
       } else {
@@ -219,17 +220,17 @@ Skylink.prototype._setIceServers = function(givenConfig) {
           rawUrl = rawUrl.split('?transport=')[0];
         }
 
-        if (this._TURNTransport === this.TURN_TRANSPORT.NONE) {
+        if (self._TURNTransport === self.TURN_TRANSPORT.NONE) {
           pushIceServer(username, credential, rawUrl);
-        } else if (this._TURNTransport === this.TURN_TRANSPORT.UDP) {
+        } else if (self._TURNTransport === self.TURN_TRANSPORT.UDP) {
           pushIceServer(username, credential, rawUrl + '?transport=udp');
-        } else if (this._TURNTransport === this.TURN_TRANSPORT.TCP) {
+        } else if (self._TURNTransport === self.TURN_TRANSPORT.TCP) {
           pushIceServer(username, credential, rawUrl + '?transport=tcp');
-        } else if (this._TURNTransport === this.TURN_TRANSPORT.ALL) {
+        } else if (self._TURNTransport === self.TURN_TRANSPORT.ALL) {
           pushIceServer(username, credential, rawUrl + '?transport=tcp');
           pushIceServer(username, credential, rawUrl + '?transport=udp');
         } else {
-          log.warn('Invalid TURN transport option "' + this._TURNTransport +
+          log.warn('Invalid TURN transport option "' + self._TURNTransport +
             '". Ignoring TURN server at index' + i, clone(server));
           continue;
         }
@@ -240,7 +241,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   }
 
   // add mozilla STUN for firefox
-  if (this._enableSTUN && this._usePublicSTUN && window.webrtcDetectedBrowser === 'firefox') {
+  if (self._enableSTUN && self._usePublicSTUN && window.webrtcDetectedBrowser === 'firefox') {
     pushIceServer('none', 'none', 'stun:stun.services.mozilla.com', 0);
   }
 
@@ -310,6 +311,23 @@ Skylink.prototype._setIceServers = function(givenConfig) {
         }
       }
     }
+  }
+
+  if (self._iceServer) {
+    var nUsername = null, nCredential = null;
+    for (i = 0; i < newIceServers.length; i++) {
+      if (newIceServers[i].username) {
+        nUsername = newIceServers[i].username;
+      }
+      if (newIceServers[i].credential) {
+        nCredential = newIceServers[i].credential;
+      }
+    }
+    newIceServers = [{
+      urls: self._iceServer.urls,
+      username: nUsername,
+      credential: nCredential
+    }];
   }
 
   log.log('Output iceServers configuration:', newIceServers);

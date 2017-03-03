@@ -110,6 +110,8 @@ Skylink.prototype.READY_STATE_CHANGE = {
  *   is not loaded.
  *   <small>To resolve this, ensure that the AdapterJS dependency is loaded before the Skylink dependency.
  *   You may use the provided AdapterJS <a href="https://github.com/Temasys/AdapterJS/">CDN here</a>.</small>
+ * @param {Number} PARSE_CODECS                <small>Value <code>8</code></small>
+ *   The value of the failure code when codecs support cannot be parsed and retrieved.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -131,7 +133,8 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   NO_XMLHTTPREQUEST_SUPPORT: 2,
   NO_WEBRTC_SUPPORT: 3,
   NO_PATH: 4,
-  ADAPTER_NO_LOADED: 7
+  ADAPTER_NO_LOADED: 7,
+  PARSE_CODECS: 8
 };
 
 /**
@@ -147,6 +150,27 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
 Skylink.prototype.REGIONAL_SERVER = {
   APAC1: '',
   US1: ''
+};
+
+/**
+ * The list of User's priority weight schemes for <a href="#method_joinRoom">
+ * <code>joinRoom()</code> method</a> connections.
+ * @attribute PRIORITY_WEIGHT_SCHEME
+ * @param {String} ENFORCE_OFFERER  <small>Value <code>"enforceOfferer"</code></small>
+ *   The value of the priority weight scheme to enforce User as the offerer.
+ * @param {String} ENFORCE_ANSWERER <small>Value <code>"enforceAnswerer"</code></small>
+ *   The value of the priority weight scheme to enforce User as the answerer.
+ * @param {String} AUTO             <small>Value <code>"auto"</code></small>
+ *   The value of the priority weight scheme to let User be offerer or answerer based on Signaling server selection.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype.PRIORITY_WEIGHT_SCHEME = {
+  ENFORCE_OFFERER: 'enforceOfferer',
+  ENFORCE_ANSWERER: 'enforceAnswerer',
+  AUTO: 'auto'
 };
 
 /**
@@ -188,8 +212,8 @@ Skylink.prototype.generateUUID = function() {
  * - When not provided or is provided as an empty string, its value is <code>options.appKey</code>.
  *   <small>Note that switching Rooms is not available when using <code>options.credentials</code> based authentication.
  *   The Room that User will be connected to is the <code>defaultRoom</code> provided.</small>
- * @param {String} [options.roomServer] The Auth server.
- * <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
+ * @param {String} [options.roomServer] The Auth server for debugging purposes to use.
+ *   <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
  * @param {Boolean} [options.enableDataChannel=true] <blockquote class="info">
@@ -200,9 +224,7 @@ Skylink.prototype.generateUUID = function() {
  *   <a href="#method_sendP2PMessage"><code>sendP2PMessage()</code> method</a>.</small>
  * @param {Boolean} [options.enableTURNServer=true] The flag if TURN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.
- * @param {Boolean} [options.enableSTUNServer=true] <blockquote class="info">
- *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
- *   </blockquote> The flag if STUN ICE servers should
+ * @param {Boolean} [options.enableSTUNServer=true] The flag if STUN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required.
  * @param {Boolean} [options.forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
@@ -275,23 +297,34 @@ Skylink.prototype.generateUUID = function() {
  *   during request to Auth server and socket connections to Signaling server
  *   when accessing <code>window.location.protocol</code> value is <code>"http:"</code>.
  *   <small>By default, <code>"https:"</code> protocol connections uses HTTPS connections.</small>
- * @param {String} [options.audioCodec] <blockquote class="info">
+ * @param {String|JSON} [options.audioCodec] <blockquote class="info">
  *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.<br>
  *   Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>
  *   The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.AUDIO_CODEC]
- * @param {String} [options.videoCodec] <blockquote class="info">
+ * @param {String} options.audioCodec.codec The audio codec to prefer to encode sending audio data when available.
+ *   <small>The value must not be <code>AUTO</code>.</small>
+ *   [Rel: Skylink.AUDIO_CODEC]
+ * @param {Number} [options.audioCodec.samplingRate] The audio codec sampling to prefer to encode sending audio data when available.
+ * @param {Number} [options.audioCodec.channels] The audio codec channels to prefer to encode sending audio data when available.
+ * @param {String|JSON} [options.videoCodec] <blockquote class="info">
  *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
  *   <code>"answer"</code> session description to prefer the codec.<br>
  *   Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>
  *   The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.VIDEO_CODEC]
+ * @param {String} options.videoCodec.codec The video codec to prefer to encode sending audio data when available.
+ *   <small>The value must not be <code>AUTO</code>.</small>
+ *   [Rel: Skylink.VIDEO_CODEC]
+ * @param {Number} [options.videoCodec.samplingRate] The video codec sampling to prefer to encode sending video data when available.
  * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
  *   <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>
+ *   <small>Note that it is recommended to use <code>12000</code> as the lowest timeout value if Peers are connecting
+ *   using Polling transports to prevent connection errors.</small>
  * @param {Boolean} [options.forceTURNSSL=false] <blockquote class="info">
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
  *   TURN ICE servers using port <code>443</code> will be used instead.<br>
@@ -324,6 +357,111 @@ Skylink.prototype.generateUUID = function() {
  *   The flag if <a href="#method_refreshConnection"><code>
  *   refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU
  *   enabled Peer connections instead of invoking <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.
+ * @param {String|Array} [options.iceServer] The ICE servers for debugging purposes to use.
+ *   - When defined as string, the value is considered as <code>[options.iceServer]</code>.
+ *   <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
+ * @param {String} [options.iceServer.#index] The ICE server url for debugging purposes to use.
+ * @param {String|JSON} [options.socketServer] The Signaling server for debugging purposes to use.
+ *   - When defined as string, the value is considered as <code>{ url: options.socketServer }</code>.
+ *   <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
+ * @param {String} options.socketServer.url The Signaling server URL for debugging purposes to use.
+ * @param {Array} [options.socketServer.ports] The list of Signaling server ports for debugging purposes to use.
+ *   <small>If not defined, it will use the default list of ports specified.</small>
+ * @param {Number} options.socketServer.ports.#index The Signaling server port to fallback and use for debugging purposes.
+ * @param {String} [options.socketServer.protocol] The Signaling server protocol for debugging purposes to use.
+ *   <small>If not defined, it will use the default protocol specified.</small>
+ * @param {JSON} [options.codecParams] <blockquote class="info">
+ *   Note that some of these parameters are mainly used for experimental or debugging purposes. Toggling any of
+ *   these feature may result in disruptions in connectivity.</blockquote>
+ *   The audio and video codecs parameters to configure.
+ * @param {JSON} [options.codecParams.video] The video codecs parameters to configure.
+ * @param {JSON} [options.codecParams.video.h264] The H264 video codec parameters to configure.
+ * @param {String} [options.codecParams.video.h264.profileLevelId] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The H264 video codec base16 encoded string which indicates the H264 baseline, main, or the extended profiles.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.video.h264.levelAsymmetryAllowed] <blockquote class="info">
+ *   Note that this is an experimental parameter which may result in connectivity issues when toggled.</blockquote>
+ *   The flag if streaming H264 sending video data should be encoded at a different level
+ *   from receiving video data from Peer encoding to User when Peer is the offerer.
+ *   <small>If Peer is the offerer instead of the User, the Peer's <code>peerInfo.config.priorityWeight</code> will be
+ *   higher than User's <code>peerInfo.config.priorityWeight</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.video.h264.packetizationMode] <blockquote class="info">
+ *   Note that this is an experimental parameter which may result in connectivity issues when enabled. It is
+ *   advisable to turn off this feature off when receiving H264 decoders do not support the packetization mode,
+ *   which may result in a blank receiving video stream.</blockquote>
+ *   The flag to enable H264 video codec packetization mode, which splits video frames that are larger
+ *   for a RTP packet into RTP packet chunks.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {JSON} [options.codecParams.video.vp8] The VP8 video codec parameters to configure.
+ * @param {Number} [options.codecParams.video.vp8.maxFr] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of fps (frames per second) that the VP8 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.video.vp8.maxFs] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of frame size macroblocks that the VP8 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>The value has to have the width and height of the frame in macroblocks less than the value of
+ *   <code>parseInt(Math.sqrt(maxFs * 8))</code>. E.g. If the value is <code>1200</code>, it is capable of
+ *   support <code>640x480</code> frame width and height, which heights up to <code>1552px</code>
+ *   (<code>97</code> macroblocks value.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {JSON} [options.codecParams.video.vp9] The VP9 video codec parameters to configure.
+ * @param {Number} [options.codecParams.video.vp9.maxFr] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of fps (frames per second) that the VP9 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.video.vp9.maxFs] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only. Do not toggle this otherwise.</blockquote>
+ *   The maximum number of frame size macroblocks that the VP9 video codec decoder is capable of
+ *   decoding when receiving encoded video data packets.
+ *   <small>The value has to have the width and height of the frame in macroblocks less than the value of
+ *   <code>parseInt(Math.sqrt(maxFs * 8))</code>. E.g. If the value is <code>1200</code>, it is capable of
+ *   support <code>640x480</code> frame width and height, which heights up to <code>1552px</code>
+ *   (<code>97</code> macroblocks value.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {JSON} [options.codecParams.audio] The audio codecs parameters to configure.
+ * @param {JSON} [options.codecParams.audio.opus] <blockquote class="info">
+ *   Note that this is only applicable to OPUS audio codecs with a sampling rate of <code>48000</code> Hz (hertz).
+ *   </blockquote> The OPUS audio codec parameters to configure.
+ * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec stereo band
+ *   should be configured for sending encoded audio data.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.audio.opus.usedtx] <blockquote class="info">
+ *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
+ *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
+ *   <small>This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
+ *   goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href="#method_joinRoom">
+ *   <code>joinRoom()</code> method</a>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.audio.opus.useinbandfec] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
+ *   (Forward Error Correction) when sending encoded audio data.
+ *   <small>This helps to reduce the harm of packet loss by encoding information about the previous packet loss.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.audio.opus.maxplaybackrate] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
+ *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
+ *   would not encode at a higher sampling rate specified by this.
+ *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Number} [options.codecParams.minptime] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only.</blockquote>
+ *   The OPUS audio codec receiving audio data decoder minimum length of time in milleseconds should be
+ *   encapsulated in a single received encoded audio data packet.
+ *   <small>This value must be between <code>3</code> to <code>120</code></small>
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {String} [options.priorityWeightScheme] <blockquote class="info">
+ *   Note that this parameter should only be used for debugging purposes only and may not work when
+ *   internals change.</blockquote> The User's priority weight to enforce User as offerer or answerer.
+ * - When not provided, its value is <code>AUTO</code>.
+ *   [Rel: Skylink.PRIORITY_WEIGHT_SCHEME]
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -336,14 +474,14 @@ Skylink.prototype.generateUUID = function() {
  * @param {Number} callback.error.errorCode The <a href="#event_readyStateChange"><code>readyStateChange</code>
  *   event</a> <code>error.errorCode</code> parameter payload value.
  *   [Rel: Skylink.READY_STATE_CHANGE_ERROR]
- * @param {Object} callback.error.error The <a href="#event_readyStateChange"><code>readyStateChange</code>
+ * @param {Error|String} callback.error.error The <a href="#event_readyStateChange"><code>readyStateChange</code>
  *   event</a> <code>error.content</code> parameter payload value.
  * @param {Number} callback.error.status The <a href="#event_readyStateChange"><code>readyStateChange</code>
  *   event</a> <code>error.status</code> parameter payload value.
  * @param {JSON} callback.success The success result in request.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {String} callback.success.serverUrl The constructed REST URL requested to Auth server.
- * @param {String} callback.success.readyState The current ready state.
+ * @param {Number} callback.success.readyState The current ready state.
  *   [Rel: Skylink.READY_STATE_CHANGE]
  * @param {String} callback.success.selectedRoom The Room based on the current Room session token retrieved for.
  * @param {String} callback.success.appKey The configured value of the <code>options.appKey</code>.
@@ -356,8 +494,8 @@ Skylink.prototype.generateUUID = function() {
  * @param {Boolean} callback.success.TURNTransport The configured value of the <code>options.TURNServerTransport</code>.
  * @param {Boolean} callback.success.audioFallback The configured value of the <code>options.audioFallback</code>.
  * @param {Boolean} callback.success.forceSSL The configured value of the <code>options.forceSSL</code>.
- * @param {String} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.
- * @param {String} callback.success.videoCodec The configured value of the <code>options.videoCodec</code>.
+ * @param {String|JSON} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.
+ * @param {String|JSON} callback.success.videoCodec The configured value of the <code>options.videoCodec</code>.
  * @param {Number} callback.success.socketTimeout The configured value of the <code>options.socketTimeout</code>.
  * @param {Boolean} callback.success.forceTURNSSL The configured value of the <code>options.forceTURNSSL</code>.
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
@@ -366,9 +504,12 @@ Skylink.prototype.generateUUID = function() {
  * @param {Boolean} callback.success.disableComfortNoiseCodec The configured value of the <code>options.disableComfortNoiseCodec</code>.
  * @param {Boolean} callback.success.disableREMB The configured value of the <code>options.disableREMB</code>.
  * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
- * @param {Number} callback.success.throttleIntervals The configured value of the <code>options.throttleIntervals</code>.
- * @param {Number} callback.success.throttleShouldThrowError The configured value of the <code>options.throttleShouldThrowError</code>.
- * @param {Number} callback.success.mcuUseRenegoRestart The configured value of the <code>options.mcuUseRenegoRestart</code>.
+ * @param {JSON} callback.success.throttleIntervals The configured value of the <code>options.throttleIntervals</code>.
+ * @param {Boolean} callback.success.throttleShouldThrowError The configured value of the <code>options.throttleShouldThrowError</code>.
+ * @param {JSON} callback.success.mcuUseRenegoRestart The configured value of the <code>options.mcuUseRenegoRestart</code>.
+ * @param {JSON} callback.success.iceServer The configured value of the <code>options.iceServer</code>.
+ *   <small>See the <code>.urls</code> property in this object for configured value if defined.</small>
+ * @param {JSON|String} callback.success.socketServer The configured value of the <code>options.socketServer</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -478,6 +619,13 @@ Skylink.prototype.init = function(options, callback) {
   };
   var throttleShouldThrowError = false;
   var mcuUseRenegoRestart = false;
+  var iceServer = null;
+  var socketServer = null;
+  var codecParams = {
+    audio: { opus: {} },
+    video: { h264: {}, vp8: {}, vp9: {} }
+  };
+  var priorityWeightScheme = self.PRIORITY_WEIGHT_SCHEME.AUTO;
 
   log.log('Provided init options:', options);
 
@@ -524,12 +672,6 @@ Skylink.prototype.init = function(options, callback) {
     // set the force turn ssl always option
     forceTURNSSL = (typeof options.forceTURNSSL === 'boolean') ?
       options.forceTURNSSL : forceTURNSSL;
-    // set the preferred audio codec
-    audioCodec = typeof options.audioCodec === 'string' ?
-      options.audioCodec : audioCodec;
-    // set the preferred video codec
-    videoCodec = typeof options.videoCodec === 'string' ?
-      options.videoCodec : videoCodec;
     // set the force turn server option
     forceTURN = (typeof options.forceTURN === 'boolean') ?
       options.forceTURN : forceTURN;
@@ -548,6 +690,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if throttling should throw error when called less than the interval timeout configured
     throttleShouldThrowError = (typeof options.throttleShouldThrowError === 'boolean') ?
       options.throttleShouldThrowError : throttleShouldThrowError;
+    // set the flag if MCU refreshConnection() should use renegotiation
+    mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
+      options.mcuUseRenegoRestart : mcuUseRenegoRestart;
     // set the flag if MCU refreshConnection() should use renegotiation
     mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
       options.mcuUseRenegoRestart : mcuUseRenegoRestart;
@@ -570,19 +715,169 @@ Skylink.prototype.init = function(options, callback) {
         options.throttleIntervals.getUserMedia : throttleIntervals.getUserMedia;
     }
 
+    // set the Signaling server url for debugging purposes
+    if (options.socketServer) {
+      if (typeof options.socketServer === 'string') {
+        socketServer = options.socketServer;
+      } else if (typeof options.socketServer === 'object' && options.socketServer.url &&
+        typeof options.socketServer.url === 'string') {
+        socketServer = {
+          url: options.socketServer.url,
+          ports: Array.isArray(options.socketServer.ports) && options.socketServer.ports.length > 0 ?
+            options.socketServer.ports : [],
+          protocol: options.socketServer.protocol && typeof options.socketServer.protocol === 'string' ?
+            options.socketServer.protocol : null
+        };
+      }
+    }
+
+    // set the Signaling server url for debugging purposes
+    if (options.iceServer) {
+      iceServer = typeof options.iceServer === 'string' ? { urls: [options.iceServer] } :
+        (Array.isArray(options.iceServer) && options.iceServer.length > 0 &&
+        options.iceServer[0] && typeof options.iceServer[0] === 'string' ? { urls: options.iceServer } : null);
+    }
+
     // set turn transport option
     if (typeof options.TURNServerTransport === 'string') {
       // loop out for every transport option
-      for (var type in self.TURN_TRANSPORT) {
-        if (self.TURN_TRANSPORT.hasOwnProperty(type)) {
-          // do a check if the transport option is valid
-          if (self.TURN_TRANSPORT[type] === options.TURNServerTransport) {
-            TURNTransport = options.TURNServerTransport;
+      for (var ttType in self.TURN_TRANSPORT) {
+        // do a check if the transport option is valid
+        if (self.TURN_TRANSPORT.hasOwnProperty(ttType) && self.TURN_TRANSPORT[ttType] === options.TURNServerTransport) {
+          TURNTransport = options.TURNServerTransport;
+          break;
+        }
+      }
+    }
+
+    // set the preferred audio codec
+    if (options.audioCodec && ((typeof options.audioCodec === 'string' &&
+      options.audioCodec !== self.AUDIO_CODEC.AUTO) || (typeof options.audioCodec === 'object' &&
+      options.audioCodec.codec && typeof options.audioCodec.codec === 'string' &&
+      options.audioCodec.codec !== self.AUDIO_CODEC.AUTO))) {
+      // loop out for every audio codec option
+      for (var acType in self.AUDIO_CODEC) {
+        // do a check if the audio codec option is valid
+        if (self.AUDIO_CODEC.hasOwnProperty(acType)) {
+          if (typeof options.audioCodec === 'string' && self.AUDIO_CODEC[acType] === options.audioCodec) {
+            audioCodec = options.audioCodec;
+            break;
+          } else if (typeof options.audioCodec === 'object' && self.AUDIO_CODEC[acType] === options.audioCodec.codec) {
+            audioCodec = {
+              codec: options.audioCodec.codec,
+              samplingRate: typeof options.audioCodec.samplingRate === 'number' &&
+                options.audioCodec.samplingRate > 0 ? options.audioCodec.samplingRate : null,
+              channels: typeof options.audioCodec.channels === 'number' &&
+                options.audioCodec.channels > 0 ? options.audioCodec.channels : null
+            };
             break;
           }
         }
       }
     }
+
+    // set the preferred video codec
+    if (options.videoCodec && ((typeof options.videoCodec === 'string' &&
+      options.videoCodec !== self.VIDEO_CODEC.AUTO) || (typeof options.videoCodec === 'object' &&
+      options.videoCodec.codec && typeof options.videoCodec.codec === 'string' &&
+      options.videoCodec.codec !== self.VIDEO_CODEC.AUTO))) {
+      // loop out for every video codec option
+      for (var vcType in self.VIDEO_CODEC) {
+        // do a check if the video codec option is valid
+        if (self.VIDEO_CODEC.hasOwnProperty(vcType)) {
+          if (typeof options.videoCodec === 'string' && self.VIDEO_CODEC[vcType] === options.videoCodec) {
+            videoCodec = options.videoCodec;
+            break;
+          } else if (typeof options.videoCodec === 'object' && self.VIDEO_CODEC[vcType] === options.videoCodec.codec) {
+            videoCodec = {
+              codec: options.videoCodec.codec,
+              samplingRate: typeof options.videoCodec.samplingRate === 'number' &&
+                options.videoCodec.samplingRate > 0 ? options.videoCodec.samplingRate : null
+            };
+            break;
+          }
+        }
+      }
+    }
+
+    // set the priority weight scheme
+    if (typeof options.priorityWeightScheme === 'string') {
+      // loop out for every transport option
+      for (var pwsType in self.PRIORITY_WEIGHT_SCHEME) {
+        // do a check if the transport option is valid
+        if (self.PRIORITY_WEIGHT_SCHEME.hasOwnProperty(pwsType) &&
+          self.PRIORITY_WEIGHT_SCHEME[pwsType] === options.priorityWeightScheme) {
+          priorityWeightScheme = options.priorityWeightScheme;
+          break;
+        }
+      }
+    }
+
+    // set the codec params
+    if (options.codecParams && typeof options.codecParams === 'object') {
+      // Set audio codecs params
+      if (options.codecParams.audio && typeof options.codecParams.audio === 'object') {
+        // Set the audio codec opus params
+        if (options.codecParams.audio.opus && typeof options.codecParams.audio.opus === 'object') {
+          codecParams.audio.opus = {
+            stereo: typeof options.codecParams.audio.opus.stereo === 'boolean' ?
+              options.codecParams.audio.opus.stereo : null,
+            usedtx: typeof options.codecParams.audio.opus.usedtx === 'boolean' ?
+              options.codecParams.audio.opus.usedtx : null,
+            useinbandfec: typeof options.codecParams.audio.opus.useinbandfec === 'boolean' ?
+              options.codecParams.audio.opus.useinbandfec : null,
+            maxplaybackrate: typeof options.codecParams.audio.opus.maxplaybackrate === 'number' &&
+              options.codecParams.audio.opus.maxplaybackrate >= 8000 &&
+              options.codecParams.audio.opus.maxplaybackrate <= 48000 ?
+              options.codecParams.audio.opus.maxplaybackrate : null,
+            minptime: typeof options.codecParams.audio.opus.minptime === 'number' &&
+              options.codecParams.audio.opus.minptime >= 3 ? options.codecParams.audio.opus.minptime : null
+          };
+        }
+      }
+      // Set video codecs params
+      if (options.codecParams.video && typeof options.codecParams.video === 'object') {
+        // Set the video codec H264 params
+        if (options.codecParams.video.h264 && typeof options.codecParams.video.h264 === 'object') {
+          codecParams.video.h264 = {
+            // Only allowing profile-level-id change for experimental fixes or changes incase..
+            // Strong NOT recommended, this is like an information
+            profileLevelId: options.codecParams.video.h264.profileLevelId &&
+              typeof options.codecParams.video.h264.profileLevelId === 'string' ?
+              options.codecParams.video.h264.profileLevelId : null,
+            levelAsymmetryAllowed: typeof options.codecParams.video.h264.levelAsymmetryAllowed === 'boolean' ?
+              options.codecParams.video.h264.levelAsymmetryAllowed : null,
+            packetizationMode: typeof options.codecParams.video.h264.packetizationMode === 'boolean' ?
+              options.codecParams.video.h264.packetizationMode : null
+          };
+        }
+        // Set the video codec VP8 params
+        if (options.codecParams.video.vp8 && typeof options.codecParams.video.vp8 === 'object') {
+          // Only allowing max-fs, max-fr change for experimental fixes or changes incase..
+          // (NOT used for any other purposes)!!!!
+          // Strong NOT recommended, this is like an information
+          codecParams.video.vp8 = {
+            maxFs: typeof options.codecParams.video.vp8.maxFs === 'number' ?
+              options.codecParams.video.vp8.maxFs : null,
+            maxFr: typeof options.codecParams.video.vp8.maxFr === 'number' ?
+              options.codecParams.video.vp8.maxFr : null
+          };
+        }
+        // Set the video codec VP9 params
+        if (options.codecParams.video.vp9 && typeof options.codecParams.video.vp9 === 'object') {
+          // Only allowing max-fs, max-fr change for experimental fixes or changes incase..
+          // (NOT used for any other purposes)!!!!
+          // Strong NOT recommended, this is like an information
+          codecParams.video.vp9 = {
+            maxFs: typeof options.codecParams.video.vp9.maxFs === 'number' ?
+              options.codecParams.video.vp9.maxFs : null,
+            maxFr: typeof options.codecParams.video.vp9.maxFr === 'number' ?
+              options.codecParams.video.vp9.maxFr : null
+          };
+        }
+      }
+    }
+
     // set audio fallback option
     audioFallback = options.audioFallback || audioFallback;
     // Custom default meeting timing and duration
@@ -610,11 +905,8 @@ Skylink.prototype.init = function(options, callback) {
   }
 
   if (window.webrtcDetectedBrowser === 'edge') {
-    enableSTUNServer = false;
     forceTURNSSL = false;
     TURNTransport = self.TURN_TRANSPORT.UDP;
-    audioCodec = self.AUDIO_CODEC.OPUS;
-    videoCodec = self.VIDEO_CODEC.H264;
     enableDataChannel = false;
   }
 
@@ -656,6 +948,10 @@ Skylink.prototype.init = function(options, callback) {
   self._throttlingShouldThrowError = throttleShouldThrowError;
   self._disableREMB = disableREMB;
   self._mcuUseRenegoRestart = mcuUseRenegoRestart;
+  self._iceServer = iceServer;
+  self._socketServer = socketServer;
+  self._codecParams = codecParams;
+  self._priorityWeightScheme = priorityWeightScheme;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -683,7 +979,11 @@ Skylink.prototype.init = function(options, callback) {
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError,
-    mcuUseRenegoRestart: self._mcuUseRenegoRestart
+    mcuUseRenegoRestart: self._mcuUseRenegoRestart,
+    iceServer: self._iceServer,
+    socketServer: self._socketServer,
+    codecParams: self._codecParams,
+    priorityWeightScheme: self._priorityWeightScheme
   });
   // trigger the readystate
   self._readyState = 0;
@@ -725,7 +1025,11 @@ Skylink.prototype.init = function(options, callback) {
             filterCandidatesType: self._filterCandidatesType,
             throttleIntervals: self._throttlingTimeouts,
             throttleShouldThrowError: self._throttlingShouldThrowError,
-            mcuUseRenegoRestart: self._mcuUseRenegoRestart
+            mcuUseRenegoRestart: self._mcuUseRenegoRestart,
+            iceServer: self._iceServer,
+            socketServer: self._socketServer,
+            codecParams: self._codecParams,
+            priorityWeightScheme: self._priorityWeightScheme
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -845,10 +1149,7 @@ Skylink.prototype._parseInfo = function(info) {
 
   this._key = info.cid;
   this._appKeyOwner = info.apiOwner;
-
   this._signalingServer = info.ipSigserver;
-  this._signalingServerPort = null;
-
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
 
@@ -956,34 +1257,72 @@ Skylink.prototype._loadInfo = function() {
   adapter.webRTCReady(function () {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
 
-    if (!window.RTCPeerConnection) {
-      log.error('WebRTC not supported. Please upgrade your browser');
+    // Prevent empty object returned when constructing the RTCPeerConnection object
+    if (!(function () {
+      try {
+        var p = new window.RTCPeerConnection(null);
+        // IE returns as typeof object
+        return ['object', 'function'].indexOf(typeof p.createOffer) > -1 && p.createOffer !== null;
+      } catch (e) {
+        return false;
+      }
+    })()) {
+      if (window.RTCPeerConnection && self._isUsingPlugin) {
+        log.error('Plugin is not available. Please check plugin status.');
+      } else {
+        log.error('WebRTC not supported. Please upgrade your browser');
+      }
       self._readyState = -1;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
-        content: 'WebRTC not available',
+        content: self._isUsingPlugin && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available',
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
       }, self._selectedRoom);
       return;
     }
-    self._readyState = 1;
-    self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
-    self._requestServerInfo('GET', self._path, function(status, response) {
-      if (status !== 200) {
-        // 403 - Room is locked
-        // 401 - API Not authorized
-        // 402 - run out of credits
-        var errorMessage = 'XMLHttpRequest status not OK\nStatus was: ' + status;
-        self._readyState = 0;
+
+    self._getCodecsSupport(function (error) {
+      if (error) {
+        log.error(error);
+        self._readyState = -1;
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-          status: status,
-          content: (response) ? (response.info || errorMessage) : errorMessage,
-          errorCode: response.error ||
-            self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
+          status: null,
+          content: error.message || error.toString(),
+          errorCode: self.READY_STATE_CHANGE_ERROR.PARSE_CODECS
         }, self._selectedRoom);
         return;
       }
-      self._parseInfo(response);
+
+      if (Object.keys(self._currentCodecSupport.audio).length === 0 && Object.keys(self._currentCodecSupport.video).length === 0) {
+        log.error('No audio/video codecs available to start connection.');
+        self._readyState = -1;
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+          status: null,
+          content: 'No audio/video codecs available to start connection',
+          errorCode: self.READY_STATE_CHANGE_ERROR.PARSE_CODECS
+        }, self._selectedRoom);
+        return;
+      }
+
+      self._readyState = 1;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
+      self._requestServerInfo('GET', self._path, function(status, response) {
+        if (status !== 200) {
+          // 403 - Room is locked
+          // 401 - API Not authorized
+          // 402 - run out of credits
+          var errorMessage = 'XMLHttpRequest status not OK\nStatus was: ' + status;
+          self._readyState = 0;
+          self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+            status: status,
+            content: (response) ? (response.info || errorMessage) : errorMessage,
+            errorCode: response.error ||
+              self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
+          }, self._selectedRoom);
+          return;
+        }
+        self._parseInfo(response);
+      });
     });
   });
 };
@@ -1025,7 +1364,11 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     filterCandidatesType: self._filterCandidatesType,
     throttleIntervals: self._throttlingTimeouts,
     throttleShouldThrowError: self._throttlingShouldThrowError,
-    mcuUseRenegoRestart: self._mcuUseRenegoRestart
+    mcuUseRenegoRestart: self._mcuUseRenegoRestart,
+    iceServer: self._iceServer ? self._iceServer.urls : null,
+    socketServer: self._socketServer ? self._socketServer : null,
+    codecParams: self._codecParams ? self._codecParams : null,
+    priorityWeightScheme: self._priorityWeightScheme ? self._priorityWeightScheme : null
   };
   if (self._roomCredentials) {
     initOptions.credentials = {

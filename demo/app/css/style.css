@@ -184,6 +184,12 @@ footer {
   text-transform: capitalize;
 }
 
+.panel .panel-heading small {
+  display: block;
+  color: #888;
+  font-size: 10px;
+}
+
 @media screen and (max-width:1999px){
   #credential_panel .panel-body {
     margin-bottom:15px;

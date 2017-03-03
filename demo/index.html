@@ -2,7 +2,7 @@
 <html>
 
 <head>
-  <title>Temasys SkylinkJS</title>
+  <title>Temasys Web SDK Demos</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel="shortcut icon" href="./favicon.ico">
   <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" media="screen">
@@ -34,7 +34,7 @@
         <div class="page-header">
           <h2>
             <a href="http://temasys.github.io/">
-              <img class="img-responsive" src="Temasys SkylinkJS.svg" alt="Skylink JS" height="120px"; width="135px">
+              <img class="img-responsive" src="skylinkjs.svg" alt="Skylink JS" height="120px"; width="135px">
             </a>
             <small>Client API Documentation</small>
           </h2>
@@ -43,7 +43,7 @@
       <!-- banner -->
       <div class="panel panel-default">
         <div class="panel-heading">
-          <h4>Temasys SkylinkJS Documentation</h4>
+          <h4>Temasys Web SDK Documentation</h4>
         </div>
         <div class="panel-body">
           <div class="panel panel-info">
@@ -139,7 +139,7 @@
           </div>
           <div class="panel-body">
             <p>
-              <em>This demo presents the different possibilities to send messages with Temasys SkylinkJS.</em>
+              <em>This demo presents the different possibilities to send messages with Temasys Web SDK.</em>
             </p>
             <hr>
             <ul>
@@ -228,7 +228,7 @@
           </div>
           <div class="panel-body">
             <p>
-              <em>This demo presents the different possibilities to send files with Temasys SkylinkJS.</em>
+              <em>This demo presents the different possibilities to send files with Temasys Web SDK.</em>
             </p>
             <hr>
             <ul>
@@ -260,7 +260,7 @@
           </div>
           <div class="panel-body">
             <p>
-              <em>This demo presents an IRC like chat powered by Temasys SkylinkJS.</em>
+              <em>This demo presents an IRC like chat powered by Temasys Web SDK.</em>
             </p>
             <hr>
             <ul>
@@ -288,7 +288,7 @@
           </div>
           <div class="panel-body">
             <p>
-              <em>This demo presents the use-case to stimulate a call-like environment with Temasys SkylinkJS.</em>
+              <em>This demo presents the use-case to stimulate a call-like environment with Temasys Web SDK.</em>
             </p>
             <hr>
             <ul>
@@ -318,7 +318,7 @@
           </div>
           <div class="panel-body">
             <p>
-              <em>This demo presents the use of privileged concept</em>
+              <em>This demo presents the use of privileged concept. This demo requires special demo <code>config.js</code> settings for various Privileged App Key and Auto-Introduce settings.</em>
             </p>
             <hr>
             <ul>
@@ -337,7 +337,16 @@
               </div>
             </div>
             <p>
-              <a href="./privileged/index.html" class="btn btn-primary">View Demo</a>
+              <h5>Auto-Introduce: Enabled</h5>
+              <div class="btn-group btn-group-sm" role="group">
+                <a href="./privileged/auto-priv/" class="btn btn-primary">Privileged Key User Demo</a>
+                <a href="./privileged/auto-unpriv/" class="btn btn-primary">Non-Privileged Key User Demo</a>
+              </div>
+              <h5>Auto-Introduce: Disabled</h5>
+              <div class="btn-group btn-group-sm" role="group">
+                <a href="./privileged/unauto-priv/" class="btn btn-primary">Privileged Key User Demo</a>
+                <a href="./privileged/unauto-unpriv/" class="btn btn-primary">Non-Privileged Key User Demo</a>
+              </div>
             </p>
           </div>
         </div>
@@ -386,7 +395,7 @@
           </div>
           <div class="panel-body">
             <p>
-              <em>This demo shows you most of the functionality Temasys SkylinkJS can provide.</em>
+              <em>This demo shows you most of the functionality Temasys Web SDK can provide.</em>
               All the states and information provided by the API are displayed.
             </p>
             <hr>
@@ -414,6 +423,70 @@
             </div>
             <p>
               <a href="./app" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- row -->
+      <div class="row row-eq-height">
+        <!-- column -->
+        <div class="col-md-5 panel panel-default">
+          <div class="panel-heading">
+            <h4>Data Streaming <br><small>(/data-streaming)</small></h4>
+          </div>
+          <div class="panel-body">
+            <div class="alert alert-warning" role="alert"><b>Warning!</b> This works only in Chrome browsers!</div>
+            <p>
+              <em>
+                This demo presents the ability to stream and share video mp4 files with friends.
+              </em>
+            </p>
+            <hr>
+            <ul>
+              <li>Streams data via Datachannel API</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-info"
+                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:30%;">
+                  Easy
+                </div>
+              </div>
+            </div>
+            <p>
+              <a href="./data-streaming" class="btn btn-primary">View Demo</a>
+            </p>
+          </div>
+        </div>
+        <!-- column -->
+        <div class="col-md-7 panel panel-default">
+          <div class="panel-heading">
+            <h4>Multi-stream Workaround <br><small>(/app)</small></h4>
+          </div>
+          <div class="panel-body">
+            <p>
+              <em>This demo presents a workaround to share both camera and screensharing stream at the same time.</em>
+            </p>
+            <hr>
+            <ul>
+              <li>Automatically fetch for cam</li>
+              <li>Automatically connects to default Room</li>
+              <li>Handle connection and disconnection of peers</li>
+              <li>With list of users in room</li>
+            </ul>
+            <div class="panel panel-info">
+              <div class="panel-heading">Difficulty</div>
+              <div class="progress" style="height:20px;margin:5px;">
+                <div class="progress-bar progress-bar-warning"
+                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:80%;">
+                  Hard
+                </div>
+              </div>
+            </div>
+            <p>
+              <a href="./screenshare-and-camera" class="btn btn-primary">View Demo</a>
             </p>
           </div>
         </div>

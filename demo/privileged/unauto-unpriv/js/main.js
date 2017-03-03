@@ -431,10 +431,7 @@ Demo.Skylink.on('channelError', function (error) {
 //------------- join room ---------------------------
 var displayName = 'name_' + 'user_' + Math.floor((Math.random() * 1000) + 1);
 
-Demo.Skylink.init({
-  appKey: config.unprivKey,
-  defaultRoom: 'test'
-}, function (error, success) {
+Demo.Skylink.init(config, function (error, success) {
   if (success) {
     Demo.Skylink.joinRoom({
       userData: displayName,

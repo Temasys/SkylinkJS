@@ -11,6 +11,7 @@ Demo.Methods = {};
 Demo.Skylink = new Skylink();
 Demo.ShowStats = {};
 Demo.TransfersDone = {};
+Demo.Downloads = {};
 
 var _peerId = null;
 
@@ -27,7 +28,9 @@ Demo.Methods.displayFileItemHTML = function(content) {
     '<div id="' + content.transferId + '" class="progress-bar ' +
     '" role="progressbar" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"' +
     ' style="width: 0%"><span>Downloading...</span></div></div>')) +
-    '<p><a id="'  + content.transferId + '_btn" class="btn btn-default" ' +
+    '<p><a id="'  + content.transferId + '_btn" class="btn btn-default ' +
+    (window.webrtcDetectedBrowser === 'IE' ? ' downloadfile' : '') + '" ' +
+    (window.webrtcDetectedBrowser === 'safari' ? 'target="_blank" ' : '') +
     'href="#" style="display: block;" download="' + content.name +
     '"><span class="glyphicon glyphicon-cloud-download"></span> <b>Download file</b></a>' +
     (content.direction === Demo.Skylink.DATA_TRANSFER_TYPE.DOWNLOAD ?
@@ -153,7 +156,15 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
       $('#' + transferId + ' .' + peerId).length === 0) {
       $('#' + transferId + ' .' + peerId).append('<tbody class="' + peerId + '"></tbody>');
       if (transferInfo.data) {
-        $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+        if (window.webrtcDetectedBrowser !== 'IE') {
+          $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+        } else {
+          $('#' + transferId + '_btn').attr('fileid', transferId);
+          Demo.Downloads[transferId] = {
+            name: transferInfo.name,
+            blob: transferInfo.data
+          };
+        }
       }
       return;
     }
@@ -164,7 +175,15 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     Demo.Methods.displayChatMessage(displayName, 'File sent: ' + transferInfo.name);
 
     if (transferInfo.data) {
-      $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+      if (window.webrtcDetectedBrowser !== 'IE') {
+        $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+      } else {
+        $('#' + transferId + '_btn').attr('fileid', transferId);
+        Demo.Downloads[transferId] = {
+          name: transferInfo.name,
+          blob: transferInfo.data
+        };
+      }
     }
     break;
   case Demo.Skylink.DATA_TRANSFER_STATE.UPLOADING :
@@ -201,7 +220,15 @@ Demo.Skylink.on('dataTransferState', function (state, transferId, peerId, transf
     // If completed, display download button
     var displayName = Demo.Skylink.getPeerInfo(peerId).userData;
     $('#' + transferId).parent().remove();
-    $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+    if (window.webrtcDetectedBrowser !== 'IE') {
+      $('#' + transferId + '_btn').attr('href', URL.createObjectURL(transferInfo.data));
+    } else {
+      $('#' + transferId + '_btn').attr('fileid', transferId);
+      Demo.Downloads[transferId] = {
+        name: transferInfo.name,
+        blob: transferInfo.data
+      };
+    }
     $('#' + transferId + '_btn').css('display', 'block');
     Demo.Methods.displayChatMessage(displayName, 'File received: ' + transferInfo.name);
     $('#file-' + transferId + ' .c-' + peerId + '.cancel').css('opacity', .5);
@@ -352,7 +379,9 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
       '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
         '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
       '<div class="candidate row"><b class="col-md-12">Selected Candidate</b><p class="col-md-6">Local: <span class="local"></span></p>' +
-        '<p class="col-md-6">Remote: <span class="remote"></span></p></div></div></div>');
+        '<p class="col-md-6">Remote: <span class="remote"></span></p></div>' +
+      '<div class="certificate row"><b class="col-md-12">Certificates</b><p class="col-md-6"><span class="certleft"></span></p>' +
+        '<p class="col-md-6"><span class="certright"></span></p></div></div></div>');
   }
 });
 //---------------------------------------------------
@@ -663,7 +692,8 @@ Demo.Skylink.on('recordingState', function(state, recordingId, url, error) {
       for (var prop in url) {
         if (url.hasOwnProperty(prop) && url[prop]) {
           $('#recording_' + recordingId + '_btn').append(
-            '<a class="btn btn-default" href="' + url[prop] + '" style="width:100%;margin:7px 0;display:block;" download="' + recordingId + '_' + prop + '.mp4">' +
+            '<a class="btn btn-default" ' + (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 ? 'target="_blank" ' : '') +
+            'href="' + url[prop] + '" style="width:100%;margin:7px 0;display:block;" download="' + recordingId + '_' + prop + '.mp4">' +
             '<span class="glyphicon glyphicon-cloud-download"></span> <b>Download Recording (' + (prop !== 'mixin' ? 'Peer ' : '') + prop + ')</b></a>');
         }
       }
@@ -699,7 +729,9 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
         ' jitter buffer <i>ms</i>' : '') + (dir === 'sending' ? ', ' + stats[type][dir].rtt + ' rtt' : '') +
         (typeof stats[type][dir].nacks === 'number' ? ', ' + stats[type][dir].nacks + ' nacks' : '') +
         (typeof stats[type][dir].plis === 'number' ? ', ' + stats[type][dir].plis + ' plis' : '') +
-        (typeof stats[type][dir].firs === 'number' ? ', ' + stats[type][dir].firs + ' firs' : '') + ')';
+        (typeof stats[type][dir].firs === 'number' ? ', ' + stats[type][dir].firs + ' firs' : '') +
+        (typeof stats[type][dir].slis === 'number' ? ', ' + stats[type][dir].slis + ' slis' : '') +
+        (typeof stats[type][dir].e2eDelay === 'number' ? ', ' + stats[type][dir].e2eDelay + ' e2eDelay' : '') + ')';
 
       // format codec stats
       if (stats[type][dir].codec) {
@@ -767,6 +799,18 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
         if (typeof stats.video[dir].frameRateStdDev === 'number') {
           itemAddStr += (itemAddStr ? ', ' : '') + 'fps std dev: ' + stats.video[dir].frameRateStdDev.toFixed(2);
         }
+
+        if (typeof stats.video[dir].framesDecoded === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'decoded: ' + stats.video[dir].framesDecoded.toFixed(2);
+        }
+
+        if (typeof stats.video[dir].framesCorrupted === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'corrupted: ' + stats.video[dir].framesCorrupted.toFixed(2);
+        }
+
+        if (typeof stats.video[dir].framesPerSecond === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'fps: ' + stats.video[dir].framesPerSecond.toFixed(2);
+        }
       }
 
       itemStr += itemAddStr + ')';
@@ -777,7 +821,9 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
       $(statsElm).find('.candidate .' + type).html((stats.selectedCandidate[type].ipAddress || '-') + ':' +
         (stats.selectedCandidate[type].portNumber || '-') + ' - (transport: ' +
         (stats.selectedCandidate[type].transport || 'N/A') +
-        ', type: ' + (stats.selectedCandidate[type].candidateType || 'N/A') + ')');
+        ', type: ' + (stats.selectedCandidate[type].candidateType || 'N/A') +
+        (stats.selectedCandidate[type].turnMediaTransport ? ', turn media transport: ' +
+        stats.selectedCandidate[type].turnMediaTransport : '') + ')');
     };
 
     formatStatItem('audio', 'sending');
@@ -786,6 +832,13 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
     formatStatItem('video', 'receiving');
     formatCanStatItem('local');
     formatCanStatItem('remote');
+
+    $(statsElm).find('.certificate .certleft').html('Certificate algorithm - (local: ' +
+      (stats.certificate.local.fingerprintAlgorithm || '-') + ', remote: ' +
+      (stats.certificate.remote.fingerprintAlgorithm || '-') + ')');
+    $(statsElm).find('.certificate .certright').html('Ciphers - (srtp: ' +
+      (stats.certificate.srtpCipher ? '<small>' + stats.certificate.srtpCipher + '</small>' : 'N/A') + ', dtls: ' +
+      (stats.certificate.dtlsCipher ? '<small>' + stats.certificate.dtlsCipher + '</small>' : 'N/A') + ')');
   }
 });
 
@@ -1037,4 +1090,17 @@ $(document).ready(function() {
     $('#selected_users_panel .all').show();
     selectedPeers = [];
   });
+
+  if (window.webrtcDetectedBrowser === 'IE') {
+    $('#file_list_panel').on('click', '.downloadfile', function () {
+      var fileid = $(this).attr('fileid');
+      window.navigator.msSaveBlob(Demo.Downloads[fileid].blob, Demo.Downloads[fileid].name);
+    });
+  }
+
+  if (window.webrtcDetectedBrowser === 'safari') {
+    $('#file_list_panel .panel-heading').html( $('#file_list_panel .panel-heading').html() +
+      '<small>For Safari, click to open a new tab. Note that only ' +
+      'media and document files can be downloaded in the new tab.</small>');
+  }
 });

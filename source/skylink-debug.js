@@ -187,7 +187,7 @@ var _printAllStoredLogsFn = function () {
  * @for Skylink
  * @since 0.5.5
  */
-window.SkylinkLogs = {
+var SkylinkLogs = {
   /**
    * Function that gets the current stored SDK <code>console</code> logs.
    * @property SkylinkLogs.getLogs

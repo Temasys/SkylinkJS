@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.17</title>
+    <title>SkylinkJS 0.6.18</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.17</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.18</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -132,7 +132,7 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  */
 Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var self = this;
-  var pc = self._peerConnections[targetMid] || self._addPeer(targetMid, peerBrowser);
+  var pc = self._peerConnections[targetMid];// || self._addPeer(targetMid, peerBrowser);
 
   log.log([targetMid, null, null, &#x27;Checking caller status&#x27;], peerBrowser);
 
@@ -151,46 +151,33 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
-  var peerIceRestartSupport = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart;
+  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
+  var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &amp;&amp;
+    iceRestart &amp;&amp; self._enableIceRestart;
+  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;);
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp;
+    ((window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
+    ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
+    !!self._currentCodecSupport.video.h264 : true);
 
   var offerConstraints = {
-    offerToReceiveAudio: true,
-    offerToReceiveVideo: true,
-    iceRestart: self._enableIceRestart &amp;&amp; peerIceRestartSupport ? iceRestart === true : false
+    offerToReceiveAudio: offerToReceiveAudio,
+    offerToReceiveVideo: offerToReceiveVideo,
+    iceRestart: doIceRestart,
+    voiceActivityDetection: self._voiceActivityDetection
   };
-
-  // NOTE: Removing ICE restart functionality as of now since Firefox does not support it yet
-  // Check if ICE connection failed or disconnected, and if so, do an ICE restart
-  /*if ([self.ICE_CONNECTION_STATE.DISCONNECTED, self.ICE_CONNECTION_STATE.FAILED].indexOf(pc.iceConnectionState) &gt; -1) {
-    offerConstraints.iceRestart = true;
-  }*/
 
   // Prevent undefined OS errors
   peerBrowser.os = peerBrowser.os || &#x27;&#x27;;
-
-  /*
-    Ignoring these old codes as Firefox 39 and below is no longer supported
-    if (window.webrtcDetectedType === &#x27;moz&#x27; &amp;&amp; peerBrowser.agent === &#x27;MCU&#x27;) {
-      unifiedOfferConstraints.mandatory = unifiedOfferConstraints.mandatory || {};
-      unifiedOfferConstraints.mandatory.MozDontOfferDataChannel = true;
-      beOfferer = true;
-    }
-
-    if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; window.webrtcDetectedVersion &gt;= 32) {
-      unifiedOfferConstraints = {
-        offerToReceiveAudio: true,
-        offerToReceiveVideo: true
-      };
-    }
-  */
 
   // Fallback to use mandatory constraints for plugin based browsers
   if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
     offerConstraints = {
       mandatory: {
-        OfferToReceiveAudio: true,
-        OfferToReceiveVideo: true,
-        iceRestart: self._enableIceRestart &amp;&amp; peerIceRestartSupport ? iceRestart === true : false
+        OfferToReceiveAudio: offerToReceiveAudio,
+        OfferToReceiveVideo: offerToReceiveVideo,
+        iceRestart: doIceRestart,
+        voiceActivityDetection: self._voiceActivityDetection
       }
     };
   }
@@ -201,7 +188,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   }
 
   if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
-    self._peerInformations[targetMid].config.enableDataChannel) {
+    self._peerInformations[targetMid].config.enableDataChannel &amp;&amp;
+    !(!self._sdpSettings.connection.data &amp;&amp; targetMid !== &#x27;MCU&#x27;)) {
     // Edge doesn&#x27;t support datachannels yet
     if (!(self._dataChannels[targetMid] &amp;&amp; self._dataChannels[targetMid].main)) {
       self._createDataChannel(targetMid);
@@ -256,9 +244,16 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }
 
   // Add stream only at offer/answer end
-  if (!self._hasMCU || targetMid === &#x27;MCU&#x27;) {
+  if ((!self._hasMCU || targetMid === &#x27;MCU&#x27;) &amp;&amp; window.webrtcDetectedBrowser !== &#x27;edge&#x27;) {
     self._addLocalMediaStreams(targetMid);
   }
+
+  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
+  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;);
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp;
+    ((window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
+    ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
+    !!self._currentCodecSupport.video.h264 : true);
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
@@ -268,7 +263,11 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }, function(error) {
     log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  });
+  }, window.webrtcDetectedBrowser === &#x27;edge&#x27; ? {
+    offerToReceiveVideo: offerToReceiveVideo,
+    offerToReceiveAudio: offerToReceiveAudio,
+    voiceActivityDetection: self._voiceActivityDetection
+  } : undefined);
 };
 
 /**
@@ -318,14 +317,20 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   pc.processingLocalSDP = true;
 
+  // Set them as first
+  if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+    sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription, {
+      audio: self.AUDIO_CODEC.OPUS,
+      video: self.VIDEO_CODEC.H264
+    });
+  }
+
   // Sets and expected receiving codecs etc.
-  //sessionDescription.sdp = self._setSDPOpusConfig(targetMid, sessionDescription);
-  //sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
-  sessionDescription.sdp = self._removeSDPH264VP9AptRtxForOlderPlugin(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
-  sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription);
-  //sessionDescription.sdp = self._setSDPBitrate(targetMid, sessionDescription);
+  sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, &#x27;local&#x27;);
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
 
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
@@ -357,7 +362,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
-      userInfo: self._getUserInfo()
+      userInfo: self._getUserInfo(targetMid)
     });
 
   }, function(error) {

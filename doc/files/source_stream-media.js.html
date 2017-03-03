@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.17</title>
+    <title>SkylinkJS 0.6.18</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" />JS<small>Version: 0.6.17</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.18</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -136,8 +136,14 @@ Skylink.prototype.VIDEO_CODEC = {
  *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/Opus_(audio_format)&quot;&gt;OPUS&lt;/a&gt; audio codec.
  * @param {String} ISAC &lt;small&gt;Value &lt;code&gt;&quot;ISAC&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec&quot;&gt;ISAC&lt;/a&gt; audio codec.
+ * @param {String} ILBC &lt;small&gt;Value &lt;code&gt;&quot;ILBC&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/Internet_Low_Bitrate_Codec&quot;&gt;iLBC&lt;/a&gt; audio codec.
  * @param {String} G722 &lt;small&gt;Value &lt;code&gt;&quot;G722&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/G.722&quot;&gt;G722&lt;/a&gt; audio codec.
+ * @param {String} PCMA &lt;small&gt;Value &lt;code&gt;&quot;PCMA&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/G.711&quot;&gt;G711u&lt;/a&gt; audio codec.
+ * @param {String} PCMU &lt;small&gt;Value &lt;code&gt;&quot;PCMU&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to prefer the &lt;a href=&quot;https://en.wikipedia.org/wiki/G.711&quot;&gt;G711a&lt;/a&gt; audio codec.
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -147,9 +153,10 @@ Skylink.prototype.AUDIO_CODEC = {
   AUTO: &#x27;auto&#x27;,
   ISAC: &#x27;ISAC&#x27;,
   OPUS: &#x27;opus&#x27;,
-  //ILBC: &#x27;ILBC&#x27;,
-  //G711: &#x27;G711&#x27;,
-  G722: &#x27;G722&#x27;
+  ILBC: &#x27;ILBC&#x27;,
+  G722: &#x27;G722&#x27;,
+  PCMU: &#x27;PCMU&#x27;,
+  PCMA: &#x27;PCMA&#x27;,
   //SILK: &#x27;SILK&#x27;
 };
 
@@ -341,30 +348,46 @@ Skylink.prototype.RECORDING_STATE = {
  *    Note that the current Edge browser implementation does not support the &lt;code&gt;options.audio.optional&lt;/code&gt;,
  *    &lt;code&gt;options.audio.deviceId&lt;/code&gt;, &lt;code&gt;options.audio.echoCancellation&lt;/code&gt;.&lt;/blockquote&gt;
  *    The audio configuration options.
- * @param {Boolean} [options.audio.stereo=false] The flag if stereo band should be configured
- *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending / receiving audio data.
- *   &lt;small&gt;Note that Peers may override the &quot;receiving&quot; &lt;code&gt;stereo&lt;/code&gt; config depending on the Peers configuration.&lt;/small&gt;
- * @param {Boolean} [options.audio.usedtx] &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
- *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
- *   is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending / receiving audio data.
- *   &lt;small&gt;This might help to reduce bandwidth it reduces the bitrate during silence or background noise.&lt;/small&gt;
+ * @param {Boolean} [options.audio.stereo=false] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
+ *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt;
+ *   parameter in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; instead. If the
+ *   &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt; is configured, this overrides the
+ *   &lt;code&gt;options.audio.stereo&lt;/code&gt; setting.&lt;/blockquote&gt;
+ *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
- *   &lt;small&gt;Note that Peers may override the &quot;receiving&quot; &lt;code&gt;usedtx&lt;/code&gt; config depending on the Peers configuration.&lt;/small&gt;
- * @param {Boolean} [options.audio.useinbandfec] &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
- *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
- *   configured when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending / receiving audio data.
- *   &lt;small&gt;This might help to reduce the harm of packet loss by encoding information about the previous packet.&lt;/small&gt;
+ * @param {Boolean} [options.audio.usedtx] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
+ *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt;
+ *   parameter in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; instead. If the
+ *   &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt; is configured, this overrides the
+ *   &lt;code&gt;options.audio.stereo&lt;/code&gt; setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.&lt;/blockquote&gt;
+ *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
+ *   &lt;small&gt;This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
+ *   goes hand-in-hand with the &lt;code&gt;options.voiceActivityDetection&lt;/code&gt; flag in &lt;a href=&quot;#method_joinRoom&quot;&gt;
+ *   &lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
- *   &lt;small&gt;Note that Peers may override the &quot;receiving&quot; &lt;code&gt;useinbandfec&lt;/code&gt; config depending on the Peers configuration.&lt;/small&gt;
- * @param {Number} [options.audio.maxplaybackrate] &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
- *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
- *   &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending / receiving audio data.
+ * @param {Boolean} [options.audio.useinbandfec] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
+ *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.useinbandfec&lt;/code&gt;
+ *   parameter in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; instead. If the
+ *   &lt;code&gt;options.codecParams.audio.opus.useinbandfec&lt;/code&gt; is configured, this overrides the
+ *   &lt;code&gt;options.audio.useinbandfec&lt;/code&gt; setting. Note that this parameter should only be used
+ *   for debugging purposes only.&lt;/blockquote&gt;
+ *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
+ *   (Forward Error Correction) when sending encoded audio data.
+ *   &lt;small&gt;This helps to reduce the harm of packet loss by encoding information about the previous packet loss.&lt;/small&gt;
+ *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
+ * @param {Number} [options.audio.maxplaybackrate] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
+ *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.maxplaybackrate&lt;/code&gt;
+ *   parameter in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; instead. If the
+ *   &lt;code&gt;options.codecParams.audio.opus.maxplaybackrate&lt;/code&gt; is configured, this overrides the
+ *   &lt;code&gt;options.audio.maxplaybackrate&lt;/code&gt; setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.
+ *   Note that this parameter should only be used for debugging purposes only.&lt;/blockquote&gt;
+ *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
+ *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
+ *   would not encode at a higher sampling rate specified by this.
  *   &lt;small&gt;This value must be between &lt;code&gt;8000&lt;/code&gt; to &lt;code&gt;48000&lt;/code&gt;.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
- *   &lt;small&gt;Note that Peers may override the &quot;receiving&quot; &lt;code&gt;maxplaybackrate&lt;/code&gt; config depending on the Peers configuration.&lt;/small&gt;
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   &lt;small&gt;Providing the value as &lt;code&gt;false&lt;/code&gt; does nothing to &lt;code&gt;peerInfo.mediaStatus.audioMuted&lt;/code&gt;,
  *   but when provided as &lt;code&gt;true&lt;/code&gt;, this sets the &lt;code&gt;peerInfo.mediaStatus.audioMuted&lt;/code&gt; value to
@@ -381,7 +404,10 @@ Skylink.prototype.RECORDING_STATE = {
  *   &lt;small&gt;The list of available audio source ID can be retrieved by the &lt;a href=&quot;https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices&quot;&gt;&lt;code&gt;navigator.mediaDevices.enumerateDevices&lt;/code&gt;
  *   API&lt;/a&gt;.&lt;/small&gt;
- * @param {Boolean} [options.audio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
+ * @param {Boolean} [options.audio.echoCancellation=true] &lt;blockquote class=&quot;info&quot;&gt;
+ *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
+ *   feedback. It is recommended to use headphones or other microphone devices rather than the device
+ *   in-built microphones.&lt;/blockquote&gt; The flag to enable echo cancellation for audio track.
  * @param {Boolean|JSON} [options.video=false] &lt;blockquote class=&quot;info&quot;&gt;
  *    Note that the current Edge browser implementation does not support the &lt;code&gt;options.video.optional&lt;/code&gt;,
  *    &lt;code&gt;options.video.deviceId&lt;/code&gt;, &lt;code&gt;options.video.resolution&lt;/code&gt; and
@@ -794,7 +820,7 @@ Skylink.prototype.sendStream = function(options, callback) {
       }
 
       if (Object.keys(self._peerConnections).length &gt; 0 || self._hasMCU) {
-        self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
+        self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
           if (err) {
             log.error(&#x27;Failed refreshing connections for sendStream() -&gt;&#x27;, err);
             if (typeof callback === &#x27;function&#x27;) {
@@ -832,6 +858,15 @@ Skylink.prototype.sendStream = function(options, callback) {
     log.error(notInRoomError, options);
     if (typeof callback === &#x27;function&#x27;){
       callback(new Error(notInRoomError),null);
+    }
+    return;
+  }
+
+  if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+    var edgeNotSupportError = &#x27;Edge browser currently does not support renegotiation.&#x27;;
+    log.error(edgeNotSupportError, options);
+    if (typeof callback === &#x27;function&#x27;){
+      callback(new Error(edgeNotSupportError),null);
     }
     return;
   }
@@ -1178,27 +1213,50 @@ Skylink.prototype.disableVideo = function() {
  * Function that retrieves screensharing Stream.
  * @method shareScreen
  * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
- * @param {Boolean} [enableAudio.stereo=false] The flag if stereo band should be configured
- *   when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
- * @param {Boolean} [enableAudio.usedtx] &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
- *   The flag if DTX (Discontinuous Transmission) should be configured when encoding audio codec
- *   is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
- *   &lt;small&gt;This might help to reduce bandwidth it reduces the bitrate during silence or background noise.&lt;/small&gt;
+ * @param {Boolean} [enableAudio.stereo=false] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
+ *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt;
+ *   parameter in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; instead. If the
+ *   &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt; is configured, this overrides the
+ *   &lt;code&gt;options.audio.stereo&lt;/code&gt; setting.&lt;/blockquote&gt;
+ *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
- * @param {Boolean} [enableAudio.useinbandfec] &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
- *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) should be
- *   configured when encoding audio codec is &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
- *   &lt;small&gt;This might help to reduce the harm of packet loss by encoding information about the previous packet.&lt;/small&gt;
+ * @param {Boolean} [enableAudio.usedtx] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
+ *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt;
+ *   parameter in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; instead. If the
+ *   &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt; is configured, this overrides the
+ *   &lt;code&gt;options.audio.stereo&lt;/code&gt; setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.&lt;/blockquote&gt;
+ *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
+ *   &lt;small&gt;This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
+ *   goes hand-in-hand with the &lt;code&gt;options.voiceActivityDetection&lt;/code&gt; flag in &lt;a href=&quot;#method_joinRoom&quot;&gt;
+ *   &lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
- * @param {Number} [enableAudio.maxplaybackrate] &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
- *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
- *   &lt;a href=&quot;#attr_AUDIO_CODEC&quot;&gt;&lt;code&gt;OPUS&lt;/code&gt;&lt;/a&gt; for sending audio data.
+ * @param {Boolean} [enableAudio.useinbandfec] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
+ *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.useinbandfec&lt;/code&gt;
+ *   parameter in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; instead. If the
+ *   &lt;code&gt;options.codecParams.audio.opus.useinbandfec&lt;/code&gt; is configured, this overrides the
+ *   &lt;code&gt;options.audio.useinbandfec&lt;/code&gt; setting. Note that this parameter should only be used
+ *   for debugging purposes only.&lt;/blockquote&gt;
+ *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
+ *   (Forward Error Correction) when sending encoded audio data.
+ *   &lt;small&gt;This helps to reduce the harm of packet loss by encoding information about the previous packet loss.&lt;/small&gt;
+ *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
+ * @param {Number} [enableAudio.maxplaybackrate] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
+ *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.maxplaybackrate&lt;/code&gt;
+ *   parameter in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; instead. If the
+ *   &lt;code&gt;options.codecParams.audio.opus.maxplaybackrate&lt;/code&gt; is configured, this overrides the
+ *   &lt;code&gt;options.audio.maxplaybackrate&lt;/code&gt; setting.  Note that this feature might
+ *   not work depending on the browser support and implementation.
+ *   Note that this parameter should only be used for debugging purposes only.&lt;/blockquote&gt;
+ *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
+ *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
+ *   would not encode at a higher sampling rate specified by this.
  *   &lt;small&gt;This value must be between &lt;code&gt;8000&lt;/code&gt; to &lt;code&gt;48000&lt;/code&gt;.&lt;/small&gt;
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
- * @param {Boolean} [enableAudio.echoCancellation=false] The flag to enable audio tracks echo cancellation.
+ * @param {Boolean} [enableAudio.echoCancellation=true] &lt;blockquote class=&quot;info&quot;&gt;
+ *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
+ *   feedback. It is recommended to use headphones or other microphone devices rather than the device
+ *   in-built microphones.&lt;/blockquote&gt; The flag to enable echo cancellation for audio track.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_mediaAccessSuccess&quot;&gt;
@@ -1280,18 +1338,19 @@ Skylink.prototype.disableVideo = function() {
 Skylink.prototype.shareScreen = function (enableAudio, callback) {
   var self = this;
   var enableAudioSettings = {
-    stereo: true
+    stereo: false,
+    echoCancellation: true
   };
 
   if (typeof enableAudio === &#x27;function&#x27;) {
     callback = enableAudio;
-    enableAudio = true;
+    enableAudio = false;
 
   } else if (enableAudio &amp;&amp; typeof enableAudio === &#x27;object&#x27;) {
     enableAudioSettings.usedtx = typeof enableAudio.usedtx === &#x27;boolean&#x27; ? enableAudio.usedtx : null;
     enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === &#x27;boolean&#x27; ? enableAudio.useinbandfec : null;
     enableAudioSettings.stereo = enableAudio.stereo === true;
-    enableAudioSettings.echoCancellation = enableAudio.echoCancellation === true;
+    enableAudioSettings.echoCancellation = enableAudio.echoCancellation !== false;
   }
 
   self._throttle(function (runFn) {
@@ -1309,7 +1368,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
     var settings = {
       settings: {
-        audio: enableAudio === true || (enableAudio &amp;&amp; typeof enableAudio === &#x27;object&#x27;) ? enableAudioSettings : false,
+        audio: enableAudio ? enableAudioSettings : false,
         video: {
           screenshare: true,
           exactConstraints: false
@@ -1330,7 +1389,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length &gt; 0 || self._hasMCU) {
-          self._refreshPeerConnection(Object.keys(self._peerConnections), false, function (err, success) {
+          self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
             if (err) {
               log.error(&#x27;Failed refreshing connections for shareScreen() -&gt;&#x27;, err);
               if (typeof callback === &#x27;function&#x27;) {
@@ -1368,7 +1427,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
     try {
       if (enableAudio &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-        settings.getUserMediaSettings.audio = true;
+        settings.getUserMediaSettings.audio = { echoCancellation: enableAudioSettings.echoCancellation };
       }
 
       navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
@@ -1378,8 +1437,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
         }
 
         navigator.getUserMedia({
-          audio: true
-
+          audio: { echoCancellation: enableAudioSettings.echoCancellation }
         }, function (audioStream) {
           try {
             audioStream.addTrack(stream.getVideoTracks()[0]);
@@ -1400,7 +1458,6 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
           log.error(&#x27;Failed retrieving audio stream for screensharing stream&#x27;, error);
           self._onStreamAccessSuccess(stream, settings, true, false);
         });
-
       }, function (error) {
         self._onStreamAccessError(error, settings, true, false);
       });
@@ -1465,7 +1522,7 @@ Skylink.prototype.stopScreen = function () {
           false, this._streams.userMedia.stream.id || this._streams.userMedia.stream.label);
         this._trigger(&#x27;peerUpdated&#x27;, this._user.sid, this.getPeerInfo(), true);
       }
-      this._refreshPeerConnection(Object.keys(this._peerConnections), false);
+      this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
     }
   }
 };
@@ -1507,6 +1564,17 @@ Skylink.prototype._muteStreams = function () {
 
   if (self._streams.screenshare &amp;&amp; self._streams.screenshare.streamClone) {
     muteFn(self._streams.screenshare.streamClone);
+  }
+
+  if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+    for (var peerId in self._peerConnections) {
+      if (self._peerConnections.hasOwnProperty(peerId) &amp;&amp; self._peerConnections[peerId]) {
+        var localStreams = self._peerConnections[peerId].getLocalStreams();
+        for (var s = 0; s &lt; localStreams.length; s++) {
+          muteFn(localStreams[s]);
+        }
+      }
+    }
   }
 
   log.debug(&#x27;Updated Streams muted status -&gt;&#x27;, self._streamsMutedSettings);
@@ -1609,10 +1677,10 @@ Skylink.prototype._parseStreamSettings = function(options) {
     settings.settings.audio = {
       stereo: false,
       exactConstraints: !!options.useExactConstraints,
-      echoCancellation: false
+      echoCancellation: true
     };
     settings.getUserMediaSettings.audio = {
-      echoCancellation: false
+      echoCancellation: true
     };
 
     if (typeof options.audio === &#x27;object&#x27;) {
@@ -1996,6 +2064,12 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     log.log([peerId, null, null, &#x27;Adding local stream&#x27;]);
 
     var pc = self._peerConnections[peerId];
+    var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || &#x27;&#x27;;
+    var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; peerId !== &#x27;MCU&#x27;);
+    var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; peerId !== &#x27;MCU&#x27;) &amp;&amp;
+      ((window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
+      ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
+      !!self._currentCodecSupport.video.h264 : true);
 
     if (pc) {
       if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
@@ -2015,7 +2089,26 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           }
 
           if (updatedStream !== null &amp;&amp; !hasStream) {
-            pc.addStream(updatedStream);
+            if (window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; (!offerToReceiveVideo || !offerToReceiveAudio)) {
+              try {
+                var cloneStream = updatedStream.clone();
+                var tracks = cloneStream.getTracks();
+                for (var t = 0; t &lt; tracks.length; t++) {
+                  if (tracks[t].kind === &#x27;video&#x27; ? !offerToReceiveVideo : !offerToReceiveAudio) {
+                    cloneStream.removeTrack(tracks[t]);
+                  } else {
+                    tracks[t].enabled = tracks[t].kind === &#x27;audio&#x27; ? !self._streamsMutedSettings.audioMuted :
+                      !self._streamsMutedSettings.videoMuted;
+                  }
+                }
+                pc.addStream(cloneStream);
+              } catch (e) {
+                pc.addStream(updatedStream);
+              }
+            } else {
+              pc.addStream(updatedStream);
+            }
+            pc.addStream(window.webrtcDetectedBrowser === &#x27;edge&#x27; ? updatedStream.clone() : updatedStream);
           }
         };
 

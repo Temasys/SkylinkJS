@@ -122,6 +122,17 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   <code>options.audio</code> is not defined, it will be defined as <code>false</code>.</small>
  *   <small>Object signature matches the <code>options.video</code> parameter in the
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
+ * @param {Boolean} [options.voiceActivityDetection=true] The flag if voice activity detection should be enabled.
+ *   <small>This can only be toggled if User is and for the offerer, which is determined if User's
+ *   <code>peerInfo.config.priorityWeight</code> is higher than Peer's.</small>
+ *   <blockquote class="details">
+ *   This works hand-in-hand with the <code>options.disableComfortNoiseCodec</code> flag in the
+ *   <a href="#method_init"><code>init()</code> method</a> and the <code>options.audio.usedtx</code> setting in
+ *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>. VAD (voice activity detection)
+ *   detects if there is an active voice in the Stream, and if there is no active voice in the Stream, the
+ *   <code>options.audio.usedtx</code> (if enabled) would prevent sending these empty bits. To prevent huge differences
+ *   when there is a silence and an active voice later, the CN codec would produce an empty voice to
+ *   make it sound better.</blockquote>
  * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this is currently not supported
  *   with Firefox browsers versions 48 and below as noted in an existing
  *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
@@ -190,8 +201,44 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled
  *   Peer connections, please  contact <a href="http://support.temasys.io">our support portal</a>.</blockquote></blockquote>
  *   The config if Peer would publish only.
- * @param {String} [options.publishOnly.parentId] The parent Peer ID to match to when Peer is connected.
+ * @param {String} [options.publishOnly.parentId] <blockquote class="info"><b>Deprecation Warning!</b>
+ *   This property has been deprecated. Use <code>options.parentId</code> instead.
+ *   </blockquote> The parent Peer ID to match to when Peer is connected.
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ * @param {String} [options.parentId] The parent Peer ID to match to when Peer is connected.
+ *   <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>
+ *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ * @param {JSON} [options.peerConnection] <blockquote class="info">
+ *   Note that this is mainly used for debugging purposes, so it may cause disruptions in connections or
+ *   connectivity issues when configured. </blockquote> The Peer connection constraints settings.
+ * @param {String} [options.peerConnection.bundlePolicy] The Peer connection media bundle policy.
+ * - When not provided, its value is <code>BALANCED</code>.
+ *   [Rel: Skylink.BUNDLE_POLICY]
+ * @param {String} [options.peerConnection.rtcpMuxPolicy] The Peer connection RTP and RTCP ICE candidates mux policy.
+ * - When not provided, its value is <code>REQUIRE</code>.
+ *   [Rel: Skylink.RTCP_MUX_POLICY]
+ * @param {Number} [options.peerConnection.iceCandidatePoolSize=0] The number of ICE candidates to gather before
+ *   gathering it when setting local offer / answer session description.
+ * @param {String} [options.peerConnection.certificate] The type of certificate that Peer connection should
+ *   generate and use when available.
+ * - When not provided, its value is <code>AUTO</code>.
+ *   [Rel: Skylink.PEER_CERTIFICATE]
+ * @param {Boolean|JSON} [options.autoBandwidthAdjustment=false] <blockquote class="info">
+ *   Note that this is an experimental feature which may be removed or changed in the future releases.
+ *   This feature is also only available for non-MCU enabled Peer connections and Edge Peer connections.
+ *   </blockquote> The flag if Peer connections uploading and downloading bandwidth should be automatically adjusted
+ *   each time based on a specified interval.
+ *   <small>Note this would cause <a href="#event_peerRestart"><code>peerRestart</code> event</a> to be triggered
+ *   for each specified interval.</small>
+ * @param {Number} [options.autoBandwidthAdjustment.interval=10] The interval each time to adjust bandwidth
+ *   connections in seconds.
+ *   <small>Note that the minimum value is <code>10</code>.</small>
+ * @param {Number} [options.autoBandwidthAdjustment.limitAtPercentage=100] The percentage of the average bandwidth to adjust to.
+ *   <small>E.g. <code>avgBandwidth * (limitPercentage / 100)</code>.</small>
+ * @param {Boolean} [options.autoBandwidthAdjustment.useUploadBwOnly=false] The flag if average bandwidth computation
+ *   should only consist of the upload bandwidth.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_peerJoined">
@@ -530,8 +577,7 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
   self._wait(function () {
     log.log([null, 'Room', previousRoom, 'User left the room']);
 
-    self._trigger('peerLeft', previousUserPeerId, self.getPeerInfo(), true,
-      self._publishOnly && self._publishOnly.parentId ? self._publishOnly.parentId : null);
+    self._trigger('peerLeft', previousUserPeerId, self.getPeerInfo(), true);
 
     if (typeof callback === 'function') {
       callback(null, {
@@ -564,6 +610,9 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
  * @since 0.5.0
  */
 Skylink.prototype.lockRoom = function() {
+  if (!(this._user && this._user.sid)) {
+    return;
+  }
   log.log('Update to isRoomLocked status ->', true);
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
@@ -571,6 +620,8 @@ Skylink.prototype.lockRoom = function() {
     rid: this._room.id,
     lock: true
   });
+  this._roomLocked = true;
+  this._trigger('roomLock', true, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**
@@ -593,6 +644,9 @@ Skylink.prototype.lockRoom = function() {
  * @since 0.5.0
  */
 Skylink.prototype.unlockRoom = function() {
+  if (!(this._user && this._user.sid)) {
+    return;
+  }
   log.log('Update to isRoomLocked status ->', false);
   this._sendChannelMessage({
     type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
@@ -600,6 +654,8 @@ Skylink.prototype.unlockRoom = function() {
     rid: this._room.id,
     lock: false
   });
+  this._roomLocked = false;
+  this._trigger('roomLock', false, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**
@@ -636,6 +692,15 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
           video: { send: true, receive: true }
         }
       };
+      self._voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === 'boolean' ?
+        mediaOptions.voiceActivityDetection : true;
+      self._peerConnectionConfig = {
+        bundlePolicy: self.BUNDLE_POLICY.BALANCED,
+        rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
+        iceCandidatePoolSize: 0,
+        certificate: self.PEER_CERTIFICATE.AUTO
+      };
+      self._bandwidthAdjuster = null;
 
       if (mediaOptions.bandwidth) {
         if (typeof mediaOptions.bandwidth.audio === 'number') {
@@ -692,11 +757,69 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
         self._sdpSettings.direction.audio.receive = false;
         self._sdpSettings.direction.video.send = true;
         self._sdpSettings.direction.video.receive = false;
-        self._publishOnly = { parentId: null };
+        self._publishOnly = true;
 
         if (typeof mediaOptions.publishOnly === 'object' && mediaOptions.publishOnly.parentId &&
           typeof mediaOptions.publishOnly.parentId === 'string') {
-          self._publishOnly.parentId = mediaOptions.publishOnly.parentId;
+          self._parentId = mediaOptions.publishOnly.parentId;
+        }
+      }
+
+      if (mediaOptions.parentId) {
+        self._parentId = mediaOptions.parentId;
+      }
+
+      if (mediaOptions.peerConnection && typeof mediaOptions.peerConnection === 'object') {
+        if (typeof mediaOptions.peerConnection.bundlePolicy === 'string') {
+          for (var bpProp in self.BUNDLE_POLICY) {
+            if (self.BUNDLE_POLICY.hasOwnProperty(bpProp) &&
+              self.BUNDLE_POLICY[bpProp] === mediaOptions.peerConnection.bundlePolicy) {
+              self._peerConnectionConfig.bundlePolicy = mediaOptions.peerConnection.bundlePolicy;
+            }
+          }
+        }
+        if (typeof mediaOptions.peerConnection.rtcpMuxPolicy === 'string') {
+          for (var rmpProp in self.RTCP_MUX_POLICY) {
+            if (self.RTCP_MUX_POLICY.hasOwnProperty(rmpProp) &&
+              self.RTCP_MUX_POLICY[rmpProp] === mediaOptions.peerConnection.rtcpMuxPolicy) {
+              self._peerConnectionConfig.rtcpMuxPolicy = mediaOptions.peerConnection.rtcpMuxPolicy;
+            }
+          }
+        }
+        if (typeof mediaOptions.peerConnection.iceCandidatePoolSize === 'number' &&
+          mediaOptions.peerConnection.iceCandidatePoolSize > 0) {
+          self._peerConnectionConfig.iceCandidatePoolSize = mediaOptions.peerConnection.iceCandidatePoolSize;
+        }
+        if (typeof mediaOptions.peerConnection.certificate === 'string') {
+          for (var pcProp in self.PEER_CERTIFICATE) {
+            if (self.PEER_CERTIFICATE.hasOwnProperty(pcProp) &&
+              self.PEER_CERTIFICATE[pcProp] === mediaOptions.peerConnection.certificate) {
+              self._peerConnectionConfig.certificate = mediaOptions.peerConnection.certificate;
+            }
+          }
+        }
+      }
+
+      if (mediaOptions.autoBandwidthAdjustment) {
+        self._bandwidthAdjuster = {
+          interval: 10,
+          limitAtPercentage: 100,
+          useUploadBwOnly: false
+        };
+
+        if (typeof mediaOptions.autoBandwidthAdjustment === 'object') {
+          if (typeof mediaOptions.autoBandwidthAdjustment.interval === 'number' &&
+            mediaOptions.autoBandwidthAdjustment.interval >= 10) {
+            self._bandwidthAdjuster.interval = mediaOptions.autoBandwidthAdjustment.interval;
+          }
+          if (typeof mediaOptions.autoBandwidthAdjustment.limitAtPercentage === 'number' &&
+            (mediaOptions.autoBandwidthAdjustment.limitAtPercentage >= 0 &&
+            mediaOptions.autoBandwidthAdjustment.limitAtPercentage <= 100)) {
+            self._bandwidthAdjuster.limitAtPercentage = mediaOptions.autoBandwidthAdjustment.limitAtPercentage;
+          }
+          if (typeof mediaOptions.autoBandwidthAdjustment.useUploadBwOnly === 'boolean') {
+            self._bandwidthAdjuster.useUploadBwOnly = mediaOptions.autoBandwidthAdjustment.useUploadBwOnly;
+          }
         }
       }
 

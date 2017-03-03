@@ -63,7 +63,7 @@ In this demo, you can find an example of how you can do a simple file transfer t
 `peerJoined`, `peerLeft`, `dataTransferState`
 
 ### demo/gridster-integration
-In this demo, you can find an example of an integration of [gridster](http://gridster.net/), a drag-and-drop grid like UI with Skylink functionalities that enables users to send files, send text messages and make video calls.
+In this demo, you can find an example of an integration of [gridster](http://gridster.net/), a drag-and-drop grid like UI with the Temasys Web SDK functionalities that enables users to send files, send text messages and make video calls.
 
 ##### Functionalities covered
 `getPeerInfo()`, `getUserData()`, `init()`, `getUserMedia()`, `joinRoom()`,  `on()`, `respondBlobRequest()`, `sendBlobData()`, `sendMessage()`, `sendP2PMessage()`
@@ -72,7 +72,7 @@ In this demo, you can find an example of an integration of [gridster](http://gri
 `dataTransferState`, `incomingMessage`, `peerJoined`, `incomingStream`, `mediaAccessSuccess`, `mediaAccessError`, `peerLeft`, `channelError`, `mediaAccessError`
 
 ### demo/messaging
-In this demo, you can find an example of all the ways to do messaging with Skylink - P2P (secure) or socket. Private (targeted) or public (broadcasted) messages.
+In this demo, you can find an example of all the ways to do messaging with the Temasys Web SDK - P2P (secure) or socket. Private (targeted) or public (broadcasted) messages.
 
 ##### Functionalities covered
 `sendP2PMessage()`, `sendMessage()`, `setUserData()`, `init()`, `joinRoom()`,  `on()`
@@ -99,7 +99,7 @@ In this demo, you can find an example of the overview of all types of stream set
 `peerJoined`, `peerLeft`, `incomingStream`, `mediaAccessSuccess`, `incomingMessage`
 
 ### demo/video-call
-In this demo, you can find an example of how you can create a simple video call with Skylink.
+In this demo, you can find an example of how you can create a simple video call with the Temasys Web SDK.
 
 ##### Functionalities covered
 `init()`, `joinRoom()`, `on()`, `getPeerInfo()`
@@ -117,4 +117,22 @@ In this demo, you can find an example of how to utilize the privileged key conce
 `getPeersStateChange`, `introduceStateChange`
 
 ##### How to use
-First, open the index page of the privileged demo. Each button there when being clicked will open another browser tab for the corresponding type of user, with corresponding functionalities available. For example privileged users have getPeers() and introduce() options while the rest do not. To introduce two peers, enter the peer ID of each peer to the textbox then hit "Introduce".
+First, open the index page of the privileged demo. Each button there when clicked will open another browser tab for the corresponding type of user, with corresponding functionalities available. For example, privileged users have getPeers() and introduce() options while the rest do not. To introduce two peers, enter the peer ID of each peer to the text box then hit "Introduce".
+
+### demo/data-streaming
+In this demo, you can find an example of how you can share video (mp4) with peers with the Temasys Web SDK.
+
+##### Functionalities covered
+`init()`, `joinRoom()`, `on()`, `streamData()`, `sendP2PMessage()`
+
+##### Events used
+`incomingDataStream`, `incomingMessage`, `peerLeft`, `dataChannelState`
+
+### demo/screenshare-and-camera
+In this demo, you can find an example of how you can share both camera and screenshare to peers with the Temasys Web SDK.
+
+##### Functionalities covered
+`init()`, `joinRoom()`, `on()`, `shareScreen()`
+
+##### Events used
+`incomingStream`, `peerLeft`

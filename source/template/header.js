@@ -1,104 +1,21 @@
-(function(refThis) {
+(function(globals) {
 
 'use strict';
 
-/**
- * Polyfill for Object.keys() from Mozilla
- * From https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
- */
-if (!Object.keys) {
-  Object.keys = (function() {
-    var hasOwnProperty = Object.prototype.hasOwnProperty,
-      hasDontEnumBug = !({
-        toString: null
-      }).propertyIsEnumerable('toString'),
-      dontEnums = [
-        'toString',
-        'toLocaleString',
-        'valueOf',
-        'hasOwnProperty',
-        'isPrototypeOf',
-        'propertyIsEnumerable',
-        'constructor'
-      ],
-      dontEnumsLength = dontEnums.length;
-
-    return function(obj) {
-      if (typeof obj !== 'object' && typeof obj !== 'function' || obj === null) throw new TypeError('Object.keys called on non-object');
-
-      var result = [];
-
-      for (var prop in obj) {
-        if (hasOwnProperty.call(obj, prop)) result.push(prop);
-      }
-
-      if (hasDontEnumBug) {
-        for (var i = 0; i < dontEnumsLength; i++) {
-          if (hasOwnProperty.call(obj, dontEnums[i])) result.push(dontEnums[i]);
-        }
-      }
-      return result;
-    }
-  })()
-}
-
-/**
- * Polyfill for Date.getISOString() from Mozilla
- * From https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
- */
-(function() {
-  function pad(number) {
-    if (number < 10) {
-      return '0' + number;
-    }
-    return number;
-  }
-
-  Date.prototype.toISOString = function() {
-    return this.getUTCFullYear() +
-      '-' + pad(this.getUTCMonth() + 1) +
-      '-' + pad(this.getUTCDate()) +
-      'T' + pad(this.getUTCHours()) +
-      ':' + pad(this.getUTCMinutes()) +
-      ':' + pad(this.getUTCSeconds()) +
-      '.' + (this.getUTCMilliseconds() / 1000).toFixed(3).slice(2, 5) +
-      'Z';
-  };
-})();
-
-/**
- * Polyfill for addEventListener() from Eirik Backer @eirikbacker (github.com).
- * From https://gist.github.com/eirikbacker/2864711
- * MIT Licensed
- */
-(function(win, doc){
-  if(win.addEventListener) return; //No need to polyfill
-
-  function docHijack(p){var old = doc[p];doc[p] = function(v){ return addListen(old(v)) }}
-  function addEvent(on, fn, self){
-    return (self = this).attachEvent('on' + on, function(e){
-      var e = e || win.event;
-      e.preventDefault  = e.preventDefault  || function(){e.returnValue = false}
-      e.stopPropagation = e.stopPropagation || function(){e.cancelBubble = true}
-      fn.call(self, e);
-    });
-  }
-  function addListen(obj, i){
-    if(i = obj.length)while(i--)obj[i].addEventListener = addEvent;
-    else obj.addEventListener = addEvent;
-    return obj;
-  }
-
-  addListen([doc, win]);
-  if('Element' in win)win.Element.prototype.addEventListener = addEvent; //IE8
-  else{                                     //IE < 8
-    doc.attachEvent('onreadystatechange', function(){addListen(doc.all)}); //Make sure we also init at domReady
-    docHijack('getElementsByTagName');
-    docHijack('getElementById');
-    docHijack('createElement');
-    addListen(doc.all);
-  }
-})(window, document);
+/* jshint ignore:start */
+// Object.keys() polyfill - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Object/keys
+!function(){Object.keys||(Object.keys=function(){var t=Object.prototype.hasOwnProperty,r=!{toString:null}.propertyIsEnumerable("toString"),e=["toString","toLocaleString","valueOf","hasOwnProperty","isPrototypeOf","propertyIsEnumerable","constructor"],o=e.length;return function(n){if("object"!=typeof n&&"function"!=typeof n||null===n)throw new TypeError("Object.keys called on non-object");var c=[];for(var l in n)t.call(n,l)&&c.push(l);if(r)for(var p=0;o>p;p++)t.call(n,e[p])&&c.push(e[p]);return c}}())}();
+// Date.getISOString() polyfill - https://developer.mozilla.org/en/docs/Web/JavaScript/Reference/Global_Objects/Date/toISOString
+!function(){function t(t){return 10>t?"0"+t:t}Date.prototype.toISOString=function(){return this.getUTCFullYear()+"-"+t(this.getUTCMonth()+1)+"-"+t(this.getUTCDate())+"T"+t(this.getUTCHours())+":"+t(this.getUTCMinutes())+":"+t(this.getUTCSeconds())+"."+(this.getUTCMilliseconds()/1e3).toFixed(3).slice(2,5)+"Z"}}();
+// Date.now() polyfill
+!function(){"function"!=typeof Date.now&&(Date.now=function(){return(new Date).getTime()})}();
+// addEventListener() polyfill - https://gist.github.com/eirikbacker/2864711
+!function(e,t){function n(e){var n=t[e];t[e]=function(e){return o(n(e))}}function a(t,n,a){return(a=this).attachEvent("on"+t,function(t){var t=t||e.event;t.preventDefault=t.preventDefault||function(){t.returnValue=!1},t.stopPropagation=t.stopPropagation||function(){t.cancelBubble=!0},n.call(a,t)})}function o(e,t){if(t=e.length)for(;t--;)e[t].addEventListener=a;else e.addEventListener=a;return e}e.addEventListener||(o([t,e]),"Element"in e?e.Element.prototype.addEventListener=a:(t.attachEvent("onreadystatechange",function(){o(t.all)}),n("getElementsByTagName"),n("getElementById"),n("createElement"),o(t.all)))}(window,document);
+// performance.now() polyfill - https://gist.github.com/paulirish/5438650
+!function(){if("performance"in window==0&&(window.performance={}),Date.now=Date.now||function(){return(new Date).getTime()},"now"in window.performance==0){var a=Date.now();performance.timing&&performance.timing.navigationStart&&(a=performance.timing.navigationStart),window.performance.now=function(){return Date.now()-a}}}();
+// BlobBuilder polyfill
+window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
+/* jshint ignore:end */
 
 /**
  * Global function that clones an object.
@@ -155,7 +72,7 @@ var clone = function (obj) {
  * If you have any issues, you may find answers to your questions in the FAQ section on [our support portal](
  * http://support.temasys.io), asks questions, request features or raise bug tickets as well.
  *
- * If you would like to contribute to our Temasys SkylinkJS codebase, see [the contributing README](
+ * If you would like to contribute to our Temasys Web SDK codebase, see [the contributing README](
  * https://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).
  *
  * [See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)
@@ -241,11 +158,22 @@ function Skylink() {
   this._dataTransfers = {};
 
   /**
+   * Stores the list of sending data streaming sessions to Peers.
+   * @attribute _dataStreams
+   * @param {JSON} #streamId The data stream session.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._dataStreams = {};
+
+  /**
    * Stores the list of buffered ICE candidates that is received before
    *   remote session description is received and set.
    * @attribute _peerCandidatesQueue
    * @param {Array} <#peerId> The list of the Peer connection buffered ICE candidates received.
-   * @param {Object} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
+   * @param {RTCIceCandidate} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
    * @type JSON
    * @private
    * @for Skylink
@@ -348,7 +276,7 @@ function Skylink() {
   /**
    * Stores the list of the Peer connections.
    * @attribute _peerConnections
-   * @param {Object} <#peerId> The Peer connection.
+   * @param {RTCPeerConnection} <#peerId> The Peer connection.
    * @type JSON
    * @private
    * @for Skylink
@@ -359,13 +287,34 @@ function Skylink() {
   /**
    * Stores the list of the Peer connections stats.
    * @attribute _peerStats
-   * @param {Object} <#peerId> The Peer connection stats.
+   * @param {JSON} <#peerId> The Peer connection stats.
    * @type JSON
    * @private
    * @for Skylink
    * @since 0.6.16
    */
   this._peerStats = {};
+
+  /**
+   * Stores the list of the Peer connections stats.
+   * @attribute _peerBandwidth
+   * @param {JSON} <#peerId> The Peer connection stats.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.16
+   */
+  this._peerBandwidth = {};
+
+  /**
+   * Stores the list of the Peer custom configs.
+   * @attribute _peerCustomConfigs
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._peerCustomConfigs = {};
 
   /**
    * The flag if User is using plugin.
@@ -1053,12 +1002,22 @@ function Skylink() {
   /**
    * Stores the publish only settings.
    * @attribute _publishOnly
-   * @type JSON|Boolean
+   * @type Boolean
    * @private
    * @for Skylink
    * @since 0.6.16
    */
   this._publishOnly = false;
+
+  /**
+   * Stores the parent ID.
+   * @attribute _parentId
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._parentId = null;
 
   /**
    * Stores the list of recordings.
@@ -1103,4 +1062,106 @@ function Skylink() {
    * @since 0.6.16
    */
   this._mcuUseRenegoRestart = false;
+
+  /**
+   * Stores the debugging TURN/STUN ICE server.
+   * @attribute _iceServer
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._iceServer = null;
+
+  /**
+   * Stores the debugging Signaling server.
+   * @attribute _socketServer
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._socketServer = null;
+
+  /**
+   * Stores the currently supported codecs.
+   * @attribute _currentCodecSupport
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._currentCodecSupport = null;
+
+  /**
+   * Stores the session description orders and info.
+   * @attribute _sdpSessions
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._sdpSessions = {};
+
+  /**
+   * Stores the flag if voice activity detection should be enabled.
+   * @attribute _voiceActivityDetection
+   * @type Boolean
+   * @default true
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._voiceActivityDetection = true;
+
+  /**
+   * Stores the datachannel binary data chunk type.
+   * @attribute _binaryChunkType
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._binaryChunkType = window.webrtcDetectedBrowser === 'firefox' ?
+    this.DATA_TRANSFER_DATA_TYPE.BLOB : this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
+
+  /**
+   * Stores the RTCPeerConnection configuration.
+   * @attribute _peerConnectionConfig
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._peerConnectionConfig = {};
+
+  /**
+   * Stores the RTCPeerConnection configuration.
+   * @attribute _peerConnectionConfig
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._codecParams = {};
+
+  /**
+   * Stores the User's priority weight scheme to determine if User is offerer or answerer.
+   * @attribute _priorityWeightScheme
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._priorityWeightScheme = this.PRIORITY_WEIGHT_SCHEME.AUTO;
+
+  /**
+   * Stores the auto bandwidth settings.
+   * @attribute _bandwidthAdjuster
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.18
+   */
+  this._bandwidthAdjuster = null;
 }
