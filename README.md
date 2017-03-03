@@ -9,7 +9,7 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 #### Supported Browsers
 
 > ##### Browsers in Beta (Edge/Bowser):
-> _Do note that MCU connections, file transfers and P2P messages does not work in Edge browsers due to its current supports and beta phase. Earlier Edge browser versions might require you to toggle the H264 experimental flag to enable video connections from Edge to Chrome/Firefox browsers. Bowser browser is only officially supported by iOS versions `9.x` and below,_
+> _Please note that MCU functionality, data channel file transfer, and P2P messaging are not supported by the Temasys Web SDK in Edge browser due to current compatibility limitations. Older versions of Edge may require you to enable experimental support for H.264 to interop with Chrome and Firefox browsers. Edge support should be considered experimental in this release._
 
 | Features       | Chrome<br>`52`-`55`+ | Firefox<br>`48`-`50`+ | Opera<br>`38`-`42`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  | Edge<br>`14.14352` | Bowser<br>(iOS `9.x` and below) | 
 | -------------- | ---------- | ----------- | --------- | ---------- | ---------- | ---- | ----- |
