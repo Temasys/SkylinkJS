@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Thu Mar 02 2017 16:39:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Mar 07 2017 00:47:10 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -74,7 +74,7 @@ var clone = function (obj) {
  * If you have any issues, you may find answers to your questions in the FAQ section on [our support portal](
  * http://support.temasys.io), asks questions, request features or raise bug tickets as well.
  *
- * If you would like to contribute to our Temasys SkylinkJS codebase, see [the contributing README](
+ * If you would like to contribute to our Temasys Web SDK codebase, see [the contributing README](
  * https://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).
  *
  * [See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)
@@ -1288,108 +1288,29 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
     channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
   }
 
-  /**
-   * Subscribe to events
-   */
-  dataChannel.onerror = function (evt) {
-    var channelError = evt.error || evt;
+  var channel = new Datachannel(dataChannel, peerId, channelProp);
 
-    log.error([peerId, 'RTCDataChannel', channelProp, 'Datachannel has an exception ->'], channelError);
+  channel.on('state', function (state) {
+    self._trigger('dataChannelState', state, peerId, null, channelName, channelType, null, channel.getStats());
+  });
 
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, channelError, channelName,
-      channelType, null, self._getDataChannelBuffer(dataChannel));
-  };
+  channel.on('error', function (error) {
+    var bufferAmount = channel.getStats();
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.ERROR, peerId, error,
+      channelName, channelType, null, bufferAmount);
+  });
 
-  // State where we can start calling .send() to queue more buffered data to be sent
-  // RTCDataChannel has an internal mechanism to queue data to be sent over
-  // This event might not be even triggered at all
-  dataChannel.onbufferedamountlow = function () {
-    log.debug([peerId, 'RTCDataChannel', channelProp, 'Datachannel buffering data transfer low']);
+  channel.on('bufferedamountlow', function (error) {
+    var bufferAmount = channel.getStats();
+    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW,
+      peerId, error, channelName, channelType, null, bufferAmount);
+  });
 
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW, peerId, null, channelName,
-      channelType, null, self._getDataChannelBuffer(dataChannel));
-  };
+  channel.on('data', function (data) {
+    self._processDataChannelData(data, peerId, channelName, channelType);
+  });
 
-  dataChannel.onmessage = function(event) {
-    self._processDataChannelData(event.data, peerId, channelName, channelType);
-  };
-
-  var onOpenHandlerFn = function () {
-    log.debug([peerId, 'RTCDataChannel', channelProp, 'Datachannel has opened']);
-
-    dataChannel.bufferedAmountLowThreshold = bufferThreshold || 0;
-
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.OPEN, peerId, null, channelName,
-      channelType, null, self._getDataChannelBuffer(dataChannel));
-  };
-
-  if (dataChannel.readyState === self.DATA_CHANNEL_STATE.OPEN) {
-    setTimeout(onOpenHandlerFn, 1); // 500);
-
-  } else {
-    self._trigger('dataChannelState', dataChannel.readyState, peerId, null, channelName,
-      channelType, null, self._getDataChannelBuffer(dataChannel));
-
-    dataChannel.onopen = onOpenHandlerFn;
-  }
-
-  var onCloseHandlerFn = function () {
-    log.debug([peerId, 'RTCDataChannel', channelProp, 'Datachannel has closed']);
-
-    self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName,
-      channelType, null, self._getDataChannelBuffer(dataChannel));
-
-    if (self._peerConnections[peerId] && self._peerConnections[peerId].remoteDescription &&
-      self._peerConnections[peerId].remoteDescription.sdp && (self._peerConnections[peerId].remoteDescription.sdp.indexOf(
-      'm=application') === -1 || self._peerConnections[peerId].remoteDescription.sdp.indexOf('m=application 0') > 0)) {
-      return;
-    }
-
-    if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
-      setTimeout(function () {
-        if (self._peerConnections[peerId] &&
-          self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
-          (self._peerConnections[peerId].localDescription &&
-          self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
-          log.debug([peerId, 'RTCDataChannel', channelProp, 'Reviving Datachannel connection']);
-          self._createDataChannel(peerId, channelName, bufferThreshold, true);
-        }
-      }, 100);
-    }
-  };
-
-  // Fixes for Firefox bug (49 is working) -> https://bugzilla.mozilla.org/show_bug.cgi?id=1118398
-  if (window.webrtcDetectedBrowser === 'firefox') {
-    var hasTriggeredClose = false;
-    var timeBlockAfterClosing = 0;
-
-    dataChannel.onclose = function () {
-      if (!hasTriggeredClose) {
-        hasTriggeredClose = true;
-        onCloseHandlerFn();
-      }
-    };
-
-    var onFFClosed = setInterval(function () {
-      if (dataChannel.readyState === self.DATA_CHANNEL_STATE.CLOSED ||
-        hasTriggeredClose || timeBlockAfterClosing === 5) {
-        clearInterval(onFFClosed);
-
-        if (!hasTriggeredClose) {
-          hasTriggeredClose = true;
-          onCloseHandlerFn();
-        }
-      // After 5 seconds from CLOSING state and Firefox is not rendering to close, we have to assume to close it.
-      // It is dead! This fixes the case where if it's Firefox who closes the Datachannel, the connection will
-      // still assume as CLOSING..
-      } else if (dataChannel.readyState === self.DATA_CHANNEL_STATE.CLOSING) {
-        timeBlockAfterClosing++;
-      }
-    }, 1000);
-
-  } else {
-    dataChannel.onclose = onCloseHandlerFn;
-  }
+  channel.init();
 
   if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
     self._dataChannels[peerId].main = {
@@ -1397,7 +1318,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
       channelType: channelType,
       transferId: null,
       streamId: null,
-      channel: dataChannel
+      channel: channel
     };
   } else {
     self._dataChannels[peerId][channelName] = {
@@ -1405,7 +1326,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
       channelType: channelType,
       transferId: null,
       streamId: null,
-      channel: dataChannel
+      channel: channel
     };
   }
 };
@@ -1420,12 +1341,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
  */
 Skylink.prototype._getDataChannelBuffer = function (peerId, channelProp) {
   if (typeof peerId === 'object') {
-    return {
-      bufferedAmountLow: typeof peerId.bufferedAmountLow === 'number' ?
-        peerId.bufferedAmountLow : parseInt(peerId.bufferedAmountLow, 10) || 0,
-      bufferedAmountLowThreshold: typeof peerId.bufferedAmountLowThreshold === 'number' ?
-        peerId.bufferedAmountLowThreshold : parseInt(peerId.bufferedAmountLowThreshold, 10) || 0
-    };
+    return peerId.getStats();
   } else if (!(this._dataChannels[peerId] && this._dataChannels[peerId][channelProp] &&
     this._dataChannels[peerId][channelProp].channel)) {
     return {
@@ -1434,14 +1350,7 @@ Skylink.prototype._getDataChannelBuffer = function (peerId, channelProp) {
     };
   }
 
-  var channel = this._dataChannels[peerId][channelProp].channel;
-
-  return {
-    bufferedAmountLow: typeof channel.bufferedAmountLow === 'number' ?
-      channel.bufferedAmountLow : parseInt(channel.bufferedAmountLow, 10) || 0,
-    bufferedAmountLowThreshold: typeof channel.bufferedAmountLowThreshold === 'number' ?
-      channel.bufferedAmountLowThreshold : parseInt(channel.bufferedAmountLowThreshold, 10) || 0
-  };
+  return this._dataChannels[peerId][channelProp].channel.getStats();
 };
 
 /**
@@ -1480,7 +1389,7 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
 
   var channelName = self._dataChannels[peerId][channelProp].channelName;
   var channelType = self._dataChannels[peerId][channelProp].channelType;
-  var readyState  = self._dataChannels[peerId][channelProp].channel.readyState;
+  var readyState  = self._dataChannels[peerId][channelProp].channel.getStats().readyState;
   var messageType = typeof data === 'object' && data.type === self._DC_PROTOCOL_TYPE.MESSAGE ?
     self.DATA_CHANNEL_MESSAGE_ERROR.MESSAGE : self.DATA_CHANNEL_MESSAGE_ERROR.TRANSFER;
 
@@ -1539,7 +1448,7 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
     var channelName = self._dataChannels[peerId][rChannelProp].channelName;
     var channelType = self._dataChannels[peerId][rChannelProp].channelType;
 
-    if (self._dataChannels[peerId][rChannelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
+    if (self._dataChannels[peerId][rChannelProp].channel.getStats().readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Closing Datachannel']);
 
       self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName, channelType,
@@ -3002,7 +2911,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     });
 
     if (!(self._dataChannels[peerId][channelProp] &&
-      self._dataChannels[peerId][channelProp].channel.readyState === self.DATA_CHANNEL_STATE.OPEN)) {
+      self._dataChannels[peerId][channelProp].channel.getStats().readyState === self.DATA_CHANNEL_STATE.OPEN)) {
       var notOpenError = new Error('Failed starting data streaming session as channel is not opened.');
       if (peerId === 'MCU') {
         for (i = 0; i < targetPeers.length; i++) {
@@ -3246,7 +3155,7 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
       var channelProp = self._dataStreams[transferId].sessions[peerId];
 
       if (!(self._dataChannels[self._hasMCU ? 'MCU' : peerId] && self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp] &&
-        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].channel.readyState === self.DATA_CHANNEL_STATE.OPEN &&
+        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].channel.getStats().readyState === self.DATA_CHANNEL_STATE.OPEN &&
         self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].streamId === transferId)) {
         log.error([peerId, 'RTCDataChannel', transferId, 'Failed streaming data as it has not started or is ready.']);
         self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, peerId, sessionInfo,
@@ -3379,7 +3288,7 @@ Skylink.prototype.stopStreamingData = function(transferId) {
       var channelProp = self._dataStreams[transferId].sessions[peerId];
 
       if (!(self._dataChannels[self._hasMCU ? 'MCU' : peerId] && self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp] &&
-        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].channel.readyState === self.DATA_CHANNEL_STATE.OPEN &&
+        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].channel.getStats().readyState === self.DATA_CHANNEL_STATE.OPEN &&
         self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].streamId === transferId)) {
         log.error([peerId, 'RTCDataChannel', transferId, 'Failed stopping data streaming session as channel is closed.']);
         self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, peerId, sessionInfo,
@@ -3844,7 +3753,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     return;
   }
 
-  if (self._dataChannels[peerId].main.channel.readyState !== self.DATA_CHANNEL_STATE.OPEN) {
+  if (self._dataChannels[peerId].main.channel.getStats().readyState !== self.DATA_CHANNEL_STATE.OPEN) {
     returnErrorBeforeTransferFn('Unable to start data transfer as Peer Datachannel connection is not opened.');
     return;
   }
@@ -4779,6 +4688,310 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
     self._getTransferInfo(transferId, peerId, true, false, false), null);
 };
 
+function Datachannel (channel, peerId, propertyId) {
+  // Inherit events functionalities
+  EventMixin(this);
+  // Public properties
+  this.name = channel.label;
+  this.peerId = peerId;
+  this.propertyId = propertyId;
+  // Private properties
+  this._connection = channel;
+  this._bufferControl = {
+    usePolling: typeof this._connection.bufferedAmountLowThreshold !== 'number',
+    bufferEvent: { block: 0.5 },
+    polling: { blocks: 8, interval: 250 },
+    messages: { timestamp: 0, flushTimeout: 100, finalFlushTimeout: 2000 }
+  };
+  this._stats = {
+    messages: { sent: 0, recv: 0 },
+    bytes: { sent: 0, recv: 0 }
+  };
+}
+
+/**
+ * Function to start initializing events.
+ */
+Datachannel.prototype.init = function () {
+  var self = this;
+
+  // Handle RTCDataChannel.onopen event
+  var onOpenFn = function () {
+    self._emit('state', 'open');
+  };
+
+  if (self._connection.readyState === 'open') {
+    // Set some time to append data before starting transfers
+    setTimeout(onOpenFn, 1);
+  } else {
+    self._connection.onopen = onOpenFn;
+    self._emit('state', self._connection.readyState);
+  }
+
+  // Handle RTCDataChannel.onclose event
+  var onCloseFn = function () {
+    self._emit('state', 'closed');
+  };
+
+  // Fixes for Firefox bug (49 is working) -> https://bugzilla.mozilla.org/show_bug.cgi?id=1118398
+  if (window.webrtcDetectedBrowser === 'firefox') {
+    var closed = false;
+    var block = 0;
+
+    self._connection.onclose = function () {
+      if (!closed) {
+        closed = true;
+        onCloseFn();
+      }
+    };
+
+    var closedChecker = setInterval(function () {
+      if (self._connection.readyState === 'closed' || closed || block === 5) {
+        clearInterval(closedChecker);
+        if (!closed) {
+          closed = true;
+          onCloseFn();
+        }
+      // After 5 seconds when state is "closed", it's actually closed on Firefox's end.
+      } else if (self._connection.readyState === 'closing') {
+        block++;
+      }
+    }, 1000);
+  } else {
+    self._connection.onclose = onCloseFn;
+  }
+
+  // Handle RTCDataChannel.onmessage event
+  self._connection.onmessage = function (evt) {
+    self._stats.messages.recv++;
+    self._stats.bytes.recv += typeof evt.data === 'string' ? Utils.getStringByteLength(evt.data) :
+      (evt.data.byteLength || evt.data.size || 0);
+    self._emit('data', evt.data);
+  };
+
+  // Handle RTCDataChannel.onbufferedamountlow event
+  self._connection.onbufferedamountlow = function () {
+    self._emit('bufferedamountlow');
+  };
+
+  // Handle RTCDataChannel.onerror event
+  self._connection.onerror = function (evt) {
+    self._emit('error', evt.error || new Error('Datachannel error occurred.'));
+  };
+};
+
+/**
+ * Function to send data.
+ */
+Datachannel.prototype.send = function (data, useBufferControl) {
+  var self = this;
+  var dataSize = data.byteLength || data.length || data.size || 0;
+
+  if (dataSize === 0) {
+    self._emit('senderror', data, new Error('Data size is 0.'));
+    return;
+  }
+
+  try {
+    // For implementing reliable mode where direct data packets are sent without congestion control or ACKs control
+    // For some reasons, RTCDataChannel.bufferedAmount returns 0 always in IE/Safari/Firefox.
+    // See: https://jira.temasys.com.sg/browse/TWP-670
+    if (useBufferControl) {
+      var fullBufferThreshold = dataSize * (self._bufferControl.usePolling ?
+        self._bufferControl.polling.blocks : self._bufferControl.bufferEvent.blocks);
+
+      self._connection.bufferedAmountLowThreshold = fullBufferThreshold;
+
+      // Fixes: https://jira.temasys.com.sg/browse/TWP-569
+      if (parseInt(self._connection.bufferedAmount, 10) >= fullBufferThreshold) {
+        // Wait for the next 250ms to check again
+        if (self._bufferControl.usePolling) {
+          setTimeout(function () {
+            self.send(data, true);
+          }, self._bufferControl.polling.interval);
+        // Wait for RTCDataChannel.onbufferedamountlow event to triggered
+        } else {
+          self.once('bufferedamountlow', function () {
+            self.send(data, true);
+          });
+        }
+        return;
+      }
+    }
+
+    self._connection.send(data);
+    self._stats.messages.sent++;
+    self._stats.bytes.recv += typeof data === 'string' ? Utils.getStringByteLength(data) :
+      (data.byteLength || data.size || 0);
+
+    if (useBufferControl) {
+      self._bufferControl.messages.timestamp = Date.now();
+      setTimeout(function () {
+        self._emit('send', data);
+      }, self._bufferControl.messages.flushTimeout);
+      return;
+    }
+
+    self._emit('send', data);
+
+  } catch (error) {
+    self._emit('senderror', data, error);
+  }
+};
+
+/**
+ * Function to get current stats.
+ */
+Datachannel.prototype.getStats = function () {
+  var self = this;
+
+  return {
+    readyState: self._connection.readyState,
+    id: self._connection.id,
+    label: self._connection.label,
+    binaryType: self._connection.binaryType,
+    bufferedAmount: parseInt(self._connection.bufferedAmount, 10) || 0,
+    bufferedAmountLowThreshold: self._connection.bufferedAmountLowThreshold || 0,
+    messagesSent: self._stats.messages.sent,
+    messagesReceived: self._stats.messages.recv,
+    bytesSent: self._stats.bytes.sent,
+    bytesReceived: self._stats.bytes.recv
+  };
+};
+
+/**
+ * Function to close connection.
+ */
+Datachannel.prototype.close = function () {
+  var self = this;
+
+  if (['closed', 'closing'].indexOf(self._connection.readyState) === -1) {
+    var now = Date.now();
+    // Prevent the Datachannel from closing if there is an ongoing buffer sent
+    // Use the polling interval here because the bufferedamountlow event is just an indication of
+    // "ready" to send next packet because threshold is lower now
+    // See Firefox case where it has to be really fast enough: https://bugzilla.mozilla.org/show_bug.cgi?id=933297
+    // Fixes: https://jira.temasys.com.sg/browse/TWP-569
+    if (parseInt(self._connection.bufferedAmount, 10) > 0) {
+      setTimeout(function () {
+        self.close();
+      }, self._bufferControl.polling.interval);
+      return;
+    }
+
+    // Prevent closing too fast if the packet has been sent within last than expected time interval
+    if ((now - self._bufferControl.messages.timestamp) >= self._bufferControl.messages.finalFlushTimeout) {
+      setTimeout(function () {
+        self.close();
+      }, (now - self._bufferControl.messages.timestamp) - self._bufferControl.messages.finalFlushTimeout);
+      return;
+    }
+
+    self._emit('state', 'closing');
+    self._connection.close();
+  }
+};
+function EventMixin (obj) {
+  // Private properties
+  obj._listeners = {
+    once: [],
+    on: []
+  };
+
+  /**
+   * Function to subscribe to an event.
+   */
+  obj.on = function (eventName, fn) {
+    if (!Array.isArray(obj._listeners.on[eventName])) {
+      obj._listeners.on[eventName] = [];
+    }
+
+    obj._listeners.on[eventName].push(fn);
+  };
+
+  /**
+   * Function to subscribe to an event once.
+   */
+  obj.once = function (eventName, fn, conditionFn, fireAlways) {
+    if (!Array.isArray(obj._listeners.once[eventName])) {
+      obj._listeners.once[eventName] = [];
+    }
+
+    obj._listeners.once[eventName].push([fn, conditionFn || function () { return true; }, fireAlways]);
+  };
+
+  /**
+   * Function to subscribe to an event once.
+   */
+  obj.off = function (eventName, fn) {
+    if (typeof eventName === 'string') {
+      if (typeof fn === 'function') {
+        // Unsubscribe .on() events
+        if (Array.isArray(obj._listeners.on[eventName])) {
+          var onIndex = 0;
+          while (onIndex < obj._listeners.on[eventName].length) {
+            if (obj._listeners.on[eventName][onIndex] === fn) {
+              obj._listeners.on[eventName].splice(onIndex, 1);
+              onIndex--;
+            }
+            onIndex++;
+          }
+        }
+        // Unsubscribe .once() events
+        if (Array.isArray(obj._listeners.once[eventName])) {
+          var onceIndex = 0;
+          while (onceIndex < obj._listeners.once[eventName].length) {
+            if (obj._listeners.once[eventName][onceIndex][0] === fn) {
+              obj._listeners.once[eventName].splice(onceIndex, 1);
+              onceIndex--;
+            }
+            onceIndex++;
+          }
+        }
+      } else {
+        obj._listeners.on[eventName] = [];
+        obj._listeners.once[eventName] = [];
+      }
+    } else {
+      obj._listeners.on = {};
+      obj._listeners.once = {};
+    }
+  };
+
+  /**
+   * Function to emit events.
+   */
+  obj._emit = function (eventName) {
+    var params = Array.prototype.slice.call(arguments);
+    // Remove the eventName parameter
+    params.shift();
+
+    // Trigger .on() event listeners
+    if (Array.isArray(obj._listeners.on[eventName])) {
+      var onIndex = 0;
+      while (onIndex < obj._listeners.on[eventName].length) {
+        obj._listeners.on[eventName][onIndex].apply(obj, params);
+        onIndex++;
+      }
+    }
+
+    // Trigger .once() event listeners
+    if (Array.isArray(obj._listeners.once[eventName])) {
+      var onceIndex = 0;
+      while (onceIndex < obj._listeners.once[eventName].length) {
+        if (obj._listeners.once[eventName][onceIndex][1].apply(obj, params)) {
+          obj._listeners.once[eventName][onceIndex][0].apply(obj, params);
+          // Remove event listener if met condition and not "fire always"
+          if (obj._listeners.once[eventName][onceIndex][0][2] !== true) {
+            obj._listeners.once[eventName].splice(onceIndex, 1);
+            onceIndex--;
+          }
+        }
+        onceIndex++;
+      }
+    }
+  };
+}
 Skylink.prototype.CANDIDATE_GENERATION_STATE = {
   NEW: 'new',
   GATHERING: 'gathering',
@@ -18454,6 +18667,27 @@ Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription, 
   return fingerprint;
 };
 
+var Utils = {
+  /**
+   * Function that gets byte length of string.
+   */
+  getStringByteLength: function (str) {
+    // Follow RFC3629 (where UTF-8 characters are at most 4-bytes long)
+    var s = str.length;
+    for (var i = str.length - 1; i >= 0; i--) {
+      var code = str.charCodeAt(i);
+      if (code > 0x7f && code <= 0x7ff) {
+        s++;
+      } else if (code > 0x7ff && code <= 0xffff) {
+        s+=2;
+      }
+      if (code >= 0xDC00 && code <= 0xDFFF) {
+        i--;
+      }
+    }
+    return s;
+  }
+};
 
   if(typeof exports !== 'undefined') {
     // Prevent breaking code

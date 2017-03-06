@@ -1258,7 +1258,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     });
 
     if (!(self._dataChannels[peerId][channelProp] &&
-      self._dataChannels[peerId][channelProp].channel.readyState === self.DATA_CHANNEL_STATE.OPEN)) {
+      self._dataChannels[peerId][channelProp].channel.getStats().readyState === self.DATA_CHANNEL_STATE.OPEN)) {
       var notOpenError = new Error('Failed starting data streaming session as channel is not opened.');
       if (peerId === 'MCU') {
         for (i = 0; i < targetPeers.length; i++) {
@@ -1502,7 +1502,7 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
       var channelProp = self._dataStreams[transferId].sessions[peerId];
 
       if (!(self._dataChannels[self._hasMCU ? 'MCU' : peerId] && self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp] &&
-        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].channel.readyState === self.DATA_CHANNEL_STATE.OPEN &&
+        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].channel.getStats().readyState === self.DATA_CHANNEL_STATE.OPEN &&
         self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].streamId === transferId)) {
         log.error([peerId, 'RTCDataChannel', transferId, 'Failed streaming data as it has not started or is ready.']);
         self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, peerId, sessionInfo,
@@ -1635,7 +1635,7 @@ Skylink.prototype.stopStreamingData = function(transferId) {
       var channelProp = self._dataStreams[transferId].sessions[peerId];
 
       if (!(self._dataChannels[self._hasMCU ? 'MCU' : peerId] && self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp] &&
-        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].channel.readyState === self.DATA_CHANNEL_STATE.OPEN &&
+        self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].channel.getStats().readyState === self.DATA_CHANNEL_STATE.OPEN &&
         self._dataChannels[self._hasMCU ? 'MCU' : peerId][channelProp].streamId === transferId)) {
         log.error([peerId, 'RTCDataChannel', transferId, 'Failed stopping data streaming session as channel is closed.']);
         self._trigger('dataStreamState', self.DATA_STREAM_STATE.ERROR, transferId, peerId, sessionInfo,
@@ -2100,7 +2100,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     return;
   }
 
-  if (self._dataChannels[peerId].main.channel.readyState !== self.DATA_CHANNEL_STATE.OPEN) {
+  if (self._dataChannels[peerId].main.channel.getStats().readyState !== self.DATA_CHANNEL_STATE.OPEN) {
     returnErrorBeforeTransferFn('Unable to start data transfer as Peer Datachannel connection is not opened.');
     return;
   }
