@@ -87,12 +87,12 @@
 		  var processNextFn = function () {
 		  	if (chunks.length > 0) {
 		  		skylink.once('incomingDataStream', function () {
-		  			setTimeout(processNextFn, 1000);
+		  			setTimeout(processNextFn, 0);
 		  		}, function (data, evtStreamId, evtPeerId, streamInfo, isSelf) {
 		  			return isSelf && evtStreamId === currentStreamId;
 		  		});
 		  		var chunk = chunks[0];
-	  			chunks.splice(0, 1000);
+	  			chunks.splice(0, 1);
 	  			skylink.streamData(currentStreamId, chunk);
 		  	} else {
 		  		skylink.stopStreamingData(currentStreamId);
