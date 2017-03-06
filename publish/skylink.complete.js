@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Tue Mar 07 2017 00:47:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Mar 07 2017 01:20:34 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11592,7 +11592,7 @@ if (typeof window.require !== 'function') {
   AdapterJS.defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.18 - Tue Mar 07 2017 00:47:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Mar 07 2017 01:20:34 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -12954,7 +12954,7 @@ Skylink.prototype._getDataChannelBuffer = function (peerId, channelProp) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp, doNotConvert) {
+Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp, doNotConvert, useBufferControl) {
   var self = this;
 
   // Set it as "main" (MESSAGING) Datachannel
@@ -13003,13 +13003,13 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
     if (!doNotConvert && typeof data === 'object') {
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Sending "' + data.type + '" protocol message ->'], data);
 
-      self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data));
+      self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data), useBufferControl);
 
     } else {
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Sending data with size ->'],
         data.size || data.length || data.byteLength);
 
-      self._dataChannels[peerId][channelProp].channel.send(data);
+      self._dataChannels[peerId][channelProp].channel.send(data, useBufferControl);
     }
   } catch (error) {
     log.error([peerId, 'RTCDataChannel', channelProp, 'Failed sending ' + (!doNotConvert && typeof data === 'object' ?
@@ -14532,7 +14532,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       target: peerId === 'MCU' ? targetPeers : peerId
-    }, channelProp);
+    }, channelProp, false, true);
     self._dataChannels[peerId][channelProp].streamId = transferId;
 
     var updatedSessionInfo = clone(sessionInfo);
@@ -14720,7 +14720,10 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
   var sendDataFn = function (peerId, channelProp, targetPeers) {
     // When ready to be sent
     var onSendDataFn = function (buffer) {
-      self._sendMessageToDataChannel(peerId, buffer, channelProp, true);
+      self._sendMessageToDataChannel(peerId, buffer, channelProp, true, true);
+
+      var updatedSessionInfo = clone(sessionInfo);
+      delete updatedSessionInfo.chunk;
 
       if (targetPeers) {
         for (var i = 0; i < targetPeers.length; i++) {
@@ -14861,7 +14864,7 @@ Skylink.prototype.stopStreamingData = function(transferId) {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       target: targetPeers ? targetPeers : peerId
-    }, channelProp);
+    }, channelProp, false, true);
 
     var updatedSessionInfo = clone(sessionInfo);
     delete updatedSessionInfo.chunk;

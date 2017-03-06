@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Tue Mar 07 2017 00:47:10 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Mar 07 2017 01:20:34 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -1360,7 +1360,7 @@ Skylink.prototype._getDataChannelBuffer = function (peerId, channelProp) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp, doNotConvert) {
+Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp, doNotConvert, useBufferControl) {
   var self = this;
 
   // Set it as "main" (MESSAGING) Datachannel
@@ -1409,13 +1409,13 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
     if (!doNotConvert && typeof data === 'object') {
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Sending "' + data.type + '" protocol message ->'], data);
 
-      self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data));
+      self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data), useBufferControl);
 
     } else {
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Sending data with size ->'],
         data.size || data.length || data.byteLength);
 
-      self._dataChannels[peerId][channelProp].channel.send(data);
+      self._dataChannels[peerId][channelProp].channel.send(data, useBufferControl);
     }
   } catch (error) {
     log.error([peerId, 'RTCDataChannel', channelProp, 'Failed sending ' + (!doNotConvert && typeof data === 'object' ?
@@ -2938,7 +2938,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       target: peerId === 'MCU' ? targetPeers : peerId
-    }, channelProp);
+    }, channelProp, false, true);
     self._dataChannels[peerId][channelProp].streamId = transferId;
 
     var updatedSessionInfo = clone(sessionInfo);
@@ -3126,7 +3126,10 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
   var sendDataFn = function (peerId, channelProp, targetPeers) {
     // When ready to be sent
     var onSendDataFn = function (buffer) {
-      self._sendMessageToDataChannel(peerId, buffer, channelProp, true);
+      self._sendMessageToDataChannel(peerId, buffer, channelProp, true, true);
+
+      var updatedSessionInfo = clone(sessionInfo);
+      delete updatedSessionInfo.chunk;
 
       if (targetPeers) {
         for (var i = 0; i < targetPeers.length; i++) {
@@ -3267,7 +3270,7 @@ Skylink.prototype.stopStreamingData = function(transferId) {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       target: targetPeers ? targetPeers : peerId
-    }, channelProp);
+    }, channelProp, false, true);
 
     var updatedSessionInfo = clone(sessionInfo);
     delete updatedSessionInfo.chunk;

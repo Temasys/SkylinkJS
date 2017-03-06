@@ -1285,7 +1285,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       target: peerId === 'MCU' ? targetPeers : peerId
-    }, channelProp);
+    }, channelProp, false, true);
     self._dataChannels[peerId][channelProp].streamId = transferId;
 
     var updatedSessionInfo = clone(sessionInfo);
@@ -1473,7 +1473,10 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
   var sendDataFn = function (peerId, channelProp, targetPeers) {
     // When ready to be sent
     var onSendDataFn = function (buffer) {
-      self._sendMessageToDataChannel(peerId, buffer, channelProp, true);
+      self._sendMessageToDataChannel(peerId, buffer, channelProp, true, true);
+
+      var updatedSessionInfo = clone(sessionInfo);
+      delete updatedSessionInfo.chunk;
 
       if (targetPeers) {
         for (var i = 0; i < targetPeers.length; i++) {
@@ -1614,7 +1617,7 @@ Skylink.prototype.stopStreamingData = function(transferId) {
       agent: window.webrtcDetectedBrowser,
       version: window.webrtcDetectedVersion,
       target: targetPeers ? targetPeers : peerId
-    }, channelProp);
+    }, channelProp, false, true);
 
     var updatedSessionInfo = clone(sessionInfo);
     delete updatedSessionInfo.chunk;

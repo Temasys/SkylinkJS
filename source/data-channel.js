@@ -222,7 +222,7 @@ Skylink.prototype._getDataChannelBuffer = function (peerId, channelProp) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp, doNotConvert) {
+Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp, doNotConvert, useBufferControl) {
   var self = this;
 
   // Set it as "main" (MESSAGING) Datachannel
@@ -271,13 +271,13 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
     if (!doNotConvert && typeof data === 'object') {
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Sending "' + data.type + '" protocol message ->'], data);
 
-      self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data));
+      self._dataChannels[peerId][channelProp].channel.send(JSON.stringify(data), useBufferControl);
 
     } else {
       log.debug([peerId, 'RTCDataChannel', channelProp, 'Sending data with size ->'],
         data.size || data.length || data.byteLength);
 
-      self._dataChannels[peerId][channelProp].channel.send(data);
+      self._dataChannels[peerId][channelProp].channel.send(data, useBufferControl);
     }
   } catch (error) {
     log.error([peerId, 'RTCDataChannel', channelProp, 'Failed sending ' + (!doNotConvert && typeof data === 'object' ?
