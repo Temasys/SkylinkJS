@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Thu Mar 02 2017 16:39:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.18 - Tue Mar 07 2017 14:53:17 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -74,7 +74,7 @@ var clone = function (obj) {
  * If you have any issues, you may find answers to your questions in the FAQ section on [our support portal](
  * http://support.temasys.io), asks questions, request features or raise bug tickets as well.
  *
- * If you would like to contribute to our Temasys SkylinkJS codebase, see [the contributing README](
+ * If you would like to contribute to our Temasys Web SDK codebase, see [the contributing README](
  * https://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).
  *
  * [See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)
@@ -3218,6 +3218,9 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
     // When ready to be sent
     var onSendDataFn = function (buffer) {
       self._sendMessageToDataChannel(peerId, buffer, channelProp, true);
+
+      var updatedSessionInfo = clone(sessionInfo);
+      delete updatedSessionInfo.chunk;
 
       if (targetPeers) {
         for (var i = 0; i < targetPeers.length; i++) {

@@ -1475,6 +1475,9 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
     var onSendDataFn = function (buffer) {
       self._sendMessageToDataChannel(peerId, buffer, channelProp, true);
 
+      var updatedSessionInfo = clone(sessionInfo);
+      delete updatedSessionInfo.chunk;
+
       if (targetPeers) {
         for (var i = 0; i < targetPeers.length; i++) {
           self._trigger('dataStreamState', self.DATA_STREAM_STATE.SENT, transferId, targetPeers[i], sessionInfo, null);
