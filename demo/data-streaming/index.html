@@ -87,7 +87,11 @@
 		  var processNextFn = function () {
 		  	if (chunks.length > 0) {
 		  		skylink.once('incomingDataStream', function () {
+<<<<<<< HEAD
 		  			setTimeout(processNextFn, 0);
+=======
+		  			setTimeout(processNextFn, chunks.length === 0 ? 2000 : 150);
+>>>>>>> 0.7.x/development
 		  		}, function (data, evtStreamId, evtPeerId, streamInfo, isSelf) {
 		  			return isSelf && evtStreamId === currentStreamId;
 		  		});

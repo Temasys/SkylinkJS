@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Tue Mar 07 2017 01:20:34 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Tue Mar 07 2017 15:27:46 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -2608,8 +2608,10 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 
 /**
  * <blockquote class="info">
+ *   Note that this feature is not supported by MCU enabled Peer connections.<br>
  *   To start streaming data, see the <a href="#method_streamData"><code>streamData()</code>
- *   method</a>. To stop data streaming session, see the <a href="#method_stopStreamingData"><code>stopStreamingData()</code> method</a>
+ *   method</a>. To stop data streaming session, see the <a href="#method_stopStreamingData"><code>
+ *   stopStreamingData()</code> method</a>.
  * </blockquote>
  * Function that starts a data chunks streaming session from User to Peers.
  * @method startStreamingData
@@ -2788,6 +2790,10 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
 
   if (listOfPeers.length === 0) {
     return emitErrorBeforeStreamingFn('Unable to start data streaming as there are no Peers to start session with.');
+  }
+
+  if (self._hasMCU) {
+    return emitErrorBeforeStreamingFn('Unable to start data streaming as this feature is current not supported by MCU yet.');
   }
 
   var transferId = 'stream_' + (self._user && self._user.sid ? self._user.sid : '-') + '_' + (new Date()).getTime();
@@ -3000,6 +3006,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
 
 /**
  * <blockquote class="info">
+ *   Note that this feature is not supported by MCU enabled Peer connections.<br>
  *   To start data streaming session, see the <a href="#method_startStreamingData"><code>startStreamingData()</code>
  *   method</a>. To stop data streaming session, see the <a href="#method_stopStreamingData"><code>stopStreamingData()</code> method</a>
  * </blockquote>
@@ -3103,6 +3110,11 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
     return;
   }
 
+  if (self._hasMCU) {
+    log.error('Failed streaming data chunk as MCU does not support this feature yet.');
+    return;
+  }
+
   var updatedDataChunk = dataChunk instanceof ArrayBuffer ? new Blob(dataChunk) : dataChunk;
 
   if (self._dataStreams[transferId].sessionChunkType === 'string' ? updatedDataChunk.length > self._CHUNK_DATAURL_SIZE :
@@ -3127,6 +3139,9 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
     // When ready to be sent
     var onSendDataFn = function (buffer) {
       self._sendMessageToDataChannel(peerId, buffer, channelProp, true, true);
+
+      var updatedSessionInfo = clone(sessionInfo);
+      delete updatedSessionInfo.chunk;
 
       var updatedSessionInfo = clone(sessionInfo);
       delete updatedSessionInfo.chunk;
@@ -3238,6 +3253,11 @@ Skylink.prototype.stopStreamingData = function(transferId) {
 
   if (!self._dataStreams[transferId].isUpload) {
     log.error('Failed stopping data streaming session as it is not sending.');
+    return;
+  }
+
+  if (self._hasMCU) {
+    log.error('Failed stopping data streaming session as MCU does not support this feature yet.');
     return;
   }
 
@@ -9820,7 +9840,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
 };
 
-Skylink.prototype.VERSION = '0.6.18';
+Skylink.prototype.VERSION = '0.6.19';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.

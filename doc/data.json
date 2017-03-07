@@ -1,9 +1,9 @@
 {
     "project": {
         "name": "skylinkjs",
-        "description": "Temasys SkylinkJS is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.18",
-        "url": "https://temasys.github.io/"
+        "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
+        "version": "0.6.19",
+        "url": "https://temasys.io/"
     },
     "files": {
         "source/template/header.js": {
@@ -42,6 +42,20 @@
             "fors": {
                 "Skylink": 1
             },
+            "namespaces": {}
+        },
+        "source/datachannel.js": {
+            "name": "source/datachannel.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
+        },
+        "source/event.mixin.js": {
+            "name": "source/event.mixin.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
             "namespaces": {}
         },
         "source/ice-candidate.js": {
@@ -169,6 +183,13 @@
                 "Skylink": 1
             },
             "namespaces": {}
+        },
+        "source/utils.js": {
+            "name": "source/utils.js",
+            "modules": {},
+            "classes": {},
+            "fors": {},
+            "namespaces": {}
         }
     },
     "modules": {},
@@ -183,7 +204,7 @@
             "extension_for": [],
             "file": "source/template/header.js",
             "line": 49,
-            "description": "<h2>Prerequisites on using Skylink</h2>\nBefore using any Skylink functionalities, you will need to authenticate your App Key using\n  the <a href=\"#method_init\">`init()` method</a>.\n\nTo manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).\n\nTo view the list of supported browsers, visit [the list here](\nhttps://github.com/Temasys/SkylinkJS#supported-browsers).\n\nHere are some articles to help you get started:\n- [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)\n- [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)\n- [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)\n\nHere are some demos you may use to aid your development:\n- Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]\n- Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]\n\nYou may see the example below in the <a href=\"#\">Constructor tab</a> to have a general idea how event subscription\n  and the ordering of <a href=\"#method_init\"><code>init()</code></a> and\n  <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> methods should be called.\n\nIf you have any issues, you may find answers to your questions in the FAQ section on [our support portal](\nhttp://support.temasys.io), asks questions, request features or raise bug tickets as well.\n\nIf you would like to contribute to our Temasys SkylinkJS codebase, see [the contributing README](\nhttps://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).\n\n[See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)",
+            "description": "<h2>Prerequisites on using Skylink</h2>\nBefore using any Skylink functionalities, you will need to authenticate your App Key using\n  the <a href=\"#method_init\">`init()` method</a>.\n\nTo manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).\n\nTo view the list of supported browsers, visit [the list here](\nhttps://github.com/Temasys/SkylinkJS#supported-browsers).\n\nHere are some articles to help you get started:\n- [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)\n- [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)\n- [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)\n\nHere are some demos you may use to aid your development:\n- Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]\n- Creating a component [[Link](https://github.com/Temasys/skylink-call-button)]\n\nYou may see the example below in the <a href=\"#\">Constructor tab</a> to have a general idea how event subscription\n  and the ordering of <a href=\"#method_init\"><code>init()</code></a> and\n  <a href=\"#method_joinRoom\"><code>joinRoom()</code></a> methods should be called.\n\nIf you have any issues, you may find answers to your questions in the FAQ section on [our support portal](\nhttp://support.temasys.io), asks questions, request features or raise bug tickets as well.\n\nIf you would like to contribute to our Temasys Web SDK codebase, see [the contributing README](\nhttps://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).\n\n[See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)",
             "is_constructor": 1,
             "example": [
                 "\n  // Here's a simple example on how you can start using Skylink.\n  var skylinkDemo = new Skylink();\n\n  // Subscribe all events first as a general guideline\n  skylinkDemo.on(\"incomingStream\", function (peerId, stream, peerInfo, isSelf) {\n    if (isSelf) {\n      attachMediaStream(document.getElementById(\"selfVideo\"), stream);\n    } else {\n      var peerVideo = document.createElement(\"video\");\n      peerVideo.id = peerId;\n      peerVideo.autoplay = \"autoplay\";\n      document.getElementById(\"peersVideo\").appendChild(peerVideo);\n      attachMediaStream(peerVideo, stream);\n    }\n  });\n\n  skylinkDemo.on(\"peerLeft\", function (peerId, peerInfo, isSelf) {\n    if (!isSelf) {\n      var peerVideo = document.getElementById(peerId);\n      // do a check if peerVideo exists first\n      if (peerVideo) {\n        document.getElementById(\"peersVideo\").removeChild(peerVideo);\n      } else {\n        console.error(\"Peer video for \" + peerId + \" is not found.\");\n      }\n    }\n  });\n\n // init() should always be called first before other methods other than event methods like on() or off().\n skylinkDemo.init(\"YOUR_APP_KEY_HERE\", function (error, success) {\n   if (success) {\n     skylinkDemo.joinRoom(\"my_room\", {\n       userData: \"My Username\",\n       audio: true,\n       video: true\n     });\n   }\n });"
@@ -1625,13 +1646,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 153,
-            "description": "Subscribe to events",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/data-channel.js",
-            "line": 275,
+            "line": 196,
             "description": "Function that returns the Datachannel buffer threshold and amount.",
             "itemtype": "method",
             "name": "_getDataChannelBuffer",
@@ -1646,7 +1661,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 309,
+            "line": 218,
             "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
             "name": "_sendMessageToDataChannel",
@@ -1657,7 +1672,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 384,
+            "line": 293,
             "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -2331,7 +2346,7 @@
         {
             "file": "source/data-transfer.js",
             "line": 956,
-            "description": "<blockquote class=\"info\">\n  To start streaming data, see the <a href=\"#method_streamData\"><code>streamData()</code>\n  method</a>. To stop data streaming session, see the <a href=\"#method_stopStreamingData\"><code>stopStreamingData()</code> method</a>\n</blockquote>\nFunction that starts a data chunks streaming session from User to Peers.",
+            "description": "<blockquote class=\"info\">\n  Note that this feature is not supported by MCU enabled Peer connections.<br>\n  To start streaming data, see the <a href=\"#method_streamData\"><code>streamData()</code>\n  method</a>. To stop data streaming session, see the <a href=\"#method_stopStreamingData\"><code>\n  stopStreamingData()</code> method</a>.\n</blockquote>\nFunction that starts a data chunks streaming session from User to Peers.",
             "itemtype": "method",
             "name": "startStreamingData",
             "params": [
@@ -2359,8 +2374,8 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1348,
-            "description": "<blockquote class=\"info\">\n  To start data streaming session, see the <a href=\"#method_startStreamingData\"><code>startStreamingData()</code>\n  method</a>. To stop data streaming session, see the <a href=\"#method_stopStreamingData\"><code>stopStreamingData()</code> method</a>\n</blockquote>\nFunction that sends a data chunk from User to Peers for an existing active data streaming session.",
+            "line": 1354,
+            "description": "<blockquote class=\"info\">\n  Note that this feature is not supported by MCU enabled Peer connections.<br>\n  To start data streaming session, see the <a href=\"#method_startStreamingData\"><code>startStreamingData()</code>\n  method</a>. To stop data streaming session, see the <a href=\"#method_stopStreamingData\"><code>stopStreamingData()</code> method</a>\n</blockquote>\nFunction that sends a data chunk from User to Peers for an existing active data streaming session.",
             "itemtype": "method",
             "name": "streamData",
             "params": [
@@ -2385,7 +2400,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1535,
+            "line": 1553,
             "description": "<blockquote class=\"info\">\n  To start data streaming session, see the <a href=\"#method_startStreamingData\"><code>startStreamingData()</code>\n  method</a> To start streaming data, see the <a href=\"#method_streamData\"><code>streamData()</code>\n  method</a>.\n</blockquote>\nFunction that stops a data chunks streaming session from User to Peers.",
             "itemtype": "method",
             "name": "stopStreamingData",
@@ -2406,7 +2421,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1669,
+            "line": 1692,
             "description": "Function that starts the data transfer to Peers.",
             "itemtype": "method",
             "name": "_startDataTransfer",
@@ -2417,13 +2432,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1866,
+            "line": 1889,
             "description": "Complete Peer function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1930,
+            "line": 1953,
             "description": "Function that starts or listens the data transfer status to Peer.\nThis reacts differently during MCU environment.",
             "itemtype": "method",
             "name": "_startDataTransferToPeer",
@@ -2438,25 +2453,25 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1945,
+            "line": 1968,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1955,
+            "line": 1978,
             "description": "Return error and trigger them if failed before or during data transfers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 1971,
+            "line": 1994,
             "description": "Send WRQ protocol to start data transfers.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2209,
+            "line": 2232,
             "description": "Function that returns the data transfer session.",
             "itemtype": "method",
             "name": "_getTransferInfo",
@@ -2467,7 +2482,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2291,
+            "line": 2314,
             "description": "Function that returns the compiled data transfer data.",
             "itemtype": "method",
             "name": "_getTransferData",
@@ -2478,7 +2493,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2318,
+            "line": 2341,
             "description": "Function that handles the data transfers sessions timeouts.",
             "itemtype": "method",
             "name": "_handleDataTransferTimeoutForPeer",
@@ -2489,13 +2504,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2362,
+            "line": 2385,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2409,
+            "line": 2432,
             "description": "Function that handles the data received from Datachannel and\nroutes to the relevant data transfer protocol handler.",
             "itemtype": "method",
             "name": "_processDataChannelData",
@@ -2506,7 +2521,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2585,
+            "line": 2608,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -2517,7 +2532,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2728,
+            "line": 2751,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -2528,13 +2543,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2747,
+            "line": 2770,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2830,
+            "line": 2853,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -2545,7 +2560,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2851,
+            "line": 2874,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -2556,13 +2571,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2870,
+            "line": 2893,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2902,
+            "line": 2925,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -2573,19 +2588,79 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2919,
+            "line": 2942,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2951,
+            "line": 2974,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
             "access": "private",
             "tagname": "",
             "since": "0.5.5",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/datachannel.js",
+            "line": 1,
+            "description": "Class that handles the RTCDataChannel connection.",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/datachannel.js",
+            "line": 25,
+            "description": "Function to start initializing events.",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/datachannel.js",
+            "line": 96,
+            "description": "Function to send data.",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/datachannel.js",
+            "line": 155,
+            "description": "Function to get current stats.",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/datachannel.js",
+            "line": 175,
+            "description": "Function to close connection.",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/event.mixin.js",
+            "line": 1,
+            "description": "Mixin that handles event listeners and subscription.",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/event.mixin.js",
+            "line": 11,
+            "description": "Function to subscribe to an event.",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/event.mixin.js",
+            "line": 22,
+            "description": "Function to subscribe to an event once.",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/event.mixin.js",
+            "line": 33,
+            "description": "Function to subscribe to an event once.",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/event.mixin.js",
+            "line": 71,
+            "description": "Function to emit events.",
             "class": "Skylink"
         },
         {
@@ -9950,6 +10025,18 @@
             "tagname": "",
             "since": "0.6.18",
             "class": "Skylink"
+        },
+        {
+            "file": "source/utils.js",
+            "line": 1,
+            "description": "Module that handles utilities functions.",
+            "class": ""
+        },
+        {
+            "file": "source/utils.js",
+            "line": 5,
+            "description": "Function that gets byte length of string.",
+            "class": ""
         }
     ],
     "warnings": [
@@ -9987,11 +10074,11 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1348"
+            "line": " source/data-transfer.js:1354"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/data-transfer.js:1535"
+            "line": " source/data-transfer.js:1553"
         },
         {
             "message": "unknown tag: trigger",
@@ -10150,44 +10237,88 @@
             "line": " source/template/header.js:20"
         },
         {
-            "message": "Missing item type\nSubscribe to events",
-            "line": " source/data-channel.js:153"
-        },
-        {
             "message": "Missing item type\nEmit data state event function.",
             "line": " source/data-transfer.js:748"
         },
         {
             "message": "Missing item type\nComplete Peer function.",
-            "line": " source/data-transfer.js:1866"
+            "line": " source/data-transfer.js:1889"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:1945"
+            "line": " source/data-transfer.js:1968"
         },
         {
             "message": "Missing item type\nReturn error and trigger them if failed before or during data transfers function.",
-            "line": " source/data-transfer.js:1955"
+            "line": " source/data-transfer.js:1978"
         },
         {
             "message": "Missing item type\nSend WRQ protocol to start data transfers.",
-            "line": " source/data-transfer.js:1971"
+            "line": " source/data-transfer.js:1994"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2362"
+            "line": " source/data-transfer.js:2385"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2747"
+            "line": " source/data-transfer.js:2770"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2870"
+            "line": " source/data-transfer.js:2893"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2919"
+            "line": " source/data-transfer.js:2942"
+        },
+        {
+            "message": "Missing item type\nClass that handles the RTCDataChannel connection.",
+            "line": " source/datachannel.js:1"
+        },
+        {
+            "message": "Missing item type\nFunction to start initializing events.",
+            "line": " source/datachannel.js:25"
+        },
+        {
+            "message": "Missing item type\nFunction to send data.",
+            "line": " source/datachannel.js:96"
+        },
+        {
+            "message": "Missing item type\nFunction to get current stats.",
+            "line": " source/datachannel.js:155"
+        },
+        {
+            "message": "Missing item type\nFunction to close connection.",
+            "line": " source/datachannel.js:175"
+        },
+        {
+            "message": "Missing item type\nMixin that handles event listeners and subscription.",
+            "line": " source/event.mixin.js:1"
+        },
+        {
+            "message": "Missing item type\nFunction to subscribe to an event.",
+            "line": " source/event.mixin.js:11"
+        },
+        {
+            "message": "Missing item type\nFunction to subscribe to an event once.",
+            "line": " source/event.mixin.js:22"
+        },
+        {
+            "message": "Missing item type\nFunction to subscribe to an event once.",
+            "line": " source/event.mixin.js:33"
+        },
+        {
+            "message": "Missing item type\nFunction to emit events.",
+            "line": " source/event.mixin.js:71"
+        },
+        {
+            "message": "Missing item type\nModule that handles utilities functions.",
+            "line": " source/utils.js:1"
+        },
+        {
+            "message": "Missing item type\nFunction that gets byte length of string.",
+            "line": " source/utils.js:5"
         }
     ]
 }
