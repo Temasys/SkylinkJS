@@ -58,10 +58,7 @@ SkylinkDemo.init(config, function (error, success) {
   if (success) {
     SkylinkDemo.joinRoom({
       audio: true,
-      video: {
-        screenshare: true,
-        optional: [{ minFrameRate: 50 }]
-      }
+      video: true
     });
   }
 });
