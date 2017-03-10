@@ -1,135 +1,149 @@
+# Temasys Web SDK
+Temasys Web SDK (formerly SkylinkJS) is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer. It is built on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://skylink.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
 
+### Start using it!
+To start using the Temasys Web SDK, you'll need a Temasys Account and an App key to use this. [Register here to get your App key](https://console.temasys.io).
 
-> Temasys Web SDK (formerly SkylinkJS) is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
+And to start integrating the Temasys Web SDK, here's just a few lines of code to get you started for a simple video call:
 
-We've gone to great length to make this library work in as many browsers as possible. Temasys Web SDK is built on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://skylink.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
+```
+<html>
+<head></head>
+<body>
+<div id="peersVideo"></div>
+<script src="https://cdn.temasys.io/skylink/skylinkjs/0.7.x/skylink.complete.js"></script>
+<script>
+var skylink = new Skylink();
 
-You'll need a Temasys Account and an App key to use this. [Register here to get your App key](https://console.temasys.io).
+skylink.on("incomingStream", function (peerId, stream, peerInfo, isSelf) {
+  if (isSelf) {
+    attachMediaStream(document.getElementById("selfVideo"), stream);
+  } else {
+    var peerVideo = document.createElement("video");
+    peerVideo.id = peerId;
+    peerVideo.autoplay = "autoplay";
+    document.getElementById("peersVideo").appendChild(peerVideo);
+    attachMediaStream(peerVideo, stream);
+  }
+});
 
-#### Supported Browsers
+skylink.on("peerLeft", function (peerId, peerInfo, isSelf) {
+  if (!isSelf) {
+    var peerVideo = document.getElementById(peerId);
+    if (peerVideo) {
+      document.getElementById("peersVideo").removeChild(peerVideo);
+    } else {
+      console.error("Peer video for " + peerId + " is not found.");
+    }
+  }
+});
 
-> ##### Browsers in Beta (Edge/Bowser):
-> _Please note that MCU functionality, data channel file transfer, and P2P messaging are not supported by the Temasys Web SDK in Edge browser due to current compatibility limitations. Older versions of Edge may require you to enable experimental support for H.264 to interop with Chrome and Firefox browsers. Edge support should be considered experimental in this release._
+skylink.init("<% Your App Key %>", function (error, success) {
+  if (success) {
+    skylinkDemo.joinRoom("<% Room name %>", {
+      audio: true,
+      video: true
+    });
+  }
+});
+</body>
+</html>
+```
 
-| Features       | Chrome<br>`52`-`55`+ | Firefox<br>`48`-`50`+ | Opera<br>`38`-`42`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  | Edge<br>`14.14352` | Bowser<br>(iOS `9.x` and below) | 
-| -------------- | ---------- | ----------- | --------- | ---------- | ---------- | ---- | ----- |
-| **Platforms:** | Win/Mac/Ubuntu/Android | Win/Mac/Ubuntu/Android | Win/Mac/Ubuntu/Android | Win/Mac | Win | Mac | Win | iOS<br>(`9.x` and below) |
-| **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing)  | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing) | No | No |
-| **Video Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes [Temasys Plugin](http://skylink.io/plugin/)  | Yes (with H264 flag enabled) | Yes |
-| **Audio Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/) | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes (no MCU) | Yes (no MCU) |
-| **File Transfers** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | No | No |
-| **Chat Messaging** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes with [Temasys Plugin](http://skylink.io/plugin/)  | Yes (Signaling only) | Yes (Signaling only) |
+If you want to integrate even more features like chat, custom data or learn more about our features, you can check out the [documentation API here](cdn.temasys.com.sg/skylink/skylinkjs/0.7.x/doc/classes/Skylink.html).
 
-- (+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.
-- (*) Custom Branded Temasys WebRTC Plugin incorporates additional features not available in the free plugin.
-- (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.com.sg). For Firefox extensions source code, [you may download from your Application Key in console.temasys.io](https://console.temasys.io).
-
-##### Installation
-Install Temasys Web SDK (formerly SkylinkJS) with [npm](https://www.npmjs.com/):
+You may also install the Temasys Web SDK (formerly SkylinkJS) with [npm](https://www.npmjs.com/):
 ```
 npm install skylinkjs@0.6.x
 ```
-Install Temasys Web SDK (formerly SkylinkJS) with [bower](http://bower.io/):
+
+Or with [bower](http://bower.io/):
 ```
 bower install skylinkjs
 ```
 
-
-#### Read more
-- [Getting started](https://temasys.io/getting-started-with-webrtc-and-skylinkjs/)
-- [API Docs](http://cdn.temasys.io/skylink/skylinkjs/latest/doc/classes/Skylink.html)
-- [Versions](http://github.com/Temasys/SkylinkJS/releases)
-- [Developer Console  - Get your App key](https://console.temasys.io)
-- [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/master/demo)
-- [Run tests](https://github.com/Temasys/SkylinkJS/tree/master/tests)
+To get started more about WebRTC and SkylinkJS, you can [follow this article here](https://temasys.io/getting-started-with-webrtc-and-skylinkjs/). If need help or want something changed, you can raise tickets on [our support portal](http://support.temasys.io). It is also recommended that you always use the latest versions of the Temasys Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
 
 
+### Browser WebRTC Supports
+Regardless of WebRTC supports, signaling chat functionality is still available.
 
-##### Need help or want something changed?
-You can raise tickets on [our support portal](http://support.temasys.io) or on [our Github Page](https://console.temasys.io/support).
+**Chrome**
 
-##### Current versions and stability
-We recommend that you always use the latest versions of the Temasys Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
+- Recommended min version: `52`
+- Platforms: Win / Mac / Ubuntu / Android
+- Supports: Audio / Video / Datachannel (File & Data transfers)
+- Screensharing extension: [Chrome Web Store](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc).
 
-[Latest version: `0.6.19`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.19).
+For custom Chrome screensharing extension, you may contact [our support team](mailto:support@temasys.io) to built one.
 
-#### Noted Issues and Solutions
-##### Installing `0.6.3` - `0.6.10` versions in NPM
-Due to corrupt files issues for versions `0.6.3` - `0.6.10`, we have removed these versions from the NPM repository.
-You may still install these versions using this command:
-```
-npm install git://github.com/Temasys/SkylinkJS#<version_tag>
-```
+**Firefox**
 
-##### Encoding issues from AdapterJS dependency
-There is a [known issue](https://github.com/Temasys/AdapterJS/issues/240) caused by AdapterJS `0.14.0` which manifests as incorrectly encoded characters. To resolve this, it is recommended that charset is set the HTML file:
+- Recommended min version: `48`
+- Platforms: Win / Mac / Ubuntu / Android
+- Supports: Audio / Video / Datachannel (File & Data transfers)
+- Screensharing extension: [Firefox Add-ons Directory](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/).
 
-```
-<meta charset="utf-8">
-```
+For custom Firefox screensharing extension, you generate one in the [Developer Console](https://console.temasys.io). 
 
-##### Upgrading from `0.5.7` and below:
-It's now recommended to use the `init()` callback instead of using `readyStateChange` complete state as this may result in an infinite loop.
+**Safari (Requires [Temasys WebRTC Plugin](https://temasys.io/plugin))**
 
-readyStateChange triggers each time the current room information is recieved, and joining a room other than default room will result in a re-fetch from the API server. This can result in a endless re-join loop. 
-```
-// Use this
-sw.init(data, function () {
-  sw.joinRoom('name');
-});
+- Recommended min version: `7`
+- Platforms: Mac
+- Supports: Audio / Video / Datachannel (File & Data transfers)
 
-// Instead of
-sw.on('readyStateChange', function (state) {
-  if (state === sw.READY_STATE_CHANGE.COMPLETED) {
-     sw.joinRoom('name');
-  }
-});
-```
+For screensharing functionalities or custom built Temasys WebRTC Plugin, you may consider signing up for [Commercial Licensed Plugin](https://temasys.io/plugin/#commercial-licensing)
 
-## How to build your own Temasys Web SDK
-Using [Git](http://git-scm.com/download) command line tools, execute the following:
-```
-# 1. Clone or download this repository via git terminal.
+**IE (Requires [Temasys WebRTC Plugin](https://temasys.io/plugin))**
 
-git clone https://github.com/Temasys/SkylinkJS.git
+- Recommended min version: `9`
+- Platforms: Win
+- Supports: Audio / Video / Datachannel (File & Data transfers)(Binary transfers from IE ver `10` onwards)
 
-# 2. Install all required dependencies. Use (sudo npm install) if required.
+For screensharing functionalities or custom built Temasys WebRTC Plugin, you may consider signing up for [Commercial Licensed Plugin](https://temasys.io/plugin/#commercial-licensing)
 
-npm install
+**Edge (Beta)**
 
-# 3. Install Grunt to run tasks.
+- Recommended min version: `14.14352`
+- Platforms: Win
+- Supports: Audio / Video (With H264 experimental flag enabled)
 
-npm install grunt -g
-npm install grunt-cli -g
+Note that Edge will not work with MCU enabled App Keys.
 
-# 4. Install Browserify and Testling to run test scripts :
+**Bowser (Beta)**
 
-> **Note** that currently the test scripts are outdated and may not work as we are evaluating to upgrade the test scripts in the future.
+- Recommended min version: `0.6.1` (only iOS `9.x` and below)
+- Platforms: iOS
+- Supports: Audio / Video
 
-npm install browserify -g
-npm install testling -g
+Note that Bowser will not work in iOS ver `10.x` and above.
 
-# 5. Run the start script to start a local webserver to be able access the demo and doc folders. This will popup Chrome (Mac). You can configure a different browsers in the start.sh file. Alternatively, you can run (sh start.sh)
+**Android (Beta)**
 
-npm start # note that this runs in Chrome currently..
-```
-
-After making edits, here are some commands to run and build the Temasys Web SDK:
-
-- `grunt jshint` : Validate for formatting and syntax errors.
-- `grunt yuidoc` : To generate the SDK documentation.
-- `grunt dev` : Compile the SDK.
-- `grunt publish` : Publish a release.
-
-__What's included in the repository?__
-
-- `demo` : Reference Code Examples.
-- `doc` : Generated documentation for the Temasys Web SDK.
-- `doc-style` : Templates used documentation.
-- `publish` : Production version of the library as well as minified variants
-- `source` : Temasys Web SDK source
-- `tests` : Test suite.
+- Recommended min version: Android OS ver `6.x`
+- Platforms: Android
+- Supports: Audio / Video
 
 
-## License
+### Building the Temasys Web SDK Project
+> Before contributing, please read the [CONTRIBUTING.md README first)(CONTRIBUTING.md).
+
+1. Clone the Temasys Web SDK Project: `git clone https://github.com/Temasys/SkylinkJS.git`
+2. Install Grunt and its command line tools: `npm install grunt grunt-cli -g`
+3. Start localhost server to play around with demos or do manual testing: `npm start`. Note that will install all required dependencies in `sudo` mode first before running the server.
+
+Here are some common grunt tasks:
+
+- `grunt dev`: Compiles the `source/` files to `publish/` for testing and development.
+- `grunt publish`: Compiles the `source/` files for production ready code to `publish/` and `release/` for CDN ready release files.
+
+These are the directories:
+
+- `demo`: The demos. Ensure that you configure with your own App Key based on the example on `config-example.js`.
+- `doc` : Compiled documentation from `source/` files and basing off the theme on `doc-style/`.
+- `doc-style` : The documentation theme for YUIDOC.
+- `publish` : The compiled `source/` files for testing or production ready SDK.
+- `source` : The source code.
+
+### License
 [APACHE 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
