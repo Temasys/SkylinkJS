@@ -68,7 +68,7 @@ To get started more about WebRTC and SkylinkJS, you can [follow this article her
 ## Browser WebRTC Supports
 Regardless of WebRTC supports, signaling chat functionality is still available.
 
-**Chrome**
+#### Chrome
 
 - Recommended min version: `52`
 - Platforms: Win / Mac / Ubuntu / Android
@@ -77,16 +77,16 @@ Regardless of WebRTC supports, signaling chat functionality is still available.
 
 For custom Chrome screensharing extension, you may contact [our support team](mailto:support@temasys.io) to built one.
 
-**Firefox**
+#### Firefox
 
 - Recommended min version: `48`
 - Platforms: Win / Mac / Ubuntu / Android
 - Supports: Audio / Video / Datachannel (File & Data transfers)
 - Screensharing extension: [Firefox Add-ons Directory](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/).
 
-For custom Firefox screensharing extension, you generate one in the [Developer Console](https://console.temasys.io). 
+For custom Firefox screensharing extension, you generate one in the [Developer Console](https://console.temasys.io).
 
-**Safari (Requires [Temasys WebRTC Plugin](https://temasys.io/plugin))**
+#### Safari (Requires [Temasys WebRTC Plugin](https://temasys.io/plugin))
 
 - Recommended min version: `7`
 - Platforms: Mac
@@ -94,7 +94,7 @@ For custom Firefox screensharing extension, you generate one in the [Developer C
 
 For screensharing functionalities or custom built Temasys WebRTC Plugin, you may consider signing up for [Commercial Licensed Plugin](https://temasys.io/plugin/#commercial-licensing)
 
-**IE (Requires [Temasys WebRTC Plugin](https://temasys.io/plugin))**
+#### IE (Requires [Temasys WebRTC Plugin](https://temasys.io/plugin))
 
 - Recommended min version: `9`
 - Platforms: Win
@@ -102,7 +102,7 @@ For screensharing functionalities or custom built Temasys WebRTC Plugin, you may
 
 For screensharing functionalities or custom built Temasys WebRTC Plugin, you may consider signing up for [Commercial Licensed Plugin](https://temasys.io/plugin/#commercial-licensing)
 
-**Edge (Beta)**
+#### Edge (Beta)
 
 - Recommended min version: `14.14352`
 - Platforms: Win
@@ -110,7 +110,7 @@ For screensharing functionalities or custom built Temasys WebRTC Plugin, you may
 
 Note that Edge will not work with MCU enabled App Keys.
 
-**Bowser (Beta)**
+#### Bowser (Beta)
 
 - Recommended min version: `0.6.1` (only iOS `9.x` and below)
 - Platforms: iOS
@@ -118,7 +118,7 @@ Note that Edge will not work with MCU enabled App Keys.
 
 Note that Bowser will not work in iOS ver `10.x` and above.
 
-**Android (Beta)**
+#### Android (Beta)
 
 - Recommended min version: Android OS ver `6.x`
 - Platforms: Android
@@ -139,11 +139,12 @@ Here are some common grunt tasks:
 
 These are the directories:
 
-- `demo`: The demos. Ensure that you configure with your own App Key based on the example on `config-example.js`.
-- `doc` : Compiled documentation from `source/` files and basing off the theme on `doc-style/`.
-- `doc-style` : The documentation theme for YUIDOC.
-- `publish` : The compiled `source/` files for testing or production ready SDK.
-- `source` : The source code.
+- `demo/`: The demos. Ensure that you configure with your own App Key based on the example on `config-example.js`.
+- `doc/` : Compiled documentation from `source/` files and basing off the theme on `doc-style/`.
+- `doc-style/` : The documentation theme for YUIDOC.
+- `publish/` : The compiled `source/` files for testing or production ready SDK.
+- `release/` : The compiled `source/` files for publishing into the CDN.
+- `source/` : The source code.
 
 ## License
 [APACHE 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
