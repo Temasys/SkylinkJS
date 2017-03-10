@@ -14,7 +14,7 @@
     "url": "http://www.apache.org/licenses/LICENSE-2.0"
   }],
   "scripts": {
-    "prestart": "./start.sh &"
+    "start": "sudo npm install && node localhost/server.js"
   },
   "dependencies": {
     "socket.io-client": "1.4.8",
