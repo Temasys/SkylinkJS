@@ -9,10 +9,12 @@
   },
   "main": "publish/skylink.min.js",
   "repository": "Temasys/SkylinkJS",
-  "licenses": [{
-    "type": "Apache",
-    "url": "http://www.apache.org/licenses/LICENSE-2.0"
-  }],
+  "licenses": [
+    {
+      "type": "Apache",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
   "scripts": {
     "start": "sudo npm install && node localhost/server.js"
   },
@@ -32,11 +34,16 @@
     "grunt-contrib-uglify": "2.2.0",
     "grunt-contrib-yuidoc": "1.0.0",
     "grunt-replace": "1.0.1",
+    "jshint": "^2.9.4",
     "load-grunt-tasks": "3.5.2"
   },
   "engines": {
     "node": ">=5.11.1",
     "npm": ">=4.0.5"
   },
-  "keywords": ["webrtc", "real-time", "p2p"]
+  "keywords": [
+    "webrtc",
+    "real-time",
+    "p2p"
+  ]
 }

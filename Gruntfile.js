@@ -13,14 +13,14 @@ module.exports = function(grunt) {
         options: {
           separator: '\n',
           stripBanners: true,
-          banner: '/*! ' + pkg.name + ' - v' + pkg.version + ' - ' + (new Date()).toString() + ' */\n\n'
+          banner: '/*! ' + pkg.name + ' - v' + pkg.version + ' - ' + (new Date()).toString() + ' */\n\n' +
+            '(function (globals) {\n\n',
+          footer: 'if(typeof exports !== \'undefined\') { module.exports = { Skylink: Skylink, SkylinkLogs: SkylinkLogs };' +
+            '} else if (globals) { globals.Skylink = Skylink; globals.SkylinkLogs = SkylinkLogs; ' +
+            '} else if (window) { window.Skylink = Skylink; window.SkylinkLogs = SkylinkLogs; } })(this);'
         },
         files: {
-          'publish/skylink.debug.js': [
-            'source/template/header.js',
-            'source/*.js',
-            'source/template/footer.js'
-          ],
+          'publish/skylink.debug.js': ['source/*.js'],
           'publish/skylink.complete.js': [
             'node_modules/socket.io-client/socket.io.js',
             'node_modules/adapterjs/publish/adapter.screenshare.js',
