@@ -54,7 +54,7 @@ If you want to integrate even more features like chat, custom data or learn more
 
 You may also install the Temasys Web SDK (formerly SkylinkJS) with [npm](https://www.npmjs.com/):
 ```
-npm install skylinkjs@0.6.x
+npm install skylinkjs@0.7.x
 ```
 
 Or with [bower](http://bower.io/):
