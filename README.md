@@ -50,6 +50,8 @@ skylink.init("<% Your App Key %>", function (error, success) {
 </html>
 ```
 
+(Try a demo video call built on Temasys Web SDK on [getaroom.io here](https://getaroom.io). Simply click "Start a new call" and share that link with others!)
+
 If you want to integrate even more features like chat, custom data or learn more about our features, you can check out the [documentation API here](cdn.temasys.com.sg/skylink/skylinkjs/0.7.x/doc/classes/Skylink.html).
 
 You may also install the Temasys Web SDK (formerly SkylinkJS) with [npm](https://www.npmjs.com/):
