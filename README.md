@@ -65,7 +65,7 @@ bower install skylinkjs
 To get started more about WebRTC and SkylinkJS, you can [follow this article here](https://temasys.io/getting-started-with-webrtc-and-skylinkjs/). If need help or want something changed, you can raise tickets on [our support portal](http://support.temasys.io). It is also recommended that you always use the latest versions of the Temasys Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
 
 
-### Browser WebRTC Supports
+## Browser WebRTC Supports
 Regardless of WebRTC supports, signaling chat functionality is still available.
 
 **Chrome**
@@ -125,7 +125,7 @@ Note that Bowser will not work in iOS ver `10.x` and above.
 - Supports: Audio / Video
 
 
-### Building the Temasys Web SDK Project
+## Building the Temasys Web SDK Project
 > Before contributing, please read the [CONTRIBUTING.md README first)(CONTRIBUTING.md).
 
 1. Clone the Temasys Web SDK Project: `git clone https://github.com/Temasys/SkylinkJS.git`
@@ -145,5 +145,5 @@ These are the directories:
 - `publish` : The compiled `source/` files for testing or production ready SDK.
 - `source` : The source code.
 
-### License
+## License
 [APACHE 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
