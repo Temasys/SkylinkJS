@@ -1,59 +1,11 @@
-# Read about how to use .gitignore: http://h5bp.com/ae
-
-# Numerous always-ignore extensions
-*.diff
-*.err
-*.orig
-*.log
-*.rej
-*.swo
-*.swp
-*.vi
-*~
-*.sass-cache
-
-# OS or Editor folders
+# Development stuff
 .DS_Store
-._*
-Thumbs.db
-.cache
-.project
-.settings
-.tmproj
-nbproject
+npm-debug.log
+node_modules
 *.sublime-workspace
 npm-debug.log
 node_modules
-codekit-config.json
-lib-cov
-*.seed
-*.log
-*.csv
-*.dat
-*.out
-*.pid
-*.gz
 
-# Dreamweaver added files
-_notes
-dwsync.xml
-
-# Komodo
-*.komodoproject
-.komodotools
-
-# Espresso
-*.esproj
-*.espressostorage
-
-# Rubinius
-*.rbc
-
-# Folders to ignore
-.hg
-.svn
-.CVS
-.idea
-bamboo
-demo/**/config.js
-tests/config.js
+# Project stuff
+release
+**/**/config.js
