@@ -108,15 +108,22 @@ module.exports = function(grunt) {
     }
   });
 
-  // Task for development purposes.
-  // Compiles source/ files to publish/ folder for testing.
+  /**
+   * Task for development purposes.
+   * - Compiles source/ files to publish/ folder for testing.
+   */
   grunt.registerTask('dev', ['jshint:dev', 'clean:dev', 'concat:dev', 'replace:dev']);
-  // Task for release purposes. Use release/ folder for CDN publish.
-  // Compiles minified production ready source/ files to publish/ folder.
-  // Compiles source/ files to doc/ folder for documentation.
-  // Gzips files for CDN release purposes.
+  /**
+   * Task for release purposes. Use release/ folder for CDN publish.
+   * - Compiles minified production ready source/ files to publish/ folder.
+   * - Compiles source/ files to doc/ folder for documentation. This uses the doc-style for the theme layout.
+   * - Gzips files for CDN release purposes.
+   */
   grunt.registerTask('publish', ['dev', 'clean:publish', 'uglify:publish',
     'yuidoc:publish', 'compress:publish', 'copy:publish']);
-  // [DEPRECATED] Task to compile doc/ from source/ folder.
+  /**
+   * [DEPRECATED] Task to compile documentation.
+   * - Compiles source/ files to doc/ folder for documentation. This uses the doc-style for the theme layout.
+   */
   grunt.registerTask('doc', ['yuidoc:publish']);
 };
