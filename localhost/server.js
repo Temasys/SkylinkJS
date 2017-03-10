@@ -16,5 +16,6 @@ process.on('uncaughtException', function () {
   httpsServer.close();
 });
 
-console.log('http server: 8081 port on localhost');
-console.log('https server: 8082 port on localhost');
+console.log('http server: 8081 port on localhost\nhttps server: 8082 port on localhost');
+console.log('To play around with demos or do manual tests, go to ' +
+  'http://localhost:8081/demo\nhttps://localhost:8082/demo on browser to start');
