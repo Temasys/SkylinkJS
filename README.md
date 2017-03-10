@@ -126,7 +126,7 @@ Note that Bowser will not work in iOS ver `10.x` and above.
 
 
 ## Building the Temasys Web SDK Project
-> Before contributing, please read the [CONTRIBUTING.md README first)(CONTRIBUTING.md).
+> Before contributing, please read the [CONTRIBUTING.md README first](CONTRIBUTING.md).
 
 1. Clone the Temasys Web SDK Project: `git clone https://github.com/Temasys/SkylinkJS.git`
 2. Install Grunt and its command line tools: `npm install grunt grunt-cli -g`
