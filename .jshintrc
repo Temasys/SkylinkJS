@@ -27,6 +27,5 @@
   "maxlen": 150,
   "globals": {
     "Skylink": true
-  },
-  "reporterOutput": "publish/jshint-report"
+  }
 }
