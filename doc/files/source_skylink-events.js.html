@@ -445,6 +445,10 @@
                          * @param {Boolean} peerInfo.config.publishOnly The flag if Peer is publishing only stream but not receiving streams.
                          * @param {Boolean} peerInfo.config.receiveOnly The flag if Peer is receiving only streams but not publishing stream.
                          * @param {String} [peerInfo.parentId] The parent Peer ID that it is matched to for multi-streaming connections.
+                         * @param {Boolean} [peerInfo.connected] The flag if Peer ICE connection has been established successfully.
+                         *  &lt;small&gt;Defined only when &lt;code&gt;isSelf&lt;/code&gt; payload value is &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
+                         * @param {Boolean} [peerInfo.init] The flag if Peer connection has been created successfully.
+                         *  &lt;small&gt;Defined only when &lt;code&gt;isSelf&lt;/code&gt; payload value is &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
                          * @param {Boolean} isSelf The flag if Peer is User.
                          * @for Skylink
                          * @since 0.5.2
@@ -1309,6 +1313,9 @@
                          * @param {String} stats.connection.dataChannels.#channelName.currentStreamId The Peer connection
                          *   Datachannel connection current data streaming session ID.
                          *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there is currently no data streaming session on the Datachannel connection.&lt;/small&gt;
+                         * @param {JSON} stats.connection.constraints The constraints passed in when constructing the Peer connection object.
+                         * @param {JSON} stats.connection.optional The optional constraints passed in when constructing the Peer connection object.
+                         * @param {JSON} [stats.connection.sdpConstraints] The constraints passed in when creating Peer connection offer or answer.
                          * @param {Error} error The error object received.
                          *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;RETRIEVE_ERROR&lt;/code&gt;.&lt;/small&gt;
                          * @for Skylink

@@ -765,7 +765,10 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
         sending: { host: [], srflx: [], relay: [] },
         receiving: { host: [], srflx: [], relay: [] }
       }),
-      dataChannels: {}
+      dataChannels: {},
+      constraints: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].constraints : null,
+      optional: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].optional : null,
+      sdpConstraints: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].sdpConstraints : null
     },
     audio: {
       sending: {
@@ -1511,6 +1514,11 @@ Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, receiveOnly,
     return;
   }
 
+  self._peerConnStatus[targetMid] = {
+    connected: false,
+    init: false
+  };
+
   log.log([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
     peerBrowser: peerBrowser,
     receiveOnly: receiveOnly,
@@ -1526,6 +1534,7 @@ Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, receiveOnly,
     return;
   }
 
+  self._peerConnStatus[targetMid].init = true;
   self._peerConnections[targetMid].hasScreen = !!isSS;
 };
 
@@ -1814,6 +1823,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     constraints.certificates = [cert];
   }
 
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].constraints = constraints;
+    self._peerConnStatus[targetMid].optional = optional;
+  }
+
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
@@ -1934,6 +1948,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
       self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+    }
+
+    if (self._peerConnStatus[targetMid]) {
+      self._peerConnStatus[targetMid].connected = [self.ICE_CONNECTION_STATE.COMPLETED,
+        self.ICE_CONNECTION_STATE.CONNECTED].indexOf(iceConnectionState) > -1;
     }
 
     if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(

@@ -1164,4 +1164,14 @@ function Skylink() {
    * @since 0.6.18
    */
   this._bandwidthAdjuster = null;
+
+  /**
+   * Stores the Peer connection status.
+   * @attribute _peerConnStatus
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.19
+   */
+  this._peerConnStatus = {};
 }

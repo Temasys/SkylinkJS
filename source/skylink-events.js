@@ -361,6 +361,10 @@ var _eventsDocs = {
    * @param {Boolean} peerInfo.config.publishOnly The flag if Peer is publishing only stream but not receiving streams.
    * @param {Boolean} peerInfo.config.receiveOnly The flag if Peer is receiving only streams but not publishing stream.
    * @param {String} [peerInfo.parentId] The parent Peer ID that it is matched to for multi-streaming connections.
+   * @param {Boolean} [peerInfo.connected] The flag if Peer ICE connection has been established successfully.
+   *  <small>Defined only when <code>isSelf</code> payload value is <code>false</code>.</small>
+   * @param {Boolean} [peerInfo.init] The flag if Peer connection has been created successfully.
+   *  <small>Defined only when <code>isSelf</code> payload value is <code>false</code>.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
@@ -1225,6 +1229,9 @@ var _eventsDocs = {
    * @param {String} stats.connection.dataChannels.#channelName.currentStreamId The Peer connection
    *   Datachannel connection current data streaming session ID.
    *   <small>Defined as <code>null</code> when there is currently no data streaming session on the Datachannel connection.</small>
+   * @param {JSON} stats.connection.constraints The constraints passed in when constructing the Peer connection object.
+   * @param {JSON} stats.connection.optional The optional constraints passed in when constructing the Peer connection object.
+   * @param {JSON} [stats.connection.sdpConstraints] The constraints passed in when creating Peer connection offer or answer.
    * @param {Error} error The error object received.
    *   <small>Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</small>
    * @for Skylink

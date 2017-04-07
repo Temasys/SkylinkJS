@@ -194,6 +194,10 @@
                       
                         pc.endOfCandidates = false;
                       
+                        if (self._peerConnStatus[targetMid]) {
+                          self._peerConnStatus[targetMid].sdpConstraints = offerConstraints;
+                        }
+                      
                         pc.createOffer(function(offer) {
                           log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
                       
@@ -247,6 +251,15 @@
                           ((window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
                           ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
                           !!self._currentCodecSupport.video.h264 : true);
+                        var answerConstraints = window.webrtcDetectedBrowser === &#x27;edge&#x27; ? {
+                          offerToReceiveVideo: offerToReceiveVideo,
+                          offerToReceiveAudio: offerToReceiveAudio,
+                          voiceActivityDetection: self._voiceActivityDetection
+                        } : undefined;
+                      
+                        if (self._peerConnStatus[targetMid]) {
+                          self._peerConnStatus[targetMid].sdpConstraints = answerConstraints;
+                        }
                       
                         // No ICE restart constraints for createAnswer as it fails in chrome 48
                         // { iceRestart: true }
@@ -256,11 +269,7 @@
                         }, function(error) {
                           log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
                           self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-                        }, window.webrtcDetectedBrowser === &#x27;edge&#x27; ? {
-                          offerToReceiveVideo: offerToReceiveVideo,
-                          offerToReceiveAudio: offerToReceiveAudio,
-                          voiceActivityDetection: self._voiceActivityDetection
-                        } : undefined);
+                        }, answerConstraints);
                       };
                       
                       /**

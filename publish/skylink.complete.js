@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 20:41:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 21:06:05 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11592,7 +11592,7 @@ if (typeof window.require !== 'function') {
   AdapterJS.defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 20:41:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 21:06:05 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -12760,6 +12760,16 @@ function Skylink() {
    * @since 0.6.18
    */
   this._bandwidthAdjuster = null;
+
+  /**
+   * Stores the Peer connection status.
+   * @attribute _peerConnStatus
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.19
+   */
+  this._peerConnStatus = {};
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -17714,7 +17724,10 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
         sending: { host: [], srflx: [], relay: [] },
         receiving: { host: [], srflx: [], relay: [] }
       }),
-      dataChannels: {}
+      dataChannels: {},
+      constraints: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].constraints : null,
+      optional: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].optional : null,
+      sdpConstraints: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].sdpConstraints : null
     },
     audio: {
       sending: {
@@ -18460,6 +18473,11 @@ Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, receiveOnly,
     return;
   }
 
+  self._peerConnStatus[targetMid] = {
+    connected: false,
+    init: false
+  };
+
   log.log([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
     peerBrowser: peerBrowser,
     receiveOnly: receiveOnly,
@@ -18475,6 +18493,7 @@ Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, receiveOnly,
     return;
   }
 
+  self._peerConnStatus[targetMid].init = true;
   self._peerConnections[targetMid].hasScreen = !!isSS;
 };
 
@@ -18763,6 +18782,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     constraints.certificates = [cert];
   }
 
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].constraints = constraints;
+    self._peerConnStatus[targetMid].optional = optional;
+  }
+
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
@@ -18883,6 +18907,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
       self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+    }
+
+    if (self._peerConnStatus[targetMid]) {
+      self._peerConnStatus[targetMid].connected = [self.ICE_CONNECTION_STATE.COMPLETED,
+        self.ICE_CONNECTION_STATE.CONNECTED].indexOf(iceConnectionState) > -1;
     }
 
     if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
@@ -19395,6 +19424,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.settings.data = !!(this._dataChannels[peerId] && this._dataChannels[peerId].main &&
       this._dataChannels[peerId].main.channel &&
       this._dataChannels[peerId].main.channel.readyState === this.DATA_CHANNEL_STATE.OPEN);
+    peerInfo.connected = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].connected;
+    peerInfo.init = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].init;
 
   } else {
     peerInfo = {
@@ -19420,7 +19451,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         priorityWeight: this._peerPriorityWeight,
         receiveOnly: false,
         publishOnly: !!this._publishOnly
-      }
+      },
+      connected: null,
+      init: null
     };
 
     if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
@@ -19988,6 +20021,10 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
 
   pc.endOfCandidates = false;
 
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].sdpConstraints = offerConstraints;
+  }
+
   pc.createOffer(function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
 
@@ -20041,6 +20078,15 @@ Skylink.prototype._doAnswer = function(targetMid) {
     ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
     (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
     !!self._currentCodecSupport.video.h264 : true);
+  var answerConstraints = window.webrtcDetectedBrowser === 'edge' ? {
+    offerToReceiveVideo: offerToReceiveVideo,
+    offerToReceiveAudio: offerToReceiveAudio,
+    voiceActivityDetection: self._voiceActivityDetection
+  } : undefined;
+
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].sdpConstraints = answerConstraints;
+  }
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
@@ -20050,11 +20096,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }, function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  }, window.webrtcDetectedBrowser === 'edge' ? {
-    offerToReceiveVideo: offerToReceiveVideo,
-    offerToReceiveAudio: offerToReceiveAudio,
-    voiceActivityDetection: self._voiceActivityDetection
-  } : undefined);
+  }, answerConstraints);
 };
 
 /**
@@ -23382,6 +23424,10 @@ var _eventsDocs = {
    * @param {Boolean} peerInfo.config.publishOnly The flag if Peer is publishing only stream but not receiving streams.
    * @param {Boolean} peerInfo.config.receiveOnly The flag if Peer is receiving only streams but not publishing stream.
    * @param {String} [peerInfo.parentId] The parent Peer ID that it is matched to for multi-streaming connections.
+   * @param {Boolean} [peerInfo.connected] The flag if Peer ICE connection has been established successfully.
+   *  <small>Defined only when <code>isSelf</code> payload value is <code>false</code>.</small>
+   * @param {Boolean} [peerInfo.init] The flag if Peer connection has been created successfully.
+   *  <small>Defined only when <code>isSelf</code> payload value is <code>false</code>.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
@@ -24246,6 +24292,9 @@ var _eventsDocs = {
    * @param {String} stats.connection.dataChannels.#channelName.currentStreamId The Peer connection
    *   Datachannel connection current data streaming session ID.
    *   <small>Defined as <code>null</code> when there is currently no data streaming session on the Datachannel connection.</small>
+   * @param {JSON} stats.connection.constraints The constraints passed in when constructing the Peer connection object.
+   * @param {JSON} stats.connection.optional The optional constraints passed in when constructing the Peer connection object.
+   * @param {JSON} [stats.connection.sdpConstraints] The constraints passed in when creating Peer connection offer or answer.
    * @param {Error} error The error object received.
    *   <small>Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</small>
    * @for Skylink

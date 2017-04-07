@@ -209,6 +209,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.settings.data = !!(this._dataChannels[peerId] && this._dataChannels[peerId].main &&
       this._dataChannels[peerId].main.channel &&
       this._dataChannels[peerId].main.channel.readyState === this.DATA_CHANNEL_STATE.OPEN);
+    peerInfo.connected = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].connected;
+    peerInfo.init = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].init;
 
   } else {
     peerInfo = {
@@ -234,7 +236,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         priorityWeight: this._peerPriorityWeight,
         receiveOnly: false,
         publishOnly: !!this._publishOnly
-      }
+      },
+      connected: null,
+      init: null
     };
 
     if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {

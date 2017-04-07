@@ -849,7 +849,10 @@
                               sending: { host: [], srflx: [], relay: [] },
                               receiving: { host: [], srflx: [], relay: [] }
                             }),
-                            dataChannels: {}
+                            dataChannels: {},
+                            constraints: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].constraints : null,
+                            optional: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].optional : null,
+                            sdpConstraints: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].sdpConstraints : null
                           },
                           audio: {
                             sending: {
@@ -1595,6 +1598,11 @@
                           return;
                         }
                       
+                        self._peerConnStatus[targetMid] = {
+                          connected: false,
+                          init: false
+                        };
+                      
                         log.log([targetMid, null, null, &#x27;Starting the connection to peer. Options provided:&#x27;], {
                           peerBrowser: peerBrowser,
                           receiveOnly: receiveOnly,
@@ -1610,6 +1618,7 @@
                           return;
                         }
                       
+                        self._peerConnStatus[targetMid].init = true;
                         self._peerConnections[targetMid].hasScreen = !!isSS;
                       };
                       
@@ -1898,6 +1907,11 @@
                           constraints.certificates = [cert];
                         }
                       
+                        if (self._peerConnStatus[targetMid]) {
+                          self._peerConnStatus[targetMid].constraints = constraints;
+                          self._peerConnStatus[targetMid].optional = optional;
+                        }
+                      
                         // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
                         // using .urls feature
                         try {
@@ -2018,6 +2032,11 @@
                       
                           if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED &amp;&amp; self._enableIceTrickle) {
                             self._trigger(&#x27;iceConnectionState&#x27;, self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+                          }
+                      
+                          if (self._peerConnStatus[targetMid]) {
+                            self._peerConnStatus[targetMid].connected = [self.ICE_CONNECTION_STATE.COMPLETED,
+                              self.ICE_CONNECTION_STATE.CONNECTED].indexOf(iceConnectionState) &gt; -1;
                           }
                       
                           if (!self._hasMCU &amp;&amp; [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
