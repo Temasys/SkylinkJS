@@ -1903,11 +1903,11 @@
                         // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
                         // using .urls feature
                         try {
-                          pc = new RTCPeerConnection(constraints, optional);
-                          log.info([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Created peer connection -&gt;&#x27;], {
+                          log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Creating peer connection -&gt;&#x27;], {
                             constraints: constraints,
                             optional: optional
                           });
+                          pc = new RTCPeerConnection(constraints, optional);
                         } catch (error) {
                           log.error([targetMid, null, null, &#x27;Failed creating peer connection:&#x27;], error);
                           self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);

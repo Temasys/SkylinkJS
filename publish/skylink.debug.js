@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 17:46:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 18:39:07 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -7174,11 +7174,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
-    pc = new RTCPeerConnection(constraints, optional);
-    log.info([targetMid, 'RTCPeerConnection', null, 'Created peer connection ->'], {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Creating peer connection ->'], {
       constraints: constraints,
       optional: optional
     });
+    pc = new RTCPeerConnection(constraints, optional);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
