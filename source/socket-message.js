@@ -1096,7 +1096,7 @@ Skylink.prototype._enterHandler = function(message) {
         agent: userInfo.agent.name,
         version: userInfo.agent.version,
         os: userInfo.agent.os
-      }, false, false, message.receiveOnly, hasScreenshare);
+      }, message.receiveOnly, hasScreenshare);
 
       if (targetMid === 'MCU') {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
@@ -1386,7 +1386,7 @@ Skylink.prototype._welcomeHandler = function(message) {
         agent: userInfo.agent.name,
         version: userInfo.agent.version,
         os: userInfo.agent.os
-      }, false, false, message.receiveOnly, hasScreenshare);
+      }, message.receiveOnly, hasScreenshare);
 
       if (targetMid === 'MCU') {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);

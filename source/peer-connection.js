@@ -1504,27 +1504,25 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
+Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, receiveOnly, isSS) {
   var self = this;
-  if (self._peerConnections[targetMid] && !restartConn) {
+  if (self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Connection to peer has already been made']);
     return;
   }
+
   log.log([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
     peerBrowser: peerBrowser,
-    toOffer: toOffer,
     receiveOnly: receiveOnly,
     enableDataChannel: self._enableDataChannel
   });
 
   log.info('Adding peer', isSS);
 
-  if (!restartConn) {
-    self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS, cert);
-  }
+  self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS, cert);
 
   if (!self._peerConnections[targetMid]) {
-    log.error([targetMid, null, null, 'Failed creating the connection to peer']);
+    log.error([targetMid, null, null, 'Failed creating the connection to peer.']);
     return;
   }
 

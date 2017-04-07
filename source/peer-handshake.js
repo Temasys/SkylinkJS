@@ -41,7 +41,7 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  */
 Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var self = this;
-  var pc = self._peerConnections[targetMid];// || self._addPeer(targetMid, peerBrowser);
+  var pc = self._peerConnections[targetMid];
 
   log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
 

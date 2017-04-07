@@ -1180,7 +1180,7 @@
                               agent: userInfo.agent.name,
                               version: userInfo.agent.version,
                               os: userInfo.agent.os
-                            }, false, false, message.receiveOnly, hasScreenshare);
+                            }, message.receiveOnly, hasScreenshare);
                       
                             if (targetMid === &#x27;MCU&#x27;) {
                               log.info([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;MCU feature has been enabled&#x27;]);
@@ -1470,7 +1470,7 @@
                               agent: userInfo.agent.name,
                               version: userInfo.agent.version,
                               os: userInfo.agent.os
-                            }, false, false, message.receiveOnly, hasScreenshare);
+                            }, message.receiveOnly, hasScreenshare);
                       
                             if (targetMid === &#x27;MCU&#x27;) {
                               log.info([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;MCU feature has been enabled&#x27;]);

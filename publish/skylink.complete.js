@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 18:39:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 20:41:17 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11592,7 +11592,7 @@ if (typeof window.require !== 'function') {
   AdapterJS.defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 18:39:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 20:41:17 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -18453,27 +18453,25 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
+Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, receiveOnly, isSS) {
   var self = this;
-  if (self._peerConnections[targetMid] && !restartConn) {
+  if (self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Connection to peer has already been made']);
     return;
   }
+
   log.log([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
     peerBrowser: peerBrowser,
-    toOffer: toOffer,
     receiveOnly: receiveOnly,
     enableDataChannel: self._enableDataChannel
   });
 
   log.info('Adding peer', isSS);
 
-  if (!restartConn) {
-    self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS, cert);
-  }
+  self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS, cert);
 
   if (!self._peerConnections[targetMid]) {
-    log.error([targetMid, null, null, 'Failed creating the connection to peer']);
+    log.error([targetMid, null, null, 'Failed creating the connection to peer.']);
     return;
   }
 
@@ -19921,7 +19919,7 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  */
 Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var self = this;
-  var pc = self._peerConnections[targetMid];// || self._addPeer(targetMid, peerBrowser);
+  var pc = self._peerConnections[targetMid];
 
   log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
 
@@ -26178,7 +26176,7 @@ Skylink.prototype._enterHandler = function(message) {
         agent: userInfo.agent.name,
         version: userInfo.agent.version,
         os: userInfo.agent.os
-      }, false, false, message.receiveOnly, hasScreenshare);
+      }, message.receiveOnly, hasScreenshare);
 
       if (targetMid === 'MCU') {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
@@ -26468,7 +26466,7 @@ Skylink.prototype._welcomeHandler = function(message) {
         agent: userInfo.agent.name,
         version: userInfo.agent.version,
         os: userInfo.agent.os
-      }, false, false, message.receiveOnly, hasScreenshare);
+      }, message.receiveOnly, hasScreenshare);
 
       if (targetMid === 'MCU') {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);

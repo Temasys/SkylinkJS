@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 18:39:07 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 20:41:17 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -6859,27 +6859,25 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
+Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, receiveOnly, isSS) {
   var self = this;
-  if (self._peerConnections[targetMid] && !restartConn) {
+  if (self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Connection to peer has already been made']);
     return;
   }
+
   log.log([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
     peerBrowser: peerBrowser,
-    toOffer: toOffer,
     receiveOnly: receiveOnly,
     enableDataChannel: self._enableDataChannel
   });
 
   log.info('Adding peer', isSS);
 
-  if (!restartConn) {
-    self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS, cert);
-  }
+  self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS, cert);
 
   if (!self._peerConnections[targetMid]) {
-    log.error([targetMid, null, null, 'Failed creating the connection to peer']);
+    log.error([targetMid, null, null, 'Failed creating the connection to peer.']);
     return;
   }
 
@@ -8327,7 +8325,7 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  */
 Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var self = this;
-  var pc = self._peerConnections[targetMid];// || self._addPeer(targetMid, peerBrowser);
+  var pc = self._peerConnections[targetMid];
 
   log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
 
@@ -14584,7 +14582,7 @@ Skylink.prototype._enterHandler = function(message) {
         agent: userInfo.agent.name,
         version: userInfo.agent.version,
         os: userInfo.agent.os
-      }, false, false, message.receiveOnly, hasScreenshare);
+      }, message.receiveOnly, hasScreenshare);
 
       if (targetMid === 'MCU') {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
@@ -14874,7 +14872,7 @@ Skylink.prototype._welcomeHandler = function(message) {
         agent: userInfo.agent.name,
         version: userInfo.agent.version,
         os: userInfo.agent.os
-      }, false, false, message.receiveOnly, hasScreenshare);
+      }, message.receiveOnly, hasScreenshare);
 
       if (targetMid === 'MCU') {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
