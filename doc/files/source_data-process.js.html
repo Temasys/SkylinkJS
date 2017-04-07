@@ -38,41 +38,35 @@
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul id="api-list" class="nav navbar-nav navbar-right">
-  <li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
-    <ul class="dropdown-menu" role="menu">
-      <li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
-      <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
-      <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
-    </ul>
-  </li>
-  
-    <li><a href="../classes/Skylink.html">Documentation</a></li>
-  
-  <!--<li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
-    <ul class="dropdown-menu" role="menu">
-      
-        <li><a href="../classes/Skylink.html">Skylink</a></li>
-      
-    </ul>
-  </li>-->
-  <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
-  <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
-  <!--<li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
-    <ul class="dropdown-menu" role="menu">
-      <li><a href="#api-modules">View all Modules</a></li>
-      
-    </ul>
-  </li>-->
-</ul>
-<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
-  <div id="api-tabview-filter" class="form-group">
-    <input type="search" id="api-filter" placeholder="Type to filter APIs">
-  </div>
-</form>-->
-      </div><!--/.navbar-collapse -->
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
+              <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
+              <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
+            </ul>
+          </li>
+            <li><a href="../classes/Skylink.html">Documentation</a></li>
+          <!--<li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="../classes/Skylink.html">Skylink</a></li>
+            </ul>
+          </li>-->
+          <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
+          <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
+          <!--<li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="#api-modules">View all Modules</a></li>
+            </ul>
+          </li>-->
+        </ul>
+        <!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
+          <div id="api-tabview-filter" class="form-group">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+          </div>
+        </form>-->      </div><!--/.navbar-collapse -->
     </div>
   </nav>
   <div id="bd" class="yui3-g">
@@ -81,230 +75,228 @@
 
       </div>
       <div class="yui3-u-3-4">
-          
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content content-main">
                       <h1 class="file-heading">File: source/data-process.js</h1>
-
-<div class="file">
-    <pre class="code prettyprint linenums">
-/**
- * The list of supported data transfer data types.
- * @attribute DATA_TRANSFER_DATA_TYPE
- * @param {String} BINARY_STRING &lt;small&gt;Value &lt;code&gt;&quot;binaryString&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of data transfer data type when Blob binary data chunks encoded to Base64 encoded string are
- *   sent or received over the Datachannel connection for the data transfer session.
- *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
- *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
- * @param {String} ARRAY_BUFFER  &lt;small&gt;Value &lt;code&gt;&quot;arrayBuffer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of data transfer data type when ArrayBuffer binary data chunks are
- *   sent or received over the Datachannel connection for the data transfer session.
- *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
- *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
- * @param {String} BLOB          &lt;small&gt;Value &lt;code&gt;&quot;blob&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of data transfer data type when Blob binary data chunks are
- *   sent or received over the Datachannel connection for the data transfer session.
- *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
- *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
- * @param {String} STRING        &lt;small&gt;Value &lt;code&gt;&quot;string&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of data transfer data type when only string data chunks are
- *   sent or received over the Datachannel connection for the data transfer session.
- *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
-  BINARY_STRING: &#x27;binaryString&#x27;,
-  ARRAY_BUFFER: &#x27;arrayBuffer&#x27;,
-  BLOB: &#x27;blob&#x27;,
-  STRING: &#x27;string&#x27;
-};
-
-/**
- * Stores the data chunk size for Blob transfers.
- * @attribute _CHUNK_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._CHUNK_FILE_SIZE = 49152;
-
-/**
- * Stores the data chunk size for Blob transfers transferring from/to
- *   Firefox browsers due to limitation tested in the past in some PCs (linx predominatly).
- * @attribute _MOZ_CHUNK_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
-
-/**
- * Stores the data chunk size for binary Blob transfers.
- * @attribute _BINARY_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._BINARY_FILE_SIZE = 65456;
-
-/**
- * Stores the data chunk size for binary Blob transfers.
- * @attribute _MOZ_BINARY_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._MOZ_BINARY_FILE_SIZE = 16384;
-
-/**
- * Stores the data chunk size for data URI string transfers.
- * @attribute _CHUNK_DATAURL_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
-
-/**
- * Function that converts Base64 string into Blob object.
- * This is referenced from devnull69@stackoverflow.com #6850276.
- * @method _base64ToBlob
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._base64ToBlob = function(dataURL) {
-  var byteString = atob(dataURL);
-  // write the bytes of the string to an ArrayBuffer
-  var ab = new ArrayBuffer(byteString.length);
-  var ia = new Uint8Array(ab);
-  for (var j = 0; j &lt; byteString.length; j++) {
-    ia[j] = byteString.charCodeAt(j);
-  }
-  // write the ArrayBuffer to a blob, and you&#x27;re done
-  return new Blob([ab]);
-};
-
-/**
- * Function that converts a Blob object into Base64 string.
- * @method _blobToBase64
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._blobToBase64 = function(data, callback) {
-  var fileReader = new FileReader();
-  fileReader.onload = function() {
-    // Load Blob as dataurl base64 string
-    var base64BinaryString = fileReader.result.split(&#x27;,&#x27;)[1];
-    callback(base64BinaryString);
-  };
-  fileReader.readAsDataURL(data);
-};
-
-/**
- * Function that converts a Blob object into ArrayBuffer object.
- * @method _blobToArrayBuffer
- * @private
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype._blobToArrayBuffer = function(data, callback) {
-  var self = this;
-  var fileReader = new FileReader();
-  fileReader.onload = function() {
-    // Load Blob as dataurl base64 string
-    if (self._isUsingPlugin) {
-      callback(new Int8Array(fileReader.result));
-    } else {
-      callback(fileReader.result);
-    }
-  };
-  fileReader.readAsArrayBuffer(data);
-};
-
-/**
- * Function that chunks Blob object based on the data chunk size provided.
- * If provided Blob object size is lesser than or equals to the chunk size, it should return an array
- *   of length of &lt;code&gt;1&lt;/code&gt;.
- * @method _chunkBlobData
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._chunkBlobData = function(blob, chunkSize) {
-  var chunksArray = [];
-  var startCount = 0;
-  var endCount = 0;
-  var blobByteSize = blob.size;
-
-  if (blobByteSize &gt; chunkSize) {
-    // File Size greater than Chunk size
-    while ((blobByteSize - 1) &gt; endCount) {
-      endCount = startCount + chunkSize;
-      chunksArray.push(blob.slice(startCount, endCount));
-      startCount += chunkSize;
-    }
-    if ((blobByteSize - (startCount + 1)) &gt; 0) {
-      chunksArray.push(blob.slice(startCount, blobByteSize - 1));
-    }
-  } else {
-    // File Size below Chunk size
-    chunksArray.push(blob);
-  }
-  return chunksArray;
-};
-
-/**
- * Function that chunks large string into string chunks based on the data chunk size provided.
- * If provided string length is lesser than or equals to the chunk size, it should return an array
- *   of length of &lt;code&gt;1&lt;/code&gt;.
- * @method _chunkDataURL
- * @private
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
-  var outputStr = dataURL; //encodeURIComponent(dataURL);
-  var dataURLArray = [];
-  var startCount = 0;
-  var endCount = 0;
-  var dataByteSize = dataURL.size || dataURL.length;
-
-  if (dataByteSize &gt; chunkSize) {
-    // File Size greater than Chunk size
-    while ((dataByteSize - 1) &gt; endCount) {
-      endCount = startCount + chunkSize;
-      dataURLArray.push(outputStr.slice(startCount, endCount));
-      startCount += chunkSize;
-    }
-    if ((dataByteSize - (startCount + 1)) &gt; 0) {
-      chunksArray.push(outputStr.slice(startCount, dataByteSize - 1));
-    }
-  } else {
-    // File Size below Chunk size
-    dataURLArray.push(outputStr);
-  }
-
-  return dataURLArray;
-};
-    </pre>
-</div>
-
+                      
+                      <div class="file">
+                          <pre class="code prettyprint linenums">
+                      /**
+                       * The list of supported data transfer data types.
+                       * @attribute DATA_TRANSFER_DATA_TYPE
+                       * @param {String} BINARY_STRING &lt;small&gt;Value &lt;code&gt;&quot;binaryString&quot;&lt;/code&gt;&lt;/small&gt;
+                       *   The value of data transfer data type when Blob binary data chunks encoded to Base64 encoded string are
+                       *   sent or received over the Datachannel connection for the data transfer session.
+                       *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
+                       *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
+                       * @param {String} ARRAY_BUFFER  &lt;small&gt;Value &lt;code&gt;&quot;arrayBuffer&quot;&lt;/code&gt;&lt;/small&gt;
+                       *   The value of data transfer data type when ArrayBuffer binary data chunks are
+                       *   sent or received over the Datachannel connection for the data transfer session.
+                       *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
+                       *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
+                       * @param {String} BLOB          &lt;small&gt;Value &lt;code&gt;&quot;blob&quot;&lt;/code&gt;&lt;/small&gt;
+                       *   The value of data transfer data type when Blob binary data chunks are
+                       *   sent or received over the Datachannel connection for the data transfer session.
+                       *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
+                       *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
+                       * @param {String} STRING        &lt;small&gt;Value &lt;code&gt;&quot;string&quot;&lt;/code&gt;&lt;/small&gt;
+                       *   The value of data transfer data type when only string data chunks are
+                       *   sent or received over the Datachannel connection for the data transfer session.
+                       *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
+                       * @type JSON
+                       * @readOnly
+                       * @for Skylink
+                       * @since 0.1.0
+                       */
+                      Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
+                        BINARY_STRING: &#x27;binaryString&#x27;,
+                        ARRAY_BUFFER: &#x27;arrayBuffer&#x27;,
+                        BLOB: &#x27;blob&#x27;,
+                        STRING: &#x27;string&#x27;
+                      };
+                      
+                      /**
+                       * Stores the data chunk size for Blob transfers.
+                       * @attribute _CHUNK_FILE_SIZE
+                       * @type Number
+                       * @private
+                       * @readOnly
+                       * @for Skylink
+                       * @since 0.5.2
+                       */
+                      Skylink.prototype._CHUNK_FILE_SIZE = 49152;
+                      
+                      /**
+                       * Stores the data chunk size for Blob transfers transferring from/to
+                       *   Firefox browsers due to limitation tested in the past in some PCs (linx predominatly).
+                       * @attribute _MOZ_CHUNK_FILE_SIZE
+                       * @type Number
+                       * @private
+                       * @readOnly
+                       * @for Skylink
+                       * @since 0.5.2
+                       */
+                      Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
+                      
+                      /**
+                       * Stores the data chunk size for binary Blob transfers.
+                       * @attribute _BINARY_FILE_SIZE
+                       * @type Number
+                       * @private
+                       * @readOnly
+                       * @for Skylink
+                       * @since 0.6.16
+                       */
+                      Skylink.prototype._BINARY_FILE_SIZE = 65456;
+                      
+                      /**
+                       * Stores the data chunk size for binary Blob transfers.
+                       * @attribute _MOZ_BINARY_FILE_SIZE
+                       * @type Number
+                       * @private
+                       * @readOnly
+                       * @for Skylink
+                       * @since 0.6.16
+                       */
+                      Skylink.prototype._MOZ_BINARY_FILE_SIZE = 16384;
+                      
+                      /**
+                       * Stores the data chunk size for data URI string transfers.
+                       * @attribute _CHUNK_DATAURL_SIZE
+                       * @type Number
+                       * @private
+                       * @readOnly
+                       * @for Skylink
+                       * @since 0.5.2
+                       */
+                      Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
+                      
+                      /**
+                       * Function that converts Base64 string into Blob object.
+                       * This is referenced from devnull69@stackoverflow.com #6850276.
+                       * @method _base64ToBlob
+                       * @private
+                       * @for Skylink
+                       * @since 0.1.0
+                       */
+                      Skylink.prototype._base64ToBlob = function(dataURL) {
+                        var byteString = atob(dataURL);
+                        // write the bytes of the string to an ArrayBuffer
+                        var ab = new ArrayBuffer(byteString.length);
+                        var ia = new Uint8Array(ab);
+                        for (var j = 0; j &lt; byteString.length; j++) {
+                          ia[j] = byteString.charCodeAt(j);
+                        }
+                        // write the ArrayBuffer to a blob, and you&#x27;re done
+                        return new Blob([ab]);
+                      };
+                      
+                      /**
+                       * Function that converts a Blob object into Base64 string.
+                       * @method _blobToBase64
+                       * @private
+                       * @for Skylink
+                       * @since 0.1.0
+                       */
+                      Skylink.prototype._blobToBase64 = function(data, callback) {
+                        var fileReader = new FileReader();
+                        fileReader.onload = function() {
+                          // Load Blob as dataurl base64 string
+                          var base64BinaryString = fileReader.result.split(&#x27;,&#x27;)[1];
+                          callback(base64BinaryString);
+                        };
+                        fileReader.readAsDataURL(data);
+                      };
+                      
+                      /**
+                       * Function that converts a Blob object into ArrayBuffer object.
+                       * @method _blobToArrayBuffer
+                       * @private
+                       * @for Skylink
+                       * @since 0.1.0
+                       */
+                      Skylink.prototype._blobToArrayBuffer = function(data, callback) {
+                        var self = this;
+                        var fileReader = new FileReader();
+                        fileReader.onload = function() {
+                          // Load Blob as dataurl base64 string
+                          if (self._isUsingPlugin) {
+                            callback(new Int8Array(fileReader.result));
+                          } else {
+                            callback(fileReader.result);
+                          }
+                        };
+                        fileReader.readAsArrayBuffer(data);
+                      };
+                      
+                      /**
+                       * Function that chunks Blob object based on the data chunk size provided.
+                       * If provided Blob object size is lesser than or equals to the chunk size, it should return an array
+                       *   of length of &lt;code&gt;1&lt;/code&gt;.
+                       * @method _chunkBlobData
+                       * @private
+                       * @for Skylink
+                       * @since 0.5.2
+                       */
+                      Skylink.prototype._chunkBlobData = function(blob, chunkSize) {
+                        var chunksArray = [];
+                        var startCount = 0;
+                        var endCount = 0;
+                        var blobByteSize = blob.size;
+                      
+                        if (blobByteSize &gt; chunkSize) {
+                          // File Size greater than Chunk size
+                          while ((blobByteSize - 1) &gt; endCount) {
+                            endCount = startCount + chunkSize;
+                            chunksArray.push(blob.slice(startCount, endCount));
+                            startCount += chunkSize;
+                          }
+                          if ((blobByteSize - (startCount + 1)) &gt; 0) {
+                            chunksArray.push(blob.slice(startCount, blobByteSize - 1));
+                          }
+                        } else {
+                          // File Size below Chunk size
+                          chunksArray.push(blob);
+                        }
+                        return chunksArray;
+                      };
+                      
+                      /**
+                       * Function that chunks large string into string chunks based on the data chunk size provided.
+                       * If provided string length is lesser than or equals to the chunk size, it should return an array
+                       *   of length of &lt;code&gt;1&lt;/code&gt;.
+                       * @method _chunkDataURL
+                       * @private
+                       * @for Skylink
+                       * @since 0.6.1
+                       */
+                      Skylink.prototype._chunkDataURL = function(dataURL, chunkSize) {
+                        var outputStr = dataURL; //encodeURIComponent(dataURL);
+                        var dataURLArray = [];
+                        var startCount = 0;
+                        var endCount = 0;
+                        var dataByteSize = dataURL.size || dataURL.length;
+                      
+                        if (dataByteSize &gt; chunkSize) {
+                          // File Size greater than Chunk size
+                          while ((dataByteSize - 1) &gt; endCount) {
+                            endCount = startCount + chunkSize;
+                            dataURLArray.push(outputStr.slice(startCount, endCount));
+                            startCount += chunkSize;
+                          }
+                          if ((dataByteSize - (startCount + 1)) &gt; 0) {
+                            chunksArray.push(outputStr.slice(startCount, dataByteSize - 1));
+                          }
+                        } else {
+                          // File Size below Chunk size
+                          dataURLArray.push(outputStr);
+                        }
+                      
+                        return dataURLArray;
+                      };
+                          </pre>
+                      </div>
                   </div>
               </div>
           </div>

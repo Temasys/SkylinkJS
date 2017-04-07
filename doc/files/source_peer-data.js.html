@@ -38,41 +38,35 @@
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul id="api-list" class="nav navbar-nav navbar-right">
-  <li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
-    <ul class="dropdown-menu" role="menu">
-      <li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
-      <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
-      <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
-    </ul>
-  </li>
-  
-    <li><a href="../classes/Skylink.html">Documentation</a></li>
-  
-  <!--<li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
-    <ul class="dropdown-menu" role="menu">
-      
-        <li><a href="../classes/Skylink.html">Skylink</a></li>
-      
-    </ul>
-  </li>-->
-  <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
-  <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
-  <!--<li class="dropdown">
-    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
-    <ul class="dropdown-menu" role="menu">
-      <li><a href="#api-modules">View all Modules</a></li>
-      
-    </ul>
-  </li>-->
-</ul>
-<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
-  <div id="api-tabview-filter" class="form-group">
-    <input type="search" id="api-filter" placeholder="Type to filter APIs">
-  </div>
-</form>-->
-      </div><!--/.navbar-collapse -->
+          <li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
+              <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
+              <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
+            </ul>
+          </li>
+            <li><a href="../classes/Skylink.html">Documentation</a></li>
+          <!--<li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+                <li><a href="../classes/Skylink.html">Skylink</a></li>
+            </ul>
+          </li>-->
+          <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
+          <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
+          <!--<li class="dropdown">
+            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
+            <ul class="dropdown-menu" role="menu">
+              <li><a href="#api-modules">View all Modules</a></li>
+            </ul>
+          </li>-->
+        </ul>
+        <!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
+          <div id="api-tabview-filter" class="form-group">
+            <input type="search" id="api-filter" placeholder="Type to filter APIs">
+          </div>
+        </form>-->      </div><!--/.navbar-collapse -->
     </div>
   </nav>
   <div id="bd" class="yui3-g">
@@ -81,735 +75,733 @@
 
       </div>
       <div class="yui3-u-3-4">
-          
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content content-main">
                       <h1 class="file-heading">File: source/peer-data.js</h1>
-
-<div class="file">
-    <pre class="code prettyprint linenums">
-/**
- * Function that overwrites the User current custom data.
- * @method setUserData
- * @param {JSON|String} userData The updated custom data.
- * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
- *   &lt;li&gt;Updates User custom data. &lt;ol&gt;
- *   &lt;li&gt;If User is in Room: &lt;ol&gt;
- *   &lt;li&gt;&lt;a href=&quot;#event_peerUpdated&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers with parameter payload
- *   &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
- * @example
- *   // Example 1: Set/Update User custom data before joinRoom()
- *   var userData = &quot;beforejoin&quot;;
- *
- *   skylinkDemo.setUserData(userData);
- *
- *   skylinkDemo.joinRoom(function (error, success) {
- *      if (error) return;
- *      if (success.peerInfo.userData === userData) {
- *        console.log(&quot;User data is sent&quot;);
- *      }
- *   });
- *
- *   // Example 2: Update User custom data after joinRoom()
- *   var userData = &quot;afterjoin&quot;;
- *
- *   skylinkDemo.joinRoom(function (error, success) {
- *     if (error) return;
- *     skylinkDemo.setUserData(userData);
- *     if (skylinkDemo.getPeerInfo().userData === userData) {
- *       console.log(&quot;User data is updated and sent&quot;);
- *     }
- *   });
- * @for Skylink
- * @since 0.5.5
- */
-Skylink.prototype.setUserData = function(userData) {
-  var self = this;
-  var updatedUserData = &#x27;&#x27;;
-
-  if (!(typeof userData === &#x27;undefined&#x27; || userData === null)) {
-    updatedUserData = userData;
-  }
-
-  this._userData = updatedUserData;
-
-  if (self._inRoom) {
-    log.log(&#x27;Updated userData -&gt; &#x27;, updatedUserData);
-    self._sendChannelMessage({
-      type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
-      mid: self._user.sid,
-      rid: self._room.id,
-      userData: updatedUserData,
-      stamp: (new Date()).getTime()
-    });
-    self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
-  } else {
-    log.warn(&#x27;User is not in the room. Broadcast of updated information will be dropped&#x27;);
-  }
-};
-
-/**
- * Function that returns the User / Peer current custom data.
- * @method getUserData
- * @param {String} [peerId] The Peer ID to return the current custom data from.
- * - When not provided or that the Peer ID is does not exists, it will return
- *   the User current custom data.
- * @return {JSON|String} The User / Peer current custom data.
- * @example
- *   // Example 1: Get Peer current custom data
- *   var peerUserData = skylinkDemo.getUserData(peerId);
- *
- *   // Example 2: Get User current custom data
- *   var userUserData = skylinkDemo.getUserData();
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype.getUserData = function(peerId) {
-  if (peerId &amp;&amp; this._peerInformations[peerId]) {
-    var userData = this._peerInformations[peerId].userData;
-    if (!(userData !== null &amp;&amp; typeof userData === &#x27;undefined&#x27;)) {
-      userData = &#x27;&#x27;;
-    }
-    return userData;
-  }
-  return this._userData;
-};
-
-/**
- * Function that returns the User / Peer current session information.
- * @method getPeerInfo
- * @param {String} [peerId] The Peer ID to return the current session information from.
- * - When not provided or that the Peer ID is does not exists, it will return
- *   the User current session information.
- * @return {JSON} The User / Peer current session information.
- *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
- *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
- * @example
- *   // Example 1: Get Peer current session information
- *   var peerPeerInfo = skylinkDemo.getPeerInfo(peerId);
- *
- *   // Example 2: Get User current session information
- *   var userPeerInfo = skylinkDemo.getPeerInfo();
- * @for Skylink
- * @since 0.4.0
- */
-Skylink.prototype.getPeerInfo = function(peerId) {
-  var peerInfo = null;
-
-  if (typeof peerId === &#x27;string&#x27; &amp;&amp; typeof this._peerInformations[peerId] === &#x27;object&#x27;) {
-    peerInfo = clone(this._peerInformations[peerId]);
-    peerInfo.room = clone(this._selectedRoom);
-    peerInfo.settings.bandwidth = peerInfo.settings.bandwidth || {};
-    peerInfo.settings.googleXBandwidth = peerInfo.settings.googleXBandwidth || {};
-
-    if (!(typeof peerInfo.settings.video === &#x27;boolean&#x27; || (peerInfo.settings.video &amp;&amp;
-      typeof peerInfo.settings.video === &#x27;object&#x27;))) {
-      peerInfo.settings.video = false;
-      peerInfo.mediaStatus.audioMuted = true;
-    }
-
-    if (!(typeof peerInfo.settings.audio === &#x27;boolean&#x27; || (peerInfo.settings.audio &amp;&amp;
-      typeof peerInfo.settings.audio === &#x27;object&#x27;))) {
-      peerInfo.settings.audio = false;
-      peerInfo.mediaStatus.audioMuted = true;
-    }
-
-    if (typeof peerInfo.mediaStatus.audioMuted !== &#x27;boolean&#x27;) {
-      peerInfo.mediaStatus.audioMuted = true;
-    }
-
-    if (typeof peerInfo.mediaStatus.videoMuted !== &#x27;boolean&#x27;) {
-      peerInfo.mediaStatus.videoMuted = true;
-    }
-
-    if (peerInfo.settings.maxBandwidth) {
-      peerInfo.settings.bandwidth = clone(peerInfo.settings.maxBandwidth);
-      delete peerInfo.settings.maxBandwidth;
-    }
-
-    if (peerInfo.settings.video &amp;&amp; typeof peerInfo.settings.video === &#x27;object&#x27; &amp;&amp;
-      peerInfo.settings.video.customSettings &amp;&amp; typeof peerInfo.settings.video.customSettings === &#x27;object&#x27;) {
-      if (peerInfo.settings.video.customSettings.frameRate) {
-        peerInfo.settings.video.frameRate = clone(peerInfo.settings.video.customSettings.frameRate);
-      }
-      if (peerInfo.settings.video.customSettings.facingMode) {
-        peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
-      }
-      if (peerInfo.settings.video.customSettings.width) {
-        peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
-        peerInfo.settings.video.resolution.width = clone(peerInfo.settings.video.customSettings.width);
-      }
-      if (peerInfo.settings.video.customSettings.height) {
-        peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
-        peerInfo.settings.video.resolution.height = clone(peerInfo.settings.video.customSettings.height);
-      }
-      if (peerInfo.settings.video.customSettings.facingMode) {
-        peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
-      }
-    }
-
-    if (peerInfo.settings.audio &amp;&amp; typeof peerInfo.settings.audio === &#x27;object&#x27;) {
-      peerInfo.settings.audio.stereo = peerInfo.settings.audio.stereo === true;
-    }
-
-    if (!(peerInfo.userData !== null &amp;&amp; typeof peerInfo.userData !== &#x27;undefined&#x27;)) {
-      peerInfo.userData = &#x27;&#x27;;
-    }
-
-    peerInfo.parentId = peerInfo.parentId || null;
-
-    if (peerId === &#x27;MCU&#x27;) {
-      peerInfo.config.receiveOnly = true;
-      peerInfo.config.publishOnly = false;
-    } else if (this._hasMCU) {
-      peerInfo.config.receiveOnly = false;
-      peerInfo.config.publishOnly = true;
-    }
-
-    // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-    if (window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name === &#x27;edge&#x27; ?
-    // If User is IE/safari and does not have H264 support, remove video support
-      [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; !this._currentCodecSupport.video.h264 :
-    // If User is Edge and Peer is not and no H264 support, remove video support
-      window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name !== &#x27;edge&#x27; &amp;&amp; !this._currentCodecSupport.video.h264) {
-      peerInfo.settings.video = false;
-      peerInfo.mediaStatus.videoMuted = true;
-    }
-
-    if (!this._sdpSettings.direction.audio.receive) {
-      peerInfo.settings.audio = false;
-      peerInfo.mediaStatus.audioMuted = true;
-    }
-
-    if (!this._sdpSettings.direction.video.receive) {
-      peerInfo.settings.video = false;
-      peerInfo.mediaStatus.videoMuted = true;
-    }
-
-    if (!this._sdpSettings.connection.audio) {
-      peerInfo.settings.audio = false;
-      peerInfo.mediaStatus.audioMuted = true;
-    }
-
-    if (!this._sdpSettings.connection.video) {
-      peerInfo.settings.video = false;
-      peerInfo.mediaStatus.videoMuted = true;
-    }
-
-    peerInfo.settings.data = !!(this._dataChannels[peerId] &amp;&amp; this._dataChannels[peerId].main &amp;&amp;
-      this._dataChannels[peerId].main.channel &amp;&amp;
-      this._dataChannels[peerId].main.channel.readyState === this.DATA_CHANNEL_STATE.OPEN);
-
-  } else {
-    peerInfo = {
-      userData: clone(this._userData),
-      settings: {
-        audio: false,
-        video: false
-      },
-      mediaStatus: clone(this._streamsMutedSettings),
-      agent: {
-        name: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
-        os: window.navigator.platform,
-        pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-        SMProtocolVersion: this.SMProtocolVersion,
-        DTProtocolVersion: this.DTProtocolVersion
-      },
-      room: clone(this._selectedRoom),
-      config: {
-        enableDataChannel: this._enableDataChannel,
-        enableIceTrickle: this._enableIceTrickle,
-        enableIceRestart: this._enableIceRestart,
-        priorityWeight: this._peerPriorityWeight,
-        receiveOnly: false,
-        publishOnly: !!this._publishOnly
-      }
-    };
-
-    if (!(peerInfo.userData !== null &amp;&amp; typeof peerInfo.userData !== &#x27;undefined&#x27;)) {
-      peerInfo.userData = &#x27;&#x27;;
-    }
-
-    if (this._streams.screenshare) {
-      peerInfo.settings = clone(this._streams.screenshare.settings);
-    } else if (this._streams.userMedia) {
-      peerInfo.settings = clone(this._streams.userMedia.settings);
-    }
-
-    peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
-    peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
-    peerInfo.parentId = this._parentId ? this._parentId : null;
-    peerInfo.config.receiveOnly = !peerInfo.settings.video &amp;&amp; !peerInfo.settings.audio;
-    peerInfo.settings.data = this._enableDataChannel &amp;&amp; this._sdpSettings.connection.data;
-
-    if (peerInfo.settings.audio &amp;&amp; typeof peerInfo.settings.audio === &#x27;object&#x27;) {
-      // Override the settings.audio.usedtx
-      if (typeof this._codecParams.audio.opus.stereo === &#x27;boolean&#x27;) {
-        peerInfo.settings.audio.stereo = this._codecParams.audio.opus.stereo;
-      }
-      // Override the settings.audio.usedtx
-      if (typeof this._codecParams.audio.opus.usedtx === &#x27;boolean&#x27;) {
-        peerInfo.settings.audio.usedtx = this._codecParams.audio.opus.usedtx;
-      }
-      // Override the settings.audio.maxplaybackrate
-      if (typeof this._codecParams.audio.opus.maxplaybackrate === &#x27;number&#x27;) {
-        peerInfo.settings.audio.maxplaybackrate = this._codecParams.audio.opus.maxplaybackrate;
-      }
-      // Override the settings.audio.useinbandfec
-      if (typeof this._codecParams.audio.opus.useinbandfec === &#x27;boolean&#x27;) {
-        peerInfo.settings.audio.useinbandfec = this._codecParams.audio.opus.useinbandfec;
-      }
-    }
-  }
-
-  if (!peerInfo.settings.audio) {
-    peerInfo.mediaStatus.audioMuted = true;
-  }
-
-  if (!peerInfo.settings.video) {
-    peerInfo.mediaStatus.videoMuted = true;
-  }
-
-  if (!peerInfo.settings.audio &amp;&amp; !peerInfo.settings.video) {
-    peerInfo.config.receiveOnly = true;
-    peerInfo.config.publishOnly = false;
-  }
-
-  return peerInfo;
-};
-
-/**
- * Function that gets the list of connected Peers in the Room.
- * @method getPeersInRoom
- * @return {JSON} The list of connected Peers. &lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;#peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Peer information.
- *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
- *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt; except there is
- *   the &lt;code&gt;isSelf&lt;/code&gt; flag that determines if Peer is User or not.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;
- * @example
- *   // Example 1: Get the list of currently connected Peers in the same Room
- *   var peers = skylinkDemo.getPeersInRoom();
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype.getPeersInRoom = function() {
-  var listOfPeersInfo = {};
-  var listOfPeers = Object.keys(this._peerInformations);
-
-  for (var i = 0; i &lt; listOfPeers.length; i++) {
-    listOfPeersInfo[listOfPeers[i]] = clone(this.getPeerInfo(listOfPeers[i]));
-    listOfPeersInfo[listOfPeers[i]].isSelf = false;
-  }
-
-  if (this._user &amp;&amp; this._user.sid) {
-    listOfPeersInfo[this._user.sid] = clone(this.getPeerInfo());
-    listOfPeersInfo[this._user.sid].isSelf = true;
-  }
-
-  return listOfPeersInfo;
-};
-
-/**
- * Function that gets the list of connected Peers Streams in the Room.
- * @method getPeersStream
- * @return {JSON} The list of Peers Stream. &lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;#peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Peer Stream.&lt;/p&gt;&lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;stream&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;MediaStream&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Stream object.&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;streamId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Stream ID.&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Boolean&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The flag if Peer is User.&lt;/p&gt;&lt;/li&gt;
- *   &lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
- * @example
- *   // Example 1: Get the list of current Peers Streams in the same Room
- *   var streams = skylinkDemo.getPeersStream();
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype.getPeersStream = function() {
-  var listOfPeersStreams = {};
-  var listOfPeers = Object.keys(this._peerConnections);
-
-  for (var i = 0; i &lt; listOfPeers.length; i++) {
-    var stream = null;
-
-    if (this._peerConnections[listOfPeers[i]] &amp;&amp;
-      this._peerConnections[listOfPeers[i]].remoteDescription &amp;&amp;
-      this._peerConnections[listOfPeers[i]].remoteDescription.sdp &amp;&amp;
-      (this._sdpSettings.direction.audio.receive || this._sdpSettings.direction.video.receive)) {
-      var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
-
-      for (var j = 0; j &lt; streams.length; j++) {
-        if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
-          &#x27;msid:&#x27; + (streams[j].id || streams[j].label)) &gt; 0) {
-          stream = streams[j];
-          break;
-        }
-      }
-    }
-
-    listOfPeersStreams[listOfPeers[i]] = {
-      streamId: stream ? stream.id || stream.label || null : null,
-      stream: stream,
-      isSelf: false
-    };
-  }
-
-  if (this._user &amp;&amp; this._user.sid) {
-    var selfStream = null;
-
-    if (this._streams.screenshare &amp;&amp; this._streams.screenshare.stream) {
-      selfStream = this._streams.screenshare.stream;
-    } else if (this._streams.userMedia &amp;&amp; this._streams.userMedia.stream) {
-      selfStream = this._streams.userMedia.stream;
-    }
-
-    listOfPeersStreams[this._user.sid] = {
-      streamId: selfStream ? selfStream.id || selfStream.label || null : null,
-      stream: selfStream,
-      isSelf: true
-    };
-  }
-
-  return listOfPeersStreams;
-};
-
-/**
- * Function that gets the current list of connected Peers Datachannel connections in the Room.
- * @method getPeersDatachannels
- * @return {JSON} The list of Peers Stream. &lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;#peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Peer Datachannels information.&lt;/p&gt;&lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;#channelName&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel information.&lt;/p&gt;&lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;channelName&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel ID..&lt;/p&gt;&lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;channelType&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel type.
- *   [Rel: Skylink.DATA_CHANNEL_TYPE]&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;channelProp&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel property.&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;currentTransferId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel connection
- *   current progressing transfer session. &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there is
- *   currently no transfer session progressing on the Datachannel connection.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;currentStreamId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel connection
- *   current data streaming session ID. &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there is currently
- *   no data streaming session on the Datachannel connection.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;readyState&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel connection readyState.
- *   [Rel: Skylink.DATA_CHANNEL_STATE]&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;bufferedAmountLow&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Number&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel buffered amount.&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;bufferedAmountLowThreshold&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Number&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel
- *   buffered amount threshold.&lt;/p&gt;&lt;/li&gt;
- *   &lt;/p&gt;&lt;/li&gt;&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
- * @example
- *   // Example 1: Get the list of current Peers Datachannels in the same Room
- *   var channels = skylinkDemo.getPeersDatachannels();
- * @for Skylink
- * @since 0.6.18
- */
-Skylink.prototype.getPeersDatachannels = function() {
-  var listOfPeersDatachannels = {};
-  var listOfPeers = Object.keys(this._peerConnections);
-
-  for (var i = 0; i &lt; listOfPeers.length; i++) {
-    listOfPeersDatachannels[listOfPeers[i]] = {};
-
-    if (this._dataChannels[listOfPeers[i]]) {
-      for (var channelProp in this._dataChannels[listOfPeers[i]]) {
-        if (this._dataChannels[listOfPeers[i]].hasOwnProperty(channelProp) &amp;&amp;
-          this._dataChannels[listOfPeers[i]][channelProp]) {
-          var channel = this._dataChannels[listOfPeers[i]][channelProp];
-          listOfPeersDatachannels[listOfPeers[i]][channel.channelName] = this._getDataChannelBuffer(listOfPeers[i], channelProp);
-          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelName = channel.channelName;
-          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelType = channel.channelType;
-          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelProp = channelProp;
-          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].currentTransferId = channel.transferId;
-          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].currentStreamId = channel.streamId;
-          listOfPeersDatachannels[listOfPeers[i]][channel.channelName].readyState = channel.channel ?
-            channel.channel.readyState : self.DATA_CHANNEL_STATE.CREATE_ERROR;
-        }
-      }
-    }
-  }
-
-  return listOfPeersDatachannels;
-};
-
-/**
- * Function that gets the list of current data transfers.
- * @method getCurrentDataTransfers
- * @return {JSON} The list of Peers Stream. &lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;#transferId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data transfer session.&lt;/p&gt;&lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;transferInfo&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data transfer information.
- *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
- *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;
- *   except without the &lt;code&gt;data&lt;/code&gt; property.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The sender Peer ID.&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Boolean&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The flag if Peer is User.&lt;/p&gt;&lt;/li&gt;
- *   &lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
- * @example
- *   // Example 1: Get the list of current data transfers in the same Room
- *   var currentTransfers = skylinkDemo.getCurrentDataTransfers();
- * @for Skylink
- * @since 0.6.18
- */
-Skylink.prototype.getCurrentDataTransfers = function() {
-  var listOfDataTransfers = {};
-
-  if (!(this._user &amp;&amp; this._user.sid)) {
-    return {};
-  }
-
-  for (var prop in this._dataTransfers) {
-    if (this._dataTransfers.hasOwnProperty(prop) &amp;&amp; this._dataTransfers[prop]) {
-      listOfDataTransfers[prop] = {
-        transferInfo: this._getTransferInfo(prop, this._user.sid, true, true, true),
-        isSelf: this._dataTransfers[prop].senderPeerId === this._user.sid,
-        peerId: this._dataTransfers[prop].senderPeerId || this._user.sid
-      };
-    }
-  }
-
-  return listOfDataTransfers;
-};
-
-/**
- * Function that gets the list of current data streaming sessions.
- * @method getCurrentDataStreamsSession
- * @return {JSON} The list of Peers Stream. &lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;#streamId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data streaming session.&lt;/p&gt;&lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;streamInfo&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data streaming information.
- *   &lt;small&gt;Object signature matches the &lt;code&gt;streamInfo&lt;/code&gt; parameter payload received in the
- *   &lt;a href=&quot;#event_dataStreamState&quot;&gt;&lt;code&gt;dataStreamState&lt;/code&gt; event&lt;/a&gt;
- *   except without the &lt;code&gt;chunk&lt;/code&gt; amd &lt;code&gt;chunkSize&lt;/code&gt; property.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The sender Peer ID.&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Boolean&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The flag if Peer is User.&lt;/p&gt;&lt;/li&gt;
- *   &lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
- * @example
- *   // Example 1: Get the list of current data streaming sessions in the same Room
- *   var currentDataStreams = skylinkDemo.getCurrentDataStreamsSession();
- * @for Skylink
- * @since 0.6.18
- */
-Skylink.prototype.getCurrentDataStreamsSession = function() {
-  var listOfDataStreams = {};
-
-  if (!(this._user &amp;&amp; this._user.sid)) {
-    return {};
-  }
-
-  for (var prop in this._dataStreams) {
-    if (this._dataStreams.hasOwnProperty(prop) &amp;&amp; this._dataStreams[prop]) {
-      listOfDataStreams[prop] = {
-        streamInfo: {
-          chunkType: this._dataStreams[prop].sessionChunkType === &#x27;string&#x27; ? this.DATA_TRANSFER_DATA_TYPE.STRING :
-            this.DATA_TRANSFER_DATA_TYPE.BLOB,
-          isPrivate: this._dataStreams[prop].isPrivate,
-          isStringStream: this._dataStreams[prop].sessionChunkType === &#x27;string&#x27;,
-          senderPeerId: this._dataStreams[prop].senderPeerId
-        },
-        isSelf: this._dataStreams[prop].senderPeerId === this._user.sid,
-        peerId: this._dataStreams[prop].senderPeerId || this._user.sid
-      };
-    }
-  }
-
-  return listOfDataStreams;
-};
-
-/**
- * Function that gets the list of current custom Peer settings sent and set.
- * @method getPeerCustomSettings
- * @return {JSON} The list of Peers custom settings sent and set. &lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;#peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Peer settings sent and set.&lt;/p&gt;&lt;ul&gt;
- *   &lt;li&gt;&lt;code&gt;settings&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The custom Peer settings.
- *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo.settings&lt;/code&gt; parameter payload received in the
- *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
- *   &lt;li&gt;&lt;code&gt;mediaStatus&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The custom Peer Stream muted settings.
- *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo.mediaStatus&lt;/code&gt; parameter payload received in the
- *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
- * @example
- *   // Example 1: Get the list of current Peer custom settings
- *   var currentPeerSettings = skylinkDemo.getPeersCustomSettings();
- * @for Skylink
- * @since 0.6.18
- */
-Skylink.prototype.getPeersCustomSettings = function () {
-  var self = this;
-  var customSettingsList = {};
-
-  for (var peerId in self._peerInformations) {
-    if (self._peerInformations.hasOwnProperty(peerId) &amp;&amp; self._peerInformations[peerId]) {
-      customSettingsList[peerId] = {
-        settings: {
-          audio: false,
-          video: false,
-          bandwidth: clone(self._streamsBandwidthSettings.bAS),
-          googleXBandwidth: clone(self._streamsBandwidthSettings.googleX)
-        },
-        mediaStatus: {
-          audioMuted: true,
-          videoMuted: true
-        }
-      };
-
-      if (self._peerConnections[peerId] &amp;&amp; self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-        var streams = self._peerConnections[peerId].getLocalStreams();
-
-        for (var s = 0; s &lt; streams.length; s++) {
-          if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream &amp;&amp; (streams[s].id ||
-            streams[s].label) === (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
-            customSettingsList[peerId].settings.audio = clone(self._streams.screenshare.settings.audio);
-            customSettingsList[peerId].settings.video = clone(self._streams.screenshare.settings.video);
-            customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
-            break;
-          } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream &amp;&amp; (streams[s].id ||
-            streams[s].label) === (self._streams.userMedia.stream.id ||
-            self._streams.userMedia.stream.label)) {
-            customSettingsList[peerId].settings.audio = clone(self._streams.userMedia.settings.audio);
-            customSettingsList[peerId].settings.video = clone(self._streams.userMedia.settings.video);
-            customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
-            break;
-          } else if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
-            customSettingsList[peerId].settings.audio = clone(self._streams.userMedia.settings.audio);
-            customSettingsList[peerId].settings.video = clone(self._streams.userMedia.settings.video);
-            customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
-            if (streams[s].getAudioTracks().length === 0) {
-              customSettingsList[peerId].settings.audio = false;
-              customSettingsList[peerId].mediaStatus.audioMuted = true;
-            }
-            if (streams[s].getVideoTracks().length === 0) {
-              customSettingsList[peerId].settings.video = false;
-              customSettingsList[peerId].mediaStatus.videoMuted = true;
-            }
-          }
-        }
-      }
-
-      if (self._peerCustomConfigs[peerId]) {
-        if (self._peerCustomConfigs[peerId].bandwidth &amp;&amp;
-          typeof self._peerCustomConfigs[peerId].bandwidth === &#x27;object&#x27;) {
-          if (typeof self._peerCustomConfigs[peerId].bandwidth.audio === &#x27;number&#x27;) {
-            customSettingsList[peerId].settings.bandwidth.audio = self._peerCustomConfigs[peerId].bandwidth.audio;
-          }
-          if (typeof self._peerCustomConfigs[peerId].bandwidth.video === &#x27;number&#x27;) {
-            customSettingsList[peerId].settings.bandwidth.video = self._peerCustomConfigs[peerId].bandwidth.video;
-          }
-          if (typeof self._peerCustomConfigs[peerId].bandwidth.data === &#x27;number&#x27;) {
-            customSettingsList[peerId].settings.bandwidth.data = self._peerCustomConfigs[peerId].bandwidth.data;
-          }
-        }
-        if (self._peerCustomConfigs[peerId].googleXBandwidth &amp;&amp;
-          typeof self._peerCustomConfigs[peerId].googleXBandwidth === &#x27;object&#x27;) {
-          if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.min === &#x27;number&#x27;) {
-            customSettingsList[peerId].settings.googleXBandwidth.min = self._peerCustomConfigs[peerId].googleXBandwidth.min;
-          }
-          if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.max === &#x27;number&#x27;) {
-            customSettingsList[peerId].settings.googleXBandwidth.max = self._peerCustomConfigs[peerId].googleXBandwidth.max;
-          }
-        }
-      }
-
-      var agent = ((self._peerInformations[peerId] || {}).agent || {}).name || &#x27;&#x27;;
-
-      // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-      if (customSettingsList[peerId].settings.video &amp;&amp; (peerId ?
-        (window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp; agent.name === &#x27;edge&#x27; ?
-      // If User is IE/safari and does not have H264 support, remove video support
-        [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; !self._currentCodecSupport.video.h264 :
-      // If User is Edge and Peer is not and no H264 support, remove video support
-        window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; agent.name !== &#x27;edge&#x27; &amp;&amp; !self._currentCodecSupport.video.h264) :
-      // If broadcast ENTER message and User is Edge and has no H264 support
-        window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; !self._currentCodecSupport.video.h264)) {
-        customSettingsList[peerId].settings.video = false;
-        customSettingsList[peerId].mediaStatus.videoMuted = true;
-      }
-
-      customSettingsList[peerId].settings.audio = !self._sdpSettings.connection.audio ? false :
-        customSettingsList[peerId].settings.audio;
-      customSettingsList[peerId].settings.video = !self._sdpSettings.connection.video ? false :
-        customSettingsList[peerId].settings.video;
-      customSettingsList[peerId].mediaStatus.audioMuted = !self._sdpSettings.connection.audio ? true :
-        customSettingsList[peerId].mediaStatus.audioMuted;
-      customSettingsList[peerId].mediaStatus.videoMuted = !self._sdpSettings.connection.video ? true :
-        customSettingsList[peerId].mediaStatus.videoMuted;
-    }
-  }
-
-  return customSettingsList;
-};
-
-/**
- * Function that returns the User session information to be sent to Peers.
- * @method _getUserInfo
- * @private
- * @for Skylink
- * @since 0.4.0
- */
-Skylink.prototype._getUserInfo = function(peerId) {
-  var userInfo = clone(this.getPeerInfo());
-  var peerInfo = clone(this.getPeerInfo(peerId));
-
-  // Adhere to SM protocol without breaking the other SDKs.
-  if (userInfo.settings.video &amp;&amp; typeof userInfo.settings.video === &#x27;object&#x27;) {
-    userInfo.settings.video.customSettings = {};
-
-    if (userInfo.settings.video.frameRate &amp;&amp; typeof userInfo.settings.video.frameRate === &#x27;object&#x27;) {
-      userInfo.settings.video.customSettings.frameRate = clone(userInfo.settings.video.frameRate);
-      userInfo.settings.video.frameRate = -1;
-    }
-
-    if (userInfo.settings.video.facingMode &amp;&amp; typeof userInfo.settings.video.facingMode === &#x27;object&#x27;) {
-      userInfo.settings.video.customSettings.facingMode = clone(userInfo.settings.video.facingMode);
-      userInfo.settings.video.facingMode = &#x27;-1&#x27;;
-    }
-
-    if (userInfo.settings.video.resolution &amp;&amp; typeof userInfo.settings.video.resolution === &#x27;object&#x27;) {
-      if (userInfo.settings.video.resolution.width &amp;&amp; typeof userInfo.settings.video.resolution.width === &#x27;object&#x27;) {
-        userInfo.settings.video.customSettings.width = clone(userInfo.settings.video.width);
-        userInfo.settings.video.resolution.width = -1;
-      }
-
-      if (userInfo.settings.video.resolution.height &amp;&amp; typeof userInfo.settings.video.resolution.height === &#x27;object&#x27;) {
-        userInfo.settings.video.customSettings.height = clone(userInfo.settings.video.height);
-        userInfo.settings.video.resolution.height = -1;
-      }
-    }
-  }
-
-  if (userInfo.settings.bandwidth) {
-    userInfo.settings.maxBandwidth = clone(userInfo.settings.bandwidth);
-    delete userInfo.settings.bandwidth;
-  }
-
-  // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-  if (peerId ? (window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name === &#x27;edge&#x27; ?
-  // If User is IE/safari and does not have H264 support, remove video support
-    [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; !this._currentCodecSupport.video.h264 :
-  // If User is Edge and Peer is not and no H264 support, remove video support
-    window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name !== &#x27;edge&#x27; &amp;&amp; !this._currentCodecSupport.video.h264) :
-  // If broadcast ENTER message and User is Edge and has no H264 support
-    window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; !this._currentCodecSupport.video.h264) {
-    userInfo.settings.video = false;
-    userInfo.mediaStatus.videoMuted = true;
-  }
-
-  if (!this._sdpSettings.connection.audio) {
-    userInfo.settings.audio = false;
-    userInfo.mediaStatus.audioMuted = true;
-  }
-
-  if (!this._sdpSettings.connection.video) {
-    userInfo.settings.video = false;
-    userInfo.mediaStatus.videoMuted = true;
-  }
-
-  delete userInfo.agent;
-  delete userInfo.room;
-  delete userInfo.config;
-  delete userInfo.parentId;
-  delete userInfo.settings.data;
-  return userInfo;
-};
-
-    </pre>
-</div>
-
+                      
+                      <div class="file">
+                          <pre class="code prettyprint linenums">
+                      /**
+                       * Function that overwrites the User current custom data.
+                       * @method setUserData
+                       * @param {JSON|String} userData The updated custom data.
+                       * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+                       *   &lt;li&gt;Updates User custom data. &lt;ol&gt;
+                       *   &lt;li&gt;If User is in Room: &lt;ol&gt;
+                       *   &lt;li&gt;&lt;a href=&quot;#event_peerUpdated&quot;&gt;&lt;code&gt;peerUpdated&lt;/code&gt; event&lt;/a&gt; triggers with parameter payload
+                       *   &lt;code&gt;isSelf&lt;/code&gt; value as &lt;code&gt;true&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
+                       * @example
+                       *   // Example 1: Set/Update User custom data before joinRoom()
+                       *   var userData = &quot;beforejoin&quot;;
+                       *
+                       *   skylinkDemo.setUserData(userData);
+                       *
+                       *   skylinkDemo.joinRoom(function (error, success) {
+                       *      if (error) return;
+                       *      if (success.peerInfo.userData === userData) {
+                       *        console.log(&quot;User data is sent&quot;);
+                       *      }
+                       *   });
+                       *
+                       *   // Example 2: Update User custom data after joinRoom()
+                       *   var userData = &quot;afterjoin&quot;;
+                       *
+                       *   skylinkDemo.joinRoom(function (error, success) {
+                       *     if (error) return;
+                       *     skylinkDemo.setUserData(userData);
+                       *     if (skylinkDemo.getPeerInfo().userData === userData) {
+                       *       console.log(&quot;User data is updated and sent&quot;);
+                       *     }
+                       *   });
+                       * @for Skylink
+                       * @since 0.5.5
+                       */
+                      Skylink.prototype.setUserData = function(userData) {
+                        var self = this;
+                        var updatedUserData = &#x27;&#x27;;
+                      
+                        if (!(typeof userData === &#x27;undefined&#x27; || userData === null)) {
+                          updatedUserData = userData;
+                        }
+                      
+                        this._userData = updatedUserData;
+                      
+                        if (self._inRoom) {
+                          log.log(&#x27;Updated userData -&gt; &#x27;, updatedUserData);
+                          self._sendChannelMessage({
+                            type: self._SIG_MESSAGE_TYPE.UPDATE_USER,
+                            mid: self._user.sid,
+                            rid: self._room.id,
+                            userData: updatedUserData,
+                            stamp: (new Date()).getTime()
+                          });
+                          self._trigger(&#x27;peerUpdated&#x27;, self._user.sid, self.getPeerInfo(), true);
+                        } else {
+                          log.warn(&#x27;User is not in the room. Broadcast of updated information will be dropped&#x27;);
+                        }
+                      };
+                      
+                      /**
+                       * Function that returns the User / Peer current custom data.
+                       * @method getUserData
+                       * @param {String} [peerId] The Peer ID to return the current custom data from.
+                       * - When not provided or that the Peer ID is does not exists, it will return
+                       *   the User current custom data.
+                       * @return {JSON|String} The User / Peer current custom data.
+                       * @example
+                       *   // Example 1: Get Peer current custom data
+                       *   var peerUserData = skylinkDemo.getUserData(peerId);
+                       *
+                       *   // Example 2: Get User current custom data
+                       *   var userUserData = skylinkDemo.getUserData();
+                       * @for Skylink
+                       * @since 0.5.10
+                       */
+                      Skylink.prototype.getUserData = function(peerId) {
+                        if (peerId &amp;&amp; this._peerInformations[peerId]) {
+                          var userData = this._peerInformations[peerId].userData;
+                          if (!(userData !== null &amp;&amp; typeof userData === &#x27;undefined&#x27;)) {
+                            userData = &#x27;&#x27;;
+                          }
+                          return userData;
+                        }
+                        return this._userData;
+                      };
+                      
+                      /**
+                       * Function that returns the User / Peer current session information.
+                       * @method getPeerInfo
+                       * @param {String} [peerId] The Peer ID to return the current session information from.
+                       * - When not provided or that the Peer ID is does not exists, it will return
+                       *   the User current session information.
+                       * @return {JSON} The User / Peer current session information.
+                       *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+                       *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;
+                       * @example
+                       *   // Example 1: Get Peer current session information
+                       *   var peerPeerInfo = skylinkDemo.getPeerInfo(peerId);
+                       *
+                       *   // Example 2: Get User current session information
+                       *   var userPeerInfo = skylinkDemo.getPeerInfo();
+                       * @for Skylink
+                       * @since 0.4.0
+                       */
+                      Skylink.prototype.getPeerInfo = function(peerId) {
+                        var peerInfo = null;
+                      
+                        if (typeof peerId === &#x27;string&#x27; &amp;&amp; typeof this._peerInformations[peerId] === &#x27;object&#x27;) {
+                          peerInfo = clone(this._peerInformations[peerId]);
+                          peerInfo.room = clone(this._selectedRoom);
+                          peerInfo.settings.bandwidth = peerInfo.settings.bandwidth || {};
+                          peerInfo.settings.googleXBandwidth = peerInfo.settings.googleXBandwidth || {};
+                      
+                          if (!(typeof peerInfo.settings.video === &#x27;boolean&#x27; || (peerInfo.settings.video &amp;&amp;
+                            typeof peerInfo.settings.video === &#x27;object&#x27;))) {
+                            peerInfo.settings.video = false;
+                            peerInfo.mediaStatus.audioMuted = true;
+                          }
+                      
+                          if (!(typeof peerInfo.settings.audio === &#x27;boolean&#x27; || (peerInfo.settings.audio &amp;&amp;
+                            typeof peerInfo.settings.audio === &#x27;object&#x27;))) {
+                            peerInfo.settings.audio = false;
+                            peerInfo.mediaStatus.audioMuted = true;
+                          }
+                      
+                          if (typeof peerInfo.mediaStatus.audioMuted !== &#x27;boolean&#x27;) {
+                            peerInfo.mediaStatus.audioMuted = true;
+                          }
+                      
+                          if (typeof peerInfo.mediaStatus.videoMuted !== &#x27;boolean&#x27;) {
+                            peerInfo.mediaStatus.videoMuted = true;
+                          }
+                      
+                          if (peerInfo.settings.maxBandwidth) {
+                            peerInfo.settings.bandwidth = clone(peerInfo.settings.maxBandwidth);
+                            delete peerInfo.settings.maxBandwidth;
+                          }
+                      
+                          if (peerInfo.settings.video &amp;&amp; typeof peerInfo.settings.video === &#x27;object&#x27; &amp;&amp;
+                            peerInfo.settings.video.customSettings &amp;&amp; typeof peerInfo.settings.video.customSettings === &#x27;object&#x27;) {
+                            if (peerInfo.settings.video.customSettings.frameRate) {
+                              peerInfo.settings.video.frameRate = clone(peerInfo.settings.video.customSettings.frameRate);
+                            }
+                            if (peerInfo.settings.video.customSettings.facingMode) {
+                              peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
+                            }
+                            if (peerInfo.settings.video.customSettings.width) {
+                              peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+                              peerInfo.settings.video.resolution.width = clone(peerInfo.settings.video.customSettings.width);
+                            }
+                            if (peerInfo.settings.video.customSettings.height) {
+                              peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+                              peerInfo.settings.video.resolution.height = clone(peerInfo.settings.video.customSettings.height);
+                            }
+                            if (peerInfo.settings.video.customSettings.facingMode) {
+                              peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
+                            }
+                          }
+                      
+                          if (peerInfo.settings.audio &amp;&amp; typeof peerInfo.settings.audio === &#x27;object&#x27;) {
+                            peerInfo.settings.audio.stereo = peerInfo.settings.audio.stereo === true;
+                          }
+                      
+                          if (!(peerInfo.userData !== null &amp;&amp; typeof peerInfo.userData !== &#x27;undefined&#x27;)) {
+                            peerInfo.userData = &#x27;&#x27;;
+                          }
+                      
+                          peerInfo.parentId = peerInfo.parentId || null;
+                      
+                          if (peerId === &#x27;MCU&#x27;) {
+                            peerInfo.config.receiveOnly = true;
+                            peerInfo.config.publishOnly = false;
+                          } else if (this._hasMCU) {
+                            peerInfo.config.receiveOnly = false;
+                            peerInfo.config.publishOnly = true;
+                          }
+                      
+                          // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
+                          if (window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name === &#x27;edge&#x27; ?
+                          // If User is IE/safari and does not have H264 support, remove video support
+                            [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; !this._currentCodecSupport.video.h264 :
+                          // If User is Edge and Peer is not and no H264 support, remove video support
+                            window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name !== &#x27;edge&#x27; &amp;&amp; !this._currentCodecSupport.video.h264) {
+                            peerInfo.settings.video = false;
+                            peerInfo.mediaStatus.videoMuted = true;
+                          }
+                      
+                          if (!this._sdpSettings.direction.audio.receive) {
+                            peerInfo.settings.audio = false;
+                            peerInfo.mediaStatus.audioMuted = true;
+                          }
+                      
+                          if (!this._sdpSettings.direction.video.receive) {
+                            peerInfo.settings.video = false;
+                            peerInfo.mediaStatus.videoMuted = true;
+                          }
+                      
+                          if (!this._sdpSettings.connection.audio) {
+                            peerInfo.settings.audio = false;
+                            peerInfo.mediaStatus.audioMuted = true;
+                          }
+                      
+                          if (!this._sdpSettings.connection.video) {
+                            peerInfo.settings.video = false;
+                            peerInfo.mediaStatus.videoMuted = true;
+                          }
+                      
+                          peerInfo.settings.data = !!(this._dataChannels[peerId] &amp;&amp; this._dataChannels[peerId].main &amp;&amp;
+                            this._dataChannels[peerId].main.channel &amp;&amp;
+                            this._dataChannels[peerId].main.channel.readyState === this.DATA_CHANNEL_STATE.OPEN);
+                      
+                        } else {
+                          peerInfo = {
+                            userData: clone(this._userData),
+                            settings: {
+                              audio: false,
+                              video: false
+                            },
+                            mediaStatus: clone(this._streamsMutedSettings),
+                            agent: {
+                              name: window.webrtcDetectedBrowser,
+                              version: window.webrtcDetectedVersion,
+                              os: window.navigator.platform,
+                              pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+                              SMProtocolVersion: this.SMProtocolVersion,
+                              DTProtocolVersion: this.DTProtocolVersion
+                            },
+                            room: clone(this._selectedRoom),
+                            config: {
+                              enableDataChannel: this._enableDataChannel,
+                              enableIceTrickle: this._enableIceTrickle,
+                              enableIceRestart: this._enableIceRestart,
+                              priorityWeight: this._peerPriorityWeight,
+                              receiveOnly: false,
+                              publishOnly: !!this._publishOnly
+                            }
+                          };
+                      
+                          if (!(peerInfo.userData !== null &amp;&amp; typeof peerInfo.userData !== &#x27;undefined&#x27;)) {
+                            peerInfo.userData = &#x27;&#x27;;
+                          }
+                      
+                          if (this._streams.screenshare) {
+                            peerInfo.settings = clone(this._streams.screenshare.settings);
+                          } else if (this._streams.userMedia) {
+                            peerInfo.settings = clone(this._streams.userMedia.settings);
+                          }
+                      
+                          peerInfo.settings.bandwidth = clone(this._streamsBandwidthSettings.bAS);
+                          peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
+                          peerInfo.parentId = this._parentId ? this._parentId : null;
+                          peerInfo.config.receiveOnly = !peerInfo.settings.video &amp;&amp; !peerInfo.settings.audio;
+                          peerInfo.settings.data = this._enableDataChannel &amp;&amp; this._sdpSettings.connection.data;
+                      
+                          if (peerInfo.settings.audio &amp;&amp; typeof peerInfo.settings.audio === &#x27;object&#x27;) {
+                            // Override the settings.audio.usedtx
+                            if (typeof this._codecParams.audio.opus.stereo === &#x27;boolean&#x27;) {
+                              peerInfo.settings.audio.stereo = this._codecParams.audio.opus.stereo;
+                            }
+                            // Override the settings.audio.usedtx
+                            if (typeof this._codecParams.audio.opus.usedtx === &#x27;boolean&#x27;) {
+                              peerInfo.settings.audio.usedtx = this._codecParams.audio.opus.usedtx;
+                            }
+                            // Override the settings.audio.maxplaybackrate
+                            if (typeof this._codecParams.audio.opus.maxplaybackrate === &#x27;number&#x27;) {
+                              peerInfo.settings.audio.maxplaybackrate = this._codecParams.audio.opus.maxplaybackrate;
+                            }
+                            // Override the settings.audio.useinbandfec
+                            if (typeof this._codecParams.audio.opus.useinbandfec === &#x27;boolean&#x27;) {
+                              peerInfo.settings.audio.useinbandfec = this._codecParams.audio.opus.useinbandfec;
+                            }
+                          }
+                        }
+                      
+                        if (!peerInfo.settings.audio) {
+                          peerInfo.mediaStatus.audioMuted = true;
+                        }
+                      
+                        if (!peerInfo.settings.video) {
+                          peerInfo.mediaStatus.videoMuted = true;
+                        }
+                      
+                        if (!peerInfo.settings.audio &amp;&amp; !peerInfo.settings.video) {
+                          peerInfo.config.receiveOnly = true;
+                          peerInfo.config.publishOnly = false;
+                        }
+                      
+                        return peerInfo;
+                      };
+                      
+                      /**
+                       * Function that gets the list of connected Peers in the Room.
+                       * @method getPeersInRoom
+                       * @return {JSON} The list of connected Peers. &lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;#peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Peer information.
+                       *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo&lt;/code&gt; parameter payload received in the
+                       *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt; except there is
+                       *   the &lt;code&gt;isSelf&lt;/code&gt; flag that determines if Peer is User or not.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;
+                       * @example
+                       *   // Example 1: Get the list of currently connected Peers in the same Room
+                       *   var peers = skylinkDemo.getPeersInRoom();
+                       * @for Skylink
+                       * @since 0.6.16
+                       */
+                      Skylink.prototype.getPeersInRoom = function() {
+                        var listOfPeersInfo = {};
+                        var listOfPeers = Object.keys(this._peerInformations);
+                      
+                        for (var i = 0; i &lt; listOfPeers.length; i++) {
+                          listOfPeersInfo[listOfPeers[i]] = clone(this.getPeerInfo(listOfPeers[i]));
+                          listOfPeersInfo[listOfPeers[i]].isSelf = false;
+                        }
+                      
+                        if (this._user &amp;&amp; this._user.sid) {
+                          listOfPeersInfo[this._user.sid] = clone(this.getPeerInfo());
+                          listOfPeersInfo[this._user.sid].isSelf = true;
+                        }
+                      
+                        return listOfPeersInfo;
+                      };
+                      
+                      /**
+                       * Function that gets the list of connected Peers Streams in the Room.
+                       * @method getPeersStream
+                       * @return {JSON} The list of Peers Stream. &lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;#peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Peer Stream.&lt;/p&gt;&lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;stream&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;MediaStream&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Stream object.&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;streamId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Stream ID.&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Boolean&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The flag if Peer is User.&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
+                       * @example
+                       *   // Example 1: Get the list of current Peers Streams in the same Room
+                       *   var streams = skylinkDemo.getPeersStream();
+                       * @for Skylink
+                       * @since 0.6.16
+                       */
+                      Skylink.prototype.getPeersStream = function() {
+                        var listOfPeersStreams = {};
+                        var listOfPeers = Object.keys(this._peerConnections);
+                      
+                        for (var i = 0; i &lt; listOfPeers.length; i++) {
+                          var stream = null;
+                      
+                          if (this._peerConnections[listOfPeers[i]] &amp;&amp;
+                            this._peerConnections[listOfPeers[i]].remoteDescription &amp;&amp;
+                            this._peerConnections[listOfPeers[i]].remoteDescription.sdp &amp;&amp;
+                            (this._sdpSettings.direction.audio.receive || this._sdpSettings.direction.video.receive)) {
+                            var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
+                      
+                            for (var j = 0; j &lt; streams.length; j++) {
+                              if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
+                                &#x27;msid:&#x27; + (streams[j].id || streams[j].label)) &gt; 0) {
+                                stream = streams[j];
+                                break;
+                              }
+                            }
+                          }
+                      
+                          listOfPeersStreams[listOfPeers[i]] = {
+                            streamId: stream ? stream.id || stream.label || null : null,
+                            stream: stream,
+                            isSelf: false
+                          };
+                        }
+                      
+                        if (this._user &amp;&amp; this._user.sid) {
+                          var selfStream = null;
+                      
+                          if (this._streams.screenshare &amp;&amp; this._streams.screenshare.stream) {
+                            selfStream = this._streams.screenshare.stream;
+                          } else if (this._streams.userMedia &amp;&amp; this._streams.userMedia.stream) {
+                            selfStream = this._streams.userMedia.stream;
+                          }
+                      
+                          listOfPeersStreams[this._user.sid] = {
+                            streamId: selfStream ? selfStream.id || selfStream.label || null : null,
+                            stream: selfStream,
+                            isSelf: true
+                          };
+                        }
+                      
+                        return listOfPeersStreams;
+                      };
+                      
+                      /**
+                       * Function that gets the current list of connected Peers Datachannel connections in the Room.
+                       * @method getPeersDatachannels
+                       * @return {JSON} The list of Peers Stream. &lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;#peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Peer Datachannels information.&lt;/p&gt;&lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;#channelName&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel information.&lt;/p&gt;&lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;channelName&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel ID..&lt;/p&gt;&lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;channelType&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel type.
+                       *   [Rel: Skylink.DATA_CHANNEL_TYPE]&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;channelProp&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel property.&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;currentTransferId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel connection
+                       *   current progressing transfer session. &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there is
+                       *   currently no transfer session progressing on the Datachannel connection.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;currentStreamId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel connection
+                       *   current data streaming session ID. &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there is currently
+                       *   no data streaming session on the Datachannel connection.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;readyState&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel connection readyState.
+                       *   [Rel: Skylink.DATA_CHANNEL_STATE]&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;bufferedAmountLow&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Number&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel buffered amount.&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;bufferedAmountLowThreshold&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Number&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Datachannel
+                       *   buffered amount threshold.&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;/p&gt;&lt;/li&gt;&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
+                       * @example
+                       *   // Example 1: Get the list of current Peers Datachannels in the same Room
+                       *   var channels = skylinkDemo.getPeersDatachannels();
+                       * @for Skylink
+                       * @since 0.6.18
+                       */
+                      Skylink.prototype.getPeersDatachannels = function() {
+                        var listOfPeersDatachannels = {};
+                        var listOfPeers = Object.keys(this._peerConnections);
+                      
+                        for (var i = 0; i &lt; listOfPeers.length; i++) {
+                          listOfPeersDatachannels[listOfPeers[i]] = {};
+                      
+                          if (this._dataChannels[listOfPeers[i]]) {
+                            for (var channelProp in this._dataChannels[listOfPeers[i]]) {
+                              if (this._dataChannels[listOfPeers[i]].hasOwnProperty(channelProp) &amp;&amp;
+                                this._dataChannels[listOfPeers[i]][channelProp]) {
+                                var channel = this._dataChannels[listOfPeers[i]][channelProp];
+                                listOfPeersDatachannels[listOfPeers[i]][channel.channelName] = this._getDataChannelBuffer(listOfPeers[i], channelProp);
+                                listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelName = channel.channelName;
+                                listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelType = channel.channelType;
+                                listOfPeersDatachannels[listOfPeers[i]][channel.channelName].channelProp = channelProp;
+                                listOfPeersDatachannels[listOfPeers[i]][channel.channelName].currentTransferId = channel.transferId;
+                                listOfPeersDatachannels[listOfPeers[i]][channel.channelName].currentStreamId = channel.streamId;
+                                listOfPeersDatachannels[listOfPeers[i]][channel.channelName].readyState = channel.channel ?
+                                  channel.channel.readyState : self.DATA_CHANNEL_STATE.CREATE_ERROR;
+                              }
+                            }
+                          }
+                        }
+                      
+                        return listOfPeersDatachannels;
+                      };
+                      
+                      /**
+                       * Function that gets the list of current data transfers.
+                       * @method getCurrentDataTransfers
+                       * @return {JSON} The list of Peers Stream. &lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;#transferId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data transfer session.&lt;/p&gt;&lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;transferInfo&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data transfer information.
+                       *   &lt;small&gt;Object signature matches the &lt;code&gt;transferInfo&lt;/code&gt; parameter payload received in the
+                       *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt;
+                       *   except without the &lt;code&gt;data&lt;/code&gt; property.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The sender Peer ID.&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Boolean&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The flag if Peer is User.&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
+                       * @example
+                       *   // Example 1: Get the list of current data transfers in the same Room
+                       *   var currentTransfers = skylinkDemo.getCurrentDataTransfers();
+                       * @for Skylink
+                       * @since 0.6.18
+                       */
+                      Skylink.prototype.getCurrentDataTransfers = function() {
+                        var listOfDataTransfers = {};
+                      
+                        if (!(this._user &amp;&amp; this._user.sid)) {
+                          return {};
+                        }
+                      
+                        for (var prop in this._dataTransfers) {
+                          if (this._dataTransfers.hasOwnProperty(prop) &amp;&amp; this._dataTransfers[prop]) {
+                            listOfDataTransfers[prop] = {
+                              transferInfo: this._getTransferInfo(prop, this._user.sid, true, true, true),
+                              isSelf: this._dataTransfers[prop].senderPeerId === this._user.sid,
+                              peerId: this._dataTransfers[prop].senderPeerId || this._user.sid
+                            };
+                          }
+                        }
+                      
+                        return listOfDataTransfers;
+                      };
+                      
+                      /**
+                       * Function that gets the list of current data streaming sessions.
+                       * @method getCurrentDataStreamsSession
+                       * @return {JSON} The list of Peers Stream. &lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;#streamId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data streaming session.&lt;/p&gt;&lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;streamInfo&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The data streaming information.
+                       *   &lt;small&gt;Object signature matches the &lt;code&gt;streamInfo&lt;/code&gt; parameter payload received in the
+                       *   &lt;a href=&quot;#event_dataStreamState&quot;&gt;&lt;code&gt;dataStreamState&lt;/code&gt; event&lt;/a&gt;
+                       *   except without the &lt;code&gt;chunk&lt;/code&gt; amd &lt;code&gt;chunkSize&lt;/code&gt; property.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;String&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The sender Peer ID.&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;isSelf&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;Boolean&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The flag if Peer is User.&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
+                       * @example
+                       *   // Example 1: Get the list of current data streaming sessions in the same Room
+                       *   var currentDataStreams = skylinkDemo.getCurrentDataStreamsSession();
+                       * @for Skylink
+                       * @since 0.6.18
+                       */
+                      Skylink.prototype.getCurrentDataStreamsSession = function() {
+                        var listOfDataStreams = {};
+                      
+                        if (!(this._user &amp;&amp; this._user.sid)) {
+                          return {};
+                        }
+                      
+                        for (var prop in this._dataStreams) {
+                          if (this._dataStreams.hasOwnProperty(prop) &amp;&amp; this._dataStreams[prop]) {
+                            listOfDataStreams[prop] = {
+                              streamInfo: {
+                                chunkType: this._dataStreams[prop].sessionChunkType === &#x27;string&#x27; ? this.DATA_TRANSFER_DATA_TYPE.STRING :
+                                  this.DATA_TRANSFER_DATA_TYPE.BLOB,
+                                isPrivate: this._dataStreams[prop].isPrivate,
+                                isStringStream: this._dataStreams[prop].sessionChunkType === &#x27;string&#x27;,
+                                senderPeerId: this._dataStreams[prop].senderPeerId
+                              },
+                              isSelf: this._dataStreams[prop].senderPeerId === this._user.sid,
+                              peerId: this._dataStreams[prop].senderPeerId || this._user.sid
+                            };
+                          }
+                        }
+                      
+                        return listOfDataStreams;
+                      };
+                      
+                      /**
+                       * Function that gets the list of current custom Peer settings sent and set.
+                       * @method getPeerCustomSettings
+                       * @return {JSON} The list of Peers custom settings sent and set. &lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;#peerId&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The Peer settings sent and set.&lt;/p&gt;&lt;ul&gt;
+                       *   &lt;li&gt;&lt;code&gt;settings&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The custom Peer settings.
+                       *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo.settings&lt;/code&gt; parameter payload received in the
+                       *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;
+                       *   &lt;li&gt;&lt;code&gt;mediaStatus&lt;/code&gt;&lt;var&gt;&lt;b&gt;{&lt;/b&gt;JSON&lt;b&gt;}&lt;/b&gt;&lt;/var&gt;&lt;p&gt;The custom Peer Stream muted settings.
+                       *   &lt;small&gt;Object signature matches the &lt;code&gt;peerInfo.mediaStatus&lt;/code&gt; parameter payload received in the
+                       *   &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;.&lt;/small&gt;&lt;/p&gt;&lt;/li&gt;&lt;/ul&gt;&lt;/li&gt;&lt;/ul&gt;
+                       * @example
+                       *   // Example 1: Get the list of current Peer custom settings
+                       *   var currentPeerSettings = skylinkDemo.getPeersCustomSettings();
+                       * @for Skylink
+                       * @since 0.6.18
+                       */
+                      Skylink.prototype.getPeersCustomSettings = function () {
+                        var self = this;
+                        var customSettingsList = {};
+                      
+                        for (var peerId in self._peerInformations) {
+                          if (self._peerInformations.hasOwnProperty(peerId) &amp;&amp; self._peerInformations[peerId]) {
+                            customSettingsList[peerId] = {
+                              settings: {
+                                audio: false,
+                                video: false,
+                                bandwidth: clone(self._streamsBandwidthSettings.bAS),
+                                googleXBandwidth: clone(self._streamsBandwidthSettings.googleX)
+                              },
+                              mediaStatus: {
+                                audioMuted: true,
+                                videoMuted: true
+                              }
+                            };
+                      
+                            if (self._peerConnections[peerId] &amp;&amp; self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+                              var streams = self._peerConnections[peerId].getLocalStreams();
+                      
+                              for (var s = 0; s &lt; streams.length; s++) {
+                                if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream &amp;&amp; (streams[s].id ||
+                                  streams[s].label) === (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
+                                  customSettingsList[peerId].settings.audio = clone(self._streams.screenshare.settings.audio);
+                                  customSettingsList[peerId].settings.video = clone(self._streams.screenshare.settings.video);
+                                  customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
+                                  break;
+                                } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream &amp;&amp; (streams[s].id ||
+                                  streams[s].label) === (self._streams.userMedia.stream.id ||
+                                  self._streams.userMedia.stream.label)) {
+                                  customSettingsList[peerId].settings.audio = clone(self._streams.userMedia.settings.audio);
+                                  customSettingsList[peerId].settings.video = clone(self._streams.userMedia.settings.video);
+                                  customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
+                                  break;
+                                } else if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+                                  customSettingsList[peerId].settings.audio = clone(self._streams.userMedia.settings.audio);
+                                  customSettingsList[peerId].settings.video = clone(self._streams.userMedia.settings.video);
+                                  customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
+                                  if (streams[s].getAudioTracks().length === 0) {
+                                    customSettingsList[peerId].settings.audio = false;
+                                    customSettingsList[peerId].mediaStatus.audioMuted = true;
+                                  }
+                                  if (streams[s].getVideoTracks().length === 0) {
+                                    customSettingsList[peerId].settings.video = false;
+                                    customSettingsList[peerId].mediaStatus.videoMuted = true;
+                                  }
+                                }
+                              }
+                            }
+                      
+                            if (self._peerCustomConfigs[peerId]) {
+                              if (self._peerCustomConfigs[peerId].bandwidth &amp;&amp;
+                                typeof self._peerCustomConfigs[peerId].bandwidth === &#x27;object&#x27;) {
+                                if (typeof self._peerCustomConfigs[peerId].bandwidth.audio === &#x27;number&#x27;) {
+                                  customSettingsList[peerId].settings.bandwidth.audio = self._peerCustomConfigs[peerId].bandwidth.audio;
+                                }
+                                if (typeof self._peerCustomConfigs[peerId].bandwidth.video === &#x27;number&#x27;) {
+                                  customSettingsList[peerId].settings.bandwidth.video = self._peerCustomConfigs[peerId].bandwidth.video;
+                                }
+                                if (typeof self._peerCustomConfigs[peerId].bandwidth.data === &#x27;number&#x27;) {
+                                  customSettingsList[peerId].settings.bandwidth.data = self._peerCustomConfigs[peerId].bandwidth.data;
+                                }
+                              }
+                              if (self._peerCustomConfigs[peerId].googleXBandwidth &amp;&amp;
+                                typeof self._peerCustomConfigs[peerId].googleXBandwidth === &#x27;object&#x27;) {
+                                if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.min === &#x27;number&#x27;) {
+                                  customSettingsList[peerId].settings.googleXBandwidth.min = self._peerCustomConfigs[peerId].googleXBandwidth.min;
+                                }
+                                if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.max === &#x27;number&#x27;) {
+                                  customSettingsList[peerId].settings.googleXBandwidth.max = self._peerCustomConfigs[peerId].googleXBandwidth.max;
+                                }
+                              }
+                            }
+                      
+                            var agent = ((self._peerInformations[peerId] || {}).agent || {}).name || &#x27;&#x27;;
+                      
+                            // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
+                            if (customSettingsList[peerId].settings.video &amp;&amp; (peerId ?
+                              (window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp; agent.name === &#x27;edge&#x27; ?
+                            // If User is IE/safari and does not have H264 support, remove video support
+                              [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; !self._currentCodecSupport.video.h264 :
+                            // If User is Edge and Peer is not and no H264 support, remove video support
+                              window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; agent.name !== &#x27;edge&#x27; &amp;&amp; !self._currentCodecSupport.video.h264) :
+                            // If broadcast ENTER message and User is Edge and has no H264 support
+                              window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; !self._currentCodecSupport.video.h264)) {
+                              customSettingsList[peerId].settings.video = false;
+                              customSettingsList[peerId].mediaStatus.videoMuted = true;
+                            }
+                      
+                            customSettingsList[peerId].settings.audio = !self._sdpSettings.connection.audio ? false :
+                              customSettingsList[peerId].settings.audio;
+                            customSettingsList[peerId].settings.video = !self._sdpSettings.connection.video ? false :
+                              customSettingsList[peerId].settings.video;
+                            customSettingsList[peerId].mediaStatus.audioMuted = !self._sdpSettings.connection.audio ? true :
+                              customSettingsList[peerId].mediaStatus.audioMuted;
+                            customSettingsList[peerId].mediaStatus.videoMuted = !self._sdpSettings.connection.video ? true :
+                              customSettingsList[peerId].mediaStatus.videoMuted;
+                          }
+                        }
+                      
+                        return customSettingsList;
+                      };
+                      
+                      /**
+                       * Function that returns the User session information to be sent to Peers.
+                       * @method _getUserInfo
+                       * @private
+                       * @for Skylink
+                       * @since 0.4.0
+                       */
+                      Skylink.prototype._getUserInfo = function(peerId) {
+                        var userInfo = clone(this.getPeerInfo());
+                        var peerInfo = clone(this.getPeerInfo(peerId));
+                      
+                        // Adhere to SM protocol without breaking the other SDKs.
+                        if (userInfo.settings.video &amp;&amp; typeof userInfo.settings.video === &#x27;object&#x27;) {
+                          userInfo.settings.video.customSettings = {};
+                      
+                          if (userInfo.settings.video.frameRate &amp;&amp; typeof userInfo.settings.video.frameRate === &#x27;object&#x27;) {
+                            userInfo.settings.video.customSettings.frameRate = clone(userInfo.settings.video.frameRate);
+                            userInfo.settings.video.frameRate = -1;
+                          }
+                      
+                          if (userInfo.settings.video.facingMode &amp;&amp; typeof userInfo.settings.video.facingMode === &#x27;object&#x27;) {
+                            userInfo.settings.video.customSettings.facingMode = clone(userInfo.settings.video.facingMode);
+                            userInfo.settings.video.facingMode = &#x27;-1&#x27;;
+                          }
+                      
+                          if (userInfo.settings.video.resolution &amp;&amp; typeof userInfo.settings.video.resolution === &#x27;object&#x27;) {
+                            if (userInfo.settings.video.resolution.width &amp;&amp; typeof userInfo.settings.video.resolution.width === &#x27;object&#x27;) {
+                              userInfo.settings.video.customSettings.width = clone(userInfo.settings.video.width);
+                              userInfo.settings.video.resolution.width = -1;
+                            }
+                      
+                            if (userInfo.settings.video.resolution.height &amp;&amp; typeof userInfo.settings.video.resolution.height === &#x27;object&#x27;) {
+                              userInfo.settings.video.customSettings.height = clone(userInfo.settings.video.height);
+                              userInfo.settings.video.resolution.height = -1;
+                            }
+                          }
+                        }
+                      
+                        if (userInfo.settings.bandwidth) {
+                          userInfo.settings.maxBandwidth = clone(userInfo.settings.bandwidth);
+                          delete userInfo.settings.bandwidth;
+                        }
+                      
+                        // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
+                        if (peerId ? (window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name === &#x27;edge&#x27; ?
+                        // If User is IE/safari and does not have H264 support, remove video support
+                          [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; !this._currentCodecSupport.video.h264 :
+                        // If User is Edge and Peer is not and no H264 support, remove video support
+                          window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name !== &#x27;edge&#x27; &amp;&amp; !this._currentCodecSupport.video.h264) :
+                        // If broadcast ENTER message and User is Edge and has no H264 support
+                          window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; !this._currentCodecSupport.video.h264) {
+                          userInfo.settings.video = false;
+                          userInfo.mediaStatus.videoMuted = true;
+                        }
+                      
+                        if (!this._sdpSettings.connection.audio) {
+                          userInfo.settings.audio = false;
+                          userInfo.mediaStatus.audioMuted = true;
+                        }
+                      
+                        if (!this._sdpSettings.connection.video) {
+                          userInfo.settings.video = false;
+                          userInfo.mediaStatus.videoMuted = true;
+                        }
+                      
+                        delete userInfo.agent;
+                        delete userInfo.room;
+                        delete userInfo.config;
+                        delete userInfo.parentId;
+                        delete userInfo.settings.data;
+                        return userInfo;
+                      };
+                      
+                          </pre>
+                      </div>
                   </div>
               </div>
           </div>
