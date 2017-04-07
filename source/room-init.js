@@ -1281,7 +1281,12 @@ Skylink.prototype._loadInfo = function() {
       return;
     }
 
+    var getCodecsSupportCalled = false;
     self._getCodecsSupport(function (error) {
+      if (getCodecsSupportCalled) {
+        return;
+      }
+      getCodecsSupportCalled = true;
       if (error) {
         log.error(error);
         self._readyState = -1;

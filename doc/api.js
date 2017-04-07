@@ -4,6 +4,7 @@ YUI.add("yuidoc-meta", function(Y) {
         "Skylink"
     ],
     "modules": [],
-    "allModules": []
+    "allModules": [],
+    "elements": []
 } };
 });

@@ -41,7 +41,7 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  */
 Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var self = this;
-  var pc = self._peerConnections[targetMid];// || self._addPeer(targetMid, peerBrowser);
+  var pc = self._peerConnections[targetMid];
 
   log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
 
@@ -110,6 +110,10 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
 
   pc.endOfCandidates = false;
 
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].sdpConstraints = offerConstraints;
+  }
+
   pc.createOffer(function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
 
@@ -163,6 +167,15 @@ Skylink.prototype._doAnswer = function(targetMid) {
     ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
     (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
     !!self._currentCodecSupport.video.h264 : true);
+  var answerConstraints = window.webrtcDetectedBrowser === 'edge' ? {
+    offerToReceiveVideo: offerToReceiveVideo,
+    offerToReceiveAudio: offerToReceiveAudio,
+    voiceActivityDetection: self._voiceActivityDetection
+  } : undefined;
+
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].sdpConstraints = answerConstraints;
+  }
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
@@ -172,11 +185,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }, function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  }, window.webrtcDetectedBrowser === 'edge' ? {
-    offerToReceiveVideo: offerToReceiveVideo,
-    offerToReceiveAudio: offerToReceiveAudio,
-    voiceActivityDetection: self._voiceActivityDetection
-  } : undefined);
+  }, answerConstraints);
 };
 
 /**

@@ -765,7 +765,10 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
         sending: { host: [], srflx: [], relay: [] },
         receiving: { host: [], srflx: [], relay: [] }
       }),
-      dataChannels: {}
+      dataChannels: {},
+      constraints: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].constraints : null,
+      optional: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].optional : null,
+      sdpConstraints: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].sdpConstraints : null
     },
     audio: {
       sending: {
@@ -1504,30 +1507,34 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
+Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, receiveOnly, isSS) {
   var self = this;
-  if (self._peerConnections[targetMid] && !restartConn) {
+  if (self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Connection to peer has already been made']);
     return;
   }
+
+  self._peerConnStatus[targetMid] = {
+    connected: false,
+    init: false
+  };
+
   log.log([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
     peerBrowser: peerBrowser,
-    toOffer: toOffer,
     receiveOnly: receiveOnly,
     enableDataChannel: self._enableDataChannel
   });
 
   log.info('Adding peer', isSS);
 
-  if (!restartConn) {
-    self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS, cert);
-  }
+  self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS, cert);
 
   if (!self._peerConnections[targetMid]) {
-    log.error([targetMid, null, null, 'Failed creating the connection to peer']);
+    log.error([targetMid, null, null, 'Failed creating the connection to peer.']);
     return;
   }
 
+  self._peerConnStatus[targetMid].init = true;
   self._peerConnections[targetMid].hasScreen = !!isSS;
 };
 
@@ -1775,6 +1782,10 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._peerCustomConfigs[peerId]) {
     delete this._peerCustomConfigs[peerId];
   }
+  // remove peer connection config
+  if (this._peerConnStatus[peerId]) {
+    delete this._peerConnStatus[peerId];
+  }
   // close datachannel connection
   if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
@@ -1816,14 +1827,19 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     constraints.certificates = [cert];
   }
 
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].constraints = constraints;
+    self._peerConnStatus[targetMid].optional = optional;
+  }
+
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
-    pc = new RTCPeerConnection(constraints, optional);
-    log.info([targetMid, 'RTCPeerConnection', null, 'Created peer connection ->'], {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Creating peer connection ->'], {
       constraints: constraints,
       optional: optional
     });
+    pc = new RTCPeerConnection(constraints, optional);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -1936,6 +1952,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
       self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+    }
+
+    if (self._peerConnStatus[targetMid]) {
+      self._peerConnStatus[targetMid].connected = [self.ICE_CONNECTION_STATE.COMPLETED,
+        self.ICE_CONNECTION_STATE.CONNECTED].indexOf(iceConnectionState) > -1;
     }
 
     if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(

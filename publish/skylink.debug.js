@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.18 - Thu Mar 02 2017 16:39:03 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 21:09:15 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -74,7 +74,7 @@ var clone = function (obj) {
  * If you have any issues, you may find answers to your questions in the FAQ section on [our support portal](
  * http://support.temasys.io), asks questions, request features or raise bug tickets as well.
  *
- * If you would like to contribute to our Temasys SkylinkJS codebase, see [the contributing README](
+ * If you would like to contribute to our Temasys Web SDK codebase, see [the contributing README](
  * https://github.com/Temasys/SkylinkJS/blob/master/CONTRIBUTING.md).
  *
  * [See License (Apache 2.0)](https://github.com/Temasys/SkylinkJS/blob/master/LICENSE)
@@ -1166,6 +1166,16 @@ function Skylink() {
    * @since 0.6.18
    */
   this._bandwidthAdjuster = null;
+
+  /**
+   * Stores the Peer connection status.
+   * @attribute _peerConnStatus
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.19
+   */
+  this._peerConnStatus = {};
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -2699,8 +2709,10 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 
 /**
  * <blockquote class="info">
+ *   Note that this feature is not supported by MCU enabled Peer connections.<br>
  *   To start streaming data, see the <a href="#method_streamData"><code>streamData()</code>
- *   method</a>. To stop data streaming session, see the <a href="#method_stopStreamingData"><code>stopStreamingData()</code> method</a>
+ *   method</a>. To stop data streaming session, see the <a href="#method_stopStreamingData"><code>
+ *   stopStreamingData()</code> method</a>.
  * </blockquote>
  * Function that starts a data chunks streaming session from User to Peers.
  * @method startStreamingData
@@ -2879,6 +2891,10 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
 
   if (listOfPeers.length === 0) {
     return emitErrorBeforeStreamingFn('Unable to start data streaming as there are no Peers to start session with.');
+  }
+
+  if (self._hasMCU) {
+    return emitErrorBeforeStreamingFn('Unable to start data streaming as this feature is current not supported by MCU yet.');
   }
 
   var transferId = 'stream_' + (self._user && self._user.sid ? self._user.sid : '-') + '_' + (new Date()).getTime();
@@ -3091,6 +3107,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
 
 /**
  * <blockquote class="info">
+ *   Note that this feature is not supported by MCU enabled Peer connections.<br>
  *   To start data streaming session, see the <a href="#method_startStreamingData"><code>startStreamingData()</code>
  *   method</a>. To stop data streaming session, see the <a href="#method_stopStreamingData"><code>stopStreamingData()</code> method</a>
  * </blockquote>
@@ -3194,6 +3211,11 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
     return;
   }
 
+  if (self._hasMCU) {
+    log.error('Failed streaming data chunk as MCU does not support this feature yet.');
+    return;
+  }
+
   var updatedDataChunk = dataChunk instanceof ArrayBuffer ? new Blob(dataChunk) : dataChunk;
 
   if (self._dataStreams[transferId].sessionChunkType === 'string' ? updatedDataChunk.length > self._CHUNK_DATAURL_SIZE :
@@ -3218,6 +3240,9 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
     // When ready to be sent
     var onSendDataFn = function (buffer) {
       self._sendMessageToDataChannel(peerId, buffer, channelProp, true);
+
+      var updatedSessionInfo = clone(sessionInfo);
+      delete updatedSessionInfo.chunk;
 
       if (targetPeers) {
         for (var i = 0; i < targetPeers.length; i++) {
@@ -3326,6 +3351,11 @@ Skylink.prototype.stopStreamingData = function(transferId) {
 
   if (!self._dataStreams[transferId].isUpload) {
     log.error('Failed stopping data streaming session as it is not sending.');
+    return;
+  }
+
+  if (self._hasMCU) {
+    log.error('Failed stopping data streaming session as MCU does not support this feature yet.');
     return;
   }
 
@@ -6100,7 +6130,10 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
         sending: { host: [], srflx: [], relay: [] },
         receiving: { host: [], srflx: [], relay: [] }
       }),
-      dataChannels: {}
+      dataChannels: {},
+      constraints: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].constraints : null,
+      optional: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].optional : null,
+      sdpConstraints: self._peerConnStatus[peerId] ? self._peerConnStatus[peerId].sdpConstraints : null
     },
     audio: {
       sending: {
@@ -6839,30 +6872,34 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, toOffer, restartConn, receiveOnly, isSS) {
+Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, receiveOnly, isSS) {
   var self = this;
-  if (self._peerConnections[targetMid] && !restartConn) {
+  if (self._peerConnections[targetMid]) {
     log.error([targetMid, null, null, 'Connection to peer has already been made']);
     return;
   }
+
+  self._peerConnStatus[targetMid] = {
+    connected: false,
+    init: false
+  };
+
   log.log([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
     peerBrowser: peerBrowser,
-    toOffer: toOffer,
     receiveOnly: receiveOnly,
     enableDataChannel: self._enableDataChannel
   });
 
   log.info('Adding peer', isSS);
 
-  if (!restartConn) {
-    self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS, cert);
-  }
+  self._peerConnections[targetMid] = self._createPeerConnection(targetMid, !!isSS, cert);
 
   if (!self._peerConnections[targetMid]) {
-    log.error([targetMid, null, null, 'Failed creating the connection to peer']);
+    log.error([targetMid, null, null, 'Failed creating the connection to peer.']);
     return;
   }
 
+  self._peerConnStatus[targetMid].init = true;
   self._peerConnections[targetMid].hasScreen = !!isSS;
 };
 
@@ -7110,6 +7147,10 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._peerCustomConfigs[peerId]) {
     delete this._peerCustomConfigs[peerId];
   }
+  // remove peer connection config
+  if (this._peerConnStatus[peerId]) {
+    delete this._peerConnStatus[peerId];
+  }
   // close datachannel connection
   if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
@@ -7151,14 +7192,19 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     constraints.certificates = [cert];
   }
 
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].constraints = constraints;
+    self._peerConnStatus[targetMid].optional = optional;
+  }
+
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
   try {
-    pc = new RTCPeerConnection(constraints, optional);
-    log.info([targetMid, 'RTCPeerConnection', null, 'Created peer connection ->'], {
+    log.debug([targetMid, 'RTCPeerConnection', null, 'Creating peer connection ->'], {
       constraints: constraints,
       optional: optional
     });
+    pc = new RTCPeerConnection(constraints, optional);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -7271,6 +7317,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
       self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+    }
+
+    if (self._peerConnStatus[targetMid]) {
+      self._peerConnStatus[targetMid].connected = [self.ICE_CONNECTION_STATE.COMPLETED,
+        self.ICE_CONNECTION_STATE.CONNECTED].indexOf(iceConnectionState) > -1;
     }
 
     if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
@@ -7783,6 +7834,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.settings.data = !!(this._dataChannels[peerId] && this._dataChannels[peerId].main &&
       this._dataChannels[peerId].main.channel &&
       this._dataChannels[peerId].main.channel.readyState === this.DATA_CHANNEL_STATE.OPEN);
+    peerInfo.connected = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].connected;
+    peerInfo.init = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].init;
 
   } else {
     peerInfo = {
@@ -7808,7 +7861,9 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         priorityWeight: this._peerPriorityWeight,
         receiveOnly: false,
         publishOnly: !!this._publishOnly
-      }
+      },
+      connected: null,
+      init: null
     };
 
     if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
@@ -8307,7 +8362,7 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  */
 Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   var self = this;
-  var pc = self._peerConnections[targetMid];// || self._addPeer(targetMid, peerBrowser);
+  var pc = self._peerConnections[targetMid];
 
   log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
 
@@ -8376,6 +8431,10 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
 
   pc.endOfCandidates = false;
 
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].sdpConstraints = offerConstraints;
+  }
+
   pc.createOffer(function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
 
@@ -8429,6 +8488,15 @@ Skylink.prototype._doAnswer = function(targetMid) {
     ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
     (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
     !!self._currentCodecSupport.video.h264 : true);
+  var answerConstraints = window.webrtcDetectedBrowser === 'edge' ? {
+    offerToReceiveVideo: offerToReceiveVideo,
+    offerToReceiveAudio: offerToReceiveAudio,
+    voiceActivityDetection: self._voiceActivityDetection
+  } : undefined;
+
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].sdpConstraints = answerConstraints;
+  }
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
@@ -8438,11 +8506,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }, function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  }, window.webrtcDetectedBrowser === 'edge' ? {
-    offerToReceiveVideo: offerToReceiveVideo,
-    offerToReceiveAudio: offerToReceiveAudio,
-    voiceActivityDetection: self._voiceActivityDetection
-  } : undefined);
+  }, answerConstraints);
 };
 
 /**
@@ -9604,7 +9668,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
 };
 
-Skylink.prototype.VERSION = '0.6.18';
+Skylink.prototype.VERSION = '0.6.19';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -10879,7 +10943,12 @@ Skylink.prototype._loadInfo = function() {
       return;
     }
 
+    var getCodecsSupportCalled = false;
     self._getCodecsSupport(function (error) {
+      if (getCodecsSupportCalled) {
+        return;
+      }
+      getCodecsSupportCalled = true;
       if (error) {
         log.error(error);
         self._readyState = -1;
@@ -11765,6 +11834,10 @@ var _eventsDocs = {
    * @param {Boolean} peerInfo.config.publishOnly The flag if Peer is publishing only stream but not receiving streams.
    * @param {Boolean} peerInfo.config.receiveOnly The flag if Peer is receiving only streams but not publishing stream.
    * @param {String} [peerInfo.parentId] The parent Peer ID that it is matched to for multi-streaming connections.
+   * @param {Boolean} [peerInfo.connected] The flag if Peer ICE connection has been established successfully.
+   *  <small>Defined only when <code>isSelf</code> payload value is <code>false</code>.</small>
+   * @param {Boolean} [peerInfo.init] The flag if Peer connection has been created successfully.
+   *  <small>Defined only when <code>isSelf</code> payload value is <code>false</code>.</small>
    * @param {Boolean} isSelf The flag if Peer is User.
    * @for Skylink
    * @since 0.5.2
@@ -12629,6 +12702,9 @@ var _eventsDocs = {
    * @param {String} stats.connection.dataChannels.#channelName.currentStreamId The Peer connection
    *   Datachannel connection current data streaming session ID.
    *   <small>Defined as <code>null</code> when there is currently no data streaming session on the Datachannel connection.</small>
+   * @param {JSON} stats.connection.constraints The constraints passed in when constructing the Peer connection object.
+   * @param {JSON} stats.connection.optional The optional constraints passed in when constructing the Peer connection object.
+   * @param {JSON} [stats.connection.sdpConstraints] The constraints passed in when creating Peer connection offer or answer.
    * @param {Error} error The error object received.
    *   <small>Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</small>
    * @for Skylink
@@ -12971,6 +13047,8 @@ Skylink.prototype._throttle = function(func, prop, wait){
     func(false);
   }
 };
+
+
 Skylink.prototype.SOCKET_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
@@ -14557,7 +14635,7 @@ Skylink.prototype._enterHandler = function(message) {
         agent: userInfo.agent.name,
         version: userInfo.agent.version,
         os: userInfo.agent.os
-      }, false, false, message.receiveOnly, hasScreenshare);
+      }, message.receiveOnly, hasScreenshare);
 
       if (targetMid === 'MCU') {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
@@ -14847,7 +14925,7 @@ Skylink.prototype._welcomeHandler = function(message) {
         agent: userInfo.agent.name,
         version: userInfo.agent.version,
         os: userInfo.agent.os
-      }, false, false, message.receiveOnly, hasScreenshare);
+      }, message.receiveOnly, hasScreenshare);
 
       if (targetMid === 'MCU') {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
