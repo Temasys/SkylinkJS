@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Tue Mar 07 2017 15:08:47 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 17:43:31 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -10899,7 +10899,12 @@ Skylink.prototype._loadInfo = function() {
       return;
     }
 
+    var getCodecsSupportCalled = false;
     self._getCodecsSupport(function (error) {
+      if (getCodecsSupportCalled) {
+        return;
+      }
+      getCodecsSupportCalled = true;
       if (error) {
         log.error(error);
         self._readyState = -1;
@@ -12991,6 +12996,8 @@ Skylink.prototype._throttle = function(func, prop, wait){
     func(false);
   }
 };
+
+
 Skylink.prototype.SOCKET_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
