@@ -3234,7 +3234,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1792,
+            "line": 1796,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -3245,7 +3245,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2048,
+            "line": 2052,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3256,7 +3256,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2196,
+            "line": 2200,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3267,7 +3267,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2216,
+            "line": 2220,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",

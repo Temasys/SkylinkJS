@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 21:06:05 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 21:09:15 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -7146,6 +7146,10 @@ Skylink.prototype._removePeer = function(peerId) {
   // remove peer ICE candidates
   if (this._peerCustomConfigs[peerId]) {
     delete this._peerCustomConfigs[peerId];
+  }
+  // remove peer connection config
+  if (this._peerConnStatus[peerId]) {
+    delete this._peerConnStatus[peerId];
   }
   // close datachannel connection
   if (this._dataChannels[peerId]) {

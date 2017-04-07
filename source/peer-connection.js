@@ -1782,6 +1782,10 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._peerCustomConfigs[peerId]) {
     delete this._peerCustomConfigs[peerId];
   }
+  // remove peer connection config
+  if (this._peerConnStatus[peerId]) {
+    delete this._peerConnStatus[peerId];
+  }
   // close datachannel connection
   if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
