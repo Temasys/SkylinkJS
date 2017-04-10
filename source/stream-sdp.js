@@ -804,6 +804,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
 
   if (self._currentCodecSupport) {
     callback(null);
+    return;
   }
 
   self._currentCodecSupport = { audio: {}, video: {} };

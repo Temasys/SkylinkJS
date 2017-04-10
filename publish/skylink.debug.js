@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Fri Apr 07 2017 21:09:15 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Mon Apr 10 2017 12:58:20 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -10943,12 +10943,7 @@ Skylink.prototype._loadInfo = function() {
       return;
     }
 
-    var getCodecsSupportCalled = false;
     self._getCodecsSupport(function (error) {
-      if (getCodecsSupportCalled) {
-        return;
-      }
-      getCodecsSupportCalled = true;
       if (error) {
         log.error(error);
         self._readyState = -1;
@@ -18235,6 +18230,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
 
   if (self._currentCodecSupport) {
     callback(null);
+    return;
   }
 
   self._currentCodecSupport = { audio: {}, video: {} };
