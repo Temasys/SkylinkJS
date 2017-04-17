@@ -177,11 +177,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     }
 
     // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-    if (window.webrtcDetectedBrowser !== 'edge' && peerInfo.agent.name === 'edge' ?
-    // If User is IE/safari and does not have H264 support, remove video support
-      ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && !this._currentCodecSupport.video.h264 :
-    // If User is Edge and Peer is not and no H264 support, remove video support
-      window.webrtcDetectedBrowser === 'edge' && peerInfo.agent.name !== 'edge' && !this._currentCodecSupport.video.h264) {
+    if (!this._getSDPEdgeVideoSupports(peerId)) {
       peerInfo.settings.video = false;
       peerInfo.mediaStatus.videoMuted = true;
     }
@@ -621,14 +617,7 @@ Skylink.prototype.getPeersCustomSettings = function () {
       var agent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
 
       // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-      if (customSettingsList[peerId].settings.video && (peerId ?
-        (window.webrtcDetectedBrowser !== 'edge' && agent.name === 'edge' ?
-      // If User is IE/safari and does not have H264 support, remove video support
-        ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && !self._currentCodecSupport.video.h264 :
-      // If User is Edge and Peer is not and no H264 support, remove video support
-        window.webrtcDetectedBrowser === 'edge' && agent.name !== 'edge' && !self._currentCodecSupport.video.h264) :
-      // If broadcast ENTER message and User is Edge and has no H264 support
-        window.webrtcDetectedBrowser === 'edge' && !self._currentCodecSupport.video.h264)) {
+      if (customSettingsList[peerId].settings.video && !self._getSDPEdgeVideoSupports(peerId)) {
         customSettingsList[peerId].settings.video = false;
         customSettingsList[peerId].mediaStatus.videoMuted = true;
       }
@@ -691,13 +680,7 @@ Skylink.prototype._getUserInfo = function(peerId) {
   }
 
   // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-  if (peerId ? (window.webrtcDetectedBrowser !== 'edge' && peerInfo.agent.name === 'edge' ?
-  // If User is IE/safari and does not have H264 support, remove video support
-    ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && !this._currentCodecSupport.video.h264 :
-  // If User is Edge and Peer is not and no H264 support, remove video support
-    window.webrtcDetectedBrowser === 'edge' && peerInfo.agent.name !== 'edge' && !this._currentCodecSupport.video.h264) :
-  // If broadcast ENTER message and User is Edge and has no H264 support
-    window.webrtcDetectedBrowser === 'edge' && !this._currentCodecSupport.video.h264) {
+  if (!this._getSDPEdgeVideoSupports(peerId)) {
     userInfo.settings.video = false;
     userInfo.mediaStatus.videoMuted = true;
   }

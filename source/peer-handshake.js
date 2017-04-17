@@ -60,14 +60,10 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
-  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
   var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &&
     iceRestart && self._enableIceRestart;
   var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
-    ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-    (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-    !!self._currentCodecSupport.video.h264 : true);
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid);
 
   var offerConstraints = {
     offerToReceiveAudio: offerToReceiveAudio,
@@ -161,12 +157,8 @@ Skylink.prototype._doAnswer = function(targetMid) {
     self._addLocalMediaStreams(targetMid);
   }
 
-  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
   var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
-    ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-    (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-    !!self._currentCodecSupport.video.h264 : true);
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid);
   var answerConstraints = window.webrtcDetectedBrowser === 'edge' ? {
     offerToReceiveVideo: offerToReceiveVideo,
     offerToReceiveAudio: offerToReceiveAudio,

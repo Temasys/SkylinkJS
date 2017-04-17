@@ -1974,11 +1974,9 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
     var pc = self._peerConnections[peerId];
     var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
+    var peerVersion = ((self._peerInformations[peerId] || {}).agent || {}).version || 0;
     var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && peerId !== 'MCU');
-    var offerToReceiveVideo = !(!self._sdpSettings.connection.video && peerId !== 'MCU') &&
-      ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-      (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-      !!self._currentCodecSupport.video.h264 : true);
+    var offerToReceiveVideo = !(!self._sdpSettings.connection.video && peerId !== 'MCU') && self._getSDPEdgeVideoSupports(peerId);
 
     if (pc) {
       if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {

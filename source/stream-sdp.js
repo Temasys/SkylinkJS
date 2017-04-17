@@ -908,6 +908,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
 
   var sdpLines = sessionDescriptionStr.split('\r\n');
   var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+  var peerVersion = ((self._peerInformations[targetMid] || {}).agent || {}).version || 0;
   var mediaType = '';
   var bundleLineIndex = -1;
   var bundleLineMids = [];
@@ -921,9 +922,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   }
 
   if (settings.connection.video) {
-    settings.connection.video = (window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-      (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-      !!self._currentCodecSupport.video.h264 : true;
+    settings.connection.video = self._getSDPEdgeVideoSupports(targetMid);
   }
 
   if (self._hasMCU) {
@@ -1100,4 +1099,28 @@ Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription, 
   }
 
   return fingerprint;
+};
+
+
+/**
+ * Function that gets edge browser video supports.
+ * @method _getSDPEdgeVideoSupports
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getSDPEdgeVideoSupports = function (peerId) {
+  var self = this;
+
+  if (peerId) {
+    var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
+    var peerVersion = ((self._peerInformations[peerId] || {}).agent || {}).version || 0;
+
+    return window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedVersion < 15.15019 &&
+      peerAgent !== 'edge' ? !!self._currentCodecSupport.video.h264 : (window.webrtcDetectedBrowser !== 'edge' &&
+      peerAgent === 'edge' && peerVersion < 15.15019 ? !!self._currentCodecSupport.video.h264 : true);
+  }
+
+  return window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedVersion < 15.15019 ?
+    !!self._currentCodecSupport.video.h264 : true;
 };

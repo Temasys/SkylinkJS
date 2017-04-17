@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Mon Apr 10 2017 12:58:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Mon Apr 17 2017 18:46:36 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11592,7 +11592,7 @@ if (typeof window.require !== 'function') {
   AdapterJS.defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.19 - Mon Apr 10 2017 12:58:20 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Mon Apr 17 2017 18:46:36 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -19396,11 +19396,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     }
 
     // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-    if (window.webrtcDetectedBrowser !== 'edge' && peerInfo.agent.name === 'edge' ?
-    // If User is IE/safari and does not have H264 support, remove video support
-      ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && !this._currentCodecSupport.video.h264 :
-    // If User is Edge and Peer is not and no H264 support, remove video support
-      window.webrtcDetectedBrowser === 'edge' && peerInfo.agent.name !== 'edge' && !this._currentCodecSupport.video.h264) {
+    if (!this._getSDPEdgeVideoSupports(peerId)) {
       peerInfo.settings.video = false;
       peerInfo.mediaStatus.videoMuted = true;
     }
@@ -19840,14 +19836,7 @@ Skylink.prototype.getPeersCustomSettings = function () {
       var agent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
 
       // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-      if (customSettingsList[peerId].settings.video && (peerId ?
-        (window.webrtcDetectedBrowser !== 'edge' && agent.name === 'edge' ?
-      // If User is IE/safari and does not have H264 support, remove video support
-        ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && !self._currentCodecSupport.video.h264 :
-      // If User is Edge and Peer is not and no H264 support, remove video support
-        window.webrtcDetectedBrowser === 'edge' && agent.name !== 'edge' && !self._currentCodecSupport.video.h264) :
-      // If broadcast ENTER message and User is Edge and has no H264 support
-        window.webrtcDetectedBrowser === 'edge' && !self._currentCodecSupport.video.h264)) {
+      if (customSettingsList[peerId].settings.video && !self._getSDPEdgeVideoSupports(peerId)) {
         customSettingsList[peerId].settings.video = false;
         customSettingsList[peerId].mediaStatus.videoMuted = true;
       }
@@ -19910,13 +19899,7 @@ Skylink.prototype._getUserInfo = function(peerId) {
   }
 
   // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-  if (peerId ? (window.webrtcDetectedBrowser !== 'edge' && peerInfo.agent.name === 'edge' ?
-  // If User is IE/safari and does not have H264 support, remove video support
-    ['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && !this._currentCodecSupport.video.h264 :
-  // If User is Edge and Peer is not and no H264 support, remove video support
-    window.webrtcDetectedBrowser === 'edge' && peerInfo.agent.name !== 'edge' && !this._currentCodecSupport.video.h264) :
-  // If broadcast ENTER message and User is Edge and has no H264 support
-    window.webrtcDetectedBrowser === 'edge' && !this._currentCodecSupport.video.h264) {
+  if (!this._getSDPEdgeVideoSupports(peerId)) {
     userInfo.settings.video = false;
     userInfo.mediaStatus.videoMuted = true;
   }
@@ -19975,14 +19958,10 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
-  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
   var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &&
     iceRestart && self._enableIceRestart;
   var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
-    ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-    (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-    !!self._currentCodecSupport.video.h264 : true);
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid);
 
   var offerConstraints = {
     offerToReceiveAudio: offerToReceiveAudio,
@@ -20076,12 +20055,8 @@ Skylink.prototype._doAnswer = function(targetMid) {
     self._addLocalMediaStreams(targetMid);
   }
 
-  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
   var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
-    ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-    (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-    !!self._currentCodecSupport.video.h264 : true);
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid);
   var answerConstraints = window.webrtcDetectedBrowser === 'edge' ? {
     offerToReceiveVideo: offerToReceiveVideo,
     offerToReceiveAudio: offerToReceiveAudio,
@@ -24636,8 +24611,6 @@ Skylink.prototype._throttle = function(func, prop, wait){
     func(false);
   }
 };
-
-
 Skylink.prototype.SOCKET_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
@@ -28897,11 +28870,9 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
     var pc = self._peerConnections[peerId];
     var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
+    var peerVersion = ((self._peerInformations[peerId] || {}).agent || {}).version || 0;
     var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && peerId !== 'MCU');
-    var offerToReceiveVideo = !(!self._sdpSettings.connection.video && peerId !== 'MCU') &&
-      ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-      (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-      !!self._currentCodecSupport.video.h264 : true);
+    var offerToReceiveVideo = !(!self._sdpSettings.connection.video && peerId !== 'MCU') && self._getSDPEdgeVideoSupports(peerId);
 
     if (pc) {
       if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
@@ -29024,6 +28995,17 @@ Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
       }
     }
   }
+};
+
+/**
+ * Function that handles m= line audio and video support.
+ * @method _getMLineSupports
+ * @private
+ * @for Skylink
+ * @since 0.6.20
+ */
+Skylink.prototype._getMLineSupports = function (peerId) {
+
 };
 Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
   var self = this;
@@ -29928,6 +29910,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
 
   var sdpLines = sessionDescriptionStr.split('\r\n');
   var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+  var peerVersion = ((self._peerInformations[targetMid] || {}).agent || {}).version || 0;
   var mediaType = '';
   var bundleLineIndex = -1;
   var bundleLineMids = [];
@@ -29941,9 +29924,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   }
 
   if (settings.connection.video) {
-    settings.connection.video = (window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-      (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-      !!self._currentCodecSupport.video.h264 : true;
+    settings.connection.video = self._getSDPEdgeVideoSupports(peerId);
   }
 
   if (self._hasMCU) {
@@ -30122,6 +30103,29 @@ Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription, 
   return fingerprint;
 };
 
+
+/**
+ * Function that gets edge browser video supports.
+ * @method _getSDPEdgeVideoSupports
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getSDPEdgeVideoSupports = function (peerId) {
+  var self = this;
+
+  if (peerId) {
+    var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
+    var peerVersion = ((self._peerInformations[peerId] || {}).agent || {}).version || 0;
+
+    return window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedVersion < 15.15019 &&
+      peerAgent !== 'edge' ? !!self._currentCodecSupport.video.h264 : (window.webrtcDetectedBrowser !== 'edge' &&
+      peerAgent === 'edge' && peerVersion < 15.15019 ? !!self._currentCodecSupport.video.h264 : true);
+  }
+
+  return window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedVersion < 15.15019 ?
+    !!self._currentCodecSupport.video.h264 : true;
+};
 
   if(typeof exports !== 'undefined') {
     // Prevent breaking code
