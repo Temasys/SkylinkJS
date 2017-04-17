@@ -93,8 +93,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   }
 
   if (self._enableDataChannel && self._peerInformations[targetMid] &&
-    self._peerInformations[targetMid].config.enableDataChannel &&
-    !(!self._sdpSettings.connection.data && targetMid !== 'MCU')) {
+    self._peerInformations[targetMid].config.enableDataChannel/* &&
+    !(!self._sdpSettings.connection.data && targetMid !== 'MCU')*/) {
     // Edge doesn't support datachannels yet
     if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main)) {
       self._createDataChannel(targetMid);
@@ -242,6 +242,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
+  //sessionDescription.sdp = sessionDescription.sdp.replace(/a=fmtp:100 packetization-mode=1;mst-mode=NI-TC;\r\n/gi, '');
+  //sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-rsize\r\n/gi, '');
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);

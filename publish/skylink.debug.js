@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Mon Apr 17 2017 18:46:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Mon Apr 17 2017 19:25:16 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -6111,6 +6111,10 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
   }
 
+  if (!self._peerStats[peerId] && !isAutoBwStats) {
+    return callback(new Error('No stats initiated yet.'));
+  }
+
   var pc = self._peerConnections[peerId];
   var result = {
     raw: null,
@@ -6462,8 +6466,8 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
               }
             } else {
               result[mediaType][dirType].frames = self._parseConnectionStats(
-                isAutoBwStats ? self._peerBandwidth[peerId][subprop] : self._peerStats[peerId][subprop],
-                streamObj,dirType === 'sending' ? obj.framesSent : obj.framesReceived);
+                isAutoBwStats ? self._peerBandwidth[peerId][prop] : self._peerStats[peerId][prop],
+                obj,dirType === 'sending' ? obj.framesSent : obj.framesReceived);
               result[mediaType][dirType].framesDropped = obj.framesDropped;
               result[mediaType][dirType].framesDecoded = obj.framesDecoded;
               result[mediaType][dirType].framesCorrupted = obj.framesCorrupted;
@@ -8397,8 +8401,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   }
 
   if (self._enableDataChannel && self._peerInformations[targetMid] &&
-    self._peerInformations[targetMid].config.enableDataChannel &&
-    !(!self._sdpSettings.connection.data && targetMid !== 'MCU')) {
+    self._peerInformations[targetMid].config.enableDataChannel/* &&
+    !(!self._sdpSettings.connection.data && targetMid !== 'MCU')*/) {
     // Edge doesn't support datachannels yet
     if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main)) {
       self._createDataChannel(targetMid);
@@ -8546,6 +8550,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
+  //sessionDescription.sdp = sessionDescription.sdp.replace(/a=fmtp:100 packetization-mode=1;mst-mode=NI-TC;\r\n/gi, '');
+  //sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-rsize\r\n/gi, '');
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
@@ -17402,17 +17408,6 @@ Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
     }
   }
 };
-
-/**
- * Function that handles m= line audio and video support.
- * @method _getMLineSupports
- * @private
- * @for Skylink
- * @since 0.6.20
- */
-Skylink.prototype._getMLineSupports = function (peerId) {
-
-};
 Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
   var self = this;
 
@@ -18330,7 +18325,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   }
 
   if (settings.connection.video) {
-    settings.connection.video = self._getSDPEdgeVideoSupports(peerId);
+    settings.connection.video = self._getSDPEdgeVideoSupports(targetMid);
   }
 
   if (self._hasMCU) {
