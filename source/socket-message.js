@@ -1524,10 +1524,10 @@ Skylink.prototype._offerHandler = function(message) {
   log.log([targetMid, null, message.type, 'Received offer from peer. ' +
     'Session description:'], clone(message));
 
-  var offer = new RTCSessionDescription({
+  var offer = {
     type: 'offer',
     sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : message.sdp
-  });
+  };
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], offer);
 
@@ -1566,7 +1566,7 @@ Skylink.prototype._offerHandler = function(message) {
     self._addLocalMediaStreams(targetMid);
   }
 
-  pc.setRemoteDescription(offer, function() {
+  pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
     pc.processingRemoteSDP = false;
@@ -1715,10 +1715,10 @@ Skylink.prototype._answerHandler = function(message) {
     self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
-  var answer = new RTCSessionDescription({
+  var answer = {
     type: 'answer',
     sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : message.sdp
-  });
+  };
 
   log.log([targetMid, 'RTCSessionDescription', message.type,
     'Session description object created'], answer);
@@ -1766,7 +1766,7 @@ Skylink.prototype._answerHandler = function(message) {
 
   pc.processingRemoteSDP = true;
 
-  pc.setRemoteDescription(answer, function() {
+  pc.setRemoteDescription(new RTCSessionDescription(answer), function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
     pc.processingRemoteSDP = false;

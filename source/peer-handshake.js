@@ -189,45 +189,50 @@ Skylink.prototype._doAnswer = function(targetMid) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
+Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescription) {
   var self = this;
   var pc = self._peerConnections[targetMid];
 
   // Added checks to ensure that sessionDescription is defined first
-  if (!(!!sessionDescription && !!sessionDescription.sdp)) {
-    log.warn([targetMid, 'RTCSessionDescription', null, 'Local session description is undefined ->'], sessionDescription);
+  if (!(!!_sessionDescription && !!_sessionDescription.sdp)) {
+    log.warn([targetMid, 'RTCSessionDescription', null, 'Local session description is undefined ->'], _sessionDescription);
     return;
   }
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
-    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Local session description will not be set as connection does not exists ->'], sessionDescription);
+    log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
+      'Local session description will not be set as connection does not exists ->'], _sessionDescription);
     return;
 
-  } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
+  } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
     pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
-    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local session description ' +
-      'will not be set as signaling state is "' + pc.signalingState + '" ->'], sessionDescription);
+    log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
+      'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
     return;
 
   // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
-  } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &&
+  } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &&
     pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local session description ' +
-      'will not be set as signaling state is "' + pc.signalingState + '" ->'], sessionDescription);
+    log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
+      'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
     return;
 
   // Added checks if there is a current local sessionDescription being processing before processing this one
   } else if (pc.processingLocalSDP) {
-    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Local session description will not be set as another is being processed ->'], sessionDescription);
+    log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
+      'Local session description will not be set as another is being processed ->'], _sessionDescription);
     return;
   }
 
   pc.processingLocalSDP = true;
 
   // Sets and expected receiving codecs etc.
+  var sessionDescription = {
+    type: _sessionDescription.type,
+    sdp: _sessionDescription.sdp
+  };
+
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
   sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
@@ -238,7 +243,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
 
-  pc.setLocalDescription(sessionDescription, function() {
+  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), function() {
     log.debug([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Local session description has been set ->'], sessionDescription);
 
