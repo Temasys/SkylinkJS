@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.19</title>
+    <title>SkylinkJS 0.6.20</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.19</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.20</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -888,6 +888,7 @@
                       
                         if (self._currentCodecSupport) {
                           callback(null);
+                          return;
                         }
                       
                         self._currentCodecSupport = { audio: {}, video: {} };
@@ -985,12 +986,14 @@
                       
                         var sessionDescriptionStr = sessionDescription.sdp;
                       
+                        // Handle a=end-of-candidates signaling for non-trickle ICE before setting remote session description
                         if (direction === &#x27;remote&#x27; &amp;&amp; !self.getPeerInfo(targetMid).config.enableIceTrickle) {
                           sessionDescriptionStr = sessionDescriptionStr.replace(/a=end-of-candidates\r\n/g, &#x27;&#x27;);
                         }
                       
                         var sdpLines = sessionDescriptionStr.split(&#x27;\r\n&#x27;);
                         var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
+                        var peerVersion = ((self._peerInformations[targetMid] || {}).agent || {}).version || 0;
                         var mediaType = &#x27;&#x27;;
                         var bundleLineIndex = -1;
                         var bundleLineMids = [];
@@ -1004,9 +1007,7 @@
                         }
                       
                         if (settings.connection.video) {
-                          settings.connection.video = (window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
-                            ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
-                            !!self._currentCodecSupport.video.h264 : true;
+                          settings.connection.video = self._getSDPEdgeVideoSupports(targetMid);
                         }
                       
                         if (self._hasMCU) {
@@ -1021,6 +1022,11 @@
                       
                         self._sdpSessions[targetMid][direction].mLines = [];
                         self._sdpSessions[targetMid][direction].bundleLine = &#x27;&#x27;;
+                        self._sdpSessions[targetMid][direction].connection = {
+                          audio: null,
+                          video: null,
+                          data: null
+                        };
                       
                         for (var i = 0; i &lt; sdpLines.length; i++) {
                           // Cache the a=group:BUNDLE line used for remote answer from Edge later
@@ -1092,28 +1098,50 @@
                             } else if (sdpLines[i].indexOf(&#x27;a=mid:&#x27;) === 0) {
                               bundleLineMids.push(sdpLines[i].split(&#x27;a=mid:&#x27;)[1] || &#x27;&#x27;);
                       
+                              if ([&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) === -1) {
+                                self._sdpSessions[targetMid][direction].connection.data = true;
+                              }
+                      
                             // Configure direction a=sendonly etc for local sessiondescription
-                            }  else if (direction === &#x27;local&#x27; &amp;&amp; mediaType &amp;&amp; [&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) &gt; -1 &amp;&amp;
+                            }  else if (mediaType &amp;&amp; [&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) &gt; -1 &amp;&amp;
                               [&#x27;a=sendrecv&#x27;, &#x27;a=sendonly&#x27;, &#x27;a=recvonly&#x27;].indexOf(sdpLines[i]) &gt; -1) {
                       
-                              if (settings.direction[mediaType].send &amp;&amp; !settings.direction[mediaType].receive) {
-                                sdpLines[i] = sdpLines[i].indexOf(&#x27;send&#x27;) &gt; -1 ? &#x27;a=sendonly&#x27; : &#x27;a=inactive&#x27;;
-                              } else if (!settings.direction[mediaType].send &amp;&amp; settings.direction[mediaType].receive) {
-                                sdpLines[i] = sdpLines[i].indexOf(&#x27;recv&#x27;) &gt; -1 ? &#x27;a=recvonly&#x27; : &#x27;a=inactive&#x27;;
-                              } else if (!settings.direction[mediaType].send &amp;&amp; !settings.direction[mediaType].receive) {
-                              // MCU currently does not support a=inactive flag.. what do we do here?
-                                sdpLines[i] = &#x27;a=inactive&#x27;;
-                              }
+                              if (direction === &#x27;local&#x27;) {
+                                if (settings.direction[mediaType].send &amp;&amp; !settings.direction[mediaType].receive) {
+                                  sdpLines[i] = sdpLines[i].indexOf(&#x27;send&#x27;) &gt; -1 ? &#x27;a=sendonly&#x27; : &#x27;a=inactive&#x27;;
+                                } else if (!settings.direction[mediaType].send &amp;&amp; settings.direction[mediaType].receive) {
+                                  sdpLines[i] = sdpLines[i].indexOf(&#x27;recv&#x27;) &gt; -1 ? &#x27;a=recvonly&#x27; : &#x27;a=inactive&#x27;;
+                                } else if (!settings.direction[mediaType].send &amp;&amp; !settings.direction[mediaType].receive) {
+                                // MCU currently does not support a=inactive flag.. what do we do here?
+                                  sdpLines[i] = &#x27;a=inactive&#x27;;
+                                }
                       
-                              // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
-                              if (!self._hasMCU &amp;&amp; window.webrtcDetectedBrowser !== &#x27;firefox&#x27; &amp;&amp; peerAgent === &#x27;firefox&#x27; &amp;&amp;
-                                sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp; sdpLines[i] === &#x27;a=recvonly&#x27;) {
-                                log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Overriding any original settings &#x27; +
-                                  &#x27;to receive only to send and receive to resolve chrome BUNDLE errors.&#x27;]);
-                                sdpLines[i] = &#x27;a=sendrecv&#x27;;
-                                settings.direction[mediaType].send = true;
-                                settings.direction[mediaType].receive = true;
+                                // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+                                if (!self._hasMCU &amp;&amp; window.webrtcDetectedBrowser !== &#x27;firefox&#x27; &amp;&amp; peerAgent === &#x27;firefox&#x27; &amp;&amp;
+                                  sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp; sdpLines[i] === &#x27;a=recvonly&#x27;) {
+                                  log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Overriding any original settings &#x27; +
+                                    &#x27;to receive only to send and receive to resolve chrome BUNDLE errors.&#x27;]);
+                                  sdpLines[i] = &#x27;a=sendrecv&#x27;;
+                                  settings.direction[mediaType].send = true;
+                                  settings.direction[mediaType].receive = true;
+                                }
+                              // Patch for incorrect responses
+                              } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
+                                var localOfferRes = self._sdpSessions[targetMid].local.connection[mediaType];
+                                // Parse a=sendonly response
+                                if (localOfferRes === &#x27;a=sendonly&#x27;) {
+                                  sdpLines[i] = [&#x27;a=inactive&#x27;, &#x27;a=recvonly&#x27;].indexOf(sdpLines[i]) === -1 ?
+                                    (sdpLines[i] === &#x27;a=sendonly&#x27; ? &#x27;a=inactive&#x27; : &#x27;a=recvonly&#x27;) : sdpLines[i];
+                                // Parse a=recvonly
+                                } else if (localOfferRes === &#x27;a=recvonly&#x27;) {
+                                  sdpLines[i] = [&#x27;a=inactive&#x27;, &#x27;a=sendonly&#x27;].indexOf(sdpLines[i]) === -1 ?
+                                    (sdpLines[i] === &#x27;a=recvonly&#x27; ? &#x27;a=inactive&#x27; : &#x27;a=sendonly&#x27;) : sdpLines[i];
+                                // Parse a=sendrecv
+                                } else if (localOfferRes === &#x27;a=inactive&#x27;) {
+                                  sdpLines[i] = &#x27;a=inactive&#x27;;
+                                }
                               }
+                              self._sdpSessions[targetMid][direction].connection[mediaType] = sdpLines[i];
                             }
                           }
                       
@@ -1185,6 +1213,29 @@
                         return fingerprint;
                       };
                       
+                      
+                      /**
+                       * Function that gets edge browser video supports.
+                       * @method _getSDPEdgeVideoSupports
+                       * @private
+                       * @for Skylink
+                       * @since 0.6.18
+                       */
+                      Skylink.prototype._getSDPEdgeVideoSupports = function (peerId) {
+                        var self = this;
+                      
+                        if (peerId) {
+                          var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || &#x27;&#x27;;
+                          var peerVersion = ((self._peerInformations[peerId] || {}).agent || {}).version || 0;
+                      
+                          return window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; window.webrtcDetectedVersion &lt; 15.15019 &amp;&amp;
+                            peerAgent !== &#x27;edge&#x27; ? !!self._currentCodecSupport.video.h264 : (window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp;
+                            peerAgent === &#x27;edge&#x27; &amp;&amp; peerVersion &lt; 15.15019 ? !!self._currentCodecSupport.video.h264 : true);
+                        }
+                      
+                        return window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; window.webrtcDetectedVersion &lt; 15.15019 ?
+                          !!self._currentCodecSupport.video.h264 : true;
+                      };
                           </pre>
                       </div>
                   </div>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.19</title>
+    <title>SkylinkJS 0.6.20</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.19</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.20</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -2058,11 +2058,9 @@
                       
                           var pc = self._peerConnections[peerId];
                           var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || &#x27;&#x27;;
+                          var peerVersion = ((self._peerInformations[peerId] || {}).agent || {}).version || 0;
                           var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; peerId !== &#x27;MCU&#x27;);
-                          var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; peerId !== &#x27;MCU&#x27;) &amp;&amp;
-                            ((window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
-                            ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
-                            !!self._currentCodecSupport.video.h264 : true);
+                          var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; peerId !== &#x27;MCU&#x27;) &amp;&amp; self._getSDPEdgeVideoSupports(peerId);
                       
                           if (pc) {
                             if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {

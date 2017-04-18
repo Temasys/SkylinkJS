@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.19</title>
+    <title>SkylinkJS 0.6.20</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.19</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.20</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -830,6 +830,10 @@
                           log.debug([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieivng connection status&#x27;]);
                         }
                       
+                        if (!self._peerStats[peerId] &amp;&amp; !isAutoBwStats) {
+                          return callback(new Error(&#x27;No stats initiated yet.&#x27;));
+                        }
+                      
                         var pc = self._peerConnections[peerId];
                         var result = {
                           raw: null,
@@ -1181,8 +1185,8 @@
                                     }
                                   } else {
                                     result[mediaType][dirType].frames = self._parseConnectionStats(
-                                      isAutoBwStats ? self._peerBandwidth[peerId][subprop] : self._peerStats[peerId][subprop],
-                                      streamObj,dirType === &#x27;sending&#x27; ? obj.framesSent : obj.framesReceived);
+                                      isAutoBwStats ? self._peerBandwidth[peerId][prop] : self._peerStats[peerId][prop],
+                                      obj,dirType === &#x27;sending&#x27; ? obj.framesSent : obj.framesReceived);
                                     result[mediaType][dirType].framesDropped = obj.framesDropped;
                                     result[mediaType][dirType].framesDecoded = obj.framesDecoded;
                                     result[mediaType][dirType].framesCorrupted = obj.framesCorrupted;
@@ -2290,9 +2294,9 @@
                        */
                       Skylink.prototype._parseConnectionStats = function(prevStats, stats, prop) {
                         var nTime = stats.timestamp;
-                        var oTime = prevStats.timestamp;
+                        var oTime = prevStats ? prevStats.timestamp || 0 : 0;
                         var nVal = parseFloat(stats[prop] || &#x27;0&#x27;, 10);
-                        var oVal = parseFloat(prevStats[prop] || &#x27;0&#x27;, 10);
+                        var oVal = parseFloat(prevStats ? prevStats[prop] || &#x27;0&#x27; : &#x27;0&#x27;, 10);
                       
                         if ((new Date(nTime).getTime()) === (new Date(oTime).getTime())) {
                           return nVal;

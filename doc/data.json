@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.19",
+        "version": "0.6.20",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -3201,7 +3201,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1502,
+            "line": 1506,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -3212,7 +3212,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1541,
+            "line": 1545,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -3223,7 +3223,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1692,
+            "line": 1696,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -3234,7 +3234,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1796,
+            "line": 1800,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -3245,7 +3245,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2052,
+            "line": 2056,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3256,7 +3256,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2200,
+            "line": 2204,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3267,7 +3267,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2220,
+            "line": 2224,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -3346,7 +3346,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 296,
+            "line": 315,
             "description": "Function that gets the list of connected Peers in the Room.",
             "itemtype": "method",
             "name": "getPeersInRoom",
@@ -3362,7 +3362,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 327,
+            "line": 346,
             "description": "Function that gets the list of connected Peers Streams in the Room.",
             "itemtype": "method",
             "name": "getPeersStream",
@@ -3378,7 +3378,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 390,
+            "line": 409,
             "description": "Function that gets the current list of connected Peers Datachannel connections in the Room.",
             "itemtype": "method",
             "name": "getPeersDatachannels",
@@ -3394,7 +3394,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 446,
+            "line": 465,
             "description": "Function that gets the list of current data transfers.",
             "itemtype": "method",
             "name": "getCurrentDataTransfers",
@@ -3410,7 +3410,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 484,
+            "line": 503,
             "description": "Function that gets the list of current data streaming sessions.",
             "itemtype": "method",
             "name": "getCurrentDataStreamsSession",
@@ -3426,7 +3426,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 528,
+            "line": 547,
             "description": "Function that gets the list of current custom Peer settings sent and set.",
             "itemtype": "method",
             "name": "getPeerCustomSettings",
@@ -3442,7 +3442,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 650,
+            "line": 662,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
@@ -3502,7 +3502,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 130,
+            "line": 126,
             "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -3513,7 +3513,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 191,
+            "line": 183,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -4972,7 +4972,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1335,
+            "line": 1330,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -9039,7 +9039,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1590,
+            "line": 1594,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -9050,7 +9050,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1685,
+            "line": 1689,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -9061,7 +9061,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1799,
+            "line": 1807,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -9800,7 +9800,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2058,
+            "line": 2056,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -9932,7 +9932,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 887,
+            "line": 888,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -9943,10 +9943,21 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1067,
+            "line": 1095,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 1133,
+            "description": "Function that gets edge browser video supports.",
+            "itemtype": "method",
+            "name": "_getSDPEdgeVideoSupports",
             "access": "private",
             "tagname": "",
             "since": "0.6.18",
