@@ -2210,9 +2210,9 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
  */
 Skylink.prototype._parseConnectionStats = function(prevStats, stats, prop) {
   var nTime = stats.timestamp;
-  var oTime = prevStats.timestamp;
+  var oTime = prevStats ? prevStats.timestamp || 0 : 0;
   var nVal = parseFloat(stats[prop] || '0', 10);
-  var oVal = parseFloat(prevStats[prop] || '0', 10);
+  var oVal = parseFloat(prevStats ? prevStats[prop] || '0' : '0', 10);
 
   if ((new Date(nTime).getTime()) === (new Date(oTime).getTime())) {
     return nVal;

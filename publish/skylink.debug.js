@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Tue Apr 18 2017 13:47:54 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Tue Apr 18 2017 13:49:14 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -7575,9 +7575,9 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
  */
 Skylink.prototype._parseConnectionStats = function(prevStats, stats, prop) {
   var nTime = stats.timestamp;
-  var oTime = prevStats.timestamp;
+  var oTime = prevStats ? prevStats.timestamp || 0 : 0;
   var nVal = parseFloat(stats[prop] || '0', 10);
-  var oVal = parseFloat(prevStats[prop] || '0', 10);
+  var oVal = parseFloat(prevStats ? prevStats[prop] || '0' : '0', 10);
 
   if ((new Date(nTime).getTime()) === (new Date(oTime).getTime())) {
     return nVal;
