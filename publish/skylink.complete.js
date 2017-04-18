@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Tue Apr 18 2017 13:49:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Tue Apr 18 2017 17:57:29 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11592,7 +11592,7 @@ if (typeof window.require !== 'function') {
   AdapterJS.defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.19 - Tue Apr 18 2017 13:49:14 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Tue Apr 18 2017 17:57:29 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -29889,6 +29889,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
 
   var sessionDescriptionStr = sessionDescription.sdp;
 
+  // Handle a=end-of-candidates signaling for non-trickle ICE before setting remote session description
   if (direction === 'remote' && !self.getPeerInfo(targetMid).config.enableIceTrickle) {
     sessionDescriptionStr = sessionDescriptionStr.replace(/a=end-of-candidates\r\n/g, '');
   }
@@ -29924,6 +29925,11 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
 
   self._sdpSessions[targetMid][direction].mLines = [];
   self._sdpSessions[targetMid][direction].bundleLine = '';
+  self._sdpSessions[targetMid][direction].connection = {
+    audio: null,
+    video: null,
+    data: null
+  };
 
   for (var i = 0; i < sdpLines.length; i++) {
     // Cache the a=group:BUNDLE line used for remote answer from Edge later
@@ -29995,28 +30001,50 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       } else if (sdpLines[i].indexOf('a=mid:') === 0) {
         bundleLineMids.push(sdpLines[i].split('a=mid:')[1] || '');
 
+        if (['audio', 'video'].indexOf(mediaType) === -1) {
+          self._sdpSessions[targetMid][direction].connection.data = true;
+        }
+
       // Configure direction a=sendonly etc for local sessiondescription
-      }  else if (direction === 'local' && mediaType && ['audio', 'video'].indexOf(mediaType) > -1 &&
+      }  else if (mediaType && ['audio', 'video'].indexOf(mediaType) > -1 &&
         ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
 
-        if (settings.direction[mediaType].send && !settings.direction[mediaType].receive) {
-          sdpLines[i] = sdpLines[i].indexOf('send') > -1 ? 'a=sendonly' : 'a=inactive';
-        } else if (!settings.direction[mediaType].send && settings.direction[mediaType].receive) {
-          sdpLines[i] = sdpLines[i].indexOf('recv') > -1 ? 'a=recvonly' : 'a=inactive';
-        } else if (!settings.direction[mediaType].send && !settings.direction[mediaType].receive) {
-        // MCU currently does not support a=inactive flag.. what do we do here?
-          sdpLines[i] = 'a=inactive';
-        }
+        if (direction === 'local') {
+          if (settings.direction[mediaType].send && !settings.direction[mediaType].receive) {
+            sdpLines[i] = sdpLines[i].indexOf('send') > -1 ? 'a=sendonly' : 'a=inactive';
+          } else if (!settings.direction[mediaType].send && settings.direction[mediaType].receive) {
+            sdpLines[i] = sdpLines[i].indexOf('recv') > -1 ? 'a=recvonly' : 'a=inactive';
+          } else if (!settings.direction[mediaType].send && !settings.direction[mediaType].receive) {
+          // MCU currently does not support a=inactive flag.. what do we do here?
+            sdpLines[i] = 'a=inactive';
+          }
 
-        // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
-        if (!self._hasMCU && window.webrtcDetectedBrowser !== 'firefox' && peerAgent === 'firefox' &&
-          sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && sdpLines[i] === 'a=recvonly') {
-          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Overriding any original settings ' +
-            'to receive only to send and receive to resolve chrome BUNDLE errors.']);
-          sdpLines[i] = 'a=sendrecv';
-          settings.direction[mediaType].send = true;
-          settings.direction[mediaType].receive = true;
+          // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+          if (!self._hasMCU && window.webrtcDetectedBrowser !== 'firefox' && peerAgent === 'firefox' &&
+            sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && sdpLines[i] === 'a=recvonly') {
+            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Overriding any original settings ' +
+              'to receive only to send and receive to resolve chrome BUNDLE errors.']);
+            sdpLines[i] = 'a=sendrecv';
+            settings.direction[mediaType].send = true;
+            settings.direction[mediaType].receive = true;
+          }
+        // Patch for incorrect responses
+        } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
+          var localOfferRes = self._sdpSessions[targetMid].local.connection[mediaType];
+          // Parse a=sendonly response
+          if (localOfferRes === 'a=sendonly') {
+            sdpLines[i] = ['a=inactive', 'a=recvonly'].indexOf(sdpLines[i]) === -1 ?
+              (sdpLines[i] === 'a=sendonly' ? 'a=inactive' : 'a=recvonly') : sdpLines[i];
+          // Parse a=recvonly
+          } else if (localOfferRes === 'a=recvonly') {
+            sdpLines[i] = ['a=inactive', 'a=sendonly'].indexOf(sdpLines[i]) === -1 ?
+              (sdpLines[i] === 'a=recvonly' ? 'a=inactive' : 'a=sendonly') : sdpLines[i];
+          // Parse a=sendrecv
+          } else if (localOfferRes === 'a=inactive') {
+            sdpLines[i] = 'a=inactive';
+          }
         }
+        self._sdpSessions[targetMid][direction].connection[mediaType] = sdpLines[i];
       }
     }
 
