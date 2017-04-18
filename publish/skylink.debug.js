@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.20 - Tue Apr 18 2017 19:02:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.20 - Tue Apr 18 2017 19:13:40 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -13220,7 +13220,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
         rid: self._room.id
       };
 
-      log.debug([message.target || 'Server', 'Socket', groupMessage.type,
+      log.log([message.target || 'Server', 'Socket', groupMessage.type,
         'Sending queued grouped message (max: 16 per group) ->'], clone(groupMessage));
 
       self._socket.send(JSON.stringify(groupMessage));
@@ -13253,7 +13253,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       if (self._socketMessageTimeout) {
         clearTimeout(self._socketMessageTimeout);
       }
-      log.warn([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
+      log.log([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
       self._socket.send(JSON.stringify(message));
       setStampFn(message);
       triggerEventFn(message);
@@ -13261,7 +13261,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       self._timestamp.socketMessage = (new Date()).getTime();
 
     } else {
-      log.warn([message.target || 'Server', 'Socket', message.type,
+      log.debug([message.target || 'Server', 'Socket', message.type,
         'Queueing socket message to prevent message drop ->'], clone(message));
 
       self._socketMessageQueue.push(message);
@@ -13271,7 +13271,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       }
     }
   } else {
-    log.debug([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
+    log.log([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
     self._socket.send(JSON.stringify(message));
 
     // If Peer sends "bye" on its own, we trigger it as session disconnected abruptly

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.20 - Tue Apr 18 2017 19:02:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.20 - Tue Apr 18 2017 19:13:40 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11592,7 +11592,7 @@ if (typeof window.require !== 'function') {
   AdapterJS.defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.20 - Tue Apr 18 2017 19:02:36 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.20 - Tue Apr 18 2017 19:13:40 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -24814,7 +24814,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
         rid: self._room.id
       };
 
-      log.debug([message.target || 'Server', 'Socket', groupMessage.type,
+      log.log([message.target || 'Server', 'Socket', groupMessage.type,
         'Sending queued grouped message (max: 16 per group) ->'], clone(groupMessage));
 
       self._socket.send(JSON.stringify(groupMessage));
@@ -24847,7 +24847,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       if (self._socketMessageTimeout) {
         clearTimeout(self._socketMessageTimeout);
       }
-      log.warn([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
+      log.log([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
       self._socket.send(JSON.stringify(message));
       setStampFn(message);
       triggerEventFn(message);
@@ -24855,7 +24855,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       self._timestamp.socketMessage = (new Date()).getTime();
 
     } else {
-      log.warn([message.target || 'Server', 'Socket', message.type,
+      log.debug([message.target || 'Server', 'Socket', message.type,
         'Queueing socket message to prevent message drop ->'], clone(message));
 
       self._socketMessageQueue.push(message);
@@ -24865,7 +24865,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
       }
     }
   } else {
-    log.debug([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
+    log.log([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
     self._socket.send(JSON.stringify(message));
 
     // If Peer sends "bye" on its own, we trigger it as session disconnected abruptly

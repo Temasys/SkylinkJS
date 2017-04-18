@@ -41,9 +41,9 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
-              <li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
-              <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
-              <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
+              <li><a href="https://temasys.io/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
+              <li><a href="https://temasys.io/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
+              <li><a href="https://temasys.io/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
             </ul>
           </li>
             <li><a href="../classes/Skylink.html">Documentation</a></li>
@@ -53,8 +53,8 @@
                 <li><a href="../classes/Skylink.html">Skylink</a></li>
             </ul>
           </li>-->
-          <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
-          <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
+          <li><a class="btn btn-info btn-navbar" href="https://console.temasys.io/">Developer Console</a></li>
+          <li><a class="btn btn-info btn-navbar" href="http://support.temasys.io/">Support</a></li>
           <!--<li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
@@ -287,7 +287,7 @@
                               rid: self._room.id
                             };
                       
-                            log.debug([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, groupMessage.type,
+                            log.log([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, groupMessage.type,
                               &#x27;Sending queued grouped message (max: 16 per group) -&gt;&#x27;], clone(groupMessage));
                       
                             self._socket.send(JSON.stringify(groupMessage));
@@ -320,7 +320,7 @@
                             if (self._socketMessageTimeout) {
                               clearTimeout(self._socketMessageTimeout);
                             }
-                            log.warn([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, message.type, &#x27;Sending message -&gt;&#x27;], clone(message));
+                            log.log([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, message.type, &#x27;Sending message -&gt;&#x27;], clone(message));
                             self._socket.send(JSON.stringify(message));
                             setStampFn(message);
                             triggerEventFn(message);
@@ -328,7 +328,7 @@
                             self._timestamp.socketMessage = (new Date()).getTime();
                       
                           } else {
-                            log.warn([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, message.type,
+                            log.debug([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, message.type,
                               &#x27;Queueing socket message to prevent message drop -&gt;&#x27;], clone(message));
                       
                             self._socketMessageQueue.push(message);
@@ -338,7 +338,7 @@
                             }
                           }
                         } else {
-                          log.debug([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, message.type, &#x27;Sending message -&gt;&#x27;], clone(message));
+                          log.log([message.target || &#x27;Server&#x27;, &#x27;Socket&#x27;, message.type, &#x27;Sending message -&gt;&#x27;], clone(message));
                           self._socket.send(JSON.stringify(message));
                       
                           // If Peer sends &quot;bye&quot; on its own, we trigger it as session disconnected abruptly
