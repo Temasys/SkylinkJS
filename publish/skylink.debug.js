@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Mon Apr 17 2017 19:25:16 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Tue Apr 18 2017 13:47:54 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -8535,14 +8535,6 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
 
   pc.processingLocalSDP = true;
 
-  // Set them as first
-  if (window.webrtcDetectedBrowser === 'edge') {
-    sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription, {
-      audio: self.AUDIO_CODEC.OPUS,
-      video: self.VIDEO_CODEC.H264
-    });
-  }
-
   // Sets and expected receiving codecs etc.
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
   sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
@@ -8550,8 +8542,6 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
-  //sessionDescription.sdp = sessionDescription.sdp.replace(/a=fmtp:100 packetization-mode=1;mst-mode=NI-TC;\r\n/gi, '');
-  //sessionDescription.sdp = sessionDescription.sdp.replace(/a=rtcp-rsize\r\n/gi, '');
 
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
