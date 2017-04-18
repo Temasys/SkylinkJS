@@ -208,6 +208,29 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.connected = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].connected;
     peerInfo.init = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].init;
 
+    if (this._sdpSessions[peerId]) {
+      // Set audio to false if SDP m= line and direction is not available
+      if (peerInfo.settings.audio && !((this._sdpSessions[peerId].local && this._sdpSessions[peerId].local.connection ?
+        (this._sdpSessions[peerId].local.connection.audio || '').indexOf('recv') > -1 : true) &&
+        (this._sdpSessions[peerId].remote && this._sdpSessions[peerId].remote.connection ?
+        (this._sdpSessions[peerId].remote.connection.audio || '').indexOf('send') > -1 : true))) {
+        peerInfo.settings.audio = false;
+      }
+      // Set video to false if SDP m= line and direction is not available
+      if (peerInfo.settings.video && !((this._sdpSessions[peerId].local && this._sdpSessions[peerId].local.connection ?
+        (this._sdpSessions[peerId].local.connection.video || '').indexOf('recv') > -1 : true) &&
+        (this._sdpSessions[peerId].remote && this._sdpSessions[peerId].remote.connection ?
+        (this._sdpSessions[peerId].remote.connection.video || '').indexOf('send') > -1 : true))) {
+        peerInfo.settings.video = false;
+      }
+      // Set data to false if SDP m= line and direction is not available
+      if (peerInfo.settings.data && !((this._sdpSessions[peerId].local && this._sdpSessions[peerId].local.connection ?
+        this._sdpSessions[peerId].local.connection.data : true) && (this._sdpSessions[peerId].remote &&
+        this._sdpSessions[peerId].remote.connection ? this._sdpSessions[peerId].remote.connection.data : true))) {
+        peerInfo.settings.data = false;
+      }
+    }
+
   } else {
     peerInfo = {
       userData: clone(this._userData),

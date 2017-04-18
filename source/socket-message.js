@@ -1566,6 +1566,10 @@ Skylink.prototype._offerHandler = function(message) {
     self._addLocalMediaStreams(targetMid);
   }
 
+  if (message.userInfo) {
+    self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
+  }
+
   pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
@@ -1765,6 +1769,10 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   pc.processingRemoteSDP = true;
+
+  if (message.userInfo) {
+    self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
+  }
 
   pc.setRemoteDescription(new RTCSessionDescription(answer), function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);

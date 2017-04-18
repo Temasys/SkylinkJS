@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.19 - Tue Apr 18 2017 18:32:00 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.19 - Tue Apr 18 2017 18:58:56 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -7837,6 +7837,29 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.connected = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].connected;
     peerInfo.init = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].init;
 
+    if (this._sdpSessions[peerId]) {
+      // Set audio to false if SDP m= line and direction is not available
+      if (peerInfo.settings.audio && !((this._sdpSessions[peerId].local && this._sdpSessions[peerId].local.connection ?
+        (this._sdpSessions[peerId].local.connection.audio || '').indexOf('recv') > -1 : true) &&
+        (this._sdpSessions[peerId].remote && this._sdpSessions[peerId].remote.connection ?
+        (this._sdpSessions[peerId].remote.connection.audio || '').indexOf('send') > -1 : true))) {
+        peerInfo.settings.audio = false;
+      }
+      // Set video to false if SDP m= line and direction is not available
+      if (peerInfo.settings.video && !((this._sdpSessions[peerId].local && this._sdpSessions[peerId].local.connection ?
+        (this._sdpSessions[peerId].local.connection.video || '').indexOf('recv') > -1 : true) &&
+        (this._sdpSessions[peerId].remote && this._sdpSessions[peerId].remote.connection ?
+        (this._sdpSessions[peerId].remote.connection.video || '').indexOf('send') > -1 : true))) {
+        peerInfo.settings.video = false;
+      }
+      // Set data to false if SDP m= line and direction is not available
+      if (peerInfo.settings.data && !((this._sdpSessions[peerId].local && this._sdpSessions[peerId].local.connection ?
+        this._sdpSessions[peerId].local.connection.data : true) && (this._sdpSessions[peerId].remote &&
+        this._sdpSessions[peerId].remote.connection ? this._sdpSessions[peerId].remote.connection.data : true))) {
+        peerInfo.settings.data = false;
+      }
+    }
+
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -15074,6 +15097,10 @@ Skylink.prototype._offerHandler = function(message) {
     self._addLocalMediaStreams(targetMid);
   }
 
+  if (message.userInfo) {
+    self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
+  }
+
   pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
@@ -15273,6 +15300,10 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   pc.processingRemoteSDP = true;
+
+  if (message.userInfo) {
+    self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
+  }
 
   pc.setRemoteDescription(new RTCSessionDescription(answer), function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
