@@ -746,6 +746,10 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
   }
 
+  if (!self._peerStats[peerId] && !isAutoBwStats) {
+    return callback(new Error('No stats initiated yet.'));
+  }
+
   var pc = self._peerConnections[peerId];
   var result = {
     raw: null,
@@ -1097,8 +1101,8 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
               }
             } else {
               result[mediaType][dirType].frames = self._parseConnectionStats(
-                isAutoBwStats ? self._peerBandwidth[peerId][subprop] : self._peerStats[peerId][subprop],
-                streamObj,dirType === 'sending' ? obj.framesSent : obj.framesReceived);
+                isAutoBwStats ? self._peerBandwidth[peerId][prop] : self._peerStats[peerId][prop],
+                obj,dirType === 'sending' ? obj.framesSent : obj.framesReceived);
               result[mediaType][dirType].framesDropped = obj.framesDropped;
               result[mediaType][dirType].framesDecoded = obj.framesDecoded;
               result[mediaType][dirType].framesCorrupted = obj.framesCorrupted;
@@ -2206,9 +2210,9 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
  */
 Skylink.prototype._parseConnectionStats = function(prevStats, stats, prop) {
   var nTime = stats.timestamp;
-  var oTime = prevStats.timestamp;
+  var oTime = prevStats ? prevStats.timestamp || 0 : 0;
   var nVal = parseFloat(stats[prop] || '0', 10);
-  var oVal = parseFloat(prevStats[prop] || '0', 10);
+  var oVal = parseFloat(prevStats ? prevStats[prop] || '0' : '0', 10);
 
   if ((new Date(nTime).getTime()) === (new Date(oTime).getTime())) {
     return nVal;

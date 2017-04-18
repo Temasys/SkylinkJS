@@ -804,6 +804,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
 
   if (self._currentCodecSupport) {
     callback(null);
+    return;
   }
 
   self._currentCodecSupport = { audio: {}, video: {} };
@@ -901,12 +902,14 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
 
   var sessionDescriptionStr = sessionDescription.sdp;
 
+  // Handle a=end-of-candidates signaling for non-trickle ICE before setting remote session description
   if (direction === 'remote' && !self.getPeerInfo(targetMid).config.enableIceTrickle) {
     sessionDescriptionStr = sessionDescriptionStr.replace(/a=end-of-candidates\r\n/g, '');
   }
 
   var sdpLines = sessionDescriptionStr.split('\r\n');
   var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+  var peerVersion = ((self._peerInformations[targetMid] || {}).agent || {}).version || 0;
   var mediaType = '';
   var bundleLineIndex = -1;
   var bundleLineMids = [];
@@ -920,9 +923,7 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   }
 
   if (settings.connection.video) {
-    settings.connection.video = (window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-      (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-      !!self._currentCodecSupport.video.h264 : true;
+    settings.connection.video = self._getSDPEdgeVideoSupports(targetMid);
   }
 
   if (self._hasMCU) {
@@ -937,6 +938,11 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
 
   self._sdpSessions[targetMid][direction].mLines = [];
   self._sdpSessions[targetMid][direction].bundleLine = '';
+  self._sdpSessions[targetMid][direction].connection = {
+    audio: null,
+    video: null,
+    data: null
+  };
 
   for (var i = 0; i < sdpLines.length; i++) {
     // Cache the a=group:BUNDLE line used for remote answer from Edge later
@@ -1008,28 +1014,50 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       } else if (sdpLines[i].indexOf('a=mid:') === 0) {
         bundleLineMids.push(sdpLines[i].split('a=mid:')[1] || '');
 
+        if (['audio', 'video'].indexOf(mediaType) === -1) {
+          self._sdpSessions[targetMid][direction].connection.data = true;
+        }
+
       // Configure direction a=sendonly etc for local sessiondescription
-      }  else if (direction === 'local' && mediaType && ['audio', 'video'].indexOf(mediaType) > -1 &&
+      }  else if (mediaType && ['audio', 'video'].indexOf(mediaType) > -1 &&
         ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
 
-        if (settings.direction[mediaType].send && !settings.direction[mediaType].receive) {
-          sdpLines[i] = sdpLines[i].indexOf('send') > -1 ? 'a=sendonly' : 'a=inactive';
-        } else if (!settings.direction[mediaType].send && settings.direction[mediaType].receive) {
-          sdpLines[i] = sdpLines[i].indexOf('recv') > -1 ? 'a=recvonly' : 'a=inactive';
-        } else if (!settings.direction[mediaType].send && !settings.direction[mediaType].receive) {
-        // MCU currently does not support a=inactive flag.. what do we do here?
-          sdpLines[i] = 'a=inactive';
-        }
+        if (direction === 'local') {
+          if (settings.direction[mediaType].send && !settings.direction[mediaType].receive) {
+            sdpLines[i] = sdpLines[i].indexOf('send') > -1 ? 'a=sendonly' : 'a=inactive';
+          } else if (!settings.direction[mediaType].send && settings.direction[mediaType].receive) {
+            sdpLines[i] = sdpLines[i].indexOf('recv') > -1 ? 'a=recvonly' : 'a=inactive';
+          } else if (!settings.direction[mediaType].send && !settings.direction[mediaType].receive) {
+          // MCU currently does not support a=inactive flag.. what do we do here?
+            sdpLines[i] = 'a=inactive';
+          }
 
-        // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
-        if (!self._hasMCU && window.webrtcDetectedBrowser !== 'firefox' && peerAgent === 'firefox' &&
-          sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && sdpLines[i] === 'a=recvonly') {
-          log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Overriding any original settings ' +
-            'to receive only to send and receive to resolve chrome BUNDLE errors.']);
-          sdpLines[i] = 'a=sendrecv';
-          settings.direction[mediaType].send = true;
-          settings.direction[mediaType].receive = true;
+          // Handle Chrome bundle bug. - See: https://bugs.chromium.org/p/webrtc/issues/detail?id=6280
+          if (!self._hasMCU && window.webrtcDetectedBrowser !== 'firefox' && peerAgent === 'firefox' &&
+            sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER && sdpLines[i] === 'a=recvonly') {
+            log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Overriding any original settings ' +
+              'to receive only to send and receive to resolve chrome BUNDLE errors.']);
+            sdpLines[i] = 'a=sendrecv';
+            settings.direction[mediaType].send = true;
+            settings.direction[mediaType].receive = true;
+          }
+        // Patch for incorrect responses
+        } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
+          var localOfferRes = self._sdpSessions[targetMid].local.connection[mediaType];
+          // Parse a=sendonly response
+          if (localOfferRes === 'a=sendonly') {
+            sdpLines[i] = ['a=inactive', 'a=recvonly'].indexOf(sdpLines[i]) === -1 ?
+              (sdpLines[i] === 'a=sendonly' ? 'a=inactive' : 'a=recvonly') : sdpLines[i];
+          // Parse a=recvonly
+          } else if (localOfferRes === 'a=recvonly') {
+            sdpLines[i] = ['a=inactive', 'a=sendonly'].indexOf(sdpLines[i]) === -1 ?
+              (sdpLines[i] === 'a=recvonly' ? 'a=inactive' : 'a=sendonly') : sdpLines[i];
+          // Parse a=sendrecv
+          } else if (localOfferRes === 'a=inactive') {
+            sdpLines[i] = 'a=inactive';
+          }
         }
+        self._sdpSessions[targetMid][direction].connection[mediaType] = sdpLines[i];
       }
     }
 
@@ -1099,4 +1127,28 @@ Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription, 
   }
 
   return fingerprint;
+};
+
+
+/**
+ * Function that gets edge browser video supports.
+ * @method _getSDPEdgeVideoSupports
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getSDPEdgeVideoSupports = function (peerId) {
+  var self = this;
+
+  if (peerId) {
+    var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
+    var peerVersion = ((self._peerInformations[peerId] || {}).agent || {}).version || 0;
+
+    return window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedVersion < 15.15019 &&
+      peerAgent !== 'edge' ? !!self._currentCodecSupport.video.h264 : (window.webrtcDetectedBrowser !== 'edge' &&
+      peerAgent === 'edge' && peerVersion < 15.15019 ? !!self._currentCodecSupport.video.h264 : true);
+  }
+
+  return window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedVersion < 15.15019 ?
+    !!self._currentCodecSupport.video.h264 : true;
 };

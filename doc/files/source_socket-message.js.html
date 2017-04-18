@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.19</title>
+    <title>SkylinkJS 0.6.20</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.19</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.20</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -41,9 +41,9 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
-              <li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
-              <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
-              <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
+              <li><a href="https://temasys.io/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
+              <li><a href="https://temasys.io/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
+              <li><a href="https://temasys.io/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
             </ul>
           </li>
             <li><a href="../classes/Skylink.html">Documentation</a></li>
@@ -53,8 +53,8 @@
                 <li><a href="../classes/Skylink.html">Skylink</a></li>
             </ul>
           </li>-->
-          <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
-          <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
+          <li><a class="btn btn-info btn-navbar" href="https://console.temasys.io/">Developer Console</a></li>
+          <li><a class="btn btn-info btn-navbar" href="http://support.temasys.io/">Support</a></li>
           <!--<li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
@@ -1608,10 +1608,10 @@
                         log.log([targetMid, null, message.type, &#x27;Received offer from peer. &#x27; +
                           &#x27;Session description:&#x27;], clone(message));
                       
-                        var offer = new RTCSessionDescription({
+                        var offer = {
                           type: &#x27;offer&#x27;,
                           sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, &#x27;\n&#x27;).split(&#x27;\n&#x27;).join(&#x27;\r\n&#x27;) : message.sdp
-                        });
+                        };
                         log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type,
                           &#x27;Session description object created&#x27;], offer);
                       
@@ -1650,7 +1650,11 @@
                           self._addLocalMediaStreams(targetMid);
                         }
                       
-                        pc.setRemoteDescription(offer, function() {
+                        if (message.userInfo) {
+                          self._trigger(&#x27;peerUpdated&#x27;, targetMid, self.getPeerInfo(targetMid), false);
+                        }
+                      
+                        pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
                           log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Remote description set&#x27;]);
                           pc.setOffer = &#x27;remote&#x27;;
                           pc.processingRemoteSDP = false;
@@ -1799,10 +1803,10 @@
                           self._peerInformations[targetMid].userData = userInfo.userData;
                         }
                       
-                        var answer = new RTCSessionDescription({
+                        var answer = {
                           type: &#x27;answer&#x27;,
                           sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, &#x27;\n&#x27;).split(&#x27;\n&#x27;).join(&#x27;\r\n&#x27;) : message.sdp
-                        });
+                        };
                       
                         log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type,
                           &#x27;Session description object created&#x27;], answer);
@@ -1850,7 +1854,11 @@
                       
                         pc.processingRemoteSDP = true;
                       
-                        pc.setRemoteDescription(answer, function() {
+                        if (message.userInfo) {
+                          self._trigger(&#x27;peerUpdated&#x27;, targetMid, self.getPeerInfo(targetMid), false);
+                        }
+                      
+                        pc.setRemoteDescription(new RTCSessionDescription(answer), function() {
                           log.debug([targetMid, null, message.type, &#x27;Remote description set&#x27;]);
                           pc.setAnswer = &#x27;remote&#x27;;
                           pc.processingRemoteSDP = false;

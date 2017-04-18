@@ -60,14 +60,10 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
-  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
   var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &&
     iceRestart && self._enableIceRestart;
   var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
-    ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-    (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-    !!self._currentCodecSupport.video.h264 : true);
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid);
 
   var offerConstraints = {
     offerToReceiveAudio: offerToReceiveAudio,
@@ -97,8 +93,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   }
 
   if (self._enableDataChannel && self._peerInformations[targetMid] &&
-    self._peerInformations[targetMid].config.enableDataChannel &&
-    !(!self._sdpSettings.connection.data && targetMid !== 'MCU')) {
+    self._peerInformations[targetMid].config.enableDataChannel/* &&
+    !(!self._sdpSettings.connection.data && targetMid !== 'MCU')*/) {
     // Edge doesn't support datachannels yet
     if (!(self._dataChannels[targetMid] && self._dataChannels[targetMid].main)) {
       self._createDataChannel(targetMid);
@@ -161,12 +157,8 @@ Skylink.prototype._doAnswer = function(targetMid) {
     self._addLocalMediaStreams(targetMid);
   }
 
-  var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
   var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
-    ((window.webrtcDetectedBrowser === 'edge' && peerAgent !== 'edge') ||
-    (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && peerAgent === 'edge') ?
-    !!self._currentCodecSupport.video.h264 : true);
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid);
   var answerConstraints = window.webrtcDetectedBrowser === 'edge' ? {
     offerToReceiveVideo: offerToReceiveVideo,
     offerToReceiveAudio: offerToReceiveAudio,
@@ -197,53 +189,50 @@ Skylink.prototype._doAnswer = function(targetMid) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
+Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescription) {
   var self = this;
   var pc = self._peerConnections[targetMid];
 
   // Added checks to ensure that sessionDescription is defined first
-  if (!(!!sessionDescription && !!sessionDescription.sdp)) {
-    log.warn([targetMid, 'RTCSessionDescription', null, 'Local session description is undefined ->'], sessionDescription);
+  if (!(!!_sessionDescription && !!_sessionDescription.sdp)) {
+    log.warn([targetMid, 'RTCSessionDescription', null, 'Local session description is undefined ->'], _sessionDescription);
     return;
   }
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
-    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Local session description will not be set as connection does not exists ->'], sessionDescription);
+    log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
+      'Local session description will not be set as connection does not exists ->'], _sessionDescription);
     return;
 
-  } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
+  } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
     pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
-    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local session description ' +
-      'will not be set as signaling state is "' + pc.signalingState + '" ->'], sessionDescription);
+    log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
+      'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
     return;
 
   // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
-  } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &&
+  } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &&
     pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local session description ' +
-      'will not be set as signaling state is "' + pc.signalingState + '" ->'], sessionDescription);
+    log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
+      'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
     return;
 
   // Added checks if there is a current local sessionDescription being processing before processing this one
   } else if (pc.processingLocalSDP) {
-    log.warn([targetMid, 'RTCSessionDescription', sessionDescription.type,
-      'Local session description will not be set as another is being processed ->'], sessionDescription);
+    log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
+      'Local session description will not be set as another is being processed ->'], _sessionDescription);
     return;
   }
 
   pc.processingLocalSDP = true;
 
-  // Set them as first
-  if (window.webrtcDetectedBrowser === 'edge') {
-    sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription, {
-      audio: self.AUDIO_CODEC.OPUS,
-      video: self.VIDEO_CODEC.H264
-    });
-  }
-
   // Sets and expected receiving codecs etc.
+  var sessionDescription = {
+    type: _sessionDescription.type,
+    sdp: _sessionDescription.sdp
+  };
+
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
   sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
@@ -254,7 +243,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescripti
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
 
-  pc.setLocalDescription(sessionDescription, function() {
+  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), function() {
     log.debug([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Local session description has been set ->'], sessionDescription);
 

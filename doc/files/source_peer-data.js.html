@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.19</title>
+    <title>SkylinkJS 0.6.20</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.19</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.20</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -41,9 +41,9 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
-              <li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
-              <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
-              <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
+              <li><a href="https://temasys.io/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
+              <li><a href="https://temasys.io/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
+              <li><a href="https://temasys.io/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
             </ul>
           </li>
             <li><a href="../classes/Skylink.html">Documentation</a></li>
@@ -53,8 +53,8 @@
                 <li><a href="../classes/Skylink.html">Skylink</a></li>
             </ul>
           </li>-->
-          <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
-          <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
+          <li><a class="btn btn-info btn-navbar" href="https://console.temasys.io/">Developer Console</a></li>
+          <li><a class="btn btn-info btn-navbar" href="http://support.temasys.io/">Support</a></li>
           <!--<li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
@@ -261,11 +261,7 @@
                           }
                       
                           // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-                          if (window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name === &#x27;edge&#x27; ?
-                          // If User is IE/safari and does not have H264 support, remove video support
-                            [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; !this._currentCodecSupport.video.h264 :
-                          // If User is Edge and Peer is not and no H264 support, remove video support
-                            window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name !== &#x27;edge&#x27; &amp;&amp; !this._currentCodecSupport.video.h264) {
+                          if (!this._getSDPEdgeVideoSupports(peerId)) {
                             peerInfo.settings.video = false;
                             peerInfo.mediaStatus.videoMuted = true;
                           }
@@ -295,6 +291,29 @@
                             this._dataChannels[peerId].main.channel.readyState === this.DATA_CHANNEL_STATE.OPEN);
                           peerInfo.connected = this._peerConnStatus[peerId] &amp;&amp; !!this._peerConnStatus[peerId].connected;
                           peerInfo.init = this._peerConnStatus[peerId] &amp;&amp; !!this._peerConnStatus[peerId].init;
+                      
+                          if (this._sdpSessions[peerId]) {
+                            // Set audio to false if SDP m= line and direction is not available
+                            if (peerInfo.settings.audio &amp;&amp; !((this._sdpSessions[peerId].local &amp;&amp; this._sdpSessions[peerId].local.connection ?
+                              (this._sdpSessions[peerId].local.connection.audio || &#x27;&#x27;).indexOf(&#x27;recv&#x27;) &gt; -1 : true) &amp;&amp;
+                              (this._sdpSessions[peerId].remote &amp;&amp; this._sdpSessions[peerId].remote.connection ?
+                              (this._sdpSessions[peerId].remote.connection.audio || &#x27;&#x27;).indexOf(&#x27;send&#x27;) &gt; -1 : true))) {
+                              peerInfo.settings.audio = false;
+                            }
+                            // Set video to false if SDP m= line and direction is not available
+                            if (peerInfo.settings.video &amp;&amp; !((this._sdpSessions[peerId].local &amp;&amp; this._sdpSessions[peerId].local.connection ?
+                              (this._sdpSessions[peerId].local.connection.video || &#x27;&#x27;).indexOf(&#x27;recv&#x27;) &gt; -1 : true) &amp;&amp;
+                              (this._sdpSessions[peerId].remote &amp;&amp; this._sdpSessions[peerId].remote.connection ?
+                              (this._sdpSessions[peerId].remote.connection.video || &#x27;&#x27;).indexOf(&#x27;send&#x27;) &gt; -1 : true))) {
+                              peerInfo.settings.video = false;
+                            }
+                            // Set data to false if SDP m= line and direction is not available
+                            if (peerInfo.settings.data &amp;&amp; !((this._sdpSessions[peerId].local &amp;&amp; this._sdpSessions[peerId].local.connection ?
+                              this._sdpSessions[peerId].local.connection.data : true) &amp;&amp; (this._sdpSessions[peerId].remote &amp;&amp;
+                              this._sdpSessions[peerId].remote.connection ? this._sdpSessions[peerId].remote.connection.data : true))) {
+                              peerInfo.settings.data = false;
+                            }
+                          }
                       
                         } else {
                           peerInfo = {
@@ -705,14 +724,7 @@
                             var agent = ((self._peerInformations[peerId] || {}).agent || {}).name || &#x27;&#x27;;
                       
                             // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-                            if (customSettingsList[peerId].settings.video &amp;&amp; (peerId ?
-                              (window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp; agent.name === &#x27;edge&#x27; ?
-                            // If User is IE/safari and does not have H264 support, remove video support
-                              [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; !self._currentCodecSupport.video.h264 :
-                            // If User is Edge and Peer is not and no H264 support, remove video support
-                              window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; agent.name !== &#x27;edge&#x27; &amp;&amp; !self._currentCodecSupport.video.h264) :
-                            // If broadcast ENTER message and User is Edge and has no H264 support
-                              window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; !self._currentCodecSupport.video.h264)) {
+                            if (customSettingsList[peerId].settings.video &amp;&amp; !self._getSDPEdgeVideoSupports(peerId)) {
                               customSettingsList[peerId].settings.video = false;
                               customSettingsList[peerId].mediaStatus.videoMuted = true;
                             }
@@ -775,13 +787,7 @@
                         }
                       
                         // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-                        if (peerId ? (window.webrtcDetectedBrowser !== &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name === &#x27;edge&#x27; ?
-                        // If User is IE/safari and does not have H264 support, remove video support
-                          [&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; !this._currentCodecSupport.video.h264 :
-                        // If User is Edge and Peer is not and no H264 support, remove video support
-                          window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerInfo.agent.name !== &#x27;edge&#x27; &amp;&amp; !this._currentCodecSupport.video.h264) :
-                        // If broadcast ENTER message and User is Edge and has no H264 support
-                          window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; !this._currentCodecSupport.video.h264) {
+                        if (!this._getSDPEdgeVideoSupports(peerId)) {
                           userInfo.settings.video = false;
                           userInfo.mediaStatus.videoMuted = true;
                         }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.19</title>
+    <title>SkylinkJS 0.6.20</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.19</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.20</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -41,9 +41,9 @@
           <li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
-              <li><a href="https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
-              <li><a href="https://temasys.com.sg/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
-              <li><a href="https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
+              <li><a href="https://temasys.io/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
+              <li><a href="https://temasys.io/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
+              <li><a href="https://temasys.io/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
             </ul>
           </li>
             <li><a href="../classes/Skylink.html">Documentation</a></li>
@@ -53,8 +53,8 @@
                 <li><a href="../classes/Skylink.html">Skylink</a></li>
             </ul>
           </li>-->
-          <li><a class="btn btn-info btn-navbar" href="http://developer.temasys.com.sg/">Developer Console</a></li>
-          <li><a class="btn btn-info btn-navbar" href="http://support.temasys.com.sg/">Support</a></li>
+          <li><a class="btn btn-info btn-navbar" href="https://console.temasys.io/">Developer Console</a></li>
+          <li><a class="btn btn-info btn-navbar" href="http://support.temasys.io/">Support</a></li>
           <!--<li class="dropdown">
             <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
             <ul class="dropdown-menu" role="menu">
@@ -144,14 +144,10 @@
                           return;
                         }
                       
-                        var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
                         var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &amp;&amp;
                           iceRestart &amp;&amp; self._enableIceRestart;
                         var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;);
-                        var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp;
-                          ((window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
-                          ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
-                          !!self._currentCodecSupport.video.h264 : true);
+                        var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp; self._getSDPEdgeVideoSupports(targetMid);
                       
                         var offerConstraints = {
                           offerToReceiveAudio: offerToReceiveAudio,
@@ -181,8 +177,8 @@
                         }
                       
                         if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
-                          self._peerInformations[targetMid].config.enableDataChannel &amp;&amp;
-                          !(!self._sdpSettings.connection.data &amp;&amp; targetMid !== &#x27;MCU&#x27;)) {
+                          self._peerInformations[targetMid].config.enableDataChannel/* &amp;&amp;
+                          !(!self._sdpSettings.connection.data &amp;&amp; targetMid !== &#x27;MCU&#x27;)*/) {
                           // Edge doesn&#x27;t support datachannels yet
                           if (!(self._dataChannels[targetMid] &amp;&amp; self._dataChannels[targetMid].main)) {
                             self._createDataChannel(targetMid);
@@ -245,12 +241,8 @@
                           self._addLocalMediaStreams(targetMid);
                         }
                       
-                        var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
                         var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;);
-                        var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp;
-                          ((window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; peerAgent !== &#x27;edge&#x27;) ||
-                          ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; peerAgent === &#x27;edge&#x27;) ?
-                          !!self._currentCodecSupport.video.h264 : true);
+                        var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp; self._getSDPEdgeVideoSupports(targetMid);
                         var answerConstraints = window.webrtcDetectedBrowser === &#x27;edge&#x27; ? {
                           offerToReceiveVideo: offerToReceiveVideo,
                           offerToReceiveAudio: offerToReceiveAudio,
@@ -281,53 +273,50 @@
                        * @for Skylink
                        * @since 0.5.2
                        */
-                      Skylink.prototype._setLocalAndSendMessage = function(targetMid, sessionDescription) {
+                      Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescription) {
                         var self = this;
                         var pc = self._peerConnections[targetMid];
                       
                         // Added checks to ensure that sessionDescription is defined first
-                        if (!(!!sessionDescription &amp;&amp; !!sessionDescription.sdp)) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, null, &#x27;Local session description is undefined -&gt;&#x27;], sessionDescription);
+                        if (!(!!_sessionDescription &amp;&amp; !!_sessionDescription.sdp)) {
+                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, null, &#x27;Local session description is undefined -&gt;&#x27;], _sessionDescription);
                           return;
                         }
                       
                         // Added checks to ensure that connection object is defined first
                         if (!pc) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-                            &#x27;Local session description will not be set as connection does not exists -&gt;&#x27;], sessionDescription);
+                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type,
+                            &#x27;Local session description will not be set as connection does not exists -&gt;&#x27;], _sessionDescription);
                           return;
                       
-                        } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
+                        } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
                           pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local session description &#x27; +
-                            &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], sessionDescription);
+                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type, &#x27;Local session description &#x27; +
+                            &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], _sessionDescription);
                           return;
                       
                         // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
-                        } else if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp;
+                        } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp;
                           pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local session description &#x27; +
-                            &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], sessionDescription);
+                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type, &#x27;Local session description &#x27; +
+                            &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], _sessionDescription);
                           return;
                       
                         // Added checks if there is a current local sessionDescription being processing before processing this one
                         } else if (pc.processingLocalSDP) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-                            &#x27;Local session description will not be set as another is being processed -&gt;&#x27;], sessionDescription);
+                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type,
+                            &#x27;Local session description will not be set as another is being processed -&gt;&#x27;], _sessionDescription);
                           return;
                         }
                       
                         pc.processingLocalSDP = true;
                       
-                        // Set them as first
-                        if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
-                          sessionDescription.sdp = self._setSDPCodec(targetMid, sessionDescription, {
-                            audio: self.AUDIO_CODEC.OPUS,
-                            video: self.VIDEO_CODEC.H264
-                          });
-                        }
-                      
                         // Sets and expected receiving codecs etc.
+                        var sessionDescription = {
+                          type: _sessionDescription.type,
+                          sdp: _sessionDescription.sdp
+                        };
+                      
                         sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
                         sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
                         sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
@@ -338,7 +327,7 @@
                         log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
                           &#x27;Local session description updated -&gt;&#x27;], sessionDescription.sdp);
                       
-                        pc.setLocalDescription(sessionDescription, function() {
+                        pc.setLocalDescription(new RTCSessionDescription(sessionDescription), function() {
                           log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
                             &#x27;Local session description has been set -&gt;&#x27;], sessionDescription);
                       

@@ -3,7 +3,7 @@
  * And Edge current does not support re-negotiation for now in the SDK.
  */
 (function () {
-  if (window.webrtcDetectedBrowser === 'edge') {
+  if (window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedBrowser < 15.15019) {
     var attachMediaStream_base = attachMediaStream;
 
     attachMediaStream = function (elm, stream) {
@@ -29,7 +29,7 @@
           audioElm.style.height = 0;
           audioElm.style.width = 0;
           audioElm.autoplay = true;
-          audioElm.muted = !!elm.getAttribute('muted');
+          audioElm.muted = !!elm.muted;
 
           document.body.appendChild(audioElm);
 
