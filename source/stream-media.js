@@ -1756,6 +1756,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSharing, isAudioFallback) {
   var self = this;
   var streamId = stream.id || stream.label;
+  var streamHasEnded = false;
 
   log.log([null, 'MediaStream', streamId, 'Has access to stream ->'], stream);
 
@@ -1775,7 +1776,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
   self._streamsStoppedCbs[streamId] = function () {
     log.log([null, 'MediaStream', streamId, 'Stream has ended']);
-
+    streamHasEnded = true;
     self._trigger('mediaAccessStopped', !!isScreenSharing, !!isAudioFallback, streamId);
 
     if (self._inRoom) {
@@ -1812,6 +1813,16 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
         delete self._streamsStoppedCbs[streamId];
       }
     };
+
+    if (isScreenSharing && stream.getVideoTracks().length > 0) {
+      stream.getVideoTracks()[0].onended = function () {
+        setTimeout(function () {
+          if (!streamHasEnded && self._inRoom) {
+            self.stopScreen();
+          }
+        }, 350);
+      };
+    }
 
   // Handle event for Firefox (use an interval)
   } else if (window.webrtcDetectedBrowser === 'firefox') {
