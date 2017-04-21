@@ -289,11 +289,15 @@
                        *   This property has been deprecated. Use &lt;code&gt;options.parentId&lt;/code&gt; instead.
                        *   &lt;/blockquote&gt; The parent Peer ID to match to when Peer is connected.
                        *   &lt;small&gt;This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.&lt;/small&gt;
-                       *   &lt;small&gt;If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.&lt;/small&gt;
+                       *   &lt;small&gt;If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
+                       *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
+                       *   (or receive the presence of) parent.&lt;/small&gt;
                        * @param {String} [options.parentId] The parent Peer ID to match to when Peer is connected.
                        *   &lt;small&gt;Note that configuring this value overrides the &lt;code&gt;options.publishOnly.parentId&lt;/code&gt; value.&lt;/small&gt;
                        *   &lt;small&gt;This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.&lt;/small&gt;
-                       *   &lt;small&gt;If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.&lt;/small&gt;
+                       *   &lt;small&gt;If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
+                       *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
+                       *   (or receive the presence of) parent.&lt;/small&gt;
                        * @param {JSON} [options.peerConnection] &lt;blockquote class=&quot;info&quot;&gt;
                        *   Note that this is mainly used for debugging purposes, so it may cause disruptions in connections or
                        *   connectivity issues when configured. &lt;/blockquote&gt; The Peer connection constraints settings.

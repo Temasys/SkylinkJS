@@ -3911,7 +3911,7 @@
                             "props": [
                                 {
                                     "name": "parentId",
-                                    "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Use <code>options.parentId</code> instead.\n  </blockquote> The parent Peer ID to match to when Peer is connected.\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>\n  <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>",
+                                    "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Use <code>options.parentId</code> instead.\n  </blockquote> The parent Peer ID to match to when Peer is connected.\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>\n  <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.\n  Parent will not be connected to (or receive the presence of) child, so will child will not be connected to\n  (or receive the presence of) parent.</small>",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -3919,7 +3919,7 @@
                         },
                         {
                             "name": "parentId",
-                            "description": "The parent Peer ID to match to when Peer is connected.\n  <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>\n  <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>",
+                            "description": "The parent Peer ID to match to when Peer is connected.\n  <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>\n  <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.\n  Parent will not be connected to (or receive the presence of) child, so will child will not be connected to\n  (or receive the presence of) parent.</small>",
                             "type": "String",
                             "optional": true
                         },
@@ -4047,7 +4047,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 477,
+            "line": 481,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4112,7 +4112,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 593,
+            "line": 597,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4122,7 +4122,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 627,
+            "line": 631,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4132,7 +4132,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 661,
+            "line": 665,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -9006,7 +9006,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1182,
+            "line": 1188,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -9017,7 +9017,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1317,
+            "line": 1329,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -9028,7 +9028,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1489,
+            "line": 1507,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -9039,7 +9039,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1594,
+            "line": 1612,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -9050,7 +9050,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1689,
+            "line": 1707,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -9061,7 +9061,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1807,
+            "line": 1825,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -10031,15 +10031,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:477"
+            "line": " source/room-connection.js:481"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:593"
+            "line": " source/room-connection.js:597"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:627"
+            "line": " source/room-connection.js:631"
         },
         {
             "message": "unknown tag: trigger",

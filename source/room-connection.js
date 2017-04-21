@@ -205,11 +205,15 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   This property has been deprecated. Use <code>options.parentId</code> instead.
  *   </blockquote> The parent Peer ID to match to when Peer is connected.
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
- *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
+ *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
+ *   (or receive the presence of) parent.</small>
  * @param {String} [options.parentId] The parent Peer ID to match to when Peer is connected.
  *   <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
- *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
+ *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
+ *   (or receive the presence of) parent.</small>
  * @param {JSON} [options.peerConnection] <blockquote class="info">
  *   Note that this is mainly used for debugging purposes, so it may cause disruptions in connections or
  *   connectivity issues when configured. </blockquote> The Peer connection constraints settings.

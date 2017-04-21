@@ -1078,8 +1078,14 @@ Skylink.prototype._enterHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for parentId or publishOnly case ->'], message);
     return;
   }
 
@@ -1237,8 +1243,14 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "restart" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "restart" for parentId or publishOnly case ->'], message);
     return;
   }
 
@@ -1368,8 +1380,14 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for parentId or publishOnly case ->'], message);
     return;
   }
 

@@ -1162,8 +1162,14 @@
                       
                         log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;enter&quot; received -&gt;&#x27;], message);
                       
-                        if (targetMid !== &#x27;MCU&#x27; &amp;&amp; self._parentId &amp;&amp; self._parentId === targetMid) {
-                          log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;enter&quot; for parentId case -&gt;&#x27;], message);
+                        // Ignore if: User is publishOnly and MCU is enabled
+                        //          : User is parent and parentId is defined and matches
+                        //          : User is child and parent matches
+                        // Don&#x27;t if : Is MCU
+                        if (targetMid !== &#x27;MCU&#x27; &amp;&amp; ((self._parentId &amp;&amp; self._parentId === targetMid) ||
+                          (self._hasMCU &amp;&amp; self._publishOnly) || (message.parentId &amp;&amp; self._user &amp;&amp; self._user.sid &amp;&amp;
+                          message.parentId === self._user.sid))) {
+                          log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;enter&quot; for parentId or publishOnly case -&gt;&#x27;], message);
                           return;
                         }
                       
@@ -1321,8 +1327,14 @@
                           return;
                         }
                       
-                        if (targetMid !== &#x27;MCU&#x27; &amp;&amp; self._parentId &amp;&amp; self._parentId === targetMid) {
-                          log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;restart&quot; for parentId case -&gt;&#x27;], message);
+                        // Ignore if: User is publishOnly and MCU is enabled
+                        //          : User is parent and parentId is defined and matches
+                        //          : User is child and parent matches
+                        // Don&#x27;t if : Is MCU
+                        if (targetMid !== &#x27;MCU&#x27; &amp;&amp; ((self._parentId &amp;&amp; self._parentId === targetMid) ||
+                          (self._hasMCU &amp;&amp; self._publishOnly) || (message.parentId &amp;&amp; self._user &amp;&amp; self._user.sid &amp;&amp;
+                          message.parentId === self._user.sid))) {
+                          log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;restart&quot; for parentId or publishOnly case -&gt;&#x27;], message);
                           return;
                         }
                       
@@ -1452,8 +1464,14 @@
                       
                         log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;welcome&quot; received -&gt;&#x27;], message);
                       
-                        if (targetMid !== &#x27;MCU&#x27; &amp;&amp; self._parentId &amp;&amp; self._parentId === targetMid) {
-                          log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;welcome&quot; for parentId case -&gt;&#x27;], message);
+                        // Ignore if: User is publishOnly and MCU is enabled
+                        //          : User is parent and parentId is defined and matches
+                        //          : User is child and parent matches
+                        // Don&#x27;t if : Is MCU
+                        if (targetMid !== &#x27;MCU&#x27; &amp;&amp; ((self._parentId &amp;&amp; self._parentId === targetMid) ||
+                          (self._hasMCU &amp;&amp; self._publishOnly) || (message.parentId &amp;&amp; self._user &amp;&amp; self._user.sid &amp;&amp;
+                          message.parentId === self._user.sid))) {
+                          log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Discarding &quot;welcome&quot; for parentId or publishOnly case -&gt;&#x27;], message);
                           return;
                         }
                       

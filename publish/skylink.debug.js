@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.20 - Tue Apr 18 2017 19:13:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.20 - Fri Apr 21 2017 20:26:43 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -8989,11 +8989,15 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   This property has been deprecated. Use <code>options.parentId</code> instead.
  *   </blockquote> The parent Peer ID to match to when Peer is connected.
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
- *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
+ *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
+ *   (or receive the presence of) parent.</small>
  * @param {String} [options.parentId] The parent Peer ID to match to when Peer is connected.
  *   <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
- *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
+ *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
+ *   (or receive the presence of) parent.</small>
  * @param {JSON} [options.peerConnection] <blockquote class="info">
  *   Note that this is mainly used for debugging purposes, so it may cause disruptions in connections or
  *   connectivity issues when configured. </blockquote> The Peer connection constraints settings.
@@ -14609,8 +14613,14 @@ Skylink.prototype._enterHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for parentId or publishOnly case ->'], message);
     return;
   }
 
@@ -14768,8 +14778,14 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "restart" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "restart" for parentId or publishOnly case ->'], message);
     return;
   }
 
@@ -14899,8 +14915,14 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for parentId or publishOnly case ->'], message);
     return;
   }
 

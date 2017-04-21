@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.20 - Tue Apr 18 2017 19:13:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.20 - Fri Apr 21 2017 20:26:43 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11592,7 +11592,7 @@ if (typeof window.require !== 'function') {
   AdapterJS.defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.20 - Tue Apr 18 2017 19:13:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.20 - Fri Apr 21 2017 20:26:43 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -20583,11 +20583,15 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   This property has been deprecated. Use <code>options.parentId</code> instead.
  *   </blockquote> The parent Peer ID to match to when Peer is connected.
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
- *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
+ *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
+ *   (or receive the presence of) parent.</small>
  * @param {String} [options.parentId] The parent Peer ID to match to when Peer is connected.
  *   <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
- *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
+ *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
+ *   (or receive the presence of) parent.</small>
  * @param {JSON} [options.peerConnection] <blockquote class="info">
  *   Note that this is mainly used for debugging purposes, so it may cause disruptions in connections or
  *   connectivity issues when configured. </blockquote> The Peer connection constraints settings.
@@ -26203,8 +26207,14 @@ Skylink.prototype._enterHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for parentId or publishOnly case ->'], message);
     return;
   }
 
@@ -26362,8 +26372,14 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "restart" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "restart" for parentId or publishOnly case ->'], message);
     return;
   }
 
@@ -26493,8 +26509,14 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for parentId or publishOnly case ->'], message);
     return;
   }
 
