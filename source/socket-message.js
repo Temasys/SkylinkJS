@@ -1830,8 +1830,8 @@ Skylink.prototype._answerHandler = function(message) {
  * @since 0.6.16
  */
 Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
-  var partsA = agentVer.split('.');
-  var partsB = requiredVer.split('.');
+  var partsA = (agentVer || '').split('.');
+  var partsB = (requiredVer || '').split('.');
 
   for (var i = 0; i < partsB.length; i++) {
     if (parseInt(partsA[i] || '0', 10) < parseInt(partsB[i] || '0', 10)) {
