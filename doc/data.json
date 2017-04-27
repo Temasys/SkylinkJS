@@ -8677,7 +8677,7 @@
         {
             "file": "source/socket-message.js",
             "line": 1,
-            "description": "<blockquote class=\"info\">\n  Note that this is used only for SDK developer purposes.<br>\n  Current version: <code>0.1.1</code>\n</blockquote>\nThe value of the current version of the Signaling socket message protocol.",
+            "description": "<blockquote class=\"info\">\n  Note that this is used only for SDK developer purposes.<br>\n  Current version: <code>0.1.4</code>\n</blockquote>\nThe value of the current version of the Signaling socket message protocol.",
             "itemtype": "attribute",
             "name": "SM_PROTOCOL_VERSION",
             "type": "String",
