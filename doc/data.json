@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.20",
+        "version": "0.6.21",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -3352,7 +3352,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 315,
+            "line": 311,
             "description": "Function that gets the list of connected Peers in the Room.",
             "itemtype": "method",
             "name": "getPeersInRoom",
@@ -3368,7 +3368,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 346,
+            "line": 342,
             "description": "Function that gets the list of connected Peers Streams in the Room.",
             "itemtype": "method",
             "name": "getPeersStream",
@@ -3384,7 +3384,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 409,
+            "line": 405,
             "description": "Function that gets the current list of connected Peers Datachannel connections in the Room.",
             "itemtype": "method",
             "name": "getPeersDatachannels",
@@ -3400,7 +3400,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 465,
+            "line": 461,
             "description": "Function that gets the list of current data transfers.",
             "itemtype": "method",
             "name": "getCurrentDataTransfers",
@@ -3416,7 +3416,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 503,
+            "line": 499,
             "description": "Function that gets the list of current data streaming sessions.",
             "itemtype": "method",
             "name": "getCurrentDataStreamsSession",
@@ -3432,7 +3432,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 547,
+            "line": 543,
             "description": "Function that gets the list of current custom Peer settings sent and set.",
             "itemtype": "method",
             "name": "getPeerCustomSettings",
@@ -3448,7 +3448,18 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 662,
+            "line": 573,
+            "description": "Function that returns the Peer custom settings.",
+            "itemtype": "method",
+            "name": "_getPeerCustomSettings",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.21",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-data.js",
+            "line": 689,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
@@ -9806,7 +9817,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1884,
+            "line": 1895,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -9817,7 +9828,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1924,
+            "line": 1935,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -9828,7 +9839,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1958,
+            "line": 1969,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -9839,7 +9850,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2056,
+            "line": 2067,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -9982,7 +9993,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1095,
+            "line": 1097,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
@@ -9993,7 +10004,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1133,
+            "line": 1135,
             "description": "Function that gets edge browser video supports.",
             "itemtype": "method",
             "name": "_getSDPEdgeVideoSupports",

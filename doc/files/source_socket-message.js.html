@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.20</title>
+    <title>SkylinkJS 0.6.21</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.20</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.21</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1921,8 +1921,8 @@ Skylink.prototype._answerHandler = function(message) {
  * @since 0.6.16
  */
 Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
-  var partsA = agentVer.split(&#x27;.&#x27;);
-  var partsB = requiredVer.split(&#x27;.&#x27;);
+  var partsA = (agentVer || &#x27;&#x27;).split(&#x27;.&#x27;);
+  var partsB = (requiredVer || &#x27;&#x27;).split(&#x27;.&#x27;);
 
   for (var i = 0; i &lt; partsB.length; i++) {
     if (parseInt(partsA[i] || &#x27;0&#x27;, 10) &lt; parseInt(partsB[i] || &#x27;0&#x27;, 10)) {

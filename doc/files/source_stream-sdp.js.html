@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.20</title>
+    <title>SkylinkJS 0.6.21</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.20</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.21</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1017,10 +1017,13 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     settings.connection.video = self._getSDPEdgeVideoSupports(targetMid);
   }
 
+  // Patches for MCU sending empty video stream despite audio+video is not sending at all
+  // Apply as a=inactive when supported
   if (self._hasMCU) {
-    settings.direction.audio.receive = targetMid === &#x27;MCU&#x27; ? false : true;
+    var peerStreamSettings = clone(self.getPeerInfo(targetMid)).settings || {};
+    settings.direction.audio.receive = targetMid === &#x27;MCU&#x27; ? false : !!peerStreamSettings.audio;
     settings.direction.audio.send = targetMid === &#x27;MCU&#x27; ? true : false;
-    settings.direction.video.receive = targetMid === &#x27;MCU&#x27; ? false : true;
+    settings.direction.video.receive = targetMid === &#x27;MCU&#x27; ? false : !!peerStreamSettings.video;
     settings.direction.video.send = targetMid === &#x27;MCU&#x27; ? true : false;
   }
 
@@ -1105,13 +1108,12 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       } else if (sdpLines[i].indexOf(&#x27;a=mid:&#x27;) === 0) {
         bundleLineMids.push(sdpLines[i].split(&#x27;a=mid:&#x27;)[1] || &#x27;&#x27;);
 
-        if ([&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) === -1) {
-          self._sdpSessions[targetMid][direction].connection.data = true;
-        }
-
       // Configure direction a=sendonly etc for local sessiondescription
-      }  else if (mediaType &amp;&amp; [&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) &gt; -1 &amp;&amp;
-        [&#x27;a=sendrecv&#x27;, &#x27;a=sendonly&#x27;, &#x27;a=recvonly&#x27;].indexOf(sdpLines[i]) &gt; -1) {
+      }  else if (mediaType &amp;&amp; [&#x27;a=sendrecv&#x27;, &#x27;a=sendonly&#x27;, &#x27;a=recvonly&#x27;].indexOf(sdpLines[i]) &gt; -1) {
+        if ([&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) === -1) {
+          self._sdpSessions[targetMid][direction].connection.data = sdpLines[i];
+          continue;
+        }
 
         if (direction === &#x27;local&#x27;) {
           if (settings.direction[mediaType].send &amp;&amp; !settings.direction[mediaType].receive) {
