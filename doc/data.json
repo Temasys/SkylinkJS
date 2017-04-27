@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.20",
+        "version": "0.6.21",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -191,7 +191,6 @@
             "since": "0.5.0"
         }
     },
-    "elements": {},
     "classitems": [
         {
             "file": "source/template/header.js",
@@ -3126,59 +3125,66 @@
                     "optional": true
                 },
                 {
-                    "name": "[callback] The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_getConnectionStatusStateChange\">\n  <code>getConnectionStatusStateChange</code> event</a> triggering <code>state</code> parameter payload\n  value as <code>RETRIEVE_SUCCESS</code> for all Peers targeted for request success.</small>\n  [Rel: Skylink.GET_CONNECTION_STATUS_STATE]",
-                    "description": "",
-                    "type": "Function"
-                },
-                {
-                    "name": "callback.error",
-                    "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>",
-                    "type": "JSON"
-                },
-                {
-                    "name": "callback.error.listOfPeers",
-                    "description": "The list of Peer IDs targeted.",
-                    "type": "Array"
-                },
-                {
-                    "name": "callback.error.retrievalErrors",
-                    "description": "The list of Peer connection stats retrieval errors.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "callback.error.retrievalErrors.#peerId",
-                    "description": "The Peer connection stats retrieval error associated\n  with the Peer ID defined in <code>#peerId</code> property.\n  <small>If <code>#peerId</code> value is <code>\"self\"</code>, it means that it is the error when there\n  are no Peer connections to refresh with.</small>",
-                    "type": "Error|String"
-                },
-                {
-                    "name": "callback.error.connectionStats",
-                    "description": "The list of Peer connection stats.\n  <small>These are the Peer connection stats that has been managed to be successfully retrieved.</small>",
-                    "type": "JSON"
-                },
-                {
-                    "name": "callback.error.connectionStats.#peerId",
-                    "description": "The Peer connection stats associated with\n  the Peer ID defined in <code>#peerId</code> property.\n  <small>Object signature matches the <code>stats</code> parameter payload received in the\n  <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>.</small>",
-                    "type": "JSON"
-                },
-                {
-                    "name": "callback.success",
-                    "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>",
-                    "type": "JSON"
-                },
-                {
-                    "name": "callback.success.listOfPeers",
-                    "description": "The list of Peer IDs targeted.",
-                    "type": "Array"
-                },
-                {
-                    "name": "callback.success.connectionStats",
-                    "description": "The list of Peer connection stats.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "callback.success.connectionStats.#peerId",
-                    "description": "The Peer connection stats associated with\n  the Peer ID defined in <code>#peerId</code> property.\n  <small>Object signature matches the <code>stats</code> parameter payload received in the\n  <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>.</small>",
-                    "type": "JSON"
+                    "name": "callback",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_getConnectionStatusStateChange\">\n  <code>getConnectionStatusStateChange</code> event</a> triggering <code>state</code> parameter payload\n  value as <code>RETRIEVE_SUCCESS</code> for all Peers targeted for request success.</small>\n  [Rel: Skylink.GET_CONNECTION_STATUS_STATE]",
+                    "type": "Function",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of Peer IDs targeted.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "retrievalErrors",
+                                    "description": "The list of Peer connection stats retrieval errors.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "retrievalErrors.#peerId",
+                                    "description": "The Peer connection stats retrieval error associated\n  with the Peer ID defined in <code>#peerId</code> property.\n  <small>If <code>#peerId</code> value is <code>\"self\"</code>, it means that it is the error when there\n  are no Peer connections to refresh with.</small>",
+                                    "type": "Error|String"
+                                },
+                                {
+                                    "name": "connectionStats",
+                                    "description": "The list of Peer connection stats.\n  <small>These are the Peer connection stats that has been managed to be successfully retrieved.</small>",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.#peerId",
+                                    "description": "The Peer connection stats associated with\n  the Peer ID defined in <code>#peerId</code> property.\n  <small>Object signature matches the <code>stats</code> parameter payload received in the\n  <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>.</small>",
+                                    "type": "JSON"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "listOfPeers",
+                                    "description": "The list of Peer IDs targeted.",
+                                    "type": "Array"
+                                },
+                                {
+                                    "name": "connectionStats",
+                                    "description": "The list of Peer connection stats.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "connectionStats.#peerId",
+                                    "description": "The Peer connection stats associated with\n  the Peer ID defined in <code>#peerId</code> property.\n  <small>Object signature matches the <code>stats</code> parameter payload received in the\n  <a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>.</small>",
+                                    "type": "JSON"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ],
             "trigger": "<ol class=\"desc-seq\">\n  <li>Retrieves Peer connection stats for all targeted Peers. <ol>\n  <li>If Peer connection has closed or does not exists: <small>This can be checked with\n  <a href=\"#event_peerConnectionState\"><code>peerConnectionState</code> event</a>\n  triggering parameter payload <code>state</code> as <code>CLOSED</code> for Peer.</small> <ol>\n  <li><a href=\"#event_getConnectionStatusStateChange\"> <code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>\n  <li><b>ABORT</b> and return error.</li></ol></li>\n  <li><a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>\n  <li>Received response from retrieval. <ol>\n  <li>If retrieval was successful: <ol>\n  <li><a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>\n  <li>Else: <ol>\n  <li><a href=\"#event_getConnectionStatusStateChange\"> <code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>\n  </ol></li></ol></li></ol></li></ol>",
@@ -3346,7 +3352,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 315,
+            "line": 311,
             "description": "Function that gets the list of connected Peers in the Room.",
             "itemtype": "method",
             "name": "getPeersInRoom",
@@ -3362,7 +3368,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 346,
+            "line": 342,
             "description": "Function that gets the list of connected Peers Streams in the Room.",
             "itemtype": "method",
             "name": "getPeersStream",
@@ -3378,7 +3384,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 409,
+            "line": 405,
             "description": "Function that gets the current list of connected Peers Datachannel connections in the Room.",
             "itemtype": "method",
             "name": "getPeersDatachannels",
@@ -3394,7 +3400,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 465,
+            "line": 461,
             "description": "Function that gets the list of current data transfers.",
             "itemtype": "method",
             "name": "getCurrentDataTransfers",
@@ -3410,7 +3416,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 503,
+            "line": 499,
             "description": "Function that gets the list of current data streaming sessions.",
             "itemtype": "method",
             "name": "getCurrentDataStreamsSession",
@@ -3426,7 +3432,7 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 547,
+            "line": 543,
             "description": "Function that gets the list of current custom Peer settings sent and set.",
             "itemtype": "method",
             "name": "getPeerCustomSettings",
@@ -3442,7 +3448,18 @@
         },
         {
             "file": "source/peer-data.js",
-            "line": 662,
+            "line": 573,
+            "description": "Function that returns the Peer custom settings.",
+            "itemtype": "method",
+            "name": "_getPeerCustomSettings",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.21",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-data.js",
+            "line": 689,
             "description": "Function that returns the User session information to be sent to Peers.",
             "itemtype": "method",
             "name": "_getUserInfo",
@@ -3582,19 +3599,22 @@
                     "optdefault": "false"
                 },
                 {
-                    "name": "[callback] The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_getPeersStateChange\">\n  <code>getPeersStateChange</code> event</a> triggering <code>state</code> parameter payload value as\n  <code>RECEIVED</code> for request success.</small>\n  [Rel: Skylink.GET_PEERS_STATE]",
-                    "description": "",
-                    "type": "Function"
-                },
-                {
-                    "name": "callback.error",
-                    "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>\n  <small>Object signature is the <code>getPeers()</code> error when retrieving list of Peer IDs from Rooms\n  within the same App space.</small>",
-                    "type": "Error|String"
-                },
-                {
-                    "name": "callback.success",
-                    "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>\n  <small>Object signature matches the <code>peerList</code> parameter payload received in the\n  <a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a>.</small>",
-                    "type": "JSON"
+                    "name": "callback",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_getPeersStateChange\">\n  <code>getPeersStateChange</code> event</a> triggering <code>state</code> parameter payload value as\n  <code>RECEIVED</code> for request success.</small>\n  [Rel: Skylink.GET_PEERS_STATE]",
+                    "type": "Function",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>\n  <small>Object signature is the <code>getPeers()</code> error when retrieving list of Peer IDs from Rooms\n  within the same App space.</small>",
+                            "type": "Error|String"
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>\n  <small>Object signature matches the <code>peerList</code> parameter payload received in the\n  <a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a>.</small>",
+                            "type": "JSON"
+                        }
+                    ]
                 }
             ],
             "trigger": "<ol class=\"desc-seq\">\n  <li>If App Key provided in the <a href=\"#method_init\"><code>init()</code> method</a> is not\n  a Privileged enabled Key: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>Retrieves the list of Peer IDs from Rooms within the same App space. <ol>\n  <li><a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>ENQUIRED</code>.</li>\n  <li>If received list from Signaling server successfully: <ol>\n  <li><a href=\"#event_getPeersStateChange\"><code>getPeersStateChange</code> event</a> triggers parameter\n  payload <code>state</code> value as <code>RECEIVED</code>.</li></ol></li></ol>",
@@ -3911,7 +3931,7 @@
                             "props": [
                                 {
                                     "name": "parentId",
-                                    "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Use <code>options.parentId</code> instead.\n  </blockquote> The parent Peer ID to match to when Peer is connected.\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>\n  <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>",
+                                    "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Use <code>options.parentId</code> instead.\n  </blockquote> The parent Peer ID to match to when Peer is connected.\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>\n  <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.\n  Parent will not be connected to (or receive the presence of) child, so will child will not be connected to\n  (or receive the presence of) parent.</small>",
                                     "type": "String",
                                     "optional": true
                                 }
@@ -3919,7 +3939,7 @@
                         },
                         {
                             "name": "parentId",
-                            "description": "The parent Peer ID to match to when Peer is connected.\n  <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>\n  <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>",
+                            "description": "The parent Peer ID to match to when Peer is connected.\n  <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>\n  <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>\n  <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.\n  Parent will not be connected to (or receive the presence of) child, so will child will not be connected to\n  (or receive the presence of) parent.</small>",
                             "type": "String",
                             "optional": true
                         },
@@ -3930,11 +3950,29 @@
                             "optional": true,
                             "props": [
                                 {
+                                    "name": "bundlePolicy",
+                                    "description": "The Peer connection media bundle policy.\n- When not provided, its value is <code>BALANCED</code>.\n  [Rel: Skylink.BUNDLE_POLICY]",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "rtcpMuxPolicy",
+                                    "description": "The Peer connection RTP and RTCP ICE candidates mux policy.\n- When not provided, its value is <code>REQUIRE</code>.\n  [Rel: Skylink.RTCP_MUX_POLICY]",
+                                    "type": "String",
+                                    "optional": true
+                                },
+                                {
                                     "name": "iceCandidatePoolSize",
                                     "description": "The number of ICE candidates to gather before\n  gathering it when setting local offer / answer session description.",
                                     "type": "Number",
                                     "optional": true,
                                     "optdefault": "0"
+                                },
+                                {
+                                    "name": "certificate",
+                                    "description": "The type of certificate that Peer connection should\n  generate and use when available.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.PEER_CERTIFICATE]",
+                                    "type": "String",
+                                    "optional": true
                                 }
                             ]
                         },
@@ -3971,21 +4009,6 @@
                     ]
                 },
                 {
-                    "name": "[options.peerConnection.bundlePolicy] The Peer connection media bundle policy.\n- When not provided, its value is <code>BALANCED</code>.\n  [Rel: Skylink.BUNDLE_POLICY]",
-                    "description": "",
-                    "type": "String"
-                },
-                {
-                    "name": "[options.peerConnection.rtcpMuxPolicy] The Peer connection RTP and RTCP ICE candidates mux policy.\n- When not provided, its value is <code>REQUIRE</code>.\n  [Rel: Skylink.RTCP_MUX_POLICY]",
-                    "description": "",
-                    "type": "String"
-                },
-                {
-                    "name": "[options.peerConnection.certificate] The type of certificate that Peer connection should\n  generate and use when available.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.PEER_CERTIFICATE]",
-                    "description": "",
-                    "type": "String"
-                },
-                {
                     "name": "callback",
                     "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_peerJoined\">\n  <code>peerJoined</code> event</a> triggering <code>isSelf</code> parameter payload value as <code>true</code>\n  for request success.</small>",
                     "type": "Function",
@@ -4000,6 +4023,12 @@
                                     "name": "error",
                                     "description": "The error received when starting Room session has failed.",
                                     "type": "Error|String"
+                                },
+                                {
+                                    "name": "errorCode",
+                                    "description": "The current <a href=\"#method_init\"><code>init()</code> method</a> ready state.\n  <small>Defined as <code>null</code> when no <a href=\"#method_init\"><code>init()</code> method</a>\n  has not been called due to invalid configuration.</small>\n  [Rel: Skylink.READY_STATE_CHANGE]",
+                                    "type": "Number",
+                                    "optional": true
                                 },
                                 {
                                     "name": "room",
@@ -4031,11 +4060,6 @@
                             ]
                         }
                     ]
-                },
-                {
-                    "name": "[callback.error.errorCode] The current <a href=\"#method_init\"><code>init()</code> method</a> ready state.\n  <small>Defined as <code>null</code> when no <a href=\"#method_init\"><code>init()</code> method</a>\n  has not been called due to invalid configuration.</small>\n  [Rel: Skylink.READY_STATE_CHANGE]",
-                    "description": "",
-                    "type": "Number"
                 }
             ],
             "example": [
@@ -4047,7 +4071,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 477,
+            "line": 481,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4112,7 +4136,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 593,
+            "line": 597,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4122,7 +4146,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 627,
+            "line": 631,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4132,7 +4156,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 661,
+            "line": 665,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4409,6 +4433,12 @@
                             "optdefault": "true"
                         },
                         {
+                            "name": "TURNServerTransport",
+                            "description": "<blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired network transports protocol\n  used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.\n  This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing\n  the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.<br>\n  Note that for Edge browsers, this value is overriden as <code>UDP</code> due to its supports.\n  </blockquote> The option to configure the <code>?transport=</code>\n  query parameter in TURN ICE servers when constructing a Peer connections.\n- When not provided, its value is <code>ANY</code>.\n  [Rel: Skylink.TURN_TRANSPORT]",
+                            "type": "Boolean",
+                            "optional": true
+                        },
+                        {
                             "name": "disableVideoFecCodecs",
                             "description": "<blockquote class=\"info\">\n  Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled,\n  and to prevent connectivity issues, these codecs will not be removed for MCU enabled Peer connections.\n  </blockquote> The flag if video FEC (Forward Error Correction)\n  codecs like ulpfec and red should be removed in sending session descriptions.\n  <small>This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.</small>",
                             "type": "Boolean",
@@ -4467,32 +4497,48 @@
                             "optdefault": "false"
                         },
                         {
-                            "name": "audioCodec.codec",
-                            "description": "The audio codec to prefer to encode sending audio data when available.\n  <small>The value must not be <code>AUTO</code>.</small>\n  [Rel: Skylink.AUDIO_CODEC]",
-                            "type": "String"
+                            "name": "audioCodec",
+                            "description": "<blockquote class=\"info\">\n  Note that if the audio codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.<br>\n  Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>\n  The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.AUDIO_CODEC]",
+                            "type": "String|JSON",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "codec",
+                                    "description": "The audio codec to prefer to encode sending audio data when available.\n  <small>The value must not be <code>AUTO</code>.</small>\n  [Rel: Skylink.AUDIO_CODEC]",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "samplingRate",
+                                    "description": "The audio codec sampling to prefer to encode sending audio data when available.",
+                                    "type": "Number",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "channels",
+                                    "description": "The audio codec channels to prefer to encode sending audio data when available.",
+                                    "type": "Number",
+                                    "optional": true
+                                }
+                            ]
                         },
                         {
-                            "name": "audioCodec.samplingRate",
-                            "description": "The audio codec sampling to prefer to encode sending audio data when available.",
-                            "type": "Number",
-                            "optional": true
-                        },
-                        {
-                            "name": "audioCodec.channels",
-                            "description": "The audio codec channels to prefer to encode sending audio data when available.",
-                            "type": "Number",
-                            "optional": true
-                        },
-                        {
-                            "name": "videoCodec.codec",
-                            "description": "The video codec to prefer to encode sending audio data when available.\n  <small>The value must not be <code>AUTO</code>.</small>\n  [Rel: Skylink.VIDEO_CODEC]",
-                            "type": "String"
-                        },
-                        {
-                            "name": "videoCodec.samplingRate",
-                            "description": "The video codec sampling to prefer to encode sending video data when available.",
-                            "type": "Number",
-                            "optional": true
+                            "name": "videoCodec",
+                            "description": "<blockquote class=\"info\">\n  Note that if the video codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.<br>\n  Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>\n  The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.VIDEO_CODEC]",
+                            "type": "String|JSON",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "codec",
+                                    "description": "The video codec to prefer to encode sending audio data when available.\n  <small>The value must not be <code>AUTO</code>.</small>\n  [Rel: Skylink.VIDEO_CODEC]",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "samplingRate",
+                                    "description": "The video codec sampling to prefer to encode sending video data when available.",
+                                    "type": "Number",
+                                    "optional": true
+                                }
+                            ]
                         },
                         {
                             "name": "socketTimeout",
@@ -4581,10 +4627,18 @@
                             "optdefault": "false"
                         },
                         {
-                            "name": "iceServer.#index",
-                            "description": "The ICE server url for debugging purposes to use.",
-                            "type": "String",
-                            "optional": true
+                            "name": "iceServer",
+                            "description": "The ICE servers for debugging purposes to use.\n  - When defined as string, the value is considered as <code>[options.iceServer]</code>.\n  <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
+                            "type": "String|Array",
+                            "optional": true,
+                            "props": [
+                                {
+                                    "name": "#index",
+                                    "description": "The ICE server url for debugging purposes to use.",
+                                    "type": "String",
+                                    "optional": true
+                                }
+                            ]
                         },
                         {
                             "name": "socketServer",
@@ -4731,203 +4785,191 @@
                                     "optional": true
                                 }
                             ]
+                        },
+                        {
+                            "name": "priorityWeightScheme",
+                            "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only and may not work when\n  internals change.</blockquote> The User's priority weight to enforce User as offerer or answerer.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.PRIORITY_WEIGHT_SCHEME]",
+                            "type": "String",
+                            "optional": true
                         }
                     ]
                 },
                 {
-                    "name": "[options.TURNServerTransport] <blockquote class=\"info\">\n  Note that configuring the protocol may not necessarily result in the desired network transports protocol\n  used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.\n  This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing\n  the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.<br>\n  Note that for Edge browsers, this value is overriden as <code>UDP</code> due to its supports.\n  </blockquote> The option to configure the <code>?transport=</code>\n  query parameter in TURN ICE servers when constructing a Peer connections.\n- When not provided, its value is <code>ANY</code>.\n  [Rel: Skylink.TURN_TRANSPORT]",
-                    "description": "",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "[options.audioCodec] <blockquote class=\"info\">\n  Note that if the audio codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.<br>\n  Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>\n  The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.AUDIO_CODEC]",
-                    "description": "",
-                    "type": "String|JSON"
-                },
-                {
-                    "name": "[options.videoCodec] <blockquote class=\"info\">\n  Note that if the video codec is not supported, the SDK will not configure the local <code>\"offer\"</code> or\n  <code>\"answer\"</code> session description to prefer the codec.<br>\n  Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>\n  The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.VIDEO_CODEC]",
-                    "description": "",
-                    "type": "String|JSON"
-                },
-                {
-                    "name": "[options.iceServer] The ICE servers for debugging purposes to use.\n  - When defined as string, the value is considered as <code>[options.iceServer]",
-                    "description": "</code>.\n  <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>",
-                    "type": "String|Array"
-                },
-                {
-                    "name": "[options.priorityWeightScheme] <blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only and may not work when\n  internals change.</blockquote> The User's priority weight to enforce User as offerer or answerer.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.PRIORITY_WEIGHT_SCHEME]",
-                    "description": "",
-                    "type": "String"
-                },
-                {
-                    "name": "[callback] The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_readyStateChange\">\n  <code>readyStateChange</code> event</a> <code>state</code> parameter payload value\n  as <code>COMPLETED</code> for request success.</small>\n  [Rel: Skylink.READY_STATE_CHANGE]",
-                    "description": "",
-                    "type": "Function"
-                },
-                {
-                    "name": "callback.error",
-                    "description": "The error result in request.\n- When defined as string, it's the error when required App Key is not provided.\n  <small>Defined as <code>null</code> when there are no errors in request</small>",
-                    "type": "JSON|String"
-                },
-                {
-                    "name": "callback.error.errorCode",
-                    "description": "The <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> <code>error.errorCode</code> parameter payload value.\n  [Rel: Skylink.READY_STATE_CHANGE_ERROR]",
-                    "type": "Number"
-                },
-                {
-                    "name": "callback.error.error",
-                    "description": "The <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> <code>error.content</code> parameter payload value.",
-                    "type": "Error|String"
-                },
-                {
-                    "name": "callback.error.status",
-                    "description": "The <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> <code>error.status</code> parameter payload value.",
-                    "type": "Number"
-                },
-                {
-                    "name": "callback.success",
-                    "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>",
-                    "type": "JSON"
-                },
-                {
-                    "name": "callback.success.serverUrl",
-                    "description": "The constructed REST URL requested to Auth server.",
-                    "type": "String"
-                },
-                {
-                    "name": "callback.success.readyState",
-                    "description": "The current ready state.\n  [Rel: Skylink.READY_STATE_CHANGE]",
-                    "type": "Number"
-                },
-                {
-                    "name": "callback.success.selectedRoom",
-                    "description": "The Room based on the current Room session token retrieved for.",
-                    "type": "String"
-                },
-                {
-                    "name": "callback.success.appKey",
-                    "description": "The configured value of the <code>options.appKey</code>.",
-                    "type": "String"
-                },
-                {
-                    "name": "callback.success.defaultRoom",
-                    "description": "The configured value of the <code>options.defaultRoom</code>.",
-                    "type": "String"
-                },
-                {
-                    "name": "callback.success.roomServer",
-                    "description": "The configured value of the <code>options.roomServer</code>.",
-                    "type": "String"
-                },
-                {
-                    "name": "callback.success.enableIceTrickle",
-                    "description": "The configured value of the <code>options.enableIceTrickle</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.enableDataChannel",
-                    "description": "The configured value of the <code>options.enableDataChannel</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.enableTURNServer",
-                    "description": "The configured value of the <code>options.enableTURNServer</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.enableSTUNServer",
-                    "description": "The configured value of the <code>options.enableSTUNServer</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.TURNTransport",
-                    "description": "The configured value of the <code>options.TURNServerTransport</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.audioFallback",
-                    "description": "The configured value of the <code>options.audioFallback</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.forceSSL",
-                    "description": "The configured value of the <code>options.forceSSL</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.audioCodec",
-                    "description": "The configured value of the <code>options.audioCodec</code>.",
-                    "type": "String|JSON"
-                },
-                {
-                    "name": "callback.success.videoCodec",
-                    "description": "The configured value of the <code>options.videoCodec</code>.",
-                    "type": "String|JSON"
-                },
-                {
-                    "name": "callback.success.socketTimeout",
-                    "description": "The configured value of the <code>options.socketTimeout</code>.",
-                    "type": "Number"
-                },
-                {
-                    "name": "callback.success.forceTURNSSL",
-                    "description": "The configured value of the <code>options.forceTURNSSL</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.forceTURN",
-                    "description": "The configured value of the <code>options.forceTURN</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.usePublicSTUN",
-                    "description": "The configured value of the <code>options.usePublicSTUN</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.disableVideoFecCodecs",
-                    "description": "The configured value of the <code>options.disableVideoFecCodecs</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.disableComfortNoiseCodec",
-                    "description": "The configured value of the <code>options.disableComfortNoiseCodec</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.disableREMB",
-                    "description": "The configured value of the <code>options.disableREMB</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.filterCandidatesType",
-                    "description": "The configured value of the <code>options.filterCandidatesType</code>.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "callback.success.throttleIntervals",
-                    "description": "The configured value of the <code>options.throttleIntervals</code>.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "callback.success.throttleShouldThrowError",
-                    "description": "The configured value of the <code>options.throttleShouldThrowError</code>.",
-                    "type": "Boolean"
-                },
-                {
-                    "name": "callback.success.mcuUseRenegoRestart",
-                    "description": "The configured value of the <code>options.mcuUseRenegoRestart</code>.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "callback.success.iceServer",
-                    "description": "The configured value of the <code>options.iceServer</code>.\n  <small>See the <code>.urls</code> property in this object for configured value if defined.</small>",
-                    "type": "JSON"
-                },
-                {
-                    "name": "callback.success.socketServer",
-                    "description": "The configured value of the <code>options.socketServer</code>.",
-                    "type": "JSON|String"
+                    "name": "callback",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_readyStateChange\">\n  <code>readyStateChange</code> event</a> <code>state</code> parameter payload value\n  as <code>COMPLETED</code> for request success.</small>\n  [Rel: Skylink.READY_STATE_CHANGE]",
+                    "type": "Function",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error result in request.\n- When defined as string, it's the error when required App Key is not provided.\n  <small>Defined as <code>null</code> when there are no errors in request</small>",
+                            "type": "JSON|String",
+                            "props": [
+                                {
+                                    "name": "errorCode",
+                                    "description": "The <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> <code>error.errorCode</code> parameter payload value.\n  [Rel: Skylink.READY_STATE_CHANGE_ERROR]",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "error",
+                                    "description": "The <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> <code>error.content</code> parameter payload value.",
+                                    "type": "Error|String"
+                                },
+                                {
+                                    "name": "status",
+                                    "description": "The <a href=\"#event_readyStateChange\"><code>readyStateChange</code>\n  event</a> <code>error.status</code> parameter payload value.",
+                                    "type": "Number"
+                                }
+                            ]
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>",
+                            "type": "JSON",
+                            "props": [
+                                {
+                                    "name": "serverUrl",
+                                    "description": "The constructed REST URL requested to Auth server.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "readyState",
+                                    "description": "The current ready state.\n  [Rel: Skylink.READY_STATE_CHANGE]",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "selectedRoom",
+                                    "description": "The Room based on the current Room session token retrieved for.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "appKey",
+                                    "description": "The configured value of the <code>options.appKey</code>.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "defaultRoom",
+                                    "description": "The configured value of the <code>options.defaultRoom</code>.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "roomServer",
+                                    "description": "The configured value of the <code>options.roomServer</code>.",
+                                    "type": "String"
+                                },
+                                {
+                                    "name": "enableIceTrickle",
+                                    "description": "The configured value of the <code>options.enableIceTrickle</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "enableDataChannel",
+                                    "description": "The configured value of the <code>options.enableDataChannel</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "enableTURNServer",
+                                    "description": "The configured value of the <code>options.enableTURNServer</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "enableSTUNServer",
+                                    "description": "The configured value of the <code>options.enableSTUNServer</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "TURNTransport",
+                                    "description": "The configured value of the <code>options.TURNServerTransport</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "audioFallback",
+                                    "description": "The configured value of the <code>options.audioFallback</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "forceSSL",
+                                    "description": "The configured value of the <code>options.forceSSL</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "audioCodec",
+                                    "description": "The configured value of the <code>options.audioCodec</code>.",
+                                    "type": "String|JSON"
+                                },
+                                {
+                                    "name": "videoCodec",
+                                    "description": "The configured value of the <code>options.videoCodec</code>.",
+                                    "type": "String|JSON"
+                                },
+                                {
+                                    "name": "socketTimeout",
+                                    "description": "The configured value of the <code>options.socketTimeout</code>.",
+                                    "type": "Number"
+                                },
+                                {
+                                    "name": "forceTURNSSL",
+                                    "description": "The configured value of the <code>options.forceTURNSSL</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "forceTURN",
+                                    "description": "The configured value of the <code>options.forceTURN</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "usePublicSTUN",
+                                    "description": "The configured value of the <code>options.usePublicSTUN</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "disableVideoFecCodecs",
+                                    "description": "The configured value of the <code>options.disableVideoFecCodecs</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "disableComfortNoiseCodec",
+                                    "description": "The configured value of the <code>options.disableComfortNoiseCodec</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "disableREMB",
+                                    "description": "The configured value of the <code>options.disableREMB</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "filterCandidatesType",
+                                    "description": "The configured value of the <code>options.filterCandidatesType</code>.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "throttleIntervals",
+                                    "description": "The configured value of the <code>options.throttleIntervals</code>.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "throttleShouldThrowError",
+                                    "description": "The configured value of the <code>options.throttleShouldThrowError</code>.",
+                                    "type": "Boolean"
+                                },
+                                {
+                                    "name": "mcuUseRenegoRestart",
+                                    "description": "The configured value of the <code>options.mcuUseRenegoRestart</code>.",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "iceServer",
+                                    "description": "The configured value of the <code>options.iceServer</code>.\n  <small>See the <code>.urls</code> property in this object for configured value if defined.</small>",
+                                    "type": "JSON"
+                                },
+                                {
+                                    "name": "socketServer",
+                                    "description": "The configured value of the <code>options.socketServer</code>.",
+                                    "type": "JSON|String"
+                                }
+                            ]
+                        }
+                    ]
                 }
             ],
             "example": [
@@ -5186,9 +5228,10 @@
             "class": "Skylink",
             "subprops": [
                 {
-                    "name": "[logLevel] The specific log level of logs to return.\n- When not provided or that the level does not exists, it will return all logs of all levels.\n [Rel: Skylink.LOG_LEVEL]",
-                    "description": "",
-                    "type": "Number"
+                    "name": "logLevel",
+                    "description": "The specific log level of logs to return.\n- When not provided or that the level does not exists, it will return all logs of all levels.\n [Rel: Skylink.LOG_LEVEL]",
+                    "type": "Number",
+                    "optional": true
                 }
             ]
         },
@@ -5283,9 +5326,10 @@
             "name": "setLogLevel",
             "params": [
                 {
-                    "name": "[logLevel] The specific log level of logs to return.\n- When not provided or that the level does not exists, it will not overwrite the current log level.\n  <small>By default, the initial log level is <code>ERROR</code>.</small>\n  [Rel: Skylink.LOG_LEVEL]",
-                    "description": "",
-                    "type": "Number"
+                    "name": "logLevel",
+                    "description": "The specific log level of logs to return.\n- When not provided or that the level does not exists, it will not overwrite the current log level.\n  <small>By default, the initial log level is <code>ERROR</code>.</small>\n  [Rel: Skylink.LOG_LEVEL]",
+                    "type": "Number",
+                    "optional": true
                 }
             ],
             "example": [
@@ -5863,6 +5907,12 @@
                                     "type": "Boolean"
                                 },
                                 {
+                                    "name": "audio.optional",
+                                    "description": "The Peer Stream <code>navigator.getUserMedia()</code> API\n  <code>audio: { optional [..] }</code> property.",
+                                    "type": "Array",
+                                    "optional": true
+                                },
+                                {
                                     "name": "audio.deviceId",
                                     "description": "The Peer Stream audio track source ID of the device used.",
                                     "type": "String",
@@ -5877,6 +5927,12 @@
                                     "name": "video",
                                     "description": "The Peer Stream video settings.\n  <small>When defined as <code>false</code>, it means there is no video being sent from Peer.</small>\n  <small>When defined as <code>true</code>, the <code>peerInfo.settings.video.screenshare</code> value is\n  considered as <code>false</code>  and the <code>peerInfo.settings.video.exactConstraints</code>\n  value is considered as <code>false</code>.</small>",
                                     "type": "Boolean|JSON"
+                                },
+                                {
+                                    "name": "video.resolution",
+                                    "description": "The Peer Stream video resolution.\n  [Rel: Skylink.VIDEO_RESOLUTION]",
+                                    "type": "JSON",
+                                    "optional": true
                                 },
                                 {
                                     "name": "video.resolution.width",
@@ -5898,6 +5954,12 @@
                                     "name": "video.screenshare",
                                     "description": "The flag if Peer Stream is a screensharing Stream.",
                                     "type": "Boolean"
+                                },
+                                {
+                                    "name": "video.optional",
+                                    "description": "The Peer Stream <code>navigator.getUserMedia()</code> API\n  <code>video: { optional [..] }</code> property.",
+                                    "type": "Array",
+                                    "optional": true
                                 },
                                 {
                                     "name": "video.deviceId",
@@ -6075,21 +6137,6 @@
                             "optional": true
                         }
                     ]
-                },
-                {
-                    "name": "[peerInfo.settings.audio.optional] The Peer Stream <code>navigator.getUserMedia()</code> API\n  <code>audio: { optional [..]",
-                    "description": "}</code> property.",
-                    "type": "Array"
-                },
-                {
-                    "name": "[peerInfo.settings.video.resolution] The Peer Stream video resolution.\n  [Rel: Skylink.VIDEO_RESOLUTION]",
-                    "description": "",
-                    "type": "JSON"
-                },
-                {
-                    "name": "[peerInfo.settings.video.optional] The Peer Stream <code>navigator.getUserMedia()</code> API\n  <code>video: { optional [..]",
-                    "description": "}</code> property.",
-                    "type": "Array"
                 },
                 {
                     "name": "isSelf",
@@ -8630,7 +8677,7 @@
         {
             "file": "source/socket-message.js",
             "line": 1,
-            "description": "<blockquote class=\"info\">\n  Note that this is used only for SDK developer purposes.<br>\n  Current version: <code>0.1.1</code>\n</blockquote>\nThe value of the current version of the Signaling socket message protocol.",
+            "description": "<blockquote class=\"info\">\n  Note that this is used only for SDK developer purposes.<br>\n  Current version: <code>0.1.4</code>\n</blockquote>\nThe value of the current version of the Signaling socket message protocol.",
             "itemtype": "attribute",
             "name": "SM_PROTOCOL_VERSION",
             "type": "String",
@@ -9006,7 +9053,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1182,
+            "line": 1188,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -9017,7 +9064,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1317,
+            "line": 1329,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -9028,7 +9075,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1489,
+            "line": 1507,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -9039,7 +9086,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1594,
+            "line": 1612,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -9050,7 +9097,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1689,
+            "line": 1707,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -9061,7 +9108,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1807,
+            "line": 1825,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -9384,6 +9431,12 @@
                                     "optdefault": "false"
                                 },
                                 {
+                                    "name": "optional",
+                                    "description": "<blockquote class=\"info\">\n  Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is\n  <code>true</code>. If you are looking to set the requested source ID of the audio track,\n  use <code>options.audio.deviceId</code> instead.</blockquote>\n  The <code>navigator.getUserMedia()</code> API <code>audio: { optional [..] }</code> property.",
+                                    "type": "Array",
+                                    "optional": true
+                                },
+                                {
                                     "name": "deviceId",
                                     "description": "<blockquote class=\"info\">\n  Note this is currently not supported in Firefox browsers.\n  </blockquote> The audio track source ID of the device to use.\n  <small>The list of available audio source ID can be retrieved by the <a href=\"https://developer.\nmozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices\"><code>navigator.mediaDevices.enumerateDevices</code>\n  API</a>.</small>",
                                     "type": "String",
@@ -9413,6 +9466,12 @@
                                     "optdefault": "false"
                                 },
                                 {
+                                    "name": "resolution",
+                                    "description": "The video resolution.\n  <small>By default, <a href=\"#attr_VIDEO_RESOLUTION\"><code>VGA</code></a> resolution option\n  is selected when not provided.</small>\n  [Rel: Skylink.VIDEO_RESOLUTION]",
+                                    "type": "JSON",
+                                    "optional": true
+                                },
+                                {
                                     "name": "resolution.width",
                                     "description": "The video resolution width.\n- When provided as a number, it is the video resolution width.\n- When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.width</code> settings.\n  Parameters are <code>\"ideal\"</code> for ideal resolution width, <code>\"exact\"</code> for exact video resolution width,\n  <code>\"min\"</code> for min video resolution width and <code>\"max\"</code> for max video resolution width.\n  Note that this may result in constraints related errors depending on the browser/hardware supports.",
                                     "type": "Number|JSON",
@@ -9431,6 +9490,12 @@
                                     "optional": true
                                 },
                                 {
+                                    "name": "optional",
+                                    "description": "<blockquote class=\"info\">\n  Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is\n  <code>true</code>. If you are looking to set the requested source ID of the video track,\n  use <code>options.video.deviceId</code> instead.</blockquote>\n  The <code>navigator.getUserMedia()</code> API <code>video: { optional [..] }</code> property.",
+                                    "type": "Array",
+                                    "optional": true
+                                },
+                                {
                                     "name": "deviceId",
                                     "description": "<blockquote class=\"info\">\n  Note this is currently not supported in Firefox browsers.\n  </blockquote> The video track source ID of the device to use.\n  <small>The list of available video source ID can be retrieved by the <a href=\"https://developer.\nmozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices\"><code>navigator.mediaDevices.enumerateDevices</code>\n  API</a>.</small>",
                                     "type": "String",
@@ -9445,21 +9510,6 @@
                             ]
                         }
                     ]
-                },
-                {
-                    "name": "[options.audio.optional] <blockquote class=\"info\">\n  Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is\n  <code>true</code>. If you are looking to set the requested source ID of the audio track,\n  use <code>options.audio.deviceId</code> instead.</blockquote>\n  The <code>navigator.getUserMedia()</code> API <code>audio: { optional [..]",
-                    "description": "}</code> property.",
-                    "type": "Array"
-                },
-                {
-                    "name": "[options.video.resolution] The video resolution.\n  <small>By default, <a href=\"#attr_VIDEO_RESOLUTION\"><code>VGA</code></a> resolution option\n  is selected when not provided.</small>\n  [Rel: Skylink.VIDEO_RESOLUTION]",
-                    "description": "",
-                    "type": "JSON"
-                },
-                {
-                    "name": "[options.video.optional] <blockquote class=\"info\">\n  Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is\n  <code>true</code>. If you are looking to set the requested source ID of the video track,\n  use <code>options.video.deviceId</code> instead.</blockquote>\n  The <code>navigator.getUserMedia()</code> API <code>video: { optional [..]",
-                    "description": "}</code> property.",
-                    "type": "Array"
                 },
                 {
                     "name": "callback",
@@ -9767,7 +9817,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1884,
+            "line": 1895,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -9778,7 +9828,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1924,
+            "line": 1935,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -9789,7 +9839,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1958,
+            "line": 1969,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -9800,7 +9850,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2056,
+            "line": 2067,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -9943,7 +9993,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1095,
+            "line": 1097,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
@@ -9954,7 +10004,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1133,
+            "line": 1135,
             "description": "Function that gets edge browser video supports.",
             "itemtype": "method",
             "name": "_getSDPEdgeVideoSupports",
@@ -10031,15 +10081,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:477"
+            "line": " source/room-connection.js:481"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:593"
+            "line": " source/room-connection.js:597"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:627"
+            "line": " source/room-connection.js:631"
         },
         {
             "message": "unknown tag: trigger",

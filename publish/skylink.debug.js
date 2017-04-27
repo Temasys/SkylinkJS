@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.20 - Tue Apr 18 2017 19:13:40 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.21 - Thu Apr 27 2017 16:42:17 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -7805,12 +7805,6 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       peerInfo.config.publishOnly = true;
     }
 
-    // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-    if (!this._getSDPEdgeVideoSupports(peerId)) {
-      peerInfo.settings.video = false;
-      peerInfo.mediaStatus.videoMuted = true;
-    }
-
     if (!this._sdpSettings.direction.audio.receive) {
       peerInfo.settings.audio = false;
       peerInfo.mediaStatus.audioMuted = true;
@@ -7837,27 +7831,29 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.connected = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].connected;
     peerInfo.init = this._peerConnStatus[peerId] && !!this._peerConnStatus[peerId].init;
 
-    if (this._sdpSessions[peerId]) {
-      // Set audio to false if SDP m= line and direction is not available
-      if (peerInfo.settings.audio && !((this._sdpSessions[peerId].local && this._sdpSessions[peerId].local.connection ?
-        (this._sdpSessions[peerId].local.connection.audio || '').indexOf('recv') > -1 : true) &&
-        (this._sdpSessions[peerId].remote && this._sdpSessions[peerId].remote.connection ?
-        (this._sdpSessions[peerId].remote.connection.audio || '').indexOf('send') > -1 : true))) {
+    // Makes sense to be send direction since we are retrieving information if Peer is sending anything to us
+    if (this._sdpSessions[peerId] && this._sdpSessions[peerId].remote &&
+      this._sdpSessions[peerId].remote.connection && typeof this._sdpSessions[peerId].remote.connection === 'object') {
+      if (!(this._sdpSessions[peerId].remote.connection.audio &&
+        this._sdpSessions[peerId].remote.connection.audio.indexOf('send') > -1)) {
         peerInfo.settings.audio = false;
+        peerInfo.mediaStatus.audioMuted = true;
       }
-      // Set video to false if SDP m= line and direction is not available
-      if (peerInfo.settings.video && !((this._sdpSessions[peerId].local && this._sdpSessions[peerId].local.connection ?
-        (this._sdpSessions[peerId].local.connection.video || '').indexOf('recv') > -1 : true) &&
-        (this._sdpSessions[peerId].remote && this._sdpSessions[peerId].remote.connection ?
-        (this._sdpSessions[peerId].remote.connection.video || '').indexOf('send') > -1 : true))) {
+      if (!(this._sdpSessions[peerId].remote.connection.video &&
+        this._sdpSessions[peerId].remote.connection.video.indexOf('send') > -1)) {
         peerInfo.settings.video = false;
+        peerInfo.mediaStatus.videoMuted = true;
       }
-      // Set data to false if SDP m= line and direction is not available
-      if (peerInfo.settings.data && !((this._sdpSessions[peerId].local && this._sdpSessions[peerId].local.connection ?
-        this._sdpSessions[peerId].local.connection.data : true) && (this._sdpSessions[peerId].remote &&
-        this._sdpSessions[peerId].remote.connection ? this._sdpSessions[peerId].remote.connection.data : true))) {
+      if (!(this._sdpSessions[peerId].remote.connection.data &&
+        this._sdpSessions[peerId].remote.connection.data.indexOf('send') > -1)) {
         peerInfo.settings.data = false;
       }
+    }
+
+    // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
+    if (!this._getSDPEdgeVideoSupports(peerId)) {
+      peerInfo.settings.video = false;
+      peerInfo.mediaStatus.videoMuted = true;
     }
 
   } else {
@@ -8196,96 +8192,127 @@ Skylink.prototype.getPeersCustomSettings = function () {
 
   for (var peerId in self._peerInformations) {
     if (self._peerInformations.hasOwnProperty(peerId) && self._peerInformations[peerId]) {
-      customSettingsList[peerId] = {
-        settings: {
-          audio: false,
-          video: false,
-          bandwidth: clone(self._streamsBandwidthSettings.bAS),
-          googleXBandwidth: clone(self._streamsBandwidthSettings.googleX)
-        },
-        mediaStatus: {
-          audioMuted: true,
-          videoMuted: true
-        }
-      };
-
-      if (self._peerConnections[peerId] && self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-        var streams = self._peerConnections[peerId].getLocalStreams();
-
-        for (var s = 0; s < streams.length; s++) {
-          if (self._streams.screenshare && self._streams.screenshare.stream && (streams[s].id ||
-            streams[s].label) === (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
-            customSettingsList[peerId].settings.audio = clone(self._streams.screenshare.settings.audio);
-            customSettingsList[peerId].settings.video = clone(self._streams.screenshare.settings.video);
-            customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
-            break;
-          } else if (self._streams.userMedia && self._streams.userMedia.stream && (streams[s].id ||
-            streams[s].label) === (self._streams.userMedia.stream.id ||
-            self._streams.userMedia.stream.label)) {
-            customSettingsList[peerId].settings.audio = clone(self._streams.userMedia.settings.audio);
-            customSettingsList[peerId].settings.video = clone(self._streams.userMedia.settings.video);
-            customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
-            break;
-          } else if (window.webrtcDetectedBrowser === 'edge') {
-            customSettingsList[peerId].settings.audio = clone(self._streams.userMedia.settings.audio);
-            customSettingsList[peerId].settings.video = clone(self._streams.userMedia.settings.video);
-            customSettingsList[peerId].mediaStatus = clone(self._streamsMutedSettings);
-            if (streams[s].getAudioTracks().length === 0) {
-              customSettingsList[peerId].settings.audio = false;
-              customSettingsList[peerId].mediaStatus.audioMuted = true;
-            }
-            if (streams[s].getVideoTracks().length === 0) {
-              customSettingsList[peerId].settings.video = false;
-              customSettingsList[peerId].mediaStatus.videoMuted = true;
-            }
-          }
-        }
-      }
-
-      if (self._peerCustomConfigs[peerId]) {
-        if (self._peerCustomConfigs[peerId].bandwidth &&
-          typeof self._peerCustomConfigs[peerId].bandwidth === 'object') {
-          if (typeof self._peerCustomConfigs[peerId].bandwidth.audio === 'number') {
-            customSettingsList[peerId].settings.bandwidth.audio = self._peerCustomConfigs[peerId].bandwidth.audio;
-          }
-          if (typeof self._peerCustomConfigs[peerId].bandwidth.video === 'number') {
-            customSettingsList[peerId].settings.bandwidth.video = self._peerCustomConfigs[peerId].bandwidth.video;
-          }
-          if (typeof self._peerCustomConfigs[peerId].bandwidth.data === 'number') {
-            customSettingsList[peerId].settings.bandwidth.data = self._peerCustomConfigs[peerId].bandwidth.data;
-          }
-        }
-        if (self._peerCustomConfigs[peerId].googleXBandwidth &&
-          typeof self._peerCustomConfigs[peerId].googleXBandwidth === 'object') {
-          if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.min === 'number') {
-            customSettingsList[peerId].settings.googleXBandwidth.min = self._peerCustomConfigs[peerId].googleXBandwidth.min;
-          }
-          if (typeof self._peerCustomConfigs[peerId].googleXBandwidth.max === 'number') {
-            customSettingsList[peerId].settings.googleXBandwidth.max = self._peerCustomConfigs[peerId].googleXBandwidth.max;
-          }
-        }
-      }
-
-      var agent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
-
-      // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-      if (customSettingsList[peerId].settings.video && !self._getSDPEdgeVideoSupports(peerId)) {
-        customSettingsList[peerId].settings.video = false;
-        customSettingsList[peerId].mediaStatus.videoMuted = true;
-      }
-
-      customSettingsList[peerId].settings.audio = !self._sdpSettings.connection.audio ? false :
-        customSettingsList[peerId].settings.audio;
-      customSettingsList[peerId].settings.video = !self._sdpSettings.connection.video ? false :
-        customSettingsList[peerId].settings.video;
-      customSettingsList[peerId].mediaStatus.audioMuted = !self._sdpSettings.connection.audio ? true :
-        customSettingsList[peerId].mediaStatus.audioMuted;
-      customSettingsList[peerId].mediaStatus.videoMuted = !self._sdpSettings.connection.video ? true :
-        customSettingsList[peerId].mediaStatus.videoMuted;
+      customSettingsList[peerId] = self._getPeerCustomSettings(peerId);
     }
   }
 
   return customSettingsList;
+};
+
+/**
+ * Function that returns the Peer custom settings.
+ * @method _getPeerCustomSettings
+ * @private
+ * @for Skylink
+ * @since 0.6.21
+ */
+Skylink.prototype._getPeerCustomSettings = function (peerId) {
+  var self = this;
+  var customSettings = {
+    settings: {
+      audio: false,
+      video: false,
+      data: false,
+      bandwidth: clone(self._streamsBandwidthSettings.bAS),
+      googleXBandwidth: clone(self._streamsBandwidthSettings.googleX)
+    },
+    mediaStatus: {
+      audioMuted: true,
+      videoMuted: true
+    }
+  };
+
+  var usePeerId = self._hasMCU ? 'MCU' : peerId;
+
+  if (!self._peerInformations[usePeerId]) {
+    return customSettings;
+  }
+  
+
+  if (self._peerConnections[usePeerId] && self._peerConnections[usePeerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
+    var streams = self._peerConnections[peerId].getLocalStreams();
+
+    customSettings.settings.data = self._enableDataChannel && self._peerInformations[peerId].config.enableDataChannel;
+
+    for (var s = 0; s < streams.length; s++) {
+      if (self._streams.screenshare && self._streams.screenshare.stream && (streams[s].id ||
+        streams[s].label) === (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
+        customSettings.settings.audio = clone(self._streams.screenshare.settings.audio);
+        customSettings.settings.video = clone(self._streams.screenshare.settings.video);
+        customSettings.mediaStatus = clone(self._streamsMutedSettings);
+        break;
+      } else if (self._streams.userMedia && self._streams.userMedia.stream && (streams[s].id ||
+        streams[s].label) === (self._streams.userMedia.stream.id ||
+        self._streams.userMedia.stream.label)) {
+        customSettings.settings.audio = clone(self._streams.userMedia.settings.audio);
+        customSettings.settings.video = clone(self._streams.userMedia.settings.video);
+        customSettings.mediaStatus = clone(self._streamsMutedSettings);
+        break;
+      } else if (window.webrtcDetectedBrowser === 'edge') {
+        customSettings.settings.audio = clone(self._streams.userMedia.settings.audio);
+        customSettings.settings.video = clone(self._streams.userMedia.settings.video);
+        customSettings.mediaStatus = clone(self._streamsMutedSettings);
+        if (streams[s].getAudioTracks().length === 0) {
+          customSettings.settings.audio = false;
+          customSettings.mediaStatus.audioMuted = true;
+        }
+        if (streams[s].getVideoTracks().length === 0) {
+          customSettings.settings.video = false;
+          customSettings.mediaStatus.videoMuted = true;
+        }
+      }
+    }
+  }
+
+  if (self._peerCustomConfigs[usePeerId]) {
+    if (self._peerCustomConfigs[usePeerId].bandwidth &&
+      typeof self._peerCustomConfigs[usePeerId].bandwidth === 'object') {
+      if (typeof self._peerCustomConfigs[usePeerId].bandwidth.audio === 'number') {
+        customSettings.settings.bandwidth.audio = self._peerCustomConfigs[usePeerId].bandwidth.audio;
+      }
+      if (typeof self._peerCustomConfigs[usePeerId].bandwidth.video === 'number') {
+        customSettings.settings.bandwidth.video = self._peerCustomConfigs[usePeerId].bandwidth.video;
+      }
+      if (typeof self._peerCustomConfigs[usePeerId].bandwidth.data === 'number') {
+        customSettings.settings.bandwidth.data = self._peerCustomConfigs[usePeerId].bandwidth.data;
+      }
+    }
+    if (self._peerCustomConfigs[usePeerId].googleXBandwidth &&
+      typeof self._peerCustomConfigs[usePeerId].googleXBandwidth === 'object') {
+      if (typeof self._peerCustomConfigs[usePeerId].googleXBandwidth.min === 'number') {
+        customSettings.settings.googleXBandwidth.min = self._peerCustomConfigs[usePeerId].googleXBandwidth.min;
+      }
+      if (typeof self._peerCustomConfigs[usePeerId].googleXBandwidth.max === 'number') {
+        customSettings.settings.googleXBandwidth.max = self._peerCustomConfigs[usePeerId].googleXBandwidth.max;
+      }
+    }
+  }
+
+  // Check we are going to send data to peer
+  if (self._sdpSessions[usePeerId] && self._sdpSessions[usePeerId].local &&
+    self._sdpSessions[usePeerId].local.connection && typeof self._sdpSessions[usePeerId].local.connection === 'object') {
+    if (!(self._sdpSessions[usePeerId].local.connection.audio &&
+      self._sdpSessions[usePeerId].local.connection.audio.indexOf('send') > -1)) {
+      customSettings.settings.audio = false;
+      customSettings.mediaStatus.audioMuted = true;
+    }
+    if (!(self._sdpSessions[usePeerId].local.connection.video &&
+      self._sdpSessions[usePeerId].local.connection.video.indexOf('send') > -1)) {
+      customSettings.settings.video = false;
+      customSettings.mediaStatus.videoMuted = true;
+    }
+    if (!(self._sdpSessions[usePeerId].local.connection.data &&
+      self._sdpSessions[usePeerId].local.connection.data.indexOf('send') > -1)) {
+      customSettings.settings.data = false;
+    }
+  }
+
+  // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
+  if (customSettings.settings.video && !self._getSDPEdgeVideoSupports(usePeerId)) {
+    customSettings.settings.video = false;
+    customSettings.mediaStatus.videoMuted = true;
+  }
+  return customSettings;
 };
 
 /**
@@ -8297,7 +8324,12 @@ Skylink.prototype.getPeersCustomSettings = function () {
  */
 Skylink.prototype._getUserInfo = function(peerId) {
   var userInfo = clone(this.getPeerInfo());
-  var peerInfo = clone(this.getPeerInfo(peerId));
+  var userCustomInfoForPeer = peerId ? this._getPeerCustomSettings(peerId) : null;
+
+  if (userCustomInfoForPeer && typeof userCustomInfoForPeer === 'object') {
+    userInfo.settings = userCustomInfoForPeer.settings;
+    userInfo.mediaStatus = userCustomInfoForPeer.mediaStatus;
+  }
 
   // Adhere to SM protocol without breaking the other SDKs.
   if (userInfo.settings.video && typeof userInfo.settings.video === 'object') {
@@ -8329,22 +8361,6 @@ Skylink.prototype._getUserInfo = function(peerId) {
   if (userInfo.settings.bandwidth) {
     userInfo.settings.maxBandwidth = clone(userInfo.settings.bandwidth);
     delete userInfo.settings.bandwidth;
-  }
-
-  // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-  if (!this._getSDPEdgeVideoSupports(peerId)) {
-    userInfo.settings.video = false;
-    userInfo.mediaStatus.videoMuted = true;
-  }
-
-  if (!this._sdpSettings.connection.audio) {
-    userInfo.settings.audio = false;
-    userInfo.mediaStatus.audioMuted = true;
-  }
-
-  if (!this._sdpSettings.connection.video) {
-    userInfo.settings.video = false;
-    userInfo.mediaStatus.videoMuted = true;
   }
 
   delete userInfo.agent;
@@ -8989,11 +9005,15 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   This property has been deprecated. Use <code>options.parentId</code> instead.
  *   </blockquote> The parent Peer ID to match to when Peer is connected.
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
- *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
+ *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
+ *   (or receive the presence of) parent.</small>
  * @param {String} [options.parentId] The parent Peer ID to match to when Peer is connected.
  *   <small>Note that configuring this value overrides the <code>options.publishOnly.parentId</code> value.</small>
  *   <small>This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.</small>
- *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.</small>
+ *   <small>If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
+ *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
+ *   (or receive the presence of) parent.</small>
  * @param {JSON} [options.peerConnection] <blockquote class="info">
  *   Note that this is mainly used for debugging purposes, so it may cause disruptions in connections or
  *   connectivity issues when configured. </blockquote> The Peer connection constraints settings.
@@ -9667,7 +9687,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
 };
 
-Skylink.prototype.VERSION = '0.6.20';
+Skylink.prototype.VERSION = '0.6.21';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -13540,7 +13560,7 @@ Skylink.prototype._closeChannel = function() {
 
   this._socket = null;
 };
-Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.2.3';
+Skylink.prototype.SM_PROTOCOL_VERSION = '0.1.2.4';
 
 /**
  * Stores the list of socket messaging protocol types.
@@ -14609,8 +14629,14 @@ Skylink.prototype._enterHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "enter" for parentId or publishOnly case ->'], message);
     return;
   }
 
@@ -14768,8 +14794,14 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "restart" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "restart" for parentId or publishOnly case ->'], message);
     return;
   }
 
@@ -14899,8 +14931,14 @@ Skylink.prototype._welcomeHandler = function(message) {
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
 
-  if (targetMid !== 'MCU' && self._parentId && self._parentId === targetMid) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for parentId case ->'], message);
+  // Ignore if: User is publishOnly and MCU is enabled
+  //          : User is parent and parentId is defined and matches
+  //          : User is child and parent matches
+  // Don't if : Is MCU
+  if (targetMid !== 'MCU' && ((self._parentId && self._parentId === targetMid) ||
+    (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
+    message.parentId === self._user.sid))) {
+    log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "welcome" for parentId or publishOnly case ->'], message);
     return;
   }
 
@@ -15343,8 +15381,8 @@ Skylink.prototype._answerHandler = function(message) {
  * @since 0.6.16
  */
 Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
-  var partsA = agentVer.split('.');
-  var partsB = requiredVer.split('.');
+  var partsA = (agentVer || '').split('.');
+  var partsB = (requiredVer || '').split('.');
 
   for (var i = 0; i < partsB.length; i++) {
     if (parseInt(partsA[i] || '0', 10) < parseInt(partsB[i] || '0', 10)) {
@@ -17090,6 +17128,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
 Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSharing, isAudioFallback) {
   var self = this;
   var streamId = stream.id || stream.label;
+  var streamHasEnded = false;
 
   log.log([null, 'MediaStream', streamId, 'Has access to stream ->'], stream);
 
@@ -17109,7 +17148,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
   self._streamsStoppedCbs[streamId] = function () {
     log.log([null, 'MediaStream', streamId, 'Stream has ended']);
-
+    streamHasEnded = true;
     self._trigger('mediaAccessStopped', !!isScreenSharing, !!isAudioFallback, streamId);
 
     if (self._inRoom) {
@@ -17146,6 +17185,16 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
         delete self._streamsStoppedCbs[streamId];
       }
     };
+
+    if (isScreenSharing && stream.getVideoTracks().length > 0) {
+      stream.getVideoTracks()[0].onended = function () {
+        setTimeout(function () {
+          if (!streamHasEnded && self._inRoom) {
+            self.stopScreen();
+          }
+        }, 350);
+      };
+    }
 
   // Handle event for Firefox (use an interval)
   } else if (window.webrtcDetectedBrowser === 'firefox') {
@@ -18355,10 +18404,13 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     settings.connection.video = self._getSDPEdgeVideoSupports(targetMid);
   }
 
+  // Patches for MCU sending empty video stream despite audio+video is not sending at all
+  // Apply as a=inactive when supported
   if (self._hasMCU) {
-    settings.direction.audio.receive = targetMid === 'MCU' ? false : true;
+    var peerStreamSettings = clone(self.getPeerInfo(targetMid)).settings || {};
+    settings.direction.audio.receive = targetMid === 'MCU' ? false : !!peerStreamSettings.audio;
     settings.direction.audio.send = targetMid === 'MCU' ? true : false;
-    settings.direction.video.receive = targetMid === 'MCU' ? false : true;
+    settings.direction.video.receive = targetMid === 'MCU' ? false : !!peerStreamSettings.video;
     settings.direction.video.send = targetMid === 'MCU' ? true : false;
   }
 
@@ -18443,13 +18495,12 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
       } else if (sdpLines[i].indexOf('a=mid:') === 0) {
         bundleLineMids.push(sdpLines[i].split('a=mid:')[1] || '');
 
-        if (['audio', 'video'].indexOf(mediaType) === -1) {
-          self._sdpSessions[targetMid][direction].connection.data = true;
-        }
-
       // Configure direction a=sendonly etc for local sessiondescription
-      }  else if (mediaType && ['audio', 'video'].indexOf(mediaType) > -1 &&
-        ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
+      }  else if (mediaType && ['a=sendrecv', 'a=sendonly', 'a=recvonly'].indexOf(sdpLines[i]) > -1) {
+        if (['audio', 'video'].indexOf(mediaType) === -1) {
+          self._sdpSessions[targetMid][direction].connection.data = sdpLines[i];
+          continue;
+        }
 
         if (direction === 'local') {
           if (settings.direction[mediaType].send && !settings.direction[mediaType].receive) {

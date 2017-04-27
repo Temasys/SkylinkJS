@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.20</title>
+    <title>SkylinkJS 0.6.21</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,40 +33,46 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.20</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.21</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
         <ul id="api-list" class="nav navbar-nav navbar-right">
-          <li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
-            <ul class="dropdown-menu" role="menu">
-              <li><a href="https://temasys.io/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
-              <li><a href="https://temasys.io/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
-              <li><a href="https://temasys.io/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
-            </ul>
-          </li>
-            <li><a href="../classes/Skylink.html">Documentation</a></li>
-          <!--<li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
-            <ul class="dropdown-menu" role="menu">
-                <li><a href="../classes/Skylink.html">Skylink</a></li>
-            </ul>
-          </li>-->
-          <li><a class="btn btn-info btn-navbar" href="https://console.temasys.io/">Developer Console</a></li>
-          <li><a class="btn btn-info btn-navbar" href="http://support.temasys.io/">Support</a></li>
-          <!--<li class="dropdown">
-            <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
-            <ul class="dropdown-menu" role="menu">
-              <li><a href="#api-modules">View all Modules</a></li>
-            </ul>
-          </li>-->
-        </ul>
-        <!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
-          <div id="api-tabview-filter" class="form-group">
-            <input type="search" id="api-filter" placeholder="Type to filter APIs">
-          </div>
-        </form>-->      </div><!--/.navbar-collapse -->
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="https://temasys.io/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
+      <li><a href="https://temasys.io/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
+      <li><a href="https://temasys.io/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
+    </ul>
+  </li>
+  
+    <li><a href="../classes/Skylink.html">Documentation</a></li>
+  
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      
+        <li><a href="../classes/Skylink.html">Skylink</a></li>
+      
+    </ul>
+  </li>-->
+  <li><a class="btn btn-info btn-navbar" href="https://console.temasys.io/">Developer Console</a></li>
+  <li><a class="btn btn-info btn-navbar" href="http://support.temasys.io/">Support</a></li>
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#api-modules">View all Modules</a></li>
+      
+    </ul>
+  </li>-->
+</ul>
+<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
+  <div id="api-tabview-filter" class="form-group">
+    <input type="search" id="api-filter" placeholder="Type to filter APIs">
+  </div>
+</form>-->
+      </div><!--/.navbar-collapse -->
     </div>
   </nav>
   <div id="bd" class="yui3-g">
@@ -75,298 +81,300 @@
 
       </div>
       <div class="yui3-u-3-4">
+          
           <div class="apidocs">
               <div id="docs-main">
                   <div class="content content-main">
                       <h1 class="file-heading">File: source/peer-handshake.js</h1>
-                      
-                      <div class="file">
-                          <pre class="code prettyprint linenums">
-                      /**
-                       * The list of Peer connection states.
-                       * @attribute HANDSHAKE_PROGRESS
-                       * @param {String} ENTER   &lt;small&gt;Value &lt;code&gt;&quot;enter&quot;&lt;/code&gt;&lt;/small&gt;
-                       *   The value of the connection state when Peer has just entered the Room.
-                       *   &lt;small&gt;At this stage, &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;
-                       *   is triggered.&lt;/small&gt;
-                       * @param {String} WELCOME &lt;small&gt;Value &lt;code&gt;&quot;welcome&quot;&lt;/code&gt;&lt;/small&gt;
-                       *   The value of the connection state when Peer is aware that User has entered the Room.
-                       *   &lt;small&gt;At this stage, &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;
-                       *   is triggered and Peer connection may commence.&lt;/small&gt;
-                       * @param {String} OFFER   &lt;small&gt;Value &lt;code&gt;&quot;offer&quot;&lt;/code&gt;&lt;/small&gt;
-                       *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;offer&quot;&lt;/code&gt;
-                       *   session description to start streaming connection.
-                       * @param {String} ANSWER  &lt;small&gt;Value &lt;code&gt;&quot;answer&quot;&lt;/code&gt;&lt;/small&gt;
-                       *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;answer&quot;&lt;/code&gt;
-                       *   session description to establish streaming connection.
-                       * @param {String} ERROR   &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
-                       *   The value of the connection state when Peer connection has failed to establish streaming connection.
-                       *   &lt;small&gt;This happens when there are errors that occurs in creating local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; /
-                       *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt;, or when setting remote / local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; / &lt;code&gt;&quot;answer&quot;&lt;/code&gt;.&lt;/small&gt;
-                       * @type JSON
-                       * @readOnly
-                       * @for Skylink
-                       * @since 0.1.0
-                       */
-                      Skylink.prototype.HANDSHAKE_PROGRESS = {
-                        ENTER: &#x27;enter&#x27;,
-                        WELCOME: &#x27;welcome&#x27;,
-                        OFFER: &#x27;offer&#x27;,
-                        ANSWER: &#x27;answer&#x27;,
-                        ERROR: &#x27;error&#x27;
-                      };
-                      
-                      /**
-                       * Function that creates the Peer connection offer session description.
-                       * @method _doOffer
-                       * @private
-                       * @for Skylink
-                       * @since 0.5.2
-                       */
-                      Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
-                        var self = this;
-                        var pc = self._peerConnections[targetMid];
-                      
-                        log.log([targetMid, null, null, &#x27;Checking caller status&#x27;], peerBrowser);
-                      
-                        // Added checks to ensure that connection object is defined first
-                        if (!pc) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;offer&#x27;, &#x27;Dropping of creating of offer &#x27; +
-                            &#x27;as connection does not exists&#x27;]);
-                          return;
-                        }
-                      
-                        // Added checks to ensure that state is &quot;stable&quot; if setting local &quot;offer&quot;
-                        if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;offer&#x27;,
-                            &#x27;Dropping of creating of offer as signalingState is not &quot;&#x27; +
-                            self.PEER_CONNECTION_STATE.STABLE + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
-                          return;
-                        }
-                      
-                        var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &amp;&amp;
-                          iceRestart &amp;&amp; self._enableIceRestart;
-                        var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;);
-                        var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp; self._getSDPEdgeVideoSupports(targetMid);
-                      
-                        var offerConstraints = {
-                          offerToReceiveAudio: offerToReceiveAudio,
-                          offerToReceiveVideo: offerToReceiveVideo,
-                          iceRestart: doIceRestart,
-                          voiceActivityDetection: self._voiceActivityDetection
-                        };
-                      
-                        // Prevent undefined OS errors
-                        peerBrowser.os = peerBrowser.os || &#x27;&#x27;;
-                      
-                        // Fallback to use mandatory constraints for plugin based browsers
-                        if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
-                          offerConstraints = {
-                            mandatory: {
-                              OfferToReceiveAudio: offerToReceiveAudio,
-                              OfferToReceiveVideo: offerToReceiveVideo,
-                              iceRestart: doIceRestart,
-                              voiceActivityDetection: self._voiceActivityDetection
-                            }
-                          };
-                        }
-                      
-                        // Add stream only at offer/answer end
-                        if (!self._hasMCU || targetMid === &#x27;MCU&#x27;) {
-                          self._addLocalMediaStreams(targetMid);
-                        }
-                      
-                        if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
-                          self._peerInformations[targetMid].config.enableDataChannel/* &amp;&amp;
-                          !(!self._sdpSettings.connection.data &amp;&amp; targetMid !== &#x27;MCU&#x27;)*/) {
-                          // Edge doesn&#x27;t support datachannels yet
-                          if (!(self._dataChannels[targetMid] &amp;&amp; self._dataChannels[targetMid].main)) {
-                            self._createDataChannel(targetMid);
-                            self._peerConnections[targetMid].hasMainChannel = true;
-                          }
-                        }
-                      
-                        log.debug([targetMid, null, null, &#x27;Creating offer with config:&#x27;], offerConstraints);
-                      
-                        pc.endOfCandidates = false;
-                      
-                        if (self._peerConnStatus[targetMid]) {
-                          self._peerConnStatus[targetMid].sdpConstraints = offerConstraints;
-                        }
-                      
-                        pc.createOffer(function(offer) {
-                          log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
-                      
-                          self._setLocalAndSendMessage(targetMid, offer);
-                      
-                        }, function(error) {
-                          self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-                      
-                          log.error([targetMid, null, null, &#x27;Failed creating an offer:&#x27;], error);
-                      
-                        }, offerConstraints);
-                      };
-                      
-                      /**
-                       * Function that creates the Peer connection answer session description.
-                       * This comes after receiving and setting the offer session description.
-                       * @method _doAnswer
-                       * @private
-                       * @for Skylink
-                       * @since 0.1.0
-                       */
-                      Skylink.prototype._doAnswer = function(targetMid) {
-                        var self = this;
-                        log.log([targetMid, null, null, &#x27;Creating answer with config:&#x27;],
-                          self._room.connection.sdpConstraints);
-                        var pc = self._peerConnections[targetMid];
-                      
-                        // Added checks to ensure that connection object is defined first
-                        if (!pc) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;answer&#x27;, &#x27;Dropping of creating of answer &#x27; +
-                            &#x27;as connection does not exists&#x27;]);
-                          return;
-                        }
-                      
-                        // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
-                        if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;answer&#x27;,
-                            &#x27;Dropping of creating of answer as signalingState is not &quot;&#x27; +
-                            self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
-                          return;
-                        }
-                      
-                        // Add stream only at offer/answer end
-                        if ((!self._hasMCU || targetMid === &#x27;MCU&#x27;) &amp;&amp; window.webrtcDetectedBrowser !== &#x27;edge&#x27;) {
-                          self._addLocalMediaStreams(targetMid);
-                        }
-                      
-                        var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;);
-                        var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp; self._getSDPEdgeVideoSupports(targetMid);
-                        var answerConstraints = window.webrtcDetectedBrowser === &#x27;edge&#x27; ? {
-                          offerToReceiveVideo: offerToReceiveVideo,
-                          offerToReceiveAudio: offerToReceiveAudio,
-                          voiceActivityDetection: self._voiceActivityDetection
-                        } : undefined;
-                      
-                        if (self._peerConnStatus[targetMid]) {
-                          self._peerConnStatus[targetMid].sdpConstraints = answerConstraints;
-                        }
-                      
-                        // No ICE restart constraints for createAnswer as it fails in chrome 48
-                        // { iceRestart: true }
-                        pc.createAnswer(function(answer) {
-                          log.debug([targetMid, null, null, &#x27;Created answer&#x27;], answer);
-                          self._setLocalAndSendMessage(targetMid, answer);
-                        }, function(error) {
-                          log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
-                          self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-                        }, answerConstraints);
-                      };
-                      
-                      /**
-                       * Function that sets the local session description and sends to Peer.
-                       * If trickle ICE is disabled, the local session description will be sent after
-                       *   ICE gathering has been completed.
-                       * @method _setLocalAndSendMessage
-                       * @private
-                       * @for Skylink
-                       * @since 0.5.2
-                       */
-                      Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescription) {
-                        var self = this;
-                        var pc = self._peerConnections[targetMid];
-                      
-                        // Added checks to ensure that sessionDescription is defined first
-                        if (!(!!_sessionDescription &amp;&amp; !!_sessionDescription.sdp)) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, null, &#x27;Local session description is undefined -&gt;&#x27;], _sessionDescription);
-                          return;
-                        }
-                      
-                        // Added checks to ensure that connection object is defined first
-                        if (!pc) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type,
-                            &#x27;Local session description will not be set as connection does not exists -&gt;&#x27;], _sessionDescription);
-                          return;
-                      
-                        } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
-                          pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type, &#x27;Local session description &#x27; +
-                            &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], _sessionDescription);
-                          return;
-                      
-                        // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
-                        } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp;
-                          pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type, &#x27;Local session description &#x27; +
-                            &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], _sessionDescription);
-                          return;
-                      
-                        // Added checks if there is a current local sessionDescription being processing before processing this one
-                        } else if (pc.processingLocalSDP) {
-                          log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type,
-                            &#x27;Local session description will not be set as another is being processed -&gt;&#x27;], _sessionDescription);
-                          return;
-                        }
-                      
-                        pc.processingLocalSDP = true;
-                      
-                        // Sets and expected receiving codecs etc.
-                        var sessionDescription = {
-                          type: _sessionDescription.type,
-                          sdp: _sessionDescription.sdp
-                        };
-                      
-                        sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
-                        sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
-                        sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
-                        sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
-                        sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, &#x27;local&#x27;);
-                        sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
-                      
-                        log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-                          &#x27;Local session description updated -&gt;&#x27;], sessionDescription.sdp);
-                      
-                        pc.setLocalDescription(new RTCSessionDescription(sessionDescription), function() {
-                          log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-                            &#x27;Local session description has been set -&gt;&#x27;], sessionDescription);
-                      
-                          pc.processingLocalSDP = false;
-                      
-                          self._trigger(&#x27;handshakeProgress&#x27;, sessionDescription.type, targetMid);
-                      
-                          if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
-                            pc.setAnswer = &#x27;local&#x27;;
-                          } else {
-                            pc.setOffer = &#x27;local&#x27;;
-                          }
-                      
-                          if (!self._enableIceTrickle &amp;&amp; !pc.gathered) {
-                            log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
-                              &#x27;Local session description sending is halted to complete ICE gathering.&#x27;]);
-                            return;
-                          }
-                      
-                          self._sendChannelMessage({
-                            type: sessionDescription.type,
-                            sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
-                            mid: self._user.sid,
-                            target: targetMid,
-                            rid: self._room.id,
-                            userInfo: self._getUserInfo(targetMid)
-                          });
-                      
-                        }, function(error) {
-                          log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local description failed setting -&gt;&#x27;], error);
-                      
-                          pc.processingLocalSDP = false;
-                      
-                          self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-                        });
-                      };
-                      
-                          </pre>
-                      </div>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * The list of Peer connection states.
+ * @attribute HANDSHAKE_PROGRESS
+ * @param {String} ENTER   &lt;small&gt;Value &lt;code&gt;&quot;enter&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the connection state when Peer has just entered the Room.
+ *   &lt;small&gt;At this stage, &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;
+ *   is triggered.&lt;/small&gt;
+ * @param {String} WELCOME &lt;small&gt;Value &lt;code&gt;&quot;welcome&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the connection state when Peer is aware that User has entered the Room.
+ *   &lt;small&gt;At this stage, &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;
+ *   is triggered and Peer connection may commence.&lt;/small&gt;
+ * @param {String} OFFER   &lt;small&gt;Value &lt;code&gt;&quot;offer&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;offer&quot;&lt;/code&gt;
+ *   session description to start streaming connection.
+ * @param {String} ANSWER  &lt;small&gt;Value &lt;code&gt;&quot;answer&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;answer&quot;&lt;/code&gt;
+ *   session description to establish streaming connection.
+ * @param {String} ERROR   &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the connection state when Peer connection has failed to establish streaming connection.
+ *   &lt;small&gt;This happens when there are errors that occurs in creating local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; /
+ *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt;, or when setting remote / local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; / &lt;code&gt;&quot;answer&quot;&lt;/code&gt;.&lt;/small&gt;
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype.HANDSHAKE_PROGRESS = {
+  ENTER: &#x27;enter&#x27;,
+  WELCOME: &#x27;welcome&#x27;,
+  OFFER: &#x27;offer&#x27;,
+  ANSWER: &#x27;answer&#x27;,
+  ERROR: &#x27;error&#x27;
+};
+
+/**
+ * Function that creates the Peer connection offer session description.
+ * @method _doOffer
+ * @private
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
+  var self = this;
+  var pc = self._peerConnections[targetMid];
+
+  log.log([targetMid, null, null, &#x27;Checking caller status&#x27;], peerBrowser);
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;offer&#x27;, &#x27;Dropping of creating of offer &#x27; +
+      &#x27;as connection does not exists&#x27;]);
+    return;
+  }
+
+  // Added checks to ensure that state is &quot;stable&quot; if setting local &quot;offer&quot;
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;offer&#x27;,
+      &#x27;Dropping of creating of offer as signalingState is not &quot;&#x27; +
+      self.PEER_CONNECTION_STATE.STABLE + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
+    return;
+  }
+
+  var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &amp;&amp;
+    iceRestart &amp;&amp; self._enableIceRestart;
+  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;);
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp; self._getSDPEdgeVideoSupports(targetMid);
+
+  var offerConstraints = {
+    offerToReceiveAudio: offerToReceiveAudio,
+    offerToReceiveVideo: offerToReceiveVideo,
+    iceRestart: doIceRestart,
+    voiceActivityDetection: self._voiceActivityDetection
+  };
+
+  // Prevent undefined OS errors
+  peerBrowser.os = peerBrowser.os || &#x27;&#x27;;
+
+  // Fallback to use mandatory constraints for plugin based browsers
+  if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
+    offerConstraints = {
+      mandatory: {
+        OfferToReceiveAudio: offerToReceiveAudio,
+        OfferToReceiveVideo: offerToReceiveVideo,
+        iceRestart: doIceRestart,
+        voiceActivityDetection: self._voiceActivityDetection
+      }
+    };
+  }
+
+  // Add stream only at offer/answer end
+  if (!self._hasMCU || targetMid === &#x27;MCU&#x27;) {
+    self._addLocalMediaStreams(targetMid);
+  }
+
+  if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
+    self._peerInformations[targetMid].config.enableDataChannel/* &amp;&amp;
+    !(!self._sdpSettings.connection.data &amp;&amp; targetMid !== &#x27;MCU&#x27;)*/) {
+    // Edge doesn&#x27;t support datachannels yet
+    if (!(self._dataChannels[targetMid] &amp;&amp; self._dataChannels[targetMid].main)) {
+      self._createDataChannel(targetMid);
+      self._peerConnections[targetMid].hasMainChannel = true;
+    }
+  }
+
+  log.debug([targetMid, null, null, &#x27;Creating offer with config:&#x27;], offerConstraints);
+
+  pc.endOfCandidates = false;
+
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].sdpConstraints = offerConstraints;
+  }
+
+  pc.createOffer(function(offer) {
+    log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
+
+    self._setLocalAndSendMessage(targetMid, offer);
+
+  }, function(error) {
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+
+    log.error([targetMid, null, null, &#x27;Failed creating an offer:&#x27;], error);
+
+  }, offerConstraints);
+};
+
+/**
+ * Function that creates the Peer connection answer session description.
+ * This comes after receiving and setting the offer session description.
+ * @method _doAnswer
+ * @private
+ * @for Skylink
+ * @since 0.1.0
+ */
+Skylink.prototype._doAnswer = function(targetMid) {
+  var self = this;
+  log.log([targetMid, null, null, &#x27;Creating answer with config:&#x27;],
+    self._room.connection.sdpConstraints);
+  var pc = self._peerConnections[targetMid];
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;answer&#x27;, &#x27;Dropping of creating of answer &#x27; +
+      &#x27;as connection does not exists&#x27;]);
+    return;
+  }
+
+  // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
+  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, &#x27;answer&#x27;,
+      &#x27;Dropping of creating of answer as signalingState is not &quot;&#x27; +
+      self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER + &#x27;&quot; -&gt;&#x27;], pc.signalingState);
+    return;
+  }
+
+  // Add stream only at offer/answer end
+  if ((!self._hasMCU || targetMid === &#x27;MCU&#x27;) &amp;&amp; window.webrtcDetectedBrowser !== &#x27;edge&#x27;) {
+    self._addLocalMediaStreams(targetMid);
+  }
+
+  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;);
+  var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp; self._getSDPEdgeVideoSupports(targetMid);
+  var answerConstraints = window.webrtcDetectedBrowser === &#x27;edge&#x27; ? {
+    offerToReceiveVideo: offerToReceiveVideo,
+    offerToReceiveAudio: offerToReceiveAudio,
+    voiceActivityDetection: self._voiceActivityDetection
+  } : undefined;
+
+  if (self._peerConnStatus[targetMid]) {
+    self._peerConnStatus[targetMid].sdpConstraints = answerConstraints;
+  }
+
+  // No ICE restart constraints for createAnswer as it fails in chrome 48
+  // { iceRestart: true }
+  pc.createAnswer(function(answer) {
+    log.debug([targetMid, null, null, &#x27;Created answer&#x27;], answer);
+    self._setLocalAndSendMessage(targetMid, answer);
+  }, function(error) {
+    log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+  }, answerConstraints);
+};
+
+/**
+ * Function that sets the local session description and sends to Peer.
+ * If trickle ICE is disabled, the local session description will be sent after
+ *   ICE gathering has been completed.
+ * @method _setLocalAndSendMessage
+ * @private
+ * @for Skylink
+ * @since 0.5.2
+ */
+Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescription) {
+  var self = this;
+  var pc = self._peerConnections[targetMid];
+
+  // Added checks to ensure that sessionDescription is defined first
+  if (!(!!_sessionDescription &amp;&amp; !!_sessionDescription.sdp)) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, null, &#x27;Local session description is undefined -&gt;&#x27;], _sessionDescription);
+    return;
+  }
+
+  // Added checks to ensure that connection object is defined first
+  if (!pc) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type,
+      &#x27;Local session description will not be set as connection does not exists -&gt;&#x27;], _sessionDescription);
+    return;
+
+  } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
+    pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type, &#x27;Local session description &#x27; +
+      &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], _sessionDescription);
+    return;
+
+  // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
+  } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER &amp;&amp;
+    pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type, &#x27;Local session description &#x27; +
+      &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], _sessionDescription);
+    return;
+
+  // Added checks if there is a current local sessionDescription being processing before processing this one
+  } else if (pc.processingLocalSDP) {
+    log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type,
+      &#x27;Local session description will not be set as another is being processed -&gt;&#x27;], _sessionDescription);
+    return;
+  }
+
+  pc.processingLocalSDP = true;
+
+  // Sets and expected receiving codecs etc.
+  var sessionDescription = {
+    type: _sessionDescription.type,
+    sdp: _sessionDescription.sdp
+  };
+
+  sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
+  sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, &#x27;local&#x27;);
+  sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
+
+  log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+    &#x27;Local session description updated -&gt;&#x27;], sessionDescription.sdp);
+
+  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), function() {
+    log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+      &#x27;Local session description has been set -&gt;&#x27;], sessionDescription);
+
+    pc.processingLocalSDP = false;
+
+    self._trigger(&#x27;handshakeProgress&#x27;, sessionDescription.type, targetMid);
+
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
+      pc.setAnswer = &#x27;local&#x27;;
+    } else {
+      pc.setOffer = &#x27;local&#x27;;
+    }
+
+    if (!self._enableIceTrickle &amp;&amp; !pc.gathered) {
+      log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
+        &#x27;Local session description sending is halted to complete ICE gathering.&#x27;]);
+      return;
+    }
+
+    self._sendChannelMessage({
+      type: sessionDescription.type,
+      sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
+      mid: self._user.sid,
+      target: targetMid,
+      rid: self._room.id,
+      userInfo: self._getUserInfo(targetMid)
+    });
+
+  }, function(error) {
+    log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local description failed setting -&gt;&#x27;], error);
+
+    pc.processingLocalSDP = false;
+
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
+  });
+};
+
+    </pre>
+</div>
+
                   </div>
               </div>
           </div>
