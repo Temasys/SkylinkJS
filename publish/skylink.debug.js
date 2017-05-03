@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.21 - Thu Apr 27 2017 16:42:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.21 - Wed May 03 2017 12:41:17 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -15442,6 +15442,28 @@ Skylink.prototype.AUDIO_CODEC = {
 };
 
 /**
+ * The list of available screensharing media sources configured in the
+ * <a href="#method_shareScreen"><code>shareScreen()</code> method</a>.
+ * @attribute MEDIA_SOURCE
+ * @param {String} SCREEN <small>Value <code>"screen"</code></small>
+ *   The value of the option to share entire screen.
+ * @param {String} WINDOW <small>Value <code>"window"</code></small>
+ *   The value of the option to share application windows.
+ * @param {String} TAB <small>Value <code>"tab"</code></small>
+ *   The value of the option to share browser tab.
+ *   <small>Note that this is not supported by Firefox currently and only from Chrome 52+ and Opera 39+.</small>
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype.MEDIA_SOURCE = {
+  SCREEN: 'screen',
+  WINDOW: 'window',
+  TAB: 'tab'
+};
+
+/**
  * <blockquote class="info">
  *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
  *   the maximum resolution of the Stream due to browser interopability and support.
@@ -16538,6 +16560,10 @@ Skylink.prototype.disableVideo = function() {
  *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
+ * @param {String} [mediaSource=window] The screensharing media source to select.
+ *   <small>If <code>TAB</code> option is selected with <code>enableAudio</code> enabled,
+ *   the browser tab audio will be used instead of user's microphone.</small>
+ *   [Rel: Skylink.MEDIA_SOURCE]
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -16616,12 +16642,13 @@ Skylink.prototype.disableVideo = function() {
  * @for Skylink
  * @since 0.6.0
  */
-Skylink.prototype.shareScreen = function (enableAudio, callback) {
+Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
   var self = this;
   var enableAudioSettings = {
     stereo: false,
     echoCancellation: true
   };
+  var useMediaSource = self.MEDIA_SOURCE.SCREEN;
 
   if (typeof enableAudio === 'function') {
     callback = enableAudio;
@@ -16632,6 +16659,25 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
     enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null;
     enableAudioSettings.stereo = enableAudio.stereo === true;
     enableAudioSettings.echoCancellation = enableAudio.echoCancellation !== false;
+  
+  } else if (enableAudio && typeof enableAudio === 'string') {
+    for (var prop in self.MEDIA_SOURCE) {
+      if (self.MEDIA_SOURCE.hasOwnProperty(prop) && enableAudio === self.MEDIA_SOURCE[prop]) {
+        useMediaSource = enableAudio;
+        break;
+      }
+    }
+  }
+
+  if (mediaSource && typeof mediaSource === 'string') {
+    for (var prop in self.MEDIA_SOURCE) {
+      if (self.MEDIA_SOURCE.hasOwnProperty(prop) && mediaSource === self.MEDIA_SOURCE[prop]) {
+        useMediaSource = mediaSource;
+        break;
+      }
+    }
+  } else if (typeof mediaSource === 'function') {
+    callback = mediaSource;
   }
 
   self._throttle(function (runFn) {
@@ -16657,7 +16703,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       },
       getUserMediaSettings: {
         video: {
-          mediaSource: 'window'
+          mediaSource: useMediaSource
         }
       }
     };
