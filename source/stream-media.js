@@ -80,6 +80,10 @@ Skylink.prototype.AUDIO_CODEC = {
  * @param {String} TAB <small>Value <code>"tab"</code></small>
  *   The value of the option to share browser tab.
  *   <small>Note that this is not supported by Firefox currently and only from Chrome 52+ and Opera 39+.</small>
+ * @param {String} TAB_AUDIO <small>Value <code>"audio"</code></small>
+ *   The value of the option to share browser tab audio.
+ *   <small>Note that this is not supported by Firefox currently and only from Chrome 52+ and Opera 39+.</small>
+ *   <small><code>options.audio</code> has to be enabled with <code>TAB</code> also requested to enable sharing of tab audio.</small>
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -88,7 +92,8 @@ Skylink.prototype.AUDIO_CODEC = {
 Skylink.prototype.MEDIA_SOURCE = {
   SCREEN: 'screen',
   WINDOW: 'window',
-  TAB: 'tab'
+  TAB: 'tab',
+  TAB_AUDIO: 'audio'
 };
 
 /**
@@ -1188,9 +1193,9 @@ Skylink.prototype.disableVideo = function() {
  *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
- * @param {String} [mediaSource=window] The screensharing media source to select.
- *   <small>If <code>TAB</code> option is selected with <code>enableAudio</code> enabled,
- *   the browser tab audio will be used instead of user's microphone.</small>
+ * @param {String|Array} [mediaSource=window] The screensharing media source to select.
+ *   <small>Note that multiple sources (like providing an Array) is not supported by Firefox. The first source item
+ *   in the Array provided will be used instead.</small>
  *   [Rel: Skylink.MEDIA_SOURCE]
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
@@ -1295,14 +1300,40 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         break;
       }
     }
+  } else if (Array.isArray(enableAudio) && enableAudio.length > 0) {
+    var outputA = [];
+    for (var i = 0; i < enableAudio.length; i++) {
+      for (var subprop in self.MEDIA_SOURCE) {
+        if (self.MEDIA_SOURCE.hasOwnProperty(subprop) && enableAudio[i] === self.MEDIA_SOURCE[subprop]) {
+          outputA.push(enableAudio[i]);
+          break;
+        }
+      }
+    }
+    if (outputA.length > 0) {
+      useMediaSource = outputA;
+    }
   }
 
   if (mediaSource && typeof mediaSource === 'string') {
-    for (var prop in self.MEDIA_SOURCE) {
-      if (self.MEDIA_SOURCE.hasOwnProperty(prop) && mediaSource === self.MEDIA_SOURCE[prop]) {
+    for (var propB in self.MEDIA_SOURCE) {
+      if (self.MEDIA_SOURCE.hasOwnProperty(propB) && mediaSource === self.MEDIA_SOURCE[propB]) {
         useMediaSource = mediaSource;
         break;
       }
+    }
+  } else if (Array.isArray(mediaSource) && mediaSource.length > 0) {
+    var outputB = [];
+    for (var j = 0; j < enableAudio.length; j++) {
+      for (var subpropB in self.MEDIA_SOURCE) {
+        if (self.MEDIA_SOURCE.hasOwnProperty(subpropB) && enableAudio[j] === self.MEDIA_SOURCE[subpropB]) {
+          outputB.push(enableAudio[j]);
+          break;
+        }
+      }
+    }
+    if (outputB.length > 0) {
+      useMediaSource = outputB;
     }
   } else if (typeof mediaSource === 'function') {
     callback = mediaSource;
