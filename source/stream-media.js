@@ -1324,10 +1324,10 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     }
   } else if (Array.isArray(mediaSource) && mediaSource.length > 0) {
     var outputB = [];
-    for (var j = 0; j < enableAudio.length; j++) {
+    for (var j = 0; j < mediaSource.length; j++) {
       for (var subpropB in self.MEDIA_SOURCE) {
-        if (self.MEDIA_SOURCE.hasOwnProperty(subpropB) && enableAudio[j] === self.MEDIA_SOURCE[subpropB]) {
-          outputB.push(enableAudio[j]);
+        if (self.MEDIA_SOURCE.hasOwnProperty(subpropB) && mediaSource[j] === self.MEDIA_SOURCE[subpropB]) {
+          outputB.push(mediaSource[j]);
           break;
         }
       }
