@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.21 - Tue May 16 2017 22:03:11 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.21 - Tue May 16 2017 22:09:26 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -16784,12 +16784,16 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     });
 
     try {
-      if (enableAudio && window.webrtcDetectedBrowser === 'firefox') {
-        settings.getUserMediaSettings.audio = { echoCancellation: enableAudioSettings.echoCancellation };
+      var hasDefaultAudioTrack = false;
+      if (enableAudio && (window.webrtcDetectedBrowser === 'firefox' || (Array.isArray(useMediaSource) &&
+        useMediaSource.indexOf('audio') > -1 && useMediaSource.indexOf('tab') > -1))) {
+        settings.getUserMediaSettings.audio = window.webrtcDetectedBrowser === 'firefox' ?
+          { echoCancellation: enableAudioSettings.echoCancellation } : {};
+        hasDefaultAudioTrack = true;
       }
 
       navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
-        if (window.webrtcDetectedBrowser === 'firefox' || !enableAudio) {
+        if (hasDefaultAudioTrack || !enableAudio) {
           self._onStreamAccessSuccess(stream, settings, true, false);
           return;
         }
