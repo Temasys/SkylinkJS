@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.21 - Thu May 18 2017 03:07:58 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.21 - Thu May 18 2017 03:15:25 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11592,7 +11592,7 @@ if (typeof window.require !== 'function') {
   AdapterJS.defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.21 - Thu May 18 2017 03:07:58 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.21 - Thu May 18 2017 03:15:25 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -23058,26 +23058,22 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {
-  if (typeof isDebugMode === 'object') {
-    if (Object.keys(isDebugMode).length > 0) {
-      _enableDebugTrace = !!isDebugMode.trace;
-      _enableDebugStack = !!isDebugMode.storeLogs;
-    } else {
-      _enableDebugMode = false;
-      _enableDebugTrace = false;
-      _enableDebugStack = false;
-    }
-  }
-  if (isDebugMode === false) {
+  // setDebugMode({})
+  if (isDebugMode && typeof isDebugMode === 'object') {
+    _enableDebugMode = true;
+    _enableDebugTrace = isDebugMode.trace === true;
+    _enableDebugStack = isDebugMode.storeLogs === true;
+  // setDebugMode(true)
+  } else if (isDebugMode === true) {
+    _enableDebugMode = true;
+    _enableDebugTrace = true;
+    _enableDebugStack = true;
+  // setDebugMode()
+  } else {
     _enableDebugMode = false;
     _enableDebugTrace = false;
     _enableDebugStack = false;
-
-    return;
   }
-  _enableDebugMode = true;
-  _enableDebugTrace = true;
-  _enableDebugStack = true;
 };
 var _eventsDocs = {
   /**
