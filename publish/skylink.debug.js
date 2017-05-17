@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.21 - Thu May 18 2017 03:15:25 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.21 - Thu May 18 2017 03:17:16 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -11424,9 +11424,6 @@ var log = {
  * @since 0.5.5
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
-  if(logLevel === undefined) {
-    logLevel = Skylink.LOG_LEVEL.WARN;
-  }
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;
