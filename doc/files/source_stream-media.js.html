@@ -170,7 +170,21 @@ Skylink.prototype.AUDIO_CODEC = {
  *   The value of the option to share application windows.
  * @param {String} TAB &lt;small&gt;Value &lt;code&gt;&quot;tab&quot;&lt;/code&gt;&lt;/small&gt;
  *   The value of the option to share browser tab.
- *   &lt;small&gt;Note that this is not supported by Firefox currently and only from Chrome 52+ and Opera 39+.&lt;/small&gt;
+ *   &lt;small&gt;Note that this is only supported by from Chrome 52+ and Opera 39+.&lt;/small&gt;
+ * @param {String} TAB_AUDIO &lt;small&gt;Value &lt;code&gt;&quot;audio&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to share browser tab audio.
+ *   &lt;small&gt;Note that this is only supported by Chrome 52+ and Opera 39+.&lt;/small&gt;
+ *   &lt;small&gt;&lt;code&gt;options.audio&lt;/code&gt; has to be enabled with &lt;code&gt;TAB&lt;/code&gt; also requested to enable sharing of tab audio.&lt;/small&gt;
+ * @param {String} APPLICATION &lt;small&gt;Value &lt;code&gt;&quot;application&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to share applications.
+ *   &lt;small&gt;Note that this is only supported by Firefox currently.&lt;/small&gt;
+ * @param {String} BROWSER &lt;small&gt;Value &lt;code&gt;&quot;browser&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to share browser.
+ *   &lt;small&gt;Note that this is only supported by Firefox currently, and requires toggling the &lt;code&gt;media.getUserMedia.browser.enabled&lt;/code&gt;
+ *   in &lt;code&gt;about:config&lt;/code&gt;.&lt;/small&gt;
+ * @param {String} CAMERA &lt;small&gt;Value &lt;code&gt;&quot;camera&quot;&lt;/code&gt;&lt;/small&gt;
+ *   The value of the option to share camera.
+ *   &lt;small&gt;Note that this is only supported by Firefox currently.&lt;/small&gt;
  * @type JSON
  * @readOnly
  * @for Skylink
@@ -179,7 +193,11 @@ Skylink.prototype.AUDIO_CODEC = {
 Skylink.prototype.MEDIA_SOURCE = {
   SCREEN: &#x27;screen&#x27;,
   WINDOW: &#x27;window&#x27;,
-  TAB: &#x27;tab&#x27;
+  TAB: &#x27;tab&#x27;,
+  TAB_AUDIO: &#x27;audio&#x27;,
+  APPLICATION: &#x27;application&#x27;,
+  BROWSER: &#x27;browser&#x27;,
+  CAMERA: &#x27;camera&#x27;
 };
 
 /**
@@ -1279,9 +1297,10 @@ Skylink.prototype.disableVideo = function() {
  *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones.&lt;/blockquote&gt; The flag to enable echo cancellation for audio track.
- * @param {String} [mediaSource=window] The screensharing media source to select.
- *   &lt;small&gt;If &lt;code&gt;TAB&lt;/code&gt; option is selected with &lt;code&gt;enableAudio&lt;/code&gt; enabled,
- *   the browser tab audio will be used instead of user&#x27;s microphone.&lt;/small&gt;
+ * @param {String|Array} [mediaSource=screen] The screensharing media source to select.
+ *   &lt;small&gt;Note that multiple sources (like providing an Array) is not supported by Firefox. The first source item
+ *   in the Array provided will be used instead.&lt;/small&gt;
+ *   &lt;small&gt;E.g. &lt;code&gt;[&quot;screen&quot;, &quot;window&quot;]&lt;/code&gt;, &lt;code&gt;[&quot;tab&quot;, &quot;audio&quot;]&lt;/code&gt;, &lt;code&gt;&quot;screen&quot;&lt;/code&gt; or &lt;code&gt;&quot;tab&quot;&lt;/code&gt;.&lt;/small&gt;
  *   [Rel: Skylink.MEDIA_SOURCE]
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
@@ -1306,6 +1325,24 @@ Skylink.prototype.disableVideo = function() {
  *
  *   // Example 2: Share screen without audio
  *   skylinkDemo.shareScreen(false, function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById(&quot;my-screen&quot;), success);
+ *   });
+ * 
+ *   // Example 3: Share &quot;window&quot; media source
+ *   skylinkDemo.shareScreen(&quot;window&quot;, function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById(&quot;my-screen&quot;), success);
+ *   });
+ * 
+ *   // Example 4: Share tab and its audio media source
+ *   skylinkDemo.shareScreen(true, [&quot;tab&quot;, &quot;audio&quot;], function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById(&quot;my-screen&quot;), success);
+ *   });
+ * 
+ *   // Example 5: Share &quot;window&quot; and &quot;screen&quot; media source
+ *   skylinkDemo.shareScreen([&quot;window&quot;, &quot;screen&quot;], function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById(&quot;my-screen&quot;), success);
  *   });
@@ -1367,36 +1404,73 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     stereo: false,
     echoCancellation: true
   };
-  var useMediaSource = self.MEDIA_SOURCE.SCREEN;
+  var useMediaSource = [self.MEDIA_SOURCE.SCREEN];
+  var checkIfSourceExistsFn = function (val) {
+    for (var prop in self.MEDIA_SOURCE) {
+      if (self.MEDIA_SOURCE.hasOwnProperty(prop) &amp;&amp; self.MEDIA_SOURCE[prop] === val) {
+        return true;
+      }
+    }
+    return false;
+  };
 
-  if (typeof enableAudio === &#x27;function&#x27;) {
-    callback = enableAudio;
-    enableAudio = false;
-
+  // shareScreen(&quot;screen&quot;)
+  if (enableAudio &amp;&amp; typeof enableAudio === &#x27;string&#x27;) {
+    if (checkIfSourceExistsFn(enableAudio)) {
+      useMediaSource = [enableAudio];
+    }
+  // shareScreen([&quot;screen&quot;, &quot;window&quot;])
+  } else if (Array.isArray(enableAudio)) {
+    var enableAudioArr = [];
+    for (var i = 0; i &lt; enableAudio.length; i++) {
+      if (checkIfSourceExistsFn(enableAudio[i])) {
+        enableAudioArr.push(enableAudio[i]);
+      }
+    }
+    if (enableAudioArr.length &gt; 0) {
+      useMediaSource = enableAudioArr;
+    }
+  // shareScreen({ stereo: true })
   } else if (enableAudio &amp;&amp; typeof enableAudio === &#x27;object&#x27;) {
     enableAudioSettings.usedtx = typeof enableAudio.usedtx === &#x27;boolean&#x27; ? enableAudio.usedtx : null;
     enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === &#x27;boolean&#x27; ? enableAudio.useinbandfec : null;
     enableAudioSettings.stereo = enableAudio.stereo === true;
     enableAudioSettings.echoCancellation = enableAudio.echoCancellation !== false;
-  
-  } else if (enableAudio &amp;&amp; typeof enableAudio === &#x27;string&#x27;) {
-    for (var prop in self.MEDIA_SOURCE) {
-      if (self.MEDIA_SOURCE.hasOwnProperty(prop) &amp;&amp; enableAudio === self.MEDIA_SOURCE[prop]) {
-        useMediaSource = enableAudio;
-        break;
-      }
-    }
+  // shareScreen(true)
+  } else if (typeof enableAudio === &#x27;boolean&#x27;) {
+    enableAudioSettings = enableAudio === false ? false : enableAudioSettings;
+  // shareScreen(function () {})
+  } else if (typeof enableAudio === &#x27;function&#x27;) {
+    callback = enableAudio;
+    enableAudio = false;
   }
 
+  // shareScreen(.., &quot;screen&quot;)
   if (mediaSource &amp;&amp; typeof mediaSource === &#x27;string&#x27;) {
-    for (var prop in self.MEDIA_SOURCE) {
-      if (self.MEDIA_SOURCE.hasOwnProperty(prop) &amp;&amp; mediaSource === self.MEDIA_SOURCE[prop]) {
-        useMediaSource = mediaSource;
-        break;
+    if (checkIfSourceExistsFn(mediaSource)) {
+      useMediaSource = [mediaSource];
+    }
+  // shareScreen(.., [&quot;screen&quot;, &quot;window&quot;])
+  } else if (Array.isArray(mediaSource)) {
+    var mediaSourceArr = [];
+    for (var i = 0; i &lt; mediaSource.length; i++) {
+      if (checkIfSourceExistsFn(mediaSource[i])) {
+        mediaSourceArr.push(mediaSource[i]);
       }
     }
+    if (mediaSourceArr.length &gt; 0) {
+      useMediaSource = mediaSourceArr;
+    }
+  // shareScreen(.., function () {})
   } else if (typeof mediaSource === &#x27;function&#x27;) {
     callback = mediaSource;
+  }
+
+  if (useMediaSource.indexOf(&#x27;audio&#x27;) &gt; -1 &amp;&amp; useMediaSource.indexOf(&#x27;tab&#x27;) === -1) {
+    useMediaSource.splice(useMediaSource.indexOf(&#x27;audio&#x27;), 1);
+    if (useMediaSource.length === 0) {
+      useMediaSource = [self.MEDIA_SOURCE.SCREEN];
+    }
   }
 
   self._throttle(function (runFn) {
@@ -1414,7 +1488,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 
     var settings = {
       settings: {
-        audio: enableAudio ? enableAudioSettings : false,
+        audio: enableAudioSettings,
         video: {
           screenshare: true,
           exactConstraints: false
@@ -1471,20 +1545,28 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       return isScreensharing;
     });
 
+    var getUserMediaAudioSettings = { echoCancellation: enableAudioSettings.echoCancellation };
+
     try {
-      if (enableAudio &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-        settings.getUserMediaSettings.audio = { echoCancellation: enableAudioSettings.echoCancellation };
+      var hasDefaultAudioTrack = false;
+      if (enableAudioSettings) {
+        if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+          hasDefaultAudioTrack = true;
+          settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
+        } else if (useMediaSource.indexOf(&#x27;audio&#x27;) &gt; -1 &amp;&amp; useMediaSource.indexOf(&#x27;tab&#x27;) &gt; -1) {
+          hasDefaultAudioTrack = true;
+          settings.getUserMediaSettings.audio = {};
+        }
       }
 
       navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
-        if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; || !enableAudio) {
+        if (hasDefaultAudioTrack || !enableAudioSettings) {
           self._onStreamAccessSuccess(stream, settings, true, false);
           return;
         }
 
-        navigator.getUserMedia({
-          audio: { echoCancellation: enableAudioSettings.echoCancellation }
-        }, function (audioStream) {
+        settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
+        navigator.getUserMedia({ audio: getUserMediaAudioSettings }, function (audioStream) {
           try {
             audioStream.addTrack(stream.getVideoTracks()[0]);
 
