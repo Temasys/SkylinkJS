@@ -9782,7 +9782,7 @@
                 },
                 {
                     "name": "mediaSource",
-                    "description": "The screensharing media source to select.\n  <small>Note that multiple sources (like providing an Array) is not supported by Firefox. The first source item\n  in the Array provided will be used instead.</small>\n  <small>E.g. <code>[\"screen\", \"window\"]</code>, <code>[\"tab\", \"audio\"]</code>, <code>\"screen\"</code> or <code>\"tab\"</code>.</small>\n  [Rel: Skylink.MEDIA_SOURCE]",
+                    "description": "The screensharing media source to select.\n  <small>Note that multiple sources are not supported by Firefox as of the time of this release.\n  Firefox will use the first item specified in the Array in the event that multiple sources are defined.</small>\n  <small>E.g. <code>[\"screen\", \"window\"]</code>, <code>[\"tab\", \"audio\"]</code>, <code>\"screen\"</code> or <code>\"tab\"</code>.</small>\n  [Rel: Skylink.MEDIA_SOURCE]",
                     "type": "String|Array",
                     "optional": true,
                     "optdefault": "screen"

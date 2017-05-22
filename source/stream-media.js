@@ -1207,8 +1207,8 @@ Skylink.prototype.disableVideo = function() {
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
  * @param {String|Array} [mediaSource=screen] The screensharing media source to select.
- *   <small>Note that multiple sources (like providing an Array) is not supported by Firefox. The first source item
- *   in the Array provided will be used instead.</small>
+ *   <small>Note that multiple sources are not supported by Firefox as of the time of this release.
+ *   Firefox will use the first item specified in the Array in the event that multiple sources are defined.</small>
  *   <small>E.g. <code>["screen", "window"]</code>, <code>["tab", "audio"]</code>, <code>"screen"</code> or <code>"tab"</code>.</small>
  *   [Rel: Skylink.MEDIA_SOURCE]
  * @param {Function} [callback] The callback function fired when request has completed.
