@@ -4071,7 +4071,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 481,
+            "line": 504,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4136,7 +4136,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 597,
+            "line": 620,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4146,7 +4146,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 631,
+            "line": 654,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4156,7 +4156,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 665,
+            "line": 688,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -10136,15 +10136,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:481"
+            "line": " source/room-connection.js:504"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:597"
+            "line": " source/room-connection.js:620"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:631"
+            "line": " source/room-connection.js:654"
         },
         {
             "message": "unknown tag: trigger",
