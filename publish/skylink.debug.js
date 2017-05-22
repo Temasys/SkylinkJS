@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.21 - Thu May 18 2017 03:17:16 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.21 - Mon May 22 2017 15:28:50 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -10719,7 +10719,7 @@ Skylink.prototype.init = function(options, callback) {
           hasTriggered = true;
           self.off('readyStateChange', readyStateChangeFn);
           callback({
-            error: new Error(error),
+            error: error.content instanceof Error ? error.content : (new Error(JSON.stringify(error.content))),
             errorCode: error.errorCode,
             status: error.status
           },null);
