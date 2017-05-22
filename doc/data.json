@@ -4022,7 +4022,7 @@
                                 {
                                     "name": "error",
                                     "description": "The error received when starting Room session has failed.",
-                                    "type": "Error|String"
+                                    "type": "Error"
                                 },
                                 {
                                     "name": "errorCode",
@@ -5340,7 +5340,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 393,
+            "line": 390,
             "description": "Function that configures the debugging mode of the SDK.",
             "itemtype": "method",
             "name": "setDebugMode",

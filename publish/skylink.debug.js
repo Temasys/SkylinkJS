@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.21 - Mon May 22 2017 15:28:50 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.21 - Mon May 22 2017 15:45:05 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -9050,7 +9050,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   for request success.</small>
  * @param {JSON} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
- * @param {Error|String} callback.error.error The error received when starting Room session has failed.
+ * @param {Error} callback.error.error The error received when starting Room session has failed.
  * @param {Number} [callback.error.errorCode] The current <a href="#method_init"><code>init()</code> method</a> ready state.
  *   <small>Defined as <code>null</code> when no <a href="#method_init"><code>init()</code> method</a>
  *   has not been called due to invalid configuration.</small>
@@ -9205,7 +9205,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
       callback({
         room: tryRoom,
         errorCode: readyState || null,
-        error: typeof error === 'string' ? new Error(error) : error
+        error: error instanceof Error ? error : new Error(JSON.stringify(error))
       });
     }
   };

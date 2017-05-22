@@ -341,7 +341,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   for request success.&lt;/small&gt;
  * @param {JSON} callback.error The error result in request.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
- * @param {Error|String} callback.error.error The error received when starting Room session has failed.
+ * @param {Error} callback.error.error The error received when starting Room session has failed.
  * @param {Number} [callback.error.errorCode] The current &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; ready state.
  *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when no &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;
  *   has not been called due to invalid configuration.&lt;/small&gt;
@@ -496,7 +496,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
       callback({
         room: tryRoom,
         errorCode: readyState || null,
-        error: typeof error === &#x27;string&#x27; ? new Error(error) : error
+        error: error instanceof Error ? error : new Error(JSON.stringify(error))
       });
     }
   };
