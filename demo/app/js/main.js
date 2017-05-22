@@ -14,7 +14,6 @@ Demo.TransfersDone = {};
 Demo.Downloads = {};
 
 var _peerId = null;
-
 var selectedPeers = [];
 
 Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);

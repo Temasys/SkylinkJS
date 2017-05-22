@@ -1038,7 +1038,7 @@ Skylink.prototype.init = function(options, callback) {
           hasTriggered = true;
           self.off('readyStateChange', readyStateChangeFn);
           callback({
-            error: new Error(error),
+            error: error.content instanceof Error ? error.content : (new Error(JSON.stringify(error.content))),
             errorCode: error.errorCode,
             status: error.status
           },null);

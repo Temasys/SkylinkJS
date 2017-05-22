@@ -377,9 +377,6 @@ var log = {
  * @since 0.5.5
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
-  if(logLevel === undefined) {
-    logLevel = Skylink.LOG_LEVEL.WARN;
-  }
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;
@@ -417,24 +414,20 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {
-  if (typeof isDebugMode === 'object') {
-    if (Object.keys(isDebugMode).length > 0) {
-      _enableDebugTrace = !!isDebugMode.trace;
-      _enableDebugStack = !!isDebugMode.storeLogs;
-    } else {
-      _enableDebugMode = false;
-      _enableDebugTrace = false;
-      _enableDebugStack = false;
-    }
-  }
-  if (isDebugMode === false) {
+  // setDebugMode({})
+  if (isDebugMode && typeof isDebugMode === 'object') {
+    _enableDebugMode = true;
+    _enableDebugTrace = isDebugMode.trace === true;
+    _enableDebugStack = isDebugMode.storeLogs === true;
+  // setDebugMode(true)
+  } else if (isDebugMode === true) {
+    _enableDebugMode = true;
+    _enableDebugTrace = true;
+    _enableDebugStack = true;
+  // setDebugMode()
+  } else {
     _enableDebugMode = false;
     _enableDebugTrace = false;
     _enableDebugStack = false;
-
-    return;
   }
-  _enableDebugMode = true;
-  _enableDebugTrace = true;
-  _enableDebugStack = true;
 };

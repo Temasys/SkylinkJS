@@ -70,6 +70,46 @@ Skylink.prototype.AUDIO_CODEC = {
 };
 
 /**
+ * The list of available screensharing media sources configured in the
+ * <a href="#method_shareScreen"><code>shareScreen()</code> method</a>.
+ * @attribute MEDIA_SOURCE
+ * @param {String} SCREEN <small>Value <code>"screen"</code></small>
+ *   The value of the option to share entire screen.
+ * @param {String} WINDOW <small>Value <code>"window"</code></small>
+ *   The value of the option to share application windows.
+ * @param {String} TAB <small>Value <code>"tab"</code></small>
+ *   The value of the option to share browser tab.
+ *   <small>Note that this is only supported by from Chrome 52+ and Opera 39+.</small>
+ * @param {String} TAB_AUDIO <small>Value <code>"audio"</code></small>
+ *   The value of the option to share browser tab audio.
+ *   <small>Note that this is only supported by Chrome 52+ and Opera 39+.</small>
+ *   <small><code>options.audio</code> has to be enabled with <code>TAB</code> also requested to enable sharing of tab audio.</small>
+ * @param {String} APPLICATION <small>Value <code>"application"</code></small>
+ *   The value of the option to share applications.
+ *   <small>Note that this is only supported by Firefox currently.</small>
+ * @param {String} BROWSER <small>Value <code>"browser"</code></small>
+ *   The value of the option to share browser.
+ *   <small>Note that this is only supported by Firefox currently, and requires toggling the <code>media.getUserMedia.browser.enabled</code>
+ *   in <code>about:config</code>.</small>
+ * @param {String} CAMERA <small>Value <code>"camera"</code></small>
+ *   The value of the option to share camera.
+ *   <small>Note that this is only supported by Firefox currently.</small>
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype.MEDIA_SOURCE = {
+  SCREEN: 'screen',
+  WINDOW: 'window',
+  TAB: 'tab',
+  TAB_AUDIO: 'audio',
+  APPLICATION: 'application',
+  BROWSER: 'browser',
+  CAMERA: 'camera'
+};
+
+/**
  * <blockquote class="info">
  *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
  *   the maximum resolution of the Stream due to browser interopability and support.
@@ -1166,6 +1206,11 @@ Skylink.prototype.disableVideo = function() {
  *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
+ * @param {String|Array} [mediaSource=screen] The screensharing media source to select.
+ *   <small>Note that multiple sources are not supported by Firefox as of the time of this release.
+ *   Firefox will use the first item specified in the Array in the event that multiple sources are defined.</small>
+ *   <small>E.g. <code>["screen", "window"]</code>, <code>["tab", "audio"]</code>, <code>"screen"</code> or <code>"tab"</code>.</small>
+ *   [Rel: Skylink.MEDIA_SOURCE]
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -1189,6 +1234,24 @@ Skylink.prototype.disableVideo = function() {
  *
  *   // Example 2: Share screen without audio
  *   skylinkDemo.shareScreen(false, function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById("my-screen"), success);
+ *   });
+ * 
+ *   // Example 3: Share "window" media source
+ *   skylinkDemo.shareScreen("window", function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById("my-screen"), success);
+ *   });
+ * 
+ *   // Example 4: Share tab and its audio media source
+ *   skylinkDemo.shareScreen(true, ["tab", "audio"], function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById("my-screen"), success);
+ *   });
+ * 
+ *   // Example 5: Share "window" and "screen" media source
+ *   skylinkDemo.shareScreen(["window", "screen"], function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
@@ -1244,22 +1307,79 @@ Skylink.prototype.disableVideo = function() {
  * @for Skylink
  * @since 0.6.0
  */
-Skylink.prototype.shareScreen = function (enableAudio, callback) {
+Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
   var self = this;
   var enableAudioSettings = {
     stereo: false,
     echoCancellation: true
   };
+  var useMediaSource = [self.MEDIA_SOURCE.SCREEN];
+  var checkIfSourceExistsFn = function (val) {
+    for (var prop in self.MEDIA_SOURCE) {
+      if (self.MEDIA_SOURCE.hasOwnProperty(prop) && self.MEDIA_SOURCE[prop] === val) {
+        return true;
+      }
+    }
+    return false;
+  };
 
-  if (typeof enableAudio === 'function') {
-    callback = enableAudio;
-    enableAudio = false;
-
+  // shareScreen("screen")
+  if (enableAudio && typeof enableAudio === 'string') {
+    if (checkIfSourceExistsFn(enableAudio)) {
+      useMediaSource = [enableAudio];
+    }
+  // shareScreen(["screen", "window"])
+  } else if (Array.isArray(enableAudio)) {
+    var enableAudioArr = [];
+    for (var i = 0; i < enableAudio.length; i++) {
+      if (checkIfSourceExistsFn(enableAudio[i])) {
+        enableAudioArr.push(enableAudio[i]);
+      }
+    }
+    if (enableAudioArr.length > 0) {
+      useMediaSource = enableAudioArr;
+    }
+  // shareScreen({ stereo: true })
   } else if (enableAudio && typeof enableAudio === 'object') {
     enableAudioSettings.usedtx = typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null;
     enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null;
     enableAudioSettings.stereo = enableAudio.stereo === true;
     enableAudioSettings.echoCancellation = enableAudio.echoCancellation !== false;
+  // shareScreen(true)
+  } else if (typeof enableAudio === 'boolean') {
+    enableAudioSettings = enableAudio === false ? false : enableAudioSettings;
+  // shareScreen(function () {})
+  } else if (typeof enableAudio === 'function') {
+    callback = enableAudio;
+    enableAudio = false;
+  }
+
+  // shareScreen(.., "screen")
+  if (mediaSource && typeof mediaSource === 'string') {
+    if (checkIfSourceExistsFn(mediaSource)) {
+      useMediaSource = [mediaSource];
+    }
+  // shareScreen(.., ["screen", "window"])
+  } else if (Array.isArray(mediaSource)) {
+    var mediaSourceArr = [];
+    for (var i = 0; i < mediaSource.length; i++) {
+      if (checkIfSourceExistsFn(mediaSource[i])) {
+        mediaSourceArr.push(mediaSource[i]);
+      }
+    }
+    if (mediaSourceArr.length > 0) {
+      useMediaSource = mediaSourceArr;
+    }
+  // shareScreen(.., function () {})
+  } else if (typeof mediaSource === 'function') {
+    callback = mediaSource;
+  }
+
+  if (useMediaSource.indexOf('audio') > -1 && useMediaSource.indexOf('tab') === -1) {
+    useMediaSource.splice(useMediaSource.indexOf('audio'), 1);
+    if (useMediaSource.length === 0) {
+      useMediaSource = [self.MEDIA_SOURCE.SCREEN];
+    }
   }
 
   self._throttle(function (runFn) {
@@ -1277,7 +1397,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
     var settings = {
       settings: {
-        audio: enableAudio ? enableAudioSettings : false,
+        audio: enableAudioSettings,
         video: {
           screenshare: true,
           exactConstraints: false
@@ -1285,7 +1405,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       },
       getUserMediaSettings: {
         video: {
-          mediaSource: 'window'
+          mediaSource: useMediaSource
         }
       }
     };
@@ -1334,20 +1454,28 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       return isScreensharing;
     });
 
+    var getUserMediaAudioSettings = { echoCancellation: enableAudioSettings.echoCancellation };
+
     try {
-      if (enableAudio && window.webrtcDetectedBrowser === 'firefox') {
-        settings.getUserMediaSettings.audio = { echoCancellation: enableAudioSettings.echoCancellation };
+      var hasDefaultAudioTrack = false;
+      if (enableAudioSettings) {
+        if (window.webrtcDetectedBrowser === 'firefox') {
+          hasDefaultAudioTrack = true;
+          settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
+        } else if (useMediaSource.indexOf('audio') > -1 && useMediaSource.indexOf('tab') > -1) {
+          hasDefaultAudioTrack = true;
+          settings.getUserMediaSettings.audio = {};
+        }
       }
 
       navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
-        if (window.webrtcDetectedBrowser === 'firefox' || !enableAudio) {
+        if (hasDefaultAudioTrack || !enableAudioSettings) {
           self._onStreamAccessSuccess(stream, settings, true, false);
           return;
         }
 
-        navigator.getUserMedia({
-          audio: { echoCancellation: enableAudioSettings.echoCancellation }
-        }, function (audioStream) {
+        settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
+        navigator.getUserMedia({ audio: getUserMediaAudioSettings }, function (audioStream) {
           try {
             audioStream.addTrack(stream.getVideoTracks()[0]);
 

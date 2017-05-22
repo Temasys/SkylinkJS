@@ -250,7 +250,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   for request success.</small>
  * @param {JSON} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
- * @param {Error|String} callback.error.error The error received when starting Room session has failed.
+ * @param {Error} callback.error.error The error received when starting Room session has failed.
  * @param {Number} [callback.error.errorCode] The current <a href="#method_init"><code>init()</code> method</a> ready state.
  *   <small>Defined as <code>null</code> when no <a href="#method_init"><code>init()</code> method</a>
  *   has not been called due to invalid configuration.</small>
@@ -405,7 +405,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
       callback({
         room: tryRoom,
         errorCode: readyState || null,
-        error: typeof error === 'string' ? new Error(error) : error
+        error: error instanceof Error ? error : new Error(JSON.stringify(error))
       });
     }
   };
@@ -423,19 +423,42 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           return;
         }
 
-        self.once('peerJoined', function(peerId, peerInfo, isSelf) {
-          if (typeof callback === 'function') {
+        if (typeof callback === 'function') {
+          var peerOnJoin = function(peerId, peerInfo, isSelf) {
+            self.off('systemAction', peerFailedJoin);
+            self.off('channelClose', peerSocketFailedJoin);
             log.info([null, 'Room', selectedRoom, 'Connected to Room ->'], peerInfo);
-
             callback(null, {
               room: self._selectedRoom,
               peerId: peerId,
               peerInfo: peerInfo
             });
-          }
-        }, function(peerId, peerInfo, isSelf) {
-          return peerInfo.room === selectedRoom && isSelf;
-        });
+          };
+
+          var peerFailedJoin = function (action, message) {
+            self.off('peerJoined', peerOnJoin);
+            self.off('channelClose', peerSocketFailedJoin);
+            log.error([null, 'Room', selectedRoom, 'Failed connecting to Room ->'], message);
+            resolveAsErrorFn(new Error(message), self._selectedRoom, self._readyState);
+          };
+
+          var peerSocketFailedJoin = function () {
+            self.off('systemAction', peerFailedJoin);
+            self.off('peerJoined', peerOnJoin);
+            log.error([null, 'Room', selectedRoom, 'Failed connecting to Room due to abrupt disconnection.']);
+            resolveAsErrorFn(new Error('Channel closed abruptly before session was established'), self._selectedRoom, self._readyState);
+          };
+
+          self.once('peerJoined', peerOnJoin, function(peerId, peerInfo, isSelf) {
+            return peerInfo.room === selectedRoom && isSelf;
+          });
+
+          self.once('systemAction', peerFailedJoin, function (action) {
+            return action === self.SYSTEM_ACTION.REJECT;
+          });
+
+          self.once('channelClose', peerSocketFailedJoin);
+        }
 
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
@@ -676,213 +699,221 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
   // wait for ready state before opening
   self._wait(function() {
-    self._condition('channelOpen', function() {
-      mediaOptions = mediaOptions || {};
+    var onChannelOpen = function () {
+      self.off('socketError', onChannelError);
 
-      self._userData = mediaOptions.userData || self._userData || '';
-      self._streamsBandwidthSettings = {
-        googleX: {},
-        bAS: {}
-      };
-      self._publishOnly = false;
-      self._sdpSettings = {
-        connection: {
-          audio: true,
-          video: true,
-          data: true
-        },
-        direction: {
-          audio: { send: true, receive: true },
-          video: { send: true, receive: true }
-        }
-      };
-      self._voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === 'boolean' ?
-        mediaOptions.voiceActivityDetection : true;
-      self._peerConnectionConfig = {
-        bundlePolicy: self.BUNDLE_POLICY.BALANCED,
-        rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
-        iceCandidatePoolSize: 0,
-        certificate: self.PEER_CERTIFICATE.AUTO
-      };
-      self._bandwidthAdjuster = null;
+      // Wait for self._channelOpen flag to be defined first
+      setTimeout(function () {
+        mediaOptions = mediaOptions || {};
 
-      if (mediaOptions.bandwidth) {
-        if (typeof mediaOptions.bandwidth.audio === 'number') {
-          self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
-        }
-
-        if (typeof mediaOptions.bandwidth.video === 'number') {
-          self._streamsBandwidthSettings.bAS.video = mediaOptions.bandwidth.video;
-        }
-
-        if (typeof mediaOptions.bandwidth.data === 'number') {
-          self._streamsBandwidthSettings.bAS.data = mediaOptions.bandwidth.data;
-        }
-      }
-
-      if (mediaOptions.googleXBandwidth) {
-        if (typeof mediaOptions.googleXBandwidth.min === 'number') {
-          self._streamsBandwidthSettings.googleX.min = mediaOptions.googleXBandwidth.min;
-        }
-
-        if (typeof mediaOptions.googleXBandwidth.max === 'number') {
-          self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
-        }
-      }
-
-      if (mediaOptions.sdpSettings) {
-        if (mediaOptions.sdpSettings.direction) {
-          if (mediaOptions.sdpSettings.direction.audio) {
-            self._sdpSettings.direction.audio.receive = typeof mediaOptions.sdpSettings.direction.audio.receive === 'boolean' ?
-              mediaOptions.sdpSettings.direction.audio.receive : true;
-            self._sdpSettings.direction.audio.send = typeof mediaOptions.sdpSettings.direction.audio.send === 'boolean' ?
-              mediaOptions.sdpSettings.direction.audio.send : true;
-          }
-
-          if (mediaOptions.sdpSettings.direction.video) {
-            self._sdpSettings.direction.video.receive = typeof mediaOptions.sdpSettings.direction.video.receive === 'boolean' ?
-              mediaOptions.sdpSettings.direction.video.receive : true;
-            self._sdpSettings.direction.video.send = typeof mediaOptions.sdpSettings.direction.video.send === 'boolean' ?
-              mediaOptions.sdpSettings.direction.video.send : true;
-          }
-        }
-        if (mediaOptions.sdpSettings.connection) {
-          self._sdpSettings.connection.audio = typeof mediaOptions.sdpSettings.connection.audio === 'boolean' ?
-            mediaOptions.sdpSettings.connection.audio : true;
-          self._sdpSettings.connection.video = typeof mediaOptions.sdpSettings.connection.video === 'boolean' ?
-            mediaOptions.sdpSettings.connection.video : true;
-          self._sdpSettings.connection.data = typeof mediaOptions.sdpSettings.connection.data === 'boolean' ?
-            mediaOptions.sdpSettings.connection.data : true;
-        }
-      }
-
-      if (mediaOptions.publishOnly) {
-        self._sdpSettings.direction.audio.send = true;
-        self._sdpSettings.direction.audio.receive = false;
-        self._sdpSettings.direction.video.send = true;
-        self._sdpSettings.direction.video.receive = false;
-        self._publishOnly = true;
-
-        if (typeof mediaOptions.publishOnly === 'object' && mediaOptions.publishOnly.parentId &&
-          typeof mediaOptions.publishOnly.parentId === 'string') {
-          self._parentId = mediaOptions.publishOnly.parentId;
-        }
-      }
-
-      if (mediaOptions.parentId) {
-        self._parentId = mediaOptions.parentId;
-      }
-
-      if (mediaOptions.peerConnection && typeof mediaOptions.peerConnection === 'object') {
-        if (typeof mediaOptions.peerConnection.bundlePolicy === 'string') {
-          for (var bpProp in self.BUNDLE_POLICY) {
-            if (self.BUNDLE_POLICY.hasOwnProperty(bpProp) &&
-              self.BUNDLE_POLICY[bpProp] === mediaOptions.peerConnection.bundlePolicy) {
-              self._peerConnectionConfig.bundlePolicy = mediaOptions.peerConnection.bundlePolicy;
-            }
-          }
-        }
-        if (typeof mediaOptions.peerConnection.rtcpMuxPolicy === 'string') {
-          for (var rmpProp in self.RTCP_MUX_POLICY) {
-            if (self.RTCP_MUX_POLICY.hasOwnProperty(rmpProp) &&
-              self.RTCP_MUX_POLICY[rmpProp] === mediaOptions.peerConnection.rtcpMuxPolicy) {
-              self._peerConnectionConfig.rtcpMuxPolicy = mediaOptions.peerConnection.rtcpMuxPolicy;
-            }
-          }
-        }
-        if (typeof mediaOptions.peerConnection.iceCandidatePoolSize === 'number' &&
-          mediaOptions.peerConnection.iceCandidatePoolSize > 0) {
-          self._peerConnectionConfig.iceCandidatePoolSize = mediaOptions.peerConnection.iceCandidatePoolSize;
-        }
-        if (typeof mediaOptions.peerConnection.certificate === 'string') {
-          for (var pcProp in self.PEER_CERTIFICATE) {
-            if (self.PEER_CERTIFICATE.hasOwnProperty(pcProp) &&
-              self.PEER_CERTIFICATE[pcProp] === mediaOptions.peerConnection.certificate) {
-              self._peerConnectionConfig.certificate = mediaOptions.peerConnection.certificate;
-            }
-          }
-        }
-      }
-
-      if (mediaOptions.autoBandwidthAdjustment) {
-        self._bandwidthAdjuster = {
-          interval: 10,
-          limitAtPercentage: 100,
-          useUploadBwOnly: false
+        self._userData = mediaOptions.userData || self._userData || '';
+        self._streamsBandwidthSettings = {
+          googleX: {},
+          bAS: {}
         };
+        self._publishOnly = false;
+        self._sdpSettings = {
+          connection: {
+            audio: true,
+            video: true,
+            data: true
+          },
+          direction: {
+            audio: { send: true, receive: true },
+            video: { send: true, receive: true }
+          }
+        };
+        self._voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === 'boolean' ?
+          mediaOptions.voiceActivityDetection : true;
+        self._peerConnectionConfig = {
+          bundlePolicy: self.BUNDLE_POLICY.BALANCED,
+          rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
+          iceCandidatePoolSize: 0,
+          certificate: self.PEER_CERTIFICATE.AUTO
+        };
+        self._bandwidthAdjuster = null;
 
-        if (typeof mediaOptions.autoBandwidthAdjustment === 'object') {
-          if (typeof mediaOptions.autoBandwidthAdjustment.interval === 'number' &&
-            mediaOptions.autoBandwidthAdjustment.interval >= 10) {
-            self._bandwidthAdjuster.interval = mediaOptions.autoBandwidthAdjustment.interval;
+        if (mediaOptions.bandwidth) {
+          if (typeof mediaOptions.bandwidth.audio === 'number') {
+            self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
           }
-          if (typeof mediaOptions.autoBandwidthAdjustment.limitAtPercentage === 'number' &&
-            (mediaOptions.autoBandwidthAdjustment.limitAtPercentage >= 0 &&
-            mediaOptions.autoBandwidthAdjustment.limitAtPercentage <= 100)) {
-            self._bandwidthAdjuster.limitAtPercentage = mediaOptions.autoBandwidthAdjustment.limitAtPercentage;
+
+          if (typeof mediaOptions.bandwidth.video === 'number') {
+            self._streamsBandwidthSettings.bAS.video = mediaOptions.bandwidth.video;
           }
-          if (typeof mediaOptions.autoBandwidthAdjustment.useUploadBwOnly === 'boolean') {
-            self._bandwidthAdjuster.useUploadBwOnly = mediaOptions.autoBandwidthAdjustment.useUploadBwOnly;
+
+          if (typeof mediaOptions.bandwidth.data === 'number') {
+            self._streamsBandwidthSettings.bAS.data = mediaOptions.bandwidth.data;
           }
         }
-      }
 
-      // get the stream
-      if (mediaOptions.manualGetUserMedia === true) {
-        self._trigger('mediaAccessRequired');
-
-        var current50Block = 0;
-        var mediaAccessRequiredFailure = false;
-        // wait for available audio or video stream
-        self._wait(function () {
-          if (mediaAccessRequiredFailure === true) {
-            self._onUserMediaError(new Error('Waiting for stream timeout'), false, false);
-          } else {
-            callback(null, self._streams.userMedia.stream);
-          }
-        }, function () {
-          current50Block += 1;
-          if (current50Block === 600) {
-            mediaAccessRequiredFailure = true;
-            return true;
+        if (mediaOptions.googleXBandwidth) {
+          if (typeof mediaOptions.googleXBandwidth.min === 'number') {
+            self._streamsBandwidthSettings.googleX.min = mediaOptions.googleXBandwidth.min;
           }
 
-          if (self._streams.userMedia && self._streams.userMedia.stream) {
-            return true;
+          if (typeof mediaOptions.googleXBandwidth.max === 'number') {
+            self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
           }
-        }, 50);
-        return;
-      }
+        }
 
-      if (mediaOptions.audio || mediaOptions.video) {
-        self.getUserMedia({
-          useExactConstraints: !!mediaOptions.useExactConstraints,
-          audio: mediaOptions.audio,
-          video: mediaOptions.video
+        if (mediaOptions.sdpSettings) {
+          if (mediaOptions.sdpSettings.direction) {
+            if (mediaOptions.sdpSettings.direction.audio) {
+              self._sdpSettings.direction.audio.receive = typeof mediaOptions.sdpSettings.direction.audio.receive === 'boolean' ?
+                mediaOptions.sdpSettings.direction.audio.receive : true;
+              self._sdpSettings.direction.audio.send = typeof mediaOptions.sdpSettings.direction.audio.send === 'boolean' ?
+                mediaOptions.sdpSettings.direction.audio.send : true;
+            }
 
-        }, function (error, success) {
-          if (error) {
-            callback(error, null);
-          } else {
-            callback(null, success);
+            if (mediaOptions.sdpSettings.direction.video) {
+              self._sdpSettings.direction.video.receive = typeof mediaOptions.sdpSettings.direction.video.receive === 'boolean' ?
+                mediaOptions.sdpSettings.direction.video.receive : true;
+              self._sdpSettings.direction.video.send = typeof mediaOptions.sdpSettings.direction.video.send === 'boolean' ?
+                mediaOptions.sdpSettings.direction.video.send : true;
+            }
           }
-        });
-        return;
-      }
+          if (mediaOptions.sdpSettings.connection) {
+            self._sdpSettings.connection.audio = typeof mediaOptions.sdpSettings.connection.audio === 'boolean' ?
+              mediaOptions.sdpSettings.connection.audio : true;
+            self._sdpSettings.connection.video = typeof mediaOptions.sdpSettings.connection.video === 'boolean' ?
+              mediaOptions.sdpSettings.connection.video : true;
+            self._sdpSettings.connection.data = typeof mediaOptions.sdpSettings.connection.data === 'boolean' ?
+              mediaOptions.sdpSettings.connection.data : true;
+          }
+        }
 
-      callback(null, null);
+        if (mediaOptions.publishOnly) {
+          self._sdpSettings.direction.audio.send = true;
+          self._sdpSettings.direction.audio.receive = false;
+          self._sdpSettings.direction.video.send = true;
+          self._sdpSettings.direction.video.receive = false;
+          self._publishOnly = true;
 
-    }, function() { // open channel first if it's not opened
+          if (typeof mediaOptions.publishOnly === 'object' && mediaOptions.publishOnly.parentId &&
+            typeof mediaOptions.publishOnly.parentId === 'string') {
+            self._parentId = mediaOptions.publishOnly.parentId;
+          }
+        }
 
-      if (!self._channelOpen) {
-        self._openChannel();
-      }
-      return self._channelOpen;
-    }, function(state) {
-      return true;
-    });
+        if (mediaOptions.parentId) {
+          self._parentId = mediaOptions.parentId;
+        }
+
+        if (mediaOptions.peerConnection && typeof mediaOptions.peerConnection === 'object') {
+          if (typeof mediaOptions.peerConnection.bundlePolicy === 'string') {
+            for (var bpProp in self.BUNDLE_POLICY) {
+              if (self.BUNDLE_POLICY.hasOwnProperty(bpProp) &&
+                self.BUNDLE_POLICY[bpProp] === mediaOptions.peerConnection.bundlePolicy) {
+                self._peerConnectionConfig.bundlePolicy = mediaOptions.peerConnection.bundlePolicy;
+              }
+            }
+          }
+          if (typeof mediaOptions.peerConnection.rtcpMuxPolicy === 'string') {
+            for (var rmpProp in self.RTCP_MUX_POLICY) {
+              if (self.RTCP_MUX_POLICY.hasOwnProperty(rmpProp) &&
+                self.RTCP_MUX_POLICY[rmpProp] === mediaOptions.peerConnection.rtcpMuxPolicy) {
+                self._peerConnectionConfig.rtcpMuxPolicy = mediaOptions.peerConnection.rtcpMuxPolicy;
+              }
+            }
+          }
+          if (typeof mediaOptions.peerConnection.iceCandidatePoolSize === 'number' &&
+            mediaOptions.peerConnection.iceCandidatePoolSize > 0) {
+            self._peerConnectionConfig.iceCandidatePoolSize = mediaOptions.peerConnection.iceCandidatePoolSize;
+          }
+          if (typeof mediaOptions.peerConnection.certificate === 'string') {
+            for (var pcProp in self.PEER_CERTIFICATE) {
+              if (self.PEER_CERTIFICATE.hasOwnProperty(pcProp) &&
+                self.PEER_CERTIFICATE[pcProp] === mediaOptions.peerConnection.certificate) {
+                self._peerConnectionConfig.certificate = mediaOptions.peerConnection.certificate;
+              }
+            }
+          }
+        }
+
+        if (mediaOptions.autoBandwidthAdjustment) {
+          self._bandwidthAdjuster = {
+            interval: 10,
+            limitAtPercentage: 100,
+            useUploadBwOnly: false
+          };
+
+          if (typeof mediaOptions.autoBandwidthAdjustment === 'object') {
+            if (typeof mediaOptions.autoBandwidthAdjustment.interval === 'number' &&
+              mediaOptions.autoBandwidthAdjustment.interval >= 10) {
+              self._bandwidthAdjuster.interval = mediaOptions.autoBandwidthAdjustment.interval;
+            }
+            if (typeof mediaOptions.autoBandwidthAdjustment.limitAtPercentage === 'number' &&
+              (mediaOptions.autoBandwidthAdjustment.limitAtPercentage >= 0 &&
+              mediaOptions.autoBandwidthAdjustment.limitAtPercentage <= 100)) {
+              self._bandwidthAdjuster.limitAtPercentage = mediaOptions.autoBandwidthAdjustment.limitAtPercentage;
+            }
+            if (typeof mediaOptions.autoBandwidthAdjustment.useUploadBwOnly === 'boolean') {
+              self._bandwidthAdjuster.useUploadBwOnly = mediaOptions.autoBandwidthAdjustment.useUploadBwOnly;
+            }
+          }
+        }
+
+        // get the stream
+        if (mediaOptions.manualGetUserMedia === true) {
+          self._trigger('mediaAccessRequired');
+
+          var current50Block = 0;
+          var mediaAccessRequiredFailure = false;
+          // wait for available audio or video stream
+          self._wait(function () {
+            if (mediaAccessRequiredFailure === true) {
+              self._onUserMediaError(new Error('Waiting for stream timeout'), false, false);
+            } else {
+              callback(null, self._streams.userMedia.stream);
+            }
+          }, function () {
+            current50Block += 1;
+            if (current50Block === 600) {
+              mediaAccessRequiredFailure = true;
+              return true;
+            }
+
+            if (self._streams.userMedia && self._streams.userMedia.stream) {
+              return true;
+            }
+          }, 50);
+          return;
+        }
+
+        if (mediaOptions.audio || mediaOptions.video) {
+          self.getUserMedia({
+            useExactConstraints: !!mediaOptions.useExactConstraints,
+            audio: mediaOptions.audio,
+            video: mediaOptions.video
+
+          }, function (error, success) {
+            if (error) {
+              callback(error, null);
+            } else {
+              callback(null, success);
+            }
+          });
+          return;
+        }
+        callback(null, null);
+      }, 1);
+    };
+    var onChannelError = function (errorState, error) {
+      self.off('channelOpen', onChannelOpen);
+      callback(error);
+    };
+
+    if (!self._channelOpen) {
+      self.once('channelOpen', onChannelOpen);
+      self.once('socketError', onChannelError, function (errorState) {
+        return errorState === self.SOCKET_ERROR.RECONNECTION_ABORTED;
+      });
+      self._openChannel();
+    } else {
+      onChannelOpen();
+    }
   }, function() {
     return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
   });
-
 };

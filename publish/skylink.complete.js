@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.21 - Thu Apr 27 2017 16:42:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.22 - Mon May 22 2017 20:30:43 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7249,7 +7249,7 @@ module.exports = yeast;
 },{}]},{},[1])(1)
 });
 
-/*! adapterjs - v0.14.1-6d236da - 2017-02-28 */
+/*! adapterjs - v0.14.2-6d236da - 2017-05-22 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7263,7 +7263,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.14.1-6d236da';
+AdapterJS.VERSION = '0.14.2-6d236da';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7296,8 +7296,8 @@ AdapterJS.webRTCReady = function (baseCallback) {
     // When you set a setTimeout(definePolyfill, 0), it overrides the WebRTC function
     // This is be more than 0s
     if (typeof window.require === 'function' &&
-      typeof AdapterJS.defineMediaSourcePolyfill === 'function') {
-      AdapterJS.defineMediaSourcePolyfill();
+      typeof AdapterJS._defineMediaSourcePolyfill === 'function') {
+      AdapterJS._defineMediaSourcePolyfill();
     }
 
     // All WebRTC interfaces are ready, just call the callback
@@ -7836,6 +7836,9 @@ createIceServer = null;
 createIceServers = null;
 //------------------------------------------------------------
 
+//Creates MediaStream object.
+MediaStream = (typeof MediaStream === 'function') ? MediaStream : null;
+
 //The RTCPeerConnection object.
 RTCPeerConnection = (typeof RTCPeerConnection === 'function') ?
   RTCPeerConnection : null;
@@ -7956,7 +7959,8 @@ SDPUtils.parseCandidate = function(line) {
       case 'tcptype':
         candidate.tcpType = parts[i + 1];
         break;
-      default: // Unknown extensions are silently ignored.
+      default: // extension handling, in particular ufrag
+        candidate[parts[i]] = parts[i + 1];
         break;
     }
   }
@@ -7990,6 +7994,12 @@ SDPUtils.writeCandidate = function(candidate) {
   return 'candidate:' + sdp.join(' ');
 };
 
+// Parses an ice-options line, returns an array of option tags.
+// a=ice-options:foo bar
+SDPUtils.parseIceOptions = function(line) {
+  return line.substr(14).split(' ');
+}
+
 // Parses an rtpmap line, returns RTCRtpCoddecParameters. Sample input:
 // a=rtpmap:111 opus/48000/2
 SDPUtils.parseRtpMap = function(line) {
@@ -8020,10 +8030,12 @@ SDPUtils.writeRtpMap = function(codec) {
 
 // Parses an a=extmap line (headerextension from RFC 5285). Sample input:
 // a=extmap:2 urn:ietf:params:rtp-hdrext:toffset
+// a=extmap:2/sendonly urn:ietf:params:rtp-hdrext:toffset
 SDPUtils.parseExtmap = function(line) {
   var parts = line.substr(9).split(' ');
   return {
     id: parseInt(parts[0], 10),
+    direction: parts[0].indexOf('/') > 0 ? parts[0].split('/')[1] : 'sendrecv',
     uri: parts[1]
   };
 };
@@ -8032,7 +8044,10 @@ SDPUtils.parseExtmap = function(line) {
 // RTCRtpHeaderExtension.
 SDPUtils.writeExtmap = function(headerExtension) {
   return 'a=extmap:' + (headerExtension.id || headerExtension.preferredId) +
-       ' ' + headerExtension.uri + '\r\n';
+      (headerExtension.direction && headerExtension.direction !== 'sendrecv'
+          ? '/' + headerExtension.direction
+          : '') +
+      ' ' + headerExtension.uri + '\r\n';
 };
 
 // Parses an ftmp line, returns dictionary. Sample input:
@@ -8110,25 +8125,35 @@ SDPUtils.parseSsrcMedia = function(line) {
   return parts;
 };
 
+// Extracts the MID (RFC 5888) from a media section.
+// returns the MID or undefined if no mid line was found.
+SDPUtils.getMid = function(mediaSection) {
+  var mid = SDPUtils.matchPrefix(mediaSection, 'a=mid:')[0];
+  if (mid) {
+    return mid.substr(6);
+  }
+}
+
+SDPUtils.parseFingerprint = function(line) {
+  var parts = line.substr(14).split(' ');
+  return {
+    algorithm: parts[0].toLowerCase(), // algorithm is case-sensitive in Edge.
+    value: parts[1]
+  };
+};
+
 // Extracts DTLS parameters from SDP media section or sessionpart.
 // FIXME: for consistency with other functions this should only
 //   get the fingerprint line as input. See also getIceParameters.
 SDPUtils.getDtlsParameters = function(mediaSection, sessionpart) {
-  var lines = SDPUtils.splitLines(mediaSection);
-  // Search in session part, too.
-  lines = lines.concat(SDPUtils.splitLines(sessionpart));
-  var fpLine = lines.filter(function(line) {
-    return line.indexOf('a=fingerprint:') === 0;
-  })[0].substr(14);
+  var lines = SDPUtils.matchPrefix(mediaSection + sessionpart,
+      'a=fingerprint:');
   // Note: a=setup line is ignored since we use the 'auto' role.
-  var dtlsParameters = {
+  // Note2: 'algorithm' is not case sensitive except in Edge.
+  return {
     role: 'auto',
-    fingerprints: [{
-      algorithm: fpLine.split(' ')[0],
-      value: fpLine.split(' ')[1]
-    }]
+    fingerprints: lines.map(SDPUtils.parseFingerprint)
   };
-  return dtlsParameters;
 };
 
 // Serializes DTLS parameters to SDP.
@@ -8320,6 +8345,61 @@ SDPUtils.parseRtpEncodingParameters = function(mediaSection) {
   return encodingParameters;
 };
 
+// parses http://draft.ortc.org/#rtcrtcpparameters*
+SDPUtils.parseRtcpParameters = function(mediaSection) {
+  var rtcpParameters = {};
+
+  var cname;
+  // Gets the first SSRC. Note that with RTX there might be multiple
+  // SSRCs.
+  var remoteSsrc = SDPUtils.matchPrefix(mediaSection, 'a=ssrc:')
+      .map(function(line) {
+        return SDPUtils.parseSsrcMedia(line);
+      })
+      .filter(function(obj) {
+        return obj.attribute === 'cname';
+      })[0];
+  if (remoteSsrc) {
+    rtcpParameters.cname = remoteSsrc.value;
+    rtcpParameters.ssrc = remoteSsrc.ssrc;
+  }
+
+  // Edge uses the compound attribute instead of reducedSize
+  // compound is !reducedSize
+  var rsize = SDPUtils.matchPrefix(mediaSection, 'a=rtcp-rsize');
+  rtcpParameters.reducedSize = rsize.length > 0;
+  rtcpParameters.compound = rsize.length === 0;
+
+  // parses the rtcp-mux attrіbute.
+  // Note that Edge does not support unmuxed RTCP.
+  var mux = SDPUtils.matchPrefix(mediaSection, 'a=rtcp-mux');
+  rtcpParameters.mux = mux.length > 0;
+
+  return rtcpParameters;
+};
+
+// parses either a=msid: or a=ssrc:... msid lines and returns
+// the id of the MediaStream and MediaStreamTrack.
+SDPUtils.parseMsid = function(mediaSection) {
+  var parts;
+  var spec = SDPUtils.matchPrefix(mediaSection, 'a=msid:');
+  if (spec.length === 1) {
+    parts = spec[0].substr(7).split(' ');
+    return {stream: parts[0], track: parts[1]};
+  }
+  var planB = SDPUtils.matchPrefix(mediaSection, 'a=ssrc:')
+  .map(function(line) {
+    return SDPUtils.parseSsrcMedia(line);
+  })
+  .filter(function(parts) {
+    return parts.attribute === 'msid';
+  });
+  if (planB.length > 0) {
+    parts = planB[0].value.split(' ');
+    return {stream: parts[0], track: parts[1]};
+  }
+};
+
 SDPUtils.writeSessionBoilerplate = function() {
   // FIXME: sess-id should be an NTP timestamp.
   return 'v=0\r\n' +
@@ -8342,7 +8422,9 @@ SDPUtils.writeMediaSection = function(transceiver, caps, type, stream) {
 
   sdp += 'a=mid:' + transceiver.mid + '\r\n';
 
-  if (transceiver.rtpSender && transceiver.rtpReceiver) {
+  if (transceiver.direction) {
+    sdp += 'a=' + transceiver.direction + '\r\n';
+  } else if (transceiver.rtpSender && transceiver.rtpReceiver) {
     sdp += 'a=sendrecv\r\n';
   } else if (transceiver.rtpSender) {
     sdp += 'a=sendonly\r\n';
@@ -8352,11 +8434,13 @@ SDPUtils.writeMediaSection = function(transceiver, caps, type, stream) {
     sdp += 'a=inactive\r\n';
   }
 
-  // FIXME: for RTX there might be multiple SSRCs. Not implemented in Edge yet.
   if (transceiver.rtpSender) {
+    // spec.
     var msid = 'msid:' + stream.id + ' ' +
         transceiver.rtpSender.track.id + '\r\n';
     sdp += 'a=' + msid;
+
+    // for Chrome.
     sdp += 'a=ssrc:' + transceiver.sendEncodingParameters[0].ssrc +
         ' ' + msid;
     if (transceiver.sendEncodingParameters[0].rtx) {
@@ -8397,6 +8481,16 @@ SDPUtils.getDirection = function(mediaSection, sessionpart) {
     return SDPUtils.getDirection(sessionpart);
   }
   return 'sendrecv';
+};
+
+SDPUtils.getKind = function(mediaSection) {
+  var lines = SDPUtils.splitLines(mediaSection);
+  var mline = lines[0].split(' ');
+  return mline[0].substr(2);
+};
+
+SDPUtils.isRejected = function(mediaSection) {
+  return mediaSection.split(' ', 2)[1] === '0';
 };
 
 // Expose public methods.
@@ -10752,6 +10846,7 @@ module.exports = {
   //
   // Shims the follwing:
   // -- getUserMedia
+  // -- MediaStream
   // -- MediaStreamTrack
   // -- MediaStreamTrack.getSources
   // -- RTCPeerConnection
@@ -10955,6 +11050,11 @@ module.exports = {
         ConstructSessionDescription(info.type, info.sdp);
     };
 
+    MediaStream = function (mediaStreamOrTracks) {
+      AdapterJS.WebRTCPlugin.WaitForPluginReady();
+      return AdapterJS.WebRTCPlugin.plugin.MediaStream(mediaStreamOrTracks);
+    }
+
     RTCPeerConnection = function (servers, constraints) {
       // Validate server argumenr
       if (!(servers === undefined ||
@@ -11095,7 +11195,11 @@ module.exports = {
       typeof Promise !== 'undefined') {
       requestUserMedia = function(constraints) {
         return new Promise(function(resolve, reject) {
-          getUserMedia(constraints, resolve, reject);
+          try {
+            getUserMedia(constraints, resolve, reject);
+          } catch (error) {
+            reject(error);
+          }
         });
       };
       navigator.mediaDevices = {getUserMedia: requestUserMedia,
@@ -11332,6 +11436,7 @@ if(typeof exports !== 'undefined') {
   module.exports = AdapterJS;
 }
 
+// Define extension popup bar text
 AdapterJS.TEXT.EXTENSION = {
   REQUIRE_INSTALLATION_FF: 'To enable screensharing you need to install the Skylink WebRTC tools Firefox Add-on.',
   REQUIRE_INSTALLATION_CHROME: 'To enable screensharing you need to install the Skylink WebRTC tools Chrome Extension.',
@@ -11340,7 +11445,33 @@ AdapterJS.TEXT.EXTENSION = {
   BUTTON_CHROME: 'Go to Chrome Web Store'
 };
 
-AdapterJS.defineMediaSourcePolyfill = function () {
+// Define extension settings
+AdapterJS.extensionInfo =  AdapterJS.extensionInfo || {
+  chrome: {
+    extensionId: 'ljckddiekopnnjoeaiofddfhgnbdoafc',
+    extensionLink: 'https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc',
+    // Deprecated! Define this to use iframe method that works with previous extension codebase that does not honor "mediaSource" flag
+    iframeLink: 'https://cdn.temasys.com.sg/skylink/extensions/detectRTC.html'
+  },
+  // Required only for Firefox 51 and below
+  firefox: {
+    extensionLink: 'https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/'
+  },
+  opera: {
+    // Define the extensionId and extensionLink to integrate the Opera screensharing extension
+    extensionId: null,
+    extensionLink: null
+  }
+};
+
+AdapterJS._mediaSourcePolyfillIsDefined = false;
+AdapterJS._defineMediaSourcePolyfill = function () {
+  // Sanity checks to prevent re-defining the polyfills again in any case.
+  if (AdapterJS._mediaSourcePolyfillIsDefined) {
+    return;
+  }
+
+  AdapterJS._mediaSourcePolyfillIsDefined = true;
   var baseGetUserMedia = null;
 
   var clone = function(obj) {
@@ -11356,62 +11487,100 @@ AdapterJS.defineMediaSourcePolyfill = function () {
     return copy;
   };
 
+  var checkIfConstraintsIsValid = function (constraints, successCb, failureCb) {
+    // Append checks for overrides as these are mandatory
+    // Browsers (not Firefox since they went Promise based) does these checks and they can be quite useful
+    if (!(constraints && typeof constraints === 'object')) {
+      throw new Error('GetUserMedia: (constraints, .., ..) argument required');
+    } else if (typeof successCb !== 'function') {
+      throw new Error('GetUserMedia: (.., successCb, ..) argument required');
+    } else if (typeof failureCb !== 'function') {
+      throw new Error('GetUserMedia: (.., .., failureCb) argument required');
+    }
+  };
+
   if (window.navigator.mozGetUserMedia) {
     baseGetUserMedia = window.navigator.getUserMedia;
 
     navigator.getUserMedia = function (constraints, successCb, failureCb) {
+      checkIfConstraintsIsValid(constraints, successCb, failureCb);
 
-      if (constraints && constraints.video && !!constraints.video.mediaSource) {
-        // intercepting screensharing requests
+      // Prevent accessing property from Boolean errors
+      if (constraints.video && typeof constraints.video === 'object' &&
+        constraints.video.hasOwnProperty('mediaSource')) {
+        var updatedConstraints = clone(constraints);
+        // See: http://fluffy.github.io/w3c-screen-share/#screen-based-video-constraints
+        // See also: https://bugzilla.mozilla.org/show_bug.cgi?id=1037405
+        var mediaSourcesList = ['screen', 'window', 'application', 'browser', 'camera'];
+        var useExtensionErrors = ['NotAllowedError', 'PermissionDeniedError', 'SecurityError'];
 
-        // Invalid mediaSource for firefox, only "screen" and "window" are supported
-        if (constraints.video.mediaSource !== 'screen' && constraints.video.mediaSource !== 'window') {
+        // Obtain first item in array if array is provided
+        if (Array.isArray(updatedConstraints.video.mediaSource)) {
+          var i = 0;
+          while (i < updatedConstraints.video.mediaSource.length) {
+            if (mediaSourcesList.indexOf(updatedConstraints.video.mediaSource[i]) > -1) {
+              updatedConstraints.video.mediaSource = updatedConstraints.video.mediaSource[i];
+              break;
+            }
+            i++;
+          }
+          updatedConstraints.video.mediaSource = typeof updatedConstraints.video.mediaSource === 'string' ?
+            updatedConstraints.video.mediaSource : null;
+        }
+
+        // Invalid mediaSource for firefox, only specified sources are supported
+        if (mediaSourcesList.indexOf(updatedConstraints.video.mediaSource) === -1) {
           failureCb(new Error('GetUserMedia: Only "screen" and "window" are supported as mediaSource constraints'));
           return;
         }
 
-        var updatedConstraints = clone(constraints);
-
-        //constraints.video.mediaSource = constraints.video.mediaSource;
-        updatedConstraints.video.mozMediaSource = updatedConstraints.video.mediaSource;
-
-        // so generally, it requires for document.readyState to be completed before the getUserMedia could be invoked.
-        // strange but this works anyway
+        // Apparently requires document.readyState to be completed before the getUserMedia() could be invoked
+        // NOTE: Doesn't make sense but let's keep it that way for now
         var checkIfReady = setInterval(function () {
-          if (document.readyState === 'complete') {
-            clearInterval(checkIfReady);
-
-            baseGetUserMedia(updatedConstraints, successCb, function (error) {
-              if (['NotAllowedError', 'PermissionDeniedError', 'SecurityError', 'NotAllowedError'].indexOf(error.name) > -1 && window.parent.location.protocol === 'https:') {
-                AdapterJS.renderNotificationBar(AdapterJS.TEXT.EXTENSION.REQUIRE_INSTALLATION_FF,
-                  AdapterJS.TEXT.EXTENSION.BUTTON_FF, function (e) {
-                  window.open('https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/', '_blank');
-                  if (e.target && e.target.parentElement && e.target.nextElementSibling &&
-                    e.target.nextElementSibling.click) {
-                    e.target.nextElementSibling.click();
-                  }
-                  // Trigger refresh bar
-                  AdapterJS.renderNotificationBar(AdapterJS.TEXT.EXTENSION ?
-                    AdapterJS.TEXT.EXTENSION.REQUIRE_REFRESH : AdapterJS.TEXT.REFRESH.REQUIRE_REFRESH,
-                    AdapterJS.TEXT.REFRESH.BUTTON, function () {
-                    window.open('javascript:location.reload()', '_top');
-                  }); // jshint ignore:line
-                });
-              } else {
-                failureCb(error);
-              }
-            });
+          if (document.readyState !== 'complete') {
+            return;
           }
-        }, 1);
 
-      } else { // regular GetUserMediaRequest
+          clearInterval(checkIfReady);
+          updatedConstraints.video.mozMediaSource = updatedConstraints.video.mediaSource;
+
+          baseGetUserMedia(updatedConstraints, successCb, function (error) {
+            // Reference: https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getUserMedia
+            // Firefox 51 and below throws the following errors when screensharing is disabled, in which we can
+            //   trigger installation for legacy extension (which no longer can be used) to enable screensharing
+            if (useExtensionErrors.indexOf(error.name) > -1 &&
+            // Note that "https:" should be required for screensharing 
+              window.webrtcDetectedVersion < 52 && window.parent.location.protocol === 'https:') {
+              // Render the notification bar to install legacy Firefox (for 51 and below) extension
+              AdapterJS.renderNotificationBar(AdapterJS.TEXT.EXTENSION.REQUIRE_INSTALLATION_FF,
+                AdapterJS.TEXT.EXTENSION.BUTTON_FF, function (e) {
+                // Render the refresh bar once the user clicks to install extension from addons store
+                window.open(AdapterJS.extensionInfo.firefox.extensionLink, '_blank');
+                if (e.target && e.target.parentElement && e.target.nextElementSibling &&
+                  e.target.nextElementSibling.click) {
+                  e.target.nextElementSibling.click();
+                }
+                AdapterJS.renderNotificationBar(AdapterJS.TEXT.EXTENSION ?
+                  AdapterJS.TEXT.EXTENSION.REQUIRE_REFRESH : AdapterJS.TEXT.REFRESH.REQUIRE_REFRESH,
+                  AdapterJS.TEXT.REFRESH.BUTTON, function () {
+                  window.open('javascript:location.reload()', '_top');
+                });
+              });
+            } else {
+              failureCb(error);
+            }
+          });
+        }, 1);
+      // Regular getUserMedia() call
+      } else {
         baseGetUserMedia(constraints, successCb, failureCb);
       }
     };
 
     AdapterJS.getUserMedia = window.getUserMedia = navigator.getUserMedia;
-    /* Comment out to prevent recursive errors
-    navigator.mediaDevices.getUserMedia = function(constraints) {
+    // Comment out to prevent recursive errors as webrtc/adapter polyfills navigator.getUserMedia and calls
+    //   navigator.mediaDevices.getUserMedia internally
+    /*navigator.mediaDevices.getUserMedia = function(constraints) {
       return new Promise(function(resolve, reject) {
         window.getUserMedia(constraints, resolve, reject);
       });
@@ -11419,88 +11588,183 @@ AdapterJS.defineMediaSourcePolyfill = function () {
 
   } else if (window.navigator.webkitGetUserMedia && window.webrtcDetectedBrowser !== 'safari') {
     baseGetUserMedia = window.navigator.getUserMedia;
+    var iframe = document.createElement('iframe');
 
     navigator.getUserMedia = function (constraints, successCb, failureCb) {
-      if (constraints && constraints.video && !!constraints.video.mediaSource) {
-        if (window.webrtcDetectedBrowser !== 'chrome') {
-          // This is Opera, which does not support screensharing
+      checkIfConstraintsIsValid(constraints, successCb, failureCb);
+
+      // Prevent accessing property from Boolean errors
+      if (constraints.video && typeof constraints.video === 'object' && constraints.video.hasOwnProperty('mediaSource')) {
+        var updatedConstraints = clone(constraints);
+        // See: https://developer.chrome.com/extensions/desktopCapture#type-DesktopCaptureSourceType
+        var mediaSourcesList = ['window', 'screen', 'tab', 'audio'];
+
+        // Check if it is Android phone for experimental 59 screensharing
+        // See: https://bugs.chromium.org/p/chromium/issues/detail?id=487935
+        if (navigator.userAgent.toLowerCase().indexOf('android') > -1) {
+          if (Array.isArray(updatedConstraints.video.mediaSource) ?
+            updatedConstraints.video.mediaSource.indexOf('screen') > -1 :
+            updatedConstraints.video.mediaSource === 'screen') {
+            updatedConstraints.video.mandatory = updatedConstraints.video.mandatory || {};
+            updatedConstraints.video.mandatory.chromeMediaSource = 'screen';
+            updatedConstraints.video.mandatory.maxHeight = window.screen.height;
+            updatedConstraints.video.mandatory.maxWidth = window.screen.width;
+            delete updatedConstraints.video.mediaSource;
+            baseGetUserMedia(updatedConstraints, successCb, failureCb);
+          } else {
+            failureCb(new Error('GetUserMedia: Only "screen" are supported as mediaSource constraints for Android'));
+          }
+          return;
+        }
+
+        // Backwards compability for Opera browsers not working when not configured
+        if (!(window.webrtcDetectedBrowser === 'opera' ? !!AdapterJS.extensionInfo.opera.extensionId : 
+          window.webrtcDetectedBrowser === 'chrome')) {
           failureCb(new Error('Current browser does not support screensharing'));
           return;
         }
 
-        // would be fine since no methods
-        var updatedConstraints = clone(constraints);
+        // Check against non valid sources
+        if (typeof updatedConstraints.video.mediaSource === 'string' &&
+          mediaSourcesList.indexOf(updatedConstraints.video.mediaSource) > -1 &&
+          updatedConstraints.video.mediaSource !== 'audio') {
+          updatedConstraints.video.mediaSource = [updatedConstraints.video.mediaSource];
+        // Loop array and remove invalid sources
+        } else if (Array.isArray(updatedConstraints.video.mediaSource)) {
+          var i = 0;
+          var outputMediaSource = [];
+          while (i < mediaSourcesList.length) {
+            var j = 0;
+            while (j < updatedConstraints.video.mediaSource.length) {
+              if (mediaSourcesList[i] === updatedConstraints.video.mediaSource[j]) {
+                outputMediaSource.push(updatedConstraints.video.mediaSource[j]);
+              }
+              j++;
+            }
+            i++;
+          }
+          updatedConstraints.video.mediaSource = outputMediaSource;
+        } else {
+          updatedConstraints.video.mediaSource = [];
+        }
 
-        var chromeCallback = function(error, sourceId) {
-          if(!error) {
+        // Check against returning "audio" or ["audio"] without "tab"
+        if (updatedConstraints.video.mediaSource.indexOf('audio') > -1 &&
+          updatedConstraints.video.mediaSource.indexOf('tab') === -1) {
+          failureCb(new Error('GetUserMedia: "audio" mediaSource must be provided with ["audio", "tab"]'));
+          return;
+        // No valid sources specified
+        } else if (updatedConstraints.video.mediaSource.length === 0) {
+          failureCb(new Error('GetUserMedia: Only "screen", "window", "tab" are supported as mediaSource constraints'));
+          return;
+        // Warn users that no tab audio will be used because constraints.audio must be enabled
+        } else if (updatedConstraints.video.mediaSource.indexOf('tab') > -1 &&
+          updatedConstraints.video.mediaSource.indexOf('audio') > -1 && !updatedConstraints.audio) {
+          console.warn('Audio must be requested if "tab" and "audio" mediaSource constraints is requested');
+        }
+
+        var fetchStream = function (response) {
+          if (response.success) {
             updatedConstraints.video.mandatory = updatedConstraints.video.mandatory || {};
             updatedConstraints.video.mandatory.chromeMediaSource = 'desktop';
             updatedConstraints.video.mandatory.maxWidth = window.screen.width > 1920 ? window.screen.width : 1920;
             updatedConstraints.video.mandatory.maxHeight = window.screen.height > 1080 ? window.screen.height : 1080;
+            updatedConstraints.video.mandatory.chromeMediaSourceId = response.sourceId;
 
-            if (sourceId) {
-              updatedConstraints.video.mandatory.chromeMediaSourceId = sourceId;
+            if (Array.isArray(updatedConstraints.video.mediaSource) &&
+              updatedConstraints.video.mediaSource.indexOf('tab') > -1 &&
+              updatedConstraints.video.mediaSource.indexOf('audio') > -1 && updatedConstraints.audio) {
+              updatedConstraints.audio = typeof updatedConstraints.audio === 'object' ? updatedConstraints.audio : {};
+              updatedConstraints.audio.mandatory = updatedConstraints.audio.mandatory || {};
+              updatedConstraints.audio.mandatory.chromeMediaSource = 'desktop';
+              updatedConstraints.audio.mandatory.chromeMediaSourceId = response.sourceId;
             }
 
             delete updatedConstraints.video.mediaSource;
-
             baseGetUserMedia(updatedConstraints, successCb, failureCb);
-
-          } else { // GUM failed
-            if (error === 'permission-denied') {
-              failureCb(new Error('Permission denied for screen retrieval'));
-            } else {
-              // NOTE(J-O): I don't think we ever pass in here.
-              // A failure to capture the screen does not lead here.
-              failureCb(new Error('Failed retrieving selected screen'));
-            }
-          }
-        };
-
-        var onIFrameCallback = function (event) {
-          if (!event.data) {
-            return;
-          }
-
-          if (event.data.chromeMediaSourceId) {
-            if (event.data.chromeMediaSourceId === 'PermissionDeniedError') {
-                chromeCallback('permission-denied');
-            } else {
-              chromeCallback(null, event.data.chromeMediaSourceId);
-            }
-          }
-
-          if (event.data.chromeExtensionStatus) {
-            if (event.data.chromeExtensionStatus === 'not-installed') {
+          } else {
+            // Extension not installed, trigger to install
+            if (response.extensionLink) {
+              // Render the notification bar to install extension
               AdapterJS.renderNotificationBar(AdapterJS.TEXT.EXTENSION.REQUIRE_INSTALLATION_CHROME,
                 AdapterJS.TEXT.EXTENSION.BUTTON_CHROME, function (e) {
-                window.open(event.data.data, '_blank');
+                // Render the refresh bar once the user clicks to install extension from addons store
+                window.open(response.extensionLink, '_blank');
                 if (e.target && e.target.parentElement && e.target.nextElementSibling &&
                   e.target.nextElementSibling.click) {
                   e.target.nextElementSibling.click();
                 }
-                // Trigger refresh bar
                 AdapterJS.renderNotificationBar(AdapterJS.TEXT.EXTENSION ?
                   AdapterJS.TEXT.EXTENSION.REQUIRE_REFRESH : AdapterJS.TEXT.REFRESH.REQUIRE_REFRESH,
                   AdapterJS.TEXT.REFRESH.BUTTON, function () {
                   window.open('javascript:location.reload()', '_top');
-                }); // jshint ignore:line
+                });
               });
-            } else {
-              chromeCallback(event.data.chromeExtensionStatus, null);
             }
+            failureCb(response.error);
           }
-
-          // this event listener is no more needed
-          window.removeEventListener('message', onIFrameCallback);
         };
 
-        window.addEventListener('message', onIFrameCallback);
+        // Communicate with detectRTC (iframe) method to retrieve source ID
+        // Opera browser should not use iframe method
+        if (AdapterJS.extensionInfo.chrome.iframeLink && window.webrtcDetectedBrowser !== 'opera') {
+          iframe.getSourceId(updatedConstraints.video.mediaSource, fetchStream);
+        // Communicate with extension directly (needs updated extension code)
+        } else {
+          var extensionId = AdapterJS.extensionInfo[window.webrtcDetectedBrowser === 'opera' ? 'opera' : 'chrome'].extensionId;
+          var extensionLink = AdapterJS.extensionInfo[window.webrtcDetectedBrowser === 'opera' ? 'opera' : 'chrome'].extensionLink;
+          var icon = document.createElement('img');
+          icon.src = 'chrome-extension://' + extensionId + '/icon.png';
 
-        postFrameMessage({
-          captureSourceId: true
-        });
+          icon.onload = function() {
+            // Check if extension is enabled, it should return data
+            chrome.runtime.sendMessage(extensionId, {
+              type: 'get-version'
+            }, function (versionRes) {
+              // Extension not enabled
+              if (!(versionRes && typeof versionRes === 'object' && versionRes.type === 'send-version')) {
+                fetchStream({
+                  success: false,
+                  error: new Error('Extension is disabled')
+                });
+                return;
+              }
+              // Retrieve source ID
+              chrome.runtime.sendMessage(extensionId, {
+                type: 'get-source',
+                sources: updatedConstraints.video.mediaSource
+              }, function (sourceRes) {
+                // Permission denied
+                if (!(sourceRes && typeof sourceRes === 'object')) {
+                  fetchStream({
+                    success: false,
+                    error: new Error('Retrieval failed')
+                  });
+                // Could be cancelled
+                } else if (sourceRes.type === 'send-source-error') {
+                  fetchStream({
+                    success: false,
+                    error: new Error('Permission denied for screen retrieval')
+                  });
+                } else {
+                  fetchStream({
+                    success: true,
+                    sourceId: sourceRes.sourceId
+                  });
+                }
+              });
+            });
+          };
 
+          // Extension icon didn't load so extension was not installed
+          icon.onerror = function () {
+            fetchStream({
+              success: false,
+              error: new Error('Extension not installed'),
+              extensionLink: extensionLink
+            });
+          };
+        }
       } else {
         baseGetUserMedia(constraints, successCb, failureCb);
       }
@@ -11509,90 +11773,211 @@ AdapterJS.defineMediaSourcePolyfill = function () {
     AdapterJS.getUserMedia = window.getUserMedia = navigator.getUserMedia;
     navigator.mediaDevices.getUserMedia = function(constraints) {
       return new Promise(function(resolve, reject) {
-        window.getUserMedia(constraints, resolve, reject);
+        try {
+          window.getUserMedia(constraints, resolve, reject);
+        } catch (error) {
+          reject(error);
+        }
       });
     };
 
+    // Start loading the iframe
+    if (window.webrtcDetectedBrowser === 'chrome') {
+      var states = {
+        loaded: false,
+        error: false
+      };
+
+      // Remove previous iframe if it exists
+      if (iframe) {
+        // Prevent errors thrown when iframe does not exists yet
+        try {
+          (document.body || document.documentElement).removeChild(iframe);
+        } catch (e) {}
+      }
+
+      // Do not need to load iframe as it is not requested
+      if (!AdapterJS.extensionInfo.chrome.iframeLink) {
+        return;
+      }
+
+      iframe.onload = function() {
+        states.loaded = true;
+      };
+
+      iframe.onerror = function () {
+        states.error = true;
+      };
+
+      iframe.src = AdapterJS.extensionInfo.chrome.iframeLink;
+      iframe.style.display = 'none';
+
+      // Listen to iframe messages
+      var getSourceIdFromIFrame = function (sources, cb) {
+        window.addEventListener('message', function iframeListener (evt) {
+          // Unload since it should be replied once if success or failure
+          window.removeEventListener('message', iframeListener);
+          // If no data is returned, it is incorrect
+          if (!evt.data) {
+            cb({
+              success: false,
+              error: new Error('Failed retrieving response')
+            });
+          // Extension not installed
+          } else if (evt.data.chromeExtensionStatus === 'not-installed') {
+            cb({
+              success: false,
+              error: new Error('Extension is not installed'),
+              // Should return the above configured chrome.extensionLink but fallback for users using custom detectRTC.html
+              extensionLink: evt.data.data || AdapterJS.extensionInfo.chrome.extensionLink
+            });
+          // Extension not enabled
+          } else if (evt.data.chromeExtensionStatus === 'installed-disabled') {
+            cb({
+              success: false,
+              error: new Error('Extension is disabled')
+            });
+          // Permission denied for retrieval
+          } else if (evt.data.chromeMediaSourceId === 'PermissionDeniedError') {
+            cb({
+              success: false,
+              error: new Error('Permission denied for screen retrieval')
+            });
+          // Source ID retrieved
+          } else if (evt.data.chromeMediaSourceId && typeof evt.data.chromeMediaSourceId === 'string') {
+            cb({
+              success: true,
+              sourceId: evt.data.chromeMediaSourceId
+            });
+          // Unknown error which is invalid state whereby iframe is not returning correctly and source cannot be retrieved correctly
+          } else {
+            cb({
+              success: false,
+              error: new Error('Failed retrieving selected screen')
+            });
+          }
+        });
+
+        // Check if extension has loaded, and then fetch for the sourceId
+        iframe.contentWindow.postMessage({
+          captureSourceId: true,
+          sources: sources,
+          legacy: true,
+          extensionId: AdapterJS.extensionInfo.chrome.extensionId,
+          extensionLink: AdapterJS.extensionInfo.chrome.extensionLink
+        }, '*');
+      };
+
+      // The function to communicate with iframe
+      iframe.getSourceId = function (sources, cb) {
+        // If iframe failed to load, ignore
+        if (states.error) {
+          cb({
+            success: false,
+            error: new Error('iframe is not loaded')
+          });
+          return;
+        }
+
+        // Set interval to wait for iframe to load till 5 seconds before counting as dead
+        if (!states.loaded) {
+          var endBlocks = 0;
+          var intervalChecker = setInterval(function () {
+            if (!states.loaded) {
+              // Loading of iframe has been dead.
+              if (endBlocks === 50) {
+                clearInterval(intervalChecker);
+                cb({
+                  success: false,
+                  error: new Error('iframe failed to load')
+                });
+              } else {
+                endBlocks++;
+              }
+            } else {
+              clearInterval(intervalChecker);
+              getSourceIdFromIFrame(sources, cb);
+            }
+          }, 100);
+        } else {
+          getSourceIdFromIFrame(sources, cb);
+        }
+      };
+
+      // Re-append to reload
+      (document.body || document.documentElement).appendChild(iframe);
+    }
+
   } else if (navigator.mediaDevices && navigator.userAgent.match(/Edge\/(\d+).(\d+)$/)) {
-    // nothing here because edge does not support screensharing
+    // Note: Not overriding getUserMedia() to reject "mediaSource" as to prevent "Invalid calling object" errors.
+    // Nothing here because edge does not support screensharing
     console.warn('Edge does not support screensharing feature in getUserMedia');
 
   } else {
     baseGetUserMedia = window.navigator.getUserMedia;
 
     navigator.getUserMedia = function (constraints, successCb, failureCb) {
-      if (constraints && constraints.video && !!constraints.video.mediaSource) {
-        // would be fine since no methods
+      checkIfConstraintsIsValid(constraints, successCb, failureCb);
+
+      if (constraints.video && typeof constraints.video === 'object' && constraints.video.hasOwnProperty('mediaSource')) {
         var updatedConstraints = clone(constraints);
 
-        // wait for plugin to be ready
+        // Wait for plugin to be ready
         AdapterJS.WebRTCPlugin.callWhenPluginReady(function() {
-          // check if screensharing feature is available
-          if (!!AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature &&
-            !!AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable) {
-            // set the constraints
-            updatedConstraints.video.optional = updatedConstraints.video.optional || [];
-            updatedConstraints.video.optional.push({
-              sourceId: AdapterJS.WebRTCPlugin.plugin.screensharingKey || 'Screensharing'
-            });
+          // Check if screensharing feature is available
+          if (!!AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature && !!AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable) {
+            // Do strict checks for the source ID - "screen", "window" or ["screen", "window"]
+            var sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKey || 'Screensharing';
 
-            delete updatedConstraints.video.mediaSource;
+            if (AdapterJS.WebRTCPlugin.plugin.screensharingKeys) {
+              // Param: ["screen", "window"]
+              if (Array.isArray(updatedConstraints.video.mediaSource) && 
+                updatedConstraints.video.mediaSource.indexOf('screen') > -1 &&
+                updatedConstraints.video.mediaSource.indexOf('window') > -1) {
+                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screenOrWindow;
+                updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screenOrWindow;
+              // Param: ["screen"] or "screen"
+              } else if ((Array.isArray(updatedConstraints.video.mediaSource) && 
+                updatedConstraints.video.mediaSource.indexOf('screen') > -1) || updatedConstraints.video.mediaSource === 'screen') {
+                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screen;
+                updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screen;
+              // Param: ["window"] or "window"
+              } else if ((Array.isArray(updatedConstraints.video.mediaSource) && 
+                updatedConstraints.video.mediaSource.indexOf('window') > -1) || updatedConstraints.video.mediaSource === 'window') {
+                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.window;
+                updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.window;
+              } else {
+                failureCb(new Error('GetUserMedia: Only "screen", "window", ["screen", "window"] are supported as mediaSource constraints'));
+                return;
+              }
+            }
+
+            updatedConstraints.video.optional = updatedConstraints.video.optional || [];
+            updatedConstraints.video.optional.push({ sourceId: sourceId });
+
+            baseGetUserMedia(updatedConstraints, successCb, failureCb);
+
           } else {
             failureCb(new Error('Your version of the WebRTC plugin does not support screensharing'));
             return;
           }
-          baseGetUserMedia(updatedConstraints, successCb, failureCb);
         });
       } else {
         baseGetUserMedia(constraints, successCb, failureCb);
       }
     };
 
-    AdapterJS.getUserMedia = getUserMedia =
-       window.getUserMedia = navigator.getUserMedia;
-    if ( navigator.mediaDevices &&
-      typeof Promise !== 'undefined') {
+    AdapterJS.getUserMedia = getUserMedia = window.getUserMedia = navigator.getUserMedia;
+    if (navigator.mediaDevices && typeof Promise !== 'undefined') {
       navigator.mediaDevices.getUserMedia = requestUserMedia;
     }
-  }
-
-  // For chrome, use an iframe to load the screensharing extension
-  // in the correct domain.
-  // Modify here for custom screensharing extension in chrome
-  if (window.webrtcDetectedBrowser === 'chrome') {
-    var iframe = document.createElement('iframe');
-
-    iframe.onload = function() {
-      iframe.isLoaded = true;
-    };
-
-    iframe.src = 'https://cdn.temasys.com.sg/skylink/extensions/detectRTC.html';
-    iframe.style.display = 'none';
-
-    (document.body || document.documentElement).appendChild(iframe);
-
-    var postFrameMessage = function (object) { // jshint ignore:line
-      object = object || {};
-
-      if (!iframe.isLoaded) {
-        setTimeout(function () {
-          iframe.contentWindow.postMessage(object, '*');
-        }, 100);
-        return;
-      }
-
-      iframe.contentWindow.postMessage(object, '*');
-    };
-  } else if (window.webrtcDetectedBrowser === 'opera') {
-    console.warn('Opera does not support screensharing feature in getUserMedia');
   }
 };
 
 if (typeof window.require !== 'function') {
-  AdapterJS.defineMediaSourcePolyfill();
+  AdapterJS._defineMediaSourcePolyfill();
 }
-
-/*! skylinkjs - v0.6.21 - Thu Apr 27 2017 16:42:17 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.22 - Mon May 22 2017 20:30:43 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -20644,7 +21029,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   for request success.</small>
  * @param {JSON} callback.error The error result in request.
  *   <small>Defined as <code>null</code> when there are no errors in request</small>
- * @param {Error|String} callback.error.error The error received when starting Room session has failed.
+ * @param {Error} callback.error.error The error received when starting Room session has failed.
  * @param {Number} [callback.error.errorCode] The current <a href="#method_init"><code>init()</code> method</a> ready state.
  *   <small>Defined as <code>null</code> when no <a href="#method_init"><code>init()</code> method</a>
  *   has not been called due to invalid configuration.</small>
@@ -20799,7 +21184,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
       callback({
         room: tryRoom,
         errorCode: readyState || null,
-        error: typeof error === 'string' ? new Error(error) : error
+        error: error instanceof Error ? error : new Error(JSON.stringify(error))
       });
     }
   };
@@ -20817,19 +21202,42 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           return;
         }
 
-        self.once('peerJoined', function(peerId, peerInfo, isSelf) {
-          if (typeof callback === 'function') {
+        if (typeof callback === 'function') {
+          var peerOnJoin = function(peerId, peerInfo, isSelf) {
+            self.off('systemAction', peerFailedJoin);
+            self.off('channelClose', peerSocketFailedJoin);
             log.info([null, 'Room', selectedRoom, 'Connected to Room ->'], peerInfo);
-
             callback(null, {
               room: self._selectedRoom,
               peerId: peerId,
               peerInfo: peerInfo
             });
-          }
-        }, function(peerId, peerInfo, isSelf) {
-          return peerInfo.room === selectedRoom && isSelf;
-        });
+          };
+
+          var peerFailedJoin = function (action, message) {
+            self.off('peerJoined', peerOnJoin);
+            self.off('channelClose', peerSocketFailedJoin);
+            log.error([null, 'Room', selectedRoom, 'Failed connecting to Room ->'], message);
+            resolveAsErrorFn(new Error(message), self._selectedRoom, self._readyState);
+          };
+
+          var peerSocketFailedJoin = function () {
+            self.off('systemAction', peerFailedJoin);
+            self.off('peerJoined', peerOnJoin);
+            log.error([null, 'Room', selectedRoom, 'Failed connecting to Room due to abrupt disconnection.']);
+            resolveAsErrorFn(new Error('Channel closed abruptly before session was established'), self._selectedRoom, self._readyState);
+          };
+
+          self.once('peerJoined', peerOnJoin, function(peerId, peerInfo, isSelf) {
+            return peerInfo.room === selectedRoom && isSelf;
+          });
+
+          self.once('systemAction', peerFailedJoin, function (action) {
+            return action === self.SYSTEM_ACTION.REJECT;
+          });
+
+          self.once('channelClose', peerSocketFailedJoin);
+        }
 
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
@@ -21070,218 +21478,226 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
 
   // wait for ready state before opening
   self._wait(function() {
-    self._condition('channelOpen', function() {
-      mediaOptions = mediaOptions || {};
+    var onChannelOpen = function () {
+      self.off('socketError', onChannelError);
 
-      self._userData = mediaOptions.userData || self._userData || '';
-      self._streamsBandwidthSettings = {
-        googleX: {},
-        bAS: {}
-      };
-      self._publishOnly = false;
-      self._sdpSettings = {
-        connection: {
-          audio: true,
-          video: true,
-          data: true
-        },
-        direction: {
-          audio: { send: true, receive: true },
-          video: { send: true, receive: true }
-        }
-      };
-      self._voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === 'boolean' ?
-        mediaOptions.voiceActivityDetection : true;
-      self._peerConnectionConfig = {
-        bundlePolicy: self.BUNDLE_POLICY.BALANCED,
-        rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
-        iceCandidatePoolSize: 0,
-        certificate: self.PEER_CERTIFICATE.AUTO
-      };
-      self._bandwidthAdjuster = null;
+      // Wait for self._channelOpen flag to be defined first
+      setTimeout(function () {
+        mediaOptions = mediaOptions || {};
 
-      if (mediaOptions.bandwidth) {
-        if (typeof mediaOptions.bandwidth.audio === 'number') {
-          self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
-        }
-
-        if (typeof mediaOptions.bandwidth.video === 'number') {
-          self._streamsBandwidthSettings.bAS.video = mediaOptions.bandwidth.video;
-        }
-
-        if (typeof mediaOptions.bandwidth.data === 'number') {
-          self._streamsBandwidthSettings.bAS.data = mediaOptions.bandwidth.data;
-        }
-      }
-
-      if (mediaOptions.googleXBandwidth) {
-        if (typeof mediaOptions.googleXBandwidth.min === 'number') {
-          self._streamsBandwidthSettings.googleX.min = mediaOptions.googleXBandwidth.min;
-        }
-
-        if (typeof mediaOptions.googleXBandwidth.max === 'number') {
-          self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
-        }
-      }
-
-      if (mediaOptions.sdpSettings) {
-        if (mediaOptions.sdpSettings.direction) {
-          if (mediaOptions.sdpSettings.direction.audio) {
-            self._sdpSettings.direction.audio.receive = typeof mediaOptions.sdpSettings.direction.audio.receive === 'boolean' ?
-              mediaOptions.sdpSettings.direction.audio.receive : true;
-            self._sdpSettings.direction.audio.send = typeof mediaOptions.sdpSettings.direction.audio.send === 'boolean' ?
-              mediaOptions.sdpSettings.direction.audio.send : true;
-          }
-
-          if (mediaOptions.sdpSettings.direction.video) {
-            self._sdpSettings.direction.video.receive = typeof mediaOptions.sdpSettings.direction.video.receive === 'boolean' ?
-              mediaOptions.sdpSettings.direction.video.receive : true;
-            self._sdpSettings.direction.video.send = typeof mediaOptions.sdpSettings.direction.video.send === 'boolean' ?
-              mediaOptions.sdpSettings.direction.video.send : true;
-          }
-        }
-        if (mediaOptions.sdpSettings.connection) {
-          self._sdpSettings.connection.audio = typeof mediaOptions.sdpSettings.connection.audio === 'boolean' ?
-            mediaOptions.sdpSettings.connection.audio : true;
-          self._sdpSettings.connection.video = typeof mediaOptions.sdpSettings.connection.video === 'boolean' ?
-            mediaOptions.sdpSettings.connection.video : true;
-          self._sdpSettings.connection.data = typeof mediaOptions.sdpSettings.connection.data === 'boolean' ?
-            mediaOptions.sdpSettings.connection.data : true;
-        }
-      }
-
-      if (mediaOptions.publishOnly) {
-        self._sdpSettings.direction.audio.send = true;
-        self._sdpSettings.direction.audio.receive = false;
-        self._sdpSettings.direction.video.send = true;
-        self._sdpSettings.direction.video.receive = false;
-        self._publishOnly = true;
-
-        if (typeof mediaOptions.publishOnly === 'object' && mediaOptions.publishOnly.parentId &&
-          typeof mediaOptions.publishOnly.parentId === 'string') {
-          self._parentId = mediaOptions.publishOnly.parentId;
-        }
-      }
-
-      if (mediaOptions.parentId) {
-        self._parentId = mediaOptions.parentId;
-      }
-
-      if (mediaOptions.peerConnection && typeof mediaOptions.peerConnection === 'object') {
-        if (typeof mediaOptions.peerConnection.bundlePolicy === 'string') {
-          for (var bpProp in self.BUNDLE_POLICY) {
-            if (self.BUNDLE_POLICY.hasOwnProperty(bpProp) &&
-              self.BUNDLE_POLICY[bpProp] === mediaOptions.peerConnection.bundlePolicy) {
-              self._peerConnectionConfig.bundlePolicy = mediaOptions.peerConnection.bundlePolicy;
-            }
-          }
-        }
-        if (typeof mediaOptions.peerConnection.rtcpMuxPolicy === 'string') {
-          for (var rmpProp in self.RTCP_MUX_POLICY) {
-            if (self.RTCP_MUX_POLICY.hasOwnProperty(rmpProp) &&
-              self.RTCP_MUX_POLICY[rmpProp] === mediaOptions.peerConnection.rtcpMuxPolicy) {
-              self._peerConnectionConfig.rtcpMuxPolicy = mediaOptions.peerConnection.rtcpMuxPolicy;
-            }
-          }
-        }
-        if (typeof mediaOptions.peerConnection.iceCandidatePoolSize === 'number' &&
-          mediaOptions.peerConnection.iceCandidatePoolSize > 0) {
-          self._peerConnectionConfig.iceCandidatePoolSize = mediaOptions.peerConnection.iceCandidatePoolSize;
-        }
-        if (typeof mediaOptions.peerConnection.certificate === 'string') {
-          for (var pcProp in self.PEER_CERTIFICATE) {
-            if (self.PEER_CERTIFICATE.hasOwnProperty(pcProp) &&
-              self.PEER_CERTIFICATE[pcProp] === mediaOptions.peerConnection.certificate) {
-              self._peerConnectionConfig.certificate = mediaOptions.peerConnection.certificate;
-            }
-          }
-        }
-      }
-
-      if (mediaOptions.autoBandwidthAdjustment) {
-        self._bandwidthAdjuster = {
-          interval: 10,
-          limitAtPercentage: 100,
-          useUploadBwOnly: false
+        self._userData = mediaOptions.userData || self._userData || '';
+        self._streamsBandwidthSettings = {
+          googleX: {},
+          bAS: {}
         };
+        self._publishOnly = false;
+        self._sdpSettings = {
+          connection: {
+            audio: true,
+            video: true,
+            data: true
+          },
+          direction: {
+            audio: { send: true, receive: true },
+            video: { send: true, receive: true }
+          }
+        };
+        self._voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === 'boolean' ?
+          mediaOptions.voiceActivityDetection : true;
+        self._peerConnectionConfig = {
+          bundlePolicy: self.BUNDLE_POLICY.BALANCED,
+          rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
+          iceCandidatePoolSize: 0,
+          certificate: self.PEER_CERTIFICATE.AUTO
+        };
+        self._bandwidthAdjuster = null;
 
-        if (typeof mediaOptions.autoBandwidthAdjustment === 'object') {
-          if (typeof mediaOptions.autoBandwidthAdjustment.interval === 'number' &&
-            mediaOptions.autoBandwidthAdjustment.interval >= 10) {
-            self._bandwidthAdjuster.interval = mediaOptions.autoBandwidthAdjustment.interval;
+        if (mediaOptions.bandwidth) {
+          if (typeof mediaOptions.bandwidth.audio === 'number') {
+            self._streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
           }
-          if (typeof mediaOptions.autoBandwidthAdjustment.limitAtPercentage === 'number' &&
-            (mediaOptions.autoBandwidthAdjustment.limitAtPercentage >= 0 &&
-            mediaOptions.autoBandwidthAdjustment.limitAtPercentage <= 100)) {
-            self._bandwidthAdjuster.limitAtPercentage = mediaOptions.autoBandwidthAdjustment.limitAtPercentage;
+
+          if (typeof mediaOptions.bandwidth.video === 'number') {
+            self._streamsBandwidthSettings.bAS.video = mediaOptions.bandwidth.video;
           }
-          if (typeof mediaOptions.autoBandwidthAdjustment.useUploadBwOnly === 'boolean') {
-            self._bandwidthAdjuster.useUploadBwOnly = mediaOptions.autoBandwidthAdjustment.useUploadBwOnly;
+
+          if (typeof mediaOptions.bandwidth.data === 'number') {
+            self._streamsBandwidthSettings.bAS.data = mediaOptions.bandwidth.data;
           }
         }
-      }
 
-      // get the stream
-      if (mediaOptions.manualGetUserMedia === true) {
-        self._trigger('mediaAccessRequired');
-
-        var current50Block = 0;
-        var mediaAccessRequiredFailure = false;
-        // wait for available audio or video stream
-        self._wait(function () {
-          if (mediaAccessRequiredFailure === true) {
-            self._onUserMediaError(new Error('Waiting for stream timeout'), false, false);
-          } else {
-            callback(null, self._streams.userMedia.stream);
-          }
-        }, function () {
-          current50Block += 1;
-          if (current50Block === 600) {
-            mediaAccessRequiredFailure = true;
-            return true;
+        if (mediaOptions.googleXBandwidth) {
+          if (typeof mediaOptions.googleXBandwidth.min === 'number') {
+            self._streamsBandwidthSettings.googleX.min = mediaOptions.googleXBandwidth.min;
           }
 
-          if (self._streams.userMedia && self._streams.userMedia.stream) {
-            return true;
+          if (typeof mediaOptions.googleXBandwidth.max === 'number') {
+            self._streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
           }
-        }, 50);
-        return;
-      }
+        }
 
-      if (mediaOptions.audio || mediaOptions.video) {
-        self.getUserMedia({
-          useExactConstraints: !!mediaOptions.useExactConstraints,
-          audio: mediaOptions.audio,
-          video: mediaOptions.video
+        if (mediaOptions.sdpSettings) {
+          if (mediaOptions.sdpSettings.direction) {
+            if (mediaOptions.sdpSettings.direction.audio) {
+              self._sdpSettings.direction.audio.receive = typeof mediaOptions.sdpSettings.direction.audio.receive === 'boolean' ?
+                mediaOptions.sdpSettings.direction.audio.receive : true;
+              self._sdpSettings.direction.audio.send = typeof mediaOptions.sdpSettings.direction.audio.send === 'boolean' ?
+                mediaOptions.sdpSettings.direction.audio.send : true;
+            }
 
-        }, function (error, success) {
-          if (error) {
-            callback(error, null);
-          } else {
-            callback(null, success);
+            if (mediaOptions.sdpSettings.direction.video) {
+              self._sdpSettings.direction.video.receive = typeof mediaOptions.sdpSettings.direction.video.receive === 'boolean' ?
+                mediaOptions.sdpSettings.direction.video.receive : true;
+              self._sdpSettings.direction.video.send = typeof mediaOptions.sdpSettings.direction.video.send === 'boolean' ?
+                mediaOptions.sdpSettings.direction.video.send : true;
+            }
           }
-        });
-        return;
-      }
+          if (mediaOptions.sdpSettings.connection) {
+            self._sdpSettings.connection.audio = typeof mediaOptions.sdpSettings.connection.audio === 'boolean' ?
+              mediaOptions.sdpSettings.connection.audio : true;
+            self._sdpSettings.connection.video = typeof mediaOptions.sdpSettings.connection.video === 'boolean' ?
+              mediaOptions.sdpSettings.connection.video : true;
+            self._sdpSettings.connection.data = typeof mediaOptions.sdpSettings.connection.data === 'boolean' ?
+              mediaOptions.sdpSettings.connection.data : true;
+          }
+        }
 
-      callback(null, null);
+        if (mediaOptions.publishOnly) {
+          self._sdpSettings.direction.audio.send = true;
+          self._sdpSettings.direction.audio.receive = false;
+          self._sdpSettings.direction.video.send = true;
+          self._sdpSettings.direction.video.receive = false;
+          self._publishOnly = true;
 
-    }, function() { // open channel first if it's not opened
+          if (typeof mediaOptions.publishOnly === 'object' && mediaOptions.publishOnly.parentId &&
+            typeof mediaOptions.publishOnly.parentId === 'string') {
+            self._parentId = mediaOptions.publishOnly.parentId;
+          }
+        }
 
-      if (!self._channelOpen) {
-        self._openChannel();
-      }
-      return self._channelOpen;
-    }, function(state) {
-      return true;
-    });
+        if (mediaOptions.parentId) {
+          self._parentId = mediaOptions.parentId;
+        }
+
+        if (mediaOptions.peerConnection && typeof mediaOptions.peerConnection === 'object') {
+          if (typeof mediaOptions.peerConnection.bundlePolicy === 'string') {
+            for (var bpProp in self.BUNDLE_POLICY) {
+              if (self.BUNDLE_POLICY.hasOwnProperty(bpProp) &&
+                self.BUNDLE_POLICY[bpProp] === mediaOptions.peerConnection.bundlePolicy) {
+                self._peerConnectionConfig.bundlePolicy = mediaOptions.peerConnection.bundlePolicy;
+              }
+            }
+          }
+          if (typeof mediaOptions.peerConnection.rtcpMuxPolicy === 'string') {
+            for (var rmpProp in self.RTCP_MUX_POLICY) {
+              if (self.RTCP_MUX_POLICY.hasOwnProperty(rmpProp) &&
+                self.RTCP_MUX_POLICY[rmpProp] === mediaOptions.peerConnection.rtcpMuxPolicy) {
+                self._peerConnectionConfig.rtcpMuxPolicy = mediaOptions.peerConnection.rtcpMuxPolicy;
+              }
+            }
+          }
+          if (typeof mediaOptions.peerConnection.iceCandidatePoolSize === 'number' &&
+            mediaOptions.peerConnection.iceCandidatePoolSize > 0) {
+            self._peerConnectionConfig.iceCandidatePoolSize = mediaOptions.peerConnection.iceCandidatePoolSize;
+          }
+          if (typeof mediaOptions.peerConnection.certificate === 'string') {
+            for (var pcProp in self.PEER_CERTIFICATE) {
+              if (self.PEER_CERTIFICATE.hasOwnProperty(pcProp) &&
+                self.PEER_CERTIFICATE[pcProp] === mediaOptions.peerConnection.certificate) {
+                self._peerConnectionConfig.certificate = mediaOptions.peerConnection.certificate;
+              }
+            }
+          }
+        }
+
+        if (mediaOptions.autoBandwidthAdjustment) {
+          self._bandwidthAdjuster = {
+            interval: 10,
+            limitAtPercentage: 100,
+            useUploadBwOnly: false
+          };
+
+          if (typeof mediaOptions.autoBandwidthAdjustment === 'object') {
+            if (typeof mediaOptions.autoBandwidthAdjustment.interval === 'number' &&
+              mediaOptions.autoBandwidthAdjustment.interval >= 10) {
+              self._bandwidthAdjuster.interval = mediaOptions.autoBandwidthAdjustment.interval;
+            }
+            if (typeof mediaOptions.autoBandwidthAdjustment.limitAtPercentage === 'number' &&
+              (mediaOptions.autoBandwidthAdjustment.limitAtPercentage >= 0 &&
+              mediaOptions.autoBandwidthAdjustment.limitAtPercentage <= 100)) {
+              self._bandwidthAdjuster.limitAtPercentage = mediaOptions.autoBandwidthAdjustment.limitAtPercentage;
+            }
+            if (typeof mediaOptions.autoBandwidthAdjustment.useUploadBwOnly === 'boolean') {
+              self._bandwidthAdjuster.useUploadBwOnly = mediaOptions.autoBandwidthAdjustment.useUploadBwOnly;
+            }
+          }
+        }
+
+        // get the stream
+        if (mediaOptions.manualGetUserMedia === true) {
+          self._trigger('mediaAccessRequired');
+
+          var current50Block = 0;
+          var mediaAccessRequiredFailure = false;
+          // wait for available audio or video stream
+          self._wait(function () {
+            if (mediaAccessRequiredFailure === true) {
+              self._onUserMediaError(new Error('Waiting for stream timeout'), false, false);
+            } else {
+              callback(null, self._streams.userMedia.stream);
+            }
+          }, function () {
+            current50Block += 1;
+            if (current50Block === 600) {
+              mediaAccessRequiredFailure = true;
+              return true;
+            }
+
+            if (self._streams.userMedia && self._streams.userMedia.stream) {
+              return true;
+            }
+          }, 50);
+          return;
+        }
+
+        if (mediaOptions.audio || mediaOptions.video) {
+          self.getUserMedia({
+            useExactConstraints: !!mediaOptions.useExactConstraints,
+            audio: mediaOptions.audio,
+            video: mediaOptions.video
+
+          }, function (error, success) {
+            if (error) {
+              callback(error, null);
+            } else {
+              callback(null, success);
+            }
+          });
+          return;
+        }
+        callback(null, null);
+      }, 1);
+    };
+    var onChannelError = function (errorState, error) {
+      self.off('channelOpen', onChannelOpen);
+      callback(error);
+    };
+
+    if (!self._channelOpen) {
+      self.once('channelOpen', onChannelOpen);
+      self.once('socketError', onChannelError, function (errorState) {
+        return errorState === self.SOCKET_ERROR.RECONNECTION_ABORTED;
+      });
+      self._openChannel();
+    } else {
+      onChannelOpen();
+    }
   }, function() {
     return self._readyState === self.READY_STATE_CHANGE.COMPLETED;
   });
-
 };
 
-Skylink.prototype.VERSION = '0.6.21';
+Skylink.prototype.VERSION = '0.6.22';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -22313,7 +22729,7 @@ Skylink.prototype.init = function(options, callback) {
           hasTriggered = true;
           self.off('readyStateChange', readyStateChangeFn);
           callback({
-            error: new Error(error),
+            error: error.content instanceof Error ? error.content : (new Error(JSON.stringify(error.content))),
             errorCode: error.errorCode,
             status: error.status
           },null);
@@ -23018,9 +23434,6 @@ var log = {
  * @since 0.5.5
  */
 Skylink.prototype.setLogLevel = function(logLevel) {
-  if(logLevel === undefined) {
-    logLevel = Skylink.LOG_LEVEL.WARN;
-  }
   for (var level in this.LOG_LEVEL) {
     if (this.LOG_LEVEL[level] === logLevel) {
       _logLevel = logLevel;
@@ -23058,26 +23471,22 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  * @since 0.5.2
  */
 Skylink.prototype.setDebugMode = function(isDebugMode) {
-  if (typeof isDebugMode === 'object') {
-    if (Object.keys(isDebugMode).length > 0) {
-      _enableDebugTrace = !!isDebugMode.trace;
-      _enableDebugStack = !!isDebugMode.storeLogs;
-    } else {
-      _enableDebugMode = false;
-      _enableDebugTrace = false;
-      _enableDebugStack = false;
-    }
-  }
-  if (isDebugMode === false) {
+  // setDebugMode({})
+  if (isDebugMode && typeof isDebugMode === 'object') {
+    _enableDebugMode = true;
+    _enableDebugTrace = isDebugMode.trace === true;
+    _enableDebugStack = isDebugMode.storeLogs === true;
+  // setDebugMode(true)
+  } else if (isDebugMode === true) {
+    _enableDebugMode = true;
+    _enableDebugTrace = true;
+    _enableDebugStack = true;
+  // setDebugMode()
+  } else {
     _enableDebugMode = false;
     _enableDebugTrace = false;
     _enableDebugStack = false;
-
-    return;
   }
-  _enableDebugMode = true;
-  _enableDebugTrace = true;
-  _enableDebugStack = true;
 };
 var _eventsDocs = {
   /**
@@ -27036,6 +27445,46 @@ Skylink.prototype.AUDIO_CODEC = {
 };
 
 /**
+ * The list of available screensharing media sources configured in the
+ * <a href="#method_shareScreen"><code>shareScreen()</code> method</a>.
+ * @attribute MEDIA_SOURCE
+ * @param {String} SCREEN <small>Value <code>"screen"</code></small>
+ *   The value of the option to share entire screen.
+ * @param {String} WINDOW <small>Value <code>"window"</code></small>
+ *   The value of the option to share application windows.
+ * @param {String} TAB <small>Value <code>"tab"</code></small>
+ *   The value of the option to share browser tab.
+ *   <small>Note that this is only supported by from Chrome 52+ and Opera 39+.</small>
+ * @param {String} TAB_AUDIO <small>Value <code>"audio"</code></small>
+ *   The value of the option to share browser tab audio.
+ *   <small>Note that this is only supported by Chrome 52+ and Opera 39+.</small>
+ *   <small><code>options.audio</code> has to be enabled with <code>TAB</code> also requested to enable sharing of tab audio.</small>
+ * @param {String} APPLICATION <small>Value <code>"application"</code></small>
+ *   The value of the option to share applications.
+ *   <small>Note that this is only supported by Firefox currently.</small>
+ * @param {String} BROWSER <small>Value <code>"browser"</code></small>
+ *   The value of the option to share browser.
+ *   <small>Note that this is only supported by Firefox currently, and requires toggling the <code>media.getUserMedia.browser.enabled</code>
+ *   in <code>about:config</code>.</small>
+ * @param {String} CAMERA <small>Value <code>"camera"</code></small>
+ *   The value of the option to share camera.
+ *   <small>Note that this is only supported by Firefox currently.</small>
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.5.10
+ */
+Skylink.prototype.MEDIA_SOURCE = {
+  SCREEN: 'screen',
+  WINDOW: 'window',
+  TAB: 'tab',
+  TAB_AUDIO: 'audio',
+  APPLICATION: 'application',
+  BROWSER: 'browser',
+  CAMERA: 'camera'
+};
+
+/**
  * <blockquote class="info">
  *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
  *   the maximum resolution of the Stream due to browser interopability and support.
@@ -28132,6 +28581,11 @@ Skylink.prototype.disableVideo = function() {
  *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
+ * @param {String|Array} [mediaSource=screen] The screensharing media source to select.
+ *   <small>Note that multiple sources are not supported by Firefox as of the time of this release.
+ *   Firefox will use the first item specified in the Array in the event that multiple sources are defined.</small>
+ *   <small>E.g. <code>["screen", "window"]</code>, <code>["tab", "audio"]</code>, <code>"screen"</code> or <code>"tab"</code>.</small>
+ *   [Rel: Skylink.MEDIA_SOURCE]
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -28155,6 +28609,24 @@ Skylink.prototype.disableVideo = function() {
  *
  *   // Example 2: Share screen without audio
  *   skylinkDemo.shareScreen(false, function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById("my-screen"), success);
+ *   });
+ * 
+ *   // Example 3: Share "window" media source
+ *   skylinkDemo.shareScreen("window", function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById("my-screen"), success);
+ *   });
+ * 
+ *   // Example 4: Share tab and its audio media source
+ *   skylinkDemo.shareScreen(true, ["tab", "audio"], function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById("my-screen"), success);
+ *   });
+ * 
+ *   // Example 5: Share "window" and "screen" media source
+ *   skylinkDemo.shareScreen(["window", "screen"], function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
@@ -28210,22 +28682,79 @@ Skylink.prototype.disableVideo = function() {
  * @for Skylink
  * @since 0.6.0
  */
-Skylink.prototype.shareScreen = function (enableAudio, callback) {
+Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
   var self = this;
   var enableAudioSettings = {
     stereo: false,
     echoCancellation: true
   };
+  var useMediaSource = [self.MEDIA_SOURCE.SCREEN];
+  var checkIfSourceExistsFn = function (val) {
+    for (var prop in self.MEDIA_SOURCE) {
+      if (self.MEDIA_SOURCE.hasOwnProperty(prop) && self.MEDIA_SOURCE[prop] === val) {
+        return true;
+      }
+    }
+    return false;
+  };
 
-  if (typeof enableAudio === 'function') {
-    callback = enableAudio;
-    enableAudio = false;
-
+  // shareScreen("screen")
+  if (enableAudio && typeof enableAudio === 'string') {
+    if (checkIfSourceExistsFn(enableAudio)) {
+      useMediaSource = [enableAudio];
+    }
+  // shareScreen(["screen", "window"])
+  } else if (Array.isArray(enableAudio)) {
+    var enableAudioArr = [];
+    for (var i = 0; i < enableAudio.length; i++) {
+      if (checkIfSourceExistsFn(enableAudio[i])) {
+        enableAudioArr.push(enableAudio[i]);
+      }
+    }
+    if (enableAudioArr.length > 0) {
+      useMediaSource = enableAudioArr;
+    }
+  // shareScreen({ stereo: true })
   } else if (enableAudio && typeof enableAudio === 'object') {
     enableAudioSettings.usedtx = typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null;
     enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null;
     enableAudioSettings.stereo = enableAudio.stereo === true;
     enableAudioSettings.echoCancellation = enableAudio.echoCancellation !== false;
+  // shareScreen(true)
+  } else if (typeof enableAudio === 'boolean') {
+    enableAudioSettings = enableAudio === false ? false : enableAudioSettings;
+  // shareScreen(function () {})
+  } else if (typeof enableAudio === 'function') {
+    callback = enableAudio;
+    enableAudio = false;
+  }
+
+  // shareScreen(.., "screen")
+  if (mediaSource && typeof mediaSource === 'string') {
+    if (checkIfSourceExistsFn(mediaSource)) {
+      useMediaSource = [mediaSource];
+    }
+  // shareScreen(.., ["screen", "window"])
+  } else if (Array.isArray(mediaSource)) {
+    var mediaSourceArr = [];
+    for (var i = 0; i < mediaSource.length; i++) {
+      if (checkIfSourceExistsFn(mediaSource[i])) {
+        mediaSourceArr.push(mediaSource[i]);
+      }
+    }
+    if (mediaSourceArr.length > 0) {
+      useMediaSource = mediaSourceArr;
+    }
+  // shareScreen(.., function () {})
+  } else if (typeof mediaSource === 'function') {
+    callback = mediaSource;
+  }
+
+  if (useMediaSource.indexOf('audio') > -1 && useMediaSource.indexOf('tab') === -1) {
+    useMediaSource.splice(useMediaSource.indexOf('audio'), 1);
+    if (useMediaSource.length === 0) {
+      useMediaSource = [self.MEDIA_SOURCE.SCREEN];
+    }
   }
 
   self._throttle(function (runFn) {
@@ -28243,7 +28772,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
 
     var settings = {
       settings: {
-        audio: enableAudio ? enableAudioSettings : false,
+        audio: enableAudioSettings,
         video: {
           screenshare: true,
           exactConstraints: false
@@ -28251,7 +28780,7 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       },
       getUserMediaSettings: {
         video: {
-          mediaSource: 'window'
+          mediaSource: useMediaSource
         }
       }
     };
@@ -28300,20 +28829,28 @@ Skylink.prototype.shareScreen = function (enableAudio, callback) {
       return isScreensharing;
     });
 
+    var getUserMediaAudioSettings = { echoCancellation: enableAudioSettings.echoCancellation };
+
     try {
-      if (enableAudio && window.webrtcDetectedBrowser === 'firefox') {
-        settings.getUserMediaSettings.audio = { echoCancellation: enableAudioSettings.echoCancellation };
+      var hasDefaultAudioTrack = false;
+      if (enableAudioSettings) {
+        if (window.webrtcDetectedBrowser === 'firefox') {
+          hasDefaultAudioTrack = true;
+          settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
+        } else if (useMediaSource.indexOf('audio') > -1 && useMediaSource.indexOf('tab') > -1) {
+          hasDefaultAudioTrack = true;
+          settings.getUserMediaSettings.audio = {};
+        }
       }
 
       navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
-        if (window.webrtcDetectedBrowser === 'firefox' || !enableAudio) {
+        if (hasDefaultAudioTrack || !enableAudioSettings) {
           self._onStreamAccessSuccess(stream, settings, true, false);
           return;
         }
 
-        navigator.getUserMedia({
-          audio: { echoCancellation: enableAudioSettings.echoCancellation }
-        }, function (audioStream) {
+        settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
+        navigator.getUserMedia({ audio: getUserMediaAudioSettings }, function (audioStream) {
           try {
             audioStream.addTrack(stream.getVideoTracks()[0]);
 
