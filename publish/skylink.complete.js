@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.22 - Mon May 22 2017 20:30:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.22 - Tue May 23 2017 23:56:00 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11977,7 +11977,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.22 - Mon May 22 2017 20:30:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.22 - Tue May 23 2017 23:56:00 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -28581,6 +28581,7 @@ Skylink.prototype.disableVideo = function() {
  *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
+ *   <small>Note that this will not be toggled for Chrome/Opera case when `mediaSource` value is `["tab","audio"]`.</small>
  * @param {String|Array} [mediaSource=screen] The screensharing media source to select.
  *   <small>Note that multiple sources are not supported by Firefox as of the time of this release.
  *   Firefox will use the first item specified in the Array in the event that multiple sources are defined.</small>
@@ -28684,10 +28685,7 @@ Skylink.prototype.disableVideo = function() {
  */
 Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
   var self = this;
-  var enableAudioSettings = {
-    stereo: false,
-    echoCancellation: true
-  };
+  var enableAudioSettings = false;
   var useMediaSource = [self.MEDIA_SOURCE.SCREEN];
   var checkIfSourceExistsFn = function (val) {
     for (var prop in self.MEDIA_SOURCE) {
@@ -28716,13 +28714,22 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     }
   // shareScreen({ stereo: true })
   } else if (enableAudio && typeof enableAudio === 'object') {
-    enableAudioSettings.usedtx = typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null;
-    enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null;
-    enableAudioSettings.stereo = enableAudio.stereo === true;
-    enableAudioSettings.echoCancellation = enableAudio.echoCancellation !== false;
+    enableAudioSettings = {
+      usedtx: typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null,
+      useinbandfec: typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null,
+      stereo: enableAudio.stereo === true,
+      echoCancellation: enableAudio.echoCancellation !== false,
+      deviceId: enableAudio.deviceId
+    };
   // shareScreen(true)
-  } else if (typeof enableAudio === 'boolean') {
-    enableAudioSettings = enableAudio === false ? false : enableAudioSettings;
+  } else if (enableAudio === true) {
+    enableAudioSettings = enableAudio === true ? {
+      usedtx: null,
+      useinbandfec: null,
+      stereo: false,
+      echoCancellation: true,
+      deviceId: null
+    } : false;
   // shareScreen(function () {})
   } else if (typeof enableAudio === 'function') {
     callback = enableAudio;
@@ -28779,6 +28786,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         }
       },
       getUserMediaSettings: {
+        audio: false,
         video: {
           mediaSource: useMediaSource
         }
@@ -28829,7 +28837,9 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       return isScreensharing;
     });
 
-    var getUserMediaAudioSettings = { echoCancellation: enableAudioSettings.echoCancellation };
+    var getUserMediaAudioSettings = enableAudioSettings ? {
+      echoCancellation: enableAudioSettings.echoCancellation
+    } : false;
 
     try {
       var hasDefaultAudioTrack = false;
