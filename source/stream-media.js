@@ -793,7 +793,8 @@ Skylink.prototype.sendStream = function(options, callback) {
     }
   };
 
-  if (typeof options !== 'object' || options === null) {
+  if (typeof options !== 'object' || options === null && !(AdapterJS && AdapterJS.WebRTCPlugin &&
+    AdapterJS.WebRTCPlugin.plugin && typeof options === 'function')) {
     var invalidOptionsError = 'Provided stream settings is invalid';
     log.error(invalidOptionsError, options);
     if (typeof callback === 'function'){
