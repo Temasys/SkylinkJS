@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.22 - Fri Jun 09 2017 01:10:49 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.22 - Fri Jun 09 2017 05:15:08 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11977,7 +11977,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.22 - Fri Jun 09 2017 01:10:49 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.22 - Fri Jun 09 2017 05:15:08 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -28168,8 +28168,9 @@ Skylink.prototype.sendStream = function(options, callback) {
     }
   };
 
-  if (typeof options !== 'object' || options === null && !(AdapterJS && AdapterJS.WebRTCPlugin &&
-    AdapterJS.WebRTCPlugin.plugin && typeof options === 'function')) {
+  // Note: Sometimes it may be "function" or "object" but then "function" might be mistaken for callback function, so for now fixing it that way
+  if ((typeof options !== 'object' || options === null) && !(AdapterJS && AdapterJS.WebRTCPlugin &&
+    AdapterJS.WebRTCPlugin.plugin && ['function', 'object'].indexOf(typeof options) > -1)) {
     var invalidOptionsError = 'Provided stream settings is invalid';
     log.error(invalidOptionsError, options);
     if (typeof callback === 'function'){

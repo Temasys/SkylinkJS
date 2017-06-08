@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.22 - Fri Jun 09 2017 01:10:49 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.22 - Fri Jun 09 2017 05:15:08 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -16189,8 +16189,9 @@ Skylink.prototype.sendStream = function(options, callback) {
     }
   };
 
-  if (typeof options !== 'object' || options === null && !(AdapterJS && AdapterJS.WebRTCPlugin &&
-    AdapterJS.WebRTCPlugin.plugin && typeof options === 'function')) {
+  // Note: Sometimes it may be "function" or "object" but then "function" might be mistaken for callback function, so for now fixing it that way
+  if ((typeof options !== 'object' || options === null) && !(AdapterJS && AdapterJS.WebRTCPlugin &&
+    AdapterJS.WebRTCPlugin.plugin && ['function', 'object'].indexOf(typeof options) > -1)) {
     var invalidOptionsError = 'Provided stream settings is invalid';
     log.error(invalidOptionsError, options);
     if (typeof callback === 'function'){
