@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.22 - Sat Jun 10 2017 15:47:28 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.22 - Sat Jun 10 2017 15:51:56 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -15739,6 +15739,7 @@ Skylink.prototype.RECORDING_STATE = {
  *   <code>true</code> and mutes any existing <a href="#method_shareScreen">
  *   <code>shareScreen()</code> Stream</a> audio tracks as well.</small>
  * @param {Array} [options.audio.optional] <blockquote class="info">
+ *   This property has been deprecated. "optional" constraints has been moved from specs.<br>
  *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
  *   <code>true</code>. If you are looking to set the requested source ID of the audio track,
  *   use <code>options.audio.deviceId</code> instead.</blockquote>
@@ -15787,6 +15788,7 @@ Skylink.prototype.RECORDING_STATE = {
  *   <code>"min"</code> for min video framerate and <code>"max"</code> for max video framerate.
  *   Note that this may result in constraints related errors depending on the browser/hardware supports.
  * @param {Array} [options.video.optional] <blockquote class="info">
+ *   This property has been deprecated. "optional" constraints has been moved from specs.<br>
  *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
  *   <code>true</code>. If you are looking to set the requested source ID of the video track,
  *   use <code>options.video.deviceId</code> instead.</blockquote>
