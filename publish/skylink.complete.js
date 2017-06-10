@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.22 - Fri Jun 09 2017 05:15:08 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.22 - Sat Jun 10 2017 15:47:28 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11977,7 +11977,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.22 - Fri Jun 09 2017 05:15:08 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.22 - Sat Jun 10 2017 15:47:28 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -29144,19 +29144,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
         if (options.audio.deviceId && typeof options.audio.deviceId === 'string' &&
           window.webrtcDetectedBrowser !== 'firefox') {
           settings.settings.audio.deviceId = options.audio.deviceId;
-
-          if (options.useExactConstraints) {
-            settings.getUserMediaSettings.audio.deviceId = { exact: options.audio.deviceId };
-
-          } else {
-            if (!Array.isArray(settings.getUserMediaSettings.audio.optional)) {
-              settings.getUserMediaSettings.audio.optional = [];
-            }
-
-            settings.getUserMediaSettings.audio.optional.push({
-              sourceId: options.audio.deviceId
-            });
-          }
+          settings.getUserMediaSettings.audio.deviceId = options.useExactConstraints ?
+            { exact: options.audio.deviceId } : { ideal: options.audio.deviceId };
         }
       }
     }
@@ -29188,19 +29177,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
       if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
         window.webrtcDetectedBrowser !== 'firefox') {
         settings.settings.video.deviceId = options.video.deviceId;
-
-        if (options.useExactConstraints) {
-          settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
-
-        } else {
-          if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
-            settings.getUserMediaSettings.video.optional = [];
-          }
-
-          settings.getUserMediaSettings.video.optional.push({
-            sourceId: options.video.deviceId
-          });
-        }
+        settings.getUserMediaSettings.video.deviceId = options.useExactConstraints ?
+          { exact: options.video.deviceId } : { ideal: options.video.deviceId };
       }
 
       if (options.video.resolution && typeof options.video.resolution === 'object') {
@@ -29236,16 +29214,12 @@ Skylink.prototype._parseStreamSettings = function(options) {
           settings.settings.video.facingMode : (options.useExactConstraints ?
           { exact: settings.settings.video.facingMode } : { max: settings.settings.video.facingMode });
       }
-    } else if (options.useExactConstraints) {
-      settings.getUserMediaSettings.video = {
-        width: { exact: settings.settings.video.resolution.width },
-        height: { exact: settings.settings.video.resolution.height }
-      };
-
     } else {
-      settings.getUserMediaSettings.video.mandatory = {
-        maxWidth: settings.settings.video.resolution.width,
-        maxHeight: settings.settings.video.resolution.height
+      settings.getUserMediaSettings.video = {
+        width: options.useExactConstraints ? { exact: settings.settings.video.resolution.width } :
+          { max: settings.settings.video.resolution.width },
+        height: options.useExactConstraints ? { exact: settings.settings.video.resolution.height } :
+          { max: settings.settings.video.resolution.height }
       };
     }
 
