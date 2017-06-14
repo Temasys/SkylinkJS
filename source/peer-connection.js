@@ -746,6 +746,10 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
   }
 
+  if (window.webrtcDetectedBrowser === 'edge') {
+    return callback(new Error('Edge does not support stats'));
+  }
+
   if (!self._peerStats[peerId] && !isAutoBwStats) {
     return callback(new Error('No stats initiated yet.'));
   }
@@ -1843,7 +1847,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       constraints: constraints,
       optional: optional
     });
-    pc = new RTCPeerConnection(constraints, optional);
+    pc = new (self._useEdgeWebRTC && window.msRTCPeerConnection ? window.msRTCPeerConnection : RTCPeerConnection)(constraints, optional);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
