@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.22 - Fri Jun 09 2017 22:14:29 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.22 - Wed Jun 14 2017 18:06:58 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -15739,6 +15739,7 @@ Skylink.prototype.RECORDING_STATE = {
  *   <code>true</code> and mutes any existing <a href="#method_shareScreen">
  *   <code>shareScreen()</code> Stream</a> audio tracks as well.</small>
  * @param {Array} [options.audio.optional] <blockquote class="info">
+ *   This property has been deprecated. "optional" constraints has been moved from specs.<br>
  *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
  *   <code>true</code>. If you are looking to set the requested source ID of the audio track,
  *   use <code>options.audio.deviceId</code> instead.</blockquote>
@@ -15787,6 +15788,7 @@ Skylink.prototype.RECORDING_STATE = {
  *   <code>"min"</code> for min video framerate and <code>"max"</code> for max video framerate.
  *   Note that this may result in constraints related errors depending on the browser/hardware supports.
  * @param {Array} [options.video.optional] <blockquote class="info">
+ *   This property has been deprecated. "optional" constraints has been moved from specs.<br>
  *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
  *   <code>true</code>. If you are looking to set the requested source ID of the video track,
  *   use <code>options.video.deviceId</code> instead.</blockquote>
@@ -17165,19 +17167,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
         if (options.audio.deviceId && typeof options.audio.deviceId === 'string' &&
           window.webrtcDetectedBrowser !== 'firefox') {
           settings.settings.audio.deviceId = options.audio.deviceId;
-
-          if (options.useExactConstraints) {
-            settings.getUserMediaSettings.audio.deviceId = { exact: options.audio.deviceId };
-
-          } else {
-            if (!Array.isArray(settings.getUserMediaSettings.audio.optional)) {
-              settings.getUserMediaSettings.audio.optional = [];
-            }
-
-            settings.getUserMediaSettings.audio.optional.push({
-              sourceId: options.audio.deviceId
-            });
-          }
+          settings.getUserMediaSettings.audio.deviceId = options.useExactConstraints ?
+            { exact: options.audio.deviceId } : { ideal: options.audio.deviceId };
         }
       }
     }
@@ -17209,19 +17200,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
       if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
         window.webrtcDetectedBrowser !== 'firefox') {
         settings.settings.video.deviceId = options.video.deviceId;
-
-        if (options.useExactConstraints) {
-          settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
-
-        } else {
-          if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
-            settings.getUserMediaSettings.video.optional = [];
-          }
-
-          settings.getUserMediaSettings.video.optional.push({
-            sourceId: options.video.deviceId
-          });
-        }
+        settings.getUserMediaSettings.video.deviceId = options.useExactConstraints ?
+          { exact: options.video.deviceId } : { ideal: options.video.deviceId };
       }
 
       if (options.video.resolution && typeof options.video.resolution === 'object') {
@@ -17257,16 +17237,12 @@ Skylink.prototype._parseStreamSettings = function(options) {
           settings.settings.video.facingMode : (options.useExactConstraints ?
           { exact: settings.settings.video.facingMode } : { max: settings.settings.video.facingMode });
       }
-    } else if (options.useExactConstraints) {
-      settings.getUserMediaSettings.video = {
-        width: { exact: settings.settings.video.resolution.width },
-        height: { exact: settings.settings.video.resolution.height }
-      };
-
     } else {
-      settings.getUserMediaSettings.video.mandatory = {
-        maxWidth: settings.settings.video.resolution.width,
-        maxHeight: settings.settings.video.resolution.height
+      settings.getUserMediaSettings.video = {
+        width: options.useExactConstraints ? { exact: settings.settings.video.resolution.width } :
+          { max: settings.settings.video.resolution.width },
+        height: options.useExactConstraints ? { exact: settings.settings.video.resolution.height } :
+          { max: settings.settings.video.resolution.height }
       };
     }
 
