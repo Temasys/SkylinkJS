@@ -434,6 +434,7 @@ Skylink.prototype.RECORDING_STATE = {
  *   &lt;code&gt;true&lt;/code&gt; and mutes any existing &lt;a href=&quot;#method_shareScreen&quot;&gt;
  *   &lt;code&gt;shareScreen()&lt;/code&gt; Stream&lt;/a&gt; audio tracks as well.&lt;/small&gt;
  * @param {Array} [options.audio.optional] &lt;blockquote class=&quot;info&quot;&gt;
+ *   This property has been deprecated. &quot;optional&quot; constraints has been moved from specs.&lt;br&gt;
  *   Note that this may result in constraints related error when &lt;code&gt;options.useExactConstraints&lt;/code&gt; value is
  *   &lt;code&gt;true&lt;/code&gt;. If you are looking to set the requested source ID of the audio track,
  *   use &lt;code&gt;options.audio.deviceId&lt;/code&gt; instead.&lt;/blockquote&gt;
@@ -482,6 +483,7 @@ Skylink.prototype.RECORDING_STATE = {
  *   &lt;code&gt;&quot;min&quot;&lt;/code&gt; for min video framerate and &lt;code&gt;&quot;max&quot;&lt;/code&gt; for max video framerate.
  *   Note that this may result in constraints related errors depending on the browser/hardware supports.
  * @param {Array} [options.video.optional] &lt;blockquote class=&quot;info&quot;&gt;
+ *   This property has been deprecated. &quot;optional&quot; constraints has been moved from specs.&lt;br&gt;
  *   Note that this may result in constraints related error when &lt;code&gt;options.useExactConstraints&lt;/code&gt; value is
  *   &lt;code&gt;true&lt;/code&gt;. If you are looking to set the requested source ID of the video track,
  *   use &lt;code&gt;options.video.deviceId&lt;/code&gt; instead.&lt;/blockquote&gt;
@@ -884,7 +886,9 @@ Skylink.prototype.sendStream = function(options, callback) {
     }
   };
 
-  if (typeof options !== &#x27;object&#x27; || options === null) {
+  // Note: Sometimes it may be &quot;function&quot; or &quot;object&quot; but then &quot;function&quot; might be mistaken for callback function, so for now fixing it that way
+  if ((typeof options !== &#x27;object&#x27; || options === null) &amp;&amp; !(AdapterJS &amp;&amp; AdapterJS.WebRTCPlugin &amp;&amp;
+    AdapterJS.WebRTCPlugin.plugin &amp;&amp; [&#x27;function&#x27;, &#x27;object&#x27;].indexOf(typeof options) &gt; -1)) {
     var invalidOptionsError = &#x27;Provided stream settings is invalid&#x27;;
     log.error(invalidOptionsError, options);
     if (typeof callback === &#x27;function&#x27;){
@@ -1297,6 +1301,7 @@ Skylink.prototype.disableVideo = function() {
  *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones.&lt;/blockquote&gt; The flag to enable echo cancellation for audio track.
+ *   &lt;small&gt;Note that this will not be toggled for Chrome/Opera case when &#x60;mediaSource&#x60; value is &#x60;[&quot;tab&quot;,&quot;audio&quot;]&#x60;.&lt;/small&gt;
  * @param {String|Array} [mediaSource=screen] The screensharing media source to select.
  *   &lt;small&gt;Note that multiple sources are not supported by Firefox as of the time of this release.
  *   Firefox will use the first item specified in the Array in the event that multiple sources are defined.&lt;/small&gt;
@@ -1400,10 +1405,7 @@ Skylink.prototype.disableVideo = function() {
  */
 Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
   var self = this;
-  var enableAudioSettings = {
-    stereo: false,
-    echoCancellation: true
-  };
+  var enableAudioSettings = false;
   var useMediaSource = [self.MEDIA_SOURCE.SCREEN];
   var checkIfSourceExistsFn = function (val) {
     for (var prop in self.MEDIA_SOURCE) {
@@ -1432,13 +1434,22 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     }
   // shareScreen({ stereo: true })
   } else if (enableAudio &amp;&amp; typeof enableAudio === &#x27;object&#x27;) {
-    enableAudioSettings.usedtx = typeof enableAudio.usedtx === &#x27;boolean&#x27; ? enableAudio.usedtx : null;
-    enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === &#x27;boolean&#x27; ? enableAudio.useinbandfec : null;
-    enableAudioSettings.stereo = enableAudio.stereo === true;
-    enableAudioSettings.echoCancellation = enableAudio.echoCancellation !== false;
+    enableAudioSettings = {
+      usedtx: typeof enableAudio.usedtx === &#x27;boolean&#x27; ? enableAudio.usedtx : null,
+      useinbandfec: typeof enableAudio.useinbandfec === &#x27;boolean&#x27; ? enableAudio.useinbandfec : null,
+      stereo: enableAudio.stereo === true,
+      echoCancellation: enableAudio.echoCancellation !== false,
+      deviceId: enableAudio.deviceId
+    };
   // shareScreen(true)
-  } else if (typeof enableAudio === &#x27;boolean&#x27;) {
-    enableAudioSettings = enableAudio === false ? false : enableAudioSettings;
+  } else if (enableAudio === true) {
+    enableAudioSettings = enableAudio === true ? {
+      usedtx: null,
+      useinbandfec: null,
+      stereo: false,
+      echoCancellation: true,
+      deviceId: null
+    } : false;
   // shareScreen(function () {})
   } else if (typeof enableAudio === &#x27;function&#x27;) {
     callback = enableAudio;
@@ -1495,6 +1506,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         }
       },
       getUserMediaSettings: {
+        audio: false,
         video: {
           mediaSource: useMediaSource
         }
@@ -1545,7 +1557,9 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       return isScreensharing;
     });
 
-    var getUserMediaAudioSettings = { echoCancellation: enableAudioSettings.echoCancellation };
+    var getUserMediaAudioSettings = enableAudioSettings ? {
+      echoCancellation: enableAudioSettings.echoCancellation
+    } : false;
 
     try {
       var hasDefaultAudioTrack = false;
@@ -1848,19 +1862,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
         if (options.audio.deviceId &amp;&amp; typeof options.audio.deviceId === &#x27;string&#x27; &amp;&amp;
           window.webrtcDetectedBrowser !== &#x27;firefox&#x27;) {
           settings.settings.audio.deviceId = options.audio.deviceId;
-
-          if (options.useExactConstraints) {
-            settings.getUserMediaSettings.audio.deviceId = { exact: options.audio.deviceId };
-
-          } else {
-            if (!Array.isArray(settings.getUserMediaSettings.audio.optional)) {
-              settings.getUserMediaSettings.audio.optional = [];
-            }
-
-            settings.getUserMediaSettings.audio.optional.push({
-              sourceId: options.audio.deviceId
-            });
-          }
+          settings.getUserMediaSettings.audio.deviceId = options.useExactConstraints ?
+            { exact: options.audio.deviceId } : { ideal: options.audio.deviceId };
         }
       }
     }
@@ -1892,19 +1895,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
       if (options.video.deviceId &amp;&amp; typeof options.video.deviceId === &#x27;string&#x27; &amp;&amp;
         window.webrtcDetectedBrowser !== &#x27;firefox&#x27;) {
         settings.settings.video.deviceId = options.video.deviceId;
-
-        if (options.useExactConstraints) {
-          settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
-
-        } else {
-          if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
-            settings.getUserMediaSettings.video.optional = [];
-          }
-
-          settings.getUserMediaSettings.video.optional.push({
-            sourceId: options.video.deviceId
-          });
-        }
+        settings.getUserMediaSettings.video.deviceId = options.useExactConstraints ?
+          { exact: options.video.deviceId } : { ideal: options.video.deviceId };
       }
 
       if (options.video.resolution &amp;&amp; typeof options.video.resolution === &#x27;object&#x27;) {
@@ -1940,16 +1932,12 @@ Skylink.prototype._parseStreamSettings = function(options) {
           settings.settings.video.facingMode : (options.useExactConstraints ?
           { exact: settings.settings.video.facingMode } : { max: settings.settings.video.facingMode });
       }
-    } else if (options.useExactConstraints) {
-      settings.getUserMediaSettings.video = {
-        width: { exact: settings.settings.video.resolution.width },
-        height: { exact: settings.settings.video.resolution.height }
-      };
-
     } else {
-      settings.getUserMediaSettings.video.mandatory = {
-        maxWidth: settings.settings.video.resolution.width,
-        maxHeight: settings.settings.video.resolution.height
+      settings.getUserMediaSettings.video = {
+        width: options.useExactConstraints ? { exact: settings.settings.video.resolution.width } :
+          { max: settings.settings.video.resolution.width },
+        height: options.useExactConstraints ? { exact: settings.settings.video.resolution.height } :
+          { max: settings.settings.video.resolution.height }
       };
     }
 

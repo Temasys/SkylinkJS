@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.22 - Mon May 22 2017 20:30:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.22 - Wed Jun 14 2017 18:21:30 GMT+0800 (SGT) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7249,7 +7249,7 @@ module.exports = yeast;
 },{}]},{},[1])(1)
 });
 
-/*! adapterjs - v0.14.2-6d236da - 2017-05-22 */
+/*! adapterjs - v0.14.3-6d236da - 2017-05-24 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7263,7 +7263,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.14.2-6d236da';
+AdapterJS.VERSION = '0.14.3-6d236da';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7887,6 +7887,11 @@ if ( (navigator.mozGetUserMedia ||
   ///////////////////////////////////////////////////////////////////
   // INJECTION OF GOOGLE'S ADAPTER.JS CONTENT
 
+  // Store the original native RTCPC in msRTCPeerConnection object
+  if (navigator.userAgent.match(/Edge\/(\d+).(\d+)$/) && window.RTCPeerConnection) {
+    window.msRTCPeerConnection = window.RTCPeerConnection;
+  }
+
 /* jshint ignore:start */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.adapter = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(requirecopy,module,exports){
  /* eslint-env node */
@@ -7959,8 +7964,7 @@ SDPUtils.parseCandidate = function(line) {
       case 'tcptype':
         candidate.tcpType = parts[i + 1];
         break;
-      default: // extension handling, in particular ufrag
-        candidate[parts[i]] = parts[i + 1];
+      default: // Unknown extensions are silently ignored.
         break;
     }
   }
@@ -7994,12 +7998,6 @@ SDPUtils.writeCandidate = function(candidate) {
   return 'candidate:' + sdp.join(' ');
 };
 
-// Parses an ice-options line, returns an array of option tags.
-// a=ice-options:foo bar
-SDPUtils.parseIceOptions = function(line) {
-  return line.substr(14).split(' ');
-}
-
 // Parses an rtpmap line, returns RTCRtpCoddecParameters. Sample input:
 // a=rtpmap:111 opus/48000/2
 SDPUtils.parseRtpMap = function(line) {
@@ -8030,12 +8028,10 @@ SDPUtils.writeRtpMap = function(codec) {
 
 // Parses an a=extmap line (headerextension from RFC 5285). Sample input:
 // a=extmap:2 urn:ietf:params:rtp-hdrext:toffset
-// a=extmap:2/sendonly urn:ietf:params:rtp-hdrext:toffset
 SDPUtils.parseExtmap = function(line) {
   var parts = line.substr(9).split(' ');
   return {
     id: parseInt(parts[0], 10),
-    direction: parts[0].indexOf('/') > 0 ? parts[0].split('/')[1] : 'sendrecv',
     uri: parts[1]
   };
 };
@@ -8044,10 +8040,7 @@ SDPUtils.parseExtmap = function(line) {
 // RTCRtpHeaderExtension.
 SDPUtils.writeExtmap = function(headerExtension) {
   return 'a=extmap:' + (headerExtension.id || headerExtension.preferredId) +
-      (headerExtension.direction && headerExtension.direction !== 'sendrecv'
-          ? '/' + headerExtension.direction
-          : '') +
-      ' ' + headerExtension.uri + '\r\n';
+       ' ' + headerExtension.uri + '\r\n';
 };
 
 // Parses an ftmp line, returns dictionary. Sample input:
@@ -8134,26 +8127,26 @@ SDPUtils.getMid = function(mediaSection) {
   }
 }
 
-SDPUtils.parseFingerprint = function(line) {
-  var parts = line.substr(14).split(' ');
-  return {
-    algorithm: parts[0].toLowerCase(), // algorithm is case-sensitive in Edge.
-    value: parts[1]
-  };
-};
-
 // Extracts DTLS parameters from SDP media section or sessionpart.
 // FIXME: for consistency with other functions this should only
 //   get the fingerprint line as input. See also getIceParameters.
 SDPUtils.getDtlsParameters = function(mediaSection, sessionpart) {
-  var lines = SDPUtils.matchPrefix(mediaSection + sessionpart,
-      'a=fingerprint:');
+  var lines = SDPUtils.splitLines(mediaSection);
+  // Search in session part, too.
+  lines = lines.concat(SDPUtils.splitLines(sessionpart));
+  var fpLine = lines.filter(function(line) {
+    return line.indexOf('a=fingerprint:') === 0;
+  })[0].substr(14);
   // Note: a=setup line is ignored since we use the 'auto' role.
   // Note2: 'algorithm' is not case sensitive except in Edge.
-  return {
+  var dtlsParameters = {
     role: 'auto',
-    fingerprints: lines.map(SDPUtils.parseFingerprint)
+    fingerprints: [{
+      algorithm: fpLine.split(' ')[0].toLowerCase(),
+      value: fpLine.split(' ')[1]
+    }]
   };
+  return dtlsParameters;
 };
 
 // Serializes DTLS parameters to SDP.
@@ -8378,7 +8371,7 @@ SDPUtils.parseRtcpParameters = function(mediaSection) {
   return rtcpParameters;
 };
 
-// parses either a=msid: or a=ssrc:... msid lines and returns
+// parses either a=msid: or a=ssrc:... msid lines an returns
 // the id of the MediaStream and MediaStreamTrack.
 SDPUtils.parseMsid = function(mediaSection) {
   var parts;
@@ -8422,9 +8415,7 @@ SDPUtils.writeMediaSection = function(transceiver, caps, type, stream) {
 
   sdp += 'a=mid:' + transceiver.mid + '\r\n';
 
-  if (transceiver.direction) {
-    sdp += 'a=' + transceiver.direction + '\r\n';
-  } else if (transceiver.rtpSender && transceiver.rtpReceiver) {
+  if (transceiver.rtpSender && transceiver.rtpReceiver) {
     sdp += 'a=sendrecv\r\n';
   } else if (transceiver.rtpSender) {
     sdp += 'a=sendonly\r\n';
@@ -11131,7 +11122,11 @@ module.exports = {
       }
       var cc = {};
       Object.keys(c).forEach(function(key) {
-        if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
+        if (key === 'require' || key === 'advanced') {
+          return;
+        }
+        if (typeof c[key] === 'string') {
+          cc[key] = c[key];
           return;
         }
         var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
@@ -11144,6 +11139,15 @@ module.exports = {
           }
           return (name === 'deviceId') ? 'sourceId' : name;
         };
+
+        // HACK : Specially handling: if deviceId is an object with exact property,
+        //          change it such that deviceId value is not in exact property
+        // Reason : AJS-286 (deviceId in WebRTC samples not in the format specified as specifications)
+        if ( oldname('', key) === 'sourceId' && r.exact !== undefined ) {
+          r.ideal = r.exact;
+          r.exact = undefined;
+        }
+
         if (r.ideal !== undefined) {
           cc.optional = cc.optional || [];
           var oc = {};
@@ -11927,24 +11931,25 @@ AdapterJS._defineMediaSourcePolyfill = function () {
           // Check if screensharing feature is available
           if (!!AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature && !!AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable) {
             // Do strict checks for the source ID - "screen", "window" or ["screen", "window"]
-            var sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKey || 'Screensharing';
+            // Note that the screen/window can be JS selected using constraints.video.optional[n].screenId
 
             if (AdapterJS.WebRTCPlugin.plugin.screensharingKeys) {
               // Param: ["screen", "window"]
-              if (Array.isArray(updatedConstraints.video.mediaSource) && 
-                updatedConstraints.video.mediaSource.indexOf('screen') > -1 &&
-                updatedConstraints.video.mediaSource.indexOf('window') > -1) {
-                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screenOrWindow;
+              // Legacy: Also s upport for "Screensharing" and "screensharing"
+              if ((Array.isArray(updatedConstraints.video.mediaSource) && 
+                    updatedConstraints.video.mediaSource.indexOf('screen') > -1 &&
+                    updatedConstraints.video.mediaSource.indexOf('window') > -1)
+                  || updatedConstraints.video.mediaSource === AdapterJS.WebRTCPlugin.plugin.screensharingKey
+                  || updatedConstraints.video.mediaSource === AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screenOrWindow
+                 ) {
                 updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screenOrWindow;
               // Param: ["screen"] or "screen"
               } else if ((Array.isArray(updatedConstraints.video.mediaSource) && 
                 updatedConstraints.video.mediaSource.indexOf('screen') > -1) || updatedConstraints.video.mediaSource === 'screen') {
-                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screen;
                 updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screen;
               // Param: ["window"] or "window"
               } else if ((Array.isArray(updatedConstraints.video.mediaSource) && 
                 updatedConstraints.video.mediaSource.indexOf('window') > -1) || updatedConstraints.video.mediaSource === 'window') {
-                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.window;
                 updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.window;
               } else {
                 failureCb(new Error('GetUserMedia: Only "screen", "window", ["screen", "window"] are supported as mediaSource constraints'));
@@ -11952,8 +11957,9 @@ AdapterJS._defineMediaSourcePolyfill = function () {
               }
             }
 
+            // Support for legacy plugins : set the sourceId to the mediaSource value
             updatedConstraints.video.optional = updatedConstraints.video.optional || [];
-            updatedConstraints.video.optional.push({ sourceId: sourceId });
+            updatedConstraints.video.optional.push({ sourceId: updatedConstraints.video.mediaSource });
 
             baseGetUserMedia(updatedConstraints, successCb, failureCb);
 
@@ -11977,7 +11983,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.22 - Mon May 22 2017 20:30:43 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.22 - Wed Jun 14 2017 18:21:30 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -13155,6 +13161,16 @@ function Skylink() {
    * @since 0.6.19
    */
   this._peerConnStatus = {};
+
+  /**
+   * Stores the egde 15.x use pre-1.0 legacy API.
+   * @attribute _useEdgeWebRTC
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.19
+   */
+  this._useEdgeWebRTC = false;
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -18090,6 +18106,10 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     log.debug([peerId, 'RTCStatsReport', null, 'Retrieivng connection status']);
   }
 
+  if (window.webrtcDetectedBrowser === 'edge') {
+    return callback(new Error('Edge does not support stats'));
+  }
+
   if (!self._peerStats[peerId] && !isAutoBwStats) {
     return callback(new Error('No stats initiated yet.'));
   }
@@ -19187,7 +19207,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       constraints: constraints,
       optional: optional
     });
-    pc = new RTCPeerConnection(constraints, optional);
+    pc = new (self._useEdgeWebRTC && window.msRTCPeerConnection ? window.msRTCPeerConnection : RTCPeerConnection)(constraints, optional);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -22153,6 +22173,7 @@ Skylink.prototype.generateUUID = function() {
  *   internals change.</blockquote> The User's priority weight to enforce User as offerer or answerer.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.PRIORITY_WEIGHT_SCHEME]
+ * @param {Boolean} [options.useEdgeWebRTC=false] The flag to use Edge 15.x pre-1.0 WebRTC support.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -22201,6 +22222,7 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} callback.success.iceServer The configured value of the <code>options.iceServer</code>.
  *   <small>See the <code>.urls</code> property in this object for configured value if defined.</small>
  * @param {JSON|String} callback.success.socketServer The configured value of the <code>options.socketServer</code>.
+ * @param {JSON|String} callback.success.useEdgeWebRTC The configured value of the <code>options.useEdgeWebRTC</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -22317,6 +22339,7 @@ Skylink.prototype.init = function(options, callback) {
     video: { h264: {}, vp8: {}, vp9: {} }
   };
   var priorityWeightScheme = self.PRIORITY_WEIGHT_SCHEME.AUTO;
+  var useEdgeWebRTC = false;
 
   log.log('Provided init options:', options);
 
@@ -22387,6 +22410,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if MCU refreshConnection() should use renegotiation
     mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === 'boolean') ?
       options.mcuUseRenegoRestart : mcuUseRenegoRestart;
+    // set the flag if edge 15.x uses the pre-1.0 webrtc implementation
+    useEdgeWebRTC = (typeof options.useEdgeWebRTC === 'boolean') ?
+      options.useEdgeWebRTC : useEdgeWebRTC;
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
@@ -22643,6 +22669,7 @@ Skylink.prototype.init = function(options, callback) {
   self._socketServer = socketServer;
   self._codecParams = codecParams;
   self._priorityWeightScheme = priorityWeightScheme;
+  self._useEdgeWebRTC = useEdgeWebRTC;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -22674,7 +22701,8 @@ Skylink.prototype.init = function(options, callback) {
     iceServer: self._iceServer,
     socketServer: self._socketServer,
     codecParams: self._codecParams,
-    priorityWeightScheme: self._priorityWeightScheme
+    priorityWeightScheme: self._priorityWeightScheme,
+    useEdgeWebRTC: self._useEdgeWebRTC
   });
   // trigger the readystate
   self._readyState = 0;
@@ -22720,7 +22748,8 @@ Skylink.prototype.init = function(options, callback) {
             iceServer: self._iceServer,
             socketServer: self._socketServer,
             codecParams: self._codecParams,
-            priorityWeightScheme: self._priorityWeightScheme
+            priorityWeightScheme: self._priorityWeightScheme,
+            useEdgeWebRTC: self._useEdgeWebRTC
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -23059,7 +23088,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     iceServer: self._iceServer ? self._iceServer.urls : null,
     socketServer: self._socketServer ? self._socketServer : null,
     codecParams: self._codecParams ? self._codecParams : null,
-    priorityWeightScheme: self._priorityWeightScheme ? self._priorityWeightScheme : null
+    priorityWeightScheme: self._priorityWeightScheme ? self._priorityWeightScheme : null,
+    useEdgeWebRTC: self._useEdgeWebRTC
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
@@ -27718,6 +27748,7 @@ Skylink.prototype.RECORDING_STATE = {
  *   <code>true</code> and mutes any existing <a href="#method_shareScreen">
  *   <code>shareScreen()</code> Stream</a> audio tracks as well.</small>
  * @param {Array} [options.audio.optional] <blockquote class="info">
+ *   This property has been deprecated. "optional" constraints has been moved from specs.<br>
  *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
  *   <code>true</code>. If you are looking to set the requested source ID of the audio track,
  *   use <code>options.audio.deviceId</code> instead.</blockquote>
@@ -27766,6 +27797,7 @@ Skylink.prototype.RECORDING_STATE = {
  *   <code>"min"</code> for min video framerate and <code>"max"</code> for max video framerate.
  *   Note that this may result in constraints related errors depending on the browser/hardware supports.
  * @param {Array} [options.video.optional] <blockquote class="info">
+ *   This property has been deprecated. "optional" constraints has been moved from specs.<br>
  *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
  *   <code>true</code>. If you are looking to set the requested source ID of the video track,
  *   use <code>options.video.deviceId</code> instead.</blockquote>
@@ -28168,7 +28200,9 @@ Skylink.prototype.sendStream = function(options, callback) {
     }
   };
 
-  if (typeof options !== 'object' || options === null) {
+  // Note: Sometimes it may be "function" or "object" but then "function" might be mistaken for callback function, so for now fixing it that way
+  if ((typeof options !== 'object' || options === null) && !(AdapterJS && AdapterJS.WebRTCPlugin &&
+    AdapterJS.WebRTCPlugin.plugin && ['function', 'object'].indexOf(typeof options) > -1)) {
     var invalidOptionsError = 'Provided stream settings is invalid';
     log.error(invalidOptionsError, options);
     if (typeof callback === 'function'){
@@ -28581,6 +28615,7 @@ Skylink.prototype.disableVideo = function() {
  *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
+ *   <small>Note that this will not be toggled for Chrome/Opera case when `mediaSource` value is `["tab","audio"]`.</small>
  * @param {String|Array} [mediaSource=screen] The screensharing media source to select.
  *   <small>Note that multiple sources are not supported by Firefox as of the time of this release.
  *   Firefox will use the first item specified in the Array in the event that multiple sources are defined.</small>
@@ -28684,10 +28719,7 @@ Skylink.prototype.disableVideo = function() {
  */
 Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
   var self = this;
-  var enableAudioSettings = {
-    stereo: false,
-    echoCancellation: true
-  };
+  var enableAudioSettings = false;
   var useMediaSource = [self.MEDIA_SOURCE.SCREEN];
   var checkIfSourceExistsFn = function (val) {
     for (var prop in self.MEDIA_SOURCE) {
@@ -28716,13 +28748,22 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     }
   // shareScreen({ stereo: true })
   } else if (enableAudio && typeof enableAudio === 'object') {
-    enableAudioSettings.usedtx = typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null;
-    enableAudioSettings.useinbandfec = typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null;
-    enableAudioSettings.stereo = enableAudio.stereo === true;
-    enableAudioSettings.echoCancellation = enableAudio.echoCancellation !== false;
+    enableAudioSettings = {
+      usedtx: typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null,
+      useinbandfec: typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null,
+      stereo: enableAudio.stereo === true,
+      echoCancellation: enableAudio.echoCancellation !== false,
+      deviceId: enableAudio.deviceId
+    };
   // shareScreen(true)
-  } else if (typeof enableAudio === 'boolean') {
-    enableAudioSettings = enableAudio === false ? false : enableAudioSettings;
+  } else if (enableAudio === true) {
+    enableAudioSettings = enableAudio === true ? {
+      usedtx: null,
+      useinbandfec: null,
+      stereo: false,
+      echoCancellation: true,
+      deviceId: null
+    } : false;
   // shareScreen(function () {})
   } else if (typeof enableAudio === 'function') {
     callback = enableAudio;
@@ -28779,6 +28820,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         }
       },
       getUserMediaSettings: {
+        audio: false,
         video: {
           mediaSource: useMediaSource
         }
@@ -28829,7 +28871,9 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       return isScreensharing;
     });
 
-    var getUserMediaAudioSettings = { echoCancellation: enableAudioSettings.echoCancellation };
+    var getUserMediaAudioSettings = enableAudioSettings ? {
+      echoCancellation: enableAudioSettings.echoCancellation
+    } : false;
 
     try {
       var hasDefaultAudioTrack = false;
@@ -29132,19 +29176,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
         if (options.audio.deviceId && typeof options.audio.deviceId === 'string' &&
           window.webrtcDetectedBrowser !== 'firefox') {
           settings.settings.audio.deviceId = options.audio.deviceId;
-
-          if (options.useExactConstraints) {
-            settings.getUserMediaSettings.audio.deviceId = { exact: options.audio.deviceId };
-
-          } else {
-            if (!Array.isArray(settings.getUserMediaSettings.audio.optional)) {
-              settings.getUserMediaSettings.audio.optional = [];
-            }
-
-            settings.getUserMediaSettings.audio.optional.push({
-              sourceId: options.audio.deviceId
-            });
-          }
+          settings.getUserMediaSettings.audio.deviceId = options.useExactConstraints ?
+            { exact: options.audio.deviceId } : { ideal: options.audio.deviceId };
         }
       }
     }
@@ -29176,19 +29209,8 @@ Skylink.prototype._parseStreamSettings = function(options) {
       if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
         window.webrtcDetectedBrowser !== 'firefox') {
         settings.settings.video.deviceId = options.video.deviceId;
-
-        if (options.useExactConstraints) {
-          settings.getUserMediaSettings.video.deviceId = { exact: options.video.deviceId };
-
-        } else {
-          if (!Array.isArray(settings.getUserMediaSettings.video.optional)) {
-            settings.getUserMediaSettings.video.optional = [];
-          }
-
-          settings.getUserMediaSettings.video.optional.push({
-            sourceId: options.video.deviceId
-          });
-        }
+        settings.getUserMediaSettings.video.deviceId = options.useExactConstraints ?
+          { exact: options.video.deviceId } : { ideal: options.video.deviceId };
       }
 
       if (options.video.resolution && typeof options.video.resolution === 'object') {
@@ -29224,16 +29246,12 @@ Skylink.prototype._parseStreamSettings = function(options) {
           settings.settings.video.facingMode : (options.useExactConstraints ?
           { exact: settings.settings.video.facingMode } : { max: settings.settings.video.facingMode });
       }
-    } else if (options.useExactConstraints) {
-      settings.getUserMediaSettings.video = {
-        width: { exact: settings.settings.video.resolution.width },
-        height: { exact: settings.settings.video.resolution.height }
-      };
-
     } else {
-      settings.getUserMediaSettings.video.mandatory = {
-        maxWidth: settings.settings.video.resolution.width,
-        maxHeight: settings.settings.video.resolution.height
+      settings.getUserMediaSettings.video = {
+        width: options.useExactConstraints ? { exact: settings.settings.video.resolution.width } :
+          { max: settings.settings.video.resolution.width },
+        height: options.useExactConstraints ? { exact: settings.settings.video.resolution.height } :
+          { max: settings.settings.video.resolution.height }
       };
     }
 
@@ -29813,7 +29831,8 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
 
     // Follow RFC 4566, that the b-line should follow after c-line.
     log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Limiting maximum sending "' + type + '" bandwidth ->'], bw);
-    sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1024) : 'b=AS:' + bw);
+    sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1000 *
+    (window.webrtcDetectedVersion > 52 && window.webrtcDetectedVersion < 55 ? 1000 : 1)).toFixed(0) : 'b=AS:' + bw);
   };
 
   var bASAudioBw = this._streamsBandwidthSettings.bAS.audio;

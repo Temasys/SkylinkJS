@@ -204,7 +204,8 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
 
     // Follow RFC 4566, that the b-line should follow after c-line.
     log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Limiting maximum sending "' + type + '" bandwidth ->'], bw);
-    sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1024) : 'b=AS:' + bw);
+    sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1000 *
+    (window.webrtcDetectedVersion > 52 && window.webrtcDetectedVersion < 55 ? 1000 : 1)).toFixed(0) : 'b=AS:' + bw);
   };
 
   var bASAudioBw = this._streamsBandwidthSettings.bAS.audio;
