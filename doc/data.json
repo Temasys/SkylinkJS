@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.22",
+        "version": "0.6.23",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -1520,6 +1520,18 @@
             "itemtype": "attribute",
             "name": "_peerConnStatus",
             "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.19",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 1178,
+            "description": "Stores the egde 15.x use pre-1.0 legacy API.",
+            "itemtype": "attribute",
+            "name": "_useEdgeWebRTC",
+            "type": "Boolean",
             "access": "private",
             "tagname": "",
             "since": "0.6.19",
@@ -3207,7 +3219,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1506,
+            "line": 1510,
             "description": "Function that starts the Peer connection session.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_addPeer",
@@ -3218,7 +3230,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1545,
+            "line": 1549,
             "description": "Function that re-negotiates a Peer connection.\nRemember to remove previous method of reconnection (re-creating the Peer connection - destroy and create connection).",
             "itemtype": "method",
             "name": "_restartPeerConnection",
@@ -3229,7 +3241,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1696,
+            "line": 1700,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -3240,7 +3252,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1800,
+            "line": 1804,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -3251,7 +3263,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2056,
+            "line": 2060,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3262,7 +3274,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2204,
+            "line": 2208,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3273,7 +3285,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2224,
+            "line": 2228,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -4791,6 +4803,13 @@
                             "description": "<blockquote class=\"info\">\n  Note that this parameter should only be used for debugging purposes only and may not work when\n  internals change.</blockquote> The User's priority weight to enforce User as offerer or answerer.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.PRIORITY_WEIGHT_SCHEME]",
                             "type": "String",
                             "optional": true
+                        },
+                        {
+                            "name": "useEdgeWebRTC",
+                            "description": "The flag to use Edge 15.x pre-1.0 WebRTC support.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
                         }
                     ]
                 },
@@ -4966,6 +4985,11 @@
                                     "name": "socketServer",
                                     "description": "The configured value of the <code>options.socketServer</code>.",
                                     "type": "JSON|String"
+                                },
+                                {
+                                    "name": "useEdgeWebRTC",
+                                    "description": "The configured value of the <code>options.useEdgeWebRTC</code>.",
+                                    "type": "JSON|String"
                                 }
                             ]
                         }
@@ -4981,7 +5005,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1055,
+            "line": 1064,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -4992,7 +5016,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1129,
+            "line": 1138,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5003,7 +5027,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1199,
+            "line": 1208,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5014,7 +5038,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1330,
+            "line": 1339,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -9938,7 +9962,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 292,
+            "line": 293,
             "description": "Function that modifies the session description to set the preferred audio/video codec.",
             "itemtype": "method",
             "name": "_setSDPCodec",
@@ -9949,7 +9973,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 389,
+            "line": 390,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -9960,7 +9984,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 405,
+            "line": 406,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -9971,7 +9995,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 551,
+            "line": 552,
             "description": "Function that modifies the session description to remove apt/rtx lines that does exists.",
             "itemtype": "method",
             "name": "_removeSDPUnknownAptRtx",
@@ -9982,7 +10006,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 606,
+            "line": 607,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -9993,7 +10017,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 680,
+            "line": 681,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -10004,7 +10028,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 696,
+            "line": 697,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -10015,7 +10039,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 753,
+            "line": 754,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -10026,7 +10050,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 795,
+            "line": 796,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -10037,7 +10061,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 888,
+            "line": 889,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -10048,7 +10072,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1097,
+            "line": 1098,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
@@ -10059,7 +10083,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1135,
+            "line": 1136,
             "description": "Function that gets edge browser video supports.",
             "itemtype": "method",
             "name": "_getSDPEdgeVideoSupports",

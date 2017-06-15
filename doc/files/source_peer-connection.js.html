@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.22</title>
+    <title>SkylinkJS 0.6.23</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.22</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.23</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -835,6 +835,10 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
 
   if (!beSilentOnLogs) {
     log.debug([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieivng connection status&#x27;]);
+  }
+
+  if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+    return callback(new Error(&#x27;Edge does not support stats&#x27;));
   }
 
   if (!self._peerStats[peerId] &amp;&amp; !isAutoBwStats) {
@@ -1934,7 +1938,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       constraints: constraints,
       optional: optional
     });
-    pc = new RTCPeerConnection(constraints, optional);
+    pc = new (self._useEdgeWebRTC &amp;&amp; window.msRTCPeerConnection ? window.msRTCPeerConnection : RTCPeerConnection)(constraints, optional);
   } catch (error) {
     log.error([targetMid, null, null, &#x27;Failed creating peer connection:&#x27;], error);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);

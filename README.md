@@ -51,7 +51,7 @@ You can raise tickets on [our support portal](http://support.temasys.io) or on [
 ##### Current versions and stability
 We recommend that you always use the latest versions of the Temasys Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: `0.6.21`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.21).
+[Latest version: `0.6.23`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.23).
 
 #### Noted Issues and Solutions
 ##### Installing `0.6.3` - `0.6.10` versions in NPM

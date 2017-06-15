@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.22</title>
+    <title>SkylinkJS 0.6.23</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.22</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.23</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -295,7 +295,8 @@ Skylink.prototype._setSDPBitrate = function(targetMid, sessionDescription) {
 
     // Follow RFC 4566, that the b-line should follow after c-line.
     log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Limiting maximum sending &quot;&#x27; + type + &#x27;&quot; bandwidth -&gt;&#x27;], bw);
-    sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ? &#x27;b=TIAS:&#x27; + (bw * 1024) : &#x27;b=AS:&#x27; + bw);
+    sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === &#x27;firefox&#x27; ? &#x27;b=TIAS:&#x27; + (bw * 1000 *
+    (window.webrtcDetectedVersion &gt; 52 &amp;&amp; window.webrtcDetectedVersion &lt; 55 ? 1000 : 1)).toFixed(0) : &#x27;b=AS:&#x27; + bw);
   };
 
   var bASAudioBw = this._streamsBandwidthSettings.bAS.audio;

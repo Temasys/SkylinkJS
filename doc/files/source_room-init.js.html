@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.22</title>
+    <title>SkylinkJS 0.6.23</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.22</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.23</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -553,6 +553,7 @@ Skylink.prototype.generateUUID = function() {
  *   internals change.&lt;/blockquote&gt; The User&#x27;s priority weight to enforce User as offerer or answerer.
  * - When not provided, its value is &lt;code&gt;AUTO&lt;/code&gt;.
  *   [Rel: Skylink.PRIORITY_WEIGHT_SCHEME]
+ * @param {Boolean} [options.useEdgeWebRTC=false] The flag to use Edge 15.x pre-1.0 WebRTC support.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_readyStateChange&quot;&gt;
@@ -601,6 +602,7 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} callback.success.iceServer The configured value of the &lt;code&gt;options.iceServer&lt;/code&gt;.
  *   &lt;small&gt;See the &lt;code&gt;.urls&lt;/code&gt; property in this object for configured value if defined.&lt;/small&gt;
  * @param {JSON|String} callback.success.socketServer The configured value of the &lt;code&gt;options.socketServer&lt;/code&gt;.
+ * @param {JSON|String} callback.success.useEdgeWebRTC The configured value of the &lt;code&gt;options.useEdgeWebRTC&lt;/code&gt;.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -717,6 +719,7 @@ Skylink.prototype.init = function(options, callback) {
     video: { h264: {}, vp8: {}, vp9: {} }
   };
   var priorityWeightScheme = self.PRIORITY_WEIGHT_SCHEME.AUTO;
+  var useEdgeWebRTC = false;
 
   log.log(&#x27;Provided init options:&#x27;, options);
 
@@ -787,6 +790,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if MCU refreshConnection() should use renegotiation
     mcuUseRenegoRestart = (typeof options.mcuUseRenegoRestart === &#x27;boolean&#x27;) ?
       options.mcuUseRenegoRestart : mcuUseRenegoRestart;
+    // set the flag if edge 15.x uses the pre-1.0 webrtc implementation
+    useEdgeWebRTC = (typeof options.useEdgeWebRTC === &#x27;boolean&#x27;) ?
+      options.useEdgeWebRTC : useEdgeWebRTC;
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === &#x27;object&#x27; &amp;&amp; options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === &#x27;boolean&#x27;) ?
@@ -1043,6 +1049,7 @@ Skylink.prototype.init = function(options, callback) {
   self._socketServer = socketServer;
   self._codecParams = codecParams;
   self._priorityWeightScheme = priorityWeightScheme;
+  self._useEdgeWebRTC = useEdgeWebRTC;
 
   log.log(&#x27;Init configuration:&#x27;, {
     serverUrl: self._path,
@@ -1074,7 +1081,8 @@ Skylink.prototype.init = function(options, callback) {
     iceServer: self._iceServer,
     socketServer: self._socketServer,
     codecParams: self._codecParams,
-    priorityWeightScheme: self._priorityWeightScheme
+    priorityWeightScheme: self._priorityWeightScheme,
+    useEdgeWebRTC: self._useEdgeWebRTC
   });
   // trigger the readystate
   self._readyState = 0;
@@ -1120,7 +1128,8 @@ Skylink.prototype.init = function(options, callback) {
             iceServer: self._iceServer,
             socketServer: self._socketServer,
             codecParams: self._codecParams,
-            priorityWeightScheme: self._priorityWeightScheme
+            priorityWeightScheme: self._priorityWeightScheme,
+            useEdgeWebRTC: self._useEdgeWebRTC
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, &#x27;Socket&#x27;, null, &#x27;Firing callback. &#x27; +
@@ -1459,7 +1468,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     iceServer: self._iceServer ? self._iceServer.urls : null,
     socketServer: self._socketServer ? self._socketServer : null,
     codecParams: self._codecParams ? self._codecParams : null,
-    priorityWeightScheme: self._priorityWeightScheme ? self._priorityWeightScheme : null
+    priorityWeightScheme: self._priorityWeightScheme ? self._priorityWeightScheme : null,
+    useEdgeWebRTC: self._useEdgeWebRTC
   };
   if (self._roomCredentials) {
     initOptions.credentials = {
