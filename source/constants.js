@@ -88,5 +88,65 @@ var Constants = {
       AUDIO: 'audio',
       VIDEO: 'video'
     }
+  },
+
+  Datachannel: {
+    /**
+     * The enum of `Datachannel` states.
+     * @attribute Datachannel.STATE
+     * @param {String} CONNECTING The state when datachannel is connecting.
+     * @param {String} CONNECTED The state when datachannel is connected.
+     * @param {String} ERROR The state when datachannel connection has errors.
+     * @param {String} DISCONNECTING The state when datachannel is disconnecting.
+     * @param {String} DISCONNECTED The state when datachannel is disconnected.
+     * @type JSON
+     * @final
+     * @static
+     * @for Constants
+     * @since 0.7.0
+     */
+    STATE: {
+      CONNECTING: 'connecting',
+      CONNECTED: 'open',
+      DISCONNECTING: 'closing',
+      DISCONNECTED: 'closed',
+      ERROR: 'error'
+    },
+
+    /**
+     * The enum of `Datachannel` data buffer modes.
+     * @attribute BUFFER_MODE
+     * @param {String} THRESHOLD The mode to use threshold amount low event to handle data buffer.
+     * @param {String} POLLING The mode to use polling interval to check the buffer size to handle data buffer.
+     * @type JSON
+     * @final
+     * @static
+     * @for Datachannel
+     * @since 0.7.0
+     */
+    BUFFER_MODE: {
+      POLLING: 'polling',
+      THRESHOLD: 'threshold'
+    },
+
+    /**
+     * The enum of `Datachannel` data binary type supported.
+     * @attribute BINARY_TYPE
+     * @param {String} BLOB The binary data type is Blob.
+     * @param {String} ARRAYBUFFER The binary data type is ArrayBuffer.
+     * @param {String} INT8ARRAY The binary data type is Int8Array.
+     * @param {String} ARRAYBUFFERVIEW The binary data type is ArrayBufferView.
+     * @type JSON
+     * @final
+     * @static
+     * @for Datachannel
+     * @since 0.7.0
+     */
+    BINARY_TYPE: {
+      BLOB: 'blob',
+      ARRAYBUFFER: 'arraybuffer',
+      INT8ARRAY: 'int8Array',
+      ARRAYBUFFERVIEW: 'arraybufferview'
+    }
   }
 };
