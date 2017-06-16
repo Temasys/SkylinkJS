@@ -7,6 +7,8 @@
  * Example:
  * 
  * new Datachannel(channel, peerId, {
+ *   // There can only be 1 for each peer. This is used for sending messages.
+ *   persistent: [Boolean],
  *   bufferMode: {
  *     mode: [Constants.Datachannel.BUFFER_MODE],
  *     flushTimeout: [Number],
