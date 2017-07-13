@@ -71,6 +71,11 @@ Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
     } else if (typeof audioSettings.stereo === 'boolean') {
       opusOptions.stereo = audioSettings.stereo;
     }
+    if (typeof self._codecParams.audio.opus['sprop-stereo'] === 'boolean') {
+      opusOptions['sprop-stereo'] = self._codecParams.audio.opus['sprop-stereo'];
+    } else if (typeof audioSettings.stereo === 'boolean') {
+      opusOptions['sprop-stereo'] = audioSettings.stereo;
+    }
     if (typeof self._codecParams.audio.opus.usedtx === 'boolean') {
       opusOptions.usedtx = self._codecParams.audio.opus.usedtx;
     } else if (typeof audioSettings.usedtx === 'boolean') {

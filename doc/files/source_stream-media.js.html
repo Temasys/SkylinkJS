@@ -389,10 +389,11 @@ Skylink.prototype.RECORDING_STATE = {
  *    &lt;code&gt;options.audio.deviceId&lt;/code&gt;, &lt;code&gt;options.audio.echoCancellation&lt;/code&gt;.&lt;/blockquote&gt;
  *    The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
- *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt;
+ *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt; and
+ *   the &lt;code&gt;options.codecParams.audio.opus[&quot;sprop-stereo&quot;]&lt;/code&gt;
  *   parameter in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; instead. If the
- *   &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt; is configured, this overrides the
- *   &lt;code&gt;options.audio.stereo&lt;/code&gt; setting.&lt;/blockquote&gt;
+ *   &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt; or &lt;code&gt;options.codecParams.audio.opus[&quot;sprop-stereo&quot;]&lt;/code&gt;
+ *   is configured, this overrides the &lt;code&gt;options.audio.stereo&lt;/code&gt; setting.&lt;/blockquote&gt;
  *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
  * @param {Boolean} [options.audio.usedtx] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
@@ -1258,10 +1259,11 @@ Skylink.prototype.disableVideo = function() {
  * @method shareScreen
  * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
  * @param {Boolean} [enableAudio.stereo=false] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
- *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt;
+ *   This property has been deprecated. Configure this with the &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt; and
+ *   the &lt;code&gt;options.codecParams.audio.opus[&quot;sprop-stereo&quot;]&lt;/code&gt;
  *   parameter in the &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; instead. If the
- *   &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt; is configured, this overrides the
- *   &lt;code&gt;options.audio.stereo&lt;/code&gt; setting.&lt;/blockquote&gt;
+ *   &lt;code&gt;options.codecParams.audio.opus.stereo&lt;/code&gt; or &lt;code&gt;options.codecParams.audio.opus[&quot;sprop-stereo&quot;]&lt;/code&gt;
+ *   is configured, this overrides the &lt;code&gt;options.audio.stereo&lt;/code&gt; setting.&lt;/blockquote&gt;
  *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
  * @param {Boolean} [enableAudio.usedtx] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;

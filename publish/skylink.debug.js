@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.23 - Thu Jun 15 2017 13:32:44 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.23 - Thu Jul 13 2017 18:37:09 GMT+0800 (SGT) */
 
 (function(globals) {
 
@@ -15718,10 +15718,11 @@ Skylink.prototype.RECORDING_STATE = {
  *    <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.</blockquote>
  *    The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
- *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code> and
+ *   the <code>options.codecParams.audio.opus["sprop-stereo"]</code>
  *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
- *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
- *   <code>options.audio.stereo</code> setting.</blockquote>
+ *   <code>options.codecParams.audio.opus.stereo</code> or <code>options.codecParams.audio.opus["sprop-stereo"]</code>
+ *   is configured, this overrides the <code>options.audio.stereo</code> setting.</blockquote>
  *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.audio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
@@ -16587,10 +16588,11 @@ Skylink.prototype.disableVideo = function() {
  * @method shareScreen
  * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
  * @param {Boolean} [enableAudio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
- *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code> and
+ *   the <code>options.codecParams.audio.opus["sprop-stereo"]</code>
  *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
- *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
- *   <code>options.audio.stereo</code> setting.</blockquote>
+ *   <code>options.codecParams.audio.opus.stereo</code> or <code>options.codecParams.audio.opus["sprop-stereo"]</code>
+ *   is configured, this overrides the <code>options.audio.stereo</code> setting.</blockquote>
  *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [enableAudio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
@@ -17712,6 +17714,11 @@ Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
       opusOptions.stereo = self._codecParams.audio.opus.stereo;
     } else if (typeof audioSettings.stereo === 'boolean') {
       opusOptions.stereo = audioSettings.stereo;
+    }
+    if (typeof self._codecParams.audio.opus['sprop-stereo'] === 'boolean') {
+      opusOptions['sprop-stereo'] = self._codecParams.audio.opus['sprop-stereo'];
+    } else if (typeof audioSettings.stereo === 'boolean') {
+      opusOptions['sprop-stereo'] = audioSettings.stereo;
     }
     if (typeof self._codecParams.audio.opus.usedtx === 'boolean') {
       opusOptions.usedtx = self._codecParams.audio.opus.usedtx;
