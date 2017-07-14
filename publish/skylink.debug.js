@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.23 - Thu Jul 13 2017 18:37:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.23 - Fri Jul 14 2017 22:08:48 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -10154,8 +10154,9 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} [options.codecParams.audio.opus] <blockquote class="info">
  *   Note that this is only applicable to OPUS audio codecs with a sampling rate of <code>48000</code> Hz (hertz).
  *   </blockquote> The OPUS audio codec parameters to configure.
- * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec stereo band
- *   should be configured for sending encoded audio data.
+ * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec is able to decode or receive stereo packets.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.audio.opus.sprop-stereo] The flag if OPUS audio codec is sending stereo packets.
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.codecParams.audio.opus.usedtx] <blockquote class="info">
  *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
@@ -10554,6 +10555,8 @@ Skylink.prototype.init = function(options, callback) {
           codecParams.audio.opus = {
             stereo: typeof options.codecParams.audio.opus.stereo === 'boolean' ?
               options.codecParams.audio.opus.stereo : null,
+            'sprop-stereo': typeof options.codecParams.audio.opus['sprop-stereo'] === 'boolean' ?
+              options.codecParams.audio.opus['sprop-stereo'] : null,
             usedtx: typeof options.codecParams.audio.opus.usedtx === 'boolean' ?
               options.codecParams.audio.opus.usedtx : null,
             useinbandfec: typeof options.codecParams.audio.opus.useinbandfec === 'boolean' ?
@@ -17708,7 +17711,8 @@ Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
   // RFC: https://tools.ietf.org/html/draft-ietf-payload-rtp-opus-11
   parseFn('audio', self.AUDIO_CODEC.OPUS, 48000, (function () {
     var opusOptions = {};
-    var audioSettings = self.getPeerInfo().settings.audio;
+    var audioSettings = self._streams.screenshare ? self._streams.screenshare.settings.audio :
+      (self._streams.userMedia ? self._streams.userMedia.settings.audio : {});
     audioSettings = audioSettings && typeof audioSettings === 'object' ? audioSettings : {};
     if (typeof self._codecParams.audio.opus.stereo === 'boolean') {
       opusOptions.stereo = self._codecParams.audio.opus.stereo;

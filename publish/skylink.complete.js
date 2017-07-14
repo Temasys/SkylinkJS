@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.23 - Thu Jul 13 2017 18:37:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.23 - Fri Jul 14 2017 22:08:48 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7249,7 +7249,7 @@ module.exports = yeast;
 },{}]},{},[1])(1)
 });
 
-/*! adapterjs - v0.14.3-6d236da - 2017-05-24 */
+/*! adapterjs - v0.14.2-6d236da - 2017-05-22 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7263,7 +7263,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.14.3-6d236da';
+AdapterJS.VERSION = '0.14.2-6d236da';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7887,11 +7887,6 @@ if ( (navigator.mozGetUserMedia ||
   ///////////////////////////////////////////////////////////////////
   // INJECTION OF GOOGLE'S ADAPTER.JS CONTENT
 
-  // Store the original native RTCPC in msRTCPeerConnection object
-  if (navigator.userAgent.match(/Edge\/(\d+).(\d+)$/) && window.RTCPeerConnection) {
-    window.msRTCPeerConnection = window.RTCPeerConnection;
-  }
-
 /* jshint ignore:start */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.adapter = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(requirecopy,module,exports){
  /* eslint-env node */
@@ -7964,7 +7959,8 @@ SDPUtils.parseCandidate = function(line) {
       case 'tcptype':
         candidate.tcpType = parts[i + 1];
         break;
-      default: // Unknown extensions are silently ignored.
+      default: // extension handling, in particular ufrag
+        candidate[parts[i]] = parts[i + 1];
         break;
     }
   }
@@ -7998,6 +7994,12 @@ SDPUtils.writeCandidate = function(candidate) {
   return 'candidate:' + sdp.join(' ');
 };
 
+// Parses an ice-options line, returns an array of option tags.
+// a=ice-options:foo bar
+SDPUtils.parseIceOptions = function(line) {
+  return line.substr(14).split(' ');
+}
+
 // Parses an rtpmap line, returns RTCRtpCoddecParameters. Sample input:
 // a=rtpmap:111 opus/48000/2
 SDPUtils.parseRtpMap = function(line) {
@@ -8028,10 +8030,12 @@ SDPUtils.writeRtpMap = function(codec) {
 
 // Parses an a=extmap line (headerextension from RFC 5285). Sample input:
 // a=extmap:2 urn:ietf:params:rtp-hdrext:toffset
+// a=extmap:2/sendonly urn:ietf:params:rtp-hdrext:toffset
 SDPUtils.parseExtmap = function(line) {
   var parts = line.substr(9).split(' ');
   return {
     id: parseInt(parts[0], 10),
+    direction: parts[0].indexOf('/') > 0 ? parts[0].split('/')[1] : 'sendrecv',
     uri: parts[1]
   };
 };
@@ -8040,7 +8044,10 @@ SDPUtils.parseExtmap = function(line) {
 // RTCRtpHeaderExtension.
 SDPUtils.writeExtmap = function(headerExtension) {
   return 'a=extmap:' + (headerExtension.id || headerExtension.preferredId) +
-       ' ' + headerExtension.uri + '\r\n';
+      (headerExtension.direction && headerExtension.direction !== 'sendrecv'
+          ? '/' + headerExtension.direction
+          : '') +
+      ' ' + headerExtension.uri + '\r\n';
 };
 
 // Parses an ftmp line, returns dictionary. Sample input:
@@ -8127,26 +8134,26 @@ SDPUtils.getMid = function(mediaSection) {
   }
 }
 
+SDPUtils.parseFingerprint = function(line) {
+  var parts = line.substr(14).split(' ');
+  return {
+    algorithm: parts[0].toLowerCase(), // algorithm is case-sensitive in Edge.
+    value: parts[1]
+  };
+};
+
 // Extracts DTLS parameters from SDP media section or sessionpart.
 // FIXME: for consistency with other functions this should only
 //   get the fingerprint line as input. See also getIceParameters.
 SDPUtils.getDtlsParameters = function(mediaSection, sessionpart) {
-  var lines = SDPUtils.splitLines(mediaSection);
-  // Search in session part, too.
-  lines = lines.concat(SDPUtils.splitLines(sessionpart));
-  var fpLine = lines.filter(function(line) {
-    return line.indexOf('a=fingerprint:') === 0;
-  })[0].substr(14);
+  var lines = SDPUtils.matchPrefix(mediaSection + sessionpart,
+      'a=fingerprint:');
   // Note: a=setup line is ignored since we use the 'auto' role.
   // Note2: 'algorithm' is not case sensitive except in Edge.
-  var dtlsParameters = {
+  return {
     role: 'auto',
-    fingerprints: [{
-      algorithm: fpLine.split(' ')[0].toLowerCase(),
-      value: fpLine.split(' ')[1]
-    }]
+    fingerprints: lines.map(SDPUtils.parseFingerprint)
   };
-  return dtlsParameters;
 };
 
 // Serializes DTLS parameters to SDP.
@@ -8371,7 +8378,7 @@ SDPUtils.parseRtcpParameters = function(mediaSection) {
   return rtcpParameters;
 };
 
-// parses either a=msid: or a=ssrc:... msid lines an returns
+// parses either a=msid: or a=ssrc:... msid lines and returns
 // the id of the MediaStream and MediaStreamTrack.
 SDPUtils.parseMsid = function(mediaSection) {
   var parts;
@@ -8415,7 +8422,9 @@ SDPUtils.writeMediaSection = function(transceiver, caps, type, stream) {
 
   sdp += 'a=mid:' + transceiver.mid + '\r\n';
 
-  if (transceiver.rtpSender && transceiver.rtpReceiver) {
+  if (transceiver.direction) {
+    sdp += 'a=' + transceiver.direction + '\r\n';
+  } else if (transceiver.rtpSender && transceiver.rtpReceiver) {
     sdp += 'a=sendrecv\r\n';
   } else if (transceiver.rtpSender) {
     sdp += 'a=sendonly\r\n';
@@ -11122,11 +11131,7 @@ module.exports = {
       }
       var cc = {};
       Object.keys(c).forEach(function(key) {
-        if (key === 'require' || key === 'advanced') {
-          return;
-        }
-        if (typeof c[key] === 'string') {
-          cc[key] = c[key];
+        if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
           return;
         }
         var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
@@ -11139,15 +11144,6 @@ module.exports = {
           }
           return (name === 'deviceId') ? 'sourceId' : name;
         };
-
-        // HACK : Specially handling: if deviceId is an object with exact property,
-        //          change it such that deviceId value is not in exact property
-        // Reason : AJS-286 (deviceId in WebRTC samples not in the format specified as specifications)
-        if ( oldname('', key) === 'sourceId' && r.exact !== undefined ) {
-          r.ideal = r.exact;
-          r.exact = undefined;
-        }
-
         if (r.ideal !== undefined) {
           cc.optional = cc.optional || [];
           var oc = {};
@@ -11931,25 +11927,24 @@ AdapterJS._defineMediaSourcePolyfill = function () {
           // Check if screensharing feature is available
           if (!!AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature && !!AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable) {
             // Do strict checks for the source ID - "screen", "window" or ["screen", "window"]
-            // Note that the screen/window can be JS selected using constraints.video.optional[n].screenId
+            var sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKey || 'Screensharing';
 
             if (AdapterJS.WebRTCPlugin.plugin.screensharingKeys) {
               // Param: ["screen", "window"]
-              // Legacy: Also s upport for "Screensharing" and "screensharing"
-              if ((Array.isArray(updatedConstraints.video.mediaSource) && 
-                    updatedConstraints.video.mediaSource.indexOf('screen') > -1 &&
-                    updatedConstraints.video.mediaSource.indexOf('window') > -1)
-                  || updatedConstraints.video.mediaSource === AdapterJS.WebRTCPlugin.plugin.screensharingKey
-                  || updatedConstraints.video.mediaSource === AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screenOrWindow
-                 ) {
+              if (Array.isArray(updatedConstraints.video.mediaSource) && 
+                updatedConstraints.video.mediaSource.indexOf('screen') > -1 &&
+                updatedConstraints.video.mediaSource.indexOf('window') > -1) {
+                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screenOrWindow;
                 updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screenOrWindow;
               // Param: ["screen"] or "screen"
               } else if ((Array.isArray(updatedConstraints.video.mediaSource) && 
                 updatedConstraints.video.mediaSource.indexOf('screen') > -1) || updatedConstraints.video.mediaSource === 'screen') {
+                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screen;
                 updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screen;
               // Param: ["window"] or "window"
               } else if ((Array.isArray(updatedConstraints.video.mediaSource) && 
                 updatedConstraints.video.mediaSource.indexOf('window') > -1) || updatedConstraints.video.mediaSource === 'window') {
+                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.window;
                 updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.window;
               } else {
                 failureCb(new Error('GetUserMedia: Only "screen", "window", ["screen", "window"] are supported as mediaSource constraints'));
@@ -11957,9 +11952,8 @@ AdapterJS._defineMediaSourcePolyfill = function () {
               }
             }
 
-            // Support for legacy plugins : set the sourceId to the mediaSource value
             updatedConstraints.video.optional = updatedConstraints.video.optional || [];
-            updatedConstraints.video.optional.push({ sourceId: updatedConstraints.video.mediaSource });
+            updatedConstraints.video.optional.push({ sourceId: sourceId });
 
             baseGetUserMedia(updatedConstraints, successCb, failureCb);
 
@@ -11983,7 +11977,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.23 - Thu Jul 13 2017 18:37:09 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.23 - Fri Jul 14 2017 22:08:48 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -22139,8 +22133,9 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} [options.codecParams.audio.opus] <blockquote class="info">
  *   Note that this is only applicable to OPUS audio codecs with a sampling rate of <code>48000</code> Hz (hertz).
  *   </blockquote> The OPUS audio codec parameters to configure.
- * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec stereo band
- *   should be configured for sending encoded audio data.
+ * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec is able to decode or receive stereo packets.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.audio.opus.sprop-stereo] The flag if OPUS audio codec is sending stereo packets.
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.codecParams.audio.opus.usedtx] <blockquote class="info">
  *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
@@ -22539,6 +22534,8 @@ Skylink.prototype.init = function(options, callback) {
           codecParams.audio.opus = {
             stereo: typeof options.codecParams.audio.opus.stereo === 'boolean' ?
               options.codecParams.audio.opus.stereo : null,
+            'sprop-stereo': typeof options.codecParams.audio.opus['sprop-stereo'] === 'boolean' ?
+              options.codecParams.audio.opus['sprop-stereo'] : null,
             usedtx: typeof options.codecParams.audio.opus.usedtx === 'boolean' ?
               options.codecParams.audio.opus.usedtx : null,
             useinbandfec: typeof options.codecParams.audio.opus.useinbandfec === 'boolean' ?
@@ -29693,7 +29690,8 @@ Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
   // RFC: https://tools.ietf.org/html/draft-ietf-payload-rtp-opus-11
   parseFn('audio', self.AUDIO_CODEC.OPUS, 48000, (function () {
     var opusOptions = {};
-    var audioSettings = self.getPeerInfo().settings.audio;
+    var audioSettings = self._streams.screenshare ? self._streams.screenshare.settings.audio :
+      (self._streams.userMedia ? self._streams.userMedia.settings.audio : {});
     audioSettings = audioSettings && typeof audioSettings === 'object' ? audioSettings : {};
     if (typeof self._codecParams.audio.opus.stereo === 'boolean') {
       opusOptions.stereo = self._codecParams.audio.opus.stereo;

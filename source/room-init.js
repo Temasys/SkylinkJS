@@ -428,8 +428,9 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} [options.codecParams.audio.opus] <blockquote class="info">
  *   Note that this is only applicable to OPUS audio codecs with a sampling rate of <code>48000</code> Hz (hertz).
  *   </blockquote> The OPUS audio codec parameters to configure.
- * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec stereo band
- *   should be configured for sending encoded audio data.
+ * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec is able to decode or receive stereo packets.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.audio.opus.sprop-stereo] The flag if OPUS audio codec is sending stereo packets.
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.codecParams.audio.opus.usedtx] <blockquote class="info">
  *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
@@ -828,6 +829,8 @@ Skylink.prototype.init = function(options, callback) {
           codecParams.audio.opus = {
             stereo: typeof options.codecParams.audio.opus.stereo === 'boolean' ?
               options.codecParams.audio.opus.stereo : null,
+            'sprop-stereo': typeof options.codecParams.audio.opus['sprop-stereo'] === 'boolean' ?
+              options.codecParams.audio.opus['sprop-stereo'] : null,
             usedtx: typeof options.codecParams.audio.opus.usedtx === 'boolean' ?
               options.codecParams.audio.opus.usedtx : null,
             useinbandfec: typeof options.codecParams.audio.opus.useinbandfec === 'boolean' ?

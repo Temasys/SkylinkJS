@@ -4768,7 +4768,13 @@
                                 },
                                 {
                                     "name": "audio.opus.stereo",
-                                    "description": "The flag if OPUS audio codec stereo band\n  should be configured for sending encoded audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "description": "The flag if OPUS audio codec is able to decode or receive stereo packets.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "audio.opus.sprop-stereo",
+                                    "description": "The flag if OPUS audio codec is sending stereo packets.\n  <small>When not provided, the default browser configuration is used.</small>",
                                     "type": "Boolean",
                                     "optional": true
                                 },
@@ -5005,7 +5011,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1064,
+            "line": 1067,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -5016,7 +5022,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1138,
+            "line": 1141,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5027,7 +5033,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1208,
+            "line": 1211,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5038,7 +5044,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1339,
+            "line": 1342,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -9951,7 +9957,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 162,
+            "line": 163,
             "description": "Function that modifies the session description to limit the maximum sending bandwidth.\nSetting this may not necessarily work in Firefox.",
             "itemtype": "method",
             "name": "_setSDPBitrate",
@@ -9962,7 +9968,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 298,
+            "line": 299,
             "description": "Function that modifies the session description to set the preferred audio/video codec.",
             "itemtype": "method",
             "name": "_setSDPCodec",
@@ -9973,7 +9979,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 395,
+            "line": 396,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -9984,7 +9990,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 411,
+            "line": 412,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -9995,7 +10001,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 557,
+            "line": 558,
             "description": "Function that modifies the session description to remove apt/rtx lines that does exists.",
             "itemtype": "method",
             "name": "_removeSDPUnknownAptRtx",
@@ -10006,7 +10012,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 612,
+            "line": 613,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -10017,7 +10023,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 686,
+            "line": 687,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -10028,7 +10034,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 702,
+            "line": 703,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -10039,7 +10045,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 759,
+            "line": 760,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -10050,7 +10056,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 801,
+            "line": 802,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -10061,7 +10067,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 894,
+            "line": 895,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -10072,7 +10078,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1103,
+            "line": 1104,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
@@ -10083,7 +10089,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1141,
+            "line": 1142,
             "description": "Function that gets edge browser video supports.",
             "itemtype": "method",
             "name": "_getSDPEdgeVideoSupports",

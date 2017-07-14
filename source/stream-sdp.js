@@ -64,7 +64,8 @@ Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
   // RFC: https://tools.ietf.org/html/draft-ietf-payload-rtp-opus-11
   parseFn('audio', self.AUDIO_CODEC.OPUS, 48000, (function () {
     var opusOptions = {};
-    var audioSettings = self.getPeerInfo().settings.audio;
+    var audioSettings = self._streams.screenshare ? self._streams.screenshare.settings.audio :
+      (self._streams.userMedia ? self._streams.userMedia.settings.audio : {});
     audioSettings = audioSettings && typeof audioSettings === 'object' ? audioSettings : {};
     if (typeof self._codecParams.audio.opus.stereo === 'boolean') {
       opusOptions.stereo = self._codecParams.audio.opus.stereo;
