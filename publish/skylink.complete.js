@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Thu Jul 20 2017 12:01:44 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Thu Jul 20 2017 12:07:16 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11977,7 +11977,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.24 - Thu Jul 20 2017 12:01:44 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Thu Jul 20 2017 12:07:16 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -21969,7 +21969,12 @@ Skylink.prototype.generateUUID = function() {
  *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
  *   it may cause disruptions in connections or connectivity issues when toggled. </blockquote>
  *   The flag if video REMB feedback packets should be disabled in sending session descriptions.
- * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
+ * @param {JSON} [options.credentials] <blockquote class="info">
+ *   Note that we strongly recommend developers to return the <code>options.credentials.duration</code>,
+ *   <code>options.credentials.startDateTime</code> and <code>options.defaultRoom</code> and generate the
+ *   <code>options.credentials.credentials</code> from a web server as secret shouldn't be exposed on client web app as
+ *   it poses a security risk itself.</blockquote>
+ *   The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
  *   <code>joinRoom()</code> method</a>.
  *   <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless

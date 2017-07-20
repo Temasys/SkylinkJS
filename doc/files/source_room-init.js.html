@@ -355,7 +355,12 @@ Skylink.prototype.generateUUID = function() {
  *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
  *   it may cause disruptions in connections or connectivity issues when toggled. &lt;/blockquote&gt;
  *   The flag if video REMB feedback packets should be disabled in sending session descriptions.
- * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
+ * @param {JSON} [options.credentials] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that we strongly recommend developers to return the &lt;code&gt;options.credentials.duration&lt;/code&gt;,
+ *   &lt;code&gt;options.credentials.startDateTime&lt;/code&gt; and &lt;code&gt;options.defaultRoom&lt;/code&gt; and generate the
+ *   &lt;code&gt;options.credentials.credentials&lt;/code&gt; from a web server as secret shouldn&#x27;t be exposed on client web app as
+ *   it poses a security risk itself.&lt;/blockquote&gt;
+ *   The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in &lt;a href=&quot;#method_joinRoom&quot;&gt;
  *   &lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.
  *   &lt;small&gt;Note that switching of Rooms is not allowed when using credentials based authentication, unless

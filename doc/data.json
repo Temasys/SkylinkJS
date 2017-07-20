@@ -4473,7 +4473,7 @@
                         },
                         {
                             "name": "credentials",
-                            "description": "The credentials used for authenticating App Key with\n  credentials to retrieve the Room session token used for connection in <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a>.\n  <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless\n  <code>init()</code> is invoked again with a different set of credentials followed by invoking\n  the <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that we strongly recommend developers to return the <code>options.credentials.duration</code>,\n  <code>options.credentials.startDateTime</code> and <code>options.defaultRoom</code> and generate the\n  <code>options.credentials.credentials</code> from a web server as secret shouldn't be exposed on client web app as\n  it poses a security risk itself.</blockquote>\n  The credentials used for authenticating App Key with\n  credentials to retrieve the Room session token used for connection in <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a>.\n  <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless\n  <code>init()</code> is invoked again with a different set of credentials followed by invoking\n  the <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.</small>",
                             "type": "JSON",
                             "optional": true,
                             "props": [
@@ -5011,7 +5011,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1067,
+            "line": 1072,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -5022,7 +5022,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1141,
+            "line": 1146,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5033,7 +5033,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1211,
+            "line": 1216,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5044,7 +5044,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1342,
+            "line": 1347,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",

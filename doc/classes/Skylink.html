@@ -7210,7 +7210,7 @@ This is experimental and never recommended to end-users.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1342"><code>source&#x2F;room-init.js:1342</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1347"><code>source&#x2F;room-init.js:1347</code></a>
       </small>
     
 
@@ -7554,7 +7554,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1211"><code>source&#x2F;room-init.js:1211</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1216"><code>source&#x2F;room-init.js:1216</code></a>
       </small>
     
 
@@ -8668,7 +8668,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1141"><code>source&#x2F;room-init.js:1141</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1146"><code>source&#x2F;room-init.js:1146</code></a>
       </small>
     
 
@@ -10214,7 +10214,7 @@ NOTE: We should perhaps not remove it since H264 is supported?</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1067"><code>source&#x2F;room-init.js:1067</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_room-init.js.html#l1072"><code>source&#x2F;room-init.js:1072</code></a>
       </small>
     
 
@@ -16072,7 +16072,12 @@ The Room that User will be connected to is the <code>defaultRoom</code> provided
 
                     <div class="param-description">
                       
-                      <p>The credentials used for authenticating App Key with
+                      <p><blockquote class="info">
+  Note that we strongly recommend developers to return the <code>options.credentials.duration</code>,
+  <code>options.credentials.startDateTime</code> and <code>options.defaultRoom</code> and generate the
+  <code>options.credentials.credentials</code> from a web server as secret shouldn&#39;t be exposed on client web app as
+  it poses a security risk itself.</blockquote>
+  The credentials used for authenticating App Key with
   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
   <code>joinRoom()</code> method</a>.
   <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless
