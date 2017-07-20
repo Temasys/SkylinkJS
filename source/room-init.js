@@ -530,7 +530,7 @@ Skylink.prototype.generateUUID = function() {
  *       startDateTime = (new Date()).toISOString(),
  *       duration      = 1, // Allows only User session to stay for 1 hour
  *       appKeySecret  = "xxxxxxx",
- *       hash          = CryptoJS.HmacSHA1(defaultRoom + "_" + duration + "_" + startDateTime, appKeySecret);
+ *       hash          = CryptoJS.HmacSHA1(defaultRoom + "\_" + duration + "\_" + startDateTime, appKeySecret);
  *       credentials   = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
  *
  *   skylinkDemo({
