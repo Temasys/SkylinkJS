@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Thu Jul 20 2017 12:07:16 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Fri Jul 21 2017 18:26:45 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11977,7 +11977,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.24 - Thu Jul 20 2017 12:07:16 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Fri Jul 21 2017 18:26:45 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -20992,7 +20992,18 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and
  *   <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.<br>
  *   Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled
- *   Peer connections, please  contact <a href="http://support.temasys.io">our support portal</a>.</blockquote></blockquote>
+ *   Peer connections, please  contact <a href="http://support.temasys.io">our support portal</a>.<br><br>
+ *   How does the publish only functionality work? Imagine several Skylink instances like A1, B1, C1 and A1
+ *   opening a new instance A2 with publish only enabled with configured A1 as parent.<br><br>
+ *   <table class="table"><thead>
+ *   <tr><th></th><th colspan="2">MCU enabled room</th><th colspan="2">MCU disabled room</th></tr>
+ *   <tr><th></th><th>Presence</th><th>Stream</th><th>Presence</th><th>Stream</th></tr></thead><tbody>
+ *   <tr><th>A1</th><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td></tr>
+ *   <tr><th>B1</th><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td></tr>
+ *   <tr><th>C1</th><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td></tr>
+ *   <tr><th>A2</th><td></td><td></td><td>B1, C1</td><td></td></tr></tbody></table>
+ *   Parent and child will not receive each other presence and stream because they are related to each other in the same client page,
+ *   hence no uploading or downloading is required. If A2 did not configure A1 as the parent, A1 will receive A2.</blockquote>
  *   The config if Peer would publish only.
  * @param {String} [options.publishOnly.parentId] <blockquote class="info"><b>Deprecation Warning!</b>
  *   This property has been deprecated. Use <code>options.parentId</code> instead.

@@ -3937,7 +3937,7 @@
                         },
                         {
                             "name": "publishOnly",
-                            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, defining this flag would make Peer not know other Peers presence in the Room.<br>\n  For non-MCU enable Peer connections, defining this flag would cause other Peers in the Room to\n  not to send Stream to Peer, and overrides the config\n  <code>options.sdpSettings.direction.audio.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and\n  <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.<br>\n  Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled\n  Peer connections, please  contact <a href=\"http://support.temasys.io\">our support portal</a>.</blockquote></blockquote>\n  The config if Peer would publish only.",
+                            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, defining this flag would make Peer not know other Peers presence in the Room.<br>\n  For non-MCU enable Peer connections, defining this flag would cause other Peers in the Room to\n  not to send Stream to Peer, and overrides the config\n  <code>options.sdpSettings.direction.audio.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and\n  <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.<br>\n  Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled\n  Peer connections, please  contact <a href=\"http://support.temasys.io\">our support portal</a>.<br><br>\n  How does the publish only functionality work? Imagine several Skylink instances like A1, B1, C1 and A1\n  opening a new instance A2 with publish only enabled with configured A1 as parent.<br><br>\n  <table class=\"table\"><thead>\n  <tr><th></th><th colspan=\"2\">MCU enabled room</th><th colspan=\"2\">MCU disabled room</th></tr>\n  <tr><th></th><th>Presence</th><th>Stream</th><th>Presence</th><th>Stream</th></tr></thead><tbody>\n  <tr><th>A1</th><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td></tr>\n  <tr><th>B1</th><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td></tr>\n  <tr><th>C1</th><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td></tr>\n  <tr><th>A2</th><td></td><td></td><td>B1, C1</td><td></td></tr></tbody></table>\n  Parent and child will not receive each other presence and stream because they are related to each other in the same client page,\n  hence no uploading or downloading is required. If A2 did not configure A1 as the parent, A1 will receive A2.</blockquote>\n  The config if Peer would publish only.",
                             "type": "JSON|Boolean",
                             "optional": true,
                             "props": [
@@ -4083,7 +4083,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 504,
+            "line": 515,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4148,7 +4148,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 620,
+            "line": 631,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4158,7 +4158,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 654,
+            "line": 665,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4168,7 +4168,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 688,
+            "line": 699,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -10166,15 +10166,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:504"
+            "line": " source/room-connection.js:515"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:620"
+            "line": " source/room-connection.js:631"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:654"
+            "line": " source/room-connection.js:665"
         },
         {
             "message": "unknown tag: trigger",

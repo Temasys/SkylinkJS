@@ -290,7 +290,18 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   &lt;code&gt;options.sdpSettings.direction.video.send&lt;/code&gt; value to &lt;code&gt;true&lt;/code&gt; and
  *   &lt;code&gt;options.sdpSettings.direction.audio.send&lt;/code&gt; value to &lt;code&gt;true&lt;/code&gt;.&lt;br&gt;
  *   Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled
- *   Peer connections, please  contact &lt;a href=&quot;http://support.temasys.io&quot;&gt;our support portal&lt;/a&gt;.&lt;/blockquote&gt;&lt;/blockquote&gt;
+ *   Peer connections, please  contact &lt;a href=&quot;http://support.temasys.io&quot;&gt;our support portal&lt;/a&gt;.&lt;br&gt;&lt;br&gt;
+ *   How does the publish only functionality work? Imagine several Skylink instances like A1, B1, C1 and A1
+ *   opening a new instance A2 with publish only enabled with configured A1 as parent.&lt;br&gt;&lt;br&gt;
+ *   &lt;table class=&quot;table&quot;&gt;&lt;thead&gt;
+ *   &lt;tr&gt;&lt;th&gt;&lt;/th&gt;&lt;th colspan=&quot;2&quot;&gt;MCU enabled room&lt;/th&gt;&lt;th colspan=&quot;2&quot;&gt;MCU disabled room&lt;/th&gt;&lt;/tr&gt;
+ *   &lt;tr&gt;&lt;th&gt;&lt;/th&gt;&lt;th&gt;Presence&lt;/th&gt;&lt;th&gt;Stream&lt;/th&gt;&lt;th&gt;Presence&lt;/th&gt;&lt;th&gt;Stream&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;
+ *   &lt;tr&gt;&lt;th&gt;A1&lt;/th&gt;&lt;td&gt;B1, C1&lt;/td&gt;&lt;td&gt;B1, C1&lt;/td&gt;&lt;td&gt;B1, C1&lt;/td&gt;&lt;td&gt;B1, C1&lt;/td&gt;&lt;/tr&gt;
+ *   &lt;tr&gt;&lt;th&gt;B1&lt;/th&gt;&lt;td&gt;A1, C1, A2&lt;/td&gt;&lt;td&gt;A1, C1, A2&lt;/td&gt;&lt;td&gt;A1, C1, A2&lt;/td&gt;&lt;td&gt;A1, C1, A2&lt;/td&gt;&lt;/tr&gt;
+ *   &lt;tr&gt;&lt;th&gt;C1&lt;/th&gt;&lt;td&gt;B1, C1, A2&lt;/td&gt;&lt;td&gt;B1, C1, A2&lt;/td&gt;&lt;td&gt;B1, C1, A2&lt;/td&gt;&lt;td&gt;B1, C1, A2&lt;/td&gt;&lt;/tr&gt;
+ *   &lt;tr&gt;&lt;th&gt;A2&lt;/th&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;&lt;/td&gt;&lt;td&gt;B1, C1&lt;/td&gt;&lt;td&gt;&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;
+ *   Parent and child will not receive each other presence and stream because they are related to each other in the same client page,
+ *   hence no uploading or downloading is required. If A2 did not configure A1 as the parent, A1 will receive A2.&lt;/blockquote&gt;
  *   The config if Peer would publish only.
  * @param {String} [options.publishOnly.parentId] &lt;blockquote class=&quot;info&quot;&gt;&lt;b&gt;Deprecation Warning!&lt;/b&gt;
  *   This property has been deprecated. Use &lt;code&gt;options.parentId&lt;/code&gt; instead.
