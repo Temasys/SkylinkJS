@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.23 - Thu Jun 15 2017 13:32:44 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.24 - Fri Jul 21 2017 18:26:45 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7249,7 +7249,7 @@ module.exports = yeast;
 },{}]},{},[1])(1)
 });
 
-/*! adapterjs - v0.14.3-6d236da - 2017-05-24 */
+/*! adapterjs - v0.14.2-6d236da - 2017-05-22 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7263,7 +7263,7 @@ AdapterJS.options = AdapterJS.options || {};
 // AdapterJS.options.hidePluginInstallPrompt = true;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.14.3-6d236da';
+AdapterJS.VERSION = '0.14.2-6d236da';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7887,11 +7887,6 @@ if ( (navigator.mozGetUserMedia ||
   ///////////////////////////////////////////////////////////////////
   // INJECTION OF GOOGLE'S ADAPTER.JS CONTENT
 
-  // Store the original native RTCPC in msRTCPeerConnection object
-  if (navigator.userAgent.match(/Edge\/(\d+).(\d+)$/) && window.RTCPeerConnection) {
-    window.msRTCPeerConnection = window.RTCPeerConnection;
-  }
-
 /* jshint ignore:start */
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.adapter = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(requirecopy,module,exports){
  /* eslint-env node */
@@ -7964,7 +7959,8 @@ SDPUtils.parseCandidate = function(line) {
       case 'tcptype':
         candidate.tcpType = parts[i + 1];
         break;
-      default: // Unknown extensions are silently ignored.
+      default: // extension handling, in particular ufrag
+        candidate[parts[i]] = parts[i + 1];
         break;
     }
   }
@@ -7998,6 +7994,12 @@ SDPUtils.writeCandidate = function(candidate) {
   return 'candidate:' + sdp.join(' ');
 };
 
+// Parses an ice-options line, returns an array of option tags.
+// a=ice-options:foo bar
+SDPUtils.parseIceOptions = function(line) {
+  return line.substr(14).split(' ');
+}
+
 // Parses an rtpmap line, returns RTCRtpCoddecParameters. Sample input:
 // a=rtpmap:111 opus/48000/2
 SDPUtils.parseRtpMap = function(line) {
@@ -8028,10 +8030,12 @@ SDPUtils.writeRtpMap = function(codec) {
 
 // Parses an a=extmap line (headerextension from RFC 5285). Sample input:
 // a=extmap:2 urn:ietf:params:rtp-hdrext:toffset
+// a=extmap:2/sendonly urn:ietf:params:rtp-hdrext:toffset
 SDPUtils.parseExtmap = function(line) {
   var parts = line.substr(9).split(' ');
   return {
     id: parseInt(parts[0], 10),
+    direction: parts[0].indexOf('/') > 0 ? parts[0].split('/')[1] : 'sendrecv',
     uri: parts[1]
   };
 };
@@ -8040,7 +8044,10 @@ SDPUtils.parseExtmap = function(line) {
 // RTCRtpHeaderExtension.
 SDPUtils.writeExtmap = function(headerExtension) {
   return 'a=extmap:' + (headerExtension.id || headerExtension.preferredId) +
-       ' ' + headerExtension.uri + '\r\n';
+      (headerExtension.direction && headerExtension.direction !== 'sendrecv'
+          ? '/' + headerExtension.direction
+          : '') +
+      ' ' + headerExtension.uri + '\r\n';
 };
 
 // Parses an ftmp line, returns dictionary. Sample input:
@@ -8127,26 +8134,26 @@ SDPUtils.getMid = function(mediaSection) {
   }
 }
 
+SDPUtils.parseFingerprint = function(line) {
+  var parts = line.substr(14).split(' ');
+  return {
+    algorithm: parts[0].toLowerCase(), // algorithm is case-sensitive in Edge.
+    value: parts[1]
+  };
+};
+
 // Extracts DTLS parameters from SDP media section or sessionpart.
 // FIXME: for consistency with other functions this should only
 //   get the fingerprint line as input. See also getIceParameters.
 SDPUtils.getDtlsParameters = function(mediaSection, sessionpart) {
-  var lines = SDPUtils.splitLines(mediaSection);
-  // Search in session part, too.
-  lines = lines.concat(SDPUtils.splitLines(sessionpart));
-  var fpLine = lines.filter(function(line) {
-    return line.indexOf('a=fingerprint:') === 0;
-  })[0].substr(14);
+  var lines = SDPUtils.matchPrefix(mediaSection + sessionpart,
+      'a=fingerprint:');
   // Note: a=setup line is ignored since we use the 'auto' role.
   // Note2: 'algorithm' is not case sensitive except in Edge.
-  var dtlsParameters = {
+  return {
     role: 'auto',
-    fingerprints: [{
-      algorithm: fpLine.split(' ')[0].toLowerCase(),
-      value: fpLine.split(' ')[1]
-    }]
+    fingerprints: lines.map(SDPUtils.parseFingerprint)
   };
-  return dtlsParameters;
 };
 
 // Serializes DTLS parameters to SDP.
@@ -8371,7 +8378,7 @@ SDPUtils.parseRtcpParameters = function(mediaSection) {
   return rtcpParameters;
 };
 
-// parses either a=msid: or a=ssrc:... msid lines an returns
+// parses either a=msid: or a=ssrc:... msid lines and returns
 // the id of the MediaStream and MediaStreamTrack.
 SDPUtils.parseMsid = function(mediaSection) {
   var parts;
@@ -8415,7 +8422,9 @@ SDPUtils.writeMediaSection = function(transceiver, caps, type, stream) {
 
   sdp += 'a=mid:' + transceiver.mid + '\r\n';
 
-  if (transceiver.rtpSender && transceiver.rtpReceiver) {
+  if (transceiver.direction) {
+    sdp += 'a=' + transceiver.direction + '\r\n';
+  } else if (transceiver.rtpSender && transceiver.rtpReceiver) {
     sdp += 'a=sendrecv\r\n';
   } else if (transceiver.rtpSender) {
     sdp += 'a=sendonly\r\n';
@@ -11122,11 +11131,7 @@ module.exports = {
       }
       var cc = {};
       Object.keys(c).forEach(function(key) {
-        if (key === 'require' || key === 'advanced') {
-          return;
-        }
-        if (typeof c[key] === 'string') {
-          cc[key] = c[key];
+        if (key === 'require' || key === 'advanced' || key === 'mediaSource') {
           return;
         }
         var r = (typeof c[key] === 'object') ? c[key] : {ideal: c[key]};
@@ -11139,15 +11144,6 @@ module.exports = {
           }
           return (name === 'deviceId') ? 'sourceId' : name;
         };
-
-        // HACK : Specially handling: if deviceId is an object with exact property,
-        //          change it such that deviceId value is not in exact property
-        // Reason : AJS-286 (deviceId in WebRTC samples not in the format specified as specifications)
-        if ( oldname('', key) === 'sourceId' && r.exact !== undefined ) {
-          r.ideal = r.exact;
-          r.exact = undefined;
-        }
-
         if (r.ideal !== undefined) {
           cc.optional = cc.optional || [];
           var oc = {};
@@ -11931,25 +11927,24 @@ AdapterJS._defineMediaSourcePolyfill = function () {
           // Check if screensharing feature is available
           if (!!AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature && !!AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable) {
             // Do strict checks for the source ID - "screen", "window" or ["screen", "window"]
-            // Note that the screen/window can be JS selected using constraints.video.optional[n].screenId
+            var sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKey || 'Screensharing';
 
             if (AdapterJS.WebRTCPlugin.plugin.screensharingKeys) {
               // Param: ["screen", "window"]
-              // Legacy: Also s upport for "Screensharing" and "screensharing"
-              if ((Array.isArray(updatedConstraints.video.mediaSource) && 
-                    updatedConstraints.video.mediaSource.indexOf('screen') > -1 &&
-                    updatedConstraints.video.mediaSource.indexOf('window') > -1)
-                  || updatedConstraints.video.mediaSource === AdapterJS.WebRTCPlugin.plugin.screensharingKey
-                  || updatedConstraints.video.mediaSource === AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screenOrWindow
-                 ) {
+              if (Array.isArray(updatedConstraints.video.mediaSource) && 
+                updatedConstraints.video.mediaSource.indexOf('screen') > -1 &&
+                updatedConstraints.video.mediaSource.indexOf('window') > -1) {
+                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screenOrWindow;
                 updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screenOrWindow;
               // Param: ["screen"] or "screen"
               } else if ((Array.isArray(updatedConstraints.video.mediaSource) && 
                 updatedConstraints.video.mediaSource.indexOf('screen') > -1) || updatedConstraints.video.mediaSource === 'screen') {
+                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screen;
                 updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.screen;
               // Param: ["window"] or "window"
               } else if ((Array.isArray(updatedConstraints.video.mediaSource) && 
                 updatedConstraints.video.mediaSource.indexOf('window') > -1) || updatedConstraints.video.mediaSource === 'window') {
+                sourceId = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.window;
                 updatedConstraints.video.mediaSource = AdapterJS.WebRTCPlugin.plugin.screensharingKeys.window;
               } else {
                 failureCb(new Error('GetUserMedia: Only "screen", "window", ["screen", "window"] are supported as mediaSource constraints'));
@@ -11957,9 +11952,8 @@ AdapterJS._defineMediaSourcePolyfill = function () {
               }
             }
 
-            // Support for legacy plugins : set the sourceId to the mediaSource value
             updatedConstraints.video.optional = updatedConstraints.video.optional || [];
-            updatedConstraints.video.optional.push({ sourceId: updatedConstraints.video.mediaSource });
+            updatedConstraints.video.optional.push({ sourceId: sourceId });
 
             baseGetUserMedia(updatedConstraints, successCb, failureCb);
 
@@ -11983,7 +11977,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.23 - Thu Jun 15 2017 13:32:44 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.24 - Fri Jul 21 2017 18:26:45 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -20998,7 +20992,18 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and
  *   <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.<br>
  *   Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled
- *   Peer connections, please  contact <a href="http://support.temasys.io">our support portal</a>.</blockquote></blockquote>
+ *   Peer connections, please  contact <a href="http://support.temasys.io">our support portal</a>.<br><br>
+ *   How does the publish only functionality work? Imagine several Skylink instances like A1, B1, C1 and A1
+ *   opening a new instance A2 with publish only enabled with configured A1 as parent.<br><br>
+ *   <table class="table"><thead>
+ *   <tr><th></th><th colspan="2">MCU enabled room</th><th colspan="2">MCU disabled room</th></tr>
+ *   <tr><th></th><th>Presence</th><th>Stream</th><th>Presence</th><th>Stream</th></tr></thead><tbody>
+ *   <tr><th>A1</th><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td></tr>
+ *   <tr><th>B1</th><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td></tr>
+ *   <tr><th>C1</th><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td></tr>
+ *   <tr><th>A2</th><td></td><td></td><td>B1, C1</td><td></td></tr></tbody></table>
+ *   Parent and child will not receive each other presence and stream because they are related to each other in the same client page,
+ *   hence no uploading or downloading is required. If A2 did not configure A1 as the parent, A1 will receive A2.</blockquote>
  *   The config if Peer would publish only.
  * @param {String} [options.publishOnly.parentId] <blockquote class="info"><b>Deprecation Warning!</b>
  *   This property has been deprecated. Use <code>options.parentId</code> instead.
@@ -21717,7 +21722,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   });
 };
 
-Skylink.prototype.VERSION = '0.6.23';
+Skylink.prototype.VERSION = '0.6.24';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -21975,7 +21980,12 @@ Skylink.prototype.generateUUID = function() {
  *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
  *   it may cause disruptions in connections or connectivity issues when toggled. </blockquote>
  *   The flag if video REMB feedback packets should be disabled in sending session descriptions.
- * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
+ * @param {JSON} [options.credentials] <blockquote class="info">
+ *   Note that we strongly recommend developers to return the <code>options.credentials.duration</code>,
+ *   <code>options.credentials.startDateTime</code> and <code>options.defaultRoom</code> and generate the
+ *   <code>options.credentials.credentials</code> from a web server as secret shouldn't be exposed on client web app as
+ *   it poses a security risk itself.</blockquote>
+ *   The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
  *   <code>joinRoom()</code> method</a>.
  *   <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless
@@ -22139,8 +22149,9 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} [options.codecParams.audio.opus] <blockquote class="info">
  *   Note that this is only applicable to OPUS audio codecs with a sampling rate of <code>48000</code> Hz (hertz).
  *   </blockquote> The OPUS audio codec parameters to configure.
- * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec stereo band
- *   should be configured for sending encoded audio data.
+ * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec is able to decode or receive stereo packets.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.audio.opus.sprop-stereo] The flag if OPUS audio codec is sending stereo packets.
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.codecParams.audio.opus.usedtx] <blockquote class="info">
  *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
@@ -22240,7 +22251,7 @@ Skylink.prototype.generateUUID = function() {
  *       startDateTime = (new Date()).toISOString(),
  *       duration      = 1, // Allows only User session to stay for 1 hour
  *       appKeySecret  = "xxxxxxx",
- *       hash          = CryptoJS.HmacSHA1(defaultRoom + "_" + duration + "_" + startDateTime, appKeySecret);
+ *       hash          = CryptoJS.HmacSHA1(defaultRoom + "\_" + duration + "\_" + startDateTime, appKeySecret);
  *       credentials   = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
  *
  *   skylinkDemo({
@@ -22539,6 +22550,8 @@ Skylink.prototype.init = function(options, callback) {
           codecParams.audio.opus = {
             stereo: typeof options.codecParams.audio.opus.stereo === 'boolean' ?
               options.codecParams.audio.opus.stereo : null,
+            'sprop-stereo': typeof options.codecParams.audio.opus['sprop-stereo'] === 'boolean' ?
+              options.codecParams.audio.opus['sprop-stereo'] : null,
             usedtx: typeof options.codecParams.audio.opus.usedtx === 'boolean' ?
               options.codecParams.audio.opus.usedtx : null,
             useinbandfec: typeof options.codecParams.audio.opus.useinbandfec === 'boolean' ?
@@ -27703,10 +27716,11 @@ Skylink.prototype.RECORDING_STATE = {
  *    <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.</blockquote>
  *    The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
- *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code> and
+ *   the <code>options.codecParams.audio.opus["sprop-stereo"]</code>
  *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
- *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
- *   <code>options.audio.stereo</code> setting.</blockquote>
+ *   <code>options.codecParams.audio.opus.stereo</code> or <code>options.codecParams.audio.opus["sprop-stereo"]</code>
+ *   is configured, this overrides the <code>options.audio.stereo</code> setting.</blockquote>
  *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.audio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
@@ -28572,10 +28586,11 @@ Skylink.prototype.disableVideo = function() {
  * @method shareScreen
  * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
  * @param {Boolean} [enableAudio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
- *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code> and
+ *   the <code>options.codecParams.audio.opus["sprop-stereo"]</code>
  *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
- *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
- *   <code>options.audio.stereo</code> setting.</blockquote>
+ *   <code>options.codecParams.audio.opus.stereo</code> or <code>options.codecParams.audio.opus["sprop-stereo"]</code>
+ *   is configured, this overrides the <code>options.audio.stereo</code> setting.</blockquote>
  *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [enableAudio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
@@ -29691,12 +29706,18 @@ Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
   // RFC: https://tools.ietf.org/html/draft-ietf-payload-rtp-opus-11
   parseFn('audio', self.AUDIO_CODEC.OPUS, 48000, (function () {
     var opusOptions = {};
-    var audioSettings = self.getPeerInfo().settings.audio;
+    var audioSettings = self._streams.screenshare ? self._streams.screenshare.settings.audio :
+      (self._streams.userMedia ? self._streams.userMedia.settings.audio : {});
     audioSettings = audioSettings && typeof audioSettings === 'object' ? audioSettings : {};
     if (typeof self._codecParams.audio.opus.stereo === 'boolean') {
       opusOptions.stereo = self._codecParams.audio.opus.stereo;
     } else if (typeof audioSettings.stereo === 'boolean') {
       opusOptions.stereo = audioSettings.stereo;
+    }
+    if (typeof self._codecParams.audio.opus['sprop-stereo'] === 'boolean') {
+      opusOptions['sprop-stereo'] = self._codecParams.audio.opus['sprop-stereo'];
+    } else if (typeof audioSettings.stereo === 'boolean') {
+      opusOptions['sprop-stereo'] = audioSettings.stereo;
     }
     if (typeof self._codecParams.audio.opus.usedtx === 'boolean') {
       opusOptions.usedtx = self._codecParams.audio.opus.usedtx;

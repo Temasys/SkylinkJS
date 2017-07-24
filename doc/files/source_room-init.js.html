@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.23</title>
+    <title>SkylinkJS 0.6.24</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.23</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.24</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -355,7 +355,12 @@ Skylink.prototype.generateUUID = function() {
  *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
  *   it may cause disruptions in connections or connectivity issues when toggled. &lt;/blockquote&gt;
  *   The flag if video REMB feedback packets should be disabled in sending session descriptions.
- * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
+ * @param {JSON} [options.credentials] &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that we strongly recommend developers to return the &lt;code&gt;options.credentials.duration&lt;/code&gt;,
+ *   &lt;code&gt;options.credentials.startDateTime&lt;/code&gt; and &lt;code&gt;options.defaultRoom&lt;/code&gt; and generate the
+ *   &lt;code&gt;options.credentials.credentials&lt;/code&gt; from a web server as secret shouldn&#x27;t be exposed on client web app as
+ *   it poses a security risk itself.&lt;/blockquote&gt;
+ *   The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in &lt;a href=&quot;#method_joinRoom&quot;&gt;
  *   &lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.
  *   &lt;small&gt;Note that switching of Rooms is not allowed when using credentials based authentication, unless
@@ -519,8 +524,9 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} [options.codecParams.audio.opus] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this is only applicable to OPUS audio codecs with a sampling rate of &lt;code&gt;48000&lt;/code&gt; Hz (hertz).
  *   &lt;/blockquote&gt; The OPUS audio codec parameters to configure.
- * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec stereo band
- *   should be configured for sending encoded audio data.
+ * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec is able to decode or receive stereo packets.
+ *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
+ * @param {Boolean} [options.codecParams.audio.opus.sprop-stereo] The flag if OPUS audio codec is sending stereo packets.
  *   &lt;small&gt;When not provided, the default browser configuration is used.&lt;/small&gt;
  * @param {Boolean} [options.codecParams.audio.opus.usedtx] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this feature might not work depending on the browser support and implementation.&lt;/blockquote&gt;
@@ -620,7 +626,7 @@ Skylink.prototype.generateUUID = function() {
  *       startDateTime = (new Date()).toISOString(),
  *       duration      = 1, // Allows only User session to stay for 1 hour
  *       appKeySecret  = &quot;xxxxxxx&quot;,
- *       hash          = CryptoJS.HmacSHA1(defaultRoom + &quot;_&quot; + duration + &quot;_&quot; + startDateTime, appKeySecret);
+ *       hash          = CryptoJS.HmacSHA1(defaultRoom + &quot;\_&quot; + duration + &quot;\_&quot; + startDateTime, appKeySecret);
  *       credentials   = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
  *
  *   skylinkDemo({
@@ -919,6 +925,8 @@ Skylink.prototype.init = function(options, callback) {
           codecParams.audio.opus = {
             stereo: typeof options.codecParams.audio.opus.stereo === &#x27;boolean&#x27; ?
               options.codecParams.audio.opus.stereo : null,
+            &#x27;sprop-stereo&#x27;: typeof options.codecParams.audio.opus[&#x27;sprop-stereo&#x27;] === &#x27;boolean&#x27; ?
+              options.codecParams.audio.opus[&#x27;sprop-stereo&#x27;] : null,
             usedtx: typeof options.codecParams.audio.opus.usedtx === &#x27;boolean&#x27; ?
               options.codecParams.audio.opus.usedtx : null,
             useinbandfec: typeof options.codecParams.audio.opus.useinbandfec === &#x27;boolean&#x27; ?

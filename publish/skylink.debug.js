@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.23 - Thu Jun 15 2017 13:32:44 GMT+0800 (SGT) */
+/*! skylinkjs - v0.6.24 - Fri Jul 21 2017 18:26:45 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -9013,7 +9013,18 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  *   <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and
  *   <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.<br>
  *   Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled
- *   Peer connections, please  contact <a href="http://support.temasys.io">our support portal</a>.</blockquote></blockquote>
+ *   Peer connections, please  contact <a href="http://support.temasys.io">our support portal</a>.<br><br>
+ *   How does the publish only functionality work? Imagine several Skylink instances like A1, B1, C1 and A1
+ *   opening a new instance A2 with publish only enabled with configured A1 as parent.<br><br>
+ *   <table class="table"><thead>
+ *   <tr><th></th><th colspan="2">MCU enabled room</th><th colspan="2">MCU disabled room</th></tr>
+ *   <tr><th></th><th>Presence</th><th>Stream</th><th>Presence</th><th>Stream</th></tr></thead><tbody>
+ *   <tr><th>A1</th><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td></tr>
+ *   <tr><th>B1</th><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td></tr>
+ *   <tr><th>C1</th><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td></tr>
+ *   <tr><th>A2</th><td></td><td></td><td>B1, C1</td><td></td></tr></tbody></table>
+ *   Parent and child will not receive each other presence and stream because they are related to each other in the same client page,
+ *   hence no uploading or downloading is required. If A2 did not configure A1 as the parent, A1 will receive A2.</blockquote>
  *   The config if Peer would publish only.
  * @param {String} [options.publishOnly.parentId] <blockquote class="info"><b>Deprecation Warning!</b>
  *   This property has been deprecated. Use <code>options.parentId</code> instead.
@@ -9732,7 +9743,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   });
 };
 
-Skylink.prototype.VERSION = '0.6.23';
+Skylink.prototype.VERSION = '0.6.24';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -9990,7 +10001,12 @@ Skylink.prototype.generateUUID = function() {
  *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
  *   it may cause disruptions in connections or connectivity issues when toggled. </blockquote>
  *   The flag if video REMB feedback packets should be disabled in sending session descriptions.
- * @param {JSON} [options.credentials] The credentials used for authenticating App Key with
+ * @param {JSON} [options.credentials] <blockquote class="info">
+ *   Note that we strongly recommend developers to return the <code>options.credentials.duration</code>,
+ *   <code>options.credentials.startDateTime</code> and <code>options.defaultRoom</code> and generate the
+ *   <code>options.credentials.credentials</code> from a web server as secret shouldn't be exposed on client web app as
+ *   it poses a security risk itself.</blockquote>
+ *   The credentials used for authenticating App Key with
  *   credentials to retrieve the Room session token used for connection in <a href="#method_joinRoom">
  *   <code>joinRoom()</code> method</a>.
  *   <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless
@@ -10154,8 +10170,9 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} [options.codecParams.audio.opus] <blockquote class="info">
  *   Note that this is only applicable to OPUS audio codecs with a sampling rate of <code>48000</code> Hz (hertz).
  *   </blockquote> The OPUS audio codec parameters to configure.
- * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec stereo band
- *   should be configured for sending encoded audio data.
+ * @param {Boolean} [options.codecParams.audio.opus.stereo] The flag if OPUS audio codec is able to decode or receive stereo packets.
+ *   <small>When not provided, the default browser configuration is used.</small>
+ * @param {Boolean} [options.codecParams.audio.opus.sprop-stereo] The flag if OPUS audio codec is sending stereo packets.
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.codecParams.audio.opus.usedtx] <blockquote class="info">
  *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
@@ -10255,7 +10272,7 @@ Skylink.prototype.generateUUID = function() {
  *       startDateTime = (new Date()).toISOString(),
  *       duration      = 1, // Allows only User session to stay for 1 hour
  *       appKeySecret  = "xxxxxxx",
- *       hash          = CryptoJS.HmacSHA1(defaultRoom + "_" + duration + "_" + startDateTime, appKeySecret);
+ *       hash          = CryptoJS.HmacSHA1(defaultRoom + "\_" + duration + "\_" + startDateTime, appKeySecret);
  *       credentials   = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));
  *
  *   skylinkDemo({
@@ -10554,6 +10571,8 @@ Skylink.prototype.init = function(options, callback) {
           codecParams.audio.opus = {
             stereo: typeof options.codecParams.audio.opus.stereo === 'boolean' ?
               options.codecParams.audio.opus.stereo : null,
+            'sprop-stereo': typeof options.codecParams.audio.opus['sprop-stereo'] === 'boolean' ?
+              options.codecParams.audio.opus['sprop-stereo'] : null,
             usedtx: typeof options.codecParams.audio.opus.usedtx === 'boolean' ?
               options.codecParams.audio.opus.usedtx : null,
             useinbandfec: typeof options.codecParams.audio.opus.useinbandfec === 'boolean' ?
@@ -15718,10 +15737,11 @@ Skylink.prototype.RECORDING_STATE = {
  *    <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.</blockquote>
  *    The audio configuration options.
  * @param {Boolean} [options.audio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
- *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code> and
+ *   the <code>options.codecParams.audio.opus["sprop-stereo"]</code>
  *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
- *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
- *   <code>options.audio.stereo</code> setting.</blockquote>
+ *   <code>options.codecParams.audio.opus.stereo</code> or <code>options.codecParams.audio.opus["sprop-stereo"]</code>
+ *   is configured, this overrides the <code>options.audio.stereo</code> setting.</blockquote>
  *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.audio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
@@ -16587,10 +16607,11 @@ Skylink.prototype.disableVideo = function() {
  * @method shareScreen
  * @param {JSON|Boolean} [enableAudio=false] The flag if audio tracks should be retrieved.
  * @param {Boolean} [enableAudio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
- *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
+ *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code> and
+ *   the <code>options.codecParams.audio.opus["sprop-stereo"]</code>
  *   parameter in the <a href="#method_init"><code>init()</code> method</a> instead. If the
- *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
- *   <code>options.audio.stereo</code> setting.</blockquote>
+ *   <code>options.codecParams.audio.opus.stereo</code> or <code>options.codecParams.audio.opus["sprop-stereo"]</code>
+ *   is configured, this overrides the <code>options.audio.stereo</code> setting.</blockquote>
  *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [enableAudio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
@@ -17706,12 +17727,18 @@ Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
   // RFC: https://tools.ietf.org/html/draft-ietf-payload-rtp-opus-11
   parseFn('audio', self.AUDIO_CODEC.OPUS, 48000, (function () {
     var opusOptions = {};
-    var audioSettings = self.getPeerInfo().settings.audio;
+    var audioSettings = self._streams.screenshare ? self._streams.screenshare.settings.audio :
+      (self._streams.userMedia ? self._streams.userMedia.settings.audio : {});
     audioSettings = audioSettings && typeof audioSettings === 'object' ? audioSettings : {};
     if (typeof self._codecParams.audio.opus.stereo === 'boolean') {
       opusOptions.stereo = self._codecParams.audio.opus.stereo;
     } else if (typeof audioSettings.stereo === 'boolean') {
       opusOptions.stereo = audioSettings.stereo;
+    }
+    if (typeof self._codecParams.audio.opus['sprop-stereo'] === 'boolean') {
+      opusOptions['sprop-stereo'] = self._codecParams.audio.opus['sprop-stereo'];
+    } else if (typeof audioSettings.stereo === 'boolean') {
+      opusOptions['sprop-stereo'] = audioSettings.stereo;
     }
     if (typeof self._codecParams.audio.opus.usedtx === 'boolean') {
       opusOptions.usedtx = self._codecParams.audio.opus.usedtx;

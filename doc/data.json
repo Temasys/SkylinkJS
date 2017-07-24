@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.23",
+        "version": "0.6.24",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -3937,7 +3937,7 @@
                         },
                         {
                             "name": "publishOnly",
-                            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, defining this flag would make Peer not know other Peers presence in the Room.<br>\n  For non-MCU enable Peer connections, defining this flag would cause other Peers in the Room to\n  not to send Stream to Peer, and overrides the config\n  <code>options.sdpSettings.direction.audio.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and\n  <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.<br>\n  Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled\n  Peer connections, please  contact <a href=\"http://support.temasys.io\">our support portal</a>.</blockquote></blockquote>\n  The config if Peer would publish only.",
+                            "description": "<blockquote class=\"info\">\n  For MCU enabled Peer connections, defining this flag would make Peer not know other Peers presence in the Room.<br>\n  For non-MCU enable Peer connections, defining this flag would cause other Peers in the Room to\n  not to send Stream to Peer, and overrides the config\n  <code>options.sdpSettings.direction.audio.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.receive</code> value to <code>false</code>,\n  <code>options.sdpSettings.direction.video.send</code> value to <code>true</code> and\n  <code>options.sdpSettings.direction.audio.send</code> value to <code>true</code>.<br>\n  Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled\n  Peer connections, please  contact <a href=\"http://support.temasys.io\">our support portal</a>.<br><br>\n  How does the publish only functionality work? Imagine several Skylink instances like A1, B1, C1 and A1\n  opening a new instance A2 with publish only enabled with configured A1 as parent.<br><br>\n  <table class=\"table\"><thead>\n  <tr><th></th><th colspan=\"2\">MCU enabled room</th><th colspan=\"2\">MCU disabled room</th></tr>\n  <tr><th></th><th>Presence</th><th>Stream</th><th>Presence</th><th>Stream</th></tr></thead><tbody>\n  <tr><th>A1</th><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td></tr>\n  <tr><th>B1</th><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td></tr>\n  <tr><th>C1</th><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td></tr>\n  <tr><th>A2</th><td></td><td></td><td>B1, C1</td><td></td></tr></tbody></table>\n  Parent and child will not receive each other presence and stream because they are related to each other in the same client page,\n  hence no uploading or downloading is required. If A2 did not configure A1 as the parent, A1 will receive A2.</blockquote>\n  The config if Peer would publish only.",
                             "type": "JSON|Boolean",
                             "optional": true,
                             "props": [
@@ -4083,7 +4083,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 504,
+            "line": 515,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4148,7 +4148,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 620,
+            "line": 631,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4158,7 +4158,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 654,
+            "line": 665,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4168,7 +4168,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 688,
+            "line": 699,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4473,7 +4473,7 @@
                         },
                         {
                             "name": "credentials",
-                            "description": "The credentials used for authenticating App Key with\n  credentials to retrieve the Room session token used for connection in <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a>.\n  <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless\n  <code>init()</code> is invoked again with a different set of credentials followed by invoking\n  the <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.</small>",
+                            "description": "<blockquote class=\"info\">\n  Note that we strongly recommend developers to return the <code>options.credentials.duration</code>,\n  <code>options.credentials.startDateTime</code> and <code>options.defaultRoom</code> and generate the\n  <code>options.credentials.credentials</code> from a web server as secret shouldn't be exposed on client web app as\n  it poses a security risk itself.</blockquote>\n  The credentials used for authenticating App Key with\n  credentials to retrieve the Room session token used for connection in <a href=\"#method_joinRoom\">\n  <code>joinRoom()</code> method</a>.\n  <small>Note that switching of Rooms is not allowed when using credentials based authentication, unless\n  <code>init()</code> is invoked again with a different set of credentials followed by invoking\n  the <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a>.</small>",
                             "type": "JSON",
                             "optional": true,
                             "props": [
@@ -4768,7 +4768,13 @@
                                 },
                                 {
                                     "name": "audio.opus.stereo",
-                                    "description": "The flag if OPUS audio codec stereo band\n  should be configured for sending encoded audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "description": "The flag if OPUS audio codec is able to decode or receive stereo packets.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "type": "Boolean",
+                                    "optional": true
+                                },
+                                {
+                                    "name": "audio.opus.sprop-stereo",
+                                    "description": "The flag if OPUS audio codec is sending stereo packets.\n  <small>When not provided, the default browser configuration is used.</small>",
                                     "type": "Boolean",
                                     "optional": true
                                 },
@@ -4997,7 +5003,7 @@
                 }
             ],
             "example": [
-                "\n  // Example 1: Using CORS authentication and connection to default Room\n  skylinkDemo(appKey, function (error, success) {\n    if (error) return;\n    skylinkDemo.joinRoom(); // Goes to default Room\n  });\n\n  // Example 2: Using CORS authentication and connection to a different Room\n  skylinkDemo(appKey, function (error, success) {\n    skylinkDemo.joinRoom(\"testxx\"); // Goes to \"testxx\" Room\n  });\n\n  // Example 3: Using credentials authentication and connection to only default Room\n  var defaultRoom   = \"test\",\n      startDateTime = (new Date()).toISOString(),\n      duration      = 1, // Allows only User session to stay for 1 hour\n      appKeySecret  = \"xxxxxxx\",\n      hash          = CryptoJS.HmacSHA1(defaultRoom + \"_\" + duration + \"_\" + startDateTime, appKeySecret);\n      credentials   = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));\n\n  skylinkDemo({\n    defaultRoom: defaultRoom,\n    appKey: appKey,\n    credentials: {\n      duration: duration,\n      startDateTime: startDateTime,\n      credentials: credentials\n    }\n  }, function (error, success) {\n    if (error) return;\n    skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)\n  });"
+                "\n  // Example 1: Using CORS authentication and connection to default Room\n  skylinkDemo(appKey, function (error, success) {\n    if (error) return;\n    skylinkDemo.joinRoom(); // Goes to default Room\n  });\n\n  // Example 2: Using CORS authentication and connection to a different Room\n  skylinkDemo(appKey, function (error, success) {\n    skylinkDemo.joinRoom(\"testxx\"); // Goes to \"testxx\" Room\n  });\n\n  // Example 3: Using credentials authentication and connection to only default Room\n  var defaultRoom   = \"test\",\n      startDateTime = (new Date()).toISOString(),\n      duration      = 1, // Allows only User session to stay for 1 hour\n      appKeySecret  = \"xxxxxxx\",\n      hash          = CryptoJS.HmacSHA1(defaultRoom + \"\\_\" + duration + \"\\_\" + startDateTime, appKeySecret);\n      credentials   = encodeURIComponent(hash.toString(CryptoJS.enc.Base64));\n\n  skylinkDemo({\n    defaultRoom: defaultRoom,\n    appKey: appKey,\n    credentials: {\n      duration: duration,\n      startDateTime: startDateTime,\n      credentials: credentials\n    }\n  }, function (error, success) {\n    if (error) return;\n    skylinkDemo.joinRoom(); // Goes to default Room (switching to different Room is not allowed for credentials authentication)\n  });"
             ],
             "trigger": "<ol class=\"desc-seq\">\n  <li>If parameter <code>options</code> is not provided: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>Checks if dependecies and browser APIs are available. <ol><li>If AdapterJS is not loaded: <ol>\n  <li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as\n  <code>ADAPTER_NO_LOADED</code>.</li><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>If socket.io-client is not loaded: <ol><li><a href=\"#event_readyStateChange\">\n  <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>\n  as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_SOCKET_IO</code>.</li>\n  <li><b>ABORT</b> and return error. </li></ol></li>\n  <li>If XMLHttpRequest API is not available: <ol><li><a href=\"#event_readyStateChange\">\n  <code>readyStateChange</code> event</a> triggers parameter payload <code>state</code>\n  as <code>ERROR</code> and <code>error.errorCode</code> as <code>NO_XMLHTTPREQUEST_SUPPORT</code>.</li>\n  <li><b>ABORT</b> and return error.</li></ol></li><li>If WebRTC is not supported by device: <ol>\n  <li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers parameter\n  payload <code>state</code> as <code>ERROR</code> and <code>error.errorCode</code> as\n  <code>NO_WEBRTC_SUPPORT</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li>\n  <li>Retrieves Room session token from Auth server. <ol>\n  <li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers\n  parameter payload <code>state</code> as <code>LOADING</code>.</li>\n  <li>If retrieval was successful: <ol><li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>COMPLETED</code>.</li></ol></li><li>Else: <ol>\n  <li><a href=\"#event_readyStateChange\"><code>readyStateChange</code> event</a> triggers parameter\n  payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol>",
             "since": "0.5.5",
@@ -5005,7 +5011,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1064,
+            "line": 1072,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -5016,7 +5022,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1138,
+            "line": 1146,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5027,7 +5033,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1208,
+            "line": 1216,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5038,7 +5044,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1339,
+            "line": 1347,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -9472,7 +9478,7 @@
                             "props": [
                                 {
                                     "name": "stereo",
-                                    "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the\n  <code>options.audio.stereo</code> setting.</blockquote>\n  The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
+                                    "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code> and\n  the <code>options.codecParams.audio.opus[\"sprop-stereo\"]</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.stereo</code> or <code>options.codecParams.audio.opus[\"sprop-stereo\"]</code>\n  is configured, this overrides the <code>options.audio.stereo</code> setting.</blockquote>\n  The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
                                     "type": "Boolean",
                                     "optional": true,
                                     "optdefault": "false"
@@ -9611,7 +9617,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 650,
+            "line": 651,
             "description": "<blockquote class=\"info\">\n  Note that if <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is available despite having\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> available, the\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is sent instead of the\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> to Peers.\n</blockquote>\nFunction that sends a new <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>\nto all connected Peers in the Room.",
             "itemtype": "method",
             "name": "sendStream",
@@ -9649,7 +9655,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 873,
+            "line": 874,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -9662,7 +9668,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 912,
+            "line": 913,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -9698,7 +9704,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1050,
+            "line": 1051,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -9713,7 +9719,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1077,
+            "line": 1078,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -9728,7 +9734,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1104,
+            "line": 1105,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -9743,7 +9749,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1131,
+            "line": 1132,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -9758,7 +9764,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1158,
+            "line": 1159,
             "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n  Note that the Opera and Edge browser does not support screensharing, and as for IE / Safari browsers using\n  the Temasys Plugin screensharing support, check out the <a href=\"https://temasys.com.sg/plugin/#commercial-licensing\">\n  commercial licensing</a> for more options.\n</blockquote>\nFunction that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -9772,7 +9778,7 @@
                     "props": [
                         {
                             "name": "stereo",
-                            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the\n  <code>options.audio.stereo</code> setting.</blockquote>\n  The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
+                            "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code> and\n  the <code>options.codecParams.audio.opus[\"sprop-stereo\"]</code>\n  parameter in the <a href=\"#method_init\"><code>init()</code> method</a> instead. If the\n  <code>options.codecParams.audio.opus.stereo</code> or <code>options.codecParams.audio.opus[\"sprop-stereo\"]</code>\n  is configured, this overrides the <code>options.audio.stereo</code> setting.</blockquote>\n  The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.\n  <small>When not provided, the default browser configuration is used.</small>",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -9839,7 +9845,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1522,
+            "line": 1524,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -9852,7 +9858,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1581,
+            "line": 1583,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -9863,7 +9869,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1639,
+            "line": 1641,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -9874,7 +9880,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1712,
+            "line": 1714,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -9885,7 +9891,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1865,
+            "line": 1867,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -9896,7 +9902,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2011,
+            "line": 2013,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -9907,7 +9913,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2051,
+            "line": 2053,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -9918,7 +9924,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2085,
+            "line": 2087,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -9929,7 +9935,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2183,
+            "line": 2185,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -9951,7 +9957,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 157,
+            "line": 163,
             "description": "Function that modifies the session description to limit the maximum sending bandwidth.\nSetting this may not necessarily work in Firefox.",
             "itemtype": "method",
             "name": "_setSDPBitrate",
@@ -9962,7 +9968,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 293,
+            "line": 299,
             "description": "Function that modifies the session description to set the preferred audio/video codec.",
             "itemtype": "method",
             "name": "_setSDPCodec",
@@ -9973,7 +9979,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 390,
+            "line": 396,
             "description": "Function that modifies the session description to remove the previous experimental H264\ncodec that is apparently breaking connections.\nNOTE: We should perhaps not remove it since H264 is supported?",
             "itemtype": "method",
             "name": "_removeSDPFirefoxH264Pref",
@@ -9984,7 +9990,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 406,
+            "line": 412,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_addSDPMediaStreamTrackIDs",
@@ -9995,7 +10001,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 552,
+            "line": 558,
             "description": "Function that modifies the session description to remove apt/rtx lines that does exists.",
             "itemtype": "method",
             "name": "_removeSDPUnknownAptRtx",
@@ -10006,7 +10012,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 607,
+            "line": 613,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -10017,7 +10023,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 681,
+            "line": 687,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -10028,7 +10034,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 697,
+            "line": 703,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -10039,7 +10045,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 754,
+            "line": 760,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -10050,7 +10056,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 796,
+            "line": 802,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -10061,7 +10067,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 889,
+            "line": 895,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -10072,7 +10078,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1098,
+            "line": 1104,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
@@ -10083,7 +10089,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1136,
+            "line": 1142,
             "description": "Function that gets edge browser video supports.",
             "itemtype": "method",
             "name": "_getSDPEdgeVideoSupports",
@@ -10160,15 +10166,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:504"
+            "line": " source/room-connection.js:515"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:620"
+            "line": " source/room-connection.js:631"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:654"
+            "line": " source/room-connection.js:665"
         },
         {
             "message": "unknown tag: trigger",
@@ -10252,39 +10258,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:650"
+            "line": " source/stream-media.js:651"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:873"
+            "line": " source/stream-media.js:874"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:912"
+            "line": " source/stream-media.js:913"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1050"
+            "line": " source/stream-media.js:1051"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1077"
+            "line": " source/stream-media.js:1078"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1104"
+            "line": " source/stream-media.js:1105"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1131"
+            "line": " source/stream-media.js:1132"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1158"
+            "line": " source/stream-media.js:1159"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1522"
+            "line": " source/stream-media.js:1524"
         },
         {
             "message": "Missing item type\nGlobal function that clones an object.",
