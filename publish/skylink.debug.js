@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 17:27:08 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 17:36:48 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -18569,6 +18569,18 @@ Skylink.prototype._getCodecsSupport = function (callback) {
 
   self._currentCodecSupport = { audio: {}, video: {} };
 
+  // Safari 11 REQUIRES a stream first before connection works, hence let's spoof it for now
+  if (window.RTCPeerConnection && window.webrtcDetectedBrowser === 'safari' &&
+    window.webrtcDetectedVersion >= 11 && !self._isUsingPlugin) {
+    self._currentCodecSupport.audio = { 
+      opus: ['48000/2']
+    };
+    self._currentCodecSupport.video = { 
+      h264: ['48000']
+    };
+    return callback(null);
+  }
+
   try {
     if (window.webrtcDetectedBrowser === 'edge') {
       var codecs = RTCRtpSender.getCapabilities().codecs;
@@ -18607,7 +18619,6 @@ Skylink.prototype._getCodecsSupport = function (callback) {
       } catch (e) {}
 
       var successCbFn = function (offer) {
-        console.info(offer.sdp);
         var sdpLines = offer.sdp.split('\r\n');
         var mediaType = '';
 
