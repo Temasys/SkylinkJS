@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 19:04:05 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 19:07:51 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -18201,7 +18201,12 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
  * @since 0.6.16
  */
 Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescription) {
-  if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].getLocalStreams().length > 0)) {
+  if (this._useSafariWebRTC) {
+    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Not enforcing MediaStream IDs for Safari 11 WebRTC implementation']);
+    return sessionDescription.sdp;
+
+  } else if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].getLocalStreams().length > 0)) {
     log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
       'Not enforcing MediaStream IDs as no Streams is sent.']);
     return sessionDescription.sdp;
