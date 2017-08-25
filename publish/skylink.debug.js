@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 18:13:12 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 18:44:33 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -17638,40 +17638,68 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
-          var hasStream = false;
+          if (self._useSafariWebRTC) {
+            var tracks = updatedStream ? updatedStream.getTracks() : [];
 
-          // remove streams
-          var streams = pc.getLocalStreams();
-          for (var i = 0; i < streams.length; i++) {
-            if (updatedStream !== null && streams[i].id === updatedStream.id) {
-              hasStream = true;
-              continue;
-            }
-            // try removeStream
-            pc.removeStream(streams[i]);
-          }
-
-          if (updatedStream !== null && !hasStream) {
-            if (window.webrtcDetectedBrowser === 'edge' && (!offerToReceiveVideo || !offerToReceiveAudio)) {
-              try {
-                var cloneStream = updatedStream.clone();
-                var tracks = cloneStream.getTracks();
-                for (var t = 0; t < tracks.length; t++) {
-                  if (tracks[t].kind === 'video' ? !offerToReceiveVideo : !offerToReceiveAudio) {
-                    cloneStream.removeTrack(tracks[t]);
-                  } else {
-                    tracks[t].enabled = tracks[t].kind === 'audio' ? !self._streamsMutedSettings.audioMuted :
-                      !self._streamsMutedSettings.videoMuted;
+            pc.getSenders().then(function (sender) {
+              if (updatedStream) {
+                var hasTrack = false;
+                // Do not remove if the track matches what we already added
+                for (var i = 0; i < tracks.length; i++) {
+                  if (tracks[i] === sender.track) {
+                    tracks.splice(i, -1);
+                    hasTrack = true;
+                    i--;
                   }
                 }
-                pc.addStream(cloneStream);
-              } catch (e) {
+                if (!hasTrack) {
+                  pc.removeTrack(sender.track);
+                }
+              } else {
+                pc.removeTrack(sender.track);
+              }
+            });
+
+            tracks.forEach(function (track) {
+              pc.addTrack(track);
+            });
+
+          } else {
+            var hasStream = false;
+
+            // remove streams
+            var streams = pc.getLocalStreams();
+            for (var i = 0; i < streams.length; i++) {
+              if (updatedStream !== null && streams[i].id === updatedStream.id) {
+                hasStream = true;
+                continue;
+              }
+              // try removeStream
+              pc.removeStream(streams[i]);
+            }
+
+            if (updatedStream !== null && !hasStream) {
+              if (window.webrtcDetectedBrowser === 'edge' && (!offerToReceiveVideo || !offerToReceiveAudio)) {
+                try {
+                  var cloneStream = updatedStream.clone();
+                  var tracks = cloneStream.getTracks();
+                  for (var t = 0; t < tracks.length; t++) {
+                    if (tracks[t].kind === 'video' ? !offerToReceiveVideo : !offerToReceiveAudio) {
+                      cloneStream.removeTrack(tracks[t]);
+                    } else {
+                      tracks[t].enabled = tracks[t].kind === 'audio' ? !self._streamsMutedSettings.audioMuted :
+                        !self._streamsMutedSettings.videoMuted;
+                    }
+                  }
+                  pc.addStream(cloneStream);
+                } catch (e) {
+                  pc.addStream(updatedStream);
+                }
+              } else {
                 pc.addStream(updatedStream);
               }
-            } else {
-              pc.addStream(updatedStream);
+              pc.addStream(window.webrtcDetectedBrowser === 'edge' ? updatedStream.clone() : updatedStream);
             }
-            pc.addStream(window.webrtcDetectedBrowser === 'edge' ? updatedStream.clone() : updatedStream);
           }
         };
 
