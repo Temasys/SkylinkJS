@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 18:44:33 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 19:01:54 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -5345,6 +5345,10 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   // plugin supports .urls
   if (self._isUsingPlugin) {
     hasUrlsSupport = true;
+
+    // safari 11 native WebRTC supports
+  } else if (window.webrtcDetectedBrowser === 'safari' && window.webrtcDetectedVersion >= 11) {
+    hasUrlsSupport = true;
   }
 
   // bowser / edge
@@ -7240,7 +7244,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       constraints: constraints,
       optional: optional
     });
-    pc = new (self._useEdgeWebRTC && window.msRTCPeerConnection ? window.msRTCPeerConnection : RTCPeerConnection)(constraints, optional);
+    pc = new (self._useEdgeWebRTC && window.msRTCPeerConnection ? window.msRTCPeerConnection : window.RTCPeerConnection)(constraints, optional);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);

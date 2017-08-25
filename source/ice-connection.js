@@ -260,6 +260,10 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   // plugin supports .urls
   if (self._isUsingPlugin) {
     hasUrlsSupport = true;
+
+    // safari 11 native WebRTC supports
+  } else if (window.webrtcDetectedBrowser === 'safari' && window.webrtcDetectedVersion >= 11) {
+    hasUrlsSupport = true;
   }
 
   // bowser / edge
