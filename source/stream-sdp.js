@@ -837,15 +837,6 @@ Skylink.prototype._getCodecsSupport = function (callback) {
         offerToReceiveVideo: true
       };
 
-      if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
-        offerConstraints = {
-          mandatory: {
-            OfferToReceiveVideo: true,
-            OfferToReceiveAudio: true
-          }
-        };
-      }
-
       // Prevent errors and proceed with create offer still...
       try {
         var channel = pc.createDataChannel('test');
@@ -862,7 +853,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
         }
       } catch (e) {}
 
-      pc.createOffer(function (offer) {
+      var successCbFn = function (offer) {
         var sdpLines = offer.sdp.split('\r\n');
         var mediaType = '';
 
@@ -880,12 +871,24 @@ Skylink.prototype._getCodecsSupport = function (callback) {
             self._currentCodecSupport[mediaType][codec] = info;
           }
         }
-
         callback(null);
+      };
 
-      }, function (error) {
+      var errorCbFn = function (error) {
         callback(error);
-      }, offerConstraints);
+      };
+
+      if (self._useSafariWebRTC) {
+        pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
+
+      } else {
+        pc.createOffer(successCbFn, errorCbFn, self._isUsingPlugin ? {
+          mandatory: {
+            OfferToReceiveVideo: offerConstraints.offerToReceiveAudio,
+            OfferToReceiveAudio: offerConstraints.offerToReceiveVideo
+          }
+        } : offerConstraints);
+      }
     }
   } catch (error) {
     callback(error);

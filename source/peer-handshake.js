@@ -75,18 +75,6 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   // Prevent undefined OS errors
   peerBrowser.os = peerBrowser.os || '';
 
-  // Fallback to use mandatory constraints for plugin based browsers
-  if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
-    offerConstraints = {
-      mandatory: {
-        OfferToReceiveAudio: offerToReceiveAudio,
-        OfferToReceiveVideo: offerToReceiveVideo,
-        iceRestart: doIceRestart,
-        voiceActivityDetection: self._voiceActivityDetection
-      }
-    };
-  }
-
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === 'MCU') {
     self._addLocalMediaStreams(targetMid);
@@ -110,17 +98,32 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     self._peerConnStatus[targetMid].sdpConstraints = offerConstraints;
   }
 
-  pc.createOffer(function(offer) {
+  var successCbFn = function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
 
     self._setLocalAndSendMessage(targetMid, offer);
+  };
 
-  }, function(error) {
+  var errorCbFn = function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
     log.error([targetMid, null, null, 'Failed creating an offer:'], error);
+  };
 
-  }, offerConstraints);
+  // Not using promises as primary even as preferred because of users using older AdapterJS to prevent breaks
+  if (self._useSafariWebRTC) {
+    pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
+  
+  } else {
+    pc.createOffer(successCbFn, errorCbFn, self._isUsingPlugin ? {
+      mandatory: {
+        OfferToReceiveAudio: offerConstraints.offerToReceiveAudio,
+        OfferToReceiveVideo: offerConstraints.offerToReceiveVideo,
+        iceRestart: offerConstraints.iceRestart,
+        voiceActivityDetection: offerConstraints.voiceActivityDetection
+      }
+    } : offerConstraints);
+  }
 };
 
 /**
@@ -171,13 +174,22 @@ Skylink.prototype._doAnswer = function(targetMid) {
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
-  pc.createAnswer(function(answer) {
+  var successCbFn = function(answer) {
     log.debug([targetMid, null, null, 'Created answer'], answer);
     self._setLocalAndSendMessage(targetMid, answer);
-  }, function(error) {
+  };
+
+  var errorCbFn = function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  }, answerConstraints);
+  };
+
+  if (self._useSafariWebRTC) {
+    pc.createAnswer(answerConstraints).then(successCbFn).catch(errorCbFn); 
+
+  } else {
+    pc.createAnswer(successCbFn, errorCbFn, answerConstraints);
+  }
 };
 
 /**
@@ -243,7 +255,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
 
-  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), function() {
+  var successCbFn = function() {
     log.debug([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Local session description has been set ->'], sessionDescription);
 
@@ -271,12 +283,19 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
     });
+  };
 
-  }, function(error) {
+  var errorCbFn = function(error) {
     log.error([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local description failed setting ->'], error);
 
     pc.processingLocalSDP = false;
 
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  });
+  };
+
+  if (self._useSafariWebRTC) {
+    pc.setLocalDescription(new RTCSessionDescription(sessionDescription)).then(successCbFn).catch(errorCbFn);
+  }
+
+  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), successCbFn, errorCbFn);
 };

@@ -236,7 +236,12 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
       this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED &&
       AdapterJS && !this._isLowerThanVersion(AdapterJS.VERSION, '0.14.0')) {
       log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
-      this._peerConnections[targetMid].addIceCandidate(null);
+      try {
+        this._peerConnections[targetMid].addIceCandidate(null);
+
+      } catch (error) {
+        log.warn([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering is not supported.']);
+      }
     }
   }
 
@@ -303,5 +308,10 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     return;
   }
 
-  self._peerConnections[targetMid].addIceCandidate(candidate, onSuccessCbFn, onErrorCbFn);
+  if (self._useSafariWebRTC) {
+    self._peerConnections[targetMid].addIceCandidate(candidate).then(onSuccessCbFn).catch(onErrorCbFn);
+
+  } else {
+    self._peerConnections[targetMid].addIceCandidate(candidate, onSuccessCbFn, onErrorCbFn);
+  }
 };

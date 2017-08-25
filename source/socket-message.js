@@ -1588,14 +1588,16 @@ Skylink.prototype._offerHandler = function(message) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
+  var successCbFn = function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
     pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
-  }, function(error) {
+  };
+
+  var errorCbFn = function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
     pc.processingRemoteSDP = false;
@@ -1605,7 +1607,14 @@ Skylink.prototype._offerHandler = function(message) {
       state: pc.signalingState,
       offer: offer
     });
-  });
+  };
+
+  if (self._useSafariWebRTC) {
+    pc.setRemoteDescription(new RTCSessionDescription(offer)).then(successCbFn).catch(errorCbFn);
+
+  } else {
+    pc.setRemoteDescription(new RTCSessionDescription(offer), successCbFn, errorCbFn);
+  }
 };
 
 
@@ -1792,7 +1801,7 @@ Skylink.prototype._answerHandler = function(message) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  pc.setRemoteDescription(new RTCSessionDescription(answer), function() {
+  var successCbFn = function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
     pc.processingRemoteSDP = false;
@@ -1808,8 +1817,9 @@ Skylink.prototype._answerHandler = function(message) {
       log.warn([targetMid, 'RTCPeerConnection', null, 'Closing all datachannels as they were rejected.']);
       self._closeDataChannel(targetMid);
     }
+  };
 
-  }, function(error) {
+  var errorCbFn = function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
     pc.processingRemoteSDP = false;
@@ -1819,7 +1829,14 @@ Skylink.prototype._answerHandler = function(message) {
       state: pc.signalingState,
       answer: answer
     });
-  });
+  };
+
+  if (self._useSafariWebRTC) {
+    pc.setRemoteDescription(new RTCSessionDescription(answer)).then(successCbFn).catch(errorCbFn);
+
+  } else {
+    pc.setRemoteDescription(new RTCSessionDescription(answer), successCbFn, errorCbFn);
+  }
 };
 
 /**

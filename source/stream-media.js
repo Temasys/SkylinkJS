@@ -630,8 +630,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
     // Parse stream settings
     var settings = self._parseStreamSettings(options);
-
-    navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+    var successCbFn = function (stream) {
       if (settings.mutedSettings.shouldAudioMuted) {
         self._streamsMutedSettings.audioMuted = true;
       }
@@ -641,10 +640,17 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       }
 
       self._onStreamAccessSuccess(stream, settings, false, false);
-
-    }, function (error) {
+    };
+    var errorCbFn = function (error) {
       self._onStreamAccessError(error, settings, false, false);
-    });
+    };
+
+    if (self._useSafariWebRTC) {
+      navigator.mediaDevices.getUserMedia(settings.getUserMediaSettings).then(successCbFn).catch(errorCbFn);
+
+    } else {
+      navigator.getUserMedia(settings.getUserMediaSettings, successCbFn, errorCbFn);
+    }
   }, 'getUserMedia', self._throttlingTimeouts.getUserMedia);
 };
 
@@ -1484,14 +1490,14 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         }
       }
 
-      navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+      var successCbFn = function (stream) {
         if (hasDefaultAudioTrack || !enableAudioSettings) {
           self._onStreamAccessSuccess(stream, settings, true, false);
           return;
         }
 
         settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
-        navigator.getUserMedia({ audio: getUserMediaAudioSettings }, function (audioStream) {
+        var audioSuccessCbFn = function (audioStream) {
           try {
             audioStream.addTrack(stream.getVideoTracks()[0]);
 
@@ -1507,14 +1513,31 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
             log.error('Failed retrieving audio stream for screensharing stream', error);
             self._onStreamAccessSuccess(stream, settings, true, false);
           }
-        }, function (error) {
+        };
+
+        var audioErrorCbFn = function (error) {
           log.error('Failed retrieving audio stream for screensharing stream', error);
           self._onStreamAccessSuccess(stream, settings, true, false);
-        });
-      }, function (error) {
-        self._onStreamAccessError(error, settings, true, false);
-      });
+        };
 
+        if (self._useSafariWebRTC) {
+          navigator.getUserMedia({ audio: getUserMediaAudioSettings }).then(successCbFn).catch(errorCbFn);
+
+        } else {
+          navigator.getUserMedia({ audio: getUserMediaAudioSettings }, successCbFn, errorCbFn);
+        }
+      };
+
+      var errorCbFn = function (error) {
+        self._onStreamAccessError(error, settings, true, false);
+      };
+
+      if (self._useSafariWebRTC) {
+        navigator.getUserMedia(settings.getUserMediaSettings).catch(successCbFn).then(errorCbFn);
+
+      } else {
+        navigator.getUserMedia(settings.getUserMediaSettings, successCbFn, errorCbFn);
+      }
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
@@ -2028,12 +2051,11 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
       diff: null
     }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKING, false, true);
 
-    navigator.getUserMedia({
-      audio: true
-    }, function (stream) {
+    var successCbFn = function (stream) {
       self._onStreamAccessSuccess(stream, settings, false, true);
+    };
 
-    }, function (error) {
+    var errorCbFn = function (error) {
       log.error('Failed fallbacking to retrieve audio only Stream ->', error);
 
       self._trigger('mediaAccessError', error, false, true);
@@ -2041,7 +2063,18 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
         error: error,
         diff: null
       }, self.MEDIA_ACCESS_FALLBACK_STATE.ERROR, false, true);
-    });
+    };
+
+    if (self._useSafariWebRTC) {
+      navigator.getUserMedia({
+        audio: true
+      }).then(successCbFn).catch(errorCbFn);
+
+    } else {
+      navigator.getUserMedia({
+        audio: true
+      }, successCbFn, errorCbFn);
+    }
     return;
   }
 

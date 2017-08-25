@@ -1184,4 +1184,14 @@ function Skylink() {
    * @since 0.6.19
    */
   this._useEdgeWebRTC = false;
+
+  /**
+   * Stores the safari 11+ use native webrtc implementation.
+   * @attribute _useSafariWebRTC
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.25
+   */
+  this._useSafariWebRTC = false;
 }

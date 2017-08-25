@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Fri Jul 21 2017 18:26:45 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 17:27:08 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -1186,6 +1186,16 @@ function Skylink() {
    * @since 0.6.19
    */
   this._useEdgeWebRTC = false;
+
+  /**
+   * Stores the safari 11+ use native webrtc implementation.
+   * @attribute _useSafariWebRTC
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.25
+   */
+  this._useSafariWebRTC = false;
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -5035,7 +5045,12 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
       this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED &&
       AdapterJS && !this._isLowerThanVersion(AdapterJS.VERSION, '0.14.0')) {
       log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
-      this._peerConnections[targetMid].addIceCandidate(null);
+      try {
+        this._peerConnections[targetMid].addIceCandidate(null);
+
+      } catch (error) {
+        log.warn([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering is not supported.']);
+      }
     }
   }
 
@@ -5102,7 +5117,12 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     return;
   }
 
-  self._peerConnections[targetMid].addIceCandidate(candidate, onSuccessCbFn, onErrorCbFn);
+  if (self._useSafariWebRTC) {
+    self._peerConnections[targetMid].addIceCandidate(candidate).then(onSuccessCbFn).catch(onErrorCbFn);
+
+  } else {
+    self._peerConnections[targetMid].addIceCandidate(candidate, onSuccessCbFn, onErrorCbFn);
+  }
 };
 Skylink.prototype.ICE_CONNECTION_STATE = {
   STARTING: 'starting',
@@ -8436,18 +8456,6 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   // Prevent undefined OS errors
   peerBrowser.os = peerBrowser.os || '';
 
-  // Fallback to use mandatory constraints for plugin based browsers
-  if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
-    offerConstraints = {
-      mandatory: {
-        OfferToReceiveAudio: offerToReceiveAudio,
-        OfferToReceiveVideo: offerToReceiveVideo,
-        iceRestart: doIceRestart,
-        voiceActivityDetection: self._voiceActivityDetection
-      }
-    };
-  }
-
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === 'MCU') {
     self._addLocalMediaStreams(targetMid);
@@ -8471,17 +8479,32 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     self._peerConnStatus[targetMid].sdpConstraints = offerConstraints;
   }
 
-  pc.createOffer(function(offer) {
+  var successCbFn = function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
 
     self._setLocalAndSendMessage(targetMid, offer);
+  };
 
-  }, function(error) {
+  var errorCbFn = function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
     log.error([targetMid, null, null, 'Failed creating an offer:'], error);
+  };
 
-  }, offerConstraints);
+  // Not using promises as primary even as preferred because of users using older AdapterJS to prevent breaks
+  if (self._useSafariWebRTC) {
+    pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
+  
+  } else {
+    pc.createOffer(successCbFn, errorCbFn, self._isUsingPlugin ? {
+      mandatory: {
+        OfferToReceiveAudio: offerConstraints.offerToReceiveAudio,
+        OfferToReceiveVideo: offerConstraints.offerToReceiveVideo,
+        iceRestart: offerConstraints.iceRestart,
+        voiceActivityDetection: offerConstraints.voiceActivityDetection
+      }
+    } : offerConstraints);
+  }
 };
 
 /**
@@ -8532,13 +8555,22 @@ Skylink.prototype._doAnswer = function(targetMid) {
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
-  pc.createAnswer(function(answer) {
+  var successCbFn = function(answer) {
     log.debug([targetMid, null, null, 'Created answer'], answer);
     self._setLocalAndSendMessage(targetMid, answer);
-  }, function(error) {
+  };
+
+  var errorCbFn = function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  }, answerConstraints);
+  };
+
+  if (self._useSafariWebRTC) {
+    pc.createAnswer(answerConstraints).then(successCbFn).catch(errorCbFn); 
+
+  } else {
+    pc.createAnswer(successCbFn, errorCbFn, answerConstraints);
+  }
 };
 
 /**
@@ -8604,7 +8636,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
 
-  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), function() {
+  var successCbFn = function() {
     log.debug([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Local session description has been set ->'], sessionDescription);
 
@@ -8632,14 +8664,21 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
     });
+  };
 
-  }, function(error) {
+  var errorCbFn = function(error) {
     log.error([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local description failed setting ->'], error);
 
     pc.processingLocalSDP = false;
 
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  });
+  };
+
+  if (self._useSafariWebRTC) {
+    pc.setLocalDescription(new RTCSessionDescription(sessionDescription)).then(successCbFn).catch(errorCbFn);
+  }
+
+  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), successCbFn, errorCbFn);
 };
 
 Skylink.prototype.GET_PEERS_STATE = {
@@ -11010,6 +11049,7 @@ Skylink.prototype._loadInfo = function() {
   }
   adapter.webRTCReady(function () {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
+    self._useSafariWebRTC = !self._isUsingPlugin && window.webrtcDetectedBrowser === 'safari';
 
     // Prevent empty object returned when constructing the RTCPeerConnection object
     if (!(function () {
@@ -15206,14 +15246,16 @@ Skylink.prototype._offerHandler = function(message) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
+  var successCbFn = function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
     pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
-  }, function(error) {
+  };
+
+  var errorCbFn = function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
     pc.processingRemoteSDP = false;
@@ -15223,7 +15265,14 @@ Skylink.prototype._offerHandler = function(message) {
       state: pc.signalingState,
       offer: offer
     });
-  });
+  };
+
+  if (self._useSafariWebRTC) {
+    pc.setRemoteDescription(new RTCSessionDescription(offer)).then(successCbFn).catch(errorCbFn);
+
+  } else {
+    pc.setRemoteDescription(new RTCSessionDescription(offer), successCbFn, errorCbFn);
+  }
 };
 
 
@@ -15410,7 +15459,7 @@ Skylink.prototype._answerHandler = function(message) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  pc.setRemoteDescription(new RTCSessionDescription(answer), function() {
+  var successCbFn = function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
     pc.processingRemoteSDP = false;
@@ -15426,8 +15475,9 @@ Skylink.prototype._answerHandler = function(message) {
       log.warn([targetMid, 'RTCPeerConnection', null, 'Closing all datachannels as they were rejected.']);
       self._closeDataChannel(targetMid);
     }
+  };
 
-  }, function(error) {
+  var errorCbFn = function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
     pc.processingRemoteSDP = false;
@@ -15437,7 +15487,14 @@ Skylink.prototype._answerHandler = function(message) {
       state: pc.signalingState,
       answer: answer
     });
-  });
+  };
+
+  if (self._useSafariWebRTC) {
+    pc.setRemoteDescription(new RTCSessionDescription(answer)).then(successCbFn).catch(errorCbFn);
+
+  } else {
+    pc.setRemoteDescription(new RTCSessionDescription(answer), successCbFn, errorCbFn);
+  }
 };
 
 /**
@@ -16069,8 +16126,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
     // Parse stream settings
     var settings = self._parseStreamSettings(options);
-
-    navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+    var successCbFn = function (stream) {
       if (settings.mutedSettings.shouldAudioMuted) {
         self._streamsMutedSettings.audioMuted = true;
       }
@@ -16080,10 +16136,17 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       }
 
       self._onStreamAccessSuccess(stream, settings, false, false);
-
-    }, function (error) {
+    };
+    var errorCbFn = function (error) {
       self._onStreamAccessError(error, settings, false, false);
-    });
+    };
+
+    if (self._useSafariWebRTC) {
+      navigator.mediaDevices.getUserMedia(settings.getUserMediaSettings).then(successCbFn).catch(errorCbFn);
+
+    } else {
+      navigator.getUserMedia(settings.getUserMediaSettings, successCbFn, errorCbFn);
+    }
   }, 'getUserMedia', self._throttlingTimeouts.getUserMedia);
 };
 
@@ -16923,14 +16986,14 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         }
       }
 
-      navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+      var successCbFn = function (stream) {
         if (hasDefaultAudioTrack || !enableAudioSettings) {
           self._onStreamAccessSuccess(stream, settings, true, false);
           return;
         }
 
         settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
-        navigator.getUserMedia({ audio: getUserMediaAudioSettings }, function (audioStream) {
+        var audioSuccessCbFn = function (audioStream) {
           try {
             audioStream.addTrack(stream.getVideoTracks()[0]);
 
@@ -16946,14 +17009,31 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
             log.error('Failed retrieving audio stream for screensharing stream', error);
             self._onStreamAccessSuccess(stream, settings, true, false);
           }
-        }, function (error) {
+        };
+
+        var audioErrorCbFn = function (error) {
           log.error('Failed retrieving audio stream for screensharing stream', error);
           self._onStreamAccessSuccess(stream, settings, true, false);
-        });
-      }, function (error) {
-        self._onStreamAccessError(error, settings, true, false);
-      });
+        };
 
+        if (self._useSafariWebRTC) {
+          navigator.getUserMedia({ audio: getUserMediaAudioSettings }).then(successCbFn).catch(errorCbFn);
+
+        } else {
+          navigator.getUserMedia({ audio: getUserMediaAudioSettings }, successCbFn, errorCbFn);
+        }
+      };
+
+      var errorCbFn = function (error) {
+        self._onStreamAccessError(error, settings, true, false);
+      };
+
+      if (self._useSafariWebRTC) {
+        navigator.getUserMedia(settings.getUserMediaSettings).catch(successCbFn).then(errorCbFn);
+
+      } else {
+        navigator.getUserMedia(settings.getUserMediaSettings, successCbFn, errorCbFn);
+      }
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
@@ -17467,12 +17547,11 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
       diff: null
     }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKING, false, true);
 
-    navigator.getUserMedia({
-      audio: true
-    }, function (stream) {
+    var successCbFn = function (stream) {
       self._onStreamAccessSuccess(stream, settings, false, true);
+    };
 
-    }, function (error) {
+    var errorCbFn = function (error) {
       log.error('Failed fallbacking to retrieve audio only Stream ->', error);
 
       self._trigger('mediaAccessError', error, false, true);
@@ -17480,7 +17559,18 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
         error: error,
         diff: null
       }, self.MEDIA_ACCESS_FALLBACK_STATE.ERROR, false, true);
-    });
+    };
+
+    if (self._useSafariWebRTC) {
+      navigator.getUserMedia({
+        audio: true
+      }).then(successCbFn).catch(errorCbFn);
+
+    } else {
+      navigator.getUserMedia({
+        audio: true
+      }, successCbFn, errorCbFn);
+    }
     return;
   }
 
@@ -18500,15 +18590,6 @@ Skylink.prototype._getCodecsSupport = function (callback) {
         offerToReceiveVideo: true
       };
 
-      if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
-        offerConstraints = {
-          mandatory: {
-            OfferToReceiveVideo: true,
-            OfferToReceiveAudio: true
-          }
-        };
-      }
-
       // Prevent errors and proceed with create offer still...
       try {
         var channel = pc.createDataChannel('test');
@@ -18525,7 +18606,8 @@ Skylink.prototype._getCodecsSupport = function (callback) {
         }
       } catch (e) {}
 
-      pc.createOffer(function (offer) {
+      var successCbFn = function (offer) {
+        console.info(offer.sdp);
         var sdpLines = offer.sdp.split('\r\n');
         var mediaType = '';
 
@@ -18543,12 +18625,24 @@ Skylink.prototype._getCodecsSupport = function (callback) {
             self._currentCodecSupport[mediaType][codec] = info;
           }
         }
-
         callback(null);
+      };
 
-      }, function (error) {
+      var errorCbFn = function (error) {
         callback(error);
-      }, offerConstraints);
+      };
+
+      if (self._useSafariWebRTC) {
+        pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
+
+      } else {
+        pc.createOffer(successCbFn, errorCbFn, self._isUsingPlugin ? {
+          mandatory: {
+            OfferToReceiveVideo: offerConstraints.offerToReceiveAudio,
+            OfferToReceiveAudio: offerConstraints.offerToReceiveVideo
+          }
+        } : offerConstraints);
+      }
     }
   } catch (error) {
     callback(error);

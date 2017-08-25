@@ -1273,6 +1273,7 @@ Skylink.prototype._loadInfo = function() {
   }
   adapter.webRTCReady(function () {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
+    self._useSafariWebRTC = !self._isUsingPlugin && window.webrtcDetectedBrowser === 'safari';
 
     // Prevent empty object returned when constructing the RTCPeerConnection object
     if (!(function () {
