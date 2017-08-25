@@ -2147,7 +2147,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           if (self._useSafariWebRTC) {
             var tracks = updatedStream ? updatedStream.getTracks() : [];
 
-            pc.getSenders().then(function (sender) {
+            pc.getSenders().forEach(function (sender) {
               if (updatedStream) {
                 var hasTrack = false;
                 // Do not remove if the track matches what we already added
