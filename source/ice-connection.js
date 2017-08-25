@@ -119,9 +119,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
   if (self._forceTURNSSL) {
-    if (window.webrtcDetectedBrowser === 'chrome' ||
-      window.webrtcDetectedBrowser === 'safari' ||
-      window.webrtcDetectedBrowser === 'IE') {
+    if (window.webrtcDetectedBrowser === 'chrome' || self._isUsingPlugin) {
       useTURNSSLProtocol = true;
     } else {
       useTURNSSLPort = true;
@@ -260,7 +258,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   }
 
   // plugin supports .urls
-  if (window.webrtcDetectedBrowser === 'safari' || window.webrtcDetectedBrowser === 'IE') {
+  if (self._isUsingPlugin) {
     hasUrlsSupport = true;
   }
 

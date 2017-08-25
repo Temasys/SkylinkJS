@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 17:36:48 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 18:13:12 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -3279,7 +3279,7 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
       self._blobToArrayBuffer(dataChunk, onSendDataFn);
     } else if (!(dataChunk instanceof Blob) && sessionInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
       onSendDataFn(new Blob([dataChunk]));
-    } else if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && typeof dataChunk !== 'string') {
+    } else if (self._isUsingPlugin && typeof dataChunk !== 'string') {
       onSendDataFn(new Int8Array(dataChunk));
     } else {
       onSendDataFn(dataChunk);
@@ -5204,9 +5204,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
   if (self._forceTURNSSL) {
-    if (window.webrtcDetectedBrowser === 'chrome' ||
-      window.webrtcDetectedBrowser === 'safari' ||
-      window.webrtcDetectedBrowser === 'IE') {
+    if (window.webrtcDetectedBrowser === 'chrome' || self._isUsingPlugin) {
       useTURNSSLProtocol = true;
     } else {
       useTURNSSLPort = true;
@@ -5345,7 +5343,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   }
 
   // plugin supports .urls
-  if (window.webrtcDetectedBrowser === 'safari' || window.webrtcDetectedBrowser === 'IE') {
+  if (self._isUsingPlugin) {
     hasUrlsSupport = true;
   }
 

@@ -1505,7 +1505,7 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
       self._blobToArrayBuffer(dataChunk, onSendDataFn);
     } else if (!(dataChunk instanceof Blob) && sessionInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
       onSendDataFn(new Blob([dataChunk]));
-    } else if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && typeof dataChunk !== 'string') {
+    } else if (self._isUsingPlugin && typeof dataChunk !== 'string') {
       onSendDataFn(new Int8Array(dataChunk));
     } else {
       onSendDataFn(dataChunk);
