@@ -1930,8 +1930,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
         var peerSettings = clone(self.getPeerInfo(targetMid).settings);
 
-        self._streamsSession[targetMid][streamId] = self._streamsSession[targetMid][streamId] || {};
-        self._streamsSession[targetMid][streamId][track.kind] = peerSettings[track.kind];
+        self._streamsSession[targetMid][pc.remoteStreamId] = self._streamsSession[targetMid][pc.remoteStreamId] || {};
+        self._streamsSession[targetMid][pc.remoteStreamId][track.kind] = peerSettings[track.kind];
 
         if (track.kind === 'video') {
           pc.hasScreen = !!(peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare);

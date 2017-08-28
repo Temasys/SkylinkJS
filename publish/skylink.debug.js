@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 01:59:23 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 02:03:10 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -7327,8 +7327,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
         var peerSettings = clone(self.getPeerInfo(targetMid).settings);
 
-        self._streamsSession[targetMid][streamId] = self._streamsSession[targetMid][streamId] || {};
-        self._streamsSession[targetMid][streamId][track.kind] = peerSettings[track.kind];
+        self._streamsSession[targetMid][pc.remoteStreamId] = self._streamsSession[targetMid][pc.remoteStreamId] || {};
+        self._streamsSession[targetMid][pc.remoteStreamId][track.kind] = peerSettings[track.kind];
 
         if (track.kind === 'video') {
           pc.hasScreen = !!(peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare);

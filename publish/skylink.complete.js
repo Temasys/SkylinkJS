@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 01:59:23 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 02:03:10 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11983,7 +11983,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 01:59:23 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 02:03:10 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -19312,8 +19312,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
         var peerSettings = clone(self.getPeerInfo(targetMid).settings);
 
-        self._streamsSession[targetMid][streamId] = self._streamsSession[targetMid][streamId] || {};
-        self._streamsSession[targetMid][streamId][track.kind] = peerSettings[track.kind];
+        self._streamsSession[targetMid][pc.remoteStreamId] = self._streamsSession[targetMid][pc.remoteStreamId] || {};
+        self._streamsSession[targetMid][pc.remoteStreamId][track.kind] = peerSettings[track.kind];
 
         if (track.kind === 'video') {
           pc.hasScreen = !!(peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare);
