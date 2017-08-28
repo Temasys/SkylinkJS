@@ -1596,7 +1596,6 @@ Skylink.prototype._offerHandler = function(message) {
     
     if (self._useSafariWebRTC && pc.remoteStreamTrigger) {
       self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
-      debugger;
       pc.remoteStreamTrigger = false;
     }
 
@@ -1828,7 +1827,6 @@ Skylink.prototype._answerHandler = function(message) {
 
     if (self._useSafariWebRTC && pc.remoteStreamTrigger) {
       self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
-      debugger;
       pc.remoteStreamTrigger = false;
     }
   };

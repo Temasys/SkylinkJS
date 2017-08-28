@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 00:33:29 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 01:29:03 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -15318,7 +15318,6 @@ Skylink.prototype._offerHandler = function(message) {
     
     if (self._useSafariWebRTC && pc.remoteStreamTrigger) {
       self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
-      debugger;
       pc.remoteStreamTrigger = false;
     }
 
@@ -15550,7 +15549,6 @@ Skylink.prototype._answerHandler = function(message) {
 
     if (self._useSafariWebRTC && pc.remoteStreamTrigger) {
       self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
-      debugger;
       pc.remoteStreamTrigger = false;
     }
   };
