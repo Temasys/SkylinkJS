@@ -418,15 +418,28 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
  * @since 0.6.16
  */
 Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescription) {
-  if (this._useSafariWebRTC) {
-    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
-      'Not enforcing MediaStream IDs for Safari 11 WebRTC implementation']);
-    return sessionDescription.sdp;
+  var localStream = null;
+  var localStreamId = null;
 
-  } else if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].getLocalStreams().length > 0)) {
-    log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
-      'Not enforcing MediaStream IDs as no Streams is sent.']);
-    return sessionDescription.sdp;
+  if (this._useSafariWebRTC) {
+    if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].localStream)) {
+      log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not enforcing MediaStream IDs as no Streams is sent.']);
+      return sessionDescription.sdp;
+    }
+
+    localStream = this._peerConnections[targetMid].localStream;
+    localStreamId = this._peerConnections[targetMid].localStreamId || this._peerConnections[targetMid].localStream.id;
+
+  } else {
+    if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].getLocalStreams().length > 0)) {
+      log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not enforcing MediaStream IDs as no Streams is sent.']);
+      return sessionDescription.sdp;
+    }
+
+    localStream = this._peerConnections[targetMid].getLocalStreams()[0];
+    localStreamId = localStream.id || localStream.label;
   }
 
   var sessionDescriptionStr = sessionDescription.sdp;
@@ -437,8 +450,6 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 
   var sdpLines = sessionDescriptionStr.split('\r\n');
   var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
-  var localStream = this._peerConnections[targetMid].getLocalStreams()[0];
-  var localStreamId = localStream.id || localStream.label;
 
   var parseFn = function (type, tracks) {
     if (tracks.length === 0) {
@@ -558,6 +569,58 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
   }*/
 
   return outputStr;
+};
+
+/**
+ * Function that parses the session description to get the MediaStream IDs.
+ * NOTE: It might not completely accurate if the setRemoteDescription() fails..
+ * @method _getSDPMediaStreamIDs
+ * @private
+ * @for Skylink
+ * @since 0.6.25
+ */
+Skylink.prototype._getSDPMediaStreamIDs = function (targetMid, sessionDescription) {
+  if (!this._peerConnections[targetMid]) {
+    return;
+  }
+
+  if (!(sessionDescription && sessionDescription.sdp) || !this._useSafariWebRTC) {
+    this._peerConnections[targetMid].remoteStream = null;
+    this._peerConnections[targetMid].remoteStreamId = null;
+    return;
+  }
+
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var currentStreamId = null;
+
+  for (var i = 0; i < sdpLines.length; i++) {
+    // a=msid:{31145dc5-b3e2-da4c-a341-315ef3ebac6b} {e0cac7dd-64a0-7447-b719-7d5bf042ca05}
+    if (sdpLines[i].indexOf('a=msid:') === 0) {
+      currentStreamId = (sdpLines[i].split('a=msid:')[1] || '').split(' ')[0];
+      break;
+    // a=ssrc:691169016 msid:c58721ed-b7db-4e7c-ac37-47432a7a2d6f 2e27a4b8-bc74-4118-b3d4-0f1c4ed4869b
+    } else if (sdpLines[i].indexOf('a=ssrc:') === 0 && sdpLines[i].indexOf(' msid:') > 0) {
+      currentStreamId = (sdpLines[i].split(' msid:')[1] || '').split(' ')[0];
+      break;
+    }
+  }
+
+  // No stream set
+  if (!currentStreamId) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'No remote stream is sent.']);
+    this._peerConnections[targetMid].remoteStream = null;
+    this._peerConnections[targetMid].remoteStreamTrigger = false;
+  // New stream set
+  } else if (currentStreamId !== this._peerConnections[targetMid].remoteStreamId) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'New remote stream is sent ->'], currentStreamId);
+    this._peerConnections[targetMid].remoteStream = new MediaStream();
+    this._peerConnections[targetMid].remoteStreamId = currentStreamId;
+    this._peerConnections[targetMid].remoteStreamTrigger = true;
+  // Same stream set
+  } else {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Same remote stream is sent ->'], currentStreamId);
+    this._peerConnections[targetMid].remoteStreamTrigger = false;
+  }
 };
 
 /**

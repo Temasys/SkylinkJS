@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Mon Aug 28 2017 15:20:31 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Mon Aug 28 2017 18:55:31 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -6606,10 +6606,10 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
           try {
             if (obj.mediaType === 'video' && dirType === 'receiving') {
               var captureStartNtpTimeMs = parseInt(obj.googCaptureStartNtpTimeMs || '0', 10);
+              var streamId = self._useSafariWebRTC ? pc.remoteStreamId : (pc.getRemoteStreams().length > 0 ?
+                pc.getRemoteStreams()[0].id || pc.getRemoteStreams()[0].label : null) ;
 
-              if (captureStartNtpTimeMs > 0 && pc.getRemoteStreams().length > 0 && document &&
-                typeof document.getElementsByTagName === 'function') {
-                var streamId = pc.getRemoteStreams()[0].id || pc.getRemoteStreams()[0].label;
+              if (captureStartNtpTimeMs > 0 && streamId && document && typeof document.getElementsByTagName === 'function') {
                 var elements = [];
 
                 if (self._isUsingPlugin) {
@@ -7261,6 +7261,12 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
   pc.processingRemoteSDP = false;
   pc.gathered = false;
   pc.gathering = false;
+  // Used for safari 11
+  pc.localStreamId = null;
+  pc.remoteStreamId = null;
+  pc.remoteStream = null;
+  pc.localStream = null;
+  pc.remoteStreamTrigger = false;
 
   // candidates
   self._gatheredCandidates[targetMid] = {
@@ -7299,42 +7305,75 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
   };
 
-  pc.onaddstream = function(event) {
-    if (!self._peerConnections[targetMid]) {
-      return;
-    }
+  if (self._useSafariWebRTC) {
+    pc.ontrack = function (event) {
+      if (!self._peerConnections[targetMid]) {
+        return;
+      }
+      
+      var track = event.track;
 
-    var stream = event.stream || event;
-    var streamId = stream.id || stream.label;
+      if (targetMid === 'MCU') {
+        log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received remote track from MCU ->'], track);
+        return;
+      } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
+        log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received empty remote track ->'], track);
+        return;
+      }
 
-    if (targetMid === 'MCU') {
-      log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received remote stream from MCU ->'], stream);
-      return;
-    } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
-      log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
-      return;
-    }
+      if (pc.remoteStream) {
+        pc.hasStream = true;
+        pc.remoteStream.addTrack(track);
 
-    // Fixes for the dirty-hack for Chrome offer to Firefox (inactive)
-    // See: ESS-680
-    if (!self._hasMCU && window.webrtcDetectedBrowser === 'firefox' &&
-      pc.getRemoteStreams().length > 1 && pc.remoteDescription && pc.remoteDescription.sdp) {
+        var peerSettings = clone(self.getPeerInfo(targetMid).settings);
 
-      if (pc.remoteDescription.sdp.indexOf(' msid:' + streamId + ' ') === -1) {
+        self._streamsSession[targetMid][streamId] = self._streamsSession[targetMid][streamId] || {};
+        self._streamsSession[targetMid][streamId][track.kind] = peerSettings[track.kind];
+
+        if (track.kind === 'video') {
+          pc.hasScreen = !!(peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare);
+        }
+      }
+    };
+
+  } else {
+    pc.onaddstream = function(event) {
+      if (!self._peerConnections[targetMid]) {
+        return;
+      }
+
+      var stream = event.stream || event;
+      var streamId = stream.id || stream.label;
+
+      if (targetMid === 'MCU') {
+        log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received remote stream from MCU ->'], stream);
+        return;
+      } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
         log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
         return;
       }
-    }
 
-    var peerSettings = clone(self.getPeerInfo(targetMid).settings);
-    var hasScreenshare = peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare;
+      // Fixes for the dirty-hack for Chrome offer to Firefox (inactive)
+      // See: ESS-680
+      if (!self._hasMCU && window.webrtcDetectedBrowser === 'firefox' &&
+        pc.getRemoteStreams().length > 1 && pc.remoteDescription && pc.remoteDescription.sdp) {
 
-    pc.hasStream = true;
-    pc.hasScreen = !!hasScreenshare;
+        if (pc.remoteDescription.sdp.indexOf(' msid:' + streamId + ' ') === -1) {
+          log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
+          return;
+        }
+      }
 
-    self._streamsSession[targetMid][streamId] = peerSettings;
-    self._onRemoteStreamAdded(targetMid, stream, !!hasScreenshare);
-  };
+      var peerSettings = clone(self.getPeerInfo(targetMid).settings);
+      var hasScreenshare = peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare;
+
+      pc.hasStream = true;
+      pc.hasScreen = !!hasScreenshare;
+
+      self._streamsSession[targetMid][streamId] = peerSettings;
+      self._onRemoteStreamAdded(targetMid, stream, !!hasScreenshare);
+    };
+  }
 
   pc.onicecandidate = function(event) {
     self._onIceCandidate(targetMid, event.candidate || event);
@@ -8025,24 +8064,34 @@ Skylink.prototype.getPeersStream = function() {
 
   for (var i = 0; i < listOfPeers.length; i++) {
     var stream = null;
+    var streamId = null;
 
     if (this._peerConnections[listOfPeers[i]] &&
       this._peerConnections[listOfPeers[i]].remoteDescription &&
       this._peerConnections[listOfPeers[i]].remoteDescription.sdp &&
       (this._sdpSettings.direction.audio.receive || this._sdpSettings.direction.video.receive)) {
-      var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
 
-      for (var j = 0; j < streams.length; j++) {
-        if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
-          'msid:' + (streams[j].id || streams[j].label)) > 0) {
-          stream = streams[j];
-          break;
+      if (self._useSafariWebRTC) {
+        stream = this._peerConnections[listOfPeers[i]].remoteStream;
+        streamId = this._peerConnections[listOfPeers[i]].remoteStreamId;
+
+      } else {
+        var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
+
+        for (var j = 0; j < streams.length; j++) {
+          if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
+            'msid:' + (streams[j].id || streams[j].label)) > 0) {
+            stream = streams[j];
+            break;
+          }
         }
+
+        streamId = stream ? stream.id || stream.label || null : null;
       }
     }
 
     listOfPeersStreams[listOfPeers[i]] = {
-      streamId: stream ? stream.id || stream.label || null : null,
+      streamId: streamId,
       stream: stream,
       isSelf: false
     };
@@ -8266,35 +8315,48 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
   
 
   if (self._peerConnections[usePeerId] && self._peerConnections[usePeerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-    var streams = self._peerConnections[peerId].getLocalStreams();
-
     customSettings.settings.data = self._enableDataChannel && self._peerInformations[peerId].config.enableDataChannel;
 
-    for (var s = 0; s < streams.length; s++) {
-      if (self._streams.screenshare && self._streams.screenshare.stream && (streams[s].id ||
-        streams[s].label) === (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
+    var parseStreamFn = function (stream, streamId) {
+      if (self._streams.screenshare && self._streams.screenshare.stream && streamId ===
+        (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
         customSettings.settings.audio = clone(self._streams.screenshare.settings.audio);
         customSettings.settings.video = clone(self._streams.screenshare.settings.video);
         customSettings.mediaStatus = clone(self._streamsMutedSettings);
-        break;
-      } else if (self._streams.userMedia && self._streams.userMedia.stream && (streams[s].id ||
-        streams[s].label) === (self._streams.userMedia.stream.id ||
-        self._streams.userMedia.stream.label)) {
+        return true;
+
+      } else if (self._streams.userMedia && self._streams.userMedia.stream && streamId ===
+        (self._streams.userMedia.stream.id || self._streams.userMedia.stream.label)) {
         customSettings.settings.audio = clone(self._streams.userMedia.settings.audio);
         customSettings.settings.video = clone(self._streams.userMedia.settings.video);
         customSettings.mediaStatus = clone(self._streamsMutedSettings);
-        break;
+        return true;
+
       } else if (window.webrtcDetectedBrowser === 'edge') {
         customSettings.settings.audio = clone(self._streams.userMedia.settings.audio);
         customSettings.settings.video = clone(self._streams.userMedia.settings.video);
         customSettings.mediaStatus = clone(self._streamsMutedSettings);
-        if (streams[s].getAudioTracks().length === 0) {
+        if (stream.getAudioTracks().length === 0) {
           customSettings.settings.audio = false;
           customSettings.mediaStatus.audioMuted = true;
         }
-        if (streams[s].getVideoTracks().length === 0) {
+        if (stream.getVideoTracks().length === 0) {
           customSettings.settings.video = false;
           customSettings.mediaStatus.videoMuted = true;
+        }
+      }
+    };
+
+    if (self._useSafariWebRTC) {
+      parseStreamFn(self._peerConnections[peerId].localStream, self._peerConnections[peerId].localStreamId);
+
+    } else {
+      var streams = self._peerConnections[peerId].getLocalStreams();
+      
+      for (var s = 0; s < streams.length; s++) {
+        var shouldBreak = parseStreamFn(streams[s], streams[s].id || streams[s].label);
+        if (shouldBreak) {
+          break;
         }
       }
     }
@@ -15253,6 +15315,11 @@ Skylink.prototype._offerHandler = function(message) {
     pc.setOffer = 'remote';
     pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
+    
+    if (self._useSafariWebRTC && pc.remoteStreamTrigger) {
+      self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
+    }
+
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
   };
@@ -15270,6 +15337,7 @@ Skylink.prototype._offerHandler = function(message) {
   };
 
   if (self._useSafariWebRTC) {
+    self._getSDPMediaStreamIDs(offer);
     pc.setRemoteDescription(new RTCSessionDescription(offer)).then(successCbFn).catch(errorCbFn);
 
   } else {
@@ -15477,6 +15545,10 @@ Skylink.prototype._answerHandler = function(message) {
       log.warn([targetMid, 'RTCPeerConnection', null, 'Closing all datachannels as they were rejected.']);
       self._closeDataChannel(targetMid);
     }
+
+    if (self._useSafariWebRTC && pc.remoteStreamTrigger) {
+      self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
+    }
   };
 
   var errorCbFn = function(error) {
@@ -15492,6 +15564,7 @@ Skylink.prototype._answerHandler = function(message) {
   };
 
   if (self._useSafariWebRTC) {
+    self._getSDPMediaStreamIDs(answer);
     pc.setRemoteDescription(new RTCSessionDescription(answer)).then(successCbFn).catch(errorCbFn);
 
   } else {
@@ -17590,11 +17663,11 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
  */
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
+  var streamId = self._useSafariWebRTC ? (self._peerConnections[targetMid] &&
+    self._peerConnections[targetMid].remoteStreamId) : stream.id || stream.label;
 
   if (!self._peerInformations[targetMid]) {
-    log.warn([targetMid, 'MediaStream', stream.id,
-      'Received remote stream when peer is not connected. ' +
-      'Ignoring stream ->'], stream);
+    log.warn([targetMid, 'MediaStream', streamId, 'Received remote stream when peer is not connected. Ignoring stream ->'], stream);
     return;
   }
 
@@ -17605,13 +17678,13 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
       ], stream);
     return;
   }*/
-  log.log([targetMid, 'MediaStream', stream.id, 'Received remote stream ->'], stream);
+  log.log([targetMid, 'MediaStream', streamId, 'Received remote stream ->'], stream);
 
   if (isScreenSharing) {
-    log.log([targetMid, 'MediaStream', stream.id, 'Peer is having a screensharing session with user']);
+    log.log([targetMid, 'MediaStream', streamId, 'Peer is having a screensharing session with user']);
   }
 
-  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid), isScreenSharing, stream.id || stream.label);
+  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid), isScreenSharing, streamId);
   self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
 };
 
@@ -17667,6 +17740,9 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
             tracks.forEach(function (track) {
               pc.addTrack(track);
             });
+
+            pc.localStreamId = updatedStream ? updatedStream.id : null;
+            pc.localStream = updatedStream || null;
 
           } else {
             var hasStream = false;
@@ -17757,12 +17833,18 @@ Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
 
     if (!checkStreamId && self._peerConnections[peerId] &&
       self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-      var streams = self._peerConnections[peerId].getRemoteStreams();
-
-      for (var i = 0; i < streams.length; i++) {
-        if (streamId === (streams[i].id || streams[i].label)) {
+      if (self._useSafariWebRTC) {
+        if (streamId === self._peerConnections[peerId].remoteStreamId) {
           shouldTrigger = false;
-          break;
+        }
+      } else {
+        var streams = self._peerConnections[peerId].getRemoteStreams();
+
+        for (var i = 0; i < streams.length; i++) {
+          if (streamId === (streams[i].id || streams[i].label)) {
+            shouldTrigger = false;
+            break;
+          }
         }
       }
     }
@@ -18201,15 +18283,28 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
  * @since 0.6.16
  */
 Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescription) {
-  if (this._useSafariWebRTC) {
-    log.warn([targetMid, 'RTCSessionDesription', sessionDescription.type,
-      'Not enforcing MediaStream IDs for Safari 11 WebRTC implementation']);
-    return sessionDescription.sdp;
+  var localStream = null;
+  var localStreamId = null;
 
-  } else if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].getLocalStreams().length > 0)) {
-    log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
-      'Not enforcing MediaStream IDs as no Streams is sent.']);
-    return sessionDescription.sdp;
+  if (this._useSafariWebRTC) {
+    if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].localStream)) {
+      log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not enforcing MediaStream IDs as no Streams is sent.']);
+      return sessionDescription.sdp;
+    }
+
+    localStream = this._peerConnections[targetMid].localStream;
+    localStreamId = this._peerConnections[targetMid].localStreamId || this._peerConnections[targetMid].localStream.id;
+
+  } else {
+    if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].getLocalStreams().length > 0)) {
+      log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Not enforcing MediaStream IDs as no Streams is sent.']);
+      return sessionDescription.sdp;
+    }
+
+    localStream = this._peerConnections[targetMid].getLocalStreams()[0];
+    localStreamId = localStream.id || localStream.label;
   }
 
   var sessionDescriptionStr = sessionDescription.sdp;
@@ -18220,8 +18315,6 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 
   var sdpLines = sessionDescriptionStr.split('\r\n');
   var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
-  var localStream = this._peerConnections[targetMid].getLocalStreams()[0];
-  var localStreamId = localStream.id || localStream.label;
 
   var parseFn = function (type, tracks) {
     if (tracks.length === 0) {
@@ -18341,6 +18434,58 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
   }*/
 
   return outputStr;
+};
+
+/**
+ * Function that parses the session description to get the MediaStream IDs.
+ * NOTE: It might not completely accurate if the setRemoteDescription() fails..
+ * @method _getSDPMediaStreamIDs
+ * @private
+ * @for Skylink
+ * @since 0.6.25
+ */
+Skylink.prototype._getSDPMediaStreamIDs = function (targetMid, sessionDescription) {
+  if (!this._peerConnections[targetMid]) {
+    return;
+  }
+
+  if (!(sessionDescription && sessionDescription.sdp) || !this._useSafariWebRTC) {
+    this._peerConnections[targetMid].remoteStream = null;
+    this._peerConnections[targetMid].remoteStreamId = null;
+    return;
+  }
+
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var currentStreamId = null;
+
+  for (var i = 0; i < sdpLines.length; i++) {
+    // a=msid:{31145dc5-b3e2-da4c-a341-315ef3ebac6b} {e0cac7dd-64a0-7447-b719-7d5bf042ca05}
+    if (sdpLines[i].indexOf('a=msid:') === 0) {
+      currentStreamId = (sdpLines[i].split('a=msid:')[1] || '').split(' ')[0];
+      break;
+    // a=ssrc:691169016 msid:c58721ed-b7db-4e7c-ac37-47432a7a2d6f 2e27a4b8-bc74-4118-b3d4-0f1c4ed4869b
+    } else if (sdpLines[i].indexOf('a=ssrc:') === 0 && sdpLines[i].indexOf(' msid:') > 0) {
+      currentStreamId = (sdpLines[i].split(' msid:')[1] || '').split(' ')[0];
+      break;
+    }
+  }
+
+  // No stream set
+  if (!currentStreamId) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'No remote stream is sent.']);
+    this._peerConnections[targetMid].remoteStream = null;
+    this._peerConnections[targetMid].remoteStreamTrigger = false;
+  // New stream set
+  } else if (currentStreamId !== this._peerConnections[targetMid].remoteStreamId) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'New remote stream is sent ->'], currentStreamId);
+    this._peerConnections[targetMid].remoteStream = new MediaStream();
+    this._peerConnections[targetMid].remoteStreamId = currentStreamId;
+    this._peerConnections[targetMid].remoteStreamTrigger = true;
+  // Same stream set
+  } else {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Same remote stream is sent ->'], currentStreamId);
+    this._peerConnections[targetMid].remoteStreamTrigger = false;
+  }
 };
 
 /**

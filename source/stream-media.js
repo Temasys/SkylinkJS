@@ -2092,11 +2092,11 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
  */
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
+  var streamId = self._useSafariWebRTC ? (self._peerConnections[targetMid] &&
+    self._peerConnections[targetMid].remoteStreamId) : stream.id || stream.label;
 
   if (!self._peerInformations[targetMid]) {
-    log.warn([targetMid, 'MediaStream', stream.id,
-      'Received remote stream when peer is not connected. ' +
-      'Ignoring stream ->'], stream);
+    log.warn([targetMid, 'MediaStream', streamId, 'Received remote stream when peer is not connected. Ignoring stream ->'], stream);
     return;
   }
 
@@ -2107,13 +2107,13 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
       ], stream);
     return;
   }*/
-  log.log([targetMid, 'MediaStream', stream.id, 'Received remote stream ->'], stream);
+  log.log([targetMid, 'MediaStream', streamId, 'Received remote stream ->'], stream);
 
   if (isScreenSharing) {
-    log.log([targetMid, 'MediaStream', stream.id, 'Peer is having a screensharing session with user']);
+    log.log([targetMid, 'MediaStream', streamId, 'Peer is having a screensharing session with user']);
   }
 
-  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid), isScreenSharing, stream.id || stream.label);
+  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid), isScreenSharing, streamId);
   self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
 };
 
@@ -2169,6 +2169,9 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
             tracks.forEach(function (track) {
               pc.addTrack(track);
             });
+
+            pc.localStreamId = updatedStream ? updatedStream.id : null;
+            pc.localStream = updatedStream || null;
 
           } else {
             var hasStream = false;
@@ -2259,12 +2262,18 @@ Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
 
     if (!checkStreamId && self._peerConnections[peerId] &&
       self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-      var streams = self._peerConnections[peerId].getRemoteStreams();
-
-      for (var i = 0; i < streams.length; i++) {
-        if (streamId === (streams[i].id || streams[i].label)) {
+      if (self._useSafariWebRTC) {
+        if (streamId === self._peerConnections[peerId].remoteStreamId) {
           shouldTrigger = false;
-          break;
+        }
+      } else {
+        var streams = self._peerConnections[peerId].getRemoteStreams();
+
+        for (var i = 0; i < streams.length; i++) {
+          if (streamId === (streams[i].id || streams[i].label)) {
+            shouldTrigger = false;
+            break;
+          }
         }
       }
     }

@@ -1209,10 +1209,10 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
           try {
             if (obj.mediaType === 'video' && dirType === 'receiving') {
               var captureStartNtpTimeMs = parseInt(obj.googCaptureStartNtpTimeMs || '0', 10);
+              var streamId = self._useSafariWebRTC ? pc.remoteStreamId : (pc.getRemoteStreams().length > 0 ?
+                pc.getRemoteStreams()[0].id || pc.getRemoteStreams()[0].label : null) ;
 
-              if (captureStartNtpTimeMs > 0 && pc.getRemoteStreams().length > 0 && document &&
-                typeof document.getElementsByTagName === 'function') {
-                var streamId = pc.getRemoteStreams()[0].id || pc.getRemoteStreams()[0].label;
+              if (captureStartNtpTimeMs > 0 && streamId && document && typeof document.getElementsByTagName === 'function') {
                 var elements = [];
 
                 if (self._isUsingPlugin) {
@@ -1864,6 +1864,12 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
   pc.processingRemoteSDP = false;
   pc.gathered = false;
   pc.gathering = false;
+  // Used for safari 11
+  pc.localStreamId = null;
+  pc.remoteStreamId = null;
+  pc.remoteStream = null;
+  pc.localStream = null;
+  pc.remoteStreamTrigger = false;
 
   // candidates
   self._gatheredCandidates[targetMid] = {
@@ -1902,42 +1908,75 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
   };
 
-  pc.onaddstream = function(event) {
-    if (!self._peerConnections[targetMid]) {
-      return;
-    }
+  if (self._useSafariWebRTC) {
+    pc.ontrack = function (event) {
+      if (!self._peerConnections[targetMid]) {
+        return;
+      }
+      
+      var track = event.track;
 
-    var stream = event.stream || event;
-    var streamId = stream.id || stream.label;
+      if (targetMid === 'MCU') {
+        log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received remote track from MCU ->'], track);
+        return;
+      } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
+        log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received empty remote track ->'], track);
+        return;
+      }
 
-    if (targetMid === 'MCU') {
-      log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received remote stream from MCU ->'], stream);
-      return;
-    } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
-      log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
-      return;
-    }
+      if (pc.remoteStream) {
+        pc.hasStream = true;
+        pc.remoteStream.addTrack(track);
 
-    // Fixes for the dirty-hack for Chrome offer to Firefox (inactive)
-    // See: ESS-680
-    if (!self._hasMCU && window.webrtcDetectedBrowser === 'firefox' &&
-      pc.getRemoteStreams().length > 1 && pc.remoteDescription && pc.remoteDescription.sdp) {
+        var peerSettings = clone(self.getPeerInfo(targetMid).settings);
 
-      if (pc.remoteDescription.sdp.indexOf(' msid:' + streamId + ' ') === -1) {
+        self._streamsSession[targetMid][streamId] = self._streamsSession[targetMid][streamId] || {};
+        self._streamsSession[targetMid][streamId][track.kind] = peerSettings[track.kind];
+
+        if (track.kind === 'video') {
+          pc.hasScreen = !!(peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare);
+        }
+      }
+    };
+
+  } else {
+    pc.onaddstream = function(event) {
+      if (!self._peerConnections[targetMid]) {
+        return;
+      }
+
+      var stream = event.stream || event;
+      var streamId = stream.id || stream.label;
+
+      if (targetMid === 'MCU') {
+        log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received remote stream from MCU ->'], stream);
+        return;
+      } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
         log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
         return;
       }
-    }
 
-    var peerSettings = clone(self.getPeerInfo(targetMid).settings);
-    var hasScreenshare = peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare;
+      // Fixes for the dirty-hack for Chrome offer to Firefox (inactive)
+      // See: ESS-680
+      if (!self._hasMCU && window.webrtcDetectedBrowser === 'firefox' &&
+        pc.getRemoteStreams().length > 1 && pc.remoteDescription && pc.remoteDescription.sdp) {
 
-    pc.hasStream = true;
-    pc.hasScreen = !!hasScreenshare;
+        if (pc.remoteDescription.sdp.indexOf(' msid:' + streamId + ' ') === -1) {
+          log.warn([targetMid, 'MediaStream', streamId, 'Ignoring received empty remote stream ->'], stream);
+          return;
+        }
+      }
 
-    self._streamsSession[targetMid][streamId] = peerSettings;
-    self._onRemoteStreamAdded(targetMid, stream, !!hasScreenshare);
-  };
+      var peerSettings = clone(self.getPeerInfo(targetMid).settings);
+      var hasScreenshare = peerSettings.video && typeof peerSettings.video === 'object' && !!peerSettings.video.screenshare;
+
+      pc.hasStream = true;
+      pc.hasScreen = !!hasScreenshare;
+
+      self._streamsSession[targetMid][streamId] = peerSettings;
+      self._onRemoteStreamAdded(targetMid, stream, !!hasScreenshare);
+    };
+  }
 
   pc.onicecandidate = function(event) {
     self._onIceCandidate(targetMid, event.candidate || event);
