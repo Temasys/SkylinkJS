@@ -1521,10 +1521,10 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         };
 
         if (self._useSafariWebRTC) {
-          navigator.mediaDevices.getUserMedia({ audio: getUserMediaAudioSettings }).then(successCbFn).catch(errorCbFn);
+          navigator.mediaDevices.getUserMedia({ audio: getUserMediaAudioSettings }).then(audioSuccessCbFn).catch(audioErrorCbFn);
 
         } else {
-          navigator.getUserMedia({ audio: getUserMediaAudioSettings }, successCbFn, errorCbFn);
+          navigator.getUserMedia({ audio: getUserMediaAudioSettings }, audioSuccessCbFn, audioErrorCbFn);
         }
       };
 
