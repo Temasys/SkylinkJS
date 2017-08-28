@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Fri Aug 25 2017 19:07:51 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Mon Aug 28 2017 15:20:31 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -17019,7 +17019,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         };
 
         if (self._useSafariWebRTC) {
-          navigator.getUserMedia({ audio: getUserMediaAudioSettings }).then(successCbFn).catch(errorCbFn);
+          navigator.mediaDevices.getUserMedia({ audio: getUserMediaAudioSettings }).then(successCbFn).catch(errorCbFn);
 
         } else {
           navigator.getUserMedia({ audio: getUserMediaAudioSettings }, successCbFn, errorCbFn);
@@ -17031,7 +17031,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       };
 
       if (self._useSafariWebRTC) {
-        navigator.getUserMedia(settings.getUserMediaSettings).catch(successCbFn).then(errorCbFn);
+        navigator.mediaDevices.getUserMedia(settings.getUserMediaSettings).catch(successCbFn).then(errorCbFn);
 
       } else {
         navigator.getUserMedia(settings.getUserMediaSettings, successCbFn, errorCbFn);
@@ -17564,7 +17564,7 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
     };
 
     if (self._useSafariWebRTC) {
-      navigator.getUserMedia({
+      navigator.mediaDevices.getUserMedia({
         audio: true
       }).then(successCbFn).catch(errorCbFn);
 

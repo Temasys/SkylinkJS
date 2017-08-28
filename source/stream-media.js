@@ -1521,7 +1521,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         };
 
         if (self._useSafariWebRTC) {
-          navigator.getUserMedia({ audio: getUserMediaAudioSettings }).then(successCbFn).catch(errorCbFn);
+          navigator.mediaDevices.getUserMedia({ audio: getUserMediaAudioSettings }).then(successCbFn).catch(errorCbFn);
 
         } else {
           navigator.getUserMedia({ audio: getUserMediaAudioSettings }, successCbFn, errorCbFn);
@@ -1533,7 +1533,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       };
 
       if (self._useSafariWebRTC) {
-        navigator.getUserMedia(settings.getUserMediaSettings).catch(successCbFn).then(errorCbFn);
+        navigator.mediaDevices.getUserMedia(settings.getUserMediaSettings).catch(successCbFn).then(errorCbFn);
 
       } else {
         navigator.getUserMedia(settings.getUserMediaSettings, successCbFn, errorCbFn);
@@ -2066,7 +2066,7 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
     };
 
     if (self._useSafariWebRTC) {
-      navigator.getUserMedia({
+      navigator.mediaDevices.getUserMedia({
         audio: true
       }).then(successCbFn).catch(errorCbFn);
 
