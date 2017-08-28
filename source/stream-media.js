@@ -2159,10 +2159,10 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
                   }
                 }
                 if (!hasTrack) {
-                  pc.removeTrack(sender.track);
+                  pc.removeTrack(sender);
                 }
               } else {
-                pc.removeTrack(sender.track);
+                pc.removeTrack(sender);
               }
             });
 

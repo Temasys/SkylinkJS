@@ -574,12 +574,12 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
 /**
  * Function that parses the session description to get the MediaStream IDs.
  * NOTE: It might not completely accurate if the setRemoteDescription() fails..
- * @method _getSDPMediaStreamIDs
+ * @method _parseSDPMediaStreamIDs
  * @private
  * @for Skylink
  * @since 0.6.25
  */
-Skylink.prototype._getSDPMediaStreamIDs = function (targetMid, sessionDescription) {
+Skylink.prototype._parseSDPMediaStreamIDs = function (targetMid, sessionDescription) {
   if (!this._peerConnections[targetMid]) {
     return;
   }
