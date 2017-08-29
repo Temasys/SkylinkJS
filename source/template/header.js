@@ -1194,4 +1194,14 @@ function Skylink() {
    * @since 0.6.25
    */
   this._useSafariWebRTC = false;
+
+  /**
+   * Stores the flag to enable simultaneous data transfers.
+   * @attribute _enableSimultaneousTransfers
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.25
+   */
+  this._enableSimultaneousTransfers = true;
 }
