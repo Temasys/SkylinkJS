@@ -1740,11 +1740,22 @@ Skylink.prototype._removePeer = function(peerId) {
     this._trigger('serverPeerLeft', peerId, this.SERVER_PEER_TYPE.MCU);
   }
 
-  // check if health timer exists
   if (this._peerConnections[peerId]) {
     if (this._peerConnections[peerId].signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
       this._peerConnections[peerId].close();
+      // Polyfill for safari 11 "closed" event not triggered for "iceConnectionState" and "signalingState".
+      if (this._useSafariWebRTC) {
+        if (!this._peerConnections[peerId].signalingStateClosed) {
+          this._peerConnections[peerId].signalingStateClosed = true;
+          this._trigger('peerConnectionState', this.PEER_CONNECTION_STATE.CLOSED, peerId);
+        }
+        if (!this._peerConnections[peerId].iceConnectionStateClosed) {
+          this._peerConnections[peerId].iceConnectionStateClosed = true;
+          this._trigger('iceConnectionState', this.ICE_CONNECTION_STATE.CLOSED, peerId);
+        }
+      }
     }
+    
     if (peerId !== 'MCU') {
       this._handleEndedStreams(peerId);
     }
@@ -1865,6 +1876,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
   pc.gathered = false;
   pc.gathering = false;
   // Used for safari 11
+  pc.iceConnectionStateClosed = false;
+  pc.signalingStateClosed = false;
   pc.localStreamId = null;
   pc.remoteStreamId = null;
   pc.remoteStream = null;
@@ -1995,6 +2008,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       }
     }
 
+    if (self._useSafariWebRTC && iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED) {
+      setTimeout(function () {
+        if (!pc.iceConnectionStateClosed) {
+          self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.CLOSED, targetMid);
+        }
+      }, 10);
+      return;
+    }
+
     self._trigger('iceConnectionState', iceConnectionState, targetMid);
 
     if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
@@ -2072,6 +2094,16 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
   pc.onsignalingstatechange = function() {
     log.debug([targetMid, 'RTCSignalingState', null, 'Peer connection state changed ->'], pc.signalingState);
+
+    if (self._useSafariWebRTC && pc.signalingState === self.PEER_CONNECTION_STATE.CLOSED) {
+      setTimeout(function () {
+        if (!pc.signalingStateClosed) {
+          self._trigger('peerConnectionState', self.PEER_CONNECTION_STATE.CLOSED, targetMid);
+        }
+      }, 10);
+      return;
+    }
+
     self._trigger('peerConnectionState', pc.signalingState, targetMid);
   };
   pc.onicegatheringstatechange = function() {
@@ -2274,7 +2306,7 @@ Skylink.prototype._parseConnectionStats = function(prevStats, stats, prop) {
 Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
   var self = this;
 
-  if (!self._peerEndOfCandidatesCounter[targetMid]) {
+  if (!self._peerEndOfCandidatesCounter[targetMid] || !self._peerConnections[targetMid]) {
     return;
   }
 

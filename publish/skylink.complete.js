@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 14:30:08 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 15:00:51 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11983,7 +11983,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 14:30:08 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 15:00:51 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -19122,11 +19122,22 @@ Skylink.prototype._removePeer = function(peerId) {
     this._trigger('serverPeerLeft', peerId, this.SERVER_PEER_TYPE.MCU);
   }
 
-  // check if health timer exists
   if (this._peerConnections[peerId]) {
     if (this._peerConnections[peerId].signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
       this._peerConnections[peerId].close();
+      // Polyfill for safari 11 "closed" event not triggered for "iceConnectionState" and "signalingState".
+      if (this._useSafariWebRTC) {
+        if (!this._peerConnections[peerId].signalingStateClosed) {
+          this._peerConnections[peerId].signalingStateClosed = true;
+          this._trigger('peerConnectionState', this.PEER_CONNECTION_STATE.CLOSED, peerId);
+        }
+        if (!this._peerConnections[peerId].iceConnectionStateClosed) {
+          this._peerConnections[peerId].iceConnectionStateClosed = true;
+          this._trigger('iceConnectionState', this.ICE_CONNECTION_STATE.CLOSED, peerId);
+        }
+      }
     }
+    
     if (peerId !== 'MCU') {
       this._handleEndedStreams(peerId);
     }
@@ -19247,6 +19258,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
   pc.gathered = false;
   pc.gathering = false;
   // Used for safari 11
+  pc.iceConnectionStateClosed = false;
+  pc.signalingStateClosed = false;
   pc.localStreamId = null;
   pc.remoteStreamId = null;
   pc.remoteStream = null;
@@ -19377,6 +19390,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       }
     }
 
+    if (self._useSafariWebRTC && iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED) {
+      setTimeout(function () {
+        if (!pc.iceConnectionStateClosed) {
+          self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.CLOSED, targetMid);
+        }
+      }, 10);
+      return;
+    }
+
     self._trigger('iceConnectionState', iceConnectionState, targetMid);
 
     if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._enableIceTrickle) {
@@ -19454,6 +19476,16 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
   pc.onsignalingstatechange = function() {
     log.debug([targetMid, 'RTCSignalingState', null, 'Peer connection state changed ->'], pc.signalingState);
+
+    if (self._useSafariWebRTC && pc.signalingState === self.PEER_CONNECTION_STATE.CLOSED) {
+      setTimeout(function () {
+        if (!pc.signalingStateClosed) {
+          self._trigger('peerConnectionState', self.PEER_CONNECTION_STATE.CLOSED, targetMid);
+        }
+      }, 10);
+      return;
+    }
+
     self._trigger('peerConnectionState', pc.signalingState, targetMid);
   };
   pc.onicegatheringstatechange = function() {
@@ -19656,7 +19688,7 @@ Skylink.prototype._parseConnectionStats = function(prevStats, stats, prop) {
 Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
   var self = this;
 
-  if (!self._peerEndOfCandidatesCounter[targetMid]) {
+  if (!self._peerEndOfCandidatesCounter[targetMid] || !self._peerConnections[targetMid]) {
     return;
   }
 
