@@ -2245,27 +2245,7 @@ Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
   self._streamsSession[peerId] = self._streamsSession[peerId] || {};
 
   var renderEndedFn = function (streamId) {
-    var shouldTrigger = !!self._streamsSession[peerId][streamId];
-
-    if (!checkStreamId && self._peerConnections[peerId] &&
-      self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-      if (self._useSafariWebRTC) {
-        if (streamId === self._peerConnections[peerId].remoteStreamId) {
-          shouldTrigger = false;
-        }
-      } else {
-        var streams = self._peerConnections[peerId].getRemoteStreams();
-
-        for (var i = 0; i < streams.length; i++) {
-          if (streamId === (streams[i].id || streams[i].label)) {
-            shouldTrigger = false;
-            break;
-          }
-        }
-      }
-    }
-
-    if (shouldTrigger) {
+    if (self._streamsSession[peerId][streamId]) {
       var peerInfo = clone(self.getPeerInfo(peerId));
       peerInfo.settings.audio = clone(self._streamsSession[peerId][streamId].audio);
       peerInfo.settings.video = clone(self._streamsSession[peerId][streamId].video);
@@ -2278,10 +2258,10 @@ Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
 
   if (checkStreamId) {
     renderEndedFn(checkStreamId);
-  } else {
-    for (var prop in self._streamsSession[peerId]) {
-      if (self._streamsSession[peerId].hasOwnProperty(prop) && self._streamsSession[peerId][prop]) {
-        renderEndedFn(prop);
+  } else if (self._peerConnections[peerId]) {
+    for (var streamId in self._streamsSession[peerId]) {
+      if (self._streamsSession[peerId].hasOwnProperty(streamId) && self._streamsSession[peerId][streamId]) {
+        renderEndedFn(streamId);
       }
     }
   }
