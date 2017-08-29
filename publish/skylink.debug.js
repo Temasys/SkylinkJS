@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 02:03:10 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 12:05:10 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -17718,33 +17718,20 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
           if (self._useSafariWebRTC) {
-            var tracks = updatedStream ? updatedStream.getTracks() : [];
-
-            pc.getSenders().forEach(function (sender) {
-              if (updatedStream) {
-                var hasTrack = false;
-                // Do not remove if the track matches what we already added
-                for (var i = 0; i < tracks.length; i++) {
-                  if (tracks[i] === sender.track) {
-                    tracks.splice(i, -1);
-                    hasTrack = true;
-                    i--;
-                  }
-                }
-                if (!hasTrack) {
-                  pc.removeTrack(sender);
-                }
-              } else {
+            if (updatedStream ? (pc.localStreamId ? updatedStream.id !== pc.localStreamId : true) : true) {
+              pc.getSenders().forEach(function (sender) {
                 pc.removeTrack(sender);
+              });
+
+              if (updatedStream) {
+                updatedStream.getTracks().forEach(function (track) {
+                  pc.addTrack(track);
+                });
+                
+                pc.localStreamId = updatedStream.id;
+                pc.localStream = updatedStream;
               }
-            });
-
-            tracks.forEach(function (track) {
-              pc.addTrack(track);
-            });
-
-            pc.localStreamId = updatedStream ? updatedStream.id : null;
-            pc.localStream = updatedStream || null;
+            }
 
           } else {
             var hasStream = false;
