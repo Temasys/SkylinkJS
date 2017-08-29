@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 19:34:08 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 19:52:01 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11983,7 +11983,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 19:34:08 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 19:52:01 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -21376,6 +21376,22 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
         if (error) {
           resolveAsErrorFn(error, self._selectedRoom, self._readyState);
           return;
+        }
+
+        if (self._useSafariWebRTC) {
+          var checkStream = self._streams.screenshare && self._streams.screenshare.stream ?
+            self._streams.screenshare.stream : (self._streams.userMedia && self._streams.userMedia.stream ?
+              self._streams.userMedia.stream : null);
+
+          if (checkStream ? checkStream.getTracks().length === 0 : true) {
+            log.warn('Note that receiving audio and video streams may fail as safari 11 needs stream with audio and video tracks');
+          } else if (checkStream.getAudioTracks().length === 0) {
+            log.warn('Note that receiving audio streams may fail as safari 11 needs stream ' +
+              'with audio and video tracks and not just with video tracks');
+          } else if (checkStream.getVideoTracks().length === 0) {
+            log.warn('Note that receiving video streams may fail as safari 11 needs stream ' +
+              'with audio and video tracks and not just with audio tracks');
+          }
         }
 
         if (typeof callback === 'function') {

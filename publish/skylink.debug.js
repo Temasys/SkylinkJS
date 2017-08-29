@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 19:34:08 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 19:52:01 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -9391,6 +9391,22 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
         if (error) {
           resolveAsErrorFn(error, self._selectedRoom, self._readyState);
           return;
+        }
+
+        if (self._useSafariWebRTC) {
+          var checkStream = self._streams.screenshare && self._streams.screenshare.stream ?
+            self._streams.screenshare.stream : (self._streams.userMedia && self._streams.userMedia.stream ?
+              self._streams.userMedia.stream : null);
+
+          if (checkStream ? checkStream.getTracks().length === 0 : true) {
+            log.warn('Note that receiving audio and video streams may fail as safari 11 needs stream with audio and video tracks');
+          } else if (checkStream.getAudioTracks().length === 0) {
+            log.warn('Note that receiving audio streams may fail as safari 11 needs stream ' +
+              'with audio and video tracks and not just with video tracks');
+          } else if (checkStream.getVideoTracks().length === 0) {
+            log.warn('Note that receiving video streams may fail as safari 11 needs stream ' +
+              'with audio and video tracks and not just with audio tracks');
+          }
         }
 
         if (typeof callback === 'function') {
