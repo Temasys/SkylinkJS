@@ -168,7 +168,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       // a=end-of-candidates should present in non-trickle ICE connections so no need to send endOfCandidates message
       self._sendChannelMessage({
         type: sessionDescription.type,
-        sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
+        sdp: self._renderSDPOutput(targetMid, sessionDescription),
         mid: self._user.sid,
         userInfo: self._getUserInfo(targetMid),
         target: targetMid,

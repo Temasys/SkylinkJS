@@ -277,7 +277,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     self._sendChannelMessage({
       type: sessionDescription.type,
-      sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
+      sdp: self._renderSDPOutput(targetMid, sessionDescription),
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,

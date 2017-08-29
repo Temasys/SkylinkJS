@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 12:05:10 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Aug 29 2017 13:51:20 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -4977,7 +4977,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       // a=end-of-candidates should present in non-trickle ICE connections so no need to send endOfCandidates message
       self._sendChannelMessage({
         type: sessionDescription.type,
-        sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
+        sdp: self._renderSDPOutput(targetMid, sessionDescription),
         mid: self._user.sid,
         userInfo: self._getUserInfo(targetMid),
         target: targetMid,
@@ -8722,7 +8722,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     self._sendChannelMessage({
       type: sessionDescription.type,
-      sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
+      sdp: self._renderSDPOutput(targetMid, sessionDescription),
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
@@ -18266,110 +18266,99 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
 /**
  * Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems
  * to be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.
- * @method _addSDPMediaStreamTrackIDs
+ * @method _renderSDPOutput
  * @private
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescription) {
+Skylink.prototype._renderSDPOutput = function (targetMid, sessionDescription) {
+  var self = this;
   var localStream = null;
   var localStreamId = null;
 
-  if (this._useSafariWebRTC) {
-    if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].localStream)) {
-      log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
-        'Not enforcing MediaStream IDs as no Streams is sent.']);
-      return sessionDescription.sdp;
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return;
+  }
+
+  if (!self._peerConnections[targetMid]) {
+    return sessionDescription.sdp;
+  }
+
+  if (self._useSafariWebRTC) {
+    if (self._peerConnections[targetMid].localStream) {
+      localStream = self._peerConnections[targetMid].localStream;
+      localStreamId = self._peerConnections[targetMid].localStreamId || self._peerConnections[targetMid].localStream.id;
     }
 
-    localStream = this._peerConnections[targetMid].localStream;
-    localStreamId = this._peerConnections[targetMid].localStreamId || this._peerConnections[targetMid].localStream.id;
-
-  } else {
-    if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].getLocalStreams().length > 0)) {
-      log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
-        'Not enforcing MediaStream IDs as no Streams is sent.']);
-      return sessionDescription.sdp;
-    }
-
-    localStream = this._peerConnections[targetMid].getLocalStreams()[0];
+  } else if (self._peerConnections[targetMid].getLocalStreams().length > 0) {
+    localStream = self._peerConnections[targetMid].getLocalStreams()[0];
     localStreamId = localStream.id || localStream.label;
   }
 
-  var sessionDescriptionStr = sessionDescription.sdp;
+  // For non-trickle ICE, remove the a=end-of-candidates line first to append it properly later
+  var sdpLines = (!self._enableIceTrickle ? sessionDescription.sdp.replace(/a=end-of-candidates\r\n/g, '') : sessionDescription.sdp).split('\r\n');
+  var agent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
 
-  if (!this._enableIceTrickle) {
-    sessionDescriptionStr = sessionDescriptionStr.replace(/a=end-of-candidates\r\n/g, '');
-  }
-
-  var sdpLines = sessionDescriptionStr.split('\r\n');
-  var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
-
-  var parseFn = function (type, tracks) {
-    if (tracks.length === 0) {
-      log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
-        'Not enforcing "' + type + '" MediaStreamTrack IDs as no Stream "' + type + '" tracks is sent.']);
-      return;
-    }
-
-    var trackId = tracks[0].id || tracks[0].label;
-    var trackLabel = tracks[0].label || 'Default';
+  // Parse and replace with the correct msid to prevent unwanted streams.
+  // Making it simple without replacing with the track IDs or labels, neither setting prefixing "mslabel" and "label" as required labels.
+  if (localStream) {
     var ssrcId = null;
-    var hasReachedType = false;
+    var mediaType = '';
 
-    // Get SSRC ID
     for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('m=' + type) === 0) {
-        if (!hasReachedType) {
-          hasReachedType = true;
-          continue;
-        } else {
-          break;
-        }
-      }
+      if (sdpLines[i].indexOf('m=') === 0) {
+        mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0] || '';
+        mediaType = ['audio', 'video'].indexOf(mediaType) === -1 ? '' : mediaType;
 
-      if (hasReachedType && sdpLines[i].indexOf('a=ssrc:') === 0) {
-        if (!ssrcId) {
-          ssrcId = (sdpLines[i].split(':')[1] || '').split(' ')[0] || null;
-        }
+      } else if (mediaType) {
+        if (sdpLines[i].indexOf('a=msid:') === 0) {
+          var msidParts = sdpLines[i].split(' ');
+          msidParts[0] = 'a=msid:' + localStreamId;
+          sdpLines[i] = msidParts.join(' ');
 
-        if (ssrcId && sdpLines[i].indexOf('a=ssrc:' + ssrcId + ' ') === 0) {
-          if (sdpLines[i].indexOf(' cname:') > 0) {
-            log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Updating MediaStreamTrack ssrc (' +
-              ssrcId + ') for "' + localStreamId + '" stream and "' + trackId + '" (label:"' + trackLabel + '")']);
-            sdpLines.splice(i + 1, 0,
-              'a=ssrc:' + ssrcId + ' msid:' + localStreamId + ' ' + trackId,
-              'a=ssrc:' + ssrcId + ' mslabel:' + trackId,
-              'a=ssrc:' + ssrcId + ' label:' + trackId);
-            i += 3;
-          } else {
-            sdpLines.splice(i, 1);
-            i--;
+        } else if (sdpLines[i].indexOf('a=ssrc:') === 0) {
+          var ssrcParts = null;
+
+          // Replace for "msid:" and "mslabel:"
+          if (sdpLines[i].indexOf(' msid:') > 0) {
+            ssrcParts = sdpLines[i].split(' msid:');
+          } else if (sdpLines[i].indexOf(' mslabel:') > 0) {
+            ssrcParts = sdpLines[i].split(' mslabel:');
+          }
+
+          if (ssrcParts) {
+            var ssrcMsidParts = (ssrcParts[1] || '').split(' ');
+            ssrcMsidParts[0] = localStreamId;
+            ssrcParts[1] = ssrcMsidParts.join(' ');
+
+            if (sdpLines[i].indexOf(' msid:') > 0) {
+              sdpLines[i] = ssrcParts.join(' msid:');
+            } else if (sdpLines[i].indexOf(' mslabel:') > 0) {
+              sdpLines[i] = ssrcParts.join(' mslabel:');
+            }
           }
         }
-        break;
       }
     }
-  };
+  }
 
-  parseFn('audio', localStream.getAudioTracks());
-  parseFn('video', localStream.getVideoTracks());
-
-  // Append signaling of end-of-candidates
-  if (!this._enableIceTrickle){
+  // For non-trickle ICE, append the signaling of end-of-candidates properly
+  if (!self._enableIceTrickle){
     log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
       'Appending end-of-candidates signal for non-trickle ICE connection.']);
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('a=candidate:') === 0) {
-        if (sdpLines[i + 1] ? !(sdpLines[i + 1].indexOf('a=candidate:') === 0 ||
-          sdpLines[i + 1].indexOf('a=end-of-candidates') === 0) : true) {
-          sdpLines.splice(i + 1, 0, 'a=end-of-candidates');
-          i++;
+
+    for (var e = 0; e < sdpLines.length; e++) {
+      if (sdpLines[e].indexOf('a=candidate:') === 0) {
+        if (sdpLines[e + 1] ? !(sdpLines[e + 1].indexOf('a=candidate:') === 0 ||
+          sdpLines[e + 1].indexOf('a=end-of-candidates') === 0) : true) {
+          sdpLines.splice(e + 1, 0, 'a=end-of-candidates');
+          e++;
         }
       }
     }
   }
 
+  // Replace the bundle policy to prevent complete removal of m= lines for some cases that do not accept missing m= lines except edge.
   if (sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER && this._sdpSessions[targetMid]) {
     var bundleLineIndex = -1;
     var mLineIndex = -1;
@@ -18408,21 +18397,24 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
     }
   }
 
+  // Ensure for chrome case to have empty "" at last line or it will return invalid SDP errors
   if (window.webrtcDetectedBrowser === 'edge' && sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER &&
     !sdpLines[sdpLines.length - 1].replace(/\s/gi, '')) {
     log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing last empty space for Edge browsers']);
     sdpLines.splice(sdpLines.length - 1, 1);
   }
 
+  /*
   var outputStr = sdpLines.join('\r\n');
-
-  /*if (window.webrtcDetectedBrowser === 'edge' && this._streams.userMedia && this._streams.userMedia.stream) {
+  if (window.webrtcDetectedBrowser === 'edge' && this._streams.userMedia && this._streams.userMedia.stream) {
     var correctStreamId = this._streams.userMedia.stream.id || this._streams.userMedia.stream.label;
     outputStr = outputStr.replace(new RegExp('a=msid:.*\ ', 'gi'), 'a=msid:' + correctStreamId + ' ');
     outputStr = outputStr.replace(new RegExp('\ msid:.*\ ', 'gi'), ' msid:' + correctStreamId + ' ');
   }*/
 
-  return outputStr;
+  log.info([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Formatted output ->'], sdpLines.join('\r\n'));
+
+  return sdpLines.join('\r\n');
 };
 
 /**
