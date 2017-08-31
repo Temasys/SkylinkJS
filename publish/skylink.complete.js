@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Thu Aug 31 2017 19:20:14 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Thu Aug 31 2017 20:19:57 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11983,7 +11983,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.24 - Thu Aug 31 2017 19:20:14 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Thu Aug 31 2017 20:19:57 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -18466,6 +18466,42 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       output.audio.sending.totalNacks = item.nackCount;
       output.audio.sending.nacks = self._parseConnectionStats(prevStats, item, 'nackCount');
 
+    // Edge (WebRTC not ORTC shim) (Inbound stats) - Stats may not be accurate as it returns 0.
+    } else if (window.webrtcDetectedBrowser === 'edge' && item.type === 'inboundrtp' && item.mediaType === 'audio' && item.isRemote) {
+      output.audio.receiving.fractionLost = item.fractionLost;
+      output.audio.receiving.jitter = item.jitter;
+
+      output.audio.receiving.totalBytes = item.bytesReceived;
+      output.audio.receiving.bytes = self._parseConnectionStats(prevStats, item, 'bytesReceived');
+
+      output.audio.receiving.totalPackets = item.packetsReceived;
+      output.audio.receiving.packets = self._parseConnectionStats(prevStats, item, 'packetsReceived');
+
+      output.audio.receiving.totalPacketsLost = item.packetsLost;
+      output.audio.receiving.packetsLost = self._parseConnectionStats(prevStats, item, 'packetsLost');
+
+      output.audio.receiving.totalNacks = item.nackCount;
+      output.audio.receiving.nacks = self._parseConnectionStats(prevStats, item, 'nackCount');
+
+    // Edge (WebRTC not ORTC shim) (Outbound stats) - Stats may not be accurate as it returns 0.
+    } else if (window.webrtcDetectedBrowser === 'edge' && item.type === 'outboundrtp' && item.mediaType === 'audio' && !item.isRemote) {
+      output.audio.sending.targetBitrate = item.targetBitrate;
+      output.audio.sending.rtt = item.roundTripTime;
+
+      output.audio.sending.totalBytes = item.bytesSent;
+      output.audio.sending.bytes = self._parseConnectionStats(prevStats, item, 'bytesSent');
+
+      output.audio.sending.totalPackets = item.packetsSent;
+      output.audio.sending.packets = self._parseConnectionStats(prevStats, item, 'packetsSent');
+
+      output.audio.sending.totalNacks = item.nackCount;
+      output.audio.sending.nacks = self._parseConnectionStats(prevStats, item, 'nackCount');
+
+      var trackItem = output.raw[item.mediaTrackId || ''] || {};
+      output.audio.sending.audioInputLevel = trackItem.audioLevel;
+      output.audio.sending.echoReturnLoss = trackItem.echoReturnLoss;
+      output.audio.sending.echoReturnLossEnhancement = trackItem.echoReturnLossEnhancement;
+
     // Chrome / Plugin
     } else if (prop.indexOf('ssrc_') === 0 && item.mediaType === 'audio') {
       // Chrome / Plugin (Inbound stats)
@@ -18599,6 +18635,71 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       output.video.sending.totalSlis = item.sliCount;
       output.video.sending.slis = self._parseConnectionStats(prevStats, item, 'sliCount');
 
+    // Edge (WebRTC not ORTC shim) (Inbound stats) - Stats may not be accurate as it returns 0.
+    } else if (window.webrtcDetectedBrowser === 'edge' && item.type === 'inboundrtp' && item.mediaType === 'video' && item.isRemote) {
+      output.video.receiving.fractionLost = item.fractionLost;
+      output.video.receiving.jitter = item.jitter;
+
+      output.video.receiving.totalBytes = item.bytesReceived;
+      output.video.receiving.bytes = self._parseConnectionStats(prevStats, item, 'bytesReceived');
+
+      output.video.receiving.totalPackets = item.packetsReceived;
+      output.video.receiving.packets = self._parseConnectionStats(prevStats, item, 'packetsReceived');
+
+      output.video.receiving.totalPacketsLost = item.packetsLost;
+      output.video.receiving.packetsLost = self._parseConnectionStats(prevStats, item, 'packetsLost');
+
+      output.video.receiving.totalNacks = item.nackCount;
+      output.video.receiving.nacks = self._parseConnectionStats(prevStats, item, 'nackCount');
+
+      output.video.receiving.totalPlis = item.pliCount;
+      output.video.receiving.plis = self._parseConnectionStats(prevStats, item, 'pliCount');
+
+      output.video.receiving.totalFirs = item.firCount;
+      output.video.receiving.firs = self._parseConnectionStats(prevStats, item, 'firCount');
+
+      output.video.receiving.totalSlis = item.sliCount;
+      output.video.receiving.slis = self._parseConnectionStats(prevStats, item, 'sliCount');
+
+      var trackItem = output.raw[item.mediaTrackId || ''] || {};
+      output.video.receiving.framesCorrupted = trackItem.framesCorrupted;
+      output.video.receiving.framesDropped = trackItem.framesDropped;
+      output.video.receiving.framesDecoded = trackItem.framesDecoded;
+
+      output.video.receiving.totalFrames = trackItem.framesReceived;
+      output.video.receiving.frames = self._parseConnectionStats(prevStats, trackItem, 'framesReceived');
+
+    // Edge (WebRTC not ORTC shim) (Outbound stats) - Stats may not be accurate as it returns 0.
+    } else if (window.webrtcDetectedBrowser === 'edge' && item.type === 'outboundrtp' && item.mediaType === 'video' && !item.isRemote) {
+      output.video.sending.targetBitrate = item.targetBitrate || 0;
+      output.video.sending.roundTripTime = item.roundTripTime || 0;
+
+      output.video.sending.totalBytes = item.bytesSent;
+      output.video.sending.bytes = self._parseConnectionStats(prevStats, item, 'bytesSent');
+
+      output.video.sending.totalPackets = item.packetsSent;
+      output.video.sending.packets = self._parseConnectionStats(prevStats, item, 'packetsSent');
+
+      output.video.sending.totalNacks = item.nackCount;
+      output.video.sending.nacks = self._parseConnectionStats(prevStats, item, 'nackCount');
+
+      output.video.sending.totalFirs = item.firCount;
+      output.video.sending.firs = self._parseConnectionStats(prevStats, item, 'firCount');
+
+      output.video.sending.totalPlis = item.pliCount;
+      output.video.sending.plis = self._parseConnectionStats(prevStats, item, 'pliCount');
+
+      output.video.sending.totalSlis = item.sliCount;
+      output.video.sending.slis = self._parseConnectionStats(prevStats, item, 'sliCount');
+
+      var trackItem = output.raw[item.mediaTrackId || ''] || {};
+      output.video.sending.frameHeight = trackItem.frameHeight;
+      output.video.sending.frameWidth = trackItem.frameWidth;
+      output.video.sending.framesPerSecond = trackItem.framesPerSecond;
+
+      output.video.sending.totalFrames = trackItem.framesSent;
+      output.video.sending.frames = self._parseConnectionStats(prevStats, trackItem, 'framesSent');
+
     // Chrome / Plugin
     } else if (prop.indexOf('ssrc_') === 0 && item.mediaType === 'video') {
       // Chrome / Plugin (Inbound stats)
@@ -18724,7 +18825,15 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     }
   };
 
-  var successCbFn =  function () {
+  var successCbFn =  function (stats) {
+    if (typeof stats.forEach === 'function') {
+      stats.forEach(function (item, prop) {
+        output.raw[prop] = item;
+      });
+    } else {
+      output.raw = stats;
+    }
+
     Object.keys(output.raw).forEach(function (prop) {
       // Polyfill for Plugin missing "mediaType" stats
       if (prop.indexOf('ssrc_') === 0 && !output.raw[prop].mediaType) {
@@ -18756,24 +18865,9 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
   };
 
   if (self._useSafariWebRTC || self._useEdgeWebRTC) {
-    pc.getStats(null).then(function (stats) {
-      stats.forEach(function (item, prop) {
-        output.raw[prop] = item;
-      });
-      successCbFn();
-    }).catch(errorCbFn);
-
+    pc.getStats(null).then(successCbFn).catch(errorCbFn);
   } else {
-    pc.getStats(null, function (stats) {
-      if (typeof stats.forEach === 'function') {
-        stats.forEach(function (item, prop) {
-          output.raw[prop] = item;
-        });
-      } else {
-        output.raw = stats;
-      }
-      successCbFn();
-    }, errorCbFn);
+    pc.getStats(null, successCbFn, errorCbFn);
   }
 };
 
