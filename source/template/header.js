@@ -15,6 +15,8 @@
 !function(){if("performance"in window==0&&(window.performance={}),Date.now=Date.now||function(){return(new Date).getTime()},"now"in window.performance==0){var a=Date.now();performance.timing&&performance.timing.navigationStart&&(a=performance.timing.navigationStart),window.performance.now=function(){return Date.now()-a}}}();
 // BlobBuilder polyfill
 window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
+// Array.forEach polyfill
+Array.prototype.forEach||(Array.prototype.forEach=function(r){for(var o=0;o<this.length;)r(this[o],index),o++});
 /* jshint ignore:end */
 
 /**

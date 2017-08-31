@@ -768,12 +768,7 @@ Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescriptio
  * @since 0.6.16
  */
 Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription, type, beSilentOnLogs) {
-  if (!(sessionDescription && sessionDescription.sdp)) {
-    return null;
-  }
-
-  var sdpLines = sessionDescription.sdp.split('\r\n');
-  var selectedCodecInfo = {
+  var codecInfo = {
     name: null,
     implementation: null,
     clockRate: null,
@@ -782,39 +777,55 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
     params: null
   };
 
-  for (var i = 0; i < sdpLines.length; i++) {
-    if (sdpLines[i].indexOf('m=' + type) === 0) {
-      var parts = sdpLines[i].split(' ');
-
-      if (parts.length < 4) {
-        break;
-      }
-
-      selectedCodecInfo.payloadType = parseInt(parts[3], 10);
-
-    } else if (selectedCodecInfo.payloadType !== null) {
-      if (sdpLines[i].indexOf('m=') === 0) {
-        break;
-      }
-
-      if (sdpLines[i].indexOf('a=rtpmap:' + selectedCodecInfo.payloadType + ' ') === 0) {
-        var params = (sdpLines[i].split(' ')[1] || '').split('/');
-        selectedCodecInfo.name = params[0] || '';
-        selectedCodecInfo.clockRate = params[1] ? parseInt(params[1], 10) : null;
-        selectedCodecInfo.channels = params[2] ? parseInt(params[2], 10) : null;
-
-      } else if (sdpLines[i].indexOf('a=fmtp:' + selectedCodecInfo.payloadType + ' ') === 0) {
-        selectedCodecInfo.params = sdpLines[i].split('a=fmtp:' + selectedCodecInfo.payloadType + ' ')[1] || null;
-      }
-    }
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return codecInfo;
   }
+
+  sessionDescription.sdp.split('m=').forEach(function (mediaItem, index) {
+    if (index === 0 || mediaItem.indexOf(type + ' ') !== 0) {
+      return;
+    }
+
+    var codecs = (mediaItem.split('\r\n')[0] || '').split(' ');
+    // Remove audio[0] 65266[1] UDP/TLS/RTP/SAVPF[2]
+    codecs.splice(0, 3);
+
+    for (var i = 0; i < codecs.length; i++) {
+      var match = mediaItem.match(new RegExp('a=rtpmap:' + codecs[i] + '.*\r\n', 'gi'));
+
+      if (!match) {
+        continue;
+      }
+
+      // Format: codec/clockRate/channels
+      var parts = ((match[0] || '').replace(/\r\n/g, '').split(' ')[1] || '').split('/');
+
+      // Ignore rtcp codecs, dtmf or comfort noise
+      if (['red', 'ulpfec', 'telephone-event', 'cn'].indexOf(parts[0].toLowerCase()) > -1) {
+        continue;
+      }
+
+      codecInfo.name = parts[0];
+      codecInfo.clockRate = parseInt(parts[1], 10) || 0;
+      codecInfo.channels = parseInt(parts[2] || '1', 10) || 1;
+      codecInfo.payloadType = parseInt(codecs[i], 10);
+      codecInfo.params = '';
+
+      // Get the list of codec parameters
+      var params = mediaItem.match(new RegExp('a=fmtp:' + codecs[i] + '.*\r\n', 'gi')) || [];
+      params.forEach(function (paramItem) {
+        codecInfo.params += paramItem.replace(new RegExp('a=fmtp:' + codecs[i], 'gi'), '').replace(/\ /g, '').replace(/\r\n/g, '');
+      });
+      break;
+    }
+  });
 
   if (!beSilentOnLogs) {
     log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type,
-      'Parsing session description "' + type + '" codecs ->'], selectedCodecInfo);
+      'Parsing session description "' + type + '" codecs ->'], codecInfo);
   }
 
-  return selectedCodecInfo;
+  return codecInfo;
 };
 
 /**
@@ -1235,4 +1246,96 @@ Skylink.prototype._getSDPEdgeVideoSupports = function (peerId) {
 
   return window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedVersion < 15.15019 ?
     !!self._currentCodecSupport.video.h264 : true;
+};
+
+/**
+ * Function that parses and retrieves the session description ICE candidates.
+ * @method _getSDPICECandidates
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getSDPICECandidates = function (targetMid, sessionDescription, beSilentOnLogs) {
+  var candidates = {
+    host: [],
+    srflx: [],
+    relay: []
+  };
+
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return candidates;
+  }
+
+  sessionDescription.sdp.split('m=').forEach(function (mediaItem, index) {
+    // Ignore the v=0 lines etc..
+    if (index === 0) {
+      return;
+    }
+
+    // Remove a=mid: and \r\n
+    var sdpMid = ((mediaItem.match(/a=mid:.*\r\n/gi) || [])[0] || '').replace(/a=mid:/gi, '').replace(/\r\n/, '');
+    var sdpMLineIndex = index - 1;
+
+    (mediaItem.match(/a=candidate:.*\r\n/gi) || []).forEach(function (item) {
+      // Remove \r\n for candidate type being set at the end of candidate DOM string.
+      var canType = (item.split(' ')[7] || 'host').replace(/\r\n/g, '');
+      candidates[canType] = candidates[canType] || [];
+      candidates[canType].push(new RTCIceCandidate({
+        sdpMid: sdpMid,
+        sdpMLineIndex: sdpMLineIndex,
+        // Remove initial "a=" in a=candidate
+        candidate: (item.split('a=')[1] || '').replace(/\r\n/g, '')
+      }));
+    });
+  });
+
+  if (!beSilentOnLogs) {
+    log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Parsing session description ICE candidates ->'], candidates);
+  }
+
+  return candidates;
+};
+
+/**
+ * Function that gets each media line SSRCs.
+ * @method _getSDPMediaSSRC
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getSDPMediaSSRC = function (targetMid, sessionDescription, beSilentOnLogs) {
+  var ssrcs = {
+    audio: 0,
+    video: 0
+  };
+
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return ssrcs;
+  }
+
+  sessionDescription.sdp.split('m=').forEach(function (mediaItem, index) {
+    // Ignore the v=0 lines etc..
+    if (index === 0) {
+      return;
+    }
+
+    var mediaType = (mediaItem.split(' ')[0] || '');
+    var ssrcLine = (mediaItem.match(/a=ssrc:.*\r\n/) || [])[0];
+
+    if (typeof ssrcs[mediaType] !== 'number') {
+      return;
+    }
+
+    if (ssrcLine) {
+      ssrcs[mediaType] = parseInt((ssrcLine.split('a=ssrc:')[1] || '').split(' ')[0], 10) || 0;
+    }
+  });
+
+  if (!beSilentOnLogs) {
+    log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Parsing session description media SSRCs ->'], ssrcs);
+  }
+
+  return ssrcs;
 };
