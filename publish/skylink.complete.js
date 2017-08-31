@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Thu Aug 31 2017 20:19:57 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Thu Aug 31 2017 21:13:11 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -11983,7 +11983,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.24 - Thu Aug 31 2017 20:19:57 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Thu Aug 31 2017 21:13:11 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -13166,6 +13166,16 @@ function Skylink() {
 
   /**
    * Stores the egde 15.x use pre-1.0 legacy API.
+   * @attribute _useEdgeWebRTCFlag
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.19
+   */
+  this._useEdgeWebRTCFlag = false;
+
+  /**
+   * Stores the edge 15.x use native webrtc implementation.
    * @attribute _useEdgeWebRTC
    * @type Boolean
    * @private
@@ -18344,35 +18354,41 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       output.selectedCandidate.responses.sent = self._parseConnectionStats(prevStats, item, 'responsesSent');
 
     // Chrome / Plugin
-    } else if (prop.indexOf('ssrc_') === 0 && item.transportId) {
-      var pairItemProp = (output.raw[item.transportId] || {}).selectedCandidatePairId || '';
-      var prevStats = isAutoBwStats ? self._peerBandwidth[peerId][pairItemProp] : self._peerStats[peerId][pairItemProp];
+    } else if (item.type === 'googCandidatePair') {
+      var prevStats = isAutoBwStats ? self._peerBandwidth[peerId][prop] : self._peerStats[peerId][prop];
 
-      var pairItem = output.raw[pairItemProp] || {};
-      output.selectedCandidate.writable = pairItem.googWritable === 'true';
-      output.selectedCandidate.readable = pairItem.googReadable === 'true';
+      output.selectedCandidate.writable = item.googWritable === 'true';
+      output.selectedCandidate.readable = item.googReadable === 'true';
 
-      var rtt = parseInt(pairItem.googRtt || '0', 10);
+      var rtt = parseInt(item.googRtt || '0', 10);
       output.selectedCandidate.totalRtt = rtt;
-      output.selectedCandidate.rtt = self._parseConnectionStats(prevStats, pairItem, 'rtt');
+      output.selectedCandidate.rtt = self._parseConnectionStats(prevStats, item, 'rtt');
 
-      var consentResponsesReceived = parseInt(pairItem.consentResponsesReceived || '0', 10);
-      output.selectedCandidate.consentResponses.totalReceived = consentResponsesReceived;
-      output.selectedCandidate.consentResponses.received = self._parseConnectionStats(prevStats, pairItem, 'consentResponsesReceived');
+      if (item.consentResponsesReceived) {
+        var consentResponsesReceived = parseInt(item.consentResponsesReceived || '0', 10);
+        output.selectedCandidate.consentResponses.totalReceived = consentResponsesReceived;
+        output.selectedCandidate.consentResponses.received = self._parseConnectionStats(prevStats, item, 'consentResponsesReceived');
+      }
 
-      var consentResponsesSent = parseInt(pairItem.consentResponsesSent || '0', 10);
-      output.selectedCandidate.consentResponses.totalSent = consentResponsesSent;
-      output.selectedCandidate.consentResponses.sent = self._parseConnectionStats(prevStats, pairItem, 'consentResponsesSent');
-      
-      var responsesReceived = parseInt(pairItem.responsesReceived || '0', 10);
-      output.selectedCandidate.responses.totalReceived = responsesReceived;
-      output.selectedCandidate.responses.received = self._parseConnectionStats(prevStats, pairItem, 'responsesReceived');
-      
-      var responsesSent = parseInt(pairItem.responsesSent || '0', 10);
-      output.selectedCandidate.responses.totalSent = responsesSent;
-      output.selectedCandidate.responses.sent = self._parseConnectionStats(prevStats, pairItem, 'responsesSent');
+      if (item.consentResponsesSent) {
+        var consentResponsesSent = parseInt(item.consentResponsesSent || '0', 10);
+        output.selectedCandidate.consentResponses.totalSent = consentResponsesSent;
+        output.selectedCandidate.consentResponses.sent = self._parseConnectionStats(prevStats, item, 'consentResponsesSent');
+      }
 
-      var localCanItem = output.raw[pairItem.localCandidateId || ''];
+      if (item.responsesReceived) {
+        var responsesReceived = parseInt(item.responsesReceived || '0', 10);
+        output.selectedCandidate.responses.totalReceived = responsesReceived;
+        output.selectedCandidate.responses.received = self._parseConnectionStats(prevStats, item, 'responsesReceived');
+      }
+
+      if (item.responsesSent) {
+        var responsesSent = parseInt(item.responsesSent || '0', 10);
+        output.selectedCandidate.responses.totalSent = responsesSent;
+        output.selectedCandidate.responses.sent = self._parseConnectionStats(prevStats, item, 'responsesSent');
+      }
+
+      var localCanItem = output.raw[item.localCandidateId || ''] || {};
       output.selectedCandidate.local.ipAddress = localCanItem.ipAddress;
       output.selectedCandidate.local.portNumber = parseInt(localCanItem.portNumber, 10);
       output.selectedCandidate.local.priority = parseInt(localCanItem.priority, 10);
@@ -18380,13 +18396,13 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       output.selectedCandidate.local.transport = localCanItem.transport;
       output.selectedCandidate.local.candidateType = localCanItem.candidateType;
 
-      var remoteCanItem = output.raw[pairItem.remoteCandidateId || ''];
+      var remoteCanItem = output.raw[item.remoteCandidateId || ''] || {};
       output.selectedCandidate.remote.ipAddress = remoteCanItem.ipAddress;
       output.selectedCandidate.remote.portNumber = parseInt(remoteCanItem.portNumber, 10);
       output.selectedCandidate.remote.priority = parseInt(remoteCanItem.priority, 10);
       output.selectedCandidate.remote.transport = remoteCanItem.transport;
       output.selectedCandidate.remote.candidateType = remoteCanItem.candidateType;
-    
+
     // Firefox
     } else if (item.type === 'candidatepair' && item.state === 'succeeded' && item.nominated) {
       output.selectedCandidate.writable = item.writable;
@@ -18825,6 +18841,63 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     }
   };
 
+  // Format video e2e delay stats
+  var videoE2EStatsFn = function (item, prop) {
+    // Chrome / Plugin (Inbound e2e stats)
+    if (prop.indexOf('ssrc_') === 0 && item.mediaType === 'video') {
+      var captureStartNtpTimeMs = parseInt(item.googCaptureStartNtpTimeMs || '0', 10);
+      var remoteStream = pc.getRemoteStreams()[0];
+
+      if (!(captureStartNtpTimeMs > 0 && prop.indexOf('_recv') > 0 && remoteStream &&
+        document && typeof document.getElementsByTagName === 'function')) {
+        return;
+      }
+
+      try {
+        var elements = document.getElementsByTagName(self._isUsingPlugin ? 'object' : 'video');
+
+        if (!self._isUsingPlugin && elements.length === 0) {
+          elements = document.getElementsByTagName('audio');
+        }
+
+        for (var e = 0; e < elements.length; e++) {
+          var videoStreamId = null;
+
+          // For Plugin case where they use the <object> element
+          if (self._isUsingPlugin) {
+            // Precautionary check to return if there is no children like <param>, which means something is wrong..
+            if (!(elements[e].children && typeof elements[e].children === 'object' &&
+              typeof elements[e].children.length === 'number' && elements[e].children.length > 0)) {
+              break;
+            }
+
+            // Retrieve the "streamId" parameter 
+            for (var ec = 0; ec < elements[e].children.length; ec++) {
+              if (elements[e].children[ec].name === 'streamId') {
+                videoStreamId = elements[e].children[ec].value || null;
+                break;
+              }
+            }
+          
+          // For Chrome case where the srcObject can be obtained and determine the streamId
+          } else {
+            videoStreamId = (elements[e].srcObject && (elements[e].srcObject.id || elements[e].srcObject.label)) || null;
+          }
+
+          if (videoStreamId && videoStreamId === (remoteStream.id || remoteStream.label)) {
+            output.video.receiving.e2eDelay = ((new Date()).getTime() + 2208988800000) - captureStartNtpTimeMs - elements[e].currentTime * 1000;
+            break;
+          }
+        }
+
+      } catch (error) {
+        if (!beSilentOnLogs) {
+          log.warn([peerId, 'RTCStatsReport', null, 'Failed retrieving e2e delay ->'], error);
+        }
+      }
+    }
+  };
+
   var successCbFn =  function (stats) {
     if (typeof stats.forEach === 'function') {
       stats.forEach(function (item, prop) {
@@ -18845,6 +18918,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       codecsFn(output.raw[prop], prop);
       audioStatsFn(output.raw[prop], prop);
       videoStatsFn(output.raw[prop], prop);
+      videoE2EStatsFn(output.raw[prop], prop);
 
       // Parse for bandwidth statistics if not yet defined to not mix with the getConnectionStatus()
       if (isAutoBwStats && !self._peerBandwidth[peerId][prop]) {
@@ -19222,7 +19296,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       constraints: constraints,
       optional: optional
     });
-    pc = new (self._useEdgeWebRTC && window.msRTCPeerConnection ? window.msRTCPeerConnection : window.RTCPeerConnection)(constraints, optional);
+    pc = new (self._useEdgeWebRTC ? window.msRTCPeerConnection : window.RTCPeerConnection)(constraints, optional);
   } catch (error) {
     log.error([targetMid, null, null, 'Failed creating peer connection:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -22827,7 +22901,7 @@ Skylink.prototype.init = function(options, callback) {
   self._socketServer = socketServer;
   self._codecParams = codecParams;
   self._priorityWeightScheme = priorityWeightScheme;
-  self._useEdgeWebRTC = useEdgeWebRTC;
+  self._useEdgeWebRTCFlag = useEdgeWebRTC;
   self._enableSimultaneousTransfers = enableSimultaneousTransfers;
 
   log.log('Init configuration:', {
@@ -22861,7 +22935,7 @@ Skylink.prototype.init = function(options, callback) {
     socketServer: self._socketServer,
     codecParams: self._codecParams,
     priorityWeightScheme: self._priorityWeightScheme,
-    useEdgeWebRTC: self._useEdgeWebRTC,
+    useEdgeWebRTC: self._useEdgeWebRTCFlag,
     enableSimultaneousTransfers: self._enableSimultaneousTransfers
   });
   // trigger the readystate
@@ -22909,7 +22983,7 @@ Skylink.prototype.init = function(options, callback) {
             socketServer: self._socketServer,
             codecParams: self._codecParams,
             priorityWeightScheme: self._priorityWeightScheme,
-            useEdgeWebRTC: self._useEdgeWebRTC,
+            useEdgeWebRTC: self._useEdgeWebRTCFlag,
             enableSimultaneousTransfers: self._enableSimultaneousTransfers
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
@@ -23138,6 +23212,7 @@ Skylink.prototype._loadInfo = function() {
   adapter.webRTCReady(function () {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
     self._useSafariWebRTC = !self._isUsingPlugin && window.webrtcDetectedBrowser === 'safari';
+    self._useEdgeWebRTC = self._useEdgeWebRTCFlag && window.webrtcDetectedBrowser === 'edge' && !!window.msRTCPeerConnection;
 
     // Prevent empty object returned when constructing the RTCPeerConnection object
     if (!(function () {
@@ -23251,7 +23326,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     socketServer: self._socketServer ? self._socketServer : null,
     codecParams: self._codecParams ? self._codecParams : null,
     priorityWeightScheme: self._priorityWeightScheme ? self._priorityWeightScheme : null,
-    useEdgeWebRTC: self._useEdgeWebRTC,
+    useEdgeWebRTC: self._useEdgeWebRTCFlag,
     enableSimultaneousTransfers: self._enableSimultaneousTransfers
   };
   if (self._roomCredentials) {

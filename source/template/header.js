@@ -1179,6 +1179,16 @@ function Skylink() {
 
   /**
    * Stores the egde 15.x use pre-1.0 legacy API.
+   * @attribute _useEdgeWebRTCFlag
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.19
+   */
+  this._useEdgeWebRTCFlag = false;
+
+  /**
+   * Stores the edge 15.x use native webrtc implementation.
    * @attribute _useEdgeWebRTC
    * @type Boolean
    * @private

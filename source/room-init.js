@@ -972,7 +972,7 @@ Skylink.prototype.init = function(options, callback) {
   self._socketServer = socketServer;
   self._codecParams = codecParams;
   self._priorityWeightScheme = priorityWeightScheme;
-  self._useEdgeWebRTC = useEdgeWebRTC;
+  self._useEdgeWebRTCFlag = useEdgeWebRTC;
   self._enableSimultaneousTransfers = enableSimultaneousTransfers;
 
   log.log('Init configuration:', {
@@ -1006,7 +1006,7 @@ Skylink.prototype.init = function(options, callback) {
     socketServer: self._socketServer,
     codecParams: self._codecParams,
     priorityWeightScheme: self._priorityWeightScheme,
-    useEdgeWebRTC: self._useEdgeWebRTC,
+    useEdgeWebRTC: self._useEdgeWebRTCFlag,
     enableSimultaneousTransfers: self._enableSimultaneousTransfers
   });
   // trigger the readystate
@@ -1054,7 +1054,7 @@ Skylink.prototype.init = function(options, callback) {
             socketServer: self._socketServer,
             codecParams: self._codecParams,
             priorityWeightScheme: self._priorityWeightScheme,
-            useEdgeWebRTC: self._useEdgeWebRTC,
+            useEdgeWebRTC: self._useEdgeWebRTCFlag,
             enableSimultaneousTransfers: self._enableSimultaneousTransfers
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
@@ -1283,6 +1283,7 @@ Skylink.prototype._loadInfo = function() {
   adapter.webRTCReady(function () {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
     self._useSafariWebRTC = !self._isUsingPlugin && window.webrtcDetectedBrowser === 'safari';
+    self._useEdgeWebRTC = self._useEdgeWebRTCFlag && window.webrtcDetectedBrowser === 'edge' && !!window.msRTCPeerConnection;
 
     // Prevent empty object returned when constructing the RTCPeerConnection object
     if (!(function () {
@@ -1396,7 +1397,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     socketServer: self._socketServer ? self._socketServer : null,
     codecParams: self._codecParams ? self._codecParams : null,
     priorityWeightScheme: self._priorityWeightScheme ? self._priorityWeightScheme : null,
-    useEdgeWebRTC: self._useEdgeWebRTC,
+    useEdgeWebRTC: self._useEdgeWebRTCFlag,
     enableSimultaneousTransfers: self._enableSimultaneousTransfers
   };
   if (self._roomCredentials) {
