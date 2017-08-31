@@ -560,6 +560,7 @@ Skylink.prototype.generateUUID = function() {
  * - When not provided, its value is &lt;code&gt;AUTO&lt;/code&gt;.
  *   [Rel: Skylink.PRIORITY_WEIGHT_SCHEME]
  * @param {Boolean} [options.useEdgeWebRTC=false] The flag to use Edge 15.x pre-1.0 WebRTC support.
+ * @param {Boolean} [options.enableSimultaneousTransfers=true] The flag to enable simultaneous data transfers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
  *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_readyStateChange&quot;&gt;
@@ -608,7 +609,8 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} callback.success.iceServer The configured value of the &lt;code&gt;options.iceServer&lt;/code&gt;.
  *   &lt;small&gt;See the &lt;code&gt;.urls&lt;/code&gt; property in this object for configured value if defined.&lt;/small&gt;
  * @param {JSON|String} callback.success.socketServer The configured value of the &lt;code&gt;options.socketServer&lt;/code&gt;.
- * @param {JSON|String} callback.success.useEdgeWebRTC The configured value of the &lt;code&gt;options.useEdgeWebRTC&lt;/code&gt;.
+ * @param {Boolean} callback.success.useEdgeWebRTC The configured value of the &lt;code&gt;options.useEdgeWebRTC&lt;/code&gt;.
+ * @param {Boolean} callback.success.enableSimultaneousTransfers The configured value of the &lt;code&gt;options.enableSimultaneousTransfers&lt;/code&gt;.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -726,6 +728,7 @@ Skylink.prototype.init = function(options, callback) {
   };
   var priorityWeightScheme = self.PRIORITY_WEIGHT_SCHEME.AUTO;
   var useEdgeWebRTC = false;
+  var enableSimultaneousTransfers = true;
 
   log.log(&#x27;Provided init options:&#x27;, options);
 
@@ -799,6 +802,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if edge 15.x uses the pre-1.0 webrtc implementation
     useEdgeWebRTC = (typeof options.useEdgeWebRTC === &#x27;boolean&#x27;) ?
       options.useEdgeWebRTC : useEdgeWebRTC;
+    // set the flag if simultaneous data transfers is disabled
+    enableSimultaneousTransfers = (typeof options.enableSimultaneousTransfers === &#x27;boolean&#x27;) ?
+      options.enableSimultaneousTransfers : enableSimultaneousTransfers;
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === &#x27;object&#x27; &amp;&amp; options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === &#x27;boolean&#x27;) ?
@@ -1057,7 +1063,8 @@ Skylink.prototype.init = function(options, callback) {
   self._socketServer = socketServer;
   self._codecParams = codecParams;
   self._priorityWeightScheme = priorityWeightScheme;
-  self._useEdgeWebRTC = useEdgeWebRTC;
+  self._useEdgeWebRTCFlag = useEdgeWebRTC;
+  self._enableSimultaneousTransfers = enableSimultaneousTransfers;
 
   log.log(&#x27;Init configuration:&#x27;, {
     serverUrl: self._path,
@@ -1090,7 +1097,8 @@ Skylink.prototype.init = function(options, callback) {
     socketServer: self._socketServer,
     codecParams: self._codecParams,
     priorityWeightScheme: self._priorityWeightScheme,
-    useEdgeWebRTC: self._useEdgeWebRTC
+    useEdgeWebRTC: self._useEdgeWebRTCFlag,
+    enableSimultaneousTransfers: self._enableSimultaneousTransfers
   });
   // trigger the readystate
   self._readyState = 0;
@@ -1137,7 +1145,8 @@ Skylink.prototype.init = function(options, callback) {
             socketServer: self._socketServer,
             codecParams: self._codecParams,
             priorityWeightScheme: self._priorityWeightScheme,
-            useEdgeWebRTC: self._useEdgeWebRTC
+            useEdgeWebRTC: self._useEdgeWebRTCFlag,
+            enableSimultaneousTransfers: self._enableSimultaneousTransfers
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, &#x27;Socket&#x27;, null, &#x27;Firing callback. &#x27; +
@@ -1364,6 +1373,8 @@ Skylink.prototype._loadInfo = function() {
   }
   adapter.webRTCReady(function () {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin &amp;&amp; !!adapter.WebRTCPlugin.plugin.VERSION;
+    self._useSafariWebRTC = !self._isUsingPlugin &amp;&amp; window.webrtcDetectedBrowser === &#x27;safari&#x27;;
+    self._useEdgeWebRTC = self._useEdgeWebRTCFlag &amp;&amp; window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; !!window.msRTCPeerConnection;
 
     // Prevent empty object returned when constructing the RTCPeerConnection object
     if (!(function () {
@@ -1477,7 +1488,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     socketServer: self._socketServer ? self._socketServer : null,
     codecParams: self._codecParams ? self._codecParams : null,
     priorityWeightScheme: self._priorityWeightScheme ? self._priorityWeightScheme : null,
-    useEdgeWebRTC: self._useEdgeWebRTC
+    useEdgeWebRTC: self._useEdgeWebRTCFlag,
+    enableSimultaneousTransfers: self._enableSimultaneousTransfers
   };
   if (self._roomCredentials) {
     initOptions.credentials = {

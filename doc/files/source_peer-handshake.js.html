@@ -166,18 +166,6 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   // Prevent undefined OS errors
   peerBrowser.os = peerBrowser.os || &#x27;&#x27;;
 
-  // Fallback to use mandatory constraints for plugin based browsers
-  if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
-    offerConstraints = {
-      mandatory: {
-        OfferToReceiveAudio: offerToReceiveAudio,
-        OfferToReceiveVideo: offerToReceiveVideo,
-        iceRestart: doIceRestart,
-        voiceActivityDetection: self._voiceActivityDetection
-      }
-    };
-  }
-
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === &#x27;MCU&#x27;) {
     self._addLocalMediaStreams(targetMid);
@@ -201,17 +189,32 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     self._peerConnStatus[targetMid].sdpConstraints = offerConstraints;
   }
 
-  pc.createOffer(function(offer) {
+  var successCbFn = function(offer) {
     log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
 
     self._setLocalAndSendMessage(targetMid, offer);
+  };
 
-  }, function(error) {
+  var errorCbFn = function(error) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
     log.error([targetMid, null, null, &#x27;Failed creating an offer:&#x27;], error);
+  };
 
-  }, offerConstraints);
+  // Not using promises as primary even as preferred because of users using older AdapterJS to prevent breaks
+  if (self._useSafariWebRTC) {
+    pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
+  
+  } else {
+    pc.createOffer(successCbFn, errorCbFn, self._isUsingPlugin ? {
+      mandatory: {
+        OfferToReceiveAudio: offerConstraints.offerToReceiveAudio,
+        OfferToReceiveVideo: offerConstraints.offerToReceiveVideo,
+        iceRestart: offerConstraints.iceRestart,
+        voiceActivityDetection: offerConstraints.voiceActivityDetection
+      }
+    } : offerConstraints);
+  }
 };
 
 /**
@@ -262,13 +265,22 @@ Skylink.prototype._doAnswer = function(targetMid) {
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
-  pc.createAnswer(function(answer) {
+  var successCbFn = function(answer) {
     log.debug([targetMid, null, null, &#x27;Created answer&#x27;], answer);
     self._setLocalAndSendMessage(targetMid, answer);
-  }, function(error) {
+  };
+
+  var errorCbFn = function(error) {
     log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  }, answerConstraints);
+  };
+
+  if (self._useSafariWebRTC) {
+    pc.createAnswer(answerConstraints).then(successCbFn).catch(errorCbFn); 
+
+  } else {
+    pc.createAnswer(successCbFn, errorCbFn, answerConstraints);
+  }
 };
 
 /**
@@ -334,7 +346,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
     &#x27;Local session description updated -&gt;&#x27;], sessionDescription.sdp);
 
-  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), function() {
+  var successCbFn = function() {
     log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
       &#x27;Local session description has been set -&gt;&#x27;], sessionDescription);
 
@@ -356,20 +368,27 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     self._sendChannelMessage({
       type: sessionDescription.type,
-      sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
+      sdp: self._renderSDPOutput(targetMid, sessionDescription),
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
     });
+  };
 
-  }, function(error) {
+  var errorCbFn = function(error) {
     log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local description failed setting -&gt;&#x27;], error);
 
     pc.processingLocalSDP = false;
 
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  });
+  };
+
+  if (self._useSafariWebRTC) {
+    pc.setLocalDescription(new RTCSessionDescription(sessionDescription)).then(successCbFn).catch(errorCbFn);
+  }
+
+  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), successCbFn, errorCbFn);
 };
 
     </pre>

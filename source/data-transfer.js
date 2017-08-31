@@ -955,7 +955,9 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 
 /**
  * <blockquote class="info">
- *   Note that this feature is not supported by MCU enabled Peer connections.<br>
+ *   Note that this feature is not supported by MCU enabled Peer connections and the
+ *   <code>enableSimultaneousTransfers</code> flag has to be enabled in the <a href="#method_init">
+ *   <code>init()</code> method</a> in order for this functionality to work.<br>
  *   To start streaming data, see the <a href="#method_streamData"><code>streamData()</code>
  *   method</a>. To stop data streaming session, see the <a href="#method_stopStreamingData"><code>
  *   stopStreamingData()</code> method</a>.
@@ -1141,6 +1143,10 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
 
   if (self._hasMCU) {
     return emitErrorBeforeStreamingFn('Unable to start data streaming as this feature is current not supported by MCU yet.');
+  }
+
+  if (!self._enableSimultaneousTransfers) {
+    return emitErrorBeforeStreamingFn('Unable to start data streaming as this feature requires simultaneous data transfers to be enabled');
   }
 
   var transferId = 'stream_' + (self._user && self._user.sid ? self._user.sid : '-') + '_' + (new Date()).getTime();

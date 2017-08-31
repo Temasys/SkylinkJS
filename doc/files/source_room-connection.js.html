@@ -525,6 +525,22 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           return;
         }
 
+        if (self._useSafariWebRTC) {
+          var checkStream = self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ?
+            self._streams.screenshare.stream : (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream ?
+              self._streams.userMedia.stream : null);
+
+          if (checkStream ? checkStream.getTracks().length === 0 : true) {
+            log.warn(&#x27;Note that receiving audio and video streams may fail as safari 11 needs stream with audio and video tracks&#x27;);
+          } else if (checkStream.getAudioTracks().length === 0) {
+            log.warn(&#x27;Note that receiving audio streams may fail as safari 11 needs stream &#x27; +
+              &#x27;with audio and video tracks and not just with video tracks&#x27;);
+          } else if (checkStream.getVideoTracks().length === 0) {
+            log.warn(&#x27;Note that receiving video streams may fail as safari 11 needs stream &#x27; +
+              &#x27;with audio and video tracks and not just with audio tracks&#x27;);
+          }
+        }
+
         if (typeof callback === &#x27;function&#x27;) {
           var peerOnJoin = function(peerId, peerInfo, isSelf) {
             self.off(&#x27;systemAction&#x27;, peerFailedJoin);
