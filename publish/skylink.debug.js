@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Thu Aug 31 2017 22:23:08 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 12:28:25 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -11366,6 +11366,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     }
   });
 };
+
 
 
 Skylink.prototype.LOG_LEVEL = {
