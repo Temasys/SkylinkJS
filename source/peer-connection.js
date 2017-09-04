@@ -1450,9 +1450,9 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       }
 
       try {
-        var elements = document.getElementsByTagName(self._isUsingPlugin ? 'object' : 'video');
+        var elements = document.getElementsByTagName(AdapterJS.webrtcDetectedType === 'plugin' ? 'object' : 'video');
 
-        if (!self._isUsingPlugin && elements.length === 0) {
+        if (AdapterJS.webrtcDetectedType !== 'plugin' && elements.length === 0) {
           elements = document.getElementsByTagName('audio');
         }
 
@@ -1460,7 +1460,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
           var videoStreamId = null;
 
           // For Plugin case where they use the <object> element
-          if (self._isUsingPlugin) {
+          if (AdapterJS.webrtcDetectedType === 'plugin') {
             // Precautionary check to return if there is no children like <param>, which means something is wrong..
             if (!(elements[e].children && typeof elements[e].children === 'object' &&
               typeof elements[e].children.length === 'number' && elements[e].children.length > 0)) {

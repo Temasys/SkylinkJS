@@ -115,7 +115,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
   
   } else {
-    pc.createOffer(successCbFn, errorCbFn, self._isUsingPlugin ? {
+    pc.createOffer(successCbFn, errorCbFn, AdapterJS.webrtcDetectedType === 'plugin' ? {
       mandatory: {
         OfferToReceiveAudio: offerConstraints.offerToReceiveAudio,
         OfferToReceiveVideo: offerConstraints.offerToReceiveVideo,

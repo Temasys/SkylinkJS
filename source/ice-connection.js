@@ -119,7 +119,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
   if (self._forceTURNSSL) {
-    if (window.webrtcDetectedBrowser === 'chrome' || self._isUsingPlugin) {
+    if (window.webrtcDetectedBrowser === 'chrome' || AdapterJS.webrtcDetectedType === 'plugin') {
       useTURNSSLProtocol = true;
     } else {
       useTURNSSLPort = true;
@@ -258,7 +258,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   }
 
   // plugin supports .urls
-  if (self._isUsingPlugin) {
+  if (AdapterJS.webrtcDetectedType === 'plugin') {
     hasUrlsSupport = true;
 
     // safari 11 native WebRTC supports

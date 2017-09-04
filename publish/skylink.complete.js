@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 18:15:32 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 18:23:26 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -13696,7 +13696,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 18:15:32 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 18:23:26 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -15420,7 +15420,7 @@ Skylink.prototype._blobToArrayBuffer = function(data, callback) {
   var fileReader = new FileReader();
   fileReader.onload = function() {
     // Load Blob as dataurl base64 string
-    if (self._isUsingPlugin) {
+    if (AdapterJS.webrtcDetectedType === 'plugin') {
       callback(new Int8Array(fileReader.result));
     } else {
       callback(fileReader.result);
@@ -16995,7 +16995,7 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
       self._blobToArrayBuffer(dataChunk, onSendDataFn);
     } else if (!(dataChunk instanceof Blob) && sessionInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
       onSendDataFn(new Blob([dataChunk]));
-    } else if (self._isUsingPlugin && typeof dataChunk !== 'string') {
+    } else if (AdapterJS.webrtcDetectedType === 'plugin' && typeof dataChunk !== 'string') {
       onSendDataFn(new Int8Array(dataChunk));
     } else {
       onSendDataFn(dataChunk);
@@ -18920,7 +18920,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
   if (self._forceTURNSSL) {
-    if (window.webrtcDetectedBrowser === 'chrome' || self._isUsingPlugin) {
+    if (window.webrtcDetectedBrowser === 'chrome' || AdapterJS.webrtcDetectedType === 'plugin') {
       useTURNSSLProtocol = true;
     } else {
       useTURNSSLPort = true;
@@ -19059,7 +19059,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   }
 
   // plugin supports .urls
-  if (self._isUsingPlugin) {
+  if (AdapterJS.webrtcDetectedType === 'plugin') {
     hasUrlsSupport = true;
 
     // safari 11 native WebRTC supports
@@ -20563,9 +20563,9 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       }
 
       try {
-        var elements = document.getElementsByTagName(self._isUsingPlugin ? 'object' : 'video');
+        var elements = document.getElementsByTagName(AdapterJS.webrtcDetectedType === 'plugin' ? 'object' : 'video');
 
-        if (!self._isUsingPlugin && elements.length === 0) {
+        if (AdapterJS.webrtcDetectedType !== 'plugin' && elements.length === 0) {
           elements = document.getElementsByTagName('audio');
         }
 
@@ -20573,7 +20573,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
           var videoStreamId = null;
 
           // For Plugin case where they use the <object> element
-          if (self._isUsingPlugin) {
+          if (AdapterJS.webrtcDetectedType === 'plugin') {
             // Precautionary check to return if there is no children like <param>, which means something is wrong..
             if (!(elements[e].children && typeof elements[e].children === 'object' &&
               typeof elements[e].children.length === 'number' && elements[e].children.length > 0)) {
@@ -22342,7 +22342,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
   
   } else {
-    pc.createOffer(successCbFn, errorCbFn, self._isUsingPlugin ? {
+    pc.createOffer(successCbFn, errorCbFn, AdapterJS.webrtcDetectedType === 'plugin' ? {
       mandatory: {
         OfferToReceiveAudio: offerConstraints.offerToReceiveAudio,
         OfferToReceiveVideo: offerConstraints.offerToReceiveVideo,
@@ -24919,7 +24919,6 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   adapter.webRTCReady(function () {
-    self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
     self._useEdgeWebRTC = self._useEdgeWebRTCFlag && window.webrtcDetectedBrowser === 'edge' && !!window.msRTCPeerConnection;
 
     // Prevent empty object returned when constructing the RTCPeerConnection object
@@ -24932,7 +24931,7 @@ Skylink.prototype._loadInfo = function() {
         return false;
       }
     })()) {
-      if (window.RTCPeerConnection && self._isUsingPlugin) {
+      if (window.RTCPeerConnection && AdapterJS.webrtcDetectedType === 'plugin') {
         log.error('Plugin is not available. Please check plugin status.');
       } else {
         log.error('WebRTC not supported. Please upgrade your browser');
@@ -24940,7 +24939,7 @@ Skylink.prototype._loadInfo = function() {
       self._readyState = -1;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
-        content: self._isUsingPlugin && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available',
+        content: AdapterJS.webrtcDetectedType === 'plugin' && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available',
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
       }, self._selectedRoom);
       return;
@@ -31234,14 +31233,14 @@ Skylink.prototype._parseStreamSettings = function(options) {
         { exact: settings.settings.video.resolution.height } : { max: settings.settings.video.resolution.height });
 
       if ((options.video.frameRate && typeof options.video.frameRate === 'object') ||
-        typeof options.video.frameRate === 'number' && !self._isUsingPlugin) {
+        typeof options.video.frameRate === 'number' && AdapterJS.webrtcDetectedType !== 'plugin') {
         settings.settings.video.frameRate = options.video.frameRate;
         settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === 'object' ?
           settings.settings.video.frameRate : (options.useExactConstraints ?
           { exact: settings.settings.video.frameRate } : { max: settings.settings.video.frameRate });
       }
 
-      if (options.video.facingMode && ['string', 'object'].indexOf(typeof options.video.facingMode) > -1 && self._isUsingPlugin) {
+      if (options.video.facingMode && ['string', 'object'].indexOf(typeof options.video.facingMode) > -1 && AdapterJS.webrtcDetectedType === 'plugin') {
         settings.settings.video.facingMode = options.video.facingMode;
         settings.getUserMediaSettings.video.facingMode = typeof settings.settings.video.facingMode === 'object' ?
           settings.settings.video.facingMode : (options.useExactConstraints ?
@@ -32606,7 +32605,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
         pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
 
       } else {
-        pc.createOffer(successCbFn, errorCbFn, self._isUsingPlugin ? {
+        pc.createOffer(successCbFn, errorCbFn, AdapterJS.webrtcDetectedType === 'plugin' ? {
           mandatory: {
             OfferToReceiveVideo: offerConstraints.offerToReceiveAudio,
             OfferToReceiveAudio: offerConstraints.offerToReceiveVideo

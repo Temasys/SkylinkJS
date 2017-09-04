@@ -1853,14 +1853,14 @@ Skylink.prototype._parseStreamSettings = function(options) {
         { exact: settings.settings.video.resolution.height } : { max: settings.settings.video.resolution.height });
 
       if ((options.video.frameRate && typeof options.video.frameRate === 'object') ||
-        typeof options.video.frameRate === 'number' && !self._isUsingPlugin) {
+        typeof options.video.frameRate === 'number' && AdapterJS.webrtcDetectedType !== 'plugin') {
         settings.settings.video.frameRate = options.video.frameRate;
         settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === 'object' ?
           settings.settings.video.frameRate : (options.useExactConstraints ?
           { exact: settings.settings.video.frameRate } : { max: settings.settings.video.frameRate });
       }
 
-      if (options.video.facingMode && ['string', 'object'].indexOf(typeof options.video.facingMode) > -1 && self._isUsingPlugin) {
+      if (options.video.facingMode && ['string', 'object'].indexOf(typeof options.video.facingMode) > -1 && AdapterJS.webrtcDetectedType === 'plugin') {
         settings.settings.video.facingMode = options.video.facingMode;
         settings.getUserMediaSettings.video.facingMode = typeof settings.settings.video.facingMode === 'object' ?
           settings.settings.video.facingMode : (options.useExactConstraints ?

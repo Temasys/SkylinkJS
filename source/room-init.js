@@ -1281,7 +1281,6 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   adapter.webRTCReady(function () {
-    self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
     self._useEdgeWebRTC = self._useEdgeWebRTCFlag && window.webrtcDetectedBrowser === 'edge' && !!window.msRTCPeerConnection;
 
     // Prevent empty object returned when constructing the RTCPeerConnection object
@@ -1294,7 +1293,7 @@ Skylink.prototype._loadInfo = function() {
         return false;
       }
     })()) {
-      if (window.RTCPeerConnection && self._isUsingPlugin) {
+      if (window.RTCPeerConnection && AdapterJS.webrtcDetectedType === 'plugin') {
         log.error('Plugin is not available. Please check plugin status.');
       } else {
         log.error('WebRTC not supported. Please upgrade your browser');
@@ -1302,7 +1301,7 @@ Skylink.prototype._loadInfo = function() {
       self._readyState = -1;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
-        content: self._isUsingPlugin && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available',
+        content: AdapterJS.webrtcDetectedType === 'plugin' && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available',
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
       }, self._selectedRoom);
       return;

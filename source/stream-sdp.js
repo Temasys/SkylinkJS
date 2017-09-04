@@ -964,7 +964,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
         pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
 
       } else {
-        pc.createOffer(successCbFn, errorCbFn, self._isUsingPlugin ? {
+        pc.createOffer(successCbFn, errorCbFn, AdapterJS.webrtcDetectedType === 'plugin' ? {
           mandatory: {
             OfferToReceiveVideo: offerConstraints.offerToReceiveAudio,
             OfferToReceiveAudio: offerConstraints.offerToReceiveVideo
