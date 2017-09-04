@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 12:35:17 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 17:18:58 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -11368,7 +11368,6 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
 };
 
 
-
 Skylink.prototype.LOG_LEVEL = {
   DEBUG: 4,
   LOG: 3,
@@ -17847,7 +17846,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
               if (updatedStream) {
                 updatedStream.getTracks().forEach(function (track) {
-                  pc.addTrack(track);
+                  pc.addTrack(track, updatedStream);
                 });
                 
                 pc.localStreamId = updatedStream.id;

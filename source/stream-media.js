@@ -2152,7 +2152,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
 
               if (updatedStream) {
                 updatedStream.getTracks().forEach(function (track) {
-                  pc.addTrack(track);
+                  pc.addTrack(track, updatedStream);
                 });
                 
                 pc.localStreamId = updatedStream.id;
