@@ -111,7 +111,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   };
 
   // Not using promises as primary even as preferred because of users using older AdapterJS to prevent breaks
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
   
   } else {
@@ -184,7 +184,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     pc.createAnswer(answerConstraints).then(successCbFn).catch(errorCbFn); 
 
   } else {
@@ -293,7 +293,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     pc.setLocalDescription(new RTCSessionDescription(sessionDescription)).then(successCbFn).catch(errorCbFn);
   }
 

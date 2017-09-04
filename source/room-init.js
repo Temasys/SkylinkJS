@@ -1282,7 +1282,6 @@ Skylink.prototype._loadInfo = function() {
   }
   adapter.webRTCReady(function () {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
-    self._useSafariWebRTC = !self._isUsingPlugin && window.webrtcDetectedBrowser === 'safari';
     self._useEdgeWebRTC = self._useEdgeWebRTCFlag && window.webrtcDetectedBrowser === 'edge' && !!window.msRTCPeerConnection;
 
     // Prevent empty object returned when constructing the RTCPeerConnection object

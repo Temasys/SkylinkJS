@@ -1594,7 +1594,7 @@ Skylink.prototype._offerHandler = function(message) {
     pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     
-    if (self._useSafariWebRTC && pc.remoteStreamTrigger) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && pc.remoteStreamTrigger) {
       self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
       pc.remoteStreamTrigger = false;
     }
@@ -1615,7 +1615,7 @@ Skylink.prototype._offerHandler = function(message) {
     });
   };
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     self._parseSDPMediaStreamIDs(targetMid, offer);
     pc.setRemoteDescription(new RTCSessionDescription(offer)).then(successCbFn).catch(errorCbFn);
 
@@ -1825,7 +1825,7 @@ Skylink.prototype._answerHandler = function(message) {
       self._closeDataChannel(targetMid);
     }
 
-    if (self._useSafariWebRTC && pc.remoteStreamTrigger) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && pc.remoteStreamTrigger) {
       self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
       pc.remoteStreamTrigger = false;
     }
@@ -1843,7 +1843,7 @@ Skylink.prototype._answerHandler = function(message) {
     });
   };
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     self._parseSDPMediaStreamIDs(targetMid, answer);
     pc.setRemoteDescription(new RTCSessionDescription(answer)).then(successCbFn).catch(errorCbFn);
 

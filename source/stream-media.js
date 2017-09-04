@@ -645,7 +645,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       self._onStreamAccessError(error, settings, false, false);
     };
 
-    if (self._useSafariWebRTC) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
       navigator.mediaDevices.getUserMedia(settings.getUserMediaSettings).then(successCbFn).catch(errorCbFn);
 
     } else {
@@ -1520,7 +1520,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
           self._onStreamAccessSuccess(stream, settings, true, false);
         };
 
-        if (self._useSafariWebRTC) {
+        if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
           navigator.mediaDevices.getUserMedia({ audio: getUserMediaAudioSettings }).then(audioSuccessCbFn).catch(audioErrorCbFn);
 
         } else {
@@ -1532,7 +1532,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         self._onStreamAccessError(error, settings, true, false);
       };
 
-      if (self._useSafariWebRTC) {
+      if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
         navigator.mediaDevices.getUserMedia(settings.getUserMediaSettings).catch(successCbFn).then(errorCbFn);
 
       } else {
@@ -2065,7 +2065,7 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
       }, self.MEDIA_ACCESS_FALLBACK_STATE.ERROR, false, true);
     };
 
-    if (self._useSafariWebRTC) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
       navigator.mediaDevices.getUserMedia({
         audio: true
       }).then(successCbFn).catch(errorCbFn);
@@ -2092,7 +2092,7 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
  */
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
-  var streamId = self._useSafariWebRTC ? (self._peerConnections[targetMid] &&
+  var streamId = AdapterJS.webrtcDetectedType === 'AppleWebKit' ? (self._peerConnections[targetMid] &&
     self._peerConnections[targetMid].remoteStreamId) : stream.id || stream.label;
 
   if (!self._peerInformations[targetMid]) {
@@ -2144,7 +2144,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
-          if (self._useSafariWebRTC) {
+          if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
             if (updatedStream ? (pc.localStreamId ? updatedStream.id !== pc.localStreamId : true) : true) {
               pc.getSenders().forEach(function (sender) {
                 pc.removeTrack(sender);

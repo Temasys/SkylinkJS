@@ -434,7 +434,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           return;
         }
 
-        if (self._useSafariWebRTC) {
+        if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
           var checkStream = self._streams.screenshare && self._streams.screenshare.stream ?
             self._streams.screenshare.stream : (self._streams.userMedia && self._streams.userMedia.stream ?
               self._streams.userMedia.stream : null);

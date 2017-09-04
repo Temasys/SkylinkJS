@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 17:18:58 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 18:15:32 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -13696,7 +13696,7 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 17:18:58 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 18:15:32 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -14896,16 +14896,6 @@ function Skylink() {
    * @since 0.6.19
    */
   this._useEdgeWebRTC = false;
-
-  /**
-   * Stores the safari 11+ use native webrtc implementation.
-   * @attribute _useSafariWebRTC
-   * @type Boolean
-   * @private
-   * @for Skylink
-   * @since 0.6.25
-   */
-  this._useSafariWebRTC = false;
 
   /**
    * Stores the flag to enable simultaneous data transfers.
@@ -18843,7 +18833,7 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     return;
   }
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     self._peerConnections[targetMid].addIceCandidate(candidate).then(onSuccessCbFn).catch(onErrorCbFn);
 
   } else {
@@ -19892,7 +19882,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
   }
 
   // Warn due to Edge not giving complete stats and returning as 0 sometimes..
-  if (window.webrtcDetectedBrowser === 'edge' || self._useSafariWebRTC) {
+  if (window.webrtcDetectedBrowser === 'edge' || AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     log.warn('Current connection stats may not be complete as it is in beta');
   }
 
@@ -20657,7 +20647,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     callback(error, null);
   };
 
-  if (self._useSafariWebRTC || self._useEdgeWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit' || self._useEdgeWebRTC) {
     pc.getStats(null).then(successCbFn).catch(errorCbFn);
   } else {
     pc.getStats(null, successCbFn, errorCbFn);
@@ -20901,7 +20891,7 @@ Skylink.prototype._removePeer = function(peerId) {
     if (this._peerConnections[peerId].signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
       this._peerConnections[peerId].close();
       // Polyfill for safari 11 "closed" event not triggered for "iceConnectionState" and "signalingState".
-      if (this._useSafariWebRTC) {
+      if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
         if (!this._peerConnections[peerId].signalingStateClosed) {
           this._peerConnections[peerId].signalingStateClosed = true;
           this._trigger('peerConnectionState', this.PEER_CONNECTION_STATE.CLOSED, peerId);
@@ -21078,7 +21068,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
   };
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     pc.ontrack = function (event) {
       if (!self._peerConnections[targetMid]) {
         return;
@@ -21165,7 +21155,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       }
     }
 
-    if (self._useSafariWebRTC && iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED) {
       setTimeout(function () {
         if (!pc.iceConnectionStateClosed) {
           self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.CLOSED, targetMid);
@@ -21252,7 +21242,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
   pc.onsignalingstatechange = function() {
     log.debug([targetMid, 'RTCSignalingState', null, 'Peer connection state changed ->'], pc.signalingState);
 
-    if (self._useSafariWebRTC && pc.signalingState === self.PEER_CONNECTION_STATE.CLOSED) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && pc.signalingState === self.PEER_CONNECTION_STATE.CLOSED) {
       setTimeout(function () {
         if (!pc.signalingStateClosed) {
           self._trigger('peerConnectionState', self.PEER_CONNECTION_STATE.CLOSED, targetMid);
@@ -21863,7 +21853,7 @@ Skylink.prototype.getPeersStream = function() {
       this._peerConnections[listOfPeers[i]].remoteDescription.sdp &&
       (this._sdpSettings.direction.audio.receive || this._sdpSettings.direction.video.receive)) {
 
-      if (self._useSafariWebRTC) {
+      if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
         stream = this._peerConnections[listOfPeers[i]].remoteStream;
         streamId = this._peerConnections[listOfPeers[i]].remoteStreamId;
 
@@ -22139,7 +22129,7 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
       }
     };
 
-    if (self._useSafariWebRTC) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
       parseStreamFn(self._peerConnections[peerId].localStream, self._peerConnections[peerId].localStreamId);
 
     } else {
@@ -22348,7 +22338,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
   };
 
   // Not using promises as primary even as preferred because of users using older AdapterJS to prevent breaks
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
   
   } else {
@@ -22421,7 +22411,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     pc.createAnswer(answerConstraints).then(successCbFn).catch(errorCbFn); 
 
   } else {
@@ -22530,7 +22520,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     pc.setLocalDescription(new RTCSessionDescription(sessionDescription)).then(successCbFn).catch(errorCbFn);
   }
 
@@ -23143,7 +23133,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           return;
         }
 
-        if (self._useSafariWebRTC) {
+        if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
           var checkStream = self._streams.screenshare && self._streams.screenshare.stream ?
             self._streams.screenshare.stream : (self._streams.userMedia && self._streams.userMedia.stream ?
               self._streams.userMedia.stream : null);
@@ -24930,7 +24920,6 @@ Skylink.prototype._loadInfo = function() {
   }
   adapter.webRTCReady(function () {
     self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
-    self._useSafariWebRTC = !self._isUsingPlugin && window.webrtcDetectedBrowser === 'safari';
     self._useEdgeWebRTC = self._useEdgeWebRTCFlag && window.webrtcDetectedBrowser === 'edge' && !!window.msRTCPeerConnection;
 
     // Prevent empty object returned when constructing the RTCPeerConnection object
@@ -29135,7 +29124,7 @@ Skylink.prototype._offerHandler = function(message) {
     pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     
-    if (self._useSafariWebRTC && pc.remoteStreamTrigger) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && pc.remoteStreamTrigger) {
       self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
       pc.remoteStreamTrigger = false;
     }
@@ -29156,7 +29145,7 @@ Skylink.prototype._offerHandler = function(message) {
     });
   };
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     self._parseSDPMediaStreamIDs(targetMid, offer);
     pc.setRemoteDescription(new RTCSessionDescription(offer)).then(successCbFn).catch(errorCbFn);
 
@@ -29366,7 +29355,7 @@ Skylink.prototype._answerHandler = function(message) {
       self._closeDataChannel(targetMid);
     }
 
-    if (self._useSafariWebRTC && pc.remoteStreamTrigger) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && pc.remoteStreamTrigger) {
       self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
       pc.remoteStreamTrigger = false;
     }
@@ -29384,7 +29373,7 @@ Skylink.prototype._answerHandler = function(message) {
     });
   };
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     self._parseSDPMediaStreamIDs(targetMid, answer);
     pc.setRemoteDescription(new RTCSessionDescription(answer)).then(successCbFn).catch(errorCbFn);
 
@@ -30037,7 +30026,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       self._onStreamAccessError(error, settings, false, false);
     };
 
-    if (self._useSafariWebRTC) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
       navigator.mediaDevices.getUserMedia(settings.getUserMediaSettings).then(successCbFn).catch(errorCbFn);
 
     } else {
@@ -30912,7 +30901,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
           self._onStreamAccessSuccess(stream, settings, true, false);
         };
 
-        if (self._useSafariWebRTC) {
+        if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
           navigator.mediaDevices.getUserMedia({ audio: getUserMediaAudioSettings }).then(audioSuccessCbFn).catch(audioErrorCbFn);
 
         } else {
@@ -30924,7 +30913,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         self._onStreamAccessError(error, settings, true, false);
       };
 
-      if (self._useSafariWebRTC) {
+      if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
         navigator.mediaDevices.getUserMedia(settings.getUserMediaSettings).catch(successCbFn).then(errorCbFn);
 
       } else {
@@ -31457,7 +31446,7 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
       }, self.MEDIA_ACCESS_FALLBACK_STATE.ERROR, false, true);
     };
 
-    if (self._useSafariWebRTC) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
       navigator.mediaDevices.getUserMedia({
         audio: true
       }).then(successCbFn).catch(errorCbFn);
@@ -31484,7 +31473,7 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
  */
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
-  var streamId = self._useSafariWebRTC ? (self._peerConnections[targetMid] &&
+  var streamId = AdapterJS.webrtcDetectedType === 'AppleWebKit' ? (self._peerConnections[targetMid] &&
     self._peerConnections[targetMid].remoteStreamId) : stream.id || stream.label;
 
   if (!self._peerInformations[targetMid]) {
@@ -31536,7 +31525,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
-          if (self._useSafariWebRTC) {
+          if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
             if (updatedStream ? (pc.localStreamId ? updatedStream.id !== pc.localStreamId : true) : true) {
               pc.getSenders().forEach(function (sender) {
                 pc.removeTrack(sender);
@@ -32083,7 +32072,7 @@ Skylink.prototype._renderSDPOutput = function (targetMid, sessionDescription) {
     return sessionDescription.sdp;
   }
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     if (self._peerConnections[targetMid].localStream) {
       localStream = self._peerConnections[targetMid].localStream;
       localStreamId = self._peerConnections[targetMid].localStreamId || self._peerConnections[targetMid].localStream.id;
@@ -32229,7 +32218,7 @@ Skylink.prototype._parseSDPMediaStreamIDs = function (targetMid, sessionDescript
     return;
   }
 
-  if (!(sessionDescription && sessionDescription.sdp) || !this._useSafariWebRTC) {
+  if (!(sessionDescription && sessionDescription.sdp) || AdapterJS.webrtcDetectedType !== 'AppleWebKit') {
     this._peerConnections[targetMid].remoteStream = null;
     this._peerConnections[targetMid].remoteStreamId = null;
     return;
@@ -32541,7 +32530,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
   self._currentCodecSupport = { audio: {}, video: {} };
 
   // Safari 11 REQUIRES a stream first before connection works, hence let's spoof it for now
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     self._currentCodecSupport.audio = { 
       opus: ['48000/2']
     };
@@ -32613,7 +32602,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
         callback(error);
       };
 
-      if (self._useSafariWebRTC) {
+      if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
         pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
 
       } else {

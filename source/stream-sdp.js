@@ -430,7 +430,7 @@ Skylink.prototype._renderSDPOutput = function (targetMid, sessionDescription) {
     return sessionDescription.sdp;
   }
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     if (self._peerConnections[targetMid].localStream) {
       localStream = self._peerConnections[targetMid].localStream;
       localStreamId = self._peerConnections[targetMid].localStreamId || self._peerConnections[targetMid].localStream.id;
@@ -576,7 +576,7 @@ Skylink.prototype._parseSDPMediaStreamIDs = function (targetMid, sessionDescript
     return;
   }
 
-  if (!(sessionDescription && sessionDescription.sdp) || !this._useSafariWebRTC) {
+  if (!(sessionDescription && sessionDescription.sdp) || AdapterJS.webrtcDetectedType !== 'AppleWebKit') {
     this._peerConnections[targetMid].remoteStream = null;
     this._peerConnections[targetMid].remoteStreamId = null;
     return;
@@ -888,7 +888,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
   self._currentCodecSupport = { audio: {}, video: {} };
 
   // Safari 11 REQUIRES a stream first before connection works, hence let's spoof it for now
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     self._currentCodecSupport.audio = { 
       opus: ['48000/2']
     };
@@ -960,7 +960,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
         callback(error);
       };
 
-      if (self._useSafariWebRTC) {
+      if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
         pc.createOffer(offerConstraints).then(successCbFn).catch(errorCbFn);
 
       } else {

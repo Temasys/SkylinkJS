@@ -367,7 +367,7 @@ Skylink.prototype.getPeersStream = function() {
       this._peerConnections[listOfPeers[i]].remoteDescription.sdp &&
       (this._sdpSettings.direction.audio.receive || this._sdpSettings.direction.video.receive)) {
 
-      if (self._useSafariWebRTC) {
+      if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
         stream = this._peerConnections[listOfPeers[i]].remoteStream;
         streamId = this._peerConnections[listOfPeers[i]].remoteStreamId;
 
@@ -643,7 +643,7 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
       }
     };
 
-    if (self._useSafariWebRTC) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
       parseStreamFn(self._peerConnections[peerId].localStream, self._peerConnections[peerId].localStreamId);
 
     } else {

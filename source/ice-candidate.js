@@ -308,7 +308,7 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     return;
   }
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     self._peerConnections[targetMid].addIceCandidate(candidate).then(onSuccessCbFn).catch(onErrorCbFn);
 
   } else {

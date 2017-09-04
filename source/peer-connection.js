@@ -769,7 +769,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
   }
 
   // Warn due to Edge not giving complete stats and returning as 0 sometimes..
-  if (window.webrtcDetectedBrowser === 'edge' || self._useSafariWebRTC) {
+  if (window.webrtcDetectedBrowser === 'edge' || AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     log.warn('Current connection stats may not be complete as it is in beta');
   }
 
@@ -1534,7 +1534,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     callback(error, null);
   };
 
-  if (self._useSafariWebRTC || self._useEdgeWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit' || self._useEdgeWebRTC) {
     pc.getStats(null).then(successCbFn).catch(errorCbFn);
   } else {
     pc.getStats(null, successCbFn, errorCbFn);
@@ -1778,7 +1778,7 @@ Skylink.prototype._removePeer = function(peerId) {
     if (this._peerConnections[peerId].signalingState !== this.PEER_CONNECTION_STATE.CLOSED) {
       this._peerConnections[peerId].close();
       // Polyfill for safari 11 "closed" event not triggered for "iceConnectionState" and "signalingState".
-      if (this._useSafariWebRTC) {
+      if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
         if (!this._peerConnections[peerId].signalingStateClosed) {
           this._peerConnections[peerId].signalingStateClosed = true;
           this._trigger('peerConnectionState', this.PEER_CONNECTION_STATE.CLOSED, peerId);
@@ -1955,7 +1955,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
   };
 
-  if (self._useSafariWebRTC) {
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     pc.ontrack = function (event) {
       if (!self._peerConnections[targetMid]) {
         return;
@@ -2042,7 +2042,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       }
     }
 
-    if (self._useSafariWebRTC && iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED) {
       setTimeout(function () {
         if (!pc.iceConnectionStateClosed) {
           self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.CLOSED, targetMid);
@@ -2129,7 +2129,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
   pc.onsignalingstatechange = function() {
     log.debug([targetMid, 'RTCSignalingState', null, 'Peer connection state changed ->'], pc.signalingState);
 
-    if (self._useSafariWebRTC && pc.signalingState === self.PEER_CONNECTION_STATE.CLOSED) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && pc.signalingState === self.PEER_CONNECTION_STATE.CLOSED) {
       setTimeout(function () {
         if (!pc.signalingStateClosed) {
           self._trigger('peerConnectionState', self.PEER_CONNECTION_STATE.CLOSED, targetMid);
