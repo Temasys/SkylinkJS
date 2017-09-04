@@ -1235,7 +1235,7 @@ Skylink.prototype._loadInfo = function() {
   // check if adapterjs has been loaded already first or not
   var adapter = (function () {
     try {
-      return window.AdapterJS || AdapterJS;
+      return window.AdapterJS || globals.AdapterJS;
     } catch (error) {
       return false;
     }

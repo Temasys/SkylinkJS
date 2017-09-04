@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 18:23:26 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 18:26:31 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -11175,7 +11175,7 @@ Skylink.prototype._loadInfo = function() {
   // check if adapterjs has been loaded already first or not
   var adapter = (function () {
     try {
-      return window.AdapterJS || AdapterJS;
+      return window.AdapterJS || globals.AdapterJS;
     } catch (error) {
       return false;
     }
