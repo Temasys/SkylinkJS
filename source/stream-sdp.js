@@ -888,8 +888,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
   self._currentCodecSupport = { audio: {}, video: {} };
 
   // Safari 11 REQUIRES a stream first before connection works, hence let's spoof it for now
-  if (window.RTCPeerConnection && window.webrtcDetectedBrowser === 'safari' &&
-    window.webrtcDetectedVersion >= 11 && !self._isUsingPlugin) {
+  if (self._useSafariWebRTC) {
     self._currentCodecSupport.audio = { 
       opus: ['48000/2']
     };
