@@ -360,24 +360,34 @@ Skylink.prototype.getPeersStream = function() {
 
   for (var i = 0; i < listOfPeers.length; i++) {
     var stream = null;
+    var streamId = null;
 
     if (this._peerConnections[listOfPeers[i]] &&
       this._peerConnections[listOfPeers[i]].remoteDescription &&
       this._peerConnections[listOfPeers[i]].remoteDescription.sdp &&
       (this._sdpSettings.direction.audio.receive || this._sdpSettings.direction.video.receive)) {
-      var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
 
-      for (var j = 0; j < streams.length; j++) {
-        if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
-          'msid:' + (streams[j].id || streams[j].label)) > 0) {
-          stream = streams[j];
-          break;
+      if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+        stream = this._peerConnections[listOfPeers[i]].remoteStream;
+        streamId = this._peerConnections[listOfPeers[i]].remoteStreamId;
+
+      } else {
+        var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
+
+        for (var j = 0; j < streams.length; j++) {
+          if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
+            'msid:' + (streams[j].id || streams[j].label)) > 0) {
+            stream = streams[j];
+            break;
+          }
         }
+
+        streamId = stream ? stream.id || stream.label || null : null;
       }
     }
 
     listOfPeersStreams[listOfPeers[i]] = {
-      streamId: stream ? stream.id || stream.label || null : null,
+      streamId: streamId,
       stream: stream,
       isSelf: false
     };
@@ -601,35 +611,48 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
   
 
   if (self._peerConnections[usePeerId] && self._peerConnections[usePeerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-    var streams = self._peerConnections[peerId].getLocalStreams();
-
     customSettings.settings.data = self._enableDataChannel && self._peerInformations[peerId].config.enableDataChannel;
 
-    for (var s = 0; s < streams.length; s++) {
-      if (self._streams.screenshare && self._streams.screenshare.stream && (streams[s].id ||
-        streams[s].label) === (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
+    var parseStreamFn = function (stream, streamId) {
+      if (self._streams.screenshare && self._streams.screenshare.stream && streamId ===
+        (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
         customSettings.settings.audio = clone(self._streams.screenshare.settings.audio);
         customSettings.settings.video = clone(self._streams.screenshare.settings.video);
         customSettings.mediaStatus = clone(self._streamsMutedSettings);
-        break;
-      } else if (self._streams.userMedia && self._streams.userMedia.stream && (streams[s].id ||
-        streams[s].label) === (self._streams.userMedia.stream.id ||
-        self._streams.userMedia.stream.label)) {
+        return true;
+
+      } else if (self._streams.userMedia && self._streams.userMedia.stream && streamId ===
+        (self._streams.userMedia.stream.id || self._streams.userMedia.stream.label)) {
         customSettings.settings.audio = clone(self._streams.userMedia.settings.audio);
         customSettings.settings.video = clone(self._streams.userMedia.settings.video);
         customSettings.mediaStatus = clone(self._streamsMutedSettings);
-        break;
+        return true;
+
       } else if (window.webrtcDetectedBrowser === 'edge') {
         customSettings.settings.audio = clone(self._streams.userMedia.settings.audio);
         customSettings.settings.video = clone(self._streams.userMedia.settings.video);
         customSettings.mediaStatus = clone(self._streamsMutedSettings);
-        if (streams[s].getAudioTracks().length === 0) {
+        if (stream.getAudioTracks().length === 0) {
           customSettings.settings.audio = false;
           customSettings.mediaStatus.audioMuted = true;
         }
-        if (streams[s].getVideoTracks().length === 0) {
+        if (stream.getVideoTracks().length === 0) {
           customSettings.settings.video = false;
           customSettings.mediaStatus.videoMuted = true;
+        }
+      }
+    };
+
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+      parseStreamFn(self._peerConnections[peerId].localStream, self._peerConnections[peerId].localStreamId);
+
+    } else {
+      var streams = self._peerConnections[peerId].getLocalStreams();
+      
+      for (var s = 0; s < streams.length; s++) {
+        var shouldBreak = parseStreamFn(streams[s], streams[s].id || streams[s].label);
+        if (shouldBreak) {
+          break;
         }
       }
     }

@@ -168,7 +168,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       // a=end-of-candidates should present in non-trickle ICE connections so no need to send endOfCandidates message
       self._sendChannelMessage({
         type: sessionDescription.type,
-        sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
+        sdp: self._renderSDPOutput(targetMid, sessionDescription),
         mid: self._user.sid,
         userInfo: self._getUserInfo(targetMid),
         target: targetMid,
@@ -236,7 +236,12 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
       this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED &&
       AdapterJS && !this._isLowerThanVersion(AdapterJS.VERSION, '0.14.0')) {
       log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
-      this._peerConnections[targetMid].addIceCandidate(null);
+      try {
+        this._peerConnections[targetMid].addIceCandidate(null);
+
+      } catch (error) {
+        log.warn([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering is not supported.']);
+      }
     }
   }
 
@@ -303,5 +308,10 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     return;
   }
 
-  self._peerConnections[targetMid].addIceCandidate(candidate, onSuccessCbFn, onErrorCbFn);
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+    self._peerConnections[targetMid].addIceCandidate(candidate).then(onSuccessCbFn).catch(onErrorCbFn);
+
+  } else {
+    self._peerConnections[targetMid].addIceCandidate(candidate, onSuccessCbFn, onErrorCbFn);
+  }
 };

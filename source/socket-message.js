@@ -1588,14 +1588,22 @@ Skylink.prototype._offerHandler = function(message) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
+  var successCbFn = function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
     pc.setOffer = 'remote';
     pc.processingRemoteSDP = false;
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
+    
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && pc.remoteStreamTrigger) {
+      self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
+      pc.remoteStreamTrigger = false;
+    }
+
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
-  }, function(error) {
+  };
+
+  var errorCbFn = function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
     pc.processingRemoteSDP = false;
@@ -1605,7 +1613,15 @@ Skylink.prototype._offerHandler = function(message) {
       state: pc.signalingState,
       offer: offer
     });
-  });
+  };
+
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+    self._parseSDPMediaStreamIDs(targetMid, offer);
+    pc.setRemoteDescription(new RTCSessionDescription(offer)).then(successCbFn).catch(errorCbFn);
+
+  } else {
+    pc.setRemoteDescription(new RTCSessionDescription(offer), successCbFn, errorCbFn);
+  }
 };
 
 
@@ -1792,7 +1808,7 @@ Skylink.prototype._answerHandler = function(message) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  pc.setRemoteDescription(new RTCSessionDescription(answer), function() {
+  var successCbFn = function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
     pc.processingRemoteSDP = false;
@@ -1809,7 +1825,13 @@ Skylink.prototype._answerHandler = function(message) {
       self._closeDataChannel(targetMid);
     }
 
-  }, function(error) {
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && pc.remoteStreamTrigger) {
+      self._onRemoteStreamAdded(targetMid, pc.remoteStream, !!pc.hasScreen);
+      pc.remoteStreamTrigger = false;
+    }
+  };
+
+  var errorCbFn = function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
     pc.processingRemoteSDP = false;
@@ -1819,7 +1841,15 @@ Skylink.prototype._answerHandler = function(message) {
       state: pc.signalingState,
       answer: answer
     });
-  });
+  };
+
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+    self._parseSDPMediaStreamIDs(targetMid, answer);
+    pc.setRemoteDescription(new RTCSessionDescription(answer)).then(successCbFn).catch(errorCbFn);
+
+  } else {
+    pc.setRemoteDescription(new RTCSessionDescription(answer), successCbFn, errorCbFn);
+  }
 };
 
 /**

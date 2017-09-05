@@ -469,6 +469,7 @@ Skylink.prototype.generateUUID = function() {
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.PRIORITY_WEIGHT_SCHEME]
  * @param {Boolean} [options.useEdgeWebRTC=false] The flag to use Edge 15.x pre-1.0 WebRTC support.
+ * @param {Boolean} [options.enableSimultaneousTransfers=true] The flag to enable simultaneous data transfers.
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_readyStateChange">
@@ -517,7 +518,8 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} callback.success.iceServer The configured value of the <code>options.iceServer</code>.
  *   <small>See the <code>.urls</code> property in this object for configured value if defined.</small>
  * @param {JSON|String} callback.success.socketServer The configured value of the <code>options.socketServer</code>.
- * @param {JSON|String} callback.success.useEdgeWebRTC The configured value of the <code>options.useEdgeWebRTC</code>.
+ * @param {Boolean} callback.success.useEdgeWebRTC The configured value of the <code>options.useEdgeWebRTC</code>.
+ * @param {Boolean} callback.success.enableSimultaneousTransfers The configured value of the <code>options.enableSimultaneousTransfers</code>.
  * @example
  *   // Example 1: Using CORS authentication and connection to default Room
  *   skylinkDemo(appKey, function (error, success) {
@@ -635,6 +637,7 @@ Skylink.prototype.init = function(options, callback) {
   };
   var priorityWeightScheme = self.PRIORITY_WEIGHT_SCHEME.AUTO;
   var useEdgeWebRTC = false;
+  var enableSimultaneousTransfers = true;
 
   log.log('Provided init options:', options);
 
@@ -708,6 +711,9 @@ Skylink.prototype.init = function(options, callback) {
     // set the flag if edge 15.x uses the pre-1.0 webrtc implementation
     useEdgeWebRTC = (typeof options.useEdgeWebRTC === 'boolean') ?
       options.useEdgeWebRTC : useEdgeWebRTC;
+    // set the flag if simultaneous data transfers is disabled
+    enableSimultaneousTransfers = (typeof options.enableSimultaneousTransfers === 'boolean') ?
+      options.enableSimultaneousTransfers : enableSimultaneousTransfers;
     // set the use of filtering ICE candidates
     if (typeof options.filterCandidatesType === 'object' && options.filterCandidatesType) {
       filterCandidatesType.host = (typeof options.filterCandidatesType.host === 'boolean') ?
@@ -966,7 +972,8 @@ Skylink.prototype.init = function(options, callback) {
   self._socketServer = socketServer;
   self._codecParams = codecParams;
   self._priorityWeightScheme = priorityWeightScheme;
-  self._useEdgeWebRTC = useEdgeWebRTC;
+  self._useEdgeWebRTCFlag = useEdgeWebRTC;
+  self._enableSimultaneousTransfers = enableSimultaneousTransfers;
 
   log.log('Init configuration:', {
     serverUrl: self._path,
@@ -999,7 +1006,8 @@ Skylink.prototype.init = function(options, callback) {
     socketServer: self._socketServer,
     codecParams: self._codecParams,
     priorityWeightScheme: self._priorityWeightScheme,
-    useEdgeWebRTC: self._useEdgeWebRTC
+    useEdgeWebRTC: self._useEdgeWebRTCFlag,
+    enableSimultaneousTransfers: self._enableSimultaneousTransfers
   });
   // trigger the readystate
   self._readyState = 0;
@@ -1046,7 +1054,8 @@ Skylink.prototype.init = function(options, callback) {
             socketServer: self._socketServer,
             codecParams: self._codecParams,
             priorityWeightScheme: self._priorityWeightScheme,
-            useEdgeWebRTC: self._useEdgeWebRTC
+            useEdgeWebRTC: self._useEdgeWebRTCFlag,
+            enableSimultaneousTransfers: self._enableSimultaneousTransfers
           });
         } else if (readyState === self.READY_STATE_CHANGE.ERROR) {
           log.log([null, 'Socket', null, 'Firing callback. ' +
@@ -1226,7 +1235,7 @@ Skylink.prototype._loadInfo = function() {
   // check if adapterjs has been loaded already first or not
   var adapter = (function () {
     try {
-      return window.AdapterJS || AdapterJS;
+      return window.AdapterJS || globals.AdapterJS;
     } catch (error) {
       return false;
     }
@@ -1272,7 +1281,7 @@ Skylink.prototype._loadInfo = function() {
     return;
   }
   adapter.webRTCReady(function () {
-    self._isUsingPlugin = !!adapter.WebRTCPlugin.plugin && !!adapter.WebRTCPlugin.plugin.VERSION;
+    self._useEdgeWebRTC = self._useEdgeWebRTCFlag && window.webrtcDetectedBrowser === 'edge' && !!window.msRTCPeerConnection;
 
     // Prevent empty object returned when constructing the RTCPeerConnection object
     if (!(function () {
@@ -1284,7 +1293,7 @@ Skylink.prototype._loadInfo = function() {
         return false;
       }
     })()) {
-      if (window.RTCPeerConnection && self._isUsingPlugin) {
+      if (window.RTCPeerConnection && AdapterJS.webrtcDetectedType === 'plugin') {
         log.error('Plugin is not available. Please check plugin status.');
       } else {
         log.error('WebRTC not supported. Please upgrade your browser');
@@ -1292,7 +1301,7 @@ Skylink.prototype._loadInfo = function() {
       self._readyState = -1;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: null,
-        content: self._isUsingPlugin && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available',
+        content: AdapterJS.webrtcDetectedType === 'plugin' && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available',
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
       }, self._selectedRoom);
       return;
@@ -1386,7 +1395,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     socketServer: self._socketServer ? self._socketServer : null,
     codecParams: self._codecParams ? self._codecParams : null,
     priorityWeightScheme: self._priorityWeightScheme ? self._priorityWeightScheme : null,
-    useEdgeWebRTC: self._useEdgeWebRTC
+    useEdgeWebRTC: self._useEdgeWebRTCFlag,
+    enableSimultaneousTransfers: self._enableSimultaneousTransfers
   };
   if (self._roomCredentials) {
     initOptions.credentials = {

@@ -630,8 +630,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
     // Parse stream settings
     var settings = self._parseStreamSettings(options);
-
-    navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+    var successCbFn = function (stream) {
       if (settings.mutedSettings.shouldAudioMuted) {
         self._streamsMutedSettings.audioMuted = true;
       }
@@ -641,10 +640,17 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       }
 
       self._onStreamAccessSuccess(stream, settings, false, false);
-
-    }, function (error) {
+    };
+    var errorCbFn = function (error) {
       self._onStreamAccessError(error, settings, false, false);
-    });
+    };
+
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+      navigator.mediaDevices.getUserMedia(settings.getUserMediaSettings).then(successCbFn).catch(errorCbFn);
+
+    } else {
+      navigator.getUserMedia(settings.getUserMediaSettings, successCbFn, errorCbFn);
+    }
   }, 'getUserMedia', self._throttlingTimeouts.getUserMedia);
 };
 
@@ -1484,14 +1490,14 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         }
       }
 
-      navigator.getUserMedia(settings.getUserMediaSettings, function (stream) {
+      var successCbFn = function (stream) {
         if (hasDefaultAudioTrack || !enableAudioSettings) {
           self._onStreamAccessSuccess(stream, settings, true, false);
           return;
         }
 
         settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
-        navigator.getUserMedia({ audio: getUserMediaAudioSettings }, function (audioStream) {
+        var audioSuccessCbFn = function (audioStream) {
           try {
             audioStream.addTrack(stream.getVideoTracks()[0]);
 
@@ -1507,14 +1513,31 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
             log.error('Failed retrieving audio stream for screensharing stream', error);
             self._onStreamAccessSuccess(stream, settings, true, false);
           }
-        }, function (error) {
+        };
+
+        var audioErrorCbFn = function (error) {
           log.error('Failed retrieving audio stream for screensharing stream', error);
           self._onStreamAccessSuccess(stream, settings, true, false);
-        });
-      }, function (error) {
-        self._onStreamAccessError(error, settings, true, false);
-      });
+        };
 
+        if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+          navigator.mediaDevices.getUserMedia({ audio: getUserMediaAudioSettings }).then(audioSuccessCbFn).catch(audioErrorCbFn);
+
+        } else {
+          navigator.getUserMedia({ audio: getUserMediaAudioSettings }, audioSuccessCbFn, audioErrorCbFn);
+        }
+      };
+
+      var errorCbFn = function (error) {
+        self._onStreamAccessError(error, settings, true, false);
+      };
+
+      if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+        navigator.mediaDevices.getUserMedia(settings.getUserMediaSettings).catch(successCbFn).then(errorCbFn);
+
+      } else {
+        navigator.getUserMedia(settings.getUserMediaSettings, successCbFn, errorCbFn);
+      }
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
@@ -1830,14 +1853,14 @@ Skylink.prototype._parseStreamSettings = function(options) {
         { exact: settings.settings.video.resolution.height } : { max: settings.settings.video.resolution.height });
 
       if ((options.video.frameRate && typeof options.video.frameRate === 'object') ||
-        typeof options.video.frameRate === 'number' && !self._isUsingPlugin) {
+        typeof options.video.frameRate === 'number' && AdapterJS.webrtcDetectedType !== 'plugin') {
         settings.settings.video.frameRate = options.video.frameRate;
         settings.getUserMediaSettings.video.frameRate = typeof settings.settings.video.frameRate === 'object' ?
           settings.settings.video.frameRate : (options.useExactConstraints ?
           { exact: settings.settings.video.frameRate } : { max: settings.settings.video.frameRate });
       }
 
-      if (options.video.facingMode && ['string', 'object'].indexOf(typeof options.video.facingMode) > -1 && self._isUsingPlugin) {
+      if (options.video.facingMode && ['string', 'object'].indexOf(typeof options.video.facingMode) > -1 && AdapterJS.webrtcDetectedType === 'plugin') {
         settings.settings.video.facingMode = options.video.facingMode;
         settings.getUserMediaSettings.video.facingMode = typeof settings.settings.video.facingMode === 'object' ?
           settings.settings.video.facingMode : (options.useExactConstraints ?
@@ -2028,12 +2051,11 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
       diff: null
     }, self.MEDIA_ACCESS_FALLBACK_STATE.FALLBACKING, false, true);
 
-    navigator.getUserMedia({
-      audio: true
-    }, function (stream) {
+    var successCbFn = function (stream) {
       self._onStreamAccessSuccess(stream, settings, false, true);
+    };
 
-    }, function (error) {
+    var errorCbFn = function (error) {
       log.error('Failed fallbacking to retrieve audio only Stream ->', error);
 
       self._trigger('mediaAccessError', error, false, true);
@@ -2041,7 +2063,18 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
         error: error,
         diff: null
       }, self.MEDIA_ACCESS_FALLBACK_STATE.ERROR, false, true);
-    });
+    };
+
+    if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+      navigator.mediaDevices.getUserMedia({
+        audio: true
+      }).then(successCbFn).catch(errorCbFn);
+
+    } else {
+      navigator.getUserMedia({
+        audio: true
+      }, successCbFn, errorCbFn);
+    }
     return;
   }
 
@@ -2059,11 +2092,11 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
  */
 Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSharing) {
   var self = this;
+  var streamId = AdapterJS.webrtcDetectedType === 'AppleWebKit' ? (self._peerConnections[targetMid] &&
+    self._peerConnections[targetMid].remoteStreamId) : stream.id || stream.label;
 
   if (!self._peerInformations[targetMid]) {
-    log.warn([targetMid, 'MediaStream', stream.id,
-      'Received remote stream when peer is not connected. ' +
-      'Ignoring stream ->'], stream);
+    log.warn([targetMid, 'MediaStream', streamId, 'Received remote stream when peer is not connected. Ignoring stream ->'], stream);
     return;
   }
 
@@ -2074,13 +2107,13 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
       ], stream);
     return;
   }*/
-  log.log([targetMid, 'MediaStream', stream.id, 'Received remote stream ->'], stream);
+  log.log([targetMid, 'MediaStream', streamId, 'Received remote stream ->'], stream);
 
   if (isScreenSharing) {
-    log.log([targetMid, 'MediaStream', stream.id, 'Peer is having a screensharing session with user']);
+    log.log([targetMid, 'MediaStream', streamId, 'Peer is having a screensharing session with user']);
   }
 
-  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid), isScreenSharing, stream.id || stream.label);
+  self._trigger('incomingStream', targetMid, stream, false, self.getPeerInfo(targetMid), isScreenSharing, streamId);
   self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
 };
 
@@ -2111,40 +2144,58 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
-          var hasStream = false;
+          if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+            if (updatedStream ? (pc.localStreamId ? updatedStream.id !== pc.localStreamId : true) : true) {
+              pc.getSenders().forEach(function (sender) {
+                pc.removeTrack(sender);
+              });
 
-          // remove streams
-          var streams = pc.getLocalStreams();
-          for (var i = 0; i < streams.length; i++) {
-            if (updatedStream !== null && streams[i].id === updatedStream.id) {
-              hasStream = true;
-              continue;
+              if (updatedStream) {
+                updatedStream.getTracks().forEach(function (track) {
+                  pc.addTrack(track, updatedStream);
+                });
+                
+                pc.localStreamId = updatedStream.id;
+                pc.localStream = updatedStream;
+              }
             }
-            // try removeStream
-            pc.removeStream(streams[i]);
-          }
 
-          if (updatedStream !== null && !hasStream) {
-            if (window.webrtcDetectedBrowser === 'edge' && (!offerToReceiveVideo || !offerToReceiveAudio)) {
-              try {
-                var cloneStream = updatedStream.clone();
-                var tracks = cloneStream.getTracks();
-                for (var t = 0; t < tracks.length; t++) {
-                  if (tracks[t].kind === 'video' ? !offerToReceiveVideo : !offerToReceiveAudio) {
-                    cloneStream.removeTrack(tracks[t]);
-                  } else {
-                    tracks[t].enabled = tracks[t].kind === 'audio' ? !self._streamsMutedSettings.audioMuted :
-                      !self._streamsMutedSettings.videoMuted;
+          } else {
+            var hasStream = false;
+
+            // remove streams
+            var streams = pc.getLocalStreams();
+            for (var i = 0; i < streams.length; i++) {
+              if (updatedStream !== null && streams[i].id === updatedStream.id) {
+                hasStream = true;
+                continue;
+              }
+              // try removeStream
+              pc.removeStream(streams[i]);
+            }
+
+            if (updatedStream !== null && !hasStream) {
+              if (window.webrtcDetectedBrowser === 'edge' && (!offerToReceiveVideo || !offerToReceiveAudio)) {
+                try {
+                  var cloneStream = updatedStream.clone();
+                  var tracks = cloneStream.getTracks();
+                  for (var t = 0; t < tracks.length; t++) {
+                    if (tracks[t].kind === 'video' ? !offerToReceiveVideo : !offerToReceiveAudio) {
+                      cloneStream.removeTrack(tracks[t]);
+                    } else {
+                      tracks[t].enabled = tracks[t].kind === 'audio' ? !self._streamsMutedSettings.audioMuted :
+                        !self._streamsMutedSettings.videoMuted;
+                    }
                   }
+                  pc.addStream(cloneStream);
+                } catch (e) {
+                  pc.addStream(updatedStream);
                 }
-                pc.addStream(cloneStream);
-              } catch (e) {
+              } else {
                 pc.addStream(updatedStream);
               }
-            } else {
-              pc.addStream(updatedStream);
+              pc.addStream(window.webrtcDetectedBrowser === 'edge' ? updatedStream.clone() : updatedStream);
             }
-            pc.addStream(window.webrtcDetectedBrowser === 'edge' ? updatedStream.clone() : updatedStream);
           }
         };
 
@@ -2194,21 +2245,7 @@ Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
   self._streamsSession[peerId] = self._streamsSession[peerId] || {};
 
   var renderEndedFn = function (streamId) {
-    var shouldTrigger = !!self._streamsSession[peerId][streamId];
-
-    if (!checkStreamId && self._peerConnections[peerId] &&
-      self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-      var streams = self._peerConnections[peerId].getRemoteStreams();
-
-      for (var i = 0; i < streams.length; i++) {
-        if (streamId === (streams[i].id || streams[i].label)) {
-          shouldTrigger = false;
-          break;
-        }
-      }
-    }
-
-    if (shouldTrigger) {
+    if (self._streamsSession[peerId][streamId]) {
       var peerInfo = clone(self.getPeerInfo(peerId));
       peerInfo.settings.audio = clone(self._streamsSession[peerId][streamId].audio);
       peerInfo.settings.video = clone(self._streamsSession[peerId][streamId].video);
@@ -2221,10 +2258,10 @@ Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
 
   if (checkStreamId) {
     renderEndedFn(checkStreamId);
-  } else {
-    for (var prop in self._streamsSession[peerId]) {
-      if (self._streamsSession[peerId].hasOwnProperty(prop) && self._streamsSession[peerId][prop]) {
-        renderEndedFn(prop);
+  } else if (self._peerConnections[peerId]) {
+    for (var streamId in self._streamsSession[peerId]) {
+      if (self._streamsSession[peerId].hasOwnProperty(streamId) && self._streamsSession[peerId][streamId]) {
+        renderEndedFn(streamId);
       }
     }
   }

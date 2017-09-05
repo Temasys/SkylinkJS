@@ -15,6 +15,8 @@
 !function(){if("performance"in window==0&&(window.performance={}),Date.now=Date.now||function(){return(new Date).getTime()},"now"in window.performance==0){var a=Date.now();performance.timing&&performance.timing.navigationStart&&(a=performance.timing.navigationStart),window.performance.now=function(){return Date.now()-a}}}();
 // BlobBuilder polyfill
 window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
+// Array.forEach polyfill
+Array.prototype.forEach||(Array.prototype.forEach=function(r){for(var o=0;o<this.length;)r(this[o],index),o++});
 /* jshint ignore:end */
 
 /**
@@ -1177,6 +1179,16 @@ function Skylink() {
 
   /**
    * Stores the egde 15.x use pre-1.0 legacy API.
+   * @attribute _useEdgeWebRTCFlag
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.19
+   */
+  this._useEdgeWebRTCFlag = false;
+
+  /**
+   * Stores the edge 15.x use native webrtc implementation.
    * @attribute _useEdgeWebRTC
    * @type Boolean
    * @private
@@ -1184,4 +1196,14 @@ function Skylink() {
    * @since 0.6.19
    */
   this._useEdgeWebRTC = false;
+
+  /**
+   * Stores the flag to enable simultaneous data transfers.
+   * @attribute _enableSimultaneousTransfers
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.25
+   */
+  this._enableSimultaneousTransfers = true;
 }

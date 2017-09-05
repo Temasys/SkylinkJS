@@ -1046,7 +1046,9 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this feature is not supported by MCU enabled Peer connections.&lt;br&gt;
+ *   Note that this feature is not supported by MCU enabled Peer connections and the
+ *   &lt;code&gt;enableSimultaneousTransfers&lt;/code&gt; flag has to be enabled in the &lt;a href=&quot;#method_init&quot;&gt;
+ *   &lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt; in order for this functionality to work.&lt;br&gt;
  *   To start streaming data, see the &lt;a href=&quot;#method_streamData&quot;&gt;&lt;code&gt;streamData()&lt;/code&gt;
  *   method&lt;/a&gt;. To stop data streaming session, see the &lt;a href=&quot;#method_stopStreamingData&quot;&gt;&lt;code&gt;
  *   stopStreamingData()&lt;/code&gt; method&lt;/a&gt;.
@@ -1234,6 +1236,10 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     return emitErrorBeforeStreamingFn(&#x27;Unable to start data streaming as this feature is current not supported by MCU yet.&#x27;);
   }
 
+  if (!self._enableSimultaneousTransfers) {
+    return emitErrorBeforeStreamingFn(&#x27;Unable to start data streaming as this feature requires simultaneous data transfers to be enabled&#x27;);
+  }
+
   var transferId = &#x27;stream_&#x27; + (self._user &amp;&amp; self._user.sid ? self._user.sid : &#x27;-&#x27;) + &#x27;_&#x27; + (new Date()).getTime();
   var peersInterop = [];
   var peersNonInterop = [];
@@ -1278,7 +1284,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     var peerId = listOfPeers[i];
     var error = null;
     var dtProtocolVersion = ((self._peerInformations[peerId] || {}).agent || {}).DTProtocolVersion || &#x27;&#x27;;
-    var channelProp = self._isLowerThanVersion(dtProtocolVersion, &#x27;0.1.2&#x27;) ? &#x27;main&#x27; : transferId;
+    var channelProp = self._isLowerThanVersion(dtProtocolVersion, &#x27;0.1.2&#x27;) || !self._enableSimultaneousTransfers ? &#x27;main&#x27; : transferId;
 
     if (!(self._dataChannels[peerId] &amp;&amp; self._dataChannels[peerId].main)) {
       error = &#x27;Datachannel connection does not exists&#x27;;
@@ -1596,7 +1602,7 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
       self._blobToArrayBuffer(dataChunk, onSendDataFn);
     } else if (!(dataChunk instanceof Blob) &amp;&amp; sessionInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
       onSendDataFn(new Blob([dataChunk]));
-    } else if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1 &amp;&amp; typeof dataChunk !== &#x27;string&#x27;) {
+    } else if (self._isUsingPlugin &amp;&amp; typeof dataChunk !== &#x27;string&#x27;) {
       onSendDataFn(new Int8Array(dataChunk));
     } else {
       onSendDataFn(dataChunk);
@@ -2233,7 +2239,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var protocolVer = (self._peerInformations[peerId].agent || {}).DTProtocolVersion || &#x27;0.1.0&#x27;;
-  var requireInterop = self._isLowerThanVersion(protocolVer, &#x27;0.1.2&#x27;);
+  var requireInterop = self._isLowerThanVersion(protocolVer, &#x27;0.1.2&#x27;) || !self._enableSimultaneousTransfers;
 
   // Prevent DATA_URL (or &quot;string&quot; dataType transfers) with Android / iOS / C++ SDKs
   if (self._isLowerThanVersion(protocolVer, &#x27;0.1.2&#x27;) &amp;&amp; self._dataTransfers[transferId].sessionType === &#x27;data&#x27; &amp;&amp;

@@ -119,9 +119,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
   if (self._forceTURNSSL) {
-    if (window.webrtcDetectedBrowser === 'chrome' ||
-      window.webrtcDetectedBrowser === 'safari' ||
-      window.webrtcDetectedBrowser === 'IE') {
+    if (window.webrtcDetectedBrowser === 'chrome' || AdapterJS.webrtcDetectedType === 'plugin') {
       useTURNSSLProtocol = true;
     } else {
       useTURNSSLPort = true;
@@ -260,7 +258,11 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   }
 
   // plugin supports .urls
-  if (window.webrtcDetectedBrowser === 'safari' || window.webrtcDetectedBrowser === 'IE') {
+  if (AdapterJS.webrtcDetectedType === 'plugin') {
+    hasUrlsSupport = true;
+
+    // safari 11 native WebRTC supports
+  } else if (window.webrtcDetectedBrowser === 'safari' && window.webrtcDetectedVersion >= 11) {
     hasUrlsSupport = true;
   }
 
