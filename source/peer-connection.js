@@ -1534,10 +1534,14 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     callback(error, null);
   };
 
-  if (AdapterJS.webrtcDetectedType === 'AppleWebKit' || self._useEdgeWebRTC) {
-    pc.getStats(null).then(successCbFn).catch(errorCbFn);
-  } else {
+  if (typeof pc.getStats !== 'function') {
+    return errorCbFn(new Error('getStats() API is not available.'));
+  }
+
+  if (AdapterJS.webrtcDetectedType === 'plugin') {
     pc.getStats(null, successCbFn, errorCbFn);
+  } else {
+    pc.getStats(null).then(successCbFn).catch(errorCbFn);
   }
 };
 

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 18:26:31 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Sep 05 2017 19:18:24 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -6949,10 +6949,14 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     callback(error, null);
   };
 
-  if (AdapterJS.webrtcDetectedType === 'AppleWebKit' || self._useEdgeWebRTC) {
-    pc.getStats(null).then(successCbFn).catch(errorCbFn);
-  } else {
+  if (typeof pc.getStats !== 'function') {
+    return errorCbFn(new Error('getStats() API is not available.'));
+  }
+
+  if (AdapterJS.webrtcDetectedType === 'plugin') {
     pc.getStats(null, successCbFn, errorCbFn);
+  } else {
+    pc.getStats(null).then(successCbFn).catch(errorCbFn);
   }
 };
 

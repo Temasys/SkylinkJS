@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 18:26:31 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.24 - Tue Sep 05 2017 19:18:24 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -7249,7 +7249,7 @@ module.exports = yeast;
 },{}]},{},[1])(1)
 });
 
-/*! adapterjs - v0.14.3-e9e54b6 - 2017-09-04 */
+/*! adapterjs - v0.15.0 - 2017-09-05 */
 
 // Adapter's interface.
 var AdapterJS = AdapterJS || {};
@@ -7269,7 +7269,7 @@ AdapterJS.options.hidePluginInstallPrompt = !!AdapterJS.options.hidePluginInstal
 AdapterJS.options.forceSafariPlugin = !!AdapterJS.options.forceSafariPlugin;
 
 // AdapterJS version
-AdapterJS.VERSION = '0.14.3-e9e54b6';
+AdapterJS.VERSION = '0.15.0';
 
 // This function will be called when the WebRTC API is ready to be used
 // Whether it is the native implementation (Chrome, Firefox, Opera) or
@@ -7435,18 +7435,12 @@ AdapterJS.WebRTCPlugin.callWhenPluginReady = null;
 // This function is the only private function that is not encapsulated to
 // allow the plugin method to be called.
 __TemWebRTCReady0 = function () {
-  if (document.readyState === 'complete') {
+  if (document.readyState === 'interactive' || document.readyState === 'complete') {
     AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY;
     AdapterJS.maybeThroughWebRTCReady();
   } else {
-    var timer = setInterval(function () {
-      if (document.readyState === 'complete') {
-        // TODO: update comments, we wait for the document to be ready
-        clearInterval(timer);
-        AdapterJS.WebRTCPlugin.pluginState = AdapterJS.WebRTCPlugin.PLUGIN_STATES.READY;
-        AdapterJS.maybeThroughWebRTCReady();
-      }
-    }, 100);
+    // Try again in 100ms
+    setTimeout(__TemWebRTCReady0, 100);
   }
 };
 
@@ -7665,7 +7659,7 @@ AdapterJS.addEvent = function(elem, evnt, func) {
 
 AdapterJS.renderNotificationBar = function (message, buttonText, buttonCallback) {
   // only inject once the page is ready
-  if (document.readyState !== 'complete') {
+  if (document.readyState !== 'interactive' && document.readyState !== 'complete') {
     return;
   }
 
@@ -7887,6 +7881,9 @@ webrtcDetectedVersion = null;
 // The minimum browser version still supported by AJS.
 webrtcMinimumVersion  = null;
 
+// The type of DC supported by the browser
+webrtcDetectedDCSupport = null;
+
 // The requestUserMedia used by plugin gUM
 requestUserMedia = null;
 
@@ -8104,7 +8101,7 @@ function isActionAllowedInSignalingState(action, type, signalingState) {
 
 function maybeAddCandidate(iceTransport, candidate) {
   // Edge's internal representation adds some fields therefore
-  // not all fieldÑ• are taken into account.
+  // not all fieldѕ are taken into account.
   var alreadyAdded = iceTransport.getRemoteCandidates()
       .find(function(remoteCandidate) {
         return candidate.foundation === remoteCandidate.foundation &&
@@ -8117,7 +8114,6 @@ function maybeAddCandidate(iceTransport, candidate) {
   if (!alreadyAdded) {
     iceTransport.addRemoteCandidate(candidate);
   }
-  return !alreadyAdded;
 }
 
 module.exports = function(window, edgeVersion) {
@@ -8379,7 +8375,7 @@ module.exports = function(window, edgeVersion) {
     iceGatherer.onlocalcandidate = function(evt) {
       if (self.usingBundle && sdpMLineIndex > 0) {
         // if we know that we use bundle we can drop candidates with
-        // Ñ•dpMLineIndex > 0. If we don't do this then our state gets
+        // ѕdpMLineIndex > 0. If we don't do this then our state gets
         // confused since we dispose the extra ice gatherer.
         return;
       }
@@ -8387,7 +8383,7 @@ module.exports = function(window, edgeVersion) {
       event.candidate = {sdpMid: mid, sdpMLineIndex: sdpMLineIndex};
 
       var cand = evt.candidate;
-      // Edge emits an empty object for RTCIceCandidateCompleteâ€¥
+      // Edge emits an empty object for RTCIceCandidateComplete‥
       var end = !cand || Object.keys(cand).length === 0;
       if (end) {
         // polyfill since RTCIceGatherer.state is not implemented in
@@ -9369,27 +9365,22 @@ module.exports = function(window, edgeVersion) {
           return Promise.resolve();
         }
         // when using bundle, avoid adding candidates to the wrong
-        // ice transport. And avoid adding candidates added in the SDP.
+        // ice transport.
         if (sdpMLineIndex === 0 || (sdpMLineIndex > 0 &&
             transceiver.iceTransport !== this.transceivers[0].iceTransport)) {
-          if (!maybeAddCandidate(transceiver.iceTransport, cand)) {
-            err = new Error('Can not add ICE candidate');
-            err.name = 'OperationError';
-          }
+          transceiver.iceTransport.addRemoteCandidate(cand);
         }
 
-        if (!err) {
-          // update the remoteDescription.
-          var candidateString = candidate.candidate.trim();
-          if (candidateString.indexOf('a=') === 0) {
-            candidateString = candidateString.substr(2);
-          }
-          sections = SDPUtils.splitSections(this.remoteDescription.sdp);
-          sections[sdpMLineIndex + 1] += 'a=' +
-              (cand.type ? candidateString : 'end-of-candidates')
-              + '\r\n';
-          this.remoteDescription.sdp = sections.join('');
+        // update the remoteDescription.
+        var candidateString = candidate.candidate.trim();
+        if (candidateString.indexOf('a=') === 0) {
+          candidateString = candidateString.substr(2);
         }
+        sections = SDPUtils.splitSections(this.remoteDescription.sdp);
+        sections[sdpMLineIndex + 1] += 'a=' +
+            (cand.type ? candidateString : 'end-of-candidates')
+            + '\r\n';
+        this.remoteDescription.sdp = sections.join('');
       } else {
         err = new Error('Can not add ICE candidate');
         err.name = 'OperationError';
@@ -9946,7 +9937,7 @@ SDPUtils.parseRtcpParameters = function(mediaSection) {
   rtcpParameters.reducedSize = rsize.length > 0;
   rtcpParameters.compound = rsize.length === 0;
 
-  // parses the rtcp-mux attrÑ–bute.
+  // parses the rtcp-mux attrіbute.
   // Note that Edge does not support unmuxed RTCP.
   var mux = SDPUtils.matchPrefix(mediaSection, 'a=rtcp-mux');
   rtcpParameters.mux = mux.length > 0;
@@ -12587,7 +12578,7 @@ module.exports = {
 
   AdapterJS.WebRTCPlugin.injectPlugin = function () {
     // only inject once the page is ready
-    if (document.readyState !== 'complete') {
+    if (document.readyState !== 'interactive' && document.readyState !== 'complete') {
       return;
     }
 
@@ -13696,7 +13687,8 @@ AdapterJS._defineMediaSourcePolyfill = function () {
 if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
-/*! skylinkjs - v0.6.24 - Mon Sep 04 2017 18:26:31 GMT+0800 (+08) */
+
+/*! skylinkjs - v0.6.24 - Tue Sep 05 2017 19:18:24 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -20647,10 +20639,14 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
     callback(error, null);
   };
 
-  if (AdapterJS.webrtcDetectedType === 'AppleWebKit' || self._useEdgeWebRTC) {
-    pc.getStats(null).then(successCbFn).catch(errorCbFn);
-  } else {
+  if (typeof pc.getStats !== 'function') {
+    return errorCbFn(new Error('getStats() API is not available.'));
+  }
+
+  if (AdapterJS.webrtcDetectedType === 'plugin') {
     pc.getStats(null, successCbFn, errorCbFn);
+  } else {
+    pc.getStats(null).then(successCbFn).catch(errorCbFn);
   }
 };
 
