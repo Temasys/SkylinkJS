@@ -119,7 +119,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
   if (self._forceTURNSSL) {
-    if (window.webrtcDetectedBrowser === 'firefox') {
+    if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion < 53) {
       useTURNSSLPort = true;
     } else {
       useTURNSSLProtocol = true;
