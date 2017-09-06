@@ -417,51 +417,66 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
  * @since 0.6.18
  */
 Skylink.prototype._removeSDPUnknownAptRtx = function (targetMid, sessionDescription) {
-  var codecsPayload = []; // Payload numbers as the keys
+  var codecsPayload = []; // m=audio 9 UDP/TLS/RTP/SAVPF [Start from index 3] 102 9 0 8 97 13 118 101  
   var sdpLines = sessionDescription.sdp.split('\r\n');
-  var hasVideo = false;
   var rtxs = {};
-  var parts = [];
+  var mediaLines = sessionDescription.sdp.split('m=');
 
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
-  for (var i = 0; i < sdpLines.length; i++) {
-    if (sdpLines[i].indexOf('m=') === 0) {
-      if (hasVideo) {
-        for (var r in rtxs) {
-          if (rtxs.hasOwnProperty(r) && rtxs[r] && codecsPayload.indexOf(rtxs[r].codec) === -1) {
-            for (var l = 0; l < rtxs[r].lines.length; l++) {
-              sdpLines.splice(sdpLines.indexOf(rtxs[r].lines[l]), 1);
-              i--;
-            }
-          }
+  for (var m = 0; m < mediaLines.length; m++) {
+    var lines = mediaLines[m].split('\r\n');
+    var payload = null;
+
+    if (lines[0].indexOf('audio ') !== 0 && lines[0].indexOf('video ') !== 0) {
+      continue;
+    }
+
+    for (var l = 0; l < lines.length; l++) {
+      // Remove unmapped fmtp lines
+      if (lines[l].indexOf('a=fmtp:') === 0) {
+        payload = (lines[l].split('a=fmtp:')[1] || '').split(' ')[0] || '';
+        if (!mediaLines[m].match(new RegExp('a=rtpmap:' + payload + '\ .*\r\n', 'gi'))) {
+          lines.splice(l, 1);
+          l--;
+          continue;
+        }
+
+      // Remove unmapped rtcp-fb lines
+      } else if (lines[l].indexOf('a=rtcp-fb:') === 0) {
+        payload = (lines[l].split('a=rtcp-fb:')[1] || '').split(' ')[0] || '';
+        if (!mediaLines[m].match(new RegExp('a=rtpmap:' + payload + '\ .*\r\n', 'gi'))) {
+          lines.splice(l, 1);
+          l--;
+          continue;
+        }
+
+      // Remove unmapped rtx lines
+      } else if (lines[l].indexOf('a=rtpmap:') === 0 && lines[l].indexOf('rtx') > 0) {
+        payload = (lines[l].split('a=rtpmap:')[1] || '').split(' ')[0] || '';
+        // Get related fmtp line to match codec
+        var fmtpLine = (mediaLines[m].match(new RegExp('a=fmtp:' + payload + '\ .*\r\n', 'gi')) || [])[0];
+
+        if (!fmtpLine) {
+          lines.splice(l, 1);
+          l--;
+          continue;
+        }
+
+        var codecPayload = (lines[l].split(' apt=')[1] || '').replace(/\r\n/gi, '');
+        if (!mediaLines[m].match(new RegExp('a=rtpmap:' + codecPayload + '\ .*\r\n', 'gi'))) {
+          lines.splice(l, 1);
+          lines[0] = lines[0].replace(' ' + payload, '');
+          l--;
+          continue;
         }
       }
-      hasVideo = sdpLines[i].indexOf('m=video ') === 0;
-      codecsPayload = [];
-      rtxs = {};
     }
-    if (sdpLines[i].toLowerCase().indexOf('a=rtpmap:') === 0) {
-      parts = (sdpLines[i].split('a=rtpmap:')[1] || '').split(' ');
-      if (parts[1].toLowerCase().indexOf('rtx') === 0) {
-        if (!rtxs[parts[0]]) {
-          rtxs[parts[0]] = { lines:[], codec: null };
-        }
-        rtxs[parts[0]].lines.push(sdpLines[i]);
-      } else {
-        codecsPayload.push(parts[0]);
-      }
-    } else if (sdpLines[i].indexOf('a=fmtp:') === 0 && sdpLines[i].indexOf(' apt=') > 0) {
-      parts = (sdpLines[i].split('a=fmtp:')[1] || '').split(' ');
-      if (parts[0] && !rtxs[parts[0]]) {
-        rtxs[parts[0]] = { lines:[], codec: null };
-      }
-      rtxs[parts[0]].codec = parts[1].split('apt=')[1];
-      rtxs[parts[0]].lines.push(sdpLines[i]);
-    }
+
+    mediaLines[m] = lines.join('\r\n');
   }
 
-  return sdpLines.join('\r\n');
+  return mediaLines.join('m=');
 };
 
 /**
@@ -1356,7 +1371,7 @@ Skylink.prototype._getSDPCommonSupports = function (targetMid, sessionDescriptio
 
   if (!targetMid || !(sessionDescription && sessionDescription.sdp)) {
     offer.video = !!(self._currentCodecSupport.video.h264 || self._currentCodecSupport.video.vp8);
-    offer.audio = !!self._currentCodecSupport.video.opus;
+    offer.audio = !!self._currentCodecSupport.audio.opus;
 
     if (targetMid) {
       var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
