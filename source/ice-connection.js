@@ -119,12 +119,10 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
   if (self._forceTURNSSL) {
-    if (window.webrtcDetectedBrowser === 'chrome' ||
-      window.webrtcDetectedBrowser === 'safari' ||
-      window.webrtcDetectedBrowser === 'IE') {
-      useTURNSSLProtocol = true;
-    } else {
+    if (window.webrtcDetectedBrowser === 'firefox') {
       useTURNSSLPort = true;
+    } else {
+      useTURNSSLProtocol = true;
     }
   }
 
@@ -245,29 +243,12 @@ Skylink.prototype._setIceServers = function(givenConfig) {
     pushIceServer('none', 'none', 'stun:stun.services.mozilla.com', 0);
   }
 
-  var hasUrlsSupport = false;
-
-  if (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 34) {
-    hasUrlsSupport = true;
-  }
-
-  if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion > 38) {
-    hasUrlsSupport = true;
-  }
-
-  if (window.webrtcDetectedBrowser === 'opera' && window.webrtcDetectedVersion > 31) {
-    hasUrlsSupport = true;
-  }
-
-  // plugin supports .urls
-  if (window.webrtcDetectedBrowser === 'safari' || window.webrtcDetectedBrowser === 'IE') {
-    hasUrlsSupport = true;
-  }
-
-  // bowser / edge
-  if (['bowser', 'edge'].indexOf(window.webrtcDetectedBrowser) > -1) {
-    hasUrlsSupport = true;
-  }
+  var hasUrlsSupport = 
+    (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 34) ||
+    (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion > 38) ||
+    (window.webrtcDetectedBrowser === 'opera' && window.webrtcDetectedVersion > 31) ||
+    (['plugin', 'AppleWebKit'].indexOf(AdapterJS.webrtcDetectedType) > -1) ||
+    (['bowser', 'edge'].indexOf(window.webrtcDetectedBrowser) > -1);
 
   for (var serverUsername in iceServersList) {
     if (iceServersList.hasOwnProperty(serverUsername)) {

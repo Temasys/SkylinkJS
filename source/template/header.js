@@ -317,16 +317,6 @@ function Skylink() {
   this._peerCustomConfigs = {};
 
   /**
-   * The flag if User is using plugin.
-   * @attribute _isUsingPlugin
-   * @type Boolean
-   * @private
-   * @for Skylink
-   * @since 0.6.16
-   */
-  this._isUsingPlugin = false;
-
-  /**
    * Stores the option for the TURN protocols to use.
    * This should configure the TURN ICE servers urls <code>?transport=protocol</code> flag.
    * @attribute _TURNTransport
@@ -1176,7 +1166,7 @@ function Skylink() {
   this._peerConnStatus = {};
 
   /**
-   * Stores the egde 15.x use pre-1.0 legacy API.
+   * Stores the flag if Edge 15.x+ WebRTC legacy 1.0 implementation should be used.
    * @attribute _useEdgeWebRTC
    * @type Boolean
    * @private
@@ -1184,4 +1174,5 @@ function Skylink() {
    * @since 0.6.19
    */
   this._useEdgeWebRTC = false;
+  
 }

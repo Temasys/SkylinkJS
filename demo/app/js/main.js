@@ -447,14 +447,6 @@ Demo.Skylink.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
 
-  if ($('#video' + peerId + ' .video-obj').length > 0) {
-    if (peerInfo.mediaStatus.videoMuted) {
-      $('#video' + peerId + ' .video-obj')[0].src = '';
-    } else {
-      $('#video' + peerId + ' .video-obj')[0].src = Demo.Streams[peerId];
-    }
-  }
-
   // Handle when stream is after ICE connection is established (wat)
   if (Demo.ShowStats[peerId]) {
     $('#video' + peerId + ' .connstats-wrapper').show();

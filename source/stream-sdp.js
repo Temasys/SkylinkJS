@@ -816,6 +816,17 @@ Skylink.prototype._getCodecsSupport = function (callback) {
 
   self._currentCodecSupport = { audio: {}, video: {} };
 
+  // Safari 11 REQUIRES a stream first before connection works, hence let's spoof it for now
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+    self._currentCodecSupport.audio = { 
+      opus: ['48000/2']
+    };
+    self._currentCodecSupport.video = { 
+      h264: ['48000']
+    };
+    return callback(null);
+  }
+
   try {
     if (window.webrtcDetectedBrowser === 'edge') {
       var codecs = RTCRtpSender.getCapabilities().codecs;
@@ -832,19 +843,15 @@ Skylink.prototype._getCodecsSupport = function (callback) {
 
     } else {
       var pc = new RTCPeerConnection(null);
-      var offerConstraints = {
+      var offerConstraints = AdapterJS.webrtcDetectedType !== 'plugin' ? {
         offerToReceiveAudio: true,
         offerToReceiveVideo: true
+      } : {
+        mandatory: {
+          OfferToReceiveVideo: true,
+          OfferToReceiveAudio: true
+        }
       };
-
-      if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
-        offerConstraints = {
-          mandatory: {
-            OfferToReceiveVideo: true,
-            OfferToReceiveAudio: true
-          }
-        };
-      }
 
       // Prevent errors and proceed with create offer still...
       try {

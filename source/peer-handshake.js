@@ -39,11 +39,9 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
+Skylink.prototype._doOffer = function(targetMid, iceRestart) {
   var self = this;
   var pc = self._peerConnections[targetMid];
-
-  log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
@@ -60,32 +58,13 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
-  var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &&
-    iceRestart && self._enableIceRestart;
-  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid);
-
   var offerConstraints = {
-    offerToReceiveAudio: offerToReceiveAudio,
-    offerToReceiveVideo: offerToReceiveVideo,
-    iceRestart: doIceRestart,
+    offerToReceiveAudio: !(!self._sdpSettings.connection.audio && targetMid !== 'MCU'),
+    offerToReceiveVideo: !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid),
+    iceRestart: !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &&
+      iceRestart && self._enableIceRestart,
     voiceActivityDetection: self._voiceActivityDetection
   };
-
-  // Prevent undefined OS errors
-  peerBrowser.os = peerBrowser.os || '';
-
-  // Fallback to use mandatory constraints for plugin based browsers
-  if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
-    offerConstraints = {
-      mandatory: {
-        OfferToReceiveAudio: offerToReceiveAudio,
-        OfferToReceiveVideo: offerToReceiveVideo,
-        iceRestart: doIceRestart,
-        voiceActivityDetection: self._voiceActivityDetection
-      }
-    };
-  }
 
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === 'MCU') {
@@ -120,7 +99,14 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
 
     log.error([targetMid, null, null, 'Failed creating an offer:'], error);
 
-  }, offerConstraints);
+  }, AdapterJS.webrtcDetectedType === 'plugin' ? {
+    mandatory: {
+      OfferToReceiveAudio: offerConstraints.offerToReceiveAudio,
+      OfferToReceiveVideo: offerConstraints.offerToReceiveVideo,
+      iceRestart: offerConstraints.iceRestart,
+      voiceActivityDetection: offerConstraints.voiceActivityDetection
+    }
+  } : offerConstraints);
 };
 
 /**
@@ -157,11 +143,9 @@ Skylink.prototype._doAnswer = function(targetMid) {
     self._addLocalMediaStreams(targetMid);
   }
 
-  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid);
   var answerConstraints = window.webrtcDetectedBrowser === 'edge' ? {
-    offerToReceiveVideo: offerToReceiveVideo,
-    offerToReceiveAudio: offerToReceiveAudio,
+    offerToReceiveVideo: !(!self._sdpSettings.connection.audio && targetMid !== 'MCU'),
+    offerToReceiveAudio: !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid),
     voiceActivityDetection: self._voiceActivityDetection
   } : undefined;
 
