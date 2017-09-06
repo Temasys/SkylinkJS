@@ -1505,10 +1505,35 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       output.raw = stats;
     }
 
+    var edgeTracksKind = {
+      remote: {},
+      local: {}
+    };
+
+    if (window.webrtcDetectedBrowser === 'edge') {
+      if (pc.remoteStream) {
+        pc.remoteStream.getTracks().forEach(function (track) {
+          edgeTracksKind.remote[track.id] = track.kind;
+        });
+      }
+
+      if (pc.localStream) {
+        pc.localStream.getTracks().forEach(function (track) {
+          edgeTracksKind.local[track.id] = track.kind;
+        });
+      }
+    }
+
     Object.keys(output.raw).forEach(function (prop) {
-      // Polyfill for Plugin missing "mediaType" stats
+      // Polyfill for Plugin missing "mediaType" stats item
       if (prop.indexOf('ssrc_') === 0 && !output.raw[prop].mediaType) {
         output.raw[prop].mediaType = output.raw[prop].audioInputLevel || output.raw[prop].audioOutputLevel ? 'audio' : 'video';
+
+      // Polyfill for Edge 15.x missing "mediaType" stats item
+      } else if (window.webrtcDetectedBrowser === 'edge' && !output.raw[prop].mediaType &&
+        ['inboundrtp', 'outboundrtp'].indexOf(output.raw[prop].type) > -1) {
+        var trackItem = output.raw[ output.raw[prop].mediaTrackId ] || {};
+        output.raw[prop].mediaType = edgeTracksKind[ output.raw[prop].isRemote ? 'remote' : 'local' ][ trackItem.trackIdentifier ] || ''; 
       }
 
       certificateFn(output.raw[prop], prop);
@@ -1525,6 +1550,27 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
         self._peerStats[peerId][prop] = output.raw[prop];
       }
     });
+
+    // Prevent "0" in Edge 15.x and Safari 11 when SSRC stats is not available
+    output.audio.sending.bytes = output.audio.sending.bytes || 0;
+    output.audio.sending.packets = output.audio.sending.packets || 0;
+    output.audio.sending.totalBytes = output.audio.sending.totalBytes || 0;
+    output.audio.sending.totalPackets = output.audio.sending.totalPackets || 0;
+
+    output.video.sending.bytes = output.video.sending.bytes || 0;
+    output.video.sending.packets = output.video.sending.packets || 0;
+    output.video.sending.totalBytes = output.video.sending.totalBytes || 0;
+    output.video.sending.totalPackets = output.video.sending.totalPackets || 0;
+
+    output.audio.receiving.bytes = output.audio.receiving.bytes || 0;
+    output.audio.receiving.packets = output.audio.receiving.packets || 0;
+    output.audio.receiving.totalBytes = output.audio.receiving.totalBytes || 0;
+    output.audio.receiving.totalPackets = output.audio.receiving.totalPackets || 0;
+
+    output.video.receiving.bytes = output.video.receiving.bytes || 0;
+    output.video.receiving.packets = output.video.receiving.packets || 0;
+    output.video.receiving.totalBytes = output.video.receiving.totalBytes || 0;
+    output.video.receiving.totalPackets = output.video.receiving.totalPackets || 0;
 
     callback(null, output);
   };
