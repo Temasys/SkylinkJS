@@ -595,7 +595,7 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
       var parts = ((match[0] || '').replace(/\r\n/g, '').split(' ')[1] || '').split('/');
 
       // Ignore rtcp codecs, dtmf or comfort noise
-      if (['red', 'ulpfec', 'telephone-event', 'cn'].indexOf(parts[0].toLowerCase()) > -1) {
+      if (['red', 'ulpfec', 'telephone-event', 'cn', 'rtx'].indexOf(parts[0].toLowerCase()) > -1) {
         continue;
       }
 
@@ -735,24 +735,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
       } catch (e) {}
 
       pc.createOffer(function (offer) {
-        var sdpLines = offer.sdp.split('\r\n');
-        var mediaType = '';
-
-        for (var i = 0; i < sdpLines.length; i++) {
-          if (sdpLines[i].indexOf('m=') === 0) {
-            mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0];
-          } else if (sdpLines[i].indexOf('a=rtpmap:') === 0) {
-            if (['audio', 'video'].indexOf(mediaType) === -1) {
-              continue;
-            }
-            var parts = (sdpLines[i].split(' ')[1] || '').split('/');
-            var codec = (parts[0] || '').toLowerCase();
-            var info = parts[1] + (parts[2] ? '/' + parts[2] : '');
-
-            self._currentCodecSupport[mediaType][codec] = info;
-          }
-        }
-
+        self._currentCodecSupport = self._getSDPCodecsSupport(null, offer);
         callback(null);
 
       }, function (error) {
@@ -801,10 +784,6 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     settings.connection.data = true;
   }
 
-  if (settings.connection.video) {
-    settings.connection.video = self._getSDPEdgeVideoSupports(targetMid);
-  }
-
   // Patches for MCU sending empty video stream despite audio+video is not sending at all
   // Apply as a=inactive when supported
   if (self._hasMCU) {
@@ -813,6 +792,18 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     settings.direction.audio.send = targetMid === 'MCU' ? true : false;
     settings.direction.video.receive = targetMid === 'MCU' ? false : !!peerStreamSettings.video;
     settings.direction.video.send = targetMid === 'MCU' ? true : false;
+  }
+
+  if (direction === 'remote') {
+    var offerCodecs = self._getSDPCommonSupports(targetMid, sessionDescription);
+
+    if (!offerCodecs.audio) {
+      settings.connection.audio = false;
+    }
+
+    if (!offerCodecs.video) {
+      settings.connection.video = false;
+    }
   }
 
   // ANSWERER: Reject only the m= lines. Returned rejected m= lines as well.
@@ -1008,30 +999,6 @@ Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription, 
   }
 
   return fingerprint;
-};
-
-
-/**
- * Function that gets edge browser video supports.
- * @method _getSDPEdgeVideoSupports
- * @private
- * @for Skylink
- * @since 0.6.18
- */
-Skylink.prototype._getSDPEdgeVideoSupports = function (peerId) {
-  var self = this;
-
-  if (peerId) {
-    var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
-    var peerVersion = ((self._peerInformations[peerId] || {}).agent || {}).version || 0;
-
-    return window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedVersion < 15.15019 &&
-      peerAgent !== 'edge' ? !!self._currentCodecSupport.video.h264 : (window.webrtcDetectedBrowser !== 'edge' &&
-      peerAgent === 'edge' && peerVersion < 15.15019 ? !!self._currentCodecSupport.video.h264 : true);
-  }
-
-  return window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedVersion < 15.15019 ?
-    !!self._currentCodecSupport.video.h264 : true;
 };
 
 /**
@@ -1319,4 +1286,105 @@ Skylink.prototype._getSDPMediaSSRC = function (targetMid, sessionDescription, be
   }
 
   return ssrcs;
+};
+
+/**
+ * Function that parses the current list of supported codecs from session description.
+ * @method _getSDPCodecsSupport
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getSDPCodecsSupport = function (targetMid, sessionDescription) {
+  var self = this;
+  var codecs = {
+    audio: {},
+    video: {}
+  };
+
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return codecs;
+  }
+
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var mediaType = '';
+
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].indexOf('m=') === 0) {
+      mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0];
+
+      if (['audio', 'video'].indexOf(mediaType) === -1) {
+        break;
+      }
+      continue;
+    }
+
+    if (sdpLines[i].indexOf('a=rtpmap:') === 0) {
+      var parts = (sdpLines[i].split(' ')[1] || '').split('/');
+      var codec = (parts[0] || '').toLowerCase();
+      var info = parts[1] + (parts[2] ? '/' + parts[2] : '');
+
+      if (['ulpfec', 'red', 'telephone-event', 'cn', 'rtx'].indexOf(codec) > -1) {
+        continue;
+      }
+
+      codecs[mediaType][codec] = codecs[mediaType][codec] || [];
+      
+      if (codecs[mediaType][codec].indexOf(info) === -1) {
+        codecs[mediaType][codec].push(info);
+      }
+    }
+  }
+
+  log.info([targetMid || null, 'RTCSessionDescription', sessionDescription.type, 'Parsed codecs support ->'], codecs);
+  return codecs;
+};
+
+/**
+ * Function that checks if there are any common codecs supported for remote end.
+ * @method _getSDPCommonSupports
+ * @private
+ * @for Skylink
+ * @since 0.6.25
+ */
+Skylink.prototype._getSDPCommonSupports = function (targetMid, sessionDescription) {
+  var self = this;
+  var offer = {
+    audio: false,
+    video: false
+  };
+
+  if (!targetMid || !(sessionDescription && sessionDescription.sdp)) {
+    offer.video = !!(self._currentCodecSupport.video.h264 || self._currentCodecSupport.video.vp8);
+    offer.audio = !!self._currentCodecSupport.video.opus;
+
+    if (targetMid) {
+      var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+
+      if (AdapterJS.webrtcDetectedBrowser === peerAgent) {
+        offer.video = Object.keys(self._currentCodecSupport.video).length > 0;
+        offer.audio = Object.keys(self._currentCodecSupport.audio).length > 0;
+      }
+    }
+    return offer;
+  }
+
+  var remoteCodecs = self._getSDPCodecsSupport(targetMid, sessionDescription);
+  var localCodecs = self._currentCodecSupport;
+
+  for (var ac in localCodecs.audio) {
+    if (localCodecs.audio.hasOwnProperty(ac) && localCodecs.audio[ac] && remoteCodecs.audio[ac]) {
+      offer.audio = true;
+      break;
+    }
+  }
+
+  for (var vc in localCodecs.video) {
+    if (localCodecs.video.hasOwnProperty(vc) && localCodecs.video[vc] && remoteCodecs.video[vc]) {
+      offer.video = true;
+      break;
+    }
+  }
+
+  return offer;
 };

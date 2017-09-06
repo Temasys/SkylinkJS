@@ -2116,10 +2116,13 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
     log.log([peerId, null, null, 'Adding local stream']);
 
     var pc = self._peerConnections[peerId];
-    var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && peerId !== 'MCU');
-    var offerToReceiveVideo = !(!self._sdpSettings.connection.video && peerId !== 'MCU') && self._getSDPEdgeVideoSupports(peerId);
 
     if (pc) {
+      var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && peerId !== 'MCU') &&
+        self._getSDPCommonSupports(peerId, pc.remoteDescription).video;
+      var offerToReceiveVideo = !(!self._sdpSettings.connection.video && peerId !== 'MCU') &&
+        self._getSDPCommonSupports(peerId, pc.remoteDescription).audio;
+
       if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {

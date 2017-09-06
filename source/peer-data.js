@@ -221,12 +221,6 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       }
     }
 
-    // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-    if (!this._getSDPEdgeVideoSupports(peerId)) {
-      peerInfo.settings.video = false;
-      peerInfo.mediaStatus.videoMuted = true;
-    }
-
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -687,11 +681,6 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
     }
   }
 
-  // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-  if (customSettings.settings.video && !self._getSDPEdgeVideoSupports(usePeerId)) {
-    customSettings.settings.video = false;
-    customSettings.mediaStatus.videoMuted = true;
-  }
   return customSettings;
 };
 
@@ -741,6 +730,16 @@ Skylink.prototype._getUserInfo = function(peerId) {
   if (userInfo.settings.bandwidth) {
     userInfo.settings.maxBandwidth = clone(userInfo.settings.bandwidth);
     delete userInfo.settings.bandwidth;
+  }
+
+  if (!this._getSDPCommonSupports(peerId).video) {
+    userInfo.settings.video = false;
+    userInfo.mediaStatus.videoMuted = true;
+  }
+
+  if (!this._getSDPCommonSupports(peerId).audio) {
+    userInfo.settings.audio = false;
+    userInfo.mediaStatus.audioMuted = true;
   }
 
   delete userInfo.agent;

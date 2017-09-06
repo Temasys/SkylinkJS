@@ -59,8 +59,8 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
   }
 
   var offerConstraints = {
-    offerToReceiveAudio: !(!self._sdpSettings.connection.audio && targetMid !== 'MCU'),
-    offerToReceiveVideo: !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid),
+    offerToReceiveAudio: !(!self._sdpSettings.connection.audio && targetMid !== 'MCU') && self._getSDPCommonSupports(targetMid).video,
+    offerToReceiveVideo: !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPCommonSupports(targetMid).audio,
     iceRestart: !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &&
       iceRestart && self._enableIceRestart,
     voiceActivityDetection: self._voiceActivityDetection
@@ -139,8 +139,10 @@ Skylink.prototype._doAnswer = function(targetMid) {
   }
 
   var answerConstraints = AdapterJS.webrtcDetectedBrowser === 'edge' ? {
-    offerToReceiveVideo: !(!self._sdpSettings.connection.audio && targetMid !== 'MCU'),
-    offerToReceiveAudio: !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid),
+    offerToReceiveVideo: !(!self._sdpSettings.connection.audio && targetMid !== 'MCU') &&
+      self._getSDPCommonSupports(targetMid, pc.remoteDescription).video,
+    offerToReceiveAudio: !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
+      self._getSDPCommonSupports(targetMid, pc.remoteDescription).audio,
     voiceActivityDetection: self._voiceActivityDetection
   } : undefined;
 
