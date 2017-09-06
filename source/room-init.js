@@ -925,7 +925,7 @@ Skylink.prototype.init = function(options, callback) {
     }
   }
 
-  if (window.webrtcDetectedBrowser === 'edge') {
+  if (AdapterJS.webrtcDetectedBrowser === 'edge') {
     forceTURNSSL = false;
     TURNTransport = self.TURN_TRANSPORT.UDP;
     enableDataChannel = false;
@@ -1101,8 +1101,8 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   if (useXDomainRequest) {
     log.debug([null, 'XMLHttpRequest', method, 'Using XDomainRequest. ' +
       'XMLHttpRequest is now XDomainRequest'], {
-      agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion
+      agent: AdapterJS.webrtcDetectedBrowser,
+      version: AdapterJS.webrtcDetectedVersion
     });
     xhr = new XDomainRequest();
     xhr.setContentType = function (contentType) {
@@ -1110,8 +1110,8 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
     };
   } else {
     log.debug([null, 'XMLHttpRequest', method, 'Using XMLHttpRequest'], {
-      agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion
+      agent: AdapterJS.webrtcDetectedBrowser,
+      version: AdapterJS.webrtcDetectedVersion
     });
     xhr = new window.XMLHttpRequest();
     xhr.setContentType = function (contentType) {
@@ -1233,16 +1233,7 @@ Skylink.prototype._parseInfo = function(info) {
 Skylink.prototype._loadInfo = function() {
   var self = this;
 
-  // check if adapterjs has been loaded already first or not
-  var adapter = (function () {
-    try {
-      return window.AdapterJS || AdapterJS;
-    } catch (error) {
-      return false;
-    }
-  })();
-
-  if (!(!!adapter ? typeof adapter.webRTCReady === 'function' : false)) {
+  if (typeof (globals.AdapterJS || window.AdapterJS || {}).webRTCReady !== 'function') {
     var noAdapterErrorMsg = 'AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used';
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
       status: null,
@@ -1250,8 +1241,8 @@ Skylink.prototype._loadInfo = function() {
       errorCode: self.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED
     }, self._selectedRoom);
     return;
-  }
-  if (!window.io) {
+
+  } else if (!(globals.io || window.io)) {
     log.error('Socket.io not loaded. Please load socket.io');
     self._readyState = -1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
@@ -1260,8 +1251,8 @@ Skylink.prototype._loadInfo = function() {
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO
     }, self._selectedRoom);
     return;
-  }
-  if (!window.XMLHttpRequest) {
+
+  } else if (!window.XMLHttpRequest) {
     log.error('XMLHttpRequest not supported. Please upgrade your browser');
     self._readyState = -1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
@@ -1270,8 +1261,8 @@ Skylink.prototype._loadInfo = function() {
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT
     }, self._selectedRoom);
     return;
-  }
-  if (!self._path) {
+
+  } else if (!self._path) {
     log.error('Skylink is not initialised. Please call init() first');
     self._readyState = -1;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
@@ -1281,8 +1272,14 @@ Skylink.prototype._loadInfo = function() {
     }, self._selectedRoom);
     return;
   }
-  adapter.webRTCReady(function () {
-    // Prevent empty object returned when constructing the RTCPeerConnection object
+
+  AdapterJS.webRTCReady(function () {
+    self._enableIceRestart = AdapterJS.webrtcDetectedBrowser === 'firefox' ?
+      AdapterJS.webrtcDetectedVersion >= 48 : true;
+    self._binaryChunkType = AdapterJS.webrtcDetectedBrowser === 'firefox' ?
+      self.DATA_TRANSFER_DATA_TYPE.BLOB : self.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
+
+      // Prevent empty object returned when constructing the RTCPeerConnection object
     if (!(function () {
       try {
         var p = new window.RTCPeerConnection(null);

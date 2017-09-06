@@ -138,7 +138,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
     return;
   }
 
-  var answerConstraints = window.webrtcDetectedBrowser === 'edge' ? {
+  var answerConstraints = AdapterJS.webrtcDetectedBrowser === 'edge' ? {
     offerToReceiveVideo: !(!self._sdpSettings.connection.audio && targetMid !== 'MCU'),
     offerToReceiveAudio: !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid),
     voiceActivityDetection: self._voiceActivityDetection

@@ -639,8 +639,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.6.16
    */
-  this._enableIceRestart = window.webrtcDetectedBrowser === 'firefox' ?
-    window.webrtcDetectedVersion >= 48 : true;
+  this._enableIceRestart = false;
 
   /**
    * Stores the flag if MCU environment is enabled.
@@ -1112,8 +1111,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.6.18
    */
-  this._binaryChunkType = window.webrtcDetectedBrowser === 'firefox' ?
-    this.DATA_TRANSFER_DATA_TYPE.BLOB : this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
+  this._binaryChunkType = this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
 
   /**
    * Stores the RTCPeerConnection configuration.

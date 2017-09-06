@@ -475,7 +475,7 @@ Skylink.prototype.RECORDING_STATE = {
  *   var sources = { audio: [], video: [] };
  *
  *   function selectStream (audioSourceId, videoSourceId) {
- *     if (window.webrtcDetectedBrowser === 'firefox') {
+ *     if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
  *       console.warn("Currently this feature is not supported by Firefox browsers!");
  *       return;
  *     }
@@ -586,8 +586,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
     return;
   }
 
-  /*if (window.location.protocol !== 'https:' && window.webrtcDetectedBrowser === 'chrome' &&
-    window.webrtcDetectedVersion > 46) {
+  /*if (window.location.protocol !== 'https:' && AdapterJS.webrtcDetectedBrowser === 'chrome' &&
+    AdapterJS.webrtcDetectedVersion > 46) {
     errorMsg = 'getUserMedia() has to be called in https:// application';
     log.error(errorMsg, options);
     if (typeof callback === 'function') {
@@ -820,7 +820,7 @@ Skylink.prototype.sendStream = function(options, callback) {
     return;
   }
 
-  if (window.webrtcDetectedBrowser === 'edge') {
+  if (AdapterJS.webrtcDetectedBrowser === 'edge') {
     var edgeNotSupportError = 'Edge browser currently does not support renegotiation.';
     log.error(edgeNotSupportError, options);
     if (typeof callback === 'function'){
@@ -1479,7 +1479,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     try {
       var hasDefaultAudioTrack = false;
       if (enableAudioSettings) {
-        if (window.webrtcDetectedBrowser === 'firefox') {
+        if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
           hasDefaultAudioTrack = true;
           settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
         } else if (useMediaSource.indexOf('audio') > -1 && useMediaSource.indexOf('tab') > -1) {
@@ -1632,7 +1632,7 @@ Skylink.prototype._muteStreams = function () {
     muteFn(self._streams.screenshare.streamClone);
   }
 
-  if (window.webrtcDetectedBrowser === 'edge') {
+  if (AdapterJS.webrtcDetectedBrowser === 'edge') {
     for (var peerId in self._peerConnections) {
       if (self._peerConnections.hasOwnProperty(peerId) && self._peerConnections[peerId]) {
         var localStreams = self._peerConnections[peerId].getLocalStreams();
@@ -1772,7 +1772,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
       }
 
       // Not supported in Edge browser features
-      if (window.webrtcDetectedBrowser !== 'edge') {
+      if (AdapterJS.webrtcDetectedBrowser !== 'edge') {
         if (typeof options.audio.echoCancellation === 'boolean') {
           settings.settings.audio.echoCancellation = options.audio.echoCancellation;
           settings.getUserMediaSettings.audio.echoCancellation = options.audio.echoCancellation;
@@ -1784,7 +1784,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
         }
 
         if (options.audio.deviceId && typeof options.audio.deviceId === 'string' &&
-          window.webrtcDetectedBrowser !== 'firefox') {
+          AdapterJS.webrtcDetectedBrowser !== 'firefox') {
           settings.settings.audio.deviceId = options.audio.deviceId;
           settings.getUserMediaSettings.audio.deviceId = options.useExactConstraints ?
             { exact: options.audio.deviceId } : { ideal: options.audio.deviceId };
@@ -1792,7 +1792,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
       }
     }
 
-    if (window.webrtcDetectedBrowser === 'edge') {
+    if (AdapterJS.webrtcDetectedBrowser === 'edge') {
       settings.getUserMediaSettings.audio = true;
     }
   }
@@ -1817,7 +1817,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
       }
 
       if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
-        window.webrtcDetectedBrowser !== 'firefox') {
+        AdapterJS.webrtcDetectedBrowser !== 'firefox') {
         settings.settings.video.deviceId = options.video.deviceId;
         settings.getUserMediaSettings.video.deviceId = options.useExactConstraints ?
           { exact: options.video.deviceId } : { ideal: options.video.deviceId };
@@ -1865,7 +1865,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
       };
     }
 
-    if (window.webrtcDetectedBrowser === 'edge') {
+    if (AdapterJS.webrtcDetectedBrowser === 'edge') {
       settings.settings.video = {
         screenshare: false,
         exactConstraints: !!options.useExactConstraints
@@ -1937,7 +1937,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   };
 
   // Handle event for Chrome / Opera
-  if (['chrome', 'opera'].indexOf(window.webrtcDetectedBrowser) > -1) {
+  if (['chrome', 'opera'].indexOf(AdapterJS.webrtcDetectedBrowser) > -1) {
     stream.oninactive = function () {
       if (self._streamsStoppedCbs[streamId]) {
         self._streamsStoppedCbs[streamId]();
@@ -1956,7 +1956,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     }
 
   // Handle event for Firefox (use an interval)
-  } else if (window.webrtcDetectedBrowser === 'firefox') {
+  } else if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
     stream.endedInterval = setInterval(function () {
       if (typeof stream.recordedTime === 'undefined') {
         stream.recordedTime = 0;

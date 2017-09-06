@@ -358,7 +358,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, options
     return;
   }
 
-  if (window.webrtcDetectedBrowser === 'edge') {
+  if (AdapterJS.webrtcDetectedBrowser === 'edge') {
     emitErrorForPeersFn('Edge browser currently does not support renegotiation.');
     return;
   }
@@ -638,7 +638,7 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
     return;
   }
 
-  if (window.webrtcDetectedBrowser === 'edge') {
+  if (AdapterJS.webrtcDetectedBrowser === 'edge') {
     log.warn('Edge browser does not have well support for stats.');
   }
 
@@ -771,7 +771,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
   }
 
   // Warn due to Edge not giving complete stats and returning as 0 sometimes..
-  if (window.webrtcDetectedBrowser === 'edge' || AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+  if (AdapterJS.webrtcDetectedBrowser === 'edge' || AdapterJS.webrtcDetectedType === 'AppleWebKit') {
     log.warn('Current connection stats may not be complete as it is in beta');
   }
 
@@ -1081,7 +1081,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       output.audio.sending.nacks = self._parseConnectionStats(prevStats, item, 'nackCount');
 
     // Edge (WebRTC not ORTC shim) (Inbound stats) - Stats may not be accurate as it returns 0.
-    } else if (window.webrtcDetectedBrowser === 'edge' && item.type === 'inboundrtp' && item.mediaType === 'audio' && item.isRemote) {
+    } else if (AdapterJS.webrtcDetectedBrowser === 'edge' && item.type === 'inboundrtp' && item.mediaType === 'audio' && item.isRemote) {
       output.audio.receiving.fractionLost = item.fractionLost;
       output.audio.receiving.jitter = item.jitter;
 
@@ -1098,7 +1098,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       output.audio.receiving.nacks = self._parseConnectionStats(prevStats, item, 'nackCount');
 
     // Edge (WebRTC not ORTC shim) (Outbound stats) - Stats may not be accurate as it returns 0.
-    } else if (window.webrtcDetectedBrowser === 'edge' && item.type === 'outboundrtp' && item.mediaType === 'audio' && !item.isRemote) {
+    } else if (AdapterJS.webrtcDetectedBrowser === 'edge' && item.type === 'outboundrtp' && item.mediaType === 'audio' && !item.isRemote) {
       output.audio.sending.targetBitrate = item.targetBitrate;
       output.audio.sending.rtt = item.roundTripTime;
 
@@ -1250,7 +1250,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       output.video.sending.slis = self._parseConnectionStats(prevStats, item, 'sliCount');
 
     // Edge (WebRTC not ORTC shim) (Inbound stats) - Stats may not be accurate as it returns 0.
-    } else if (window.webrtcDetectedBrowser === 'edge' && item.type === 'inboundrtp' && item.mediaType === 'video' && item.isRemote) {
+    } else if (AdapterJS.webrtcDetectedBrowser === 'edge' && item.type === 'inboundrtp' && item.mediaType === 'video' && item.isRemote) {
       output.video.receiving.fractionLost = item.fractionLost;
       output.video.receiving.jitter = item.jitter;
 
@@ -1284,7 +1284,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       output.video.receiving.frames = self._parseConnectionStats(prevStats, trackItem, 'framesReceived');
 
     // Edge (WebRTC not ORTC shim) (Outbound stats) - Stats may not be accurate as it returns 0.
-    } else if (window.webrtcDetectedBrowser === 'edge' && item.type === 'outboundrtp' && item.mediaType === 'video' && !item.isRemote) {
+    } else if (AdapterJS.webrtcDetectedBrowser === 'edge' && item.type === 'outboundrtp' && item.mediaType === 'video' && !item.isRemote) {
       output.video.sending.targetBitrate = item.targetBitrate || 0;
       output.video.sending.roundTripTime = item.roundTripTime || 0;
 
@@ -1510,7 +1510,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       local: {}
     };
 
-    if (window.webrtcDetectedBrowser === 'edge') {
+    if (AdapterJS.webrtcDetectedBrowser === 'edge') {
       if (pc.remoteStream) {
         pc.remoteStream.getTracks().forEach(function (track) {
           edgeTracksKind.remote[track.id] = track.kind;
@@ -1530,7 +1530,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
         output.raw[prop].mediaType = output.raw[prop].audioInputLevel || output.raw[prop].audioOutputLevel ? 'audio' : 'video';
 
       // Polyfill for Edge 15.x missing "mediaType" stats item
-      } else if (window.webrtcDetectedBrowser === 'edge' && !output.raw[prop].mediaType &&
+      } else if (AdapterJS.webrtcDetectedBrowser === 'edge' && !output.raw[prop].mediaType &&
         ['inboundrtp', 'outboundrtp'].indexOf(output.raw[prop].type) > -1) {
         var trackItem = output.raw[ output.raw[prop].mediaTrackId ] || {};
         output.raw[prop].mediaType = edgeTracksKind[ output.raw[prop].isRemote ? 'remote' : 'local' ][ trackItem.trackIdentifier ] || ''; 
@@ -1704,8 +1704,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
       type: self._SIG_MESSAGE_TYPE.RESTART,
       mid: self._user.sid,
       rid: self._room.id,
-      agent: window.webrtcDetectedBrowser,
-      version: (window.webrtcDetectedVersion || 0).toString(),
+      agent: AdapterJS.webrtcDetectedBrowser,
+      version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,
       userInfo: self._getUserInfo(peerId),
       target: peerId,
@@ -2051,7 +2051,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], iceConnectionState);
 
-    if (window.webrtcDetectedBrowser === 'edge') {
+    if (AdapterJS.webrtcDetectedBrowser === 'edge') {
       if (iceConnectionState === 'connecting') {
         iceConnectionState = self.ICE_CONNECTION_STATE.CHECKING;
       } else if (iceConnectionState === 'new') {
@@ -2080,7 +2080,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
 
     if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
-      iceConnectionState) > -1 && !!self._bandwidthAdjuster && !bandwidth && window.webrtcDetectedBrowser !== 'edge' &&
+      iceConnectionState) > -1 && !!self._bandwidthAdjuster && !bandwidth && AdapterJS.webrtcDetectedBrowser !== 'edge' &&
       (((self._peerInformations[targetMid] || {}).agent || {}).name || 'edge') !== 'edge') {
       var currentBlock = 0;
       var formatTotalFn = function (arr) {
@@ -2162,7 +2162,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     self._trigger('candidateGenerationState', pc.iceGatheringState, targetMid);
   };
 
-  if (window.webrtcDetectedBrowser === 'firefox') {
+  if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
     pc.removeStream = function (stream) {
       var senders = pc.getSenders();
       for (var s = 0; s < senders.length; s++) {
@@ -2198,8 +2198,8 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
       type: self._SIG_MESSAGE_TYPE.RESTART,
       mid: self._user.sid,
       rid: self._room.id,
-      agent: window.webrtcDetectedBrowser,
-      version: (window.webrtcDetectedVersion || 0).toString(),
+      agent: AdapterJS.webrtcDetectedBrowser,
+      version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,
       userInfo: self._getUserInfo(peerId),
       target: peerId,
@@ -2374,7 +2374,7 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
     self._peerEndOfCandidatesCounter[targetMid].hasSet = true;
     try {
-      if (window.webrtcDetectedBrowser === 'edge') {
+      if (AdapterJS.webrtcDetectedBrowser === 'edge') {
         var mLineCounter = -1;
         var addedMids = [];
         var sdpLines = self._peerConnections[targetMid].remoteDescription.sdp.split('\r\n');

@@ -236,8 +236,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       },
       mediaStatus: clone(this._streamsMutedSettings),
       agent: {
-        name: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
+        name: AdapterJS.webrtcDetectedBrowser,
+        version: AdapterJS.webrtcDetectedVersion,
         os: window.navigator.platform,
         pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
         SMProtocolVersion: this.SMProtocolVersion,

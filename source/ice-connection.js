@@ -119,7 +119,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
   if (self._forceTURNSSL) {
-    if (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion < 53) {
+    if (AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion < 53) {
       useTURNSSLPort = true;
     } else {
       useTURNSSLProtocol = true;
@@ -197,7 +197,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
       // add the ICE server port
       // Edge uses 3478 with ?transport=udp for now
-      if (window.webrtcDetectedBrowser === 'edge') {
+      if (AdapterJS.webrtcDetectedBrowser === 'edge') {
         server.url += ':3478';
       } else if (protocolParts[2]) {
         server.url += ':' + protocolParts[2];
@@ -239,16 +239,16 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   }
 
   // add mozilla STUN for firefox
-  if (self._enableSTUN && self._usePublicSTUN && window.webrtcDetectedBrowser === 'firefox') {
+  if (self._enableSTUN && self._usePublicSTUN && AdapterJS.webrtcDetectedBrowser === 'firefox') {
     pushIceServer('none', 'none', 'stun:stun.services.mozilla.com', 0);
   }
 
   var hasUrlsSupport = 
-    (window.webrtcDetectedBrowser === 'chrome' && window.webrtcDetectedVersion > 34) ||
-    (window.webrtcDetectedBrowser === 'firefox' && window.webrtcDetectedVersion > 38) ||
-    (window.webrtcDetectedBrowser === 'opera' && window.webrtcDetectedVersion > 31) ||
+    (AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion > 34) ||
+    (AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion > 38) ||
+    (AdapterJS.webrtcDetectedBrowser === 'opera' && AdapterJS.webrtcDetectedVersion > 31) ||
     (['plugin', 'AppleWebKit'].indexOf(AdapterJS.webrtcDetectedType) > -1) ||
-    (['bowser', 'edge'].indexOf(window.webrtcDetectedBrowser) > -1);
+    (['bowser', 'edge'].indexOf(AdapterJS.webrtcDetectedBrowser) > -1);
 
   for (var serverUsername in iceServersList) {
     if (iceServersList.hasOwnProperty(serverUsername)) {
@@ -266,7 +266,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
             }
 
             // Edge uses 1 url only for now
-            if (window.webrtcDetectedBrowser === 'edge') {
+            if (AdapterJS.webrtcDetectedBrowser === 'edge') {
               if (urlsItem.username && urlsItem.credential) {
                 urlsItem.urls = [urlsItem.urls[0]];
                 newIceServers.push(urlsItem);
