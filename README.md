@@ -53,6 +53,26 @@ We recommend that you always use the latest versions of the Temasys Web SDK as W
 
 [Latest version: `0.6.24`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.24).
 
+##### Setting AdapterJS flags
+If you require to set Temasys AdapterJS flags (e.g. forcing Temasys WebRTC plugin), we recommend the following method:
+
+```
+<script>
+  // Example options.
+  var AdapterJS = {
+    options: {
+      forceSafariPlugin: [Boolean],
+      hidePluginInstallPrompt: [Boolean],
+      getAllCams: [Boolean]
+    }
+  };
+</script>
+<! -- Now reference AdapterJS or SkylinkJS (complete version) -->
+<script src="https://cdn.temasys.io/skylink/skylinkjs/0.6.x/skylink.complete.js"></script>
+```
+
+For more details, please read the documentation in [Temasys AdapterJS](https://github.com/Temasys/AdapterJS).
+
 #### Noted Issues and Solutions
 ##### Installing `0.6.3` - `0.6.10` versions in NPM
 Due to corrupt files issues for versions `0.6.3` - `0.6.10`, we have removed these versions from the NPM repository.
