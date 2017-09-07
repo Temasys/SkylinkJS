@@ -419,61 +419,50 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
 Skylink.prototype._removeSDPUnknownAptRtx = function (targetMid, sessionDescription) {
   var codecsPayload = []; // m=audio 9 UDP/TLS/RTP/SAVPF [Start from index 3] 102 9 0 8 97 13 118 101  
   var sdpLines = sessionDescription.sdp.split('\r\n');
-  var rtxs = {};
   var mediaLines = sessionDescription.sdp.split('m=');
+
+  // Remove unmapped rtx lines
+  var formatRtx = function (str) {
+    (str.match(/a=rtpmap:.*\ rtx\/.*\r\n/gi) || []).forEach(function (line) {
+      var payload = (line.split('a=rtpmap:')[1] || '').split(' ')[0] || '';
+      var fmtpLine = (str.match(new RegExp('a=fmtp:' + payload + '\ .*\r\n', 'gi')) || [])[0];
+
+      if (!fmtpLine) {
+        str = str.replace(new RegExp(line, 'g'), '');
+        return;
+      }
+
+      var codecPayload = (fmtpLine.split(' apt=')[1] || '').replace(/\r\n/gi, '');
+      var rtmpLine = str.match(new RegExp('a=rtpmap:' + codecPayload + '\ .*\r\n', 'gi'));
+
+      if (!rtmpLine) {
+        str = str.replace(new RegExp(line, 'g'), '');
+        str = str.replace(new RegExp(fmtpLine, 'g'), '');
+      }
+    });
+
+    return str;
+  };
+
+  // Remove unmapped fmtp and rtcp-fb lines
+  var formatFmtpRtcpFb = function (str) {
+    (str.match(/a=(fmtp|rtcp-fb):.*\ rtx\/.*\r\n/gi) || []).forEach(function (line) {
+      var payload = (line.split('a=' + (line.indexOf('rtcp') > 0 ? 'rtcp-fb' : 'fmtp'))[1] || '').split(' ')[0] || '';
+      var rtmpLine = str.match(new RegExp('a=rtpmap:' + payload + '\ .*\r\n', 'gi'));
+
+      if (!rtmpLine) {
+        str = str.replace(new RegExp(line, 'g'), '');
+      }
+    });
+
+    return str;
+  };
 
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
   for (var m = 0; m < mediaLines.length; m++) {
-    var lines = mediaLines[m].split('\r\n');
-    var payload = null;
-
-    if (lines[0].indexOf('audio ') !== 0 && lines[0].indexOf('video ') !== 0) {
-      continue;
-    }
-
-    for (var l = 0; l < lines.length; l++) {
-      // Remove unmapped fmtp lines
-      if (lines[l].indexOf('a=fmtp:') === 0) {
-        payload = (lines[l].split('a=fmtp:')[1] || '').split(' ')[0] || '';
-        if (!mediaLines[m].match(new RegExp('a=rtpmap:' + payload + '\ .*\r\n', 'gi'))) {
-          lines.splice(l, 1);
-          l--;
-          continue;
-        }
-
-      // Remove unmapped rtcp-fb lines
-      } else if (lines[l].indexOf('a=rtcp-fb:') === 0) {
-        payload = (lines[l].split('a=rtcp-fb:')[1] || '').split(' ')[0] || '';
-        if (!mediaLines[m].match(new RegExp('a=rtpmap:' + payload + '\ .*\r\n', 'gi'))) {
-          lines.splice(l, 1);
-          l--;
-          continue;
-        }
-
-      // Remove unmapped rtx lines
-      } else if (lines[l].indexOf('a=rtpmap:') === 0 && lines[l].indexOf('rtx') > 0) {
-        payload = (lines[l].split('a=rtpmap:')[1] || '').split(' ')[0] || '';
-        // Get related fmtp line to match codec
-        var fmtpLine = (mediaLines[m].match(new RegExp('a=fmtp:' + payload + '\ .*\r\n', 'gi')) || [])[0];
-
-        if (!fmtpLine) {
-          lines.splice(l, 1);
-          l--;
-          continue;
-        }
-
-        var codecPayload = (lines[l].split(' apt=')[1] || '').replace(/\r\n/gi, '');
-        if (!mediaLines[m].match(new RegExp('a=rtpmap:' + codecPayload + '\ .*\r\n', 'gi'))) {
-          lines.splice(l, 1);
-          lines[0] = lines[0].replace(' ' + payload, '');
-          l--;
-          continue;
-        }
-      }
-    }
-
-    mediaLines[m] = lines.join('\r\n');
+    mediaLines[m] = formatRtx(mediaLines[m]);
+    mediaLines[m] = formatFmtpRtcpFb(mediaLines[m]);
   }
 
   return mediaLines.join('m=');
