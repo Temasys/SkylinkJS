@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.24</title>
+    <title>SkylinkJS 0.6.25</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.24</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.25</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -130,11 +130,9 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
+Skylink.prototype._doOffer = function(targetMid, iceRestart) {
   var self = this;
   var pc = self._peerConnections[targetMid];
-
-  log.log([targetMid, null, null, &#x27;Checking caller status&#x27;], peerBrowser);
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
@@ -151,32 +149,13 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
-  var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &amp;&amp;
-    iceRestart &amp;&amp; self._enableIceRestart;
-  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;);
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp; self._getSDPEdgeVideoSupports(targetMid);
-
   var offerConstraints = {
-    offerToReceiveAudio: offerToReceiveAudio,
-    offerToReceiveVideo: offerToReceiveVideo,
-    iceRestart: doIceRestart,
+    offerToReceiveAudio: !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp; self._getSDPCommonSupports(targetMid).video,
+    offerToReceiveVideo: !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp; self._getSDPCommonSupports(targetMid).audio,
+    iceRestart: !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &amp;&amp;
+      iceRestart &amp;&amp; self._enableIceRestart,
     voiceActivityDetection: self._voiceActivityDetection
   };
-
-  // Prevent undefined OS errors
-  peerBrowser.os = peerBrowser.os || &#x27;&#x27;;
-
-  // Fallback to use mandatory constraints for plugin based browsers
-  if ([&#x27;IE&#x27;, &#x27;safari&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
-    offerConstraints = {
-      mandatory: {
-        OfferToReceiveAudio: offerToReceiveAudio,
-        OfferToReceiveVideo: offerToReceiveVideo,
-        iceRestart: doIceRestart,
-        voiceActivityDetection: self._voiceActivityDetection
-      }
-    };
-  }
 
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === &#x27;MCU&#x27;) {
@@ -201,17 +180,24 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     self._peerConnStatus[targetMid].sdpConstraints = offerConstraints;
   }
 
-  pc.createOffer(function(offer) {
+  var onSuccessCbFn = function(offer) {
     log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
-
     self._setLocalAndSendMessage(targetMid, offer);
+  };
 
-  }, function(error) {
+  var onErrorCbFn = function(error) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-
     log.error([targetMid, null, null, &#x27;Failed creating an offer:&#x27;], error);
+  };
 
-  }, offerConstraints);
+  pc.createOffer(onSuccessCbFn, onErrorCbFn, AdapterJS.webrtcDetectedType === &#x27;plugin&#x27; ? {
+    mandatory: {
+      OfferToReceiveAudio: offerConstraints.offerToReceiveAudio,
+      OfferToReceiveVideo: offerConstraints.offerToReceiveVideo,
+      iceRestart: offerConstraints.iceRestart,
+      voiceActivityDetection: offerConstraints.voiceActivityDetection
+    }
+  } : offerConstraints);
 };
 
 /**
@@ -243,32 +229,36 @@ Skylink.prototype._doAnswer = function(targetMid) {
     return;
   }
 
-  // Add stream only at offer/answer end
-  if ((!self._hasMCU || targetMid === &#x27;MCU&#x27;) &amp;&amp; window.webrtcDetectedBrowser !== &#x27;edge&#x27;) {
-    self._addLocalMediaStreams(targetMid);
-  }
-
-  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;);
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp; self._getSDPEdgeVideoSupports(targetMid);
-  var answerConstraints = window.webrtcDetectedBrowser === &#x27;edge&#x27; ? {
-    offerToReceiveVideo: offerToReceiveVideo,
-    offerToReceiveAudio: offerToReceiveAudio,
+  var answerConstraints = AdapterJS.webrtcDetectedBrowser === &#x27;edge&#x27; ? {
+    offerToReceiveVideo: !(!self._sdpSettings.connection.audio &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp;
+      self._getSDPCommonSupports(targetMid, pc.remoteDescription).video,
+    offerToReceiveAudio: !(!self._sdpSettings.connection.video &amp;&amp; targetMid !== &#x27;MCU&#x27;) &amp;&amp;
+      self._getSDPCommonSupports(targetMid, pc.remoteDescription).audio,
     voiceActivityDetection: self._voiceActivityDetection
   } : undefined;
+
+  // Add stream only at offer/answer end
+  if (!self._hasMCU || targetMid === &#x27;MCU&#x27;) {
+    self._addLocalMediaStreams(targetMid);
+  }
 
   if (self._peerConnStatus[targetMid]) {
     self._peerConnStatus[targetMid].sdpConstraints = answerConstraints;
   }
 
-  // No ICE restart constraints for createAnswer as it fails in chrome 48
-  // { iceRestart: true }
-  pc.createAnswer(function(answer) {
+  var onSuccessCbFn = function(answer) {
     log.debug([targetMid, null, null, &#x27;Created answer&#x27;], answer);
     self._setLocalAndSendMessage(targetMid, answer);
-  }, function(error) {
+  };
+
+  var onErrorCbFn = function(error) {
     log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  }, answerConstraints);
+  };
+
+  // No ICE restart constraints for createAnswer as it fails in chrome 48
+  // { iceRestart: true }
+  pc.createAnswer(onSuccessCbFn, onErrorCbFn, answerConstraints);
 };
 
 /**
@@ -334,7 +324,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
     &#x27;Local session description updated -&gt;&#x27;], sessionDescription.sdp);
 
-  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), function() {
+  var onSuccessCbFn = function() {
     log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
       &#x27;Local session description has been set -&gt;&#x27;], sessionDescription);
 
@@ -356,20 +346,23 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     self._sendChannelMessage({
       type: sessionDescription.type,
-      sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
+      sdp: self._renderSDPOutput(targetMid, sessionDescription),
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
     });
+  };
 
-  }, function(error) {
+  var onErrorCbFn = function(error) {
     log.error([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Local description failed setting -&gt;&#x27;], error);
 
     pc.processingLocalSDP = false;
 
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  });
+  };
+
+  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), onSuccessCbFn, onErrorCbFn);
 };
 
     </pre>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.24</title>
+    <title>SkylinkJS 0.6.25</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.24</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.25</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -210,12 +210,10 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
 
   if (self._forceTURNSSL) {
-    if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; ||
-      window.webrtcDetectedBrowser === &#x27;safari&#x27; ||
-      window.webrtcDetectedBrowser === &#x27;IE&#x27;) {
-      useTURNSSLProtocol = true;
-    } else {
+    if (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; AdapterJS.webrtcDetectedVersion &lt; 53) {
       useTURNSSLPort = true;
+    } else {
+      useTURNSSLProtocol = true;
     }
   }
 
@@ -290,7 +288,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
 
       // add the ICE server port
       // Edge uses 3478 with ?transport=udp for now
-      if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+      if (AdapterJS.webrtcDetectedBrowser === &#x27;edge&#x27;) {
         server.url += &#x27;:3478&#x27;;
       } else if (protocolParts[2]) {
         server.url += &#x27;:&#x27; + protocolParts[2];
@@ -332,33 +330,16 @@ Skylink.prototype._setIceServers = function(givenConfig) {
   }
 
   // add mozilla STUN for firefox
-  if (self._enableSTUN &amp;&amp; self._usePublicSTUN &amp;&amp; window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+  if (self._enableSTUN &amp;&amp; self._usePublicSTUN &amp;&amp; AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
     pushIceServer(&#x27;none&#x27;, &#x27;none&#x27;, &#x27;stun:stun.services.mozilla.com&#x27;, 0);
   }
 
-  var hasUrlsSupport = false;
-
-  if (window.webrtcDetectedBrowser === &#x27;chrome&#x27; &amp;&amp; window.webrtcDetectedVersion &gt; 34) {
-    hasUrlsSupport = true;
-  }
-
-  if (window.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; window.webrtcDetectedVersion &gt; 38) {
-    hasUrlsSupport = true;
-  }
-
-  if (window.webrtcDetectedBrowser === &#x27;opera&#x27; &amp;&amp; window.webrtcDetectedVersion &gt; 31) {
-    hasUrlsSupport = true;
-  }
-
-  // plugin supports .urls
-  if (window.webrtcDetectedBrowser === &#x27;safari&#x27; || window.webrtcDetectedBrowser === &#x27;IE&#x27;) {
-    hasUrlsSupport = true;
-  }
-
-  // bowser / edge
-  if ([&#x27;bowser&#x27;, &#x27;edge&#x27;].indexOf(window.webrtcDetectedBrowser) &gt; -1) {
-    hasUrlsSupport = true;
-  }
+  var hasUrlsSupport = 
+    (AdapterJS.webrtcDetectedBrowser === &#x27;chrome&#x27; &amp;&amp; AdapterJS.webrtcDetectedVersion &gt; 34) ||
+    (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; AdapterJS.webrtcDetectedVersion &gt; 38) ||
+    (AdapterJS.webrtcDetectedBrowser === &#x27;opera&#x27; &amp;&amp; AdapterJS.webrtcDetectedVersion &gt; 31) ||
+    ([&#x27;plugin&#x27;, &#x27;AppleWebKit&#x27;].indexOf(AdapterJS.webrtcDetectedType) &gt; -1) ||
+    ([&#x27;bowser&#x27;, &#x27;edge&#x27;].indexOf(AdapterJS.webrtcDetectedBrowser) &gt; -1);
 
   for (var serverUsername in iceServersList) {
     if (iceServersList.hasOwnProperty(serverUsername)) {
@@ -376,7 +357,7 @@ Skylink.prototype._setIceServers = function(givenConfig) {
             }
 
             // Edge uses 1 url only for now
-            if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+            if (AdapterJS.webrtcDetectedBrowser === &#x27;edge&#x27;) {
               if (urlsItem.username &amp;&amp; urlsItem.credential) {
                 urlsItem.urls = [urlsItem.urls[0]];
                 newIceServers.push(urlsItem);

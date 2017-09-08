@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.24</title>
+    <title>SkylinkJS 0.6.25</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.24</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.25</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -686,8 +686,8 @@ Skylink.prototype._approachEventHandler = function(message){
     type: self._SIG_MESSAGE_TYPE.ENTER,
     mid: self._user.sid,
     rid: self._room.id,
-    agent: window.webrtcDetectedBrowser,
-    version: (window.webrtcDetectedVersion || 0).toString(),
+    agent: AdapterJS.webrtcDetectedBrowser,
+    version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
     receiveOnly: self.getPeerInfo().config.receiveOnly,
@@ -1088,8 +1088,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     type: self._SIG_MESSAGE_TYPE.ENTER,
     mid: self._user.sid,
     rid: self._room.id,
-    agent: window.webrtcDetectedBrowser,
-    version: (window.webrtcDetectedVersion || 0).toString(),
+    agent: AdapterJS.webrtcDetectedBrowser,
+    version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
     os: window.navigator.platform,
     userInfo: self._getUserInfo(),
     receiveOnly: self.getPeerInfo().config.receiveOnly,
@@ -1221,8 +1221,8 @@ Skylink.prototype._enterHandler = function(message) {
       enableIceTrickle: self._enableIceTrickle,
       enableDataChannel: self._enableDataChannel,
       enableIceRestart: self._enableIceRestart,
-      agent: window.webrtcDetectedBrowser,
-      version: (window.webrtcDetectedVersion || 0).toString(),
+      agent: AdapterJS.webrtcDetectedBrowser,
+      version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
       receiveOnly: self.getPeerInfo().config.receiveOnly,
       os: window.navigator.platform,
       userInfo: self._getUserInfo(targetMid),
@@ -1384,8 +1384,8 @@ Skylink.prototype._restartHandler = function(message){
       type: self._SIG_MESSAGE_TYPE.RESTART,
       mid: self._user.sid,
       rid: self._room.id,
-      agent: window.webrtcDetectedBrowser,
-      version: (window.webrtcDetectedVersion || 0).toString(),
+      agent: AdapterJS.webrtcDetectedBrowser,
+      version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
       os: window.navigator.platform,
       userInfo: self._getUserInfo(targetMid),
       target: targetMid,
@@ -1544,8 +1544,8 @@ Skylink.prototype._welcomeHandler = function(message) {
         enableDataChannel: self._enableDataChannel,
         enableIceRestart: self._enableIceRestart,
         receiveOnly: self.getPeerInfo().config.receiveOnly,
-        agent: window.webrtcDetectedBrowser,
-        version: (window.webrtcDetectedVersion || 0).toString(),
+        agent: AdapterJS.webrtcDetectedBrowser,
+        version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
         os: window.navigator.platform,
         userInfo: self._getUserInfo(targetMid),
         target: targetMid,
@@ -1647,6 +1647,7 @@ Skylink.prototype._offerHandler = function(message) {
   offer.sdp = self._removeSDPCodecs(targetMid, offer);
   offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
   offer.sdp = self._handleSDPConnectionSettings(targetMid, offer, &#x27;remote&#x27;);
+  offer.sdp = self._removeSDPUnknownAptRtx(targetMid, offer);
 
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Updated remote offer -&gt;&#x27;], offer.sdp);
 
@@ -1670,23 +1671,23 @@ Skylink.prototype._offerHandler = function(message) {
 
   pc.processingRemoteSDP = true;
 
-  // Edge FIXME problem: Add stream only at offer/answer end
-  if (window.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; (!self._hasMCU || targetMid === &#x27;MCU&#x27;)) {
-    self._addLocalMediaStreams(targetMid);
-  }
-
   if (message.userInfo) {
     self._trigger(&#x27;peerUpdated&#x27;, targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  pc.setRemoteDescription(new RTCSessionDescription(offer), function() {
+  self._parseSDPMediaStreamIDs(targetMid, offer);
+
+  var onSuccessCbFn = function() {
     log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Remote description set&#x27;]);
     pc.setOffer = &#x27;remote&#x27;;
     pc.processingRemoteSDP = false;
+
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
-  }, function(error) {
+  };
+
+  var onErrorCbFn = function(error) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
     pc.processingRemoteSDP = false;
@@ -1696,7 +1697,9 @@ Skylink.prototype._offerHandler = function(message) {
       state: pc.signalingState,
       offer: offer
     });
-  });
+  };
+
+  pc.setRemoteDescription(new RTCSessionDescription(offer), onSuccessCbFn, onErrorCbFn);
 };
 
 
@@ -1855,6 +1858,7 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPCodecs(targetMid, answer);
   answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
   answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, &#x27;remote&#x27;);
+  answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
 
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Updated remote answer -&gt;&#x27;], answer.sdp);
 
@@ -1883,10 +1887,13 @@ Skylink.prototype._answerHandler = function(message) {
     self._trigger(&#x27;peerUpdated&#x27;, targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  pc.setRemoteDescription(new RTCSessionDescription(answer), function() {
+  self._parseSDPMediaStreamIDs(targetMid, answer);
+
+  var onSuccessCbFn = function() {
     log.debug([targetMid, null, message.type, &#x27;Remote description set&#x27;]);
     pc.setAnswer = &#x27;remote&#x27;;
     pc.processingRemoteSDP = false;
+
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
 
@@ -1899,8 +1906,9 @@ Skylink.prototype._answerHandler = function(message) {
       log.warn([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Closing all datachannels as they were rejected.&#x27;]);
       self._closeDataChannel(targetMid);
     }
+  };
 
-  }, function(error) {
+  var onErrorCbFn = function(error) {
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
     pc.processingRemoteSDP = false;
@@ -1910,7 +1918,9 @@ Skylink.prototype._answerHandler = function(message) {
       state: pc.signalingState,
       answer: answer
     });
-  });
+  };
+
+  pc.setRemoteDescription(new RTCSessionDescription(answer), onSuccessCbFn, onErrorCbFn);
 };
 
 /**

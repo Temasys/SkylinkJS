@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.24</title>
+    <title>SkylinkJS 0.6.25</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.24</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.25</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -259,7 +259,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       // a=end-of-candidates should present in non-trickle ICE connections so no need to send endOfCandidates message
       self._sendChannelMessage({
         type: sessionDescription.type,
-        sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
+        sdp: self._renderSDPOutput(targetMid, sessionDescription),
         mid: self._user.sid,
         userInfo: self._getUserInfo(targetMid),
         target: targetMid,
@@ -326,8 +326,12 @@ Skylink.prototype._addIceCandidateFromQueue = function(targetMid) {
     } else if (this._peerConnections[targetMid] &amp;&amp;
       this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED &amp;&amp;
       AdapterJS &amp;&amp; !this._isLowerThanVersion(AdapterJS.VERSION, &#x27;0.14.0&#x27;)) {
-      log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Signaling of end-of-candidates remote ICE gathering.&#x27;]);
-      this._peerConnections[targetMid].addIceCandidate(null);
+      try {
+        this._peerConnections[targetMid].addIceCandidate(null);
+        log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Signaling of end-of-candidates remote ICE gathering.&#x27;]);
+      } catch (error) {
+        log.error([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Failed signaling of end-of-candidates remote ICE gathering.&#x27;]);
+      }
     }
   }
 
@@ -394,7 +398,11 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     return;
   }
 
-  self._peerConnections[targetMid].addIceCandidate(candidate, onSuccessCbFn, onErrorCbFn);
+  try {
+    self._peerConnections[targetMid].addIceCandidate(candidate, onSuccessCbFn, onErrorCbFn);
+  } catch (error) {
+    onErrorCbFn(error);
+  }
 };
     </pre>
 </div>
