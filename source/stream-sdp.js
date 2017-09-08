@@ -410,152 +410,6 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
 };
 
 /**
- * Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems
- * to be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.
- * @method _addSDPMediaStreamTrackIDs
- * @private
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescription) {
-  if (!(this._peerConnections[targetMid] && this._peerConnections[targetMid].getLocalStreams().length > 0)) {
-    log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
-      'Not enforcing MediaStream IDs as no Streams is sent.']);
-    return sessionDescription.sdp;
-  }
-
-  var sessionDescriptionStr = sessionDescription.sdp;
-
-  if (!this._enableIceTrickle) {
-    sessionDescriptionStr = sessionDescriptionStr.replace(/a=end-of-candidates\r\n/g, '');
-  }
-
-  var sdpLines = sessionDescriptionStr.split('\r\n');
-  var agent = ((this._peerInformations[targetMid] || {}).agent || {}).name || '';
-  var localStream = this._peerConnections[targetMid].getLocalStreams()[0];
-  var localStreamId = localStream.id || localStream.label;
-
-  var parseFn = function (type, tracks) {
-    if (tracks.length === 0) {
-      log.log([targetMid, 'RTCSessionDesription', sessionDescription.type,
-        'Not enforcing "' + type + '" MediaStreamTrack IDs as no Stream "' + type + '" tracks is sent.']);
-      return;
-    }
-
-    var trackId = tracks[0].id || tracks[0].label;
-    var trackLabel = tracks[0].label || 'Default';
-    var ssrcId = null;
-    var hasReachedType = false;
-
-    // Get SSRC ID
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('m=' + type) === 0) {
-        if (!hasReachedType) {
-          hasReachedType = true;
-          continue;
-        } else {
-          break;
-        }
-      }
-
-      if (hasReachedType && sdpLines[i].indexOf('a=ssrc:') === 0) {
-        if (!ssrcId) {
-          ssrcId = (sdpLines[i].split(':')[1] || '').split(' ')[0] || null;
-        }
-
-        if (ssrcId && sdpLines[i].indexOf('a=ssrc:' + ssrcId + ' ') === 0) {
-          if (sdpLines[i].indexOf(' cname:') > 0) {
-            log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Updating MediaStreamTrack ssrc (' +
-              ssrcId + ') for "' + localStreamId + '" stream and "' + trackId + '" (label:"' + trackLabel + '")']);
-            sdpLines.splice(i + 1, 0,
-              'a=ssrc:' + ssrcId + ' msid:' + localStreamId + ' ' + trackId,
-              'a=ssrc:' + ssrcId + ' mslabel:' + trackId,
-              'a=ssrc:' + ssrcId + ' label:' + trackId);
-            i += 3;
-          } else {
-            sdpLines.splice(i, 1);
-            i--;
-          }
-        }
-        break;
-      }
-    }
-  };
-
-  parseFn('audio', localStream.getAudioTracks());
-  parseFn('video', localStream.getVideoTracks());
-
-  // Append signaling of end-of-candidates
-  if (!this._enableIceTrickle){
-    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
-      'Appending end-of-candidates signal for non-trickle ICE connection.']);
-    for (var i = 0; i < sdpLines.length; i++) {
-      if (sdpLines[i].indexOf('a=candidate:') === 0) {
-        if (sdpLines[i + 1] ? !(sdpLines[i + 1].indexOf('a=candidate:') === 0 ||
-          sdpLines[i + 1].indexOf('a=end-of-candidates') === 0) : true) {
-          sdpLines.splice(i + 1, 0, 'a=end-of-candidates');
-          i++;
-        }
-      }
-    }
-  }
-
-  if (sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER && this._sdpSessions[targetMid]) {
-    var bundleLineIndex = -1;
-    var mLineIndex = -1;
-
-    for (var j = 0; j < sdpLines.length; j++) {
-      if (sdpLines[j].indexOf('a=group:BUNDLE') === 0 && this._sdpSessions[targetMid].remote.bundleLine &&
-        this._peerConnectionConfig.bundlePolicy === this.BUNDLE_POLICY.MAX_BUNDLE) {
-        sdpLines[j] = this._sdpSessions[targetMid].remote.bundleLine;
-      } else if (sdpLines[j].indexOf('m=') === 0) {
-        mLineIndex++;
-        var compareA = sdpLines[j].split(' ');
-        var compareB = (this._sdpSessions[targetMid].remote.mLines[mLineIndex] || '').split(' ');
-
-        if (compareA[0] && compareB[0] && compareA[0] !== compareB[0]) {
-          compareB[1] = 0;
-          log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
-            'Appending middle rejected m= line ->'], compareB.join(' '));
-          sdpLines.splice(j, 0, compareB.join(' '));
-          j++;
-          mLineIndex++;
-        }
-      }
-    }
-
-    while (this._sdpSessions[targetMid].remote.mLines[mLineIndex + 1]) {
-      mLineIndex++;
-      var appendIndex = sdpLines.length;
-      if (!sdpLines[appendIndex - 1].replace(/\s/gi, '')) {
-        appendIndex -= 1;
-      }
-      var parts = (this._sdpSessions[targetMid].remote.mLines[mLineIndex] || '').split(' ');
-      parts[1] = 0;
-      log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
-        'Appending later rejected m= line ->'], parts.join(' '));
-      sdpLines.splice(appendIndex, 0, parts.join(' '));
-    }
-  }
-
-  if (window.webrtcDetectedBrowser === 'edge' && sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER &&
-    !sdpLines[sdpLines.length - 1].replace(/\s/gi, '')) {
-    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing last empty space for Edge browsers']);
-    sdpLines.splice(sdpLines.length - 1, 1);
-  }
-
-  var outputStr = sdpLines.join('\r\n');
-
-  /*if (window.webrtcDetectedBrowser === 'edge' && this._streams.userMedia && this._streams.userMedia.stream) {
-    var correctStreamId = this._streams.userMedia.stream.id || this._streams.userMedia.stream.label;
-    outputStr = outputStr.replace(new RegExp('a=msid:.*\ ', 'gi'), 'a=msid:' + correctStreamId + ' ');
-    outputStr = outputStr.replace(new RegExp('\ msid:.*\ ', 'gi'), ' msid:' + correctStreamId + ' ');
-  }*/
-
-  return outputStr;
-};
-
-/**
  * Function that modifies the session description to remove apt/rtx lines that does exists.
  * @method _removeSDPUnknownAptRtx
  * @private
@@ -563,51 +417,55 @@ Skylink.prototype._addSDPMediaStreamTrackIDs = function (targetMid, sessionDescr
  * @since 0.6.18
  */
 Skylink.prototype._removeSDPUnknownAptRtx = function (targetMid, sessionDescription) {
-  var codecsPayload = []; // Payload numbers as the keys
+  var codecsPayload = []; // m=audio 9 UDP/TLS/RTP/SAVPF [Start from index 3] 102 9 0 8 97 13 118 101  
   var sdpLines = sessionDescription.sdp.split('\r\n');
-  var hasVideo = false;
-  var rtxs = {};
-  var parts = [];
+  var mediaLines = sessionDescription.sdp.split('m=');
+
+  // Remove unmapped rtx lines
+  var formatRtx = function (str) {
+    (str.match(/a=rtpmap:.*\ rtx\/.*\r\n/gi) || []).forEach(function (line) {
+      var payload = (line.split('a=rtpmap:')[1] || '').split(' ')[0] || '';
+      var fmtpLine = (str.match(new RegExp('a=fmtp:' + payload + '\ .*\r\n', 'gi')) || [])[0];
+
+      if (!fmtpLine) {
+        str = str.replace(new RegExp(line, 'g'), '');
+        return;
+      }
+
+      var codecPayload = (fmtpLine.split(' apt=')[1] || '').replace(/\r\n/gi, '');
+      var rtmpLine = str.match(new RegExp('a=rtpmap:' + codecPayload + '\ .*\r\n', 'gi'));
+
+      if (!rtmpLine) {
+        str = str.replace(new RegExp(line, 'g'), '');
+        str = str.replace(new RegExp(fmtpLine, 'g'), '');
+      }
+    });
+
+    return str;
+  };
+
+  // Remove unmapped fmtp and rtcp-fb lines
+  var formatFmtpRtcpFb = function (str) {
+    (str.match(/a=(fmtp|rtcp-fb):.*\ rtx\/.*\r\n/gi) || []).forEach(function (line) {
+      var payload = (line.split('a=' + (line.indexOf('rtcp') > 0 ? 'rtcp-fb' : 'fmtp'))[1] || '').split(' ')[0] || '';
+      var rtmpLine = str.match(new RegExp('a=rtpmap:' + payload + '\ .*\r\n', 'gi'));
+
+      if (!rtmpLine) {
+        str = str.replace(new RegExp(line, 'g'), '');
+      }
+    });
+
+    return str;
+  };
 
   // Remove rtx or apt= lines that prevent connections for browsers without VP8 or VP9 support
   // See: https://bugs.chromium.org/p/webrtc/issues/detail?id=3962
-  for (var i = 0; i < sdpLines.length; i++) {
-    if (sdpLines[i].indexOf('m=') === 0) {
-      if (hasVideo) {
-        for (var r in rtxs) {
-          if (rtxs.hasOwnProperty(r) && rtxs[r] && codecsPayload.indexOf(rtxs[r].codec) === -1) {
-            for (var l = 0; l < rtxs[r].lines.length; l++) {
-              sdpLines.splice(sdpLines.indexOf(rtxs[r].lines[l]), 1);
-              i--;
-            }
-          }
-        }
-      }
-      hasVideo = sdpLines[i].indexOf('m=video ') === 0;
-      codecsPayload = [];
-      rtxs = {};
-    }
-    if (sdpLines[i].toLowerCase().indexOf('a=rtpmap:') === 0) {
-      parts = (sdpLines[i].split('a=rtpmap:')[1] || '').split(' ');
-      if (parts[1].toLowerCase().indexOf('rtx') === 0) {
-        if (!rtxs[parts[0]]) {
-          rtxs[parts[0]] = { lines:[], codec: null };
-        }
-        rtxs[parts[0]].lines.push(sdpLines[i]);
-      } else {
-        codecsPayload.push(parts[0]);
-      }
-    } else if (sdpLines[i].indexOf('a=fmtp:') === 0 && sdpLines[i].indexOf(' apt=') > 0) {
-      parts = (sdpLines[i].split('a=fmtp:')[1] || '').split(' ');
-      if (parts[0] && !rtxs[parts[0]]) {
-        rtxs[parts[0]] = { lines:[], codec: null };
-      }
-      rtxs[parts[0]].codec = parts[1].split('apt=')[1];
-      rtxs[parts[0]].lines.push(sdpLines[i]);
-    }
+  for (var m = 0; m < mediaLines.length; m++) {
+    mediaLines[m] = formatRtx(mediaLines[m]);
+    mediaLines[m] = formatFmtpRtcpFb(mediaLines[m]);
   }
 
-  return sdpLines.join('\r\n');
+  return mediaLines.join('m=');
 };
 
 /**
@@ -708,12 +566,7 @@ Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescriptio
  * @since 0.6.16
  */
 Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription, type, beSilentOnLogs) {
-  if (!(sessionDescription && sessionDescription.sdp)) {
-    return null;
-  }
-
-  var sdpLines = sessionDescription.sdp.split('\r\n');
-  var selectedCodecInfo = {
+  var codecInfo = {
     name: null,
     implementation: null,
     clockRate: null,
@@ -722,39 +575,55 @@ Skylink.prototype._getSDPSelectedCodec = function (targetMid, sessionDescription
     params: null
   };
 
-  for (var i = 0; i < sdpLines.length; i++) {
-    if (sdpLines[i].indexOf('m=' + type) === 0) {
-      var parts = sdpLines[i].split(' ');
-
-      if (parts.length < 4) {
-        break;
-      }
-
-      selectedCodecInfo.payloadType = parseInt(parts[3], 10);
-
-    } else if (selectedCodecInfo.payloadType !== null) {
-      if (sdpLines[i].indexOf('m=') === 0) {
-        break;
-      }
-
-      if (sdpLines[i].indexOf('a=rtpmap:' + selectedCodecInfo.payloadType + ' ') === 0) {
-        var params = (sdpLines[i].split(' ')[1] || '').split('/');
-        selectedCodecInfo.name = params[0] || '';
-        selectedCodecInfo.clockRate = params[1] ? parseInt(params[1], 10) : null;
-        selectedCodecInfo.channels = params[2] ? parseInt(params[2], 10) : null;
-
-      } else if (sdpLines[i].indexOf('a=fmtp:' + selectedCodecInfo.payloadType + ' ') === 0) {
-        selectedCodecInfo.params = sdpLines[i].split('a=fmtp:' + selectedCodecInfo.payloadType + ' ')[1] || null;
-      }
-    }
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return codecInfo;
   }
+
+  sessionDescription.sdp.split('m=').forEach(function (mediaItem, index) {
+    if (index === 0 || mediaItem.indexOf(type + ' ') !== 0) {
+      return;
+    }
+
+    var codecs = (mediaItem.split('\r\n')[0] || '').split(' ');
+    // Remove audio[0] 65266[1] UDP/TLS/RTP/SAVPF[2]
+    codecs.splice(0, 3);
+
+    for (var i = 0; i < codecs.length; i++) {
+      var match = mediaItem.match(new RegExp('a=rtpmap:' + codecs[i] + '.*\r\n', 'gi'));
+
+      if (!match) {
+        continue;
+      }
+
+      // Format: codec/clockRate/channels
+      var parts = ((match[0] || '').replace(/\r\n/g, '').split(' ')[1] || '').split('/');
+
+      // Ignore rtcp codecs, dtmf or comfort noise
+      if (['red', 'ulpfec', 'telephone-event', 'cn', 'rtx'].indexOf(parts[0].toLowerCase()) > -1) {
+        continue;
+      }
+
+      codecInfo.name = parts[0];
+      codecInfo.clockRate = parseInt(parts[1], 10) || 0;
+      codecInfo.channels = parseInt(parts[2] || '1', 10) || 1;
+      codecInfo.payloadType = parseInt(codecs[i], 10);
+      codecInfo.params = '';
+
+      // Get the list of codec parameters
+      var params = mediaItem.match(new RegExp('a=fmtp:' + codecs[i] + '.*\r\n', 'gi')) || [];
+      params.forEach(function (paramItem) {
+        codecInfo.params += paramItem.replace(new RegExp('a=fmtp:' + codecs[i], 'gi'), '').replace(/\ /g, '').replace(/\r\n/g, '');
+      });
+      break;
+    }
+  });
 
   if (!beSilentOnLogs) {
     log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type,
-      'Parsing session description "' + type + '" codecs ->'], selectedCodecInfo);
+      'Parsing session description "' + type + '" codecs ->'], codecInfo);
   }
 
-  return selectedCodecInfo;
+  return codecInfo;
 };
 
 /**
@@ -816,6 +685,17 @@ Skylink.prototype._getCodecsSupport = function (callback) {
 
   self._currentCodecSupport = { audio: {}, video: {} };
 
+  // Safari 11 REQUIRES a stream first before connection works, hence let's spoof it for now
+  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+    self._currentCodecSupport.audio = { 
+      opus: ['48000/2']
+    };
+    self._currentCodecSupport.video = { 
+      h264: ['48000']
+    };
+    return callback(null);
+  }
+
   try {
     if (window.webrtcDetectedBrowser === 'edge') {
       var codecs = RTCRtpSender.getCapabilities().codecs;
@@ -832,19 +712,15 @@ Skylink.prototype._getCodecsSupport = function (callback) {
 
     } else {
       var pc = new RTCPeerConnection(null);
-      var offerConstraints = {
+      var offerConstraints = AdapterJS.webrtcDetectedType !== 'plugin' ? {
         offerToReceiveAudio: true,
         offerToReceiveVideo: true
+      } : {
+        mandatory: {
+          OfferToReceiveVideo: true,
+          OfferToReceiveAudio: true
+        }
       };
-
-      if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
-        offerConstraints = {
-          mandatory: {
-            OfferToReceiveVideo: true,
-            OfferToReceiveAudio: true
-          }
-        };
-      }
 
       // Prevent errors and proceed with create offer still...
       try {
@@ -863,24 +739,7 @@ Skylink.prototype._getCodecsSupport = function (callback) {
       } catch (e) {}
 
       pc.createOffer(function (offer) {
-        var sdpLines = offer.sdp.split('\r\n');
-        var mediaType = '';
-
-        for (var i = 0; i < sdpLines.length; i++) {
-          if (sdpLines[i].indexOf('m=') === 0) {
-            mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0];
-          } else if (sdpLines[i].indexOf('a=rtpmap:') === 0) {
-            if (['audio', 'video'].indexOf(mediaType) === -1) {
-              continue;
-            }
-            var parts = (sdpLines[i].split(' ')[1] || '').split('/');
-            var codec = (parts[0] || '').toLowerCase();
-            var info = parts[1] + (parts[2] ? '/' + parts[2] : '');
-
-            self._currentCodecSupport[mediaType][codec] = info;
-          }
-        }
-
+        self._currentCodecSupport = self._getSDPCodecsSupport(null, offer);
         callback(null);
 
       }, function (error) {
@@ -929,10 +788,6 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     settings.connection.data = true;
   }
 
-  if (settings.connection.video) {
-    settings.connection.video = self._getSDPEdgeVideoSupports(targetMid);
-  }
-
   // Patches for MCU sending empty video stream despite audio+video is not sending at all
   // Apply as a=inactive when supported
   if (self._hasMCU) {
@@ -941,6 +796,18 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
     settings.direction.audio.send = targetMid === 'MCU' ? true : false;
     settings.direction.video.receive = targetMid === 'MCU' ? false : !!peerStreamSettings.video;
     settings.direction.video.send = targetMid === 'MCU' ? true : false;
+  }
+
+  if (direction === 'remote') {
+    var offerCodecs = self._getSDPCommonSupports(targetMid, sessionDescription);
+
+    if (!offerCodecs.audio) {
+      settings.connection.audio = false;
+    }
+
+    if (!offerCodecs.video) {
+      settings.connection.video = false;
+    }
   }
 
   // ANSWERER: Reject only the m= lines. Returned rejected m= lines as well.
@@ -1138,26 +1005,390 @@ Skylink.prototype._getSDPFingerprint = function (targetMid, sessionDescription, 
   return fingerprint;
 };
 
+/**
+ * Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems
+ * to be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.
+ * @method _renderSDPOutput
+ * @private
+ * @for Skylink
+ * @since 0.6.25
+ */
+Skylink.prototype._renderSDPOutput = function (targetMid, sessionDescription) {
+  var self = this;
+  var localStream = null;
+  var localStreamId = null;
+
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return;
+  }
+
+  if (!self._peerConnections[targetMid]) {
+    return sessionDescription.sdp;
+  }
+
+  if (self._peerConnections[targetMid].localStream) {
+    localStream = self._peerConnections[targetMid].localStream;
+    localStreamId = self._peerConnections[targetMid].localStreamId || self._peerConnections[targetMid].localStream.id;
+  }
+
+  // For non-trickle ICE, remove the a=end-of-candidates line first to append it properly later
+  var sdpLines = (!self._enableIceTrickle ? sessionDescription.sdp.replace(/a=end-of-candidates\r\n/g, '') : sessionDescription.sdp).split('\r\n');
+  var agent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+
+  // Parse and replace with the correct msid to prevent unwanted streams.
+  // Making it simple without replacing with the track IDs or labels, neither setting prefixing "mslabel" and "label" as required labels.
+  if (localStream) {
+    var ssrcId = null;
+    var mediaType = '';
+
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('m=') === 0) {
+        mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0] || '';
+        mediaType = ['audio', 'video'].indexOf(mediaType) === -1 ? '' : mediaType;
+
+      } else if (mediaType) {
+        if (sdpLines[i].indexOf('a=msid:') === 0) {
+          var msidParts = sdpLines[i].split(' ');
+          msidParts[0] = 'a=msid:' + localStreamId;
+          sdpLines[i] = msidParts.join(' ');
+
+        } else if (sdpLines[i].indexOf('a=ssrc:') === 0) {
+          var ssrcParts = null;
+
+          // Replace for "msid:" and "mslabel:"
+          if (sdpLines[i].indexOf(' msid:') > 0) {
+            ssrcParts = sdpLines[i].split(' msid:');
+          } else if (sdpLines[i].indexOf(' mslabel:') > 0) {
+            ssrcParts = sdpLines[i].split(' mslabel:');
+          }
+
+          if (ssrcParts) {
+            var ssrcMsidParts = (ssrcParts[1] || '').split(' ');
+            ssrcMsidParts[0] = localStreamId;
+            ssrcParts[1] = ssrcMsidParts.join(' ');
+
+            if (sdpLines[i].indexOf(' msid:') > 0) {
+              sdpLines[i] = ssrcParts.join(' msid:');
+            } else if (sdpLines[i].indexOf(' mslabel:') > 0) {
+              sdpLines[i] = ssrcParts.join(' mslabel:');
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // For non-trickle ICE, append the signaling of end-of-candidates properly
+  if (!self._enableIceTrickle){
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Appending end-of-candidates signal for non-trickle ICE connection.']);
+
+    for (var e = 0; e < sdpLines.length; e++) {
+      if (sdpLines[e].indexOf('a=candidate:') === 0) {
+        if (sdpLines[e + 1] ? !(sdpLines[e + 1].indexOf('a=candidate:') === 0 ||
+          sdpLines[e + 1].indexOf('a=end-of-candidates') === 0) : true) {
+          sdpLines.splice(e + 1, 0, 'a=end-of-candidates');
+          e++;
+        }
+      }
+    }
+  }
+
+  // Replace the bundle policy to prevent complete removal of m= lines for some cases that do not accept missing m= lines except edge.
+  if (sessionDescription.type === this.HANDSHAKE_PROGRESS.ANSWER && this._sdpSessions[targetMid]) {
+    var bundleLineIndex = -1;
+    var mLineIndex = -1;
+
+    for (var j = 0; j < sdpLines.length; j++) {
+      if (sdpLines[j].indexOf('a=group:BUNDLE') === 0 && this._sdpSessions[targetMid].remote.bundleLine &&
+        this._peerConnectionConfig.bundlePolicy === this.BUNDLE_POLICY.MAX_BUNDLE) {
+        sdpLines[j] = this._sdpSessions[targetMid].remote.bundleLine;
+      } else if (sdpLines[j].indexOf('m=') === 0) {
+        mLineIndex++;
+        var compareA = sdpLines[j].split(' ');
+        var compareB = (this._sdpSessions[targetMid].remote.mLines[mLineIndex] || '').split(' ');
+
+        if (compareA[0] && compareB[0] && compareA[0] !== compareB[0]) {
+          compareB[1] = 0;
+          log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+            'Appending middle rejected m= line ->'], compareB.join(' '));
+          sdpLines.splice(j, 0, compareB.join(' '));
+          j++;
+          mLineIndex++;
+        }
+      }
+    }
+
+    while (this._sdpSessions[targetMid].remote.mLines[mLineIndex + 1]) {
+      mLineIndex++;
+      var appendIndex = sdpLines.length;
+      if (!sdpLines[appendIndex - 1].replace(/\s/gi, '')) {
+        appendIndex -= 1;
+      }
+      var parts = (this._sdpSessions[targetMid].remote.mLines[mLineIndex] || '').split(' ');
+      parts[1] = 0;
+      log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+        'Appending later rejected m= line ->'], parts.join(' '));
+      sdpLines.splice(appendIndex, 0, parts.join(' '));
+    }
+  }
+
+  // Ensure for chrome case to have empty "" at last line or it will return invalid SDP errors
+  if (window.webrtcDetectedBrowser === 'edge' && sessionDescription.type === this.HANDSHAKE_PROGRESS.OFFER &&
+    !sdpLines[sdpLines.length - 1].replace(/\s/gi, '')) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing last empty space for Edge browsers']);
+    sdpLines.splice(sdpLines.length - 1, 1);
+  }
+
+  /*
+  var outputStr = sdpLines.join('\r\n');
+  if (window.webrtcDetectedBrowser === 'edge' && this._streams.userMedia && this._streams.userMedia.stream) {
+    var correctStreamId = this._streams.userMedia.stream.id || this._streams.userMedia.stream.label;
+    outputStr = outputStr.replace(new RegExp('a=msid:.*\ ', 'gi'), 'a=msid:' + correctStreamId + ' ');
+    outputStr = outputStr.replace(new RegExp('\ msid:.*\ ', 'gi'), ' msid:' + correctStreamId + ' ');
+  }*/
+
+  log.info([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Formatted output ->'], sdpLines.join('\r\n'));
+
+  return sdpLines.join('\r\n');
+};
 
 /**
- * Function that gets edge browser video supports.
- * @method _getSDPEdgeVideoSupports
+ * Function that parses the session description to get the MediaStream IDs.
+ * NOTE: It might not completely accurate if the setRemoteDescription() fails..
+ * @method _parseSDPMediaStreamIDs
+ * @private
+ * @for Skylink
+ * @since 0.6.25
+ */
+Skylink.prototype._parseSDPMediaStreamIDs = function (targetMid, sessionDescription) {
+  if (!this._peerConnections[targetMid]) {
+    return;
+  }
+
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    this._peerConnections[targetMid].remoteStreamId = null;
+    return;
+  }
+
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var currentStreamId = null;
+
+  for (var i = 0; i < sdpLines.length; i++) {
+    // a=msid:{31145dc5-b3e2-da4c-a341-315ef3ebac6b} {e0cac7dd-64a0-7447-b719-7d5bf042ca05}
+    if (sdpLines[i].indexOf('a=msid:') === 0) {
+      currentStreamId = (sdpLines[i].split('a=msid:')[1] || '').split(' ')[0];
+      break;
+    // a=ssrc:691169016 msid:c58721ed-b7db-4e7c-ac37-47432a7a2d6f 2e27a4b8-bc74-4118-b3d4-0f1c4ed4869b
+    } else if (sdpLines[i].indexOf('a=ssrc:') === 0 && sdpLines[i].indexOf(' msid:') > 0) {
+      currentStreamId = (sdpLines[i].split(' msid:')[1] || '').split(' ')[0];
+      break;
+    }
+  }
+
+  // No stream set
+  if (!currentStreamId) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'No remote stream is sent.']);
+    this._peerConnections[targetMid].remoteStreamId = null;
+  // New stream set
+  } else if (currentStreamId !== this._peerConnections[targetMid].remoteStreamId) {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'New remote stream is sent ->'], currentStreamId);
+    this._peerConnections[targetMid].remoteStreamId = currentStreamId;
+  // Same stream set
+  } else {
+    log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Same remote stream is sent ->'], currentStreamId);
+  }
+};
+
+/**
+ * Function that parses and retrieves the session description ICE candidates.
+ * @method _getSDPICECandidates
  * @private
  * @for Skylink
  * @since 0.6.18
  */
-Skylink.prototype._getSDPEdgeVideoSupports = function (peerId) {
-  var self = this;
+Skylink.prototype._getSDPICECandidates = function (targetMid, sessionDescription, beSilentOnLogs) {
+  var candidates = {
+    host: [],
+    srflx: [],
+    relay: []
+  };
 
-  if (peerId) {
-    var peerAgent = ((self._peerInformations[peerId] || {}).agent || {}).name || '';
-    var peerVersion = ((self._peerInformations[peerId] || {}).agent || {}).version || 0;
-
-    return window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedVersion < 15.15019 &&
-      peerAgent !== 'edge' ? !!self._currentCodecSupport.video.h264 : (window.webrtcDetectedBrowser !== 'edge' &&
-      peerAgent === 'edge' && peerVersion < 15.15019 ? !!self._currentCodecSupport.video.h264 : true);
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return candidates;
   }
 
-  return window.webrtcDetectedBrowser === 'edge' && window.webrtcDetectedVersion < 15.15019 ?
-    !!self._currentCodecSupport.video.h264 : true;
+  sessionDescription.sdp.split('m=').forEach(function (mediaItem, index) {
+    // Ignore the v=0 lines etc..
+    if (index === 0) {
+      return;
+    }
+
+    // Remove a=mid: and \r\n
+    var sdpMid = ((mediaItem.match(/a=mid:.*\r\n/gi) || [])[0] || '').replace(/a=mid:/gi, '').replace(/\r\n/, '');
+    var sdpMLineIndex = index - 1;
+
+    (mediaItem.match(/a=candidate:.*\r\n/gi) || []).forEach(function (item) {
+      // Remove \r\n for candidate type being set at the end of candidate DOM string.
+      var canType = (item.split(' ')[7] || 'host').replace(/\r\n/g, '');
+      candidates[canType] = candidates[canType] || [];
+      candidates[canType].push(new RTCIceCandidate({
+        sdpMid: sdpMid,
+        sdpMLineIndex: sdpMLineIndex,
+        // Remove initial "a=" in a=candidate
+        candidate: (item.split('a=')[1] || '').replace(/\r\n/g, '')
+      }));
+    });
+  });
+
+  if (!beSilentOnLogs) {
+    log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Parsing session description ICE candidates ->'], candidates);
+  }
+
+  return candidates;
+};
+
+/**
+ * Function that gets each media line SSRCs.
+ * @method _getSDPMediaSSRC
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getSDPMediaSSRC = function (targetMid, sessionDescription, beSilentOnLogs) {
+  var ssrcs = {
+    audio: 0,
+    video: 0
+  };
+
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return ssrcs;
+  }
+
+  sessionDescription.sdp.split('m=').forEach(function (mediaItem, index) {
+    // Ignore the v=0 lines etc..
+    if (index === 0) {
+      return;
+    }
+
+    var mediaType = (mediaItem.split(' ')[0] || '');
+    var ssrcLine = (mediaItem.match(/a=ssrc:.*\r\n/) || [])[0];
+
+    if (typeof ssrcs[mediaType] !== 'number') {
+      return;
+    }
+
+    if (ssrcLine) {
+      ssrcs[mediaType] = parseInt((ssrcLine.split('a=ssrc:')[1] || '').split(' ')[0], 10) || 0;
+    }
+  });
+
+  if (!beSilentOnLogs) {
+    log.debug([targetMid, 'RTCSessionDesription', sessionDescription.type,
+      'Parsing session description media SSRCs ->'], ssrcs);
+  }
+
+  return ssrcs;
+};
+
+/**
+ * Function that parses the current list of supported codecs from session description.
+ * @method _getSDPCodecsSupport
+ * @private
+ * @for Skylink
+ * @since 0.6.18
+ */
+Skylink.prototype._getSDPCodecsSupport = function (targetMid, sessionDescription) {
+  var self = this;
+  var codecs = {
+    audio: {},
+    video: {}
+  };
+
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return codecs;
+  }
+
+  var sdpLines = sessionDescription.sdp.split('\r\n');
+  var mediaType = '';
+
+  for (var i = 0; i < sdpLines.length; i++) {
+    if (sdpLines[i].indexOf('m=') === 0) {
+      mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0];
+
+      if (['audio', 'video'].indexOf(mediaType) === -1) {
+        break;
+      }
+      continue;
+    }
+
+    if (sdpLines[i].indexOf('a=rtpmap:') === 0) {
+      var parts = (sdpLines[i].split(' ')[1] || '').split('/');
+      var codec = (parts[0] || '').toLowerCase();
+      var info = parts[1] + (parts[2] ? '/' + parts[2] : '');
+
+      if (['ulpfec', 'red', 'telephone-event', 'cn', 'rtx'].indexOf(codec) > -1) {
+        continue;
+      }
+
+      codecs[mediaType][codec] = codecs[mediaType][codec] || [];
+      
+      if (codecs[mediaType][codec].indexOf(info) === -1) {
+        codecs[mediaType][codec].push(info);
+      }
+    }
+  }
+
+  log.info([targetMid || null, 'RTCSessionDescription', sessionDescription.type, 'Parsed codecs support ->'], codecs);
+  return codecs;
+};
+
+/**
+ * Function that checks if there are any common codecs supported for remote end.
+ * @method _getSDPCommonSupports
+ * @private
+ * @for Skylink
+ * @since 0.6.25
+ */
+Skylink.prototype._getSDPCommonSupports = function (targetMid, sessionDescription) {
+  var self = this;
+  var offer = {
+    audio: false,
+    video: false
+  };
+
+  if (!targetMid || !(sessionDescription && sessionDescription.sdp)) {
+    offer.video = !!(self._currentCodecSupport.video.h264 || self._currentCodecSupport.video.vp8);
+    offer.audio = !!self._currentCodecSupport.audio.opus;
+
+    if (targetMid) {
+      var peerAgent = ((self._peerInformations[targetMid] || {}).agent || {}).name || '';
+
+      if (AdapterJS.webrtcDetectedBrowser === peerAgent) {
+        offer.video = Object.keys(self._currentCodecSupport.video).length > 0;
+        offer.audio = Object.keys(self._currentCodecSupport.audio).length > 0;
+      }
+    }
+    return offer;
+  }
+
+  var remoteCodecs = self._getSDPCodecsSupport(targetMid, sessionDescription);
+  var localCodecs = self._currentCodecSupport;
+
+  for (var ac in localCodecs.audio) {
+    if (localCodecs.audio.hasOwnProperty(ac) && localCodecs.audio[ac] && remoteCodecs.audio[ac]) {
+      offer.audio = true;
+      break;
+    }
+  }
+
+  for (var vc in localCodecs.video) {
+    if (localCodecs.video.hasOwnProperty(vc) && localCodecs.video[vc] && remoteCodecs.video[vc]) {
+      offer.video = true;
+      break;
+    }
+  }
+
+  return offer;
 };

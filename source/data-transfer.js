@@ -955,7 +955,9 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
 
 /**
  * <blockquote class="info">
- *   Note that this feature is not supported by MCU enabled Peer connections.<br>
+ *   Note that this feature is not supported by MCU enabled Peer connections and the
+ *   <code>enableSimultaneousTransfers</code> flag has to be enabled in the <a href="#method_init">
+ *   <code>init()</code> method</a> in order for this functionality to work.<br>
  *   To start streaming data, see the <a href="#method_streamData"><code>streamData()</code>
  *   method</a>. To stop data streaming session, see the <a href="#method_stopStreamingData"><code>
  *   stopStreamingData()</code> method</a>.
@@ -1143,6 +1145,10 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     return emitErrorBeforeStreamingFn('Unable to start data streaming as this feature is current not supported by MCU yet.');
   }
 
+  if (!self._enableSimultaneousTransfers) {
+    return emitErrorBeforeStreamingFn('Unable to start data streaming as this feature requires simultaneous data transfers to be enabled');
+  }
+
   var transferId = 'stream_' + (self._user && self._user.sid ? self._user.sid : '-') + '_' + (new Date()).getTime();
   var peersInterop = [];
   var peersNonInterop = [];
@@ -1187,7 +1193,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     var peerId = listOfPeers[i];
     var error = null;
     var dtProtocolVersion = ((self._peerInformations[peerId] || {}).agent || {}).DTProtocolVersion || '';
-    var channelProp = self._isLowerThanVersion(dtProtocolVersion, '0.1.2') ? 'main' : transferId;
+    var channelProp = self._isLowerThanVersion(dtProtocolVersion, '0.1.2') || !self._enableSimultaneousTransfers ? 'main' : transferId;
 
     if (!(self._dataChannels[peerId] && self._dataChannels[peerId].main)) {
       error = 'Datachannel connection does not exists';
@@ -1288,8 +1294,8 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
       timeout: 0,
       isPrivate: isPrivate,
       sender: self._user.sid,
-      agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
+      agent: AdapterJS.webrtcDetectedBrowser,
+      version: AdapterJS.webrtcDetectedVersion,
       target: peerId === 'MCU' ? targetPeers : peerId
     }, channelProp);
     self._dataChannels[peerId][channelProp].streamId = transferId;
@@ -1327,7 +1333,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
       }
     });
     self._createDataChannel(peerId, transferId, sessionChunkType === 'string' ? self._CHUNK_DATAURL_SIZE :
-      (window.webrtcDetectedBrowser === 'firefox' ? self._MOZ_BINARY_FILE_SIZE : self._BINARY_FILE_SIZE));
+      (AdapterJS.webrtcDetectedBrowser === 'firefox' ? self._MOZ_BINARY_FILE_SIZE : self._BINARY_FILE_SIZE));
   };
 
   if (peersNonInterop.length > 0) {
@@ -1505,7 +1511,7 @@ Skylink.prototype.streamData = function(transferId, dataChunk) {
       self._blobToArrayBuffer(dataChunk, onSendDataFn);
     } else if (!(dataChunk instanceof Blob) && sessionInfo.chunkType === self.DATA_TRANSFER_DATA_TYPE.BLOB) {
       onSendDataFn(new Blob([dataChunk]));
-    } else if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1 && typeof dataChunk !== 'string') {
+    } else if (AdapterJS.webrtcDetectedType === 'plugin' && typeof dataChunk !== 'string') {
       onSendDataFn(new Int8Array(dataChunk));
     } else {
       onSendDataFn(dataChunk);
@@ -1631,8 +1637,8 @@ Skylink.prototype.stopStreamingData = function(transferId) {
       timeout: 0,
       isPrivate: self._dataStreams[transferId].isPrivate,
       sender: self._user.sid,
-      agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
+      agent: AdapterJS.webrtcDetectedBrowser,
+      version: AdapterJS.webrtcDetectedVersion,
       target: targetPeers ? targetPeers : peerId
     }, channelProp);
 
@@ -1789,8 +1795,8 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
       sessionChunkType = 'string';
     }
 
-    var chunkSize = sessionChunkType === 'string' ? (window.webrtcDetectedBrowser === 'firefox' ?
-      self._MOZ_CHUNK_FILE_SIZE : self._CHUNK_FILE_SIZE) : (window.webrtcDetectedBrowser === 'firefox' ?
+    var chunkSize = sessionChunkType === 'string' ? (AdapterJS.webrtcDetectedBrowser === 'firefox' ?
+      self._MOZ_CHUNK_FILE_SIZE : self._CHUNK_FILE_SIZE) : (AdapterJS.webrtcDetectedBrowser === 'firefox' ?
       self._MOZ_BINARY_FILE_SIZE : self._BINARY_FILE_SIZE);
 
     transferInfo.dataType = self.DATA_TRANSFER_SESSION_TYPE.BLOB;
@@ -1871,7 +1877,7 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
     }
 
     if (self._dataTransfers[transferId].enforceBSPeers.length > 0) {
-      var bsChunkSize = window.webrtcDetectedBrowser === 'firefox' ? self._MOZ_CHUNK_FILE_SIZE : self._CHUNK_FILE_SIZE;
+      var bsChunkSize = AdapterJS.webrtcDetectedBrowser === 'firefox' ? self._MOZ_CHUNK_FILE_SIZE : self._CHUNK_FILE_SIZE;
       var bsChunks = self._chunkBlobData(new Blob(chunks), bsChunkSize);
 
       self._dataTransfers[transferId].enforceBSInfo = {
@@ -2019,8 +2025,8 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       timeout: self._dataTransfers[transferId].timeout,
       isPrivate: self._dataTransfers[transferId].isPrivate,
       sender: self._user.sid,
-      agent: window.webrtcDetectedBrowser,
-      version: window.webrtcDetectedVersion,
+      agent: AdapterJS.webrtcDetectedBrowser,
+      version: AdapterJS.webrtcDetectedVersion,
       target: targetPeers ? targetPeers : peerId
     }, channelProp);
 
@@ -2142,7 +2148,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var protocolVer = (self._peerInformations[peerId].agent || {}).DTProtocolVersion || '0.1.0';
-  var requireInterop = self._isLowerThanVersion(protocolVer, '0.1.2');
+  var requireInterop = self._isLowerThanVersion(protocolVer, '0.1.2') || !self._enableSimultaneousTransfers;
 
   // Prevent DATA_URL (or "string" dataType transfers) with Android / iOS / C++ SDKs
   if (self._isLowerThanVersion(protocolVer, '0.1.2') && self._dataTransfers[transferId].sessionType === 'data' &&
@@ -2218,8 +2224,8 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
     channelProp = transferId;
     self._createDataChannel(peerId, transferId, self._dataTransfers[transferId].sessionType === 'data' ?
       self._CHUNK_DATAURL_SIZE : (self._dataTransfers[transferId].sessionChunkType === 'string' ?
-      (window.webrtcDetectedBrowser === 'firefox' ? 16384 : 65546) : // After conversion to base64 string computed size
-      (window.webrtcDetectedBrowser === 'firefox' ? self._MOZ_BINARY_FILE_SIZE : self._BINARY_FILE_SIZE)));
+      (AdapterJS.webrtcDetectedBrowser === 'firefox' ? 16384 : 65546) : // After conversion to base64 string computed size
+      (AdapterJS.webrtcDetectedBrowser === 'firefox' ? self._MOZ_BINARY_FILE_SIZE : self._BINARY_FILE_SIZE)));
   } else {
     self._dataChannels[peerId].main.transferId = transferId;
     sendWRQFn();
@@ -2583,7 +2589,7 @@ Skylink.prototype._processDataChannelData = function(rawData, peerId, channelNam
       }
 
       // Fallback for older IE versions
-      if (window.webrtcDetectedBrowser === 'IE') {
+      if (AdapterJS.webrtcDetectedBrowser === 'IE') {
         if (window.BlobBuilder) {
           var bb = new BlobBuilder();
           bb.append(rawData.constructor && rawData.constructor.name === 'ArrayBuffer' ?

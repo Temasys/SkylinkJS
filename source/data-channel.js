@@ -221,7 +221,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
   };
 
   // Fixes for Firefox bug (49 is working) -> https://bugzilla.mozilla.org/show_bug.cgi?id=1118398
-  if (window.webrtcDetectedBrowser === 'firefox') {
+  if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
     var hasTriggeredClose = false;
     var timeBlockAfterClosing = 0;
 

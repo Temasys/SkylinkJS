@@ -39,11 +39,9 @@ Skylink.prototype.HANDSHAKE_PROGRESS = {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
+Skylink.prototype._doOffer = function(targetMid, iceRestart) {
   var self = this;
   var pc = self._peerConnections[targetMid];
-
-  log.log([targetMid, null, null, 'Checking caller status'], peerBrowser);
 
   // Added checks to ensure that connection object is defined first
   if (!pc) {
@@ -60,32 +58,13 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     return;
   }
 
-  var doIceRestart = !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &&
-    iceRestart && self._enableIceRestart;
-  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid);
-
   var offerConstraints = {
-    offerToReceiveAudio: offerToReceiveAudio,
-    offerToReceiveVideo: offerToReceiveVideo,
-    iceRestart: doIceRestart,
+    offerToReceiveAudio: !(!self._sdpSettings.connection.audio && targetMid !== 'MCU') && self._getSDPCommonSupports(targetMid).video,
+    offerToReceiveVideo: !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPCommonSupports(targetMid).audio,
+    iceRestart: !!((self._peerInformations[targetMid] || {}).config || {}).enableIceRestart &&
+      iceRestart && self._enableIceRestart,
     voiceActivityDetection: self._voiceActivityDetection
   };
-
-  // Prevent undefined OS errors
-  peerBrowser.os = peerBrowser.os || '';
-
-  // Fallback to use mandatory constraints for plugin based browsers
-  if (['IE', 'safari'].indexOf(window.webrtcDetectedBrowser) > -1) {
-    offerConstraints = {
-      mandatory: {
-        OfferToReceiveAudio: offerToReceiveAudio,
-        OfferToReceiveVideo: offerToReceiveVideo,
-        iceRestart: doIceRestart,
-        voiceActivityDetection: self._voiceActivityDetection
-      }
-    };
-  }
 
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === 'MCU') {
@@ -110,17 +89,24 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, peerBrowser) {
     self._peerConnStatus[targetMid].sdpConstraints = offerConstraints;
   }
 
-  pc.createOffer(function(offer) {
+  var onSuccessCbFn = function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
-
     self._setLocalAndSendMessage(targetMid, offer);
+  };
 
-  }, function(error) {
+  var onErrorCbFn = function(error) {
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-
     log.error([targetMid, null, null, 'Failed creating an offer:'], error);
+  };
 
-  }, offerConstraints);
+  pc.createOffer(onSuccessCbFn, onErrorCbFn, AdapterJS.webrtcDetectedType === 'plugin' ? {
+    mandatory: {
+      OfferToReceiveAudio: offerConstraints.offerToReceiveAudio,
+      OfferToReceiveVideo: offerConstraints.offerToReceiveVideo,
+      iceRestart: offerConstraints.iceRestart,
+      voiceActivityDetection: offerConstraints.voiceActivityDetection
+    }
+  } : offerConstraints);
 };
 
 /**
@@ -152,32 +138,36 @@ Skylink.prototype._doAnswer = function(targetMid) {
     return;
   }
 
-  // Add stream only at offer/answer end
-  if ((!self._hasMCU || targetMid === 'MCU') && window.webrtcDetectedBrowser !== 'edge') {
-    self._addLocalMediaStreams(targetMid);
-  }
-
-  var offerToReceiveAudio = !(!self._sdpSettings.connection.audio && targetMid !== 'MCU');
-  var offerToReceiveVideo = !(!self._sdpSettings.connection.video && targetMid !== 'MCU') && self._getSDPEdgeVideoSupports(targetMid);
-  var answerConstraints = window.webrtcDetectedBrowser === 'edge' ? {
-    offerToReceiveVideo: offerToReceiveVideo,
-    offerToReceiveAudio: offerToReceiveAudio,
+  var answerConstraints = AdapterJS.webrtcDetectedBrowser === 'edge' ? {
+    offerToReceiveVideo: !(!self._sdpSettings.connection.audio && targetMid !== 'MCU') &&
+      self._getSDPCommonSupports(targetMid, pc.remoteDescription).video,
+    offerToReceiveAudio: !(!self._sdpSettings.connection.video && targetMid !== 'MCU') &&
+      self._getSDPCommonSupports(targetMid, pc.remoteDescription).audio,
     voiceActivityDetection: self._voiceActivityDetection
   } : undefined;
+
+  // Add stream only at offer/answer end
+  if (!self._hasMCU || targetMid === 'MCU') {
+    self._addLocalMediaStreams(targetMid);
+  }
 
   if (self._peerConnStatus[targetMid]) {
     self._peerConnStatus[targetMid].sdpConstraints = answerConstraints;
   }
 
-  // No ICE restart constraints for createAnswer as it fails in chrome 48
-  // { iceRestart: true }
-  pc.createAnswer(function(answer) {
+  var onSuccessCbFn = function(answer) {
     log.debug([targetMid, null, null, 'Created answer'], answer);
     self._setLocalAndSendMessage(targetMid, answer);
-  }, function(error) {
+  };
+
+  var onErrorCbFn = function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  }, answerConstraints);
+  };
+
+  // No ICE restart constraints for createAnswer as it fails in chrome 48
+  // { iceRestart: true }
+  pc.createAnswer(onSuccessCbFn, onErrorCbFn, answerConstraints);
 };
 
 /**
@@ -243,7 +233,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
 
-  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), function() {
+  var onSuccessCbFn = function() {
     log.debug([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Local session description has been set ->'], sessionDescription);
 
@@ -265,18 +255,21 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     self._sendChannelMessage({
       type: sessionDescription.type,
-      sdp: self._addSDPMediaStreamTrackIDs(targetMid, sessionDescription),
+      sdp: self._renderSDPOutput(targetMid, sessionDescription),
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
     });
+  };
 
-  }, function(error) {
+  var onErrorCbFn = function(error) {
     log.error([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local description failed setting ->'], error);
 
     pc.processingLocalSDP = false;
 
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
-  });
+  };
+
+  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), onSuccessCbFn, onErrorCbFn);
 };
