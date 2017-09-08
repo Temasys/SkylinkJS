@@ -6,7 +6,7 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 
 #### Supported Browsers
 
-> ##### Browsers in Beta (Edge/Bowser):
+> ##### Browsers in Beta (Edge/Bowser/Safari):
 > _Note that for beta supported browsers, some of the audio / video functionalities may not work well. Some older versions of Edge may require you to enable experimental support for H.264 video codec to interop with Chrome and Firefox browsers._
 
 | Features       | Chrome | Firefox | Opera | IE (plugin) | Safari (beta) | Safari (plugin) | Edge (beta) | Bowser (beta) | 
