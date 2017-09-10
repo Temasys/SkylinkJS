@@ -15,6 +15,8 @@
 !function(){if("performance"in window==0&&(window.performance={}),Date.now=Date.now||function(){return(new Date).getTime()},"now"in window.performance==0){var a=Date.now();performance.timing&&performance.timing.navigationStart&&(a=performance.timing.navigationStart),window.performance.now=function(){return Date.now()-a}}}();
 // BlobBuilder polyfill
 window.BlobBuilder = window.BlobBuilder || window.WebKitBlobBuilder || window.MozBlobBuilder || window.MSBlobBuilder;
+// Array.prototype.forEach polyfill - https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/forEach
+if(!Array.prototype.forEach){Array.prototype.forEach=function(callback){var T,k;if(this==null){throw new TypeError('this is null or not defined');} var O=Object(this);var len=O.length>>>0;if(typeof callback!=='function'){throw new TypeError(callback+' is not a function');} if(arguments.length>1){T=arguments[1];} k=0;while(k<len){var kValue;if(k in O){kValue=O[k];callback.call(T,kValue,k,O);} k++;}};}
 /* jshint ignore:end */
 
 /**
@@ -315,16 +317,6 @@ function Skylink() {
    * @since 0.6.18
    */
   this._peerCustomConfigs = {};
-
-  /**
-   * The flag if User is using plugin.
-   * @attribute _isUsingPlugin
-   * @type Boolean
-   * @private
-   * @for Skylink
-   * @since 0.6.16
-   */
-  this._isUsingPlugin = false;
 
   /**
    * Stores the option for the TURN protocols to use.
@@ -649,8 +641,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.6.16
    */
-  this._enableIceRestart = window.webrtcDetectedBrowser === 'firefox' ?
-    window.webrtcDetectedVersion >= 48 : true;
+  this._enableIceRestart = false;
 
   /**
    * Stores the flag if MCU environment is enabled.
@@ -1122,8 +1113,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.6.18
    */
-  this._binaryChunkType = window.webrtcDetectedBrowser === 'firefox' ?
-    this.DATA_TRANSFER_DATA_TYPE.BLOB : this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
+  this._binaryChunkType = this.DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
 
   /**
    * Stores the RTCPeerConnection configuration.
@@ -1176,7 +1166,7 @@ function Skylink() {
   this._peerConnStatus = {};
 
   /**
-   * Stores the egde 15.x use pre-1.0 legacy API.
+   * Stores the flag if Edge 15.x+ WebRTC legacy 1.0 implementation should be used.
    * @attribute _useEdgeWebRTC
    * @type Boolean
    * @private
@@ -1184,4 +1174,5 @@ function Skylink() {
    * @since 0.6.19
    */
   this._useEdgeWebRTC = false;
+  
 }

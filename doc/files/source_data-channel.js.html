@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.24</title>
+    <title>SkylinkJS 0.6.25</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.24</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.25</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -312,7 +312,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
   };
 
   // Fixes for Firefox bug (49 is working) -&gt; https://bugzilla.mozilla.org/show_bug.cgi?id=1118398
-  if (window.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+  if (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
     var hasTriggeredClose = false;
     var timeBlockAfterClosing = 0;
 

@@ -137,7 +137,7 @@ Skylink.prototype._blobToArrayBuffer = function(data, callback) {
   var fileReader = new FileReader();
   fileReader.onload = function() {
     // Load Blob as dataurl base64 string
-    if (self._isUsingPlugin) {
+    if (AdapterJS.webrtcDetectedType === 'plugin') {
       callback(new Int8Array(fileReader.result));
     } else {
       callback(fileReader.result);

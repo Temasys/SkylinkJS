@@ -1,5 +1,3 @@
-
-
 > Temasys Web SDK (formerly SkylinkJS) is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
 
 We've gone to great length to make this library work in as many browsers as possible. Temasys Web SDK is built on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://temasys.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
@@ -8,17 +6,18 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 
 #### Supported Browsers
 
-> ##### Browsers in Beta (Edge/Bowser):
-> _Please note that MCU functionality, data channel file transfer, and P2P messaging are not supported by the Temasys Web SDK in Edge browser due to current compatibility limitations. Older versions of Edge may require you to enable experimental support for H.264 to interop with Chrome and Firefox browsers. Edge support should be considered experimental in this release._
+> ##### Browsers in Beta (Edge/Bowser/Safari):
+> _Note that for beta supported browsers, some of the audio / video functionalities may not work well. Some older versions of Edge may require you to enable experimental support for H.264 video codec to interop with Chrome and Firefox browsers._
 
-| Features       | Chrome<br>`52`-`55`+ | Firefox<br>`48`-`50`+ | Opera<br>`38`-`42`+ | IE<br>`9`-`11`+     | Safari<br>`7`-`9`  | Edge<br>`14.14352` | Bowser<br>(iOS `9.x` and below) | 
-| -------------- | ---------- | ----------- | --------- | ---------- | ---------- | ---- | ----- |
-| **Platforms:** | Win/Mac/Ubuntu/Android | Win/Mac/Ubuntu/Android | Win/Mac/Ubuntu/Android | Win/Mac | Win | Mac | Win | iOS<br>(`9.x` and below) |
-| **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing)  | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing) | No | No |
-| **Video Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes [Temasys Plugin](http://temasys.io/plugin/)  | Yes (with H264 flag enabled) | Yes |
-| **Audio Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/) | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes (no MCU) | Yes (no MCU) |
-| **File Transfers** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | No | No |
-| **Chat Messaging** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes (Signaling only) | Yes (Signaling only) |
+| Features       | Chrome | Firefox | Opera | IE (plugin) | Safari (beta) | Safari (plugin) | Edge (beta) | Bowser (beta) | 
+| -------------- | ---------- | ----------- | --------- | ---------- | ------ | ---------- | ---- | ----- |
+| **Platforms:** | Win, Mac, Ubuntu, Android | Win, Mac, Ubuntu, Android | Win, Mac, Ubuntu, Android | Win | Mac | Mac | Win | iOS |
+| **Minimum Recommended Versions:** | `52` | `48` | `38` | `9` | `11` | `7` | `14.14352` | `0.6.1` |
+| **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing)  | - | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing) | No | No |
+| **Video Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes | Yes [Temasys Plugin](http://temasys.io/plugin/)  | Yes (with H264 flag enabled) | Yes |
+| **Audio Call**     | Yes        | Yes         |  Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/) | Yes | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes | Yes |
+| **File Transfers** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | No | No |
+| **Chat Messaging** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/) for P2P | Yes | Yes with [Temasys Plugin](http://temasys.io/plugin/) for P2P  | Yes (Signaling only) | Yes (Signaling only) |
 
 - (+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.
 - (*) Custom Branded Temasys WebRTC Plugin incorporates additional features not available in the free plugin.
@@ -51,7 +50,27 @@ You can raise tickets on [our support portal](http://support.temasys.io) or on [
 ##### Current versions and stability
 We recommend that you always use the latest versions of the Temasys Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: `0.6.24`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.24).
+[Latest version: `0.6.25`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.25).
+
+##### Setting AdapterJS flags
+If you require to set Temasys AdapterJS flags (e.g. forcing Temasys WebRTC plugin), we recommend the following method:
+
+```
+<script>
+  // Example options.
+  var AdapterJS = {
+    options: {
+      forceSafariPlugin: [Boolean],
+      hidePluginInstallPrompt: [Boolean],
+      getAllCams: [Boolean]
+    }
+  };
+</script>
+<! -- Now reference AdapterJS or SkylinkJS (complete version) -->
+<script src="https://cdn.temasys.io/skylink/skylinkjs/0.6.x/skylink.complete.js"></script>
+```
+
+For more details, please read the documentation in [Temasys AdapterJS](https://github.com/Temasys/AdapterJS).
 
 #### Noted Issues and Solutions
 ##### Installing `0.6.3` - `0.6.10` versions in NPM

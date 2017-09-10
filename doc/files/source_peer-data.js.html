@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.24</title>
+    <title>SkylinkJS 0.6.25</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.24</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.25</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -312,12 +312,6 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       }
     }
 
-    // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-    if (!this._getSDPEdgeVideoSupports(peerId)) {
-      peerInfo.settings.video = false;
-      peerInfo.mediaStatus.videoMuted = true;
-    }
-
   } else {
     peerInfo = {
       userData: clone(this._userData),
@@ -327,8 +321,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       },
       mediaStatus: clone(this._streamsMutedSettings),
       agent: {
-        name: window.webrtcDetectedBrowser,
-        version: window.webrtcDetectedVersion,
+        name: AdapterJS.webrtcDetectedBrowser,
+        version: AdapterJS.webrtcDetectedVersion,
         os: window.navigator.platform,
         pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
         SMProtocolVersion: this.SMProtocolVersion,
@@ -451,24 +445,18 @@ Skylink.prototype.getPeersStream = function() {
 
   for (var i = 0; i &lt; listOfPeers.length; i++) {
     var stream = null;
+    var streamId = null;
 
     if (this._peerConnections[listOfPeers[i]] &amp;&amp;
       this._peerConnections[listOfPeers[i]].remoteDescription &amp;&amp;
       this._peerConnections[listOfPeers[i]].remoteDescription.sdp &amp;&amp;
       (this._sdpSettings.direction.audio.receive || this._sdpSettings.direction.video.receive)) {
-      var streams = this._peerConnections[listOfPeers[i]].getRemoteStreams();
-
-      for (var j = 0; j &lt; streams.length; j++) {
-        if (this._peerConnections[listOfPeers[i]].remoteDescription.sdp.indexOf(
-          &#x27;msid:&#x27; + (streams[j].id || streams[j].label)) &gt; 0) {
-          stream = streams[j];
-          break;
-        }
-      }
+      stream = this._peerConnections[listOfPeers[i]].remoteStream;
+      streamId = stream &amp;&amp; (this._peerConnections[listOfPeers[i]].remoteStreamId || stream.id || stream.label);
     }
 
     listOfPeersStreams[listOfPeers[i]] = {
-      streamId: stream ? stream.id || stream.label || null : null,
+      streamId: streamId,
       stream: stream,
       isSelf: false
     };
@@ -692,33 +680,48 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
   
 
   if (self._peerConnections[usePeerId] &amp;&amp; self._peerConnections[usePeerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-    var streams = self._peerConnections[peerId].getLocalStreams();
+    var stream = self._peerConnections[peerId].localStream;
+    var streamId = self._peerConnections[peerId].localStreamId || (stream &amp;&amp; (stream.id || stream.label));
 
     customSettings.settings.data = self._enableDataChannel &amp;&amp; self._peerInformations[peerId].config.enableDataChannel;
 
-    for (var s = 0; s &lt; streams.length; s++) {
-      if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream &amp;&amp; (streams[s].id ||
-        streams[s].label) === (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
+    if (stream) {
+      if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream &amp;&amp;
+        streamId === (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
         customSettings.settings.audio = clone(self._streams.screenshare.settings.audio);
         customSettings.settings.video = clone(self._streams.screenshare.settings.video);
         customSettings.mediaStatus = clone(self._streamsMutedSettings);
-        break;
-      } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream &amp;&amp; (streams[s].id ||
-        streams[s].label) === (self._streams.userMedia.stream.id ||
-        self._streams.userMedia.stream.label)) {
+
+      } else if (self._streams.userMedia &amp;&amp; self._streams.userMedia.stream &amp;&amp;
+        streamId === (self._streams.userMedia.stream.id || self._streams.userMedia.stream.label)) {
         customSettings.settings.audio = clone(self._streams.userMedia.settings.audio);
         customSettings.settings.video = clone(self._streams.userMedia.settings.video);
         customSettings.mediaStatus = clone(self._streamsMutedSettings);
-        break;
-      } else if (window.webrtcDetectedBrowser === &#x27;edge&#x27;) {
-        customSettings.settings.audio = clone(self._streams.userMedia.settings.audio);
-        customSettings.settings.video = clone(self._streams.userMedia.settings.video);
-        customSettings.mediaStatus = clone(self._streamsMutedSettings);
-        if (streams[s].getAudioTracks().length === 0) {
+      }
+
+      if (typeof self._peerConnections[peerId].getSenders === &#x27;function&#x27; &amp;&amp;
+        !(self._useEdgeWebRTC &amp;&amp; window.msRTCPeerConnection)) {
+        var senders = self._peerConnections[peerId].getSenders();
+        var hasSendAudio = false;
+        var hasSendVideo = false;
+
+        for (var i = 0; i &lt; senders.length; i++) {
+          if (!(senders[i] &amp;&amp; senders[i].track &amp;&amp; senders[i].track.kind)) {
+            continue;
+          }
+          if (senders[i].track.kind === &#x27;audio&#x27;) {
+            hasSendAudio = true;
+          } else if (senders[i].track.kind === &#x27;video&#x27;) {
+            hasSendVideo = true;
+          }
+        }
+
+        if (!hasSendAudio) {
           customSettings.settings.audio = false;
           customSettings.mediaStatus.audioMuted = true;
         }
-        if (streams[s].getVideoTracks().length === 0) {
+
+        if (!hasSendVideo) {
           customSettings.settings.video = false;
           customSettings.mediaStatus.videoMuted = true;
         }
@@ -769,11 +772,6 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
     }
   }
 
-  // If there is Peer ID (not broadcast ENTER message) and Peer is Edge browser and User is not
-  if (customSettings.settings.video &amp;&amp; !self._getSDPEdgeVideoSupports(usePeerId)) {
-    customSettings.settings.video = false;
-    customSettings.mediaStatus.videoMuted = true;
-  }
   return customSettings;
 };
 
@@ -823,6 +821,16 @@ Skylink.prototype._getUserInfo = function(peerId) {
   if (userInfo.settings.bandwidth) {
     userInfo.settings.maxBandwidth = clone(userInfo.settings.bandwidth);
     delete userInfo.settings.bandwidth;
+  }
+
+  if (!this._getSDPCommonSupports(peerId).video) {
+    userInfo.settings.video = false;
+    userInfo.mediaStatus.videoMuted = true;
+  }
+
+  if (!this._getSDPCommonSupports(peerId).audio) {
+    userInfo.settings.audio = false;
+    userInfo.mediaStatus.audioMuted = true;
   }
 
   delete userInfo.agent;
