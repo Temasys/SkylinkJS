@@ -1174,5 +1174,18 @@ function Skylink() {
    * @since 0.6.19
    */
   this._useEdgeWebRTC = false;
+
+  /**
+   * Stores the flag to temporarily halt joinRoom() from processing.
+   * @attribute _joinRoomManager
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.19
+   */
+  this._joinRoomManager = {
+    timestamp: 0,
+    socketsFn: []
+  };
   
 }
