@@ -538,14 +538,20 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
 
   self._joinRoomManager.socketsFn = [];
 
-  if (self._inRoom) {
-    var stopStream = mediaOptions.audio === false && mediaOptions.video === false;
+  var stopStream = mediaOptions.audio === false && mediaOptions.video === false;  
 
-    self.leaveRoom(stopStream, function (lRError, lRSuccess) {
+  if (self._inRoom) {
+    self.leaveRoom({
+      userMedia: stopStream
+    }, function (lRError, lRSuccess) {
       log.debug([null, 'Room', previousRoom, 'Leave Room callback result ->'], [lRError, lRSuccess]);
       joinRoomFn();
     });
   } else {
+    if (stopStream) {
+      self.stopStream();
+    }
+
     joinRoomFn();
   }
 };
