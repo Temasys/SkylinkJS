@@ -88,6 +88,17 @@ var _eventsDocs = {
   socketError: [],
 
   /**
+   * Event triggered when socket connection latency to Signaling server has been updated.
+   * @event socketLatency
+   * @param {Number} pingTimestamp The datetime stamp in epoch miliseconds when "ping" packet is written out to Signaling server.
+   * @param {Number} pongTimestamp The datetime stamp in epoch miliseconds when "pong" packet is received from Signaling server.
+   * @param {Number} latency The latency in miliseconds.
+   * @for Skylink
+   * @since 0.6.26
+   */
+  socketLatency: [],
+
+  /**
    * Event triggered when <a href="#method_init"><code>init()</code> method</a> ready state changes.
    * @event readyStateChange
    * @param {Number} readyState The current <code>init()</code> ready state.

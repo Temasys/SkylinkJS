@@ -16,7 +16,24 @@ Demo.Downloads = {};
 var _peerId = null;
 var selectedPeers = [];
 
-Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);
+Demo.Skylink.setDebugMode()
+//Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);
+
+Demo.Skylink.on('socketError', function (a, b, c, d, e) {
+  console.error('socketError ->', [a, b, c, d, e]);
+});
+
+Demo.Skylink.on('channelRetry', function (fallbackType, attempts, session) {
+  console.log('channelRetry ->', 'fallbackType: ', fallbackType, ' attempts: ', attempts, ' session: ', session);
+});
+
+Demo.Skylink.on('channelOpen', function (a, b, c, d, e) {
+  console.warn('channelOpen ->', [a, b, c]);
+});
+
+Demo.Skylink.on('channelClose', function (a, b, c, d, e) {
+  console.warn('channelClose ->', [a, b, c, d, e]);
+});
 
 Demo.Methods.displayFileItemHTML = function(content) {
   return '<p>' + content.name + '<small style="float:right;color:#aaa;">' + content.size + ' B</small></p>' +

@@ -159,7 +159,6 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     log.debug([null, 'Socket', null, 'Broadcasting message to Peers']);
 
     this._sendChannelMessage({
-      cid: this._key,
       data: message,
       mid: this._user.sid,
       rid: this._room.id,

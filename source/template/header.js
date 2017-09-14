@@ -525,27 +525,64 @@ function Skylink() {
   this._socketSession = {};
 
   /**
+   * Stores the current socket connection fallback type.
+   * @attribute _socketSessionFallbackType
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 0.6.26
+   */
+  this._socketSessionFallbackType = null;
+
+  /**
    * Stores the queued socket messages.
    * This is to prevent too many sent over less than a second interval that might cause dropped messages
    *   or jams to the Signaling connection.
    * @attribute _socketMessageQueue
-   * @type Array
+   * @type JSON
    * @private
    * @for Skylink
    * @since 0.5.8
    */
-  this._socketMessageQueue = [];
+  this._socketMessageQueue = {
+    target: [],
+    broadcast: []
+  };
 
   /**
-   * Stores the <code>setTimeout</code> to sent queued socket messages.
+   * Stores the <code>setTimeout()</code> to sent queued socket messages.
    * @attribute _socketMessageTimeout
-   * @type Object
+   * @type Number
    * @private
    * @for Skylink
    * @since 0.5.8
    */
   this._socketMessageTimeout = null;
 
+  /**
+   * Stores the last send timestamp in epoch miliseconds.
+   * @attribute _socketMessageTimestamp
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.6.26
+   */
+  this._socketMessageTimestamp = 0;
+
+  /**
+   * Stores the socket connection latency from User to Signaling.
+   * @attribute _socketLatency
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.6.26
+   */
+  this._socketLatency = {
+    pingTimestamp: null,
+    pongTimestamp: null,
+    latency: 0
+  };
+  
   /**
    * Stores the list of socket ports to use to connect to the Signaling.
    * These ports are defined by default which is commonly used currently by the Signaling.
@@ -562,6 +599,17 @@ function Skylink() {
     'http:': [80, 3000],
     'https:': [443, 3443]
   };
+
+  /**
+   * Stores the list of socket trasports to use to connect to the Signaling.
+   * These transports are defined by default which is commonly used currently by the Signaling.
+   * @attribute _socketTransports
+   * @type Array
+   * @private
+   * @for Skylink
+   * @since 0.6.26
+   */
+  this._socketTransports = ['websocket', 'polling'];
 
   /**
    * Stores the flag that indicates if socket connection to the Signaling has opened.
@@ -602,6 +650,17 @@ function Skylink() {
    * @since 0.5.4
    */
   this._signalingServerPort = null;
+
+  /**
+   * Stores the Signaling server transport.
+   * @attribute _signalingServerTransport
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.6.26
+   */
+  // For IE < 9 that doesn't support WebSocket
+  this._signalingServerTransport = null;
 
   /**
    * Stores the Signaling socket connection object.
