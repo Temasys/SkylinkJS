@@ -970,7 +970,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   var self = this;
   log.log(['Server', null, message.type, 'User is now in the room and ' +
     'functionalities are now available. Config received:'], message.pc_config);
-  self._room.connection.peerConfig = self._setIceServers(message.pc_config);
+  self._room.connection.peerConfig = self._setIceServers((message.pc_config || {}).iceServers || []);
   self._inRoom = true;
   self._user.sid = message.sid;
   self._peerPriorityWeight = message.tieBreaker + (self._priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.AUTO ?

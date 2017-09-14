@@ -236,7 +236,7 @@ Skylink.prototype.generateUUID = function() {
  *   configuration is not honoured as Peers connected with MCU is similar as a forced TURN connection. The flags
  *   will act as if the value is <code>false</code> and ICE candidates will never be filtered regardless of the
  *   <code>options.filterCandidatesType</code> configuration.</small>
- * @param {Boolean} [options.usePublicSTUN=true] The flag if publicly available STUN ICE servers should
+ * @param {Boolean} [options.usePublicSTUN=false] The flag if publicly available STUN ICE servers should
  *   be used if <code>options.enableSTUNServer</code> is enabled.
  * @param {Boolean} [options.TURNServerTransport] <blockquote class="info">
  *   Note that configuring the protocol may not necessarily result in the desired network transports protocol
@@ -613,7 +613,7 @@ Skylink.prototype.init = function(options, callback) {
   var audioCodec = self.AUDIO_CODEC.AUTO;
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
-  var usePublicSTUN = true;
+  var usePublicSTUN = false;
   var disableVideoFecCodecs = false;
   var disableComfortNoiseCodec = false;
   var disableREMB = false;

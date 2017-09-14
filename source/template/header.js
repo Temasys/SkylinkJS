@@ -257,12 +257,12 @@ function Skylink() {
    * Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.
    * @attribute _usePublicSTUN
    * @type Boolean
-   * @default true
+   * @default false
    * @private
    * @for Skylink
    * @since 0.6.1
    */
-  this._usePublicSTUN = true;
+  this._usePublicSTUN = false;
 
   /**
    * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
