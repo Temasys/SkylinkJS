@@ -647,7 +647,17 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       self._onStreamAccessError(error, settings, false, false);
     };
 
-    navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+    try {
+      if (typeof (AdapterJS || {}).webRTCReady !== 'function') {
+        return onErrorCbFn(new Error('Failed to call getUserMedia() as AdapterJS is not yet loaded!'));
+      }
+
+      AdapterJS.webRTCReady(function () {
+        navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+      });
+    } catch (error) {
+      onErrorCbFn(error);
+    }
 
   }, 'getUserMedia', self._throttlingTimeouts.getUserMedia);
 };
@@ -1526,8 +1536,13 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         self._onStreamAccessError(error, settings, true, false);
       };
 
-      navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+      if (typeof (AdapterJS || {}).webRTCReady !== 'function') {
+        return onErrorCbFn(new Error('Failed to call getUserMedia() as AdapterJS is not yet loaded!'));
+      }
 
+      AdapterJS.webRTCReady(function () {
+        navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+      });
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
