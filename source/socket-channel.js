@@ -313,7 +313,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
     options.transports = ['xhr-polling', 'jsonp-polling', 'polling'];
   }
 
-  var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
+  var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort + '?rand=' + Date.now();
   var retries = 0;
 
   if (self._socketServer) {

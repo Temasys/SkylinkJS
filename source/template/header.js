@@ -621,7 +621,7 @@ function Skylink() {
    * @for Skylink
    * @since 0.5.4
    */
-  this._socketTimeout = 20000;
+  this._socketTimeout = 7000;
 
   /**
    * Stores the flag that indicates if XDomainRequest is used for IE 8/9.

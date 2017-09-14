@@ -325,10 +325,10 @@ Skylink.prototype.generateUUID = function() {
  *   <small>The value must not be <code>AUTO</code>.</small>
  *   [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.videoCodec.samplingRate] The video codec sampling to prefer to encode sending video data when available.
- * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
+ * @param {Number} [options.socketTimeout=7000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
  *   <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>
- *   <small>Note that it is recommended to use <code>12000</code> as the lowest timeout value if Peers are connecting
+ *   <small>Note that it is recommended to use <code>7000</code> as the lowest timeout value if Peers are connecting
  *   using Polling transports to prevent connection errors.</small>
  * @param {Boolean} [options.forceTURNSSL=false] <blockquote class="info">
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
@@ -608,7 +608,7 @@ Skylink.prototype.init = function(options, callback) {
   var TURNTransport = self.TURN_TRANSPORT.ANY;
   var audioFallback = false;
   var forceSSL = false;
-  var socketTimeout = 20000;
+  var socketTimeout = 7000;
   var forceTURNSSL = false;
   var audioCodec = self.AUDIO_CODEC.AUTO;
   var videoCodec = self.VIDEO_CODEC.AUTO;
@@ -1209,8 +1209,8 @@ Skylink.prototype._parseInfo = function(info) {
 
   // set the socket ports
   this._socketPorts = {
-    'http:': info.httpPortList,
-    'https:': info.httpsPortList
+    'http:': Array.isArray(info.httpPortList) && info.httpPortList.length > 0 ? info.httpPortList : [80, 3000],
+    'https:': Array.isArray(info.httpsPortList) && info.httpsPortList.length > 0 ? info.httpsPortList : [443, 3443]
   };
 
   // use default bandwidth and media resolution provided by server
