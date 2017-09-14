@@ -624,6 +624,16 @@ function Skylink() {
   this._socketTimeout = 7000;
 
   /**
+   * Stores the response timeout when establishing connection to the API (auth) server.
+   * @attribute _apiTimeout
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.6.26
+   */
+  this._apiTimeout = 4000;
+
+  /**
    * Stores the flag that indicates if XDomainRequest is used for IE 8/9.
    * @attribute _socketUseXDR
    * @type Boolean
@@ -659,12 +669,12 @@ function Skylink() {
    * HTTPS connections are enforced if App is accessing from HTTPS domains.
    * @attribute _forceSSL
    * @type Boolean
-   * @default false
+   * @default true
    * @private
    * @for Skylink
    * @since 0.5.4
    */
-  this._forceSSL = false;
+  this._forceSSL = true;
 
   /**
    * Stores the flag if TURNS connections should be enforced when connecting to
