@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.25</title>
+    <title>SkylinkJS 0.6.26</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.25</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1061,7 +1061,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   var self = this;
   log.log([&#x27;Server&#x27;, null, message.type, &#x27;User is now in the room and &#x27; +
     &#x27;functionalities are now available. Config received:&#x27;], message.pc_config);
-  self._room.connection.peerConfig = self._setIceServers(message.pc_config);
+  self._room.connection.peerConfig = self._setIceServers((message.pc_config || {}).iceServers || []);
   self._inRoom = true;
   self._user.sid = message.sid;
   self._peerPriorityWeight = message.tieBreaker + (self._priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.AUTO ?

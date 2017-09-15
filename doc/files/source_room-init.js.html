@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.25</title>
+    <title>SkylinkJS 0.6.26</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.25</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -177,6 +177,8 @@ Skylink.prototype.READY_STATE_CHANGE = {
  *   &lt;code&gt;roomServer&lt;/code&gt; configuration, contact our &lt;a href=&quot;http://support.temasys.io&quot;&gt;support portal&lt;/a&gt;.&lt;/small&gt;
  * @param {Number} XML_HTTP_REQUEST_ERROR      &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when requesting to Auth server has timed out.
+ * @param {Number} XML_HTTP_NO_REPONSE_ERROR      &lt;small&gt;Value &lt;code&gt;-2&lt;/code&gt;&lt;/small&gt;
+ *   The value of the failure code when response from Auth server is empty or timed out.   
  * @param {Number} NO_SOCKET_IO                &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when dependency &lt;a href=&quot;http://socket.io/download/&quot;&gt;Socket.IO client&lt;/a&gt; is not loaded.
  *   &lt;small&gt;To resolve this, ensure that the Socket.IO client dependency is loaded before the Skylink SDK.
@@ -220,6 +222,7 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   API_RETRIEVAL_FAILED: 4021,
   API_WRONG_ACCESS_DOMAIN: 5005,
   XML_HTTP_REQUEST_ERROR: -1,
+  XML_HTTP_NO_REPONSE_ERROR: -2,
   NO_SOCKET_IO: 1,
   NO_XMLHTTPREQUEST_SUPPORT: 2,
   NO_WEBRTC_SUPPORT: 3,
@@ -327,7 +330,7 @@ Skylink.prototype.generateUUID = function() {
  *   configuration is not honoured as Peers connected with MCU is similar as a forced TURN connection. The flags
  *   will act as if the value is &lt;code&gt;false&lt;/code&gt; and ICE candidates will never be filtered regardless of the
  *   &lt;code&gt;options.filterCandidatesType&lt;/code&gt; configuration.&lt;/small&gt;
- * @param {Boolean} [options.usePublicSTUN=true] The flag if publicly available STUN ICE servers should
+ * @param {Boolean} [options.usePublicSTUN=false] The flag if publicly available STUN ICE servers should
  *   be used if &lt;code&gt;options.enableSTUNServer&lt;/code&gt; is enabled.
  * @param {Boolean} [options.TURNServerTransport] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that configuring the protocol may not necessarily result in the desired network transports protocol
@@ -389,7 +392,7 @@ Skylink.prototype.generateUUID = function() {
  * @param {Boolean} [options.audioFallback=false] The flag if &lt;a href=&quot;#method_getUserMedia&quot;&gt;
  *   &lt;code&gt;getUserMedia()&lt;/code&gt; method&lt;/a&gt; should fallback to retrieve only audio Stream when
  *   retrieving audio and video Stream fails.
- * @param {Boolean} [options.forceSSL=false] The flag if HTTPS connections should be enforced
+ * @param {Boolean} [options.forceSSL=true] The flag if HTTPS connections should be enforced
  *   during request to Auth server and socket connections to Signaling server
  *   when accessing &lt;code&gt;window.location.protocol&lt;/code&gt; value is &lt;code&gt;&quot;http:&quot;&lt;/code&gt;.
  *   &lt;small&gt;By default, &lt;code&gt;&quot;https:&quot;&lt;/code&gt; protocol connections uses HTTPS connections.&lt;/small&gt;
@@ -416,11 +419,12 @@ Skylink.prototype.generateUUID = function() {
  *   &lt;small&gt;The value must not be &lt;code&gt;AUTO&lt;/code&gt;.&lt;/small&gt;
  *   [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.videoCodec.samplingRate] The video codec sampling to prefer to encode sending video data when available.
- * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
+ * @param {Number} [options.socketTimeout=7000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
  *   &lt;small&gt;Note that the mininum timeout value is &lt;code&gt;5000&lt;/code&gt;. If less, this value will be &lt;code&gt;5000&lt;/code&gt;.&lt;/small&gt;
- *   &lt;small&gt;Note that it is recommended to use &lt;code&gt;12000&lt;/code&gt; as the lowest timeout value if Peers are connecting
+ *   &lt;small&gt;Note that it is recommended to use &lt;code&gt;7000&lt;/code&gt; as the lowest timeout value if Peers are connecting
  *   using Polling transports to prevent connection errors.&lt;/small&gt;
+ * @param {Number} [options.apiTimeout=4000] The timeout to wait for response from Auth server.
  * @param {Boolean} [options.forceTURNSSL=false] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
  *   TURN ICE servers using port &lt;code&gt;443&lt;/code&gt; will be used instead.&lt;br&gt;
@@ -596,6 +600,7 @@ Skylink.prototype.generateUUID = function() {
  * @param {String|JSON} callback.success.audioCodec The configured value of the &lt;code&gt;options.audioCodec&lt;/code&gt;.
  * @param {String|JSON} callback.success.videoCodec The configured value of the &lt;code&gt;options.videoCodec&lt;/code&gt;.
  * @param {Number} callback.success.socketTimeout The configured value of the &lt;code&gt;options.socketTimeout&lt;/code&gt;.
+ * @param {Number} callback.success.apiTimeout The configured value of the &lt;code&gt;options.apiTimeout&lt;/code&gt;.
  * @param {Boolean} callback.success.forceTURNSSL The configured value of the &lt;code&gt;options.forceTURNSSL&lt;/code&gt;.
  * @param {Boolean} callback.success.forceTURN The configured value of the &lt;code&gt;options.forceTURN&lt;/code&gt;.
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the &lt;code&gt;options.usePublicSTUN&lt;/code&gt;.
@@ -698,13 +703,14 @@ Skylink.prototype.init = function(options, callback) {
   var enableTURNServer = true;
   var TURNTransport = self.TURN_TRANSPORT.ANY;
   var audioFallback = false;
-  var forceSSL = false;
-  var socketTimeout = 20000;
+  var forceSSL = true;
+  var socketTimeout = 7000;
+  var apiTimeout = 4000;
   var forceTURNSSL = false;
   var audioCodec = self.AUDIO_CODEC.AUTO;
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
-  var usePublicSTUN = true;
+  var usePublicSTUN = false;
   var disableVideoFecCodecs = false;
   var disableComfortNoiseCodec = false;
   var disableREMB = false;
@@ -767,11 +773,12 @@ Skylink.prototype.init = function(options, callback) {
     // set the force ssl always option
     forceSSL = (typeof options.forceSSL === &#x27;boolean&#x27;) ?
       options.forceSSL : forceSSL;
-    // set the socket timeout option
-    socketTimeout = (typeof options.socketTimeout === &#x27;number&#x27;) ?
-      options.socketTimeout : socketTimeout;
     // set the socket timeout option to be above 5000
-    socketTimeout = (socketTimeout &lt; 5000) ? 5000 : socketTimeout;
+    socketTimeout = (typeof options.socketTimeout === &#x27;number&#x27; &amp;&amp; socketTimeout &lt; 5000 &amp;&amp; socketTimeout &gt; 0) ?
+      options.socketTimeout : socketTimeout;
+    // set the api timeout option
+    apiTimeout = (typeof options.apiTimeout === &#x27;number&#x27; &amp;&amp; options.apiTimeout &gt; 0) ?
+      options.apiTimeout : apiTimeout;
     // set the force turn ssl always option
     forceTURNSSL = (typeof options.forceTURNSSL === &#x27;boolean&#x27;) ?
       options.forceTURNSSL : forceTURNSSL;
@@ -1048,6 +1055,7 @@ Skylink.prototype.init = function(options, callback) {
   self._audioFallback = audioFallback;
   self._forceSSL = forceSSL;
   self._socketTimeout = socketTimeout;
+  self._apiTimeout = apiTimeout;
   self._forceTURNSSL = forceTURNSSL;
   self._selectedAudioCodec = audioCodec;
   self._selectedVideoCodec = videoCodec;
@@ -1082,6 +1090,7 @@ Skylink.prototype.init = function(options, callback) {
     audioFallback: self._audioFallback,
     forceSSL: self._forceSSL,
     socketTimeout: self._socketTimeout,
+    apiTimeout: self._apiTimeout,
     forceTURNSSL: self._forceTURNSSL,
     audioCodec: self._selectedAudioCodec,
     videoCodec: self._selectedVideoCodec,
@@ -1130,6 +1139,7 @@ Skylink.prototype.init = function(options, callback) {
             audioFallback: self._audioFallback,
             forceSSL: self._forceSSL,
             socketTimeout: self._socketTimeout,
+            apiTimeout: self._apiTimeout,
             forceTURNSSL: self._forceTURNSSL,
             audioCodec: self._selectedAudioCodec,
             videoCodec: self._selectedVideoCodec,
@@ -1179,69 +1189,99 @@ Skylink.prototype.init = function(options, callback) {
  */
 Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   var self = this;
-  // XDomainRequest is supported in IE8 - 9
-  var useXDomainRequest = typeof window.XDomainRequest === &#x27;function&#x27; ||
-    typeof window.XDomainRequest === &#x27;object&#x27;;
+  var retries = 0;
 
-  self._socketUseXDR = useXDomainRequest;
-  var xhr;
-
-  // set force SSL option
+  // XDomainRequest is supported in IE8 - 9 for CORS connection.
+  self._socketUseXDR = typeof window.XDomainRequest === &#x27;function&#x27; || typeof window.XDomainRequest === &#x27;object&#x27;;
   url = (self._forceSSL) ? &#x27;https:&#x27; + url : url;
 
-  if (useXDomainRequest) {
-    log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Using XDomainRequest. &#x27; +
-      &#x27;XMLHttpRequest is now XDomainRequest&#x27;], {
-      agent: AdapterJS.webrtcDetectedBrowser,
-      version: AdapterJS.webrtcDetectedVersion
-    });
-    xhr = new XDomainRequest();
-    xhr.setContentType = function (contentType) {
-      xhr.contentType = contentType;
+  (function requestFn () {
+    var xhr = new XMLHttpRequest();
+    var completed = false;
+
+    if (self._socketUseXDR) {
+      log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Using XDomainRequest for CORS authentication.&#x27;]);
+      xhr = new XDomainRequest();
+      xhr.setContentType = function (contentType) {
+        xhr.contentType = contentType;
+      };
+    }
+
+    xhr.onload = function () {
+      if (completed) {
+        return;
+      }
+      completed = true;
+      var response = JSON.parse(xhr.responseText || xhr.response || &#x27;{}&#x27;);
+      var status = xhr.status || 200;
+      log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Received sessions parameters -&gt;&#x27;], response);
+      callback(status, response);
     };
-  } else {
-    log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Using XMLHttpRequest&#x27;], {
-      agent: AdapterJS.webrtcDetectedBrowser,
-      version: AdapterJS.webrtcDetectedVersion
-    });
-    xhr = new window.XMLHttpRequest();
-    xhr.setContentType = function (contentType) {
-      xhr.setRequestHeader(&#x27;Content-type&#x27;, contentType);
+  
+    xhr.onerror = function (error) {
+      if (completed) {
+        return;
+      }
+      completed = true;
+      log.error([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Failed retrieving information with status -&gt;&#x27;], xhr.status);
+
+      self._readyState = -1;
+      self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
+        status: xhr.status || null,
+        content: &#x27;Network error occurred. (Status: &#x27; + xhr.status + &#x27;)&#x27;,
+        errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_REQUEST_ERROR
+      }, self._selectedRoom);
     };
-  }
 
-  xhr.onload = function () {
-    var response = xhr.responseText || xhr.response;
-    var status = xhr.status || 200;
-    log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Received sessions parameters&#x27;],
-      JSON.parse(response || &#x27;{}&#x27;));
-    callback(status, JSON.parse(response || &#x27;{}&#x27;));
-  };
+    xhr.onprogress = function () {
+      log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Retrieving information and config from webserver -&gt;&#x27;], {
+        url: url,
+        params: params
+      });
+    };
 
-  xhr.onerror = function (error) {
-    log.error([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Failed retrieving information:&#x27;],
-      { status: xhr.status });
-    self._readyState = -1;
-    self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
-      status: xhr.status || null,
-      content: &#x27;Network error occurred. (Status: &#x27; + xhr.status + &#x27;)&#x27;,
-      errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_REQUEST_ERROR
-    }, self._selectedRoom);
-  };
+    try {
+      xhr.open(method, url, true);
+      if (params) {
+        xhr.setContentType(&#x27;application/json;charset=UTF-8&#x27;);
+        xhr.send(JSON.stringify(params));
+      } else {
+        xhr.send();
+      }
+    } catch (error) {
+      completed = true;
+      self._readyState = -1;
+      self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
+        status: xhr.status || null,
+        content: &#x27;Failed starting XHR process.&#x27;,
+        errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_REQUEST_ERROR
+      }, self._selectedRoom);
+      return;
+    }
 
-  xhr.onprogress = function () {
-    log.debug([null, &#x27;XMLHttpRequest&#x27;, method,
-      &#x27;Retrieving information and config from webserver. Url:&#x27;], url);
-    log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Provided parameters:&#x27;], params);
-  };
+    setTimeout(function () {
+      if (completed) {
+        return;
+      }
+      completed = true;
+      xhr.onload = null;
+      xhr.onerror = null;
+      xhr.onprogress = null;
 
-  xhr.open(method, url, true);
-  if (params) {
-    xhr.setContentType(&#x27;application/json;charset=UTF-8&#x27;);
-    xhr.send(JSON.stringify(params));
-  } else {
-    xhr.send();
-  }
+      if (retries &lt; 2) {
+        retries++;
+        requestFn();
+
+      } else {
+        self._readyState = -1;
+        self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
+          status: xhr.status || null,
+          content: &#x27;Response timed out from API server&#x27;,
+          errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_NO_REPONSE_ERROR
+        }, self._selectedRoom);
+      }
+    }, self._apiTimeout);
+  })();
 };
 
 /**
@@ -1300,8 +1340,8 @@ Skylink.prototype._parseInfo = function(info) {
 
   // set the socket ports
   this._socketPorts = {
-    &#x27;http:&#x27;: info.httpPortList,
-    &#x27;https:&#x27;: info.httpsPortList
+    &#x27;http:&#x27;: Array.isArray(info.httpPortList) &amp;&amp; info.httpPortList.length &gt; 0 ? info.httpPortList : [80, 3000],
+    &#x27;https:&#x27;: Array.isArray(info.httpsPortList) &amp;&amp; info.httpsPortList.length &gt; 0 ? info.httpsPortList : [443, 3443]
   };
 
   // use default bandwidth and media resolution provided by server
@@ -1466,6 +1506,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     audioFallback: self._audioFallback,
     forceSSL: self._forceSSL,
     socketTimeout: self._socketTimeout,
+    apiTimeout: self._apiTimeout,
     forceTURNSSL: self._forceTURNSSL,
     audioCodec: self._selectedAudioCodec,
     videoCodec: self._selectedVideoCodec,
