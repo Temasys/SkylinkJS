@@ -273,7 +273,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._createSocket = function (type) {
+Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   var self = this;
   var options = {
     forceNew: true,
@@ -313,7 +313,7 @@ Skylink.prototype._createSocket = function (type) {
     options.transports = ['xhr-polling', 'jsonp-polling', 'polling'];
   }
 
-  var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
+  var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort + '?rand=' + Date.now();
   var retries = 0;
 
   if (self._socketServer) {
@@ -346,8 +346,10 @@ Skylink.prototype._createSocket = function (type) {
 
   log.log('Opening channel with signaling server url:', clone(self._socketSession));
 
+  var socket = null;
+
   try {
-    self._socket = io.connect(url, options);
+    socket = io.connect(url, options);
   } catch (error){
     log.error('Failed creating socket connection object ->', error);
     if (fallbackType === self.SOCKET_FALLBACK.NON_FALLBACK) {
@@ -360,13 +362,13 @@ Skylink.prototype._createSocket = function (type) {
     return;
   }
 
-  self._socket.on('reconnect_attempt', function (attempt) {
+  socket.on('reconnect_attempt', function (attempt) {
     retries++;
     self._socketSession.attempts++;
     self._trigger('channelRetry', fallbackType, self._socketSession.attempts, clone(self._socketSession));
   });
 
-  self._socket.on('reconnect_failed', function () {
+  socket.on('reconnect_failed', function () {
     if (fallbackType === self.SOCKET_FALLBACK.NON_FALLBACK) {
       self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED, new Error('Failed connection with transport "' +
         type + '" and port ' + self._signalingServerPort + '.'), fallbackType, clone(self._socketSession));
@@ -376,14 +378,14 @@ Skylink.prototype._createSocket = function (type) {
     }
 
     if (self._socketSession.finalAttempts < 2) {
-      self._createSocket(type);
+      self._createSocket(type, joinRoomTimestamp);
     } else {
       self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED, new Error('Reconnection aborted as ' +
         'there no more available ports, transports and final attempts left.'), fallbackType, clone(self._socketSession));
     }
   });
 
-  self._socket.on('connect', function () {
+  socket.on('connect', function () {
     if (!self._channelOpen) {
       log.log([null, 'Socket', null, 'Channel opened']);
       self._channelOpen = true;
@@ -391,7 +393,7 @@ Skylink.prototype._createSocket = function (type) {
     }
   });
 
-  self._socket.on('reconnect', function () {
+  socket.on('reconnect', function () {
     if (!self._channelOpen) {
       log.log([null, 'Socket', null, 'Channel opened']);
       self._channelOpen = true;
@@ -399,7 +401,7 @@ Skylink.prototype._createSocket = function (type) {
     }
   });
 
-  self._socket.on('error', function(error) {
+  socket.on('error', function(error) {
     if (error ? error.message.indexOf('xhr poll error') > -1 : false) {
       log.error([null, 'Socket', null, 'XHR poll connection unstable. Disconnecting.. ->'], error);
       self._closeChannel();
@@ -409,7 +411,7 @@ Skylink.prototype._createSocket = function (type) {
     self._trigger('channelError', error, clone(self._socketSession));
   });
 
-  self._socket.on('disconnect', function() {
+  socket.on('disconnect', function() {
     if (self._channelOpen) {
       self._channelOpen = false;
       self._trigger('channelClose', clone(self._socketSession));
@@ -422,7 +424,7 @@ Skylink.prototype._createSocket = function (type) {
     }
   });
 
-  self._socket.on('message', function(messageStr) {
+  socket.on('message', function(messageStr) {
     var message = JSON.parse(messageStr);
 
     log.log([null, 'Socket', null, 'Received message ->'], message);
@@ -439,6 +441,13 @@ Skylink.prototype._createSocket = function (type) {
       self._trigger('channelMessage', message, clone(self._socketSession));
     }
   });
+
+  self._joinRoomManager.socketsFn.push(function (currentJoinRoomTimestamp) {
+    if (currentJoinRoomTimestamp !== joinRoomTimestamp) {
+      socket.disconnect();
+    }
+  });
+  self._socket = socket;
 };
 
 /**
@@ -449,7 +458,7 @@ Skylink.prototype._createSocket = function (type) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._openChannel = function() {
+Skylink.prototype._openChannel = function(joinRoomTimestamp) {
   var self = this;
   if (self._channelOpen) {
     log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
@@ -482,7 +491,7 @@ Skylink.prototype._openChannel = function() {
   self._signalingServerPort = null;
 
   // Begin with a websocket connection
-  self._createSocket(socketType);
+  self._createSocket(socketType, joinRoomTimestamp);
 };
 
 /**

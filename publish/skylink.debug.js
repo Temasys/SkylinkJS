@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.25 - Fri Sep 08 2017 17:34:14 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.26 - Fri Sep 15 2017 15:25:49 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -259,12 +259,12 @@ function Skylink() {
    * Stores the flag that indicates if public STUN ICE servers should be used when constructing Peer connection.
    * @attribute _usePublicSTUN
    * @type Boolean
-   * @default true
+   * @default false
    * @private
    * @for Skylink
    * @since 0.6.1
    */
-  this._usePublicSTUN = true;
+  this._usePublicSTUN = false;
 
   /**
    * Stores the global number of Peer connection retries that would increase the wait-for-response timeout
@@ -623,7 +623,17 @@ function Skylink() {
    * @for Skylink
    * @since 0.5.4
    */
-  this._socketTimeout = 20000;
+  this._socketTimeout = 7000;
+
+  /**
+   * Stores the response timeout when establishing connection to the API (auth) server.
+   * @attribute _apiTimeout
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.6.26
+   */
+  this._apiTimeout = 4000;
 
   /**
    * Stores the flag that indicates if XDomainRequest is used for IE 8/9.
@@ -661,12 +671,12 @@ function Skylink() {
    * HTTPS connections are enforced if App is accessing from HTTPS domains.
    * @attribute _forceSSL
    * @type Boolean
-   * @default false
+   * @default true
    * @private
    * @for Skylink
    * @since 0.5.4
    */
-  this._forceSSL = false;
+  this._forceSSL = true;
 
   /**
    * Stores the flag if TURNS connections should be enforced when connecting to
@@ -1176,6 +1186,19 @@ function Skylink() {
    * @since 0.6.19
    */
   this._useEdgeWebRTC = false;
+
+  /**
+   * Stores the flag to temporarily halt joinRoom() from processing.
+   * @attribute _joinRoomManager
+   * @type Boolean
+   * @private
+   * @for Skylink
+   * @since 0.6.19
+   */
+  this._joinRoomManager = {
+    timestamp: 0,
+    socketsFn: []
+  };
   
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
@@ -5176,214 +5199,119 @@ Skylink.prototype.TURN_TRANSPORT = {
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._setIceServers = function(givenConfig) {
+Skylink.prototype._setIceServers = function(passedIceServers) {
   var self = this;
-  var givenIceServers = clone(givenConfig.iceServers);
-  var iceServersList = {};
-  var newIceServers = [];
-  // TURN SSL config
-  var useTURNSSLProtocol = false;
-  var useTURNSSLPort = false;
+  var iceServerName = null;
+  var iceServerProtocol = 'stun';
+  var iceServerPorts = {
+    udp: [3478, 19302, 19303, 19304],
+    tcp: [80, 443],
+    both: [19305, 19306, 19307, 19308]
+  };
+  var iceServers = [
+    // Public
+    { urls: [] },
+    // Private
+    { urls: [] }
+  ];
 
+  // Note: Provide only 1 single TURN! turn:xxxx.io for custom TURN servers. Ignores custom ports.
+  passedIceServers.forEach(function (server) {
+    if (server.url.indexOf('stun:') === 0) {
+      if (server.url.indexOf('temasys') > 0) {
+        // server[?transport=xxx]
+        iceServerName = (server.url.split(':')[1] || '').split('?')[0] || null;
+      } else {
+        iceServers[0].urls.push(server.url);
+      }
 
+    } else if (server.url.indexOf('turn:') === 0 && server.url.indexOf('@') > 0 && server.credential &&
+      !(iceServers[1].username || iceServers[1].credential)) {
+      var parts = server.url.split(':');
+      var urlParts = (parts[1] || '').split('@');
 
-  if (self._forceTURNSSL) {
-    if (AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion < 53) {
-      useTURNSSLPort = true;
-    } else {
-      useTURNSSLProtocol = true;
+      // server[?transport=xxx]
+      iceServerName = (urlParts[1] || '').split('?')[0];
+      iceServers[1].username = urlParts[0];
+      iceServers[1].credential = server.credential;
+      iceServerProtocol = 'turn';
     }
-  }
-
-  log.log('TURN server connections SSL configuration', {
-    useTURNSSLProtocol: useTURNSSLProtocol,
-    useTURNSSLPort: useTURNSSLPort
   });
 
-  var pushIceServer = function (username, credential, url, index) {
-    if (!iceServersList[username]) {
-      iceServersList[username] = {};
-    }
-
-    if (!iceServersList[username][credential]) {
-      iceServersList[username][credential] = [];
-    }
-
-    if (iceServersList[username][credential].indexOf(url) === -1) {
-      if (typeof index === 'number') {
-        iceServersList[username][credential].splice(index, 0, url);
-      } else {
-        iceServersList[username][credential].push(url);
-      }
-    }
-  };
-
-  var i, serverItem;
-
-  for (i = 0; i < givenIceServers.length; i++) {
-    var server = givenIceServers[i];
-
-    if (typeof server.url !== 'string') {
-      log.warn('Ignoring ICE server provided at index ' + i, clone(server));
-      continue;
-    }
-
-    if (server.url.indexOf('stun') === 0) {
-      if (!self._enableSTUN) {
-        log.warn('Ignoring STUN server provided at index ' + i, clone(server));
-        continue;
-      }
-
-      if (!self._usePublicSTUN && server.url.indexOf('temasys') === -1) {
-        log.warn('Ignoring public STUN server provided at index ' + i, clone(server));
-        continue;
-      }
-
-    } else if (server.url.indexOf('turn') === 0) {
-      if (!self._enableTURN) {
-        log.warn('Ignoring TURN server provided at index ' + i, clone(server));
-        continue;
-      }
-
-      if (server.url.indexOf(':443') === -1 && useTURNSSLPort) {
-        log.log('Ignoring TURN Server (non-SSL port) provided at index ' + i, clone(server));
-        continue;
-      }
-
-      if (useTURNSSLProtocol) {
-        var parts = server.url.split(':');
-        parts[0] = 'turns';
-        server.url = parts.join(':');
-      }
-    }
-
-    // parse "@" settings
-    if (server.url.indexOf('@') > 0) {
-      var protocolParts = server.url.split(':');
-      var urlParts = protocolParts[1].split('@');
-      server.username = urlParts[0];
-      server.url = protocolParts[0] + ':' + urlParts[1];
-
-      // add the ICE server port
-      // Edge uses 3478 with ?transport=udp for now
-      if (AdapterJS.webrtcDetectedBrowser === 'edge') {
-        server.url += ':3478';
-      } else if (protocolParts[2]) {
-        server.url += ':' + protocolParts[2];
-      }
-    }
-
-    var username = typeof server.username === 'string' ? server.username : 'none';
-    var credential = typeof server.credential === 'string' ? server.credential : 'none';
-
-    if (server.url.indexOf('turn') === 0) {
-      if (self._TURNTransport === self.TURN_TRANSPORT.ANY) {
-        pushIceServer(username, credential, server.url);
-
-      } else {
-        var rawUrl = server.url;
-
-        if (rawUrl.indexOf('?transport=') > 0) {
-          rawUrl = rawUrl.split('?transport=')[0];
-        }
-
-        if (self._TURNTransport === self.TURN_TRANSPORT.NONE) {
-          pushIceServer(username, credential, rawUrl);
-        } else if (self._TURNTransport === self.TURN_TRANSPORT.UDP) {
-          pushIceServer(username, credential, rawUrl + '?transport=udp');
-        } else if (self._TURNTransport === self.TURN_TRANSPORT.TCP) {
-          pushIceServer(username, credential, rawUrl + '?transport=tcp');
-        } else if (self._TURNTransport === self.TURN_TRANSPORT.ALL) {
-          pushIceServer(username, credential, rawUrl + '?transport=tcp');
-          pushIceServer(username, credential, rawUrl + '?transport=udp');
-        } else {
-          log.warn('Invalid TURN transport option "' + self._TURNTransport +
-            '". Ignoring TURN server at index' + i, clone(server));
-          continue;
-        }
-      }
-    } else {
-      pushIceServer(username, credential, server.url);
-    }
-  }
-
-  // add mozilla STUN for firefox
-  if (self._enableSTUN && self._usePublicSTUN && AdapterJS.webrtcDetectedBrowser === 'firefox') {
-    pushIceServer('none', 'none', 'stun:stun.services.mozilla.com', 0);
-  }
-
-  var hasUrlsSupport = 
-    (AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion > 34) ||
-    (AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion > 38) ||
-    (AdapterJS.webrtcDetectedBrowser === 'opera' && AdapterJS.webrtcDetectedVersion > 31) ||
-    (['plugin', 'AppleWebKit'].indexOf(AdapterJS.webrtcDetectedType) > -1) ||
-    (['bowser', 'edge'].indexOf(AdapterJS.webrtcDetectedBrowser) > -1);
-
-  for (var serverUsername in iceServersList) {
-    if (iceServersList.hasOwnProperty(serverUsername)) {
-      for (var serverCred in iceServersList[serverUsername]) {
-        if (iceServersList[serverUsername].hasOwnProperty(serverCred)) {
-          if (hasUrlsSupport) {
-            var urlsItem = {
-              urls: iceServersList[serverUsername][serverCred]
-            };
-            if (serverUsername !== 'none') {
-              urlsItem.username = serverUsername;
-            }
-            if (serverCred !== 'none') {
-              urlsItem.credential = serverCred;
-            }
-
-            // Edge uses 1 url only for now
-            if (AdapterJS.webrtcDetectedBrowser === 'edge') {
-              if (urlsItem.username && urlsItem.credential) {
-                urlsItem.urls = [urlsItem.urls[0]];
-                newIceServers.push(urlsItem);
-                break;
-              }
-            } else {
-              newIceServers.push(urlsItem);
-            }
-          } else {
-            for (var j = 0; j < iceServersList[serverUsername][serverCred].length; j++) {
-              var urlItem = {
-                url: iceServersList[serverUsername][serverCred][j]
-              };
-              if (serverUsername !== 'none') {
-                urlItem.username = serverUsername;
-              }
-              if (serverCred !== 'none') {
-                urlItem.credential = serverCred;
-              }
-              newIceServers.push(urlItem);
-            }
-          }
-        }
-      }
-    }
-  }
-
   if (self._iceServer) {
-    var nUsername = null, nCredential = null;
-    for (i = 0; i < newIceServers.length; i++) {
-      if (newIceServers[i].username) {
-        nUsername = newIceServers[i].username;
-      }
-      if (newIceServers[i].credential) {
-        nCredential = newIceServers[i].credential;
-      }
-    }
-    newIceServers = [{
+    iceServers = [{
       urls: self._iceServer.urls,
-      username: nUsername,
-      credential: nCredential
+      username: iceServers[1].username,
+      credential: iceServers[1].credential
     }];
+
+  } else {
+    iceServerName = iceServerName || 'turn.temasys.io';
+
+    if (AdapterJS.webrtcDetectedBrowser === 'edge') {
+      iceServerPorts.udp = [3478];
+      iceServerPorts.tcp = [];
+      iceServerPorts.both = [];
+      iceServerProtocol = 'turn';
+
+    } else if (self._forceTURNSSL) {
+      if (AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion < 53) {
+        iceServerPorts.udp = [];
+        iceServerPorts.tcp = [443];
+        iceServerPorts.both = [];
+        iceServerProtocol = 'turn';
+
+      } else {
+        iceServerPorts.udp = [];
+        iceServerProtocol = 'turns';
+      }
+
+    // Limit the number of ports..
+    } else if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
+      iceServerPorts.udp = [3478];
+      iceServerPorts.tcp = [443, 80];
+    }
+
+    if (self._TURNTransport === self.TURN_TRANSPORT.UDP && !self._forceTURNSSL) {
+      iceServerPorts.udp = iceServerPorts.udp.concat(iceServerPorts.both);
+      iceServerPorts.tcp = [];
+      iceServerPorts.both = [];
+
+    } else if (self._TURNTransport === self.TURN_TRANSPORT.TCP) {
+      iceServerPorts.tcp = iceServerPorts.tcp.concat(iceServerPorts.both);
+      iceServerPorts.udp = [];
+      iceServerPorts.both = [];
+
+    } else if (self._TURNTransport === self.TURN_TRANSPORT.NONE) {
+      iceServerPorts.tcp = [];
+      iceServerPorts.udp = [];
+    }
+
+    if (iceServerProtocol === 'stun') {
+      iceServerPorts.tcp = [];
+    }
+
+    iceServerPorts.tcp.forEach(function (tcpPort) {
+      iceServers[1].urls.push(iceServerProtocol + ':' + iceServerName + ':' + tcpPort + '?transport=tcp');
+    });
+
+    iceServerPorts.udp.forEach(function (udpPort) {
+      iceServers[1].urls.push(iceServerProtocol + ':' + iceServerName + ':' + udpPort + '?transport=udp');
+    });
+
+    iceServerPorts.both.forEach(function (bothPort) {
+      iceServers[1].urls.push(iceServerProtocol + ':' + iceServerName + ':' + bothPort);
+    });
   }
 
-  log.log('Output iceServers configuration:', newIceServers);
+  if (!self._usePublicSTUN) {
+    iceServers.splice(0, 1);
+  }
+
+  log.log('Output iceServers configuration:', iceServers);  
 
   return {
-    iceServers: newIceServers
+    iceServers: iceServers
   };
 };
 Skylink.prototype.PEER_CONNECTION_STATE = {
@@ -9316,6 +9244,8 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
   var selectedRoom = self._defaultRoom;
   var previousRoom = self._selectedRoom;
   var mediaOptions = {};
+  var timestamp = (new Date()).getTime() + Math.floor(Math.random() * 10000);
+  self._joinRoomManager.timestamp = timestamp;
 
   if (room && typeof room === 'string') {
     selectedRoom = room;
@@ -9344,15 +9274,29 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
   };
 
   var joinRoomFn = function () {
+    // If room has been stopped but does not matches timestamp skip.
+    if (self._joinRoomManager.timestamp !== timestamp) {
+      resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+      return;
+    }
+
     self._initSelectedRoom(selectedRoom, function(initError, initSuccess) {
       if (initError) {
         resolveAsErrorFn(initError.error, self._selectedRoom, self._readyState);
         return;
+      // If details has been initialised but does not matches timestamp skip.
+      } else if (self._joinRoomManager.timestamp !== timestamp) {
+        resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+        return;
       }
 
-      self._waitForOpenChannel(mediaOptions, function (error, success) {
+      self._waitForOpenChannel(mediaOptions || {}, timestamp, function (error, success) {
         if (error) {
           resolveAsErrorFn(error, self._selectedRoom, self._readyState);
+          return;
+        // If socket and stream has been retrieved but socket connection does not matches timestamp skip.
+        } else if (self._joinRoomManager.timestamp !== timestamp) {
+          resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
           return;
         }
 
@@ -9438,14 +9382,26 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
     return;
   }
 
-  if (self._inRoom) {
-    var stopStream = mediaOptions.audio === false && mediaOptions.video === false;
+  self._joinRoomManager.socketsFn.forEach(function (fnItem) {
+    fnItem(timestamp);
+  });
 
-    self.leaveRoom(stopStream, function (lRError, lRSuccess) {
+  self._joinRoomManager.socketsFn = [];
+
+  var stopStream = mediaOptions.audio === false && mediaOptions.video === false;  
+
+  if (self._inRoom) {
+    self.leaveRoom({
+      userMedia: stopStream
+    }, function (lRError, lRSuccess) {
       log.debug([null, 'Room', previousRoom, 'Leave Room callback result ->'], [lRError, lRSuccess]);
       joinRoomFn();
     });
   } else {
+    if (stopStream) {
+      self.stopStream();
+    }
+
     joinRoomFn();
   }
 };
@@ -9641,7 +9597,7 @@ Skylink.prototype.unlockRoom = function() {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions, joinRoomTimestamp, callback) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
@@ -9858,7 +9814,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       self.once('socketError', onChannelError, function (errorState) {
         return errorState === self.SOCKET_ERROR.RECONNECTION_ABORTED;
       });
-      self._openChannel();
+      self._openChannel(joinRoomTimestamp);
     } else {
       onChannelOpen();
     }
@@ -9867,7 +9823,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
   });
 };
 
-Skylink.prototype.VERSION = '0.6.25';
+Skylink.prototype.VERSION = '0.6.26';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -9947,6 +9903,8 @@ Skylink.prototype.READY_STATE_CHANGE = {
  *   <code>roomServer</code> configuration, contact our <a href="http://support.temasys.io">support portal</a>.</small>
  * @param {Number} XML_HTTP_REQUEST_ERROR      <small>Value <code>-1</code></small>
  *   The value of the failure code when requesting to Auth server has timed out.
+ * @param {Number} XML_HTTP_NO_REPONSE_ERROR      <small>Value <code>-2</code></small>
+ *   The value of the failure code when response from Auth server is empty or timed out.   
  * @param {Number} NO_SOCKET_IO                <small>Value <code>1</code></small>
  *   The value of the failure code when dependency <a href="http://socket.io/download/">Socket.IO client</a> is not loaded.
  *   <small>To resolve this, ensure that the Socket.IO client dependency is loaded before the Skylink SDK.
@@ -9990,6 +9948,7 @@ Skylink.prototype.READY_STATE_CHANGE_ERROR = {
   API_RETRIEVAL_FAILED: 4021,
   API_WRONG_ACCESS_DOMAIN: 5005,
   XML_HTTP_REQUEST_ERROR: -1,
+  XML_HTTP_NO_REPONSE_ERROR: -2,
   NO_SOCKET_IO: 1,
   NO_XMLHTTPREQUEST_SUPPORT: 2,
   NO_WEBRTC_SUPPORT: 3,
@@ -10097,7 +10056,7 @@ Skylink.prototype.generateUUID = function() {
  *   configuration is not honoured as Peers connected with MCU is similar as a forced TURN connection. The flags
  *   will act as if the value is <code>false</code> and ICE candidates will never be filtered regardless of the
  *   <code>options.filterCandidatesType</code> configuration.</small>
- * @param {Boolean} [options.usePublicSTUN=true] The flag if publicly available STUN ICE servers should
+ * @param {Boolean} [options.usePublicSTUN=false] The flag if publicly available STUN ICE servers should
  *   be used if <code>options.enableSTUNServer</code> is enabled.
  * @param {Boolean} [options.TURNServerTransport] <blockquote class="info">
  *   Note that configuring the protocol may not necessarily result in the desired network transports protocol
@@ -10159,7 +10118,7 @@ Skylink.prototype.generateUUID = function() {
  * @param {Boolean} [options.audioFallback=false] The flag if <a href="#method_getUserMedia">
  *   <code>getUserMedia()</code> method</a> should fallback to retrieve only audio Stream when
  *   retrieving audio and video Stream fails.
- * @param {Boolean} [options.forceSSL=false] The flag if HTTPS connections should be enforced
+ * @param {Boolean} [options.forceSSL=true] The flag if HTTPS connections should be enforced
  *   during request to Auth server and socket connections to Signaling server
  *   when accessing <code>window.location.protocol</code> value is <code>"http:"</code>.
  *   <small>By default, <code>"https:"</code> protocol connections uses HTTPS connections.</small>
@@ -10186,11 +10145,12 @@ Skylink.prototype.generateUUID = function() {
  *   <small>The value must not be <code>AUTO</code>.</small>
  *   [Rel: Skylink.VIDEO_CODEC]
  * @param {Number} [options.videoCodec.samplingRate] The video codec sampling to prefer to encode sending video data when available.
- * @param {Number} [options.socketTimeout=20000] The timeout for each attempts for socket connection
+ * @param {Number} [options.socketTimeout=7000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
  *   <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>
- *   <small>Note that it is recommended to use <code>12000</code> as the lowest timeout value if Peers are connecting
+ *   <small>Note that it is recommended to use <code>7000</code> as the lowest timeout value if Peers are connecting
  *   using Polling transports to prevent connection errors.</small>
+ * @param {Number} [options.apiTimeout=4000] The timeout to wait for response from Auth server.
  * @param {Boolean} [options.forceTURNSSL=false] <blockquote class="info">
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
  *   TURN ICE servers using port <code>443</code> will be used instead.<br>
@@ -10366,6 +10326,7 @@ Skylink.prototype.generateUUID = function() {
  * @param {String|JSON} callback.success.audioCodec The configured value of the <code>options.audioCodec</code>.
  * @param {String|JSON} callback.success.videoCodec The configured value of the <code>options.videoCodec</code>.
  * @param {Number} callback.success.socketTimeout The configured value of the <code>options.socketTimeout</code>.
+ * @param {Number} callback.success.apiTimeout The configured value of the <code>options.apiTimeout</code>.
  * @param {Boolean} callback.success.forceTURNSSL The configured value of the <code>options.forceTURNSSL</code>.
  * @param {Boolean} callback.success.forceTURN The configured value of the <code>options.forceTURN</code>.
  * @param {Boolean} callback.success.usePublicSTUN The configured value of the <code>options.usePublicSTUN</code>.
@@ -10468,13 +10429,14 @@ Skylink.prototype.init = function(options, callback) {
   var enableTURNServer = true;
   var TURNTransport = self.TURN_TRANSPORT.ANY;
   var audioFallback = false;
-  var forceSSL = false;
-  var socketTimeout = 20000;
+  var forceSSL = true;
+  var socketTimeout = 7000;
+  var apiTimeout = 4000;
   var forceTURNSSL = false;
   var audioCodec = self.AUDIO_CODEC.AUTO;
   var videoCodec = self.VIDEO_CODEC.AUTO;
   var forceTURN = false;
-  var usePublicSTUN = true;
+  var usePublicSTUN = false;
   var disableVideoFecCodecs = false;
   var disableComfortNoiseCodec = false;
   var disableREMB = false;
@@ -10537,11 +10499,12 @@ Skylink.prototype.init = function(options, callback) {
     // set the force ssl always option
     forceSSL = (typeof options.forceSSL === 'boolean') ?
       options.forceSSL : forceSSL;
-    // set the socket timeout option
-    socketTimeout = (typeof options.socketTimeout === 'number') ?
-      options.socketTimeout : socketTimeout;
     // set the socket timeout option to be above 5000
-    socketTimeout = (socketTimeout < 5000) ? 5000 : socketTimeout;
+    socketTimeout = (typeof options.socketTimeout === 'number' && socketTimeout < 5000 && socketTimeout > 0) ?
+      options.socketTimeout : socketTimeout;
+    // set the api timeout option
+    apiTimeout = (typeof options.apiTimeout === 'number' && options.apiTimeout > 0) ?
+      options.apiTimeout : apiTimeout;
     // set the force turn ssl always option
     forceTURNSSL = (typeof options.forceTURNSSL === 'boolean') ?
       options.forceTURNSSL : forceTURNSSL;
@@ -10818,6 +10781,7 @@ Skylink.prototype.init = function(options, callback) {
   self._audioFallback = audioFallback;
   self._forceSSL = forceSSL;
   self._socketTimeout = socketTimeout;
+  self._apiTimeout = apiTimeout;
   self._forceTURNSSL = forceTURNSSL;
   self._selectedAudioCodec = audioCodec;
   self._selectedVideoCodec = videoCodec;
@@ -10852,6 +10816,7 @@ Skylink.prototype.init = function(options, callback) {
     audioFallback: self._audioFallback,
     forceSSL: self._forceSSL,
     socketTimeout: self._socketTimeout,
+    apiTimeout: self._apiTimeout,
     forceTURNSSL: self._forceTURNSSL,
     audioCodec: self._selectedAudioCodec,
     videoCodec: self._selectedVideoCodec,
@@ -10900,6 +10865,7 @@ Skylink.prototype.init = function(options, callback) {
             audioFallback: self._audioFallback,
             forceSSL: self._forceSSL,
             socketTimeout: self._socketTimeout,
+            apiTimeout: self._apiTimeout,
             forceTURNSSL: self._forceTURNSSL,
             audioCodec: self._selectedAudioCodec,
             videoCodec: self._selectedVideoCodec,
@@ -10949,69 +10915,99 @@ Skylink.prototype.init = function(options, callback) {
  */
 Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
   var self = this;
-  // XDomainRequest is supported in IE8 - 9
-  var useXDomainRequest = typeof window.XDomainRequest === 'function' ||
-    typeof window.XDomainRequest === 'object';
+  var retries = 0;
 
-  self._socketUseXDR = useXDomainRequest;
-  var xhr;
-
-  // set force SSL option
+  // XDomainRequest is supported in IE8 - 9 for CORS connection.
+  self._socketUseXDR = typeof window.XDomainRequest === 'function' || typeof window.XDomainRequest === 'object';
   url = (self._forceSSL) ? 'https:' + url : url;
 
-  if (useXDomainRequest) {
-    log.debug([null, 'XMLHttpRequest', method, 'Using XDomainRequest. ' +
-      'XMLHttpRequest is now XDomainRequest'], {
-      agent: AdapterJS.webrtcDetectedBrowser,
-      version: AdapterJS.webrtcDetectedVersion
-    });
-    xhr = new XDomainRequest();
-    xhr.setContentType = function (contentType) {
-      xhr.contentType = contentType;
+  (function requestFn () {
+    var xhr = new XMLHttpRequest();
+    var completed = false;
+
+    if (self._socketUseXDR) {
+      log.debug([null, 'XMLHttpRequest', method, 'Using XDomainRequest for CORS authentication.']);
+      xhr = new XDomainRequest();
+      xhr.setContentType = function (contentType) {
+        xhr.contentType = contentType;
+      };
+    }
+
+    xhr.onload = function () {
+      if (completed) {
+        return;
+      }
+      completed = true;
+      var response = JSON.parse(xhr.responseText || xhr.response || '{}');
+      var status = xhr.status || 200;
+      log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters ->'], response);
+      callback(status, response);
     };
-  } else {
-    log.debug([null, 'XMLHttpRequest', method, 'Using XMLHttpRequest'], {
-      agent: AdapterJS.webrtcDetectedBrowser,
-      version: AdapterJS.webrtcDetectedVersion
-    });
-    xhr = new window.XMLHttpRequest();
-    xhr.setContentType = function (contentType) {
-      xhr.setRequestHeader('Content-type', contentType);
+  
+    xhr.onerror = function (error) {
+      if (completed) {
+        return;
+      }
+      completed = true;
+      log.error([null, 'XMLHttpRequest', method, 'Failed retrieving information with status ->'], xhr.status);
+
+      self._readyState = -1;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+        status: xhr.status || null,
+        content: 'Network error occurred. (Status: ' + xhr.status + ')',
+        errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_REQUEST_ERROR
+      }, self._selectedRoom);
     };
-  }
 
-  xhr.onload = function () {
-    var response = xhr.responseText || xhr.response;
-    var status = xhr.status || 200;
-    log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters'],
-      JSON.parse(response || '{}'));
-    callback(status, JSON.parse(response || '{}'));
-  };
+    xhr.onprogress = function () {
+      log.debug([null, 'XMLHttpRequest', method, 'Retrieving information and config from webserver ->'], {
+        url: url,
+        params: params
+      });
+    };
 
-  xhr.onerror = function (error) {
-    log.error([null, 'XMLHttpRequest', method, 'Failed retrieving information:'],
-      { status: xhr.status });
-    self._readyState = -1;
-    self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: xhr.status || null,
-      content: 'Network error occurred. (Status: ' + xhr.status + ')',
-      errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_REQUEST_ERROR
-    }, self._selectedRoom);
-  };
+    try {
+      xhr.open(method, url, true);
+      if (params) {
+        xhr.setContentType('application/json;charset=UTF-8');
+        xhr.send(JSON.stringify(params));
+      } else {
+        xhr.send();
+      }
+    } catch (error) {
+      completed = true;
+      self._readyState = -1;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+        status: xhr.status || null,
+        content: 'Failed starting XHR process.',
+        errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_REQUEST_ERROR
+      }, self._selectedRoom);
+      return;
+    }
 
-  xhr.onprogress = function () {
-    log.debug([null, 'XMLHttpRequest', method,
-      'Retrieving information and config from webserver. Url:'], url);
-    log.debug([null, 'XMLHttpRequest', method, 'Provided parameters:'], params);
-  };
+    setTimeout(function () {
+      if (completed) {
+        return;
+      }
+      completed = true;
+      xhr.onload = null;
+      xhr.onerror = null;
+      xhr.onprogress = null;
 
-  xhr.open(method, url, true);
-  if (params) {
-    xhr.setContentType('application/json;charset=UTF-8');
-    xhr.send(JSON.stringify(params));
-  } else {
-    xhr.send();
-  }
+      if (retries < 2) {
+        retries++;
+        requestFn();
+
+      } else {
+        self._readyState = -1;
+        self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+          status: xhr.status || null,
+          content: 'Response timed out from API server',
+          errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_NO_REPONSE_ERROR
+        }, self._selectedRoom);
+      }
+    }, self._apiTimeout);
+  })();
 };
 
 /**
@@ -11070,8 +11066,8 @@ Skylink.prototype._parseInfo = function(info) {
 
   // set the socket ports
   this._socketPorts = {
-    'http:': info.httpPortList,
-    'https:': info.httpsPortList
+    'http:': Array.isArray(info.httpPortList) && info.httpPortList.length > 0 ? info.httpPortList : [80, 3000],
+    'https:': Array.isArray(info.httpsPortList) && info.httpsPortList.length > 0 ? info.httpsPortList : [443, 3443]
   };
 
   // use default bandwidth and media resolution provided by server
@@ -11236,6 +11232,7 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     audioFallback: self._audioFallback,
     forceSSL: self._forceSSL,
     socketTimeout: self._socketTimeout,
+    apiTimeout: self._apiTimeout,
     forceTURNSSL: self._forceTURNSSL,
     audioCodec: self._selectedAudioCodec,
     videoCodec: self._selectedVideoCodec,
@@ -11271,7 +11268,6 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
     }
   });
 };
-
 
 
 Skylink.prototype.LOG_LEVEL = {
@@ -11356,6 +11352,18 @@ var _enableDebugStack = false;
  * @since 0.5.5
  */
 var _enableDebugTrace = false;
+
+/**
+ * Stores the flag if logs should print timestamp.
+ * @attribute _printTimestamp
+ * @type Boolean
+ * @default false
+ * @private
+ * @scoped true
+ * @for Skylink
+ * @since 0.6.26
+ */
+var _printTimestamp = false;
 
 /**
  * Stores the logs used for SkylinkLogs object.
@@ -11507,7 +11515,8 @@ var SkylinkLogs = {
  * @since 0.5.5
  */
 var _logFn = function(logLevel, message, debugObject) {
-  var outputLog = _LOG_KEY;
+  var outputLog = '';
+  var datetime = (new Date());
 
   if (typeof message === 'object') {
     outputLog += (message[0]) ? ' [' + message[0] + '] -' : ' -';
@@ -11529,13 +11538,15 @@ var _logFn = function(logLevel, message, debugObject) {
 
   if (_enableDebugMode && _enableDebugStack) {
     // store the logs
-    var logItem = [(new Date()), _LOG_LEVELS[logLevel], outputLog];
+    var logItem = [datetime, _LOG_LEVELS[logLevel], outputLog];
 
     if (typeof debugObject !== 'undefined') {
       logItem.push(debugObject);
     }
     _storedLogs.push(logItem);
   }
+
+  outputLog = _LOG_KEY + (_printTimestamp ? ' :: ' + datetime.toISOString() : '') + outputLog;
 
   if (_logLevel >= logLevel) {
     // Fallback to log if failure
@@ -11653,6 +11664,7 @@ Skylink.prototype.setLogLevel = function(logLevel) {
  *   will fallback to use <code>console.log()</code> API.</small>
  * @param {Boolean} [options.storeLogs=false] The flag if SDK should store the <code>console</code> logs.
  *   <small>This is required to be enabled for <a href="#prop_SkylinkLogs"><code>SkylinkLogs</code> API</a>.</small>
+ * @param {Boolean} [options.printTimestamp=false] The flag if SDK should print the timestamp of the <code>console</code> logs.
  * @example
  *   // Example 1: Enable both options.storeLogs and options.trace
  *   skylinkDemo.setDebugMode(true);
@@ -11671,16 +11683,19 @@ Skylink.prototype.setDebugMode = function(isDebugMode) {
     _enableDebugMode = true;
     _enableDebugTrace = isDebugMode.trace === true;
     _enableDebugStack = isDebugMode.storeLogs === true;
+    _printTimestamp = isDebugMode.printTimestamp === true;
   // setDebugMode(true)
   } else if (isDebugMode === true) {
     _enableDebugMode = true;
     _enableDebugTrace = true;
     _enableDebugStack = true;
+    _printTimestamp = false;
   // setDebugMode()
   } else {
     _enableDebugMode = false;
     _enableDebugTrace = false;
     _enableDebugStack = false;
+    _printTimestamp = false;
   }
 };
 var _eventsDocs = {
@@ -13508,7 +13523,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
  * @for Skylink
  * @since 0.5.10
  */
-Skylink.prototype._createSocket = function (type) {
+Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   var self = this;
   var options = {
     forceNew: true,
@@ -13548,7 +13563,7 @@ Skylink.prototype._createSocket = function (type) {
     options.transports = ['xhr-polling', 'jsonp-polling', 'polling'];
   }
 
-  var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort;
+  var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort + '?rand=' + Date.now();
   var retries = 0;
 
   if (self._socketServer) {
@@ -13581,8 +13596,10 @@ Skylink.prototype._createSocket = function (type) {
 
   log.log('Opening channel with signaling server url:', clone(self._socketSession));
 
+  var socket = null;
+
   try {
-    self._socket = io.connect(url, options);
+    socket = io.connect(url, options);
   } catch (error){
     log.error('Failed creating socket connection object ->', error);
     if (fallbackType === self.SOCKET_FALLBACK.NON_FALLBACK) {
@@ -13595,13 +13612,13 @@ Skylink.prototype._createSocket = function (type) {
     return;
   }
 
-  self._socket.on('reconnect_attempt', function (attempt) {
+  socket.on('reconnect_attempt', function (attempt) {
     retries++;
     self._socketSession.attempts++;
     self._trigger('channelRetry', fallbackType, self._socketSession.attempts, clone(self._socketSession));
   });
 
-  self._socket.on('reconnect_failed', function () {
+  socket.on('reconnect_failed', function () {
     if (fallbackType === self.SOCKET_FALLBACK.NON_FALLBACK) {
       self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED, new Error('Failed connection with transport "' +
         type + '" and port ' + self._signalingServerPort + '.'), fallbackType, clone(self._socketSession));
@@ -13611,14 +13628,14 @@ Skylink.prototype._createSocket = function (type) {
     }
 
     if (self._socketSession.finalAttempts < 2) {
-      self._createSocket(type);
+      self._createSocket(type, joinRoomTimestamp);
     } else {
       self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_ABORTED, new Error('Reconnection aborted as ' +
         'there no more available ports, transports and final attempts left.'), fallbackType, clone(self._socketSession));
     }
   });
 
-  self._socket.on('connect', function () {
+  socket.on('connect', function () {
     if (!self._channelOpen) {
       log.log([null, 'Socket', null, 'Channel opened']);
       self._channelOpen = true;
@@ -13626,7 +13643,7 @@ Skylink.prototype._createSocket = function (type) {
     }
   });
 
-  self._socket.on('reconnect', function () {
+  socket.on('reconnect', function () {
     if (!self._channelOpen) {
       log.log([null, 'Socket', null, 'Channel opened']);
       self._channelOpen = true;
@@ -13634,7 +13651,7 @@ Skylink.prototype._createSocket = function (type) {
     }
   });
 
-  self._socket.on('error', function(error) {
+  socket.on('error', function(error) {
     if (error ? error.message.indexOf('xhr poll error') > -1 : false) {
       log.error([null, 'Socket', null, 'XHR poll connection unstable. Disconnecting.. ->'], error);
       self._closeChannel();
@@ -13644,7 +13661,7 @@ Skylink.prototype._createSocket = function (type) {
     self._trigger('channelError', error, clone(self._socketSession));
   });
 
-  self._socket.on('disconnect', function() {
+  socket.on('disconnect', function() {
     if (self._channelOpen) {
       self._channelOpen = false;
       self._trigger('channelClose', clone(self._socketSession));
@@ -13657,7 +13674,7 @@ Skylink.prototype._createSocket = function (type) {
     }
   });
 
-  self._socket.on('message', function(messageStr) {
+  socket.on('message', function(messageStr) {
     var message = JSON.parse(messageStr);
 
     log.log([null, 'Socket', null, 'Received message ->'], message);
@@ -13674,6 +13691,13 @@ Skylink.prototype._createSocket = function (type) {
       self._trigger('channelMessage', message, clone(self._socketSession));
     }
   });
+
+  self._joinRoomManager.socketsFn.push(function (currentJoinRoomTimestamp) {
+    if (currentJoinRoomTimestamp !== joinRoomTimestamp) {
+      socket.disconnect();
+    }
+  });
+  self._socket = socket;
 };
 
 /**
@@ -13684,7 +13708,7 @@ Skylink.prototype._createSocket = function (type) {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._openChannel = function() {
+Skylink.prototype._openChannel = function(joinRoomTimestamp) {
   var self = this;
   if (self._channelOpen) {
     log.error([null, 'Socket', null, 'Unable to instantiate a new channel connection ' +
@@ -13717,7 +13741,7 @@ Skylink.prototype._openChannel = function() {
   self._signalingServerPort = null;
 
   // Begin with a websocket connection
-  self._createSocket(socketType);
+  self._createSocket(socketType, joinRoomTimestamp);
 };
 
 /**
@@ -14719,7 +14743,7 @@ Skylink.prototype._inRoomHandler = function(message) {
   var self = this;
   log.log(['Server', null, message.type, 'User is now in the room and ' +
     'functionalities are now available. Config received:'], message.pc_config);
-  self._room.connection.peerConfig = self._setIceServers(message.pc_config);
+  self._room.connection.peerConfig = self._setIceServers((message.pc_config || {}).iceServers || []);
   self._inRoom = true;
   self._user.sid = message.sid;
   self._peerPriorityWeight = message.tieBreaker + (self._priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.AUTO ?
@@ -16227,7 +16251,17 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       self._onStreamAccessError(error, settings, false, false);
     };
 
-    navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+    try {
+      if (typeof (AdapterJS || {}).webRTCReady !== 'function') {
+        return onErrorCbFn(new Error('Failed to call getUserMedia() as AdapterJS is not yet loaded!'));
+      }
+
+      AdapterJS.webRTCReady(function () {
+        navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+      });
+    } catch (error) {
+      onErrorCbFn(error);
+    }
 
   }, 'getUserMedia', self._throttlingTimeouts.getUserMedia);
 };
@@ -17106,8 +17140,13 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         self._onStreamAccessError(error, settings, true, false);
       };
 
-      navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+      if (typeof (AdapterJS || {}).webRTCReady !== 'function') {
+        return onErrorCbFn(new Error('Failed to call getUserMedia() as AdapterJS is not yet loaded!'));
+      }
 
+      AdapterJS.webRTCReady(function () {
+        navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+      });
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }

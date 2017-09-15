@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.25</title>
+    <title>SkylinkJS 0.6.26</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.25</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -198,214 +198,119 @@ Skylink.prototype.TURN_TRANSPORT = {
  * @for Skylink
  * @since 0.5.4
  */
-Skylink.prototype._setIceServers = function(givenConfig) {
+Skylink.prototype._setIceServers = function(passedIceServers) {
   var self = this;
-  var givenIceServers = clone(givenConfig.iceServers);
-  var iceServersList = {};
-  var newIceServers = [];
-  // TURN SSL config
-  var useTURNSSLProtocol = false;
-  var useTURNSSLPort = false;
+  var iceServerName = null;
+  var iceServerProtocol = &#x27;stun&#x27;;
+  var iceServerPorts = {
+    udp: [3478, 19302, 19303, 19304],
+    tcp: [80, 443],
+    both: [19305, 19306, 19307, 19308]
+  };
+  var iceServers = [
+    // Public
+    { urls: [] },
+    // Private
+    { urls: [] }
+  ];
 
+  // Note: Provide only 1 single TURN! turn:xxxx.io for custom TURN servers. Ignores custom ports.
+  passedIceServers.forEach(function (server) {
+    if (server.url.indexOf(&#x27;stun:&#x27;) === 0) {
+      if (server.url.indexOf(&#x27;temasys&#x27;) &gt; 0) {
+        // server[?transport=xxx]
+        iceServerName = (server.url.split(&#x27;:&#x27;)[1] || &#x27;&#x27;).split(&#x27;?&#x27;)[0] || null;
+      } else {
+        iceServers[0].urls.push(server.url);
+      }
 
+    } else if (server.url.indexOf(&#x27;turn:&#x27;) === 0 &amp;&amp; server.url.indexOf(&#x27;@&#x27;) &gt; 0 &amp;&amp; server.credential &amp;&amp;
+      !(iceServers[1].username || iceServers[1].credential)) {
+      var parts = server.url.split(&#x27;:&#x27;);
+      var urlParts = (parts[1] || &#x27;&#x27;).split(&#x27;@&#x27;);
 
-  if (self._forceTURNSSL) {
-    if (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; AdapterJS.webrtcDetectedVersion &lt; 53) {
-      useTURNSSLPort = true;
-    } else {
-      useTURNSSLProtocol = true;
+      // server[?transport=xxx]
+      iceServerName = (urlParts[1] || &#x27;&#x27;).split(&#x27;?&#x27;)[0];
+      iceServers[1].username = urlParts[0];
+      iceServers[1].credential = server.credential;
+      iceServerProtocol = &#x27;turn&#x27;;
     }
-  }
-
-  log.log(&#x27;TURN server connections SSL configuration&#x27;, {
-    useTURNSSLProtocol: useTURNSSLProtocol,
-    useTURNSSLPort: useTURNSSLPort
   });
 
-  var pushIceServer = function (username, credential, url, index) {
-    if (!iceServersList[username]) {
-      iceServersList[username] = {};
-    }
-
-    if (!iceServersList[username][credential]) {
-      iceServersList[username][credential] = [];
-    }
-
-    if (iceServersList[username][credential].indexOf(url) === -1) {
-      if (typeof index === &#x27;number&#x27;) {
-        iceServersList[username][credential].splice(index, 0, url);
-      } else {
-        iceServersList[username][credential].push(url);
-      }
-    }
-  };
-
-  var i, serverItem;
-
-  for (i = 0; i &lt; givenIceServers.length; i++) {
-    var server = givenIceServers[i];
-
-    if (typeof server.url !== &#x27;string&#x27;) {
-      log.warn(&#x27;Ignoring ICE server provided at index &#x27; + i, clone(server));
-      continue;
-    }
-
-    if (server.url.indexOf(&#x27;stun&#x27;) === 0) {
-      if (!self._enableSTUN) {
-        log.warn(&#x27;Ignoring STUN server provided at index &#x27; + i, clone(server));
-        continue;
-      }
-
-      if (!self._usePublicSTUN &amp;&amp; server.url.indexOf(&#x27;temasys&#x27;) === -1) {
-        log.warn(&#x27;Ignoring public STUN server provided at index &#x27; + i, clone(server));
-        continue;
-      }
-
-    } else if (server.url.indexOf(&#x27;turn&#x27;) === 0) {
-      if (!self._enableTURN) {
-        log.warn(&#x27;Ignoring TURN server provided at index &#x27; + i, clone(server));
-        continue;
-      }
-
-      if (server.url.indexOf(&#x27;:443&#x27;) === -1 &amp;&amp; useTURNSSLPort) {
-        log.log(&#x27;Ignoring TURN Server (non-SSL port) provided at index &#x27; + i, clone(server));
-        continue;
-      }
-
-      if (useTURNSSLProtocol) {
-        var parts = server.url.split(&#x27;:&#x27;);
-        parts[0] = &#x27;turns&#x27;;
-        server.url = parts.join(&#x27;:&#x27;);
-      }
-    }
-
-    // parse &quot;@&quot; settings
-    if (server.url.indexOf(&#x27;@&#x27;) &gt; 0) {
-      var protocolParts = server.url.split(&#x27;:&#x27;);
-      var urlParts = protocolParts[1].split(&#x27;@&#x27;);
-      server.username = urlParts[0];
-      server.url = protocolParts[0] + &#x27;:&#x27; + urlParts[1];
-
-      // add the ICE server port
-      // Edge uses 3478 with ?transport=udp for now
-      if (AdapterJS.webrtcDetectedBrowser === &#x27;edge&#x27;) {
-        server.url += &#x27;:3478&#x27;;
-      } else if (protocolParts[2]) {
-        server.url += &#x27;:&#x27; + protocolParts[2];
-      }
-    }
-
-    var username = typeof server.username === &#x27;string&#x27; ? server.username : &#x27;none&#x27;;
-    var credential = typeof server.credential === &#x27;string&#x27; ? server.credential : &#x27;none&#x27;;
-
-    if (server.url.indexOf(&#x27;turn&#x27;) === 0) {
-      if (self._TURNTransport === self.TURN_TRANSPORT.ANY) {
-        pushIceServer(username, credential, server.url);
-
-      } else {
-        var rawUrl = server.url;
-
-        if (rawUrl.indexOf(&#x27;?transport=&#x27;) &gt; 0) {
-          rawUrl = rawUrl.split(&#x27;?transport=&#x27;)[0];
-        }
-
-        if (self._TURNTransport === self.TURN_TRANSPORT.NONE) {
-          pushIceServer(username, credential, rawUrl);
-        } else if (self._TURNTransport === self.TURN_TRANSPORT.UDP) {
-          pushIceServer(username, credential, rawUrl + &#x27;?transport=udp&#x27;);
-        } else if (self._TURNTransport === self.TURN_TRANSPORT.TCP) {
-          pushIceServer(username, credential, rawUrl + &#x27;?transport=tcp&#x27;);
-        } else if (self._TURNTransport === self.TURN_TRANSPORT.ALL) {
-          pushIceServer(username, credential, rawUrl + &#x27;?transport=tcp&#x27;);
-          pushIceServer(username, credential, rawUrl + &#x27;?transport=udp&#x27;);
-        } else {
-          log.warn(&#x27;Invalid TURN transport option &quot;&#x27; + self._TURNTransport +
-            &#x27;&quot;. Ignoring TURN server at index&#x27; + i, clone(server));
-          continue;
-        }
-      }
-    } else {
-      pushIceServer(username, credential, server.url);
-    }
-  }
-
-  // add mozilla STUN for firefox
-  if (self._enableSTUN &amp;&amp; self._usePublicSTUN &amp;&amp; AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
-    pushIceServer(&#x27;none&#x27;, &#x27;none&#x27;, &#x27;stun:stun.services.mozilla.com&#x27;, 0);
-  }
-
-  var hasUrlsSupport = 
-    (AdapterJS.webrtcDetectedBrowser === &#x27;chrome&#x27; &amp;&amp; AdapterJS.webrtcDetectedVersion &gt; 34) ||
-    (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; AdapterJS.webrtcDetectedVersion &gt; 38) ||
-    (AdapterJS.webrtcDetectedBrowser === &#x27;opera&#x27; &amp;&amp; AdapterJS.webrtcDetectedVersion &gt; 31) ||
-    ([&#x27;plugin&#x27;, &#x27;AppleWebKit&#x27;].indexOf(AdapterJS.webrtcDetectedType) &gt; -1) ||
-    ([&#x27;bowser&#x27;, &#x27;edge&#x27;].indexOf(AdapterJS.webrtcDetectedBrowser) &gt; -1);
-
-  for (var serverUsername in iceServersList) {
-    if (iceServersList.hasOwnProperty(serverUsername)) {
-      for (var serverCred in iceServersList[serverUsername]) {
-        if (iceServersList[serverUsername].hasOwnProperty(serverCred)) {
-          if (hasUrlsSupport) {
-            var urlsItem = {
-              urls: iceServersList[serverUsername][serverCred]
-            };
-            if (serverUsername !== &#x27;none&#x27;) {
-              urlsItem.username = serverUsername;
-            }
-            if (serverCred !== &#x27;none&#x27;) {
-              urlsItem.credential = serverCred;
-            }
-
-            // Edge uses 1 url only for now
-            if (AdapterJS.webrtcDetectedBrowser === &#x27;edge&#x27;) {
-              if (urlsItem.username &amp;&amp; urlsItem.credential) {
-                urlsItem.urls = [urlsItem.urls[0]];
-                newIceServers.push(urlsItem);
-                break;
-              }
-            } else {
-              newIceServers.push(urlsItem);
-            }
-          } else {
-            for (var j = 0; j &lt; iceServersList[serverUsername][serverCred].length; j++) {
-              var urlItem = {
-                url: iceServersList[serverUsername][serverCred][j]
-              };
-              if (serverUsername !== &#x27;none&#x27;) {
-                urlItem.username = serverUsername;
-              }
-              if (serverCred !== &#x27;none&#x27;) {
-                urlItem.credential = serverCred;
-              }
-              newIceServers.push(urlItem);
-            }
-          }
-        }
-      }
-    }
-  }
-
   if (self._iceServer) {
-    var nUsername = null, nCredential = null;
-    for (i = 0; i &lt; newIceServers.length; i++) {
-      if (newIceServers[i].username) {
-        nUsername = newIceServers[i].username;
-      }
-      if (newIceServers[i].credential) {
-        nCredential = newIceServers[i].credential;
-      }
-    }
-    newIceServers = [{
+    iceServers = [{
       urls: self._iceServer.urls,
-      username: nUsername,
-      credential: nCredential
+      username: iceServers[1].username,
+      credential: iceServers[1].credential
     }];
+
+  } else {
+    iceServerName = iceServerName || &#x27;turn.temasys.io&#x27;;
+
+    if (AdapterJS.webrtcDetectedBrowser === &#x27;edge&#x27;) {
+      iceServerPorts.udp = [3478];
+      iceServerPorts.tcp = [];
+      iceServerPorts.both = [];
+      iceServerProtocol = &#x27;turn&#x27;;
+
+    } else if (self._forceTURNSSL) {
+      if (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27; &amp;&amp; AdapterJS.webrtcDetectedVersion &lt; 53) {
+        iceServerPorts.udp = [];
+        iceServerPorts.tcp = [443];
+        iceServerPorts.both = [];
+        iceServerProtocol = &#x27;turn&#x27;;
+
+      } else {
+        iceServerPorts.udp = [];
+        iceServerProtocol = &#x27;turns&#x27;;
+      }
+
+    // Limit the number of ports..
+    } else if (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+      iceServerPorts.udp = [3478];
+      iceServerPorts.tcp = [443, 80];
+    }
+
+    if (self._TURNTransport === self.TURN_TRANSPORT.UDP &amp;&amp; !self._forceTURNSSL) {
+      iceServerPorts.udp = iceServerPorts.udp.concat(iceServerPorts.both);
+      iceServerPorts.tcp = [];
+      iceServerPorts.both = [];
+
+    } else if (self._TURNTransport === self.TURN_TRANSPORT.TCP) {
+      iceServerPorts.tcp = iceServerPorts.tcp.concat(iceServerPorts.both);
+      iceServerPorts.udp = [];
+      iceServerPorts.both = [];
+
+    } else if (self._TURNTransport === self.TURN_TRANSPORT.NONE) {
+      iceServerPorts.tcp = [];
+      iceServerPorts.udp = [];
+    }
+
+    if (iceServerProtocol === &#x27;stun&#x27;) {
+      iceServerPorts.tcp = [];
+    }
+
+    iceServerPorts.tcp.forEach(function (tcpPort) {
+      iceServers[1].urls.push(iceServerProtocol + &#x27;:&#x27; + iceServerName + &#x27;:&#x27; + tcpPort + &#x27;?transport=tcp&#x27;);
+    });
+
+    iceServerPorts.udp.forEach(function (udpPort) {
+      iceServers[1].urls.push(iceServerProtocol + &#x27;:&#x27; + iceServerName + &#x27;:&#x27; + udpPort + &#x27;?transport=udp&#x27;);
+    });
+
+    iceServerPorts.both.forEach(function (bothPort) {
+      iceServers[1].urls.push(iceServerProtocol + &#x27;:&#x27; + iceServerName + &#x27;:&#x27; + bothPort);
+    });
   }
 
-  log.log(&#x27;Output iceServers configuration:&#x27;, newIceServers);
+  if (!self._usePublicSTUN) {
+    iceServers.splice(0, 1);
+  }
+
+  log.log(&#x27;Output iceServers configuration:&#x27;, iceServers);  
 
   return {
-    iceServers: newIceServers
+    iceServers: iceServers
   };
 };
     </pre>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.25</title>
+    <title>SkylinkJS 0.6.26</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.25</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -485,6 +485,8 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
   var selectedRoom = self._defaultRoom;
   var previousRoom = self._selectedRoom;
   var mediaOptions = {};
+  var timestamp = (new Date()).getTime() + Math.floor(Math.random() * 10000);
+  self._joinRoomManager.timestamp = timestamp;
 
   if (room &amp;&amp; typeof room === &#x27;string&#x27;) {
     selectedRoom = room;
@@ -513,15 +515,29 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
   };
 
   var joinRoomFn = function () {
+    // If room has been stopped but does not matches timestamp skip.
+    if (self._joinRoomManager.timestamp !== timestamp) {
+      resolveAsErrorFn(&#x27;joinRoom() process did not complete&#x27;, selectedRoom);
+      return;
+    }
+
     self._initSelectedRoom(selectedRoom, function(initError, initSuccess) {
       if (initError) {
         resolveAsErrorFn(initError.error, self._selectedRoom, self._readyState);
         return;
+      // If details has been initialised but does not matches timestamp skip.
+      } else if (self._joinRoomManager.timestamp !== timestamp) {
+        resolveAsErrorFn(&#x27;joinRoom() process did not complete&#x27;, selectedRoom);
+        return;
       }
 
-      self._waitForOpenChannel(mediaOptions, function (error, success) {
+      self._waitForOpenChannel(mediaOptions || {}, timestamp, function (error, success) {
         if (error) {
           resolveAsErrorFn(error, self._selectedRoom, self._readyState);
+          return;
+        // If socket and stream has been retrieved but socket connection does not matches timestamp skip.
+        } else if (self._joinRoomManager.timestamp !== timestamp) {
+          resolveAsErrorFn(&#x27;joinRoom() process did not complete&#x27;, selectedRoom);
           return;
         }
 
@@ -607,14 +623,26 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
     return;
   }
 
-  if (self._inRoom) {
-    var stopStream = mediaOptions.audio === false &amp;&amp; mediaOptions.video === false;
+  self._joinRoomManager.socketsFn.forEach(function (fnItem) {
+    fnItem(timestamp);
+  });
 
-    self.leaveRoom(stopStream, function (lRError, lRSuccess) {
+  self._joinRoomManager.socketsFn = [];
+
+  var stopStream = mediaOptions.audio === false &amp;&amp; mediaOptions.video === false;  
+
+  if (self._inRoom) {
+    self.leaveRoom({
+      userMedia: stopStream
+    }, function (lRError, lRSuccess) {
       log.debug([null, &#x27;Room&#x27;, previousRoom, &#x27;Leave Room callback result -&gt;&#x27;], [lRError, lRSuccess]);
       joinRoomFn();
     });
   } else {
+    if (stopStream) {
+      self.stopStream();
+    }
+
     joinRoomFn();
   }
 };
@@ -810,7 +838,7 @@ Skylink.prototype.unlockRoom = function() {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions, joinRoomTimestamp, callback) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
@@ -1027,7 +1055,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       self.once(&#x27;socketError&#x27;, onChannelError, function (errorState) {
         return errorState === self.SOCKET_ERROR.RECONNECTION_ABORTED;
       });
-      self._openChannel();
+      self._openChannel(joinRoomTimestamp);
     } else {
       onChannelOpen();
     }

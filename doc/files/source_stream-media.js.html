@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.25</title>
+    <title>SkylinkJS 0.6.26</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.25</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -738,7 +738,17 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       self._onStreamAccessError(error, settings, false, false);
     };
 
-    navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+    try {
+      if (typeof (AdapterJS || {}).webRTCReady !== &#x27;function&#x27;) {
+        return onErrorCbFn(new Error(&#x27;Failed to call getUserMedia() as AdapterJS is not yet loaded!&#x27;));
+      }
+
+      AdapterJS.webRTCReady(function () {
+        navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+      });
+    } catch (error) {
+      onErrorCbFn(error);
+    }
 
   }, &#x27;getUserMedia&#x27;, self._throttlingTimeouts.getUserMedia);
 };
@@ -1617,8 +1627,13 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         self._onStreamAccessError(error, settings, true, false);
       };
 
-      navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+      if (typeof (AdapterJS || {}).webRTCReady !== &#x27;function&#x27;) {
+        return onErrorCbFn(new Error(&#x27;Failed to call getUserMedia() as AdapterJS is not yet loaded!&#x27;));
+      }
 
+      AdapterJS.webRTCReady(function () {
+        navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+      });
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }

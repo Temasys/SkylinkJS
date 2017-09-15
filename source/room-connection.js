@@ -394,6 +394,8 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
   var selectedRoom = self._defaultRoom;
   var previousRoom = self._selectedRoom;
   var mediaOptions = {};
+  var timestamp = (new Date()).getTime() + Math.floor(Math.random() * 10000);
+  self._joinRoomManager.timestamp = timestamp;
 
   if (room && typeof room === 'string') {
     selectedRoom = room;
@@ -422,15 +424,29 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
   };
 
   var joinRoomFn = function () {
+    // If room has been stopped but does not matches timestamp skip.
+    if (self._joinRoomManager.timestamp !== timestamp) {
+      resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+      return;
+    }
+
     self._initSelectedRoom(selectedRoom, function(initError, initSuccess) {
       if (initError) {
         resolveAsErrorFn(initError.error, self._selectedRoom, self._readyState);
         return;
+      // If details has been initialised but does not matches timestamp skip.
+      } else if (self._joinRoomManager.timestamp !== timestamp) {
+        resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+        return;
       }
 
-      self._waitForOpenChannel(mediaOptions, function (error, success) {
+      self._waitForOpenChannel(mediaOptions || {}, timestamp, function (error, success) {
         if (error) {
           resolveAsErrorFn(error, self._selectedRoom, self._readyState);
+          return;
+        // If socket and stream has been retrieved but socket connection does not matches timestamp skip.
+        } else if (self._joinRoomManager.timestamp !== timestamp) {
+          resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
           return;
         }
 
@@ -516,14 +532,26 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
     return;
   }
 
-  if (self._inRoom) {
-    var stopStream = mediaOptions.audio === false && mediaOptions.video === false;
+  self._joinRoomManager.socketsFn.forEach(function (fnItem) {
+    fnItem(timestamp);
+  });
 
-    self.leaveRoom(stopStream, function (lRError, lRSuccess) {
+  self._joinRoomManager.socketsFn = [];
+
+  var stopStream = mediaOptions.audio === false && mediaOptions.video === false;  
+
+  if (self._inRoom) {
+    self.leaveRoom({
+      userMedia: stopStream
+    }, function (lRError, lRSuccess) {
       log.debug([null, 'Room', previousRoom, 'Leave Room callback result ->'], [lRError, lRSuccess]);
       joinRoomFn();
     });
   } else {
+    if (stopStream) {
+      self.stopStream();
+    }
+
     joinRoomFn();
   }
 };
@@ -719,7 +747,7 @@ Skylink.prototype.unlockRoom = function() {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
+Skylink.prototype._waitForOpenChannel = function(mediaOptions, joinRoomTimestamp, callback) {
   var self = this;
   // when reopening room, it should stay as 0
   self._socketCurrentReconnectionAttempt = 0;
@@ -936,7 +964,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, callback) {
       self.once('socketError', onChannelError, function (errorState) {
         return errorState === self.SOCKET_ERROR.RECONNECTION_ABORTED;
       });
-      self._openChannel();
+      self._openChannel(joinRoomTimestamp);
     } else {
       onChannelOpen();
     }

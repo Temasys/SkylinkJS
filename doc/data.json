@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.25",
+        "version": "0.6.26",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -402,7 +402,7 @@
             "itemtype": "attribute",
             "name": "_usePublicSTUN",
             "type": "Boolean",
-            "default": "true",
+            "default": "false",
             "access": "private",
             "tagname": "",
             "since": "0.6.1",
@@ -900,6 +900,18 @@
         {
             "file": "source/template/header.js",
             "line": 626,
+            "description": "Stores the response timeout when establishing connection to the API (auth) server.",
+            "itemtype": "attribute",
+            "name": "_apiTimeout",
+            "type": "Number",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.26",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 636,
             "description": "Stores the flag that indicates if XDomainRequest is used for IE 8/9.",
             "itemtype": "attribute",
             "name": "_socketUseXDR",
@@ -911,7 +923,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 636,
+            "line": 646,
             "description": "Stores the value if ICE restart is supported.",
             "itemtype": "attribute",
             "name": "_enableIceRestart",
@@ -923,7 +935,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 646,
+            "line": 656,
             "description": "Stores the flag if MCU environment is enabled.",
             "itemtype": "attribute",
             "name": "_hasMCU",
@@ -935,12 +947,12 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 656,
+            "line": 666,
             "description": "Stores the flag if HTTPS connections should be enforced when connecting to\n  the API or Signaling server if App is accessing from HTTP domain.\nHTTPS connections are enforced if App is accessing from HTTPS domains.",
             "itemtype": "attribute",
             "name": "_forceSSL",
             "type": "Boolean",
-            "default": "false",
+            "default": "true",
             "access": "private",
             "tagname": "",
             "since": "0.5.4",
@@ -948,7 +960,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 669,
+            "line": 679,
             "description": "Stores the flag if TURNS connections should be enforced when connecting to\n  the TURN server if App is accessing from HTTP domain.\nTURNS connections are enforced if App is accessing from HTTPS domains.",
             "itemtype": "attribute",
             "name": "_forceTURNSSL",
@@ -961,7 +973,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 682,
+            "line": 692,
             "description": "Stores the flag if TURN connections should be enforced when connecting to Peers.\nThis filters all non \"relay\" ICE candidates to enforce connections via the TURN server.",
             "itemtype": "attribute",
             "name": "_forceTURN",
@@ -974,7 +986,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 694,
+            "line": 704,
             "description": "Stores the construct API REST path to obtain Room credentials.",
             "itemtype": "attribute",
             "name": "_path",
@@ -986,7 +998,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 704,
+            "line": 714,
             "description": "Stores the API server url.",
             "itemtype": "attribute",
             "name": "_roomServer",
@@ -998,7 +1010,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 714,
+            "line": 724,
             "description": "Stores the App Key configured in <code>init()</code>.",
             "itemtype": "attribute",
             "name": "_appKey",
@@ -1010,7 +1022,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 724,
+            "line": 734,
             "description": "Stores the default Room name to connect to when <code>joinRoom()</code> does not provide a Room name.",
             "itemtype": "attribute",
             "name": "_defaultRoom",
@@ -1022,7 +1034,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 734,
+            "line": 744,
             "description": "Stores the <code>init()</code> credentials starting DateTime stamp in ISO 8601.",
             "itemtype": "attribute",
             "name": "_roomStart",
@@ -1034,7 +1046,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 744,
+            "line": 754,
             "description": "Stores the <code>init()</code> credentials duration counted in hours.",
             "itemtype": "attribute",
             "name": "_roomDuration",
@@ -1046,7 +1058,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 754,
+            "line": 764,
             "description": "Stores the <code>init()</code> generated credentials string.",
             "itemtype": "attribute",
             "name": "_roomCredentials",
@@ -1058,7 +1070,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 764,
+            "line": 774,
             "description": "Stores the current <code>init()</code> readyState.",
             "itemtype": "attribute",
             "name": "_readyState",
@@ -1070,7 +1082,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 774,
+            "line": 784,
             "description": "Stores the \"cid\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_key",
@@ -1082,7 +1094,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 784,
+            "line": 794,
             "description": "Stores the \"apiOwner\" used for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_appKeyOwner",
@@ -1094,7 +1106,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 794,
+            "line": 804,
             "description": "Stores the Room credentials information for <code>joinRoom()</code>.",
             "itemtype": "attribute",
             "name": "_room",
@@ -1133,7 +1145,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 810,
+            "line": 820,
             "description": "Stores the list of Peer messages timestamp.",
             "itemtype": "attribute",
             "name": "_peerMessagesStamps",
@@ -1145,7 +1157,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 820,
+            "line": 830,
             "description": "Stores the flag that indicates if <code>getUserMedia()</code> should fallback to retrieve\n  audio only Stream after retrieval of audio and video Stream had failed.",
             "itemtype": "attribute",
             "name": "_audioFallback",
@@ -1158,7 +1170,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 832,
+            "line": 842,
             "description": "Stores the Streams.",
             "itemtype": "attribute",
             "name": "_streams",
@@ -1170,7 +1182,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 845,
+            "line": 855,
             "description": "Stores the default camera Stream settings.",
             "itemtype": "attribute",
             "name": "_streamsDefaultSettings",
@@ -1182,7 +1194,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 871,
+            "line": 881,
             "description": "Stores all the Stream required muted settings.",
             "itemtype": "attribute",
             "name": "_streamsMutedSettings",
@@ -1194,7 +1206,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 884,
+            "line": 894,
             "description": "Stores all the Stream sending maximum bandwidth settings.",
             "itemtype": "attribute",
             "name": "_streamsBandwidthSettings",
@@ -1206,7 +1218,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 897,
+            "line": 907,
             "description": "Stores all the Stream stopped callbacks.",
             "itemtype": "attribute",
             "name": "_streamsStoppedCbs",
@@ -1218,7 +1230,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 907,
+            "line": 917,
             "description": "Stores all the Stream sessions.\nDefined as <code>false</code> when Stream has already ended.",
             "itemtype": "attribute",
             "name": "_streamsSession",
@@ -1230,7 +1242,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 918,
+            "line": 928,
             "description": "Stores the preferred sending Peer connection streaming audio codec.",
             "itemtype": "attribute",
             "name": "_selectedAudioCodec",
@@ -1243,7 +1255,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 929,
+            "line": 939,
             "description": "Stores the preferred sending Peer connection streaming video codec.",
             "itemtype": "attribute",
             "name": "_selectedVideoCodec",
@@ -1256,7 +1268,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 940,
+            "line": 950,
             "description": "Stores the flag if ulpfec and red codecs should be removed.",
             "itemtype": "attribute",
             "name": "_disableVideoFecCodecs",
@@ -1269,7 +1281,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 951,
+            "line": 961,
             "description": "Stores the flag if CN (Comfort Noise) codec should be removed.",
             "itemtype": "attribute",
             "name": "_disableComfortNoiseCodec",
@@ -1282,7 +1294,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 962,
+            "line": 972,
             "description": "Stores the flag if REMB feedback packets should be removed.",
             "itemtype": "attribute",
             "name": "_disableREMB",
@@ -1295,7 +1307,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 973,
+            "line": 983,
             "description": "Stores the session description settings.",
             "itemtype": "attribute",
             "name": "_sdpSettings",
@@ -1307,7 +1319,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 993,
+            "line": 1003,
             "description": "Stores the publish only settings.",
             "itemtype": "attribute",
             "name": "_publishOnly",
@@ -1319,7 +1331,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1003,
+            "line": 1013,
             "description": "Stores the parent ID.",
             "itemtype": "attribute",
             "name": "_parentId",
@@ -1331,7 +1343,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1013,
+            "line": 1023,
             "description": "Stores the list of recordings.",
             "itemtype": "attribute",
             "name": "_recordings",
@@ -1344,7 +1356,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1024,
+            "line": 1034,
             "description": "Stores the current active recording session ID.\nThere can only be 1 recording session at a time in a Room",
             "itemtype": "attribute",
             "name": "_currentRecordingId",
@@ -1357,7 +1369,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1036,
+            "line": 1046,
             "description": "Stores the recording session timeout to ensure 4 seconds has been recorded.",
             "itemtype": "attribute",
             "name": "_recordingStartInterval",
@@ -1370,7 +1382,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1047,
+            "line": 1057,
             "description": "Stores the flag if MCU should use renegotiation.",
             "itemtype": "attribute",
             "name": "_mcuUseRenegoRestart",
@@ -1382,7 +1394,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1057,
+            "line": 1067,
             "description": "Stores the debugging TURN/STUN ICE server.",
             "itemtype": "attribute",
             "name": "_iceServer",
@@ -1394,7 +1406,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1067,
+            "line": 1077,
             "description": "Stores the debugging Signaling server.",
             "itemtype": "attribute",
             "name": "_socketServer",
@@ -1406,7 +1418,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1077,
+            "line": 1087,
             "description": "Stores the currently supported codecs.",
             "itemtype": "attribute",
             "name": "_currentCodecSupport",
@@ -1418,7 +1430,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1087,
+            "line": 1097,
             "description": "Stores the session description orders and info.",
             "itemtype": "attribute",
             "name": "_sdpSessions",
@@ -1430,7 +1442,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1097,
+            "line": 1107,
             "description": "Stores the flag if voice activity detection should be enabled.",
             "itemtype": "attribute",
             "name": "_voiceActivityDetection",
@@ -1443,22 +1455,10 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1108,
+            "line": 1118,
             "description": "Stores the datachannel binary data chunk type.",
             "itemtype": "attribute",
             "name": "_binaryChunkType",
-            "type": "JSON",
-            "access": "private",
-            "tagname": "",
-            "since": "0.6.18",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/template/header.js",
-            "line": 1118,
-            "description": "Stores the RTCPeerConnection configuration.",
-            "itemtype": "attribute",
-            "name": "_peerConnectionConfig",
             "type": "JSON",
             "access": "private",
             "tagname": "",
@@ -1480,6 +1480,18 @@
         {
             "file": "source/template/header.js",
             "line": 1138,
+            "description": "Stores the RTCPeerConnection configuration.",
+            "itemtype": "attribute",
+            "name": "_peerConnectionConfig",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.18",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 1148,
             "description": "Stores the User's priority weight scheme to determine if User is offerer or answerer.",
             "itemtype": "attribute",
             "name": "_priorityWeightScheme",
@@ -1491,7 +1503,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1148,
+            "line": 1158,
             "description": "Stores the auto bandwidth settings.",
             "itemtype": "attribute",
             "name": "_bandwidthAdjuster",
@@ -1503,7 +1515,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1158,
+            "line": 1168,
             "description": "Stores the Peer connection status.",
             "itemtype": "attribute",
             "name": "_peerConnStatus",
@@ -1515,10 +1527,22 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 1168,
+            "line": 1178,
             "description": "Stores the flag if Edge 15.x+ WebRTC legacy 1.0 implementation should be used.",
             "itemtype": "attribute",
             "name": "_useEdgeWebRTC",
+            "type": "Boolean",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.19",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 1188,
+            "description": "Stores the flag to temporarily halt joinRoom() from processing.",
+            "itemtype": "attribute",
+            "name": "_joinRoomManager",
             "type": "Boolean",
             "access": "private",
             "tagname": "",
@@ -4071,7 +4095,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 531,
+            "line": 559,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4136,7 +4160,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 647,
+            "line": 675,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4146,7 +4170,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 681,
+            "line": 709,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4156,7 +4180,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 715,
+            "line": 743,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4272,6 +4296,11 @@
                     "type": "Number"
                 },
                 {
+                    "name": "XML_HTTP_NO_REPONSE_ERROR",
+                    "description": "<small>Value <code>-2</code></small>\n  The value of the failure code when response from Auth server is empty or timed out.",
+                    "type": "Number"
+                },
+                {
                     "name": "NO_SOCKET_IO",
                     "description": "<small>Value <code>1</code></small>\n  The value of the failure code when dependency <a href=\"http://socket.io/download/\">Socket.IO client</a> is not loaded.\n  <small>To resolve this, ensure that the Socket.IO client dependency is loaded before the Skylink SDK.\n  You may use the provided Socket.IO client <a href=\"http://socket.io/download/\">CDN here</a>.</small>",
                     "type": "Number"
@@ -4309,7 +4338,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 140,
+            "line": 143,
             "description": "Spoofs the REGIONAL_SERVER to prevent errors on deployed apps except the fact this no longer works.\nAutomatic regional selection has already been implemented hence REGIONAL_SERVER is no longer useful.",
             "itemtype": "attribute",
             "name": "REGIONAL_SERVER",
@@ -4322,7 +4351,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 155,
+            "line": 158,
             "description": "The list of User's priority weight schemes for <a href=\"#method_joinRoom\">\n<code>joinRoom()</code> method</a> connections.",
             "itemtype": "attribute",
             "name": "PRIORITY_WEIGHT_SCHEME",
@@ -4350,7 +4379,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 176,
+            "line": 179,
             "description": "Function that generates an <a href=\"https://en.wikipedia.org/wiki/Universally_unique_identifier\">UUID</a> (Unique ID).",
             "itemtype": "method",
             "name": "generateUUID",
@@ -4363,7 +4392,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 195,
+            "line": 198,
             "description": "Function that authenticates and initialises App Key used for Room connections.",
             "itemtype": "method",
             "name": "init",
@@ -4430,7 +4459,7 @@
                             "description": "The flag if publicly available STUN ICE servers should\n  be used if <code>options.enableSTUNServer</code> is enabled.",
                             "type": "Boolean",
                             "optional": true,
-                            "optdefault": "true"
+                            "optdefault": "false"
                         },
                         {
                             "name": "TURNServerTransport",
@@ -4494,7 +4523,7 @@
                             "description": "The flag if HTTPS connections should be enforced\n  during request to Auth server and socket connections to Signaling server\n  when accessing <code>window.location.protocol</code> value is <code>\"http:\"</code>.\n  <small>By default, <code>\"https:\"</code> protocol connections uses HTTPS connections.</small>",
                             "type": "Boolean",
                             "optional": true,
-                            "optdefault": "false"
+                            "optdefault": "true"
                         },
                         {
                             "name": "audioCodec",
@@ -4542,10 +4571,17 @@
                         },
                         {
                             "name": "socketTimeout",
-                            "description": "The timeout for each attempts for socket connection\n  with the Signaling server to indicate that connection has timed out and has failed to establish.\n  <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>\n  <small>Note that it is recommended to use <code>12000</code> as the lowest timeout value if Peers are connecting\n  using Polling transports to prevent connection errors.</small>",
+                            "description": "The timeout for each attempts for socket connection\n  with the Signaling server to indicate that connection has timed out and has failed to establish.\n  <small>Note that the mininum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.</small>\n  <small>Note that it is recommended to use <code>7000</code> as the lowest timeout value if Peers are connecting\n  using Polling transports to prevent connection errors.</small>",
                             "type": "Number",
                             "optional": true,
-                            "optdefault": "20000"
+                            "optdefault": "7000"
+                        },
+                        {
+                            "name": "apiTimeout",
+                            "description": "The timeout to wait for response from Auth server.",
+                            "type": "Number",
+                            "optional": true,
+                            "optdefault": "4000"
                         },
                         {
                             "name": "forceTURNSSL",
@@ -4928,6 +4964,11 @@
                                     "type": "Number"
                                 },
                                 {
+                                    "name": "apiTimeout",
+                                    "description": "The configured value of the <code>options.apiTimeout</code>.",
+                                    "type": "Number"
+                                },
+                                {
                                     "name": "forceTURNSSL",
                                     "description": "The configured value of the <code>options.forceTURNSSL</code>.",
                                     "type": "Boolean"
@@ -5011,7 +5052,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1082,
+            "line": 1092,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -5022,7 +5063,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1156,
+            "line": 1196,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5033,7 +5074,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1226,
+            "line": 1266,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5044,7 +5085,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1352,
+            "line": 1392,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5181,6 +5222,20 @@
         {
             "file": "source/skylink-debug.js",
             "line": 108,
+            "description": "Stores the flag if logs should print timestamp.",
+            "itemtype": "attribute",
+            "name": "_printTimestamp",
+            "type": "Boolean",
+            "default": "false",
+            "access": "private",
+            "tagname": "",
+            "scoped": "true",
+            "since": "0.6.26",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-debug.js",
+            "line": 120,
             "description": "Stores the logs used for SkylinkLogs object.",
             "itemtype": "attribute",
             "name": "_storedLogs",
@@ -5193,7 +5248,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 119,
+            "line": 131,
             "description": "Function that gets the stored logs.",
             "itemtype": "method",
             "name": "_getStoredLogsFn",
@@ -5205,7 +5260,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 140,
+            "line": 152,
             "description": "Function that clears the stored logs.",
             "itemtype": "method",
             "name": "_clearAllStoredLogsFn",
@@ -5217,7 +5272,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 152,
+            "line": 164,
             "description": "Function that prints in the Web Console interface the stored logs.",
             "itemtype": "method",
             "name": "_printAllStoredLogsFn",
@@ -5229,7 +5284,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 176,
+            "line": 188,
             "description": "<blockquote class=\"info\">\n  To utilise and enable the <code>SkylinkLogs</code> API functionalities, the\n  <a href=\"#method_setDebugMode\"><code>setDebugMode()</code> method</a>\n  <code>options.storeLogs</code> parameter has to be enabled.\n</blockquote>\nThe object interface to manage the SDK <a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">\nJavascript Web Console</a> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs",
@@ -5240,7 +5295,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 191,
+            "line": 203,
             "description": "Function that gets the current stored SDK <code>console</code> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.getLogs",
@@ -5267,7 +5322,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 218,
+            "line": 230,
             "description": "Function that clears all the current stored SDK <code>console</code> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.clearAllLogs",
@@ -5282,7 +5337,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 232,
+            "line": 244,
             "description": "Function that prints all the current stored SDK <code>console</code> logs into the\n<a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">Javascript Web Console</a>.",
             "itemtype": "property",
             "name": "SkylinkLogs.printAllLogs",
@@ -5297,7 +5352,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 248,
+            "line": 260,
             "description": "Function that handles the logs received and prints in the Web Console interface according to the log level set.",
             "itemtype": "method",
             "name": "_logFn",
@@ -5310,7 +5365,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 317,
+            "line": 332,
             "description": "Stores the logging functions.",
             "itemtype": "attribute",
             "name": "log",
@@ -5350,7 +5405,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 353,
+            "line": 368,
             "description": "Function that configures the level of <code>console</code> API logs to be printed in the\n<a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">Javascript Web Console</a>.",
             "itemtype": "method",
             "name": "setLogLevel",
@@ -5370,7 +5425,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 390,
+            "line": 405,
             "description": "Function that configures the debugging mode of the SDK.",
             "itemtype": "method",
             "name": "setDebugMode",
@@ -5392,6 +5447,13 @@
                         {
                             "name": "storeLogs",
                             "description": "The flag if SDK should store the <code>console</code> logs.\n  <small>This is required to be enabled for <a href=\"#prop_SkylinkLogs\"><code>SkylinkLogs</code> API</a>.</small>",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "false"
+                        },
+                        {
+                            "name": "printTimestamp",
+                            "description": "The flag if SDK should print the timestamp of the <code>console</code> logs.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "false"
@@ -8684,7 +8746,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 444,
+            "line": 453,
             "description": "Function that starts the socket connection to the Signaling.\nThis starts creating the socket connection and called at first not when requiring to fallback.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -8695,7 +8757,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 488,
+            "line": 497,
             "description": "Function that stops the socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -9617,7 +9679,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 655,
+            "line": 665,
             "description": "<blockquote class=\"info\">\n  Note that if <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is available despite having\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> available, the\n  <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is sent instead of the\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> to Peers.\n</blockquote>\nFunction that sends a new <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>\nto all connected Peers in the Room.",
             "itemtype": "method",
             "name": "sendStream",
@@ -9655,7 +9717,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 878,
+            "line": 888,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -9668,7 +9730,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 917,
+            "line": 927,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -9704,7 +9766,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1055,
+            "line": 1065,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -9719,7 +9781,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1082,
+            "line": 1092,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -9734,7 +9796,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1109,
+            "line": 1119,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -9749,7 +9811,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1136,
+            "line": 1146,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -9764,7 +9826,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1163,
+            "line": 1173,
             "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n  Note that the Opera and Edge browser does not support screensharing, and as for IE / Safari browsers using\n  the Temasys Plugin screensharing support, check out the <a href=\"https://temasys.com.sg/plugin/#commercial-licensing\">\n  commercial licensing</a> for more options.\n</blockquote>\nFunction that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -9845,7 +9907,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1537,
+            "line": 1552,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -9858,7 +9920,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1596,
+            "line": 1611,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -9869,7 +9931,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1654,
+            "line": 1669,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -9880,7 +9942,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1727,
+            "line": 1742,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -9891,7 +9953,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1880,
+            "line": 1895,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -9902,7 +9964,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2026,
+            "line": 2041,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -9913,7 +9975,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2067,
+            "line": 2082,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -9924,7 +9986,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2101,
+            "line": 2116,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -9935,7 +9997,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2196,
+            "line": 2211,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -10210,19 +10272,19 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:531"
+            "line": " source/room-connection.js:559"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:647"
+            "line": " source/room-connection.js:675"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:681"
+            "line": " source/room-connection.js:709"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-init.js:195"
+            "line": " source/room-init.js:198"
         },
         {
             "message": "unknown tag: scoped",
@@ -10254,35 +10316,39 @@
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:119"
+            "line": " source/skylink-debug.js:120"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:140"
+            "line": " source/skylink-debug.js:131"
         },
         {
             "message": "unknown tag: scoped",
             "line": " source/skylink-debug.js:152"
         },
         {
-            "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:191"
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:164"
         },
         {
             "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:218"
+            "line": " source/skylink-debug.js:203"
         },
         {
             "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:232"
+            "line": " source/skylink-debug.js:230"
+        },
+        {
+            "message": "unknown tag: triggerforprophacknone",
+            "line": " source/skylink-debug.js:244"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:248"
+            "line": " source/skylink-debug.js:260"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:317"
+            "line": " source/skylink-debug.js:332"
         },
         {
             "message": "unknown tag: trigger",
@@ -10302,39 +10368,39 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:655"
+            "line": " source/stream-media.js:665"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:878"
+            "line": " source/stream-media.js:888"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:917"
+            "line": " source/stream-media.js:927"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1055"
+            "line": " source/stream-media.js:1065"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1082"
+            "line": " source/stream-media.js:1092"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1109"
+            "line": " source/stream-media.js:1119"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1136"
+            "line": " source/stream-media.js:1146"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1163"
+            "line": " source/stream-media.js:1173"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1537"
+            "line": " source/stream-media.js:1552"
         },
         {
             "message": "Missing item type\nGlobal function that clones an object.",
