@@ -180,13 +180,12 @@ Skylink.prototype._setIceServers = function(passedIceServers) {
       iceServerPorts.tcp = [443, 80];
     }
 
-    if (self._TURNTransport === self.TURN_TRANSPORT.UDP) {
+    if (self._TURNTransport === self.TURN_TRANSPORT.UDP && !self._forceTURNSSL) {
       iceServerPorts.udp = iceServerPorts.udp.concat(iceServerPorts.both);
       iceServerPorts.tcp = [];
       iceServerPorts.both = [];
-    }
 
-    if (self._TURNTransport === self.TURN_TRANSPORT.TCP) {
+    } else if (self._TURNTransport === self.TURN_TRANSPORT.TCP) {
       iceServerPorts.tcp = iceServerPorts.tcp.concat(iceServerPorts.both);
       iceServerPorts.udp = [];
       iceServerPorts.both = [];
