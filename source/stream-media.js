@@ -1439,11 +1439,13 @@ Skylink.prototype.getStreamSources = function(callback) {
     navigator.mediaDevices.enumerateDevices().then(sourcesListFn);
   } else if (window.MediaStreamTrack && typeof MediaStreamTrack.getSources === 'function') {
     MediaStreamTrack.getSources(sourcesListFn);
-  } else {
+  } else if (typeof navigator.getUserMedia === 'function') {
     sourcesListFn([
       { deviceId: 'default', kind: 'audioinput', label: 'Default Audio Track' },
       { deviceId: 'default', kind: 'videoinput', label: 'Default Video Track' }
     ]);
+  } else {
+    sourcesListFn([]);
   }
 };
 
