@@ -952,10 +952,11 @@ Skylink.prototype.disableVideo = function() {
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
  *   <small>Note that this will not be toggled for Chrome/Opera case when `mediaSource` value is `["tab","audio"]`.</small>
- * @param {String|Array} [mediaSource=screen] The screensharing media source to select.
+ * @param {String|Array|JSON} [mediaSource=screen] The screensharing media source to select.
  *   <small>Note that multiple sources are not supported by Firefox as of the time of this release.
  *   Firefox will use the first item specified in the Array in the event that multiple sources are defined.</small>
- *   <small>E.g. <code>["screen", "window"]</code>, <code>["tab", "audio"]</code>, <code>"screen"</code> or <code>"tab"</code>.</small>
+ *   <small>E.g. <code>["screen", "window"]</code>, <code>["tab", "audio"]</code>, <code>"screen"</code> or <code>"tab"</code>
+ *   or <code>{ sourceId: "xxxxx", mediaSource: "screen" }</code>.</small>
  *   [Rel: Skylink.MEDIA_SOURCE]
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
@@ -998,6 +999,12 @@ Skylink.prototype.disableVideo = function() {
  * 
  *   // Example 5: Share "window" and "screen" media source
  *   skylinkDemo.shareScreen(["window", "screen"], function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById("my-screen"), success);
+ *   });
+ * 
+ *   // Example 6: Share "window" with specific media source for specific plugin build users.
+ *   skylinkDemo.shareScreen({ mediaSource: "window", sourceId: "xxxxx" }, function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
@@ -1057,6 +1064,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
   var self = this;
   var enableAudioSettings = false;
   var useMediaSource = [self.MEDIA_SOURCE.SCREEN];
+  var useMediaSourceId = null;
   var checkIfSourceExistsFn = function (val) {
     for (var prop in self.MEDIA_SOURCE) {
       if (self.MEDIA_SOURCE.hasOwnProperty(prop) && self.MEDIA_SOURCE[prop] === val) {
@@ -1066,31 +1074,39 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     return false;
   };
 
-  // shareScreen("screen")
-  if (enableAudio && typeof enableAudio === 'string') {
-    if (checkIfSourceExistsFn(enableAudio)) {
-      useMediaSource = [enableAudio];
+  // shareScreen("screen") or shareScreen({ sourceId: "xxxx", mediaSource: "xxxxx" })
+  if (enableAudio && typeof enableAudio === 'string' ||
+    (enableAudio && typeof enableAudio === 'object' && enableAudio.sourceId && enableAudio.mediaSource)) {
+    if (checkIfSourceExistsFn(typeof enableAudio === 'object' ? enableAudio.mediaSource : enableAudio)) {
+      useMediaSource = [typeof enableAudio === 'object' ? enableAudio.mediaSource : enableAudio];
     }
+    useMediaSourceId = typeof enableAudio === 'object' ? enableAudio.sourceId : null;
   // shareScreen(["screen", "window"])
   } else if (Array.isArray(enableAudio)) {
     var enableAudioArr = [];
+
     for (var i = 0; i < enableAudio.length; i++) {
       if (checkIfSourceExistsFn(enableAudio[i])) {
         enableAudioArr.push(enableAudio[i]);
       }
     }
+
     if (enableAudioArr.length > 0) {
       useMediaSource = enableAudioArr;
     }
   // shareScreen({ stereo: true })
   } else if (enableAudio && typeof enableAudio === 'object') {
-    enableAudioSettings = {
-      usedtx: typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null,
-      useinbandfec: typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null,
-      stereo: enableAudio.stereo === true,
-      echoCancellation: enableAudio.echoCancellation !== false,
-      deviceId: enableAudio.deviceId
-    };
+    if (enableAudio.sourceId && enableAudio.mediaSource) {
+
+    } else {
+      enableAudioSettings = {
+        usedtx: typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null,
+        useinbandfec: typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null,
+        stereo: enableAudio.stereo === true,
+        echoCancellation: enableAudio.echoCancellation !== false,
+        deviceId: enableAudio.deviceId
+      };
+    }
   // shareScreen(true)
   } else if (enableAudio === true) {
     enableAudioSettings = enableAudio === true ? {
@@ -1106,11 +1122,13 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     enableAudio = false;
   }
 
-  // shareScreen(.., "screen")
-  if (mediaSource && typeof mediaSource === 'string') {
-    if (checkIfSourceExistsFn(mediaSource)) {
-      useMediaSource = [mediaSource];
+  // shareScreen(.., "screen") or shareScreen({ sourceId: "xxxx", mediaSource: "xxxxx" })
+  if (mediaSource && typeof mediaSource === 'string' ||
+    (mediaSource && typeof mediaSource === 'object' && mediaSource.sourceId && mediaSource.mediaSource)) {
+    if (checkIfSourceExistsFn(typeof mediaSource === 'object' ? mediaSource.mediaSource : mediaSource)) {
+      useMediaSource = [typeof mediaSource === 'object' ? mediaSource.mediaSource : mediaSource];
     }
+    useMediaSourceId = typeof mediaSource === 'object' ? mediaSource.sourceId : null;
   // shareScreen(.., ["screen", "window"])
   } else if (Array.isArray(mediaSource)) {
     var mediaSourceArr = [];
@@ -1162,6 +1180,12 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         }
       }
     };
+
+    if (AdapterJS.webrtcDetectedType === 'plugin' && useMediaSourceId) {
+      settings.getUserMediaSettings.video.optional = [{
+        screenId: useMediaSourceId
+      }];
+    }
 
     var mediaAccessSuccessFn = function (stream) {
       self.off('mediaAccessError', mediaAccessErrorFn);
@@ -1331,6 +1355,217 @@ Skylink.prototype.stopScreen = function () {
       this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
     }
   }
+};
+
+/**
+ * Function that returns the camera and microphone sources.
+ * @method getStreamSources
+ * @param {Function} callback The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (success)</code></small>
+ * @param {JSON} callback.success The success result in request.
+ *   <small>Object signature is the list of sources.</small>
+ * @param {JSON} callback.success.audio The list of audio input (microphone) and output (speakers) sources.
+ * @param {Array} callback.success.audio.input The list of audio input (microphone) sources.
+ * @param {JSON} callback.success.audio.input.#index The audio input source item.
+ * @param {String} callback.success.audio.input.#index.deviceId The audio input source item device ID.
+ * @param {String} callback.success.audio.input.#index.label The audio input source item device label name.
+ * @param {String} [callback.success.audio.input.#index.groupId] The audio input source item device physical device ID.
+ * <small>Note that there can be different <code>deviceId</code> due to differing sources but can share a
+ * <code>groupId</code> because it's the same device.</small>
+ * @param {Array} callback.success.audio.output The list of audio output (speakers) sources.
+ * @param {JSON} callback.success.audio.output.#index The audio output source item.
+ * <small>Object signature matches <code>callback.success.audio.input.#index</code> format.</small>
+ * @param {JSON} callback.success.video The list of video input (camera) sources.
+ * @param {Array} callback.success.video.input The list of video input (camera) sources.
+ * @param {JSON} callback.success.video.input.#index The video input source item.
+ * <small>Object signature matches <code>callback.success.audio.input.#index</code> format.</small>
+ * @example
+ *   // Example 1: Retrieve the getUserMedia() stream with selected source ID.
+ *   skylinkDemo.getStreamSources(function (sources) {
+ *     skylinkDemo.getUserMedia({
+ *       audio: sources.audio.input[0].deviceId,
+ *       video: sources.video.input[0].deviceId
+ *     });
+ *   });
+ *   
+ *   // Example 2: Set the output audio speaker (Chrome 49+ supported only)
+ *   skylinkDemo.getStreamSources(function (sources) {
+ *     var videoElement = document.getElementById('video');
+ *     if (videoElement && typeof videoElement.setSinkId === 'function') {
+ *       videoElement.setSinkId(sources.audio.output[0].deviceId)
+ *     }
+ *   });
+ * @for Skylink
+ * @since 0.6.27
+ */
+Skylink.prototype.getStreamSources = function(callback) {
+  var outputSources = {
+    audio: {
+      input: [],
+      output: []
+    },
+    video: {
+      input: []
+    }
+  };
+
+  if (typeof callback !== 'function') {
+    return log.error('Please provide the callback.');
+  }
+
+  var sourcesListFn = function (sources) {
+    sources.forEach(function (sourceItem) {
+      var item = {
+        deviceId: sourceItem.deviceId || sourceItem.sourceId || 'default',
+        label: sourceItem.label,
+        groupId: sourceItem.groupId || null
+      };
+
+      item.label = item.label || 'Source for ' + item.deviceId;
+
+      if (['audio', 'audioinput'].indexOf(sourceItem.kind) > -1) {
+        outputSources.audio.input.push(item);
+      } else if (['video', 'videoinput'].indexOf(sourceItem.kind) > -1) {
+        outputSources.video.input.push(item);
+      } else if (sourceItem.kind === 'audiooutput') {
+        outputSources.audio.output.push(item);
+      }
+    });
+
+    callback(outputSources);
+  };
+
+  if (navigator.mediaDevices && typeof navigator.mediaDevices.enumerateDevices === 'function') {
+    navigator.mediaDevices.enumerateDevices().then(sourcesListFn);
+  } else if (window.MediaStreamTrack && typeof MediaStreamTrack.getSources === 'function') {
+    MediaStreamTrack.getSources(sourcesListFn);
+  } else {
+    sourcesListFn([
+      { deviceId: 'default', kind: 'audioinput', label: 'Default Audio Track' },
+      { deviceId: 'default', kind: 'videoinput', label: 'Default Video Track' }
+    ]);
+  }
+};
+
+/**
+ * Function that returns the screensharing sources.
+ * @method getScreenSources
+ * @param {Function} callback The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (success)</code></small>
+ * @param {JSON} callback.success The success result in request.
+ *   <small>Object signature is the list of sources.</small>
+ * @param {JSON} callback.success The list of screensharing media sources and screen sources.
+ * @param {Array} callback.success.mediaSource The array of screensharing media sources.
+ * @param {String} callback.success.mediaSource.#index The screensharing media source item.
+ * [Rel: Skylink.MEDIA_SOURCE]
+ * @param {Array} callback.success.mediaSourceInput The list of specific media source screen inputs.
+ * @param {JSON} callback.success.mediaSourceInput.#index The media source screen input item.
+ * @param {String} callback.success.mediaSourceInput.#index.sourceId The screen input item ID.
+ * @param {String} callback.success.mediaSourceInput.#index.label The screen input item label name.
+ * @param {String} callback.success.mediaSourceInput.#index.mediaSource The screen input item media source it belongs to.
+ * [Rel: Skylink.MEDIA_SOURCE]
+ * @example
+ *   // Example 1: Retrieve the list of available shareScreen() sources.
+ *   skylinkDemo.getScreenSources(function (sources) {
+ *     skylinkDemo.shareScreen(sources.mediaSource[0] || null);
+ *   });
+ *   
+ *   // Example 2: Retrieve the list of available shareScreen() sources with a specific item.
+ *   skylinkDemo.getScreenSources(function (sources) {
+ *     if (sources.mediaSourceInput[0]) {
+ *       skylinkDemo.shareScreen({
+ *         mediaSource: mediaSourceInput[0].mediaSource,
+ *         sourceId: mediaSourceInput[0].sourceId
+ *       });
+ *     } else {
+ *       skylinkDemo.shareScreen();
+ *     }
+ *   });
+ * @for Skylink
+ * @since 0.6.27
+ */
+Skylink.prototype.getScreenSources = function(callback) {
+  var outputSources = {
+    mediaSource: [],
+    mediaSourceInput: []
+  };
+
+  if (typeof callback !== 'function') {
+    return log.error('Please provide the callback.');
+  }
+
+  // For chrome android 59+ has screensharing support behind chrome://flags (needs to be enabled by user)
+  // Reference: https://bugs.chromium.org/p/chromium/issues/detail?id=487935
+  if (navigator.userAgent.toLowerCase().indexOf('android') > -1) {
+    if (AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion >= 59) {
+      outputSources.mediaSource = ['screen']; 
+    }
+    callback(outputSources);
+    return;
+  }
+
+  // IE / Safari (plugin) needs commerical screensharing enabled
+  if (AdapterJS.webrtcDetectedType === 'plugin') {
+    AdapterJS.webRTCReady(function () {
+      // IE / Safari (plugin) is not available or do not support screensharing
+      if (AdapterJS.WebRTCPlugin.plugin && AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable &&
+        AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature) {
+        outputSources.mediaSource = ['window', 'screen'];
+
+        // Do not provide the error callback as well or it will throw NPError.
+        if (typeof AdapterJS.WebRTCPlugin.plugin.getScreensharingSources === 'function') {
+          AdapterJS.WebRTCPlugin.plugin.getScreensharingSources(function (sources) {
+            sources.forEach(sources, function (sourceItem) {
+              var item = {
+                sourceId: sourceItem.id || sourceItem.sourceId || 'default',
+                label: sourceItem.label,
+                mediaSource: sourceItem.kind || 'screen'
+              };
+
+              item.label = item.label || 'Source for ' + item.sourceId;
+              outputSources.mediaSourceInput.push(item);
+            });
+
+            callback(outputSources);
+          });
+          return;
+        }
+      }
+      
+      callback(outputSources);
+    });
+    return;
+
+  // Chrome 34+ and Opera 21(?)+ supports screensharing
+  // Firefox 38(?)+ supports screensharing
+  } else if ((AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion >= 34) ||
+    (AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion >= 38) ||
+    (AdapterJS.webrtcDetectedBrowser === 'opera' && AdapterJS.webrtcDetectedVersion >= 21)) {
+    // Just warn users for those who did not configure the Opera screensharing extension settings, it will not work!
+    if (AdapterJS.webrtcDetectedBrowser === 'opera' && !(AdapterJS.extensionInfo &&
+      AdapterJS.extensionInfo.opera && AdapterJS.extensionInfo.opera.extensionId)) {
+      log.warn('Please ensure that your application allows Opera screensharing!');
+    }
+
+    outputSources.mediaSource = ['window', 'screen'];
+
+    // Chrome 52+ and Opera 39+ supports tab and audio
+    // Reference: https://developer.chrome.com/extensions/desktopCapture
+    if ((AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion >= 52) ||
+      (AdapterJS.webrtcDetectedBrowser === 'opera' && AdapterJS.webrtcDetectedVersion >= 39)) {
+      outputSources.mediaSource.push('tab', 'audio');
+
+    // Firefox supports some other sources
+    // Reference: http://fluffy.github.io/w3c-screen-share/#screen-based-video-constraints
+    //            https://bugzilla.mozilla.org/show_bug.cgi?id=1313758
+    //            https://bugzilla.mozilla.org/show_bug.cgi?id=1037405
+    //            https://bugzilla.mozilla.org/show_bug.cgi?id=1313758
+    } else if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
+      outputSources.mediaSource.push('browser', 'camera', 'application');
+    }
+  }
+
+  callback(outputSources);
 };
 
 /**
