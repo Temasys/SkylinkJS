@@ -423,7 +423,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   <small>Object signature is the <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
  *   Stream object.</small>
  * @example
- *   // Example 1: Send MediaStream object
+ *   // Example 1: Send MediaStream object before being connected to Room
  *   function retrieveStreamBySourceForFirefox (sourceId) {
  *     navigator.mediaDevices.getUserMedia({
  *       audio: true,
@@ -442,29 +442,21 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *     });
  *   }
  *
- *   // Example 2: Send video later
- *   var inRoom = false;
- *
+ *   // Example 2: Send video after being connected to Room
  *   function sendVideo () {
- *     if (!inRoom) return;
- *     skylinkDemo.sendStream({
- *       audio: true,
- *       video: true
- *     }, function (error, success) {
- *       if (error) return;
- *       console.log("getUserMedia() Stream with video is now being sent to Peers");
- *       attachMediaStream(document.getElementById("my-video"), success);
+ *     skylinkDemo.joinRoom(function (jRError, jRSuccess) {
+ *       if (jRError) return;
+ *       skylinkDemo.sendStream({
+ *         audio: true,
+ *         video: true
+ *       }, function (error, success) {
+ *         if (error) return;
+ *         console.log("getUserMedia() Stream with video is now being sent to Peers");
+ *         attachMediaStream(document.getElementById("my-video"), success);
+ *       });
  *     });
  *   }
- *
- *   skylinkDemo.joinRoom({
- *     audio: true
- *   }, function (jRError, jRSuccess) {
- *     if (jRError) return;
- *     inRoom = true;
- *   });
  * @trigger <ol class="desc-seq">
- *   <li>If User is not in Room: <ol><li><b>ABORT</b> and return error.</li></ol></li>
  *   <li>Checks <code>options</code> provided. <ol><li>If provided parameter <code>options</code> is not valid: <ol>
  *   <li><b>ABORT</b> and return error.</li></ol></li>
  *   <li>Else if provided parameter <code>options</code> is a Stream object: <ol>
@@ -483,7 +475,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   <li>Invoke <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> with
  *   <code>options</code> provided in <code>sendStream()</code>. <ol><li>If request has errors: <ol>
  *   <li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>
- *   <li>If there is currently no <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>: <ol>
+ *   <li>If there is currently no <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> and User is in Room: <ol>
  *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers parameter payload
  *   <code>isSelf</code> value as <code>true</code> and <code>stream</code> as
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>.</li>
@@ -526,12 +518,8 @@ Skylink.prototype.sendStream = function(options, callback) {
       } else if (typeof callback === 'function') {
         callback(null, stream);
       }
-    } else {
-      var notInRoomAgainError = 'Unable to send stream as user is not in the Room.';
-      log.error(notInRoomAgainError, stream);
-      if (typeof callback === 'function') {
-        callback(new Error(notInRoomAgainError), null);
-      }
+    } else if (typeof callback === 'function') {
+      callback(null, stream);
     }
   };
 
@@ -547,12 +535,7 @@ Skylink.prototype.sendStream = function(options, callback) {
   }
 
   if (!self._inRoom) {
-    var notInRoomError = 'Unable to send stream as user is not in the Room.';
-    log.error(notInRoomError, options);
-    if (typeof callback === 'function'){
-      callback(new Error(notInRoomError),null);
-    }
-    return;
+    log.warn('There are no peers to send stream to as not in room!');
   }
 
   if (AdapterJS.webrtcDetectedBrowser === 'edge') {
@@ -665,7 +648,7 @@ Skylink.prototype.stopStream = function () {
  * @param {JSON} options The Streams muting options.
  * @param {Boolean} [options.audioMuted=true] The flag if all Streams audio
  *   tracks should be muted or not.
- * @param {Boolean} [options.videoMuted=true] The flag if all Streams video
+ * @param {Boolean} [options.videoMuted=true] The flag if all Strea.ms video
  *   tracks should be muted or not.
  * @example
  *   // Example 1: Mute both audio and video tracks in all Streams
