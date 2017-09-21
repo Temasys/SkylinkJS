@@ -298,7 +298,7 @@
 
 Skylink.prototype.joinRoom = function(room, options, callback) {
   var self = this;
-  var selectedRoom = self._defaultRoom;
+  var selectedRoom = self._initOptions.defaultRoom;
   var previousRoom = self._selectedRoom;
   var mediaOptions = {};
   var timestamp = (new Date()).getTime() + Math.floor(Math.random() * 10000);
@@ -423,7 +423,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           len: self._room.duration,
           isPrivileged: self._isPrivileged === true, // Default to false if undefined
           autoIntroduce: self._autoIntroduce !== false, // Default to true if undefined
-          key: self._appKey
+          key: self._initOptions.appKey
         });
       });
     });

@@ -213,14 +213,14 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   var options = {
     forceNew: true,
     reconnection: true,
-    timeout: self._socketTimeout,
+    timeout: self._initOptions.socketTimeout,
     reconnectionAttempts: 2,
     reconnectionDelayMax: 5000,
     reconnectionDelay: 1000,
     transports: ['websocket']
   };
-  var ports = self._socketServer && typeof self._socketServer === 'object' && Array.isArray(self._socketServer.ports) &&
-    self._socketServer.ports.length > 0 ? self._socketServer.ports : self._socketPorts[self._signalingServerProtocol];
+  var ports = self._initOptions.socketServer && typeof self._initOptions.socketServer === 'object' && Array.isArray(self._initOptions.socketServer.ports) &&
+    self._initOptions.socketServer.ports.length > 0 ? self._initOptions.socketServer.ports : self._socketPorts[self._signalingServerProtocol];
   var fallbackType = null;
 
   // just beginning
@@ -229,7 +229,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
     fallbackType = self.SOCKET_FALLBACK.NON_FALLBACK;
 
   // reached the end of the last port for the protocol type
-  } else if (ports.indexOf(self._signalingServerPort) === ports.length - 1 || typeof self._socketServer === 'string') {
+  } else if (ports.indexOf(self._signalingServerPort) === ports.length - 1 || typeof self._initOptions.socketServer === 'string') {
     // re-refresh to long-polling port
     if (type === 'WebSocket') {
       type = 'Polling';
@@ -251,11 +251,11 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort + '?rand=' + Date.now();
   var retries = 0;
 
-  if (self._socketServer) {
+  if (self._initOptions.socketServer) {
     // Provided as string, make it as just the fixed server
-    url = typeof self._socketServer === 'string' ? self._socketServer :
-      (self._socketServer.protocol ? self._socketServer.protocol : self._signalingServerProtocol) + '//' +
-      self._socketServer.url + ':' + self._signalingServerPort;
+    url = typeof self._initOptions.socketServer === 'string' ? self._initOptions.socketServer :
+      (self._initOptions.socketServer.protocol ? self._initOptions.socketServer.protocol : self._signalingServerProtocol) + '//' +
+      self._initOptions.socketServer.url + ':' + self._signalingServerPort;
   }
 
   self._socketSession.transportType = type;
@@ -408,7 +408,7 @@ Skylink.prototype._openChannel = function(joinRoomTimestamp) {
   }
 
   // set if forceSSL
-  if (self._forceSSL) {
+  if (self._initOptions.forceSSL) {
     self._signalingServerProtocol = 'https:';
   } else {
     self._signalingServerProtocol = window.location.protocol;

@@ -46,9 +46,9 @@ Skylink.prototype._setIceServers = function(passedIceServers) {
     }
   });
 
-  if (self._iceServer) {
+  if (self._initOptions.iceServer) {
     iceServers = [{
-      urls: self._iceServer.urls,
+      urls: self._initOptions.iceServer.urls,
       username: iceServers[1].username,
       credential: iceServers[1].credential
     }];
@@ -62,7 +62,7 @@ Skylink.prototype._setIceServers = function(passedIceServers) {
       iceServerPorts.both = [];
       iceServerProtocol = 'turn';
 
-    } else if (self._forceTURNSSL) {
+    } else if (self._initOptions.forceTURNSSL) {
       if (AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion < 53) {
         iceServerPorts.udp = [];
         iceServerPorts.tcp = [443];
@@ -80,17 +80,17 @@ Skylink.prototype._setIceServers = function(passedIceServers) {
       iceServerPorts.tcp = [443, 80];
     }
 
-    if (self._TURNTransport === self.TURN_TRANSPORT.UDP && !self._forceTURNSSL) {
+    if (self._initOptions.TURNServerTransport === self.TURN_TRANSPORT.UDP && !self._initOptions.forceTURNSSL) {
       iceServerPorts.udp = iceServerPorts.udp.concat(iceServerPorts.both);
       iceServerPorts.tcp = [];
       iceServerPorts.both = [];
 
-    } else if (self._TURNTransport === self.TURN_TRANSPORT.TCP) {
+    } else if (self._initOptions.TURNServerTransport === self.TURN_TRANSPORT.TCP) {
       iceServerPorts.tcp = iceServerPorts.tcp.concat(iceServerPorts.both);
       iceServerPorts.udp = [];
       iceServerPorts.both = [];
 
-    } else if (self._TURNTransport === self.TURN_TRANSPORT.NONE) {
+    } else if (self._initOptions.TURNServerTransport === self.TURN_TRANSPORT.NONE) {
       iceServerPorts.tcp = [];
       iceServerPorts.udp = [];
     }
@@ -112,7 +112,7 @@ Skylink.prototype._setIceServers = function(passedIceServers) {
     });
   }
 
-  if (!self._usePublicSTUN) {
+  if (!self._initOptions.usePublicSTUN) {
     iceServers.splice(0, 1);
   }
 

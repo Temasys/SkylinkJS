@@ -61,7 +61,7 @@ Skylink.prototype.getPeers = function(showAll, callback){
 		log.warn('Please upgrade your key to privileged to use this function');
 		return;
 	}
-	if (!self._appKey){
+	if (!self._initOptions.appKey){
 		log.warn('App key is not defined. Please authenticate again.');
 		return;
 	}

@@ -534,8 +534,8 @@ Skylink.prototype._approachEventHandler = function(message){
     target: message.target,
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-    enableIceTrickle: self._enableIceTrickle,
-    enableDataChannel: self._enableDataChannel,
+    enableIceTrickle: self._initOptions.enableIceTrickle,
+    enableDataChannel: self._initOptions.enableDataChannel,
     enableIceRestart: self._enableIceRestart,
     SMProtocolVersion: self.SM_PROTOCOL_VERSION,
     DTProtocolVersion: self.DT_PROTOCOL_VERSION
@@ -904,8 +904,8 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._room.connection.peerConfig = self._setIceServers((message.pc_config || {}).iceServers || []);
   self._inRoom = true;
   self._user.sid = message.sid;
-  self._peerPriorityWeight = message.tieBreaker + (self._priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.AUTO ?
-    0 : (self._priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.ENFORCE_OFFERER ? 2e+15 : -(2e+15)));
+  self._peerPriorityWeight = message.tieBreaker + (self._initOptions.priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.AUTO ?
+    0 : (self._initOptions.priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.ENFORCE_OFFERER ? 2e+15 : -(2e+15)));
 
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
@@ -935,8 +935,8 @@ Skylink.prototype._inRoomHandler = function(message) {
     receiveOnly: self.getPeerInfo().config.receiveOnly,
     weight: self._peerPriorityWeight,
     temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-    enableIceTrickle: self._enableIceTrickle,
-    enableDataChannel: self._enableDataChannel,
+    enableIceTrickle: self._initOptions.enableIceTrickle,
+    enableDataChannel: self._initOptions.enableDataChannel,
     enableIceRestart: self._enableIceRestart,
     SMProtocolVersion: self.SM_PROTOCOL_VERSION,
     DTProtocolVersion: self.DT_PROTOCOL_VERSION
@@ -1058,8 +1058,8 @@ Skylink.prototype._enterHandler = function(message) {
       type: self._SIG_MESSAGE_TYPE.WELCOME,
       mid: self._user.sid,
       rid: self._room.id,
-      enableIceTrickle: self._enableIceTrickle,
-      enableDataChannel: self._enableDataChannel,
+      enableIceTrickle: self._initOptions.enableIceTrickle,
+      enableDataChannel: self._initOptions.enableDataChannel,
       enableIceRestart: self._enableIceRestart,
       agent: AdapterJS.webrtcDetectedBrowser,
       version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
@@ -1185,7 +1185,7 @@ Skylink.prototype._restartHandler = function(message){
     return;
   }
 
-  if (self._hasMCU && !self._mcuUseRenegoRestart) {
+  if (self._hasMCU && !self._initOptions.mcuUseRenegoRestart) {
     log.warn([targetMid, 'RTCPeerConnection', null, 'Dropping restart request as MCU does not support re-negotiation. ' +
       'Restart workaround is to re-join Room for Peer.']);
     self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false, false);
@@ -1230,8 +1230,8 @@ Skylink.prototype._restartHandler = function(message){
       userInfo: self._getUserInfo(targetMid),
       target: targetMid,
       weight: self._peerPriorityWeight,
-      enableIceTrickle: self._enableIceTrickle,
-      enableDataChannel: self._enableDataChannel,
+      enableIceTrickle: self._initOptions.enableIceTrickle,
+      enableDataChannel: self._initOptions.enableDataChannel,
       enableIceRestart: self._enableIceRestart,
       doIceRestart: message.doIceRestart === true,
       receiveOnly: self.getPeerInfo().config.receiveOnly,
@@ -1380,8 +1380,8 @@ Skylink.prototype._welcomeHandler = function(message) {
         type: self._SIG_MESSAGE_TYPE.WELCOME,
         mid: self._user.sid,
         rid: self._room.id,
-        enableIceTrickle: self._enableIceTrickle,
-        enableDataChannel: self._enableDataChannel,
+        enableIceTrickle: self._initOptions.enableIceTrickle,
+        enableDataChannel: self._initOptions.enableDataChannel,
         enableIceRestart: self._enableIceRestart,
         receiveOnly: self.getPeerInfo().config.receiveOnly,
         agent: AdapterJS.webrtcDetectedBrowser,
@@ -1596,8 +1596,8 @@ Skylink.prototype._candidateHandler = function(message) {
     return;
   }
 
-  if (this._filterCandidatesType[candidateType]) {
-    if (!(this._hasMCU && this._forceTURN)) {
+  if (this._initOptions.filterCandidatesType[candidateType]) {
+    if (!(this._hasMCU && this._initOptions.forceTURN)) {
       log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping received ICE candidate as ' +
         'it matches ICE candidate filtering flag ->'], candidate);
       this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,

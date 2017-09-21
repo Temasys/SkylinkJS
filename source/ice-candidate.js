@@ -37,8 +37,8 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       return;
     }
 
-    if (self._filterCandidatesType[candidateType]) {
-      if (!(self._hasMCU && self._forceTURN)) {
+    if (self._initOptions.filterCandidatesType[candidateType]) {
+      if (!(self._hasMCU && self._initOptions.forceTURN)) {
         log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
           'it matches ICE candidate filtering flag ->'], candidate);
         return;
@@ -62,7 +62,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidate: candidate.candidate
     });
 
-    if (!self._enableIceTrickle) {
+    if (!self._initOptions.enableIceTrickle) {
       log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
         'trickle ICE is disabled ->'], candidate);
       return;
@@ -93,7 +93,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED, targetMid);
 
     // Disable Ice trickle option
-    if (!self._enableIceTrickle) {
+    if (!self._initOptions.enableIceTrickle) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
       if (!(sessionDescription && sessionDescription.type && sessionDescription.sdp)) {

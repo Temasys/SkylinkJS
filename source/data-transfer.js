@@ -725,7 +725,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     return;
   }
 
-  if (!this._enableDataChannel) {
+  if (!this._initOptions.enableDataChannel) {
     log.error('Unable to send message as User does not have Datachannel enabled. ->', message);
     return;
   }
@@ -964,7 +964,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     return emitErrorBeforeStreamingFn('Unable to start data streaming as User is not in Room.');
   }
 
-  if (!this._enableDataChannel) {
+  if (!this._initOptions.enableDataChannel) {
     return emitErrorBeforeStreamingFn('Unable to start data streaming as User does not have Datachannel enabled.');
   }
 
@@ -976,7 +976,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     return emitErrorBeforeStreamingFn('Unable to start data streaming as this feature is current not supported by MCU yet.');
   }
 
-  if (!self._enableSimultaneousTransfers) {
+  if (!self._initOptions.enableSimultaneousTransfers) {
     return emitErrorBeforeStreamingFn('Unable to start data streaming as this feature requires simultaneous data transfers to be enabled');
   }
 
@@ -1024,7 +1024,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     var peerId = listOfPeers[i];
     var error = null;
     var dtProtocolVersion = ((self._peerInformations[peerId] || {}).agent || {}).DTProtocolVersion || '';
-    var channelProp = self._isLowerThanVersion(dtProtocolVersion, '0.1.2') || !self._enableSimultaneousTransfers ? 'main' : transferId;
+    var channelProp = self._isLowerThanVersion(dtProtocolVersion, '0.1.2') || !self._initOptions.enableSimultaneousTransfers ? 'main' : transferId;
 
     if (!(self._dataChannels[peerId] && self._dataChannels[peerId].main)) {
       error = 'Datachannel connection does not exists';
@@ -1672,7 +1672,7 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
     return;
   }
 
-  if (!self._enableDataChannel) {
+  if (!self._initOptions.enableDataChannel) {
     emitErrorBeforeDataTransferFn('Unable to send any ' +
       sessionType.replace('data', 'dataURL') + ' data. Datachannel is disabled');
     return;
@@ -1979,7 +1979,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var protocolVer = (self._peerInformations[peerId].agent || {}).DTProtocolVersion || '0.1.0';
-  var requireInterop = self._isLowerThanVersion(protocolVer, '0.1.2') || !self._enableSimultaneousTransfers;
+  var requireInterop = self._isLowerThanVersion(protocolVer, '0.1.2') || !self._initOptions.enableSimultaneousTransfers;
 
   // Prevent DATA_URL (or "string" dataType transfers) with Android / iOS / C++ SDKs
   if (self._isLowerThanVersion(protocolVer, '0.1.2') && self._dataTransfers[transferId].sessionType === 'data' &&

@@ -239,8 +239,8 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       },
       room: clone(this._selectedRoom),
       config: {
-        enableDataChannel: this._enableDataChannel,
-        enableIceTrickle: this._enableIceTrickle,
+        enableDataChannel: this._initOptions.enableDataChannel,
+        enableIceTrickle: this._initOptions.enableIceTrickle,
         enableIceRestart: this._enableIceRestart,
         priorityWeight: this._peerPriorityWeight,
         receiveOnly: false,
@@ -264,24 +264,24 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.settings.googleXBandwidth = clone(this._streamsBandwidthSettings.googleX);
     peerInfo.parentId = this._parentId ? this._parentId : null;
     peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
-    peerInfo.settings.data = this._enableDataChannel && this._sdpSettings.connection.data;
+    peerInfo.settings.data = this._initOptions.enableDataChannel && this._sdpSettings.connection.data;
 
     if (peerInfo.settings.audio && typeof peerInfo.settings.audio === 'object') {
       // Override the settings.audio.usedtx
-      if (typeof this._codecParams.audio.opus.stereo === 'boolean') {
-        peerInfo.settings.audio.stereo = this._codecParams.audio.opus.stereo;
+      if (typeof this._initOptions.codecParams.audio.opus.stereo === 'boolean') {
+        peerInfo.settings.audio.stereo = this._initOptions.codecParams.audio.opus.stereo;
       }
       // Override the settings.audio.usedtx
-      if (typeof this._codecParams.audio.opus.usedtx === 'boolean') {
-        peerInfo.settings.audio.usedtx = this._codecParams.audio.opus.usedtx;
+      if (typeof this._initOptions.codecParams.audio.opus.usedtx === 'boolean') {
+        peerInfo.settings.audio.usedtx = this._initOptions.codecParams.audio.opus.usedtx;
       }
       // Override the settings.audio.maxplaybackrate
-      if (typeof this._codecParams.audio.opus.maxplaybackrate === 'number') {
-        peerInfo.settings.audio.maxplaybackrate = this._codecParams.audio.opus.maxplaybackrate;
+      if (typeof this._initOptions.codecParams.audio.opus.maxplaybackrate === 'number') {
+        peerInfo.settings.audio.maxplaybackrate = this._initOptions.codecParams.audio.opus.maxplaybackrate;
       }
       // Override the settings.audio.useinbandfec
-      if (typeof this._codecParams.audio.opus.useinbandfec === 'boolean') {
-        peerInfo.settings.audio.useinbandfec = this._codecParams.audio.opus.useinbandfec;
+      if (typeof this._initOptions.codecParams.audio.opus.useinbandfec === 'boolean') {
+        peerInfo.settings.audio.useinbandfec = this._initOptions.codecParams.audio.opus.useinbandfec;
       }
     }
   }
@@ -592,7 +592,7 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
     var stream = self._peerConnections[peerId].localStream;
     var streamId = self._peerConnections[peerId].localStreamId || (stream && (stream.id || stream.label));
 
-    customSettings.settings.data = self._enableDataChannel && self._peerInformations[peerId].config.enableDataChannel;
+    customSettings.settings.data = self._initOptions.enableDataChannel && self._peerInformations[peerId].config.enableDataChannel;
 
     if (stream) {
       if (self._streams.screenshare && self._streams.screenshare.stream &&
@@ -609,7 +609,7 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
       }
 
       if (typeof self._peerConnections[peerId].getSenders === 'function' &&
-        !(self._useEdgeWebRTC && window.msRTCPeerConnection)) {
+        !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
         var senders = self._peerConnections[peerId].getSenders();
         var hasSendAudio = false;
         var hasSendVideo = false;

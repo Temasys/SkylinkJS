@@ -323,8 +323,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
   self._throttle(function (runFn) {
     if (!runFn) {
-      if (self._throttlingShouldThrowError) {
-        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.getUserMedia + 'ms).';
+      if (self._initOptions.throttlingShouldThrowError) {
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._initOptions.throttleIntervals.getUserMedia + 'ms).';
         log.error(throttleLimitError);
 
         if (typeof callback === 'function') {
@@ -384,7 +384,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       onErrorCbFn(error);
     }
 
-  }, 'getUserMedia', self._throttlingTimeouts.getUserMedia);
+  }, 'getUserMedia', self._initOptions.throttleIntervals.getUserMedia);
 };
 
 /**
@@ -1137,8 +1137,8 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 
   self._throttle(function (runFn) {
     if (!runFn) {
-      if (self._throttlingShouldThrowError) {
-        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.shareScreen + 'ms).';
+      if (self._initOptions.throttlingShouldThrowError) {
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._initOptions.throttleIntervals.shareScreen + 'ms).';
         log.error(throttleLimitError);
 
         if (typeof callback === 'function') {
@@ -1278,7 +1278,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-  }, 'shareScreen', self._throttlingTimeouts.shareScreen);
+  }, 'shareScreen', self._initOptions.throttleIntervals.shareScreen);
 };
 
 /**
@@ -1993,7 +1993,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 Skylink.prototype._onStreamAccessError = function(error, settings, isScreenSharing) {
   var self = this;
 
-  if (!isScreenSharing && settings.settings.audio && settings.settings.video && self._audioFallback) {
+  if (!isScreenSharing && settings.settings.audio && settings.settings.video && self._initOptions.audioFallback) {
     log.debug('Fallbacking to retrieve audio only Stream');
 
     self._trigger('mediaAccessFallback', {
@@ -2087,7 +2087,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
           if (updatedStream ? (pc.localStreamId ? updatedStream.id !== pc.localStreamId : true) : true) {
-            if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._useEdgeWebRTC && window.msRTCPeerConnection)) {
+            if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
               pc.getSenders().forEach(function (sender) {
                 pc.removeTrack(sender);
               });
@@ -2102,7 +2102,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
             }
 
             if (updatedStream) {
-              if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._useEdgeWebRTC && window.msRTCPeerConnection)) {
+              if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
                 updatedStream.getTracks().forEach(function (track) {
                   if ((track.kind === 'audio' && !offerToReceiveAudio) || (track.kind === 'video' && !offerToReceiveVideo)) {
                     return;
