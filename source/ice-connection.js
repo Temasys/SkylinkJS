@@ -56,7 +56,10 @@ Skylink.prototype._setIceServers = function(passedIceServers) {
   } else {
     iceServerName = iceServerName || 'turn.temasys.io';
 
-    if (AdapterJS.webrtcDetectedBrowser === 'edge') {
+    if (iceServerProtocol === 'turn' && !self._initOptions.enableTURNServer && !self._initOptions.forceTURNSSL) {
+      iceServerProtocol = 'stun';
+
+    } else if (AdapterJS.webrtcDetectedBrowser === 'edge') {
       iceServerPorts.udp = [3478];
       iceServerPorts.tcp = [];
       iceServerPorts.both = [];
@@ -99,21 +102,26 @@ Skylink.prototype._setIceServers = function(passedIceServers) {
       iceServerPorts.tcp = [];
     }
 
-    iceServerPorts.tcp.forEach(function (tcpPort) {
-      iceServers[1].urls.push(iceServerProtocol + ':' + iceServerName + ':' + tcpPort + '?transport=tcp');
-    });
+    if (iceServerProtocol === 'stun' && !self._initOptions.enableSTUNServer) {
+      iceServers = [];
 
-    iceServerPorts.udp.forEach(function (udpPort) {
-      iceServers[1].urls.push(iceServerProtocol + ':' + iceServerName + ':' + udpPort + '?transport=udp');
-    });
+    } else {
+      iceServerPorts.tcp.forEach(function (tcpPort) {
+        iceServers[1].urls.push(iceServerProtocol + ':' + iceServerName + ':' + tcpPort + '?transport=tcp');
+      });
 
-    iceServerPorts.both.forEach(function (bothPort) {
-      iceServers[1].urls.push(iceServerProtocol + ':' + iceServerName + ':' + bothPort);
-    });
+      iceServerPorts.udp.forEach(function (udpPort) {
+        iceServers[1].urls.push(iceServerProtocol + ':' + iceServerName + ':' + udpPort + '?transport=udp');
+      });
 
-    if (!self._initOptions.usePublicSTUN) {
-      iceServers.splice(0, 1);
-    } 
+      iceServerPorts.both.forEach(function (bothPort) {
+        iceServers[1].urls.push(iceServerProtocol + ':' + iceServerName + ':' + bothPort);
+      });
+
+      if (!self._initOptions.usePublicSTUN) {
+        iceServers.splice(0, 1);
+      }
+    }
   }
 
   log.log('Output iceServers configuration:', iceServers);  
