@@ -502,7 +502,7 @@ Skylink.prototype.init = function(_options, _callback) {
   options.TURNServerTransport = self._containsInList('TURN_TRANSPORT', options.TURNServerTransport, 'ANY');
 
   // `init({ credentials: { credentials: "xxxxx", startDateTime: "xxxxx", duration: 24 } })`
-  options.credentials = options.credentials && typeof options.credentials === 'string' &&
+  options.credentials = options.credentials && typeof options.credentials === 'object' &&
     options.credentials.startDateTime && typeof options.credentials.startDateTime === 'string' &&
     options.credentials.credentials && typeof options.credentials.credentials === 'string' &&
     typeof options.credentials.duration === 'number' ? options.credentials : null;
