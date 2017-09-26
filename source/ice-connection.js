@@ -49,8 +49,8 @@ Skylink.prototype._setIceServers = function(passedIceServers) {
   if (self._initOptions.iceServer) {
     iceServers = [{
       urls: self._initOptions.iceServer.urls,
-      username: iceServers[1].username,
-      credential: iceServers[1].credential
+      username: iceServers[1].username || null,
+      credential: iceServers[1].credential || null
     }];
 
   } else {
@@ -110,10 +110,10 @@ Skylink.prototype._setIceServers = function(passedIceServers) {
     iceServerPorts.both.forEach(function (bothPort) {
       iceServers[1].urls.push(iceServerProtocol + ':' + iceServerName + ':' + bothPort);
     });
-  }
 
-  if (!self._initOptions.usePublicSTUN) {
-    iceServers.splice(0, 1);
+    if (!self._initOptions.usePublicSTUN) {
+      iceServers.splice(0, 1);
+    } 
   }
 
   log.log('Output iceServers configuration:', iceServers);  
