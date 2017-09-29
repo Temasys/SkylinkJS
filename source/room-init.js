@@ -472,7 +472,7 @@ Skylink.prototype.init = function(_options, _callback) {
   options.forceTURN = options.forceTURN === true;
 
   // `init({ usePublicSTUN: false })`
-  options.usePublicSTUN = options.usePublicSTUN !== false;
+  options.usePublicSTUN = options.usePublicSTUN === true;
 
   // `init({ disableVideoFecCodecs: false })`
   options.disableVideoFecCodecs = options.disableVideoFecCodecs === true;
