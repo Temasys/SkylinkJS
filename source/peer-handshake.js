@@ -47,6 +47,21 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
     }
   }
 
+
+  /* Safari does not support createOffer with (offerToReceiveAudio: 1)
+   * So the following patch is needed until it is fixed in AdapterJS.
+   * AdapterJS ticket : https://github.com/webrtc/adapter/issues/661
+   */
+  if(window.webrtcDetectedBrowser === 'safari' && webrtcDetectedVersion >= 11 
+      && AdapterJS.webrtcDetectedType !== 'plugin'){
+      if (offerConstraints.offerToReceiveAudio) {
+        pc.addTransceiver('audio');
+      }
+      if (offerConstraints.offerToReceiveVideo) {
+        pc.addTransceiver('video');
+      }
+  }
+
   log.debug([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
 
   pc.endOfCandidates = false;
@@ -115,6 +130,21 @@ Skylink.prototype._doAnswer = function(targetMid) {
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === 'MCU') {
     self._addLocalMediaStreams(targetMid);
+  }
+
+
+  /* Safari does not support createOffer with (offerToReceiveAudio: 1)
+   * So the following patch is needed until it is fixed in AdapterJS.
+   * AdapterJS ticket : https://github.com/webrtc/adapter/issues/661
+   */
+  if(window.webrtcDetectedBrowser === 'safari' && webrtcDetectedVersion >= 11 
+      && AdapterJS.webrtcDetectedType !== 'plugin'){
+      if (answerConstraints.offerToReceiveAudio) {
+        pc.addTransceiver('audio');
+      }
+      if (answerConstraints.offerToReceiveVideo) {
+        pc.addTransceiver('video');
+      }
   }
 
   if (self._peerConnStatus[targetMid]) {
