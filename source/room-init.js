@@ -493,7 +493,7 @@ Skylink.prototype.init = function(_options, _callback) {
   options.useEdgeWebRTC = options.useEdgeWebRTC === true;
 
   // `init({ enableSimultaneousTransfers: true })`
-  options.enableSimultaneousTransfers = options.enableSimultaneousTransfers === true;
+  options.enableSimultaneousTransfers = options.enableSimultaneousTransfers !== false;
 
   // `init({ priorityWeightScheme: "auto" })`
   options.priorityWeightScheme = self._containsInList('PRIORITY_WEIGHT_SCHEME', self.priorityWeightScheme, 'AUTO');

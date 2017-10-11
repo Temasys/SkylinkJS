@@ -1775,7 +1775,7 @@ Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
   var partsB = (requiredVer || '').split('.');
 
   for (var i = 0; i < partsB.length; i++) {
-    if (parseInt(partsA[i] || '0', 10) < parseInt(partsB[i] || '0', 10)) {
+    if ((partsA[i] || '0') < (partsB[i] || '0')) {
       return true;
     }
   }

@@ -321,7 +321,7 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
     }
   };
 
-  if (!channelProp) {
+  if (!channelProp || channelProp === 'main') {
     for (var channelNameProp in self._dataChannels) {
       if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
         if (self._dataChannels[peerId][channelNameProp]) {
