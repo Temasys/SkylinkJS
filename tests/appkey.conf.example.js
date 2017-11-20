@@ -1,13 +1,15 @@
-var appkeys = {
+var config = {
 
-  p2p: {
-    id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-    secret: 'xxxxxxxxxxxxx'
-  },
+  appKeys: {
+    p2p: {
+      id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+      secret: 'xxxxxxxxxxxxx'
+    },
 
-  mcu: {
-    id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-    secret: 'xxxxxxxxxxxxx'
+    mcu: {
+      id: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
+      secret: 'xxxxxxxxxxxxx'
+    }
   }
 
 };
