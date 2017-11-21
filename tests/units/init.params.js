@@ -1,9 +1,9 @@
 /**
  * Tests the init() method.
  */
-describe('init()', function() {
+describe('init() - Parameters', function() {
 
-  var success = {
+  var returnSuccess = {
 
     /**
      * Tests `success.selectedRoom`.
@@ -168,8 +168,8 @@ describe('init()', function() {
     enableSTUNServer: function (scope) {
       it('Configures & returns success.enableSTUNServer correctly', function () {
         // Test the configured settings.
-        // Setting `options.forceTURN` force sets this value to false.
         expect(scope.skylink._initOptions.enableSTUNServer).to.eql(
+          // Setting `options.forceTURN` force sets this value to false.
           scope.skylink._initOptions.forceTURN ? false : scope.options.enableSTUNServer !== false);
         // Test returned output.
         expect(scope.result.success.enableSTUNServer).to.eql(scope.skylink._initOptions.enableSTUNServer);
@@ -373,6 +373,7 @@ describe('init()', function() {
         // Test the configured settings.
         expect(scope.skylink._initOptions.priorityWeightScheme).to.eql((function () {
           if (scope.options.priorityWeightScheme) {
+            // Check if property value exists.
             for (var property in Skylink.prototype.PRIORITY_WEIGHT_SCHEME) {
               if (Skylink.prototype.PRIORITY_WEIGHT_SCHEME[property] === scope.options.priorityWeightScheme) {
                 return scope.options.priorityWeightScheme;
@@ -380,6 +381,7 @@ describe('init()', function() {
             }
           }
 
+          // Return default property value.
           return Skylink.prototype.PRIORITY_WEIGHT_SCHEME.AUTO;
         })());
         // Test returned output.
@@ -396,6 +398,7 @@ describe('init()', function() {
         // Test the configured settings.
         expect(scope.skylink._initOptions.TURNServerTransport).to.eql((function () {
           if (scope.options.TURNServerTransport) {
+            // Check if property value exists.
             for (var property in Skylink.prototype.TURN_TRANSPORT) {
               if (Skylink.prototype.TURN_TRANSPORT[property] === scope.options.TURNServerTransport) {
                 return scope.options.TURNServerTransport;
@@ -403,6 +406,7 @@ describe('init()', function() {
             }
           }
 
+          // Return default property value.
           return Skylink.prototype.TURN_TRANSPORT.ANY;
         })());
         // Test returned output.
@@ -420,22 +424,26 @@ describe('init()', function() {
      */
     filterCandidatesType: function (scope) {
       it('Configures & returns success.filterCandidatesType correctly', function () {
-        // Test the configured settings.
-        // Setting `options.forceTURN` force sets this value to true.
+        // Test the configured `.host` settings.
         expect(scope.skylink._initOptions.filterCandidatesType.host).to.eql(
+          // Setting `options.forceTURN` force sets this value to true.
           scope.skylink._initOptions.forceTURN ? true :
           scope.options.filterCandidatesType.host && scope.options.filterCandidatesType.host === true);
-        // Setting `options.forceTURN` force sets this value to true.
+        // Test the configured `.srflx` settings.
         expect(scope.skylink._initOptions.filterCandidatesType.srflx).to.eql(
+          // Setting `options.forceTURN` force sets this value to true.
           scope.skylink._initOptions.forceTURN ? true :
           scope.options.filterCandidatesType.srflx && scope.options.filterCandidatesType.srflx === true);
-        // Setting `options.forceTURN` force sets this value to false.
+        // Test the configured `.relay` settings.
         expect(scope.skylink._initOptions.filterCandidatesType.relay).to.eql(
+          // Setting `options.forceTURN` force sets this value to true.
           scope.skylink._initOptions.forceTURN ? false :
           scope.options.filterCandidatesType.relay && scope.options.filterCandidatesType.relay === true);
-        // Test returned output.
+        // Test returned `.host` output.
         expect(scope.result.success.filterCandidatesType.host).to.eql(scope.skylink._initOptions.filterCandidatesType.host);
+        // Test returned `.srflx` output.
         expect(scope.result.success.filterCandidatesType.srflx).to.eql(scope.skylink._initOptions.filterCandidatesType.srflx);
+        // Test returned `.relay` output.
         expect(scope.result.success.filterCandidatesType.relay).to.eql(scope.skylink._initOptions.filterCandidatesType.relay);
       });
     },
@@ -450,19 +458,23 @@ describe('init()', function() {
      */
     throttleIntervals: function (scope) {
       it('Configures & returns success.throttleIntervals correctly', function () {
-        // Test the configured settings.
+        // Test the configured `.shareScreen` settings.
         expect(scope.skylink._initOptions.throttleIntervals.shareScreen).to.eql(
           scope.options.throttleIntervals && scope.options.throttleIntervals.shareScreen ?
           scope.options.shareScreen : 10000);
+        // Test the configured `.refreshConnection` settings.
         expect(scope.skylink._initOptions.throttleIntervals.refreshConnection).to.eql(
           scope.options.throttleIntervals && scope.options.throttleIntervals.refreshConnection ?
           scope.options.refreshConnection : 5000);
+        // Test the configured `.getUserMedia` settings.
         expect(scope.skylink._initOptions.throttleIntervals.getUserMedia).to.eql(
           scope.options.throttleIntervals && scope.options.throttleIntervals.getUserMedia ?
           scope.options.getUserMedia : 0);
-        // Test returned output.
+        // Test returned `.shareScreen` output.
         expect(scope.result.success.throttleIntervals.shareScreen).to.eql(scope.skylink._initOptions.throttleIntervals.shareScreen);
+        // Test returned `.refreshConnection` output.
         expect(scope.result.success.throttleIntervals.refreshConnection).to.eql(scope.skylink._initOptions.throttleIntervals.refreshConnection);
+        // Test returned `.getUserMedia` output.
         expect(scope.result.success.throttleIntervals.getUserMedia).to.eql(scope.skylink._initOptions.throttleIntervals.getUserMedia);
       });
     },
@@ -470,19 +482,21 @@ describe('init()', function() {
     /**
      * Tests `success.iceServer`.
      * Defaults: null
-     * Returned as `{ urls: [] }` when configured.
+     * Returned as JSON when configured as Array or String: {
+     *   urls: []
+     * }
      */
     iceServer: function (scope) {
       it('Configures & returns success.iceServer correctly', function () {
         var output = null;
 
-        // When provided as `['xxxx', 'xxxx']`. Requires a length greater than 0.
+        // When provided as `['turn:xxxx1.com', 'turn:xxxx2.com']`. Requires a length greater than 0.
         if (Array.isArray(scope.options.iceServer) && scope.options.iceServer.length > 0) {
           output = {
             urls: scope.options.iceServer
           };
 
-        // When provided as `'xxxx'`.
+        // When provided as `'turn:xxxx1.com'`.
         } else if (scope.options.iceServer && typeof scope.options.iceServer === 'string') {
           output = {
             urls: [scope.options.iceServer]
@@ -499,115 +513,508 @@ describe('init()', function() {
     /**
      * Tests `success.socketServer`.
      * Defaults: null
-     * Returned as `{ url: 'xxx', ports: [xx, xx], transports: [xx, xx] }` or as `'xxx'` as configured.
+     * Returned as String when configured as String: `https://sig-xxxx.com`
+     * Returned as JSON when configured as JSON. Requires `.url` to be defined: {
+     *   url: 'sig-xxx.com',
+     *   ports: [443, 3443],
+     *   protocol: 'https:'
+     * }
      */
     socketServer: function (scope) {
       it('Configures & returns success.socketServer correctly', function () {
         var output = null;
 
-        // When provided as `['xxxx', 'xxxx']`. Requires a length greater than 0.
-        if (Array.isArray(scope.options.iceServer) && scope.options.iceServer.length > 0) {
+        // When provided as `{ url: 'sig-xxx.com' }`.
+        if (scope.options.socketServer && scope.options.socketServer.url) {
           output = {
-            urls: scope.options.iceServer
+            url: scope.options.socketServer.url,
+            // When provided as `{ ports: [xxx] }`. Requires a length greater than 0.
+            ports: Array.isArray(scope.options.socketServer.ports) &&
+              // Should it be defined as `[]` or `null`. Ambigious documentation here.
+              scope.options.socketServer.ports.length > 0 ? scope.options.socketServer.ports : [],
+            // When provided as `{ protocol: 'https:' }.
+            protocol: scope.options.socketServer.protocol || null
           };
 
-        // When provided as `'xxxx'`.
-        } else if (scope.options.iceServer && typeof scope.options.iceServer === 'string') {
-          output = {
-            urls: [scope.options.iceServer]
-          };
+        // When provided as `'https://sig-xxx.com'`.
+        } else if (scope.options.socketServer && typeof scope.options.socketServer === 'string') {
+          output = scope.options.socketServer;
         }
 
         // Test the configured settings.
-        expect(scope.skylink._initOptions.iceServer).to.eql(output);
+        expect(scope.skylink._initOptions.socketServer).to.eql(output);
         // Test returned output.
-        expect(scope.result.options.iceServer).to.eql(scope.skylink._initOptions.iceServer);
+        expect(scope.result.options.socketServer).to.eql(scope.skylink._initOptions.socketServer);
       });
     },
 
-  }
+    /**
+     * Tests `success.audioCodec`.
+     * Defaults: AUDIO_CODEC.AUTO
+     */
+    audioCodec: function (scope) {
+      it('Configures & returns success.audioCodec correctly', function () {
+        // Test the configured settings.
+        expect(scope.skylink._initOptions.audioCodec).to.eql((function () {
+          if (scope.options.audioCodec) {
+            // Check if property value exists.
+            for (var property in Skylink.prototype.AUDIO_CODEC) {
+              if (Skylink.prototype.AUDIO_CODEC[property] === scope.options.audioCodec) {
+                return scope.options.audioCodec;
+              }
+            }
+          }
+
+          // Return default property value.
+          return Skylink.prototype.AUDIO_CODEC.AUTO;
+        })());
+        // Test returned output.
+        expect(scope.result.success.audioCodec).to.eql(scope.skylink._initOptions.audioCodec);
+      });
+    },
+
+    /**
+     * Tests `success.videoCodec`.
+     * Defaults: VIDEO_CODEC.AUTO
+     */
+    videoCodec: function (scope) {
+      it('Configures & returns success.videoCodec correctly', function () {
+        // Test the configured settings.
+        expect(scope.skylink._initOptions.videoCodec).to.eql((function () {
+          if (scope.options.videoCodec) {
+            // Check if property value exists.
+            for (var property in Skylink.prototype.VIDEO_CODEC) {
+              if (Skylink.prototype.VIDEO_CODEC[property] === scope.options.videoCodec) {
+                return scope.options.videoCodec;
+              }
+            }
+          }
+
+          // Return default property value.
+          return Skylink.prototype.VIDEO_CODEC.AUTO;
+        })());
+        // Test returned output.
+        expect(scope.result.success.videoCodec).to.eql(scope.skylink._initOptions.videoCodec);
+      });
+    },
+
+    /**
+     * Tests `success.codecParams`.
+     * Defaults: {
+     *   video: { h264: {}, vp8: {}, vp9: {} },
+     *   audio: { opus: {} }
+     * }
+     */
+    codecParams: function (scope) {
+      it('Configures & returns success.codecParams correctly', function () {
+        var output = {
+          video: { h264: {}, vp8: {}, vp9: {} },
+          audio: { opus: {} }
+        };
+
+        // When provided as `{ .. }`.
+        if (scope.skylink.options.codecParams) {
+          // When provided as `{ video: { .. } }`.
+          if (scope.skylink.options.codecParams.video) {
+            // When provided as `{ video: { h264: { .. } } }`.
+            if (scope.skylink.options.codecParams.video.h264) {
+              output.video.h264 = {
+                // When provided as `{ profileLevelId: 'xxx' }`.
+                profileLevelId: scope.skylink.options.codecParams.video.h264.profileLevelId || null,
+                // When provided as `{ levelAsymmetryAllowed: false }`.
+                levelAsymmetryAllowed: typeof scope.skylink.options.codecParams.video.h264.levelAsymmetryAllowed === 'boolean' ?
+                  scope.skylink.options.codecParams.video.h264.levelAsymmetryAllowed : null,
+                // When provided as `{ packetizationMode: 1 }`.
+                packetizationMode: typeof scope.skylink.options.codecParams.video.h264.packetizationMode === 'number' ?
+                  scope.skylink.options.codecParams.video.h264.packetizationMode : null,
+              };
+            }
+
+            // When provided as `{ video: { vp8: { .. } } }`.
+            if (scope.skylink.options.codecParams.video.vp8) {
+              output.video.vp8 = {
+                // When provided as `{ maxFr: 100 }`.
+                maxFr: typeof scope.skylink.options.codecParams.video.vp8.maxFr === 'number' ?
+                  scope.skylink.options.codecParams.video.vp8.maxFr : null,
+                // When provided as `{ maxFs: 100 }`.
+                maxFs: typeof scope.skylink.options.codecParams.video.vp8.maxFs === 'number' ?
+                  scope.skylink.options.codecParams.video.vp8.maxFs : null
+              };
+            }
+
+            // When provided as `{ video: { vp9: { .. } } }`.
+            if (scope.skylink.options.codecParams.video.vp9) {
+              output.video.vp9 = {
+                // When provided as `{ maxFr: 100 }`.
+                maxFr: typeof scope.skylink.options.codecParams.video.vp9.maxFr === 'number' ?
+                  scope.skylink.options.codecParams.video.vp9.maxFr : null,
+                // When provided as `{ maxFs: 100 }`.
+                maxFs: typeof scope.skylink.options.codecParams.video.vp9.maxFs === 'number' ?
+                  scope.skylink.options.codecParams.video.vp9.maxFs : null
+              };
+            }
+          }
+
+          // When provided as `{ audio: { .. } }`.
+          if (scope.skylink.options.codecParams.audio) {
+            // When provided as `{ audio: { opus: { .. } } }`.
+            if (scope.skylink.options.codecParams.audio.opus) {
+              output.audio.opus = {
+                // When provided as `{ stereo: false }`.
+                stereo: typeof scope.skylink.options.codecParams.audio.opus.stereo === 'boolean' ?
+                  scope.skylink.options.codecParams.audio.opus.stereo : null,
+                // When provided as `{ sprop-stereo: false }`.
+                'sprop-stereo': typeof scope.skylink.options.codecParams.audio.opus['sprop-stereo'] === 'boolean' ?
+                  scope.skylink.options.codecParams.audio.opus['sprop-stereo'] : null,
+                // When provided as `{ usedtx: false }`.
+                usedtx: typeof scope.skylink.options.codecParams.audio.opus.usedtx === 'boolean' ?
+                  scope.skylink.options.codecParams.audio.opus.usedtx : null,
+                // When provided as `{ useinbandfec: false }`.
+                useinbandfec: typeof scope.skylink.options.codecParams.audio.opus.useinbandfec === 'boolean' ?
+                  scope.skylink.options.codecParams.audio.opus.useinbandfec : null,
+                // When provided as `{ maxplaybackrate: 8000 }`. Range: 8000 - 48000.
+                maxplaybackrate: typeof scope.skylink.options.codecParams.audio.opus.maxplaybackrate === 'number' &&
+                  scope.skylink.options.codecParams.audio.opus.maxplaybackrate >= 8000 &&
+                  scope.skylink.options.codecParams.audio.opus.maxplaybackrate <= 48000 ?
+                  scope.skylink.options.codecParams.audio.opus.maxplaybackrate : null,
+                // When provided as `{ minptime: 10 }`.
+                minptime: typeof scope.skylink.options.codecParams.audio.opus.minptime === 'number' ?
+                  scope.skylink.options.codecParams.audio.opus.minptime : null
+              };
+            }
+          }
+        }
+
+        // Test the configured settings.
+        expect(scope.skylink._initOptions.codecParams).to.eql(output)
+        // Test returned output.
+        expect(scope.result.success.codecParams).to.eql(scope.skylink._initOptions.codecParams);
+      });
+    }
+
+  };
 
 
-  function successFields (scope, options) {
+  var returnError = {
 
-    // Tests success.roomServer
-    it('Returned success.roomServer is configured correctly', function () {
-      var roomServer = scope.config.roomServer || scope.result.success.roomServer;
+    /**
+     * Tests `error.errorCode`.
+     */
+    errorCode: function (scope, expected) {
 
-      expect(scope.result.success.credentials).to.eql(roomServer);
-      expect(scope.skylink._initOptions.credentials).to.eql(roomServer);
-    });
+    },
 
-"socketServer":null,"audioCodec":"auto","videoCodec":"auto","codecParams":{"audio":{"opus":{"stereo":null,"sprop-stereo":null,"usedtx":null,"useinbandfec":null,"maxplaybackrate":null,"minptime":null}},"video":{"h264":{"profileLevelId":null,"levelAsymmetryAllowed":null,"packetizationMode":null},"vp8":{"maxFs":null,"maxFr":null},"vp9":{"maxFs":null,"maxFr":null}}}}
+    /**
+     * Tests `error.error`.
+     */
+    error: function (scope) {
 
+    },
 
-  }
+    /**
+     * Tests `error.status`.
+     */
+    status: function (scope) {
+
+    }
+
+  };
 
   /**
-   * Tests `init(appKey)`
+   * Tests `init(callback)`
    */
-  describe('When provided as (appKey)', function () {
+  /*describe('When provided as (callback)', function () {
     var scope = this;
-    scope.skylink = new Skylink();
-    scope.config = {
-      appKey: config.p2p.appKey
-    };
 
-    before(function (done) {
-      skylink.init(scope.config.appKey, function (error, success) {
+    /**
+     * Starts the test.
+     */
+    /*it('Should return as (error, ...)', function (done) {
+      // Stores the init() options.
+      scope.config = undefined;
+      // Stores the init() callback result.
+      scope.result = {};
+      // Invokes the init() method.
+      scope.skylink = new Skylink();
+      scope.skylink.init(function (error, success) {
         scope.result.error = error;
         scope.result.success = success;
+        // error should be defined.
+        assert.isN(scope.result.error);
+        // success should not be defined.
+        assert.isNull(scope.result.success);
         done();
       });
     });
 
-    fields.appKey(scope);
+    returnError.errorCode(scope);
+    returnError.error(scope);
+    returnError.status(scope);
+  });
 
+  /**
+   * Tests `init(appKey, callback)`
+   */
+  describe('When provided as (appKey, callback)', function () {
+    var scope = this;
 
-    successFields(scope);
+    /**
+     * Starts the test.
+     */
+    it('Should return as (.., success)', function (done) {
+      // Stores the init() options.
+      scope.options = config.p2p.appKey;
+      // Stores the init() callback result.
+      scope.result = {};
+      // Invokes the init() method.
+      scope.skylink = new Skylink();
+      scope.skylink.init(scope.options, function (error, success) {
+        scope.result.error = error;
+        scope.result.success = success;
+        // error should be null.
+        assert.isNull(scope.result.error);
+        // success should not be null.
+        assert.isNotNull(scope.result.success);
+        console.error(JSON.stringify(scope.result.success));
+        done();
+      });
+    });
+
+    returnSuccess.appKey(scope);
+    returnSuccess.defaultRoom(scope);
+    returnSuccess.selectedRoom(scope);
+
+    /*describe('Test defaults parameters', function () {
+      returnSuccess.serverUrl(scope);
+      returnSuccess.readyState(scope);
+      returnSuccess.useEdgeWebRTC(scope);
+      returnSuccess.credentials(scope);
+      returnSuccess.roomServer(scope);
+      returnSuccess.enableIceTrickle(scope);
+      returnSuccess.enableDataChannel(scope);
+      returnSuccess.enableSTUNServer(scope);
+      returnSuccess.enableTURNServer(scope);
+      returnSuccess.audioFallback(scope);
+      returnSuccess.forceSSL(scope);
+      returnSuccess.socketTimeout(scope);
+      returnSuccess.apiTimeout(scope);
+      returnSuccess.forceTURNSSL(scope);
+      returnSuccess.forceTURN(scope);
+      returnSuccess.usePublicSTUN(scope);
+      returnSuccess.disableVideoFecCodecs(scope);
+      returnSuccess.disableComfortNoiseCodec(scope);
+      returnSuccess.disableREMB(scope);
+      returnSuccess.throttleShouldThrowError(scope);
+      returnSuccess.mcuUseRenegoRestart(scope);
+      returnSuccess.enableSimultaneousTransfers(scope);
+      returnSuccess.priorityWeightScheme(scope);
+      returnSuccess.TURNServerTransport(scope);
+      returnSuccess.filterCandidatesType(scope);
+      returnSuccess.throttleIntervals(scope);
+      returnSuccess.iceServer(scope);
+      returnSuccess.socketServer(scope);
+      returnSuccess.audioCodec(scope);
+      returnSuccess.videoCodec(scope);
+      returnSuccess.codecParams(scope);
+    });*/
+  });
+
+  /**
+   * Tests `init({ appKey: .. }, callback)`
+   */
+  /*describe('When provided as ({ appKey: .. }, callback)', function () {
+    var scope = this;
+
+    /**
+     * Starts the test.
+     */
+    /*it('Should return as (.., success)', function (done) {
+      // Stores the init() options.
+      scope.config = {
+        appKey: config.p2p.appKey
+      };
+      // Stores the init() callback result.
+      scope.result = {};
+      // Invokes the init() method.
+      scope.skylink = new Skylink();
+      scope.skylink.init(scope.config, function (error, success) {
+        scope.result.error = error;
+        scope.result.success = success;
+        // error should not be defined.
+        assert.isUndefined(scope.result.error);
+        // success should be defined.
+        assert.isDefined(scope.result.success);
+        done();
+      });
+    });
+
+    returnSuccess.appKey(scope);
+    returnSuccess.defaultRoom(scope);
+    returnSuccess.selectedRoom(scope);
+  });
+
+  /**
+   * Tests `init({ apiKey: .. }, callback)`
+   */
+  /*describe('When provided as ({ apiKey: .. }, callback)', function () {
+    var scope = this;
+
+    /**
+     * Starts the test.
+     */
+    /*it('Should return as (.., success)', function (done) {
+      // Stores the init() options.
+      scope.config = {
+        apiKey: config.p2p.appKey
+      };
+      // Stores the init() callback result.
+      scope.result = {};
+      // Invokes the init() method.
+      scope.skylink = new Skylink();
+      scope.skylink.init(scope.config, function (error, success) {
+        scope.result.error = error;
+        scope.result.success = success;
+        // error should not be defined.
+        assert.isUndefined(scope.result.error);
+        // success should be defined.
+        assert.isDefined(scope.result.success);
+        done();
+      });
+    });
+
+    returnSuccess.appKey(scope);
+    returnSuccess.defaultRoom(scope);
+    returnSuccess.selectedRoom(scope);
+  });
+
+  /**
+   * Tests `init({ appKey: .., defaultRoom: .. }, callback)`
+   */
+  /*describe('When provided as ({ appKey: .., defaultRoom: .. }, callback)', function () {
+    var scope = this;
+
+    /**
+     * Starts the test.
+     */
+    /*it('Should return as (.., success)', function (done) {
+      // Stores the init() options.
+      scope.config = {
+        appKey: config.p2p.appKey,
+        defaultRoom: 'test_' + (new Date()).getTime()
+      };
+      // Stores the init() callback result.
+      scope.result = {};
+      // Invokes the init() method.
+      scope.skylink = new Skylink();
+      scope.skylink.init(scope.config, function (error, success) {
+        scope.result.error = error;
+        scope.result.success = success;
+        // error should not be defined.
+        assert.isUndefined(scope.result.error);
+        // success should be defined.
+        assert.isDefined(scope.result.success);
+        done();
+      });
+    });
+
+    returnSuccess.defaultRoom(scope);
+    returnSuccess.selectedRoom(scope);
   });
 
 
+  /**
+   * Tests `init({ appKey: .., useEdgeWebRTC: .. }, callback)`
+   */
+  /*describe('When provided as ({ appKey: .., useEdgeWebRTC: .. }, callback)', function () {
+    var scope = this;
 
-  /*describe('Error cases', function () {
-
-    it('When app key is invalid', function (done) {
-      var skylink = new Skylink();
-      var testKey = appkeys.p2p.id + '-1';
-      var states = [];
-
-      skylink.on('readyStateChange', function (readyState, error, room) {
-
-        states.push({
-          readyState: readyState,
-          error: error,
-          room: room
-        });
-
-      });
-
-      skylink.init(testKey, function (error, success) {
-
-        it('readyStateChange[0] is INIT', function () {
-          expect(states[0].readyState).to.eql(Skylink.prototype.READY_STATE_CHANGE.INIT);
-          expect(states[0].error).to.eql(null);
-          expect(states[0].room).to.eql(testKey);
-        });
-
-        it('readyStateChange[1] is ERROR', function () {
-          expect(states[0].readyState).to.eql(Skylink.prototype.READY_STATE_CHANGE.ERROR);
-          expect(states[0].error.status).to.not.eql(200);
-          assert.isNumber(states[0].error.errorCode);
-          assert.ifError(states[0].error.content);
-          expect(states[0].room).to.eql(testKey);
-        });
-
+    /**
+     * Starts the test.
+     */
+    /*it('Should return as (.., success)', function (done) {
+      // Stores the init() options.
+      scope.config = {
+        appKey: config.p2p.appKey,
+        useEdgeWebRTC: true
+      };
+      // Stores the init() callback result.
+      scope.result = {};
+      // Invokes the init() method.
+      scope.skylink = new Skylink();
+      scope.skylink.init(scope.config, function (error, success) {
+        scope.result.error = error;
+        scope.result.success = success;
+        // error should not be defined.
+        assert.isUndefined(scope.result.error);
+        // success should be defined.
+        assert.isDefined(scope.result.success);
         done();
-
       });
-
     });
 
+    returnSuccess.useEdgeWebRTC(scope);
+  });
+
+  /**
+   * Tests `init({ appKey: .., defaultRoom: .. }, callback)`
+   */
+  /*describe('When provided as ({ appKey: .., defaultRoom: .. }, callback)', function () {
+    var scope = this;
+
+    /**
+     * Starts the test.
+     */
+    /*it('Should return as (.., success)', function (done) {
+      // Stores the init() options.
+      scope.config = {
+        appKey: config.p2p.appKey,
+        defaultRoom: 'test_' + (new Date()).getTime()
+      };
+      // Stores the init() callback result.
+      scope.result = {};
+      // Invokes the init() method.
+      scope.skylink = new Skylink();
+      scope.skylink.init(scope.config, function (error, success) {
+        scope.result.error = error;
+        scope.result.success = success;
+        // error should not be defined.
+        assert.isUndefined(scope.result.error);
+        // success should be defined.
+        assert.isDefined(scope.result.success);
+        done();
+      });
+    });
+
+    returnSuccess.useEdgeWebRTC(scope);
+    returnSuccess.credentials(scope);
+    returnSuccess.roomServer(scope);
+    returnSuccess.enableIceTrickle(scope);
+    returnSuccess.enableDataChannel(scope);
+    returnSuccess.enableSTUNServer(scope);
+    returnSuccess.enableTURNServer(scope);
+    returnSuccess.audioFallback(scope);
+    returnSuccess.forceSSL(scope);
+    returnSuccess.socketTimeout(scope);
+    returnSuccess.apiTimeout(scope);
+    returnSuccess.forceTURNSSL(scope);
+    returnSuccess.forceTURN(scope);
+    returnSuccess.usePublicSTUN(scope);
+    returnSuccess.disableVideoFecCodecs(scope);
+    returnSuccess.disableComfortNoiseCodec(scope);
+    returnSuccess.disableREMB(scope);
+    returnSuccess.throttleShouldThrowError(scope);
+    returnSuccess.mcuUseRenegoRestart(scope);
+    returnSuccess.enableSimultaneousTransfers(scope);
+    returnSuccess.priorityWeightScheme(scope);
+    returnSuccess.TURNServerTransport(scope);
+    returnSuccess.filterCandidatesType(scope);
+    returnSuccess.throttleIntervals(scope);
+    returnSuccess.iceServer(scope);
+    returnSuccess.socketServer(scope);
+    returnSuccess.audioCodec(scope);
+    returnSuccess.videoCodec(scope);
+    returnSuccess.codecParams(scope);
   });*/
+
 
 });
