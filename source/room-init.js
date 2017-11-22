@@ -460,7 +460,7 @@ Skylink.prototype.init = function(_options, _callback) {
   options.forceSSL = options.forceSSL !== false;
 
   // `init({ socketTimeout: 20000 })`
-  options.socketTimeout = typeof options.socketTimeout === 'number' && options.socketTimeout <= 5000 ? options.socketTimeout : 7000;
+  options.socketTimeout = typeof options.socketTimeout === 'number' && options.socketTimeout >= 5000 ? options.socketTimeout : 7000;
 
   // `init({ socketTimeout: 4000 })`
   options.apiTimeout = typeof options.apiTimeout === 'number' ? options.apiTimeout : 4000;
@@ -496,7 +496,7 @@ Skylink.prototype.init = function(_options, _callback) {
   options.enableSimultaneousTransfers = options.enableSimultaneousTransfers !== false;
 
   // `init({ priorityWeightScheme: "auto" })`
-  options.priorityWeightScheme = self._containsInList('PRIORITY_WEIGHT_SCHEME', self.priorityWeightScheme, 'AUTO');
+  options.priorityWeightScheme = self._containsInList('PRIORITY_WEIGHT_SCHEME', options.priorityWeightScheme, 'AUTO');
 
   // `init({ TURNServerTransport: "any" })`
   options.TURNServerTransport = self._containsInList('TURN_TRANSPORT', options.TURNServerTransport, 'ANY');
@@ -706,7 +706,7 @@ Skylink.prototype.init = function(_options, _callback) {
       success.selectedRoom = self._selectedRoom;
       success.TURNTransport = success.TURNServerTransport;
   
-      callback(null, options);
+      callback(null, success);
       return true;
     }
   });
@@ -786,9 +786,26 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       }
       completed = true;
       var response = JSON.parse(xhr.responseText || xhr.response || '{}');
-      var status = xhr.status || 200;
-      log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters ->'], response);
-      callback(status, response);
+      var status = xhr.status || (response.success ? 200 : 400);
+
+      if (response.success) {
+      	log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters ->'], response);
+      	callback(response);
+      	return;
+      }
+
+      log.error([null, 'XMLHttpRequest', method, 'Failed retrieving sessions parameters ->'], response);
+
+      // 400 - Bad request
+      // 403 - Room is locked
+      // 401 - API Not authorized
+      // 402 - run out of credits
+      self._readyState = self.READY_STATE_CHANGE.ERROR;
+      self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
+        status: status,
+        content: new Error(response.info || 'XMLHttpRequest status not OK\nStatus was: ' + status),
+        errorCode: response.error || status
+      }, self._selectedRoom);
     };
   
     xhr.onerror = function (error) {
@@ -800,7 +817,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
 
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-        status: xhr.status || null,
+        status: xhr.status || -1,
         content: new Error('Network error occurred. (Status: ' + xhr.status + ')'),
         errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_REQUEST_ERROR
       }, self._selectedRoom);
@@ -825,7 +842,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       completed = true;
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-        status: xhr.status || null,
+        status: xhr.status || -1,
         content: new Error('Failed starting XHR process.'),
         errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_REQUEST_ERROR
       }, self._selectedRoom);
@@ -848,7 +865,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       } else {
         self._readyState = self.READY_STATE_CHANGE.ERROR;
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-          status: xhr.status || null,
+          status: xhr.status || -1,
           content: new Error('Response timed out from API server'),
           errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_NO_REPONSE_ERROR
         }, self._selectedRoom);
@@ -938,7 +955,7 @@ Skylink.prototype._loadInfo = function() {
   if (typeof (globals.AdapterJS || window.AdapterJS || {}).webRTCReady !== 'function') {
     var noAdapterErrorMsg = 'AdapterJS dependency is not loaded or incorrect AdapterJS dependency is used';
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: null,
+      status: -2,
       content: new Error(noAdapterErrorMsg),
       errorCode: self.READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED
     }, self._selectedRoom);
@@ -948,7 +965,7 @@ Skylink.prototype._loadInfo = function() {
     log.error('Socket.io not loaded. Please load socket.io');
     self._readyState = self.READY_STATE_CHANGE.ERROR;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: null,
+      status: -2,
       content: new Error('Socket.io not found'),
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_SOCKET_IO
     }, self._selectedRoom);
@@ -958,7 +975,7 @@ Skylink.prototype._loadInfo = function() {
     log.error('XMLHttpRequest not supported. Please upgrade your browser');
     self._readyState = self.READY_STATE_CHANGE.ERROR;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: null,
+      status: -2,
       content: new Error('XMLHttpRequest not available'),
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT
     }, self._selectedRoom);
@@ -968,7 +985,7 @@ Skylink.prototype._loadInfo = function() {
     log.error('Skylink is not initialised. Please call init() first');
     self._readyState = self.READY_STATE_CHANGE.ERROR;
     self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-      status: null,
+      status: -2,
       content: new Error('No API Path is found'),
       errorCode: self.READY_STATE_CHANGE_ERROR.NO_PATH
     }, self._selectedRoom);
@@ -998,7 +1015,7 @@ Skylink.prototype._loadInfo = function() {
       }
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-        status: null,
+        status: -2,
         content: new Error(AdapterJS.webrtcDetectedType === 'plugin' && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available'),
         errorCode: self.READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT
       }, self._selectedRoom);
@@ -1010,7 +1027,7 @@ Skylink.prototype._loadInfo = function() {
         log.error(error);
         self._readyState = self.READY_STATE_CHANGE.ERROR;
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-          status: null,
+          status: -2,
           content: new Error(error.message || error.toString()),
           errorCode: self.READY_STATE_CHANGE_ERROR.PARSE_CODECS
         }, self._selectedRoom);
@@ -1021,7 +1038,7 @@ Skylink.prototype._loadInfo = function() {
         log.error('No audio/video codecs available to start connection.');
         self._readyState = self.READY_STATE_CHANGE.ERROR;
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-          status: null,
+          status: -2,
           content: new Error('No audio/video codecs available to start connection'),
           errorCode: self.READY_STATE_CHANGE_ERROR.PARSE_CODECS
         }, self._selectedRoom);
@@ -1030,20 +1047,7 @@ Skylink.prototype._loadInfo = function() {
 
       self._readyState = self.READY_STATE_CHANGE.LOADING;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
-      self._requestServerInfo('GET', self._path, function(status, response) {
-        if (status !== 200) {
-          // 403 - Room is locked
-          // 401 - API Not authorized
-          // 402 - run out of credits
-          var errorMessage = 'XMLHttpRequest status not OK\nStatus was: ' + status;
-          self._readyState = self.READY_STATE_CHANGE.ERROR;
-          self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
-            status: status,
-            content: new Error(response ? (response.info || errorMessage) : errorMessage),
-            errorCode: response.error || self.READY_STATE_CHANGE_ERROR.INVALID_XMLHTTPREQUEST_STATUS
-          }, self._selectedRoom);
-          return;
-        }
+      self._requestServerInfo('GET', self._path, function(response) {
         self._parseInfo(response);
       });
     });
