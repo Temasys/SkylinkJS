@@ -12,9 +12,16 @@ module.exports = function(config) {
 
     // list of files / patterns to load in the browser
     files: [
-        { pattern: '../publish/skylink.complete.js', included: true },
-        { pattern: 'appkey.conf.js', included: true, served: true },
-        { pattern: 'units/*.js', included: true, served: true },
+        { pattern: '../node_modules/socket.io-client/socket.io.js' },
+        { pattern: '../node_modules/adapterjs/publish/adapter.screenshare.js' },
+        { pattern: '../publish/skylink.debug.js' },
+        { pattern: 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js' },
+        { pattern: 'https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js' },
+        { pattern: 'test.conf.js' },
+        { pattern: 'utils.js' },
+        { pattern: 'units/*.success.js' },
+        { pattern: 'units/*.error.js' },
+        { pattern: 'units/*.js' },
     ],
 
 
@@ -45,7 +52,7 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_ERROR,
+    logLevel: config.LOG_DISABLE,
 
 
     // enable / disable watching file and executing tests whenever any file changes
@@ -55,6 +62,7 @@ module.exports = function(config) {
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
     browsers: [
+        // Let's run on Chrome for now.
         'Chrome',
         //'Firefox',
         //'Safari',
@@ -70,7 +78,14 @@ module.exports = function(config) {
 
     // Concurrency level
     // how many browser should be started simultaneous
-    concurrency: Infinity
+    concurrency: Infinity,
+
+    // If mocha should exit when there is 1 error
+    /*client: {
+      mocha: {
+        bail: true
+      }
+    }*/
 
   })
 }

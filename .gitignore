@@ -57,4 +57,4 @@ dwsync.xml
 bamboo
 demo/**/config.js
 tests/config.js
-tests/appkey.conf.js
+tests/test.conf.js
