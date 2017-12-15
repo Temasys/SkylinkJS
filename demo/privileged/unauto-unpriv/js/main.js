@@ -231,20 +231,23 @@ Demo.Skylink.on('incomingStream', function (peerId, stream, isSelf, peerInfo){
     peerVideo = document.createElement('video');
     peerVideo.id = 'video' + peerId;
     peerVideo.className = 'col-md-6';
-    if (window.webrtcDetectedBrowser !== 'IE') {
-      peerVideo.autoplay = 'autoplay';
-    }
+    peerVideo.autoplay = true;
+    peerVideo.muted = isSelf;
+    peerVideo.controls = true;
+    peerVideo.setAttribute('playsinline', true);
 
-    // mutes user's video
-    if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
-      peerVideo.muted = 'muted';
-    }
     $('#peer_video_list').append(peerVideo);
+
+    setTimeout(function () {
+      peerVideo.removeAttribute('controls');
+    });
+
   } else {
     peerVideo = document.getElementById('video' + peerId);
   }
 
   attachMediaStream(peerVideo, stream);
+
   Demo.Streams[peerId] = Demo.Streams[peerId] || {};
   Demo.Streams[peerId][stream.id] = peerVideo.src;
 });

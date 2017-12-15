@@ -206,11 +206,17 @@ Demo.Skylink.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
   //Video
   var peerVideo = document.createElement('video');
   peerVideo.id = 'video_' + peerId;
+  peerVideo.autoplay = true;
+  peerVideo.controls = true;
   peerVideo.style.cssText = "width:100%;";
-  if (window.webrtcDetectedBrowser !== 'IE') {
-    peerVideo.autoplay = 'autoplay';
-  }
+  peerVideo.setAttribute('playsinline', true);
+
   $('#media_' + peerId).append(peerVideo);
+
+  setTimeout(function () {
+    peerVideo.removeAttribute('controls');
+  });
+
   attachMediaStream(peerVideo, stream);
   $('#picture_' + peerId).remove();
 });
@@ -219,14 +225,20 @@ Demo.Skylink.on('mediaAccessSuccess', function(stream) {
   var ownerVideo = document.createElement('video');
   ownerVideo.id = 'video_self';
   ownerVideo.style.cssText = "width:100%;";
-  if (window.webrtcDetectedBrowser !== 'IE') {
-    ownerVideo.muted = 'muted';
-    ownerVideo.autoplay = 'autoplay';
-  }
-  $('#media_self').append(ownerVideo);
-  attachMediaStream(ownerVideo, stream);
-  $('#picture_self').remove();
+  ownerVideo.muted = true;
+  ownerVideo.autoplay = true;
+  ownerVideo.controls = true;
+  ownerVideo.setAttribute('playsinline', true);
 
+  $('#media_self').append(ownerVideo);
+
+  setTimeout(function () {
+    ownerVideo.removeAttribute('controls');
+  });
+
+  attachMediaStream(ownerVideo, stream);
+
+  $('#picture_self').remove();
 });
 
 

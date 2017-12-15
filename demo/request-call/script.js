@@ -29,10 +29,15 @@ SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
   if(!document.getElementById(peerId)) {
     var peervid = document.createElement('video');
     peervid.id = peerId;
-    if (window.webrtcDetectedBrowser !== 'IE') {
-      peervid.autoplay = true;
-    }
+    peervid.autoplay = true;
+    peervid.muted = isSelf;
+    peervid.controls = true;
+    peervid.setAttribute('playsinline', true);
     document.body.appendChild(peervid);
+
+    setTimeout(function () {
+      peervid.removeAttribute('controls');
+    });
   }
 
 });
@@ -71,10 +76,15 @@ SkylinkDemo.on('mediaAccessSuccess', function(stream) {
   if(!document.getElementById('myvideo')) {
     var myvid = document.createElement('video');
     myvid.id = 'myvideo';
-    if (window.webrtcDetectedBrowser !== 'IE') {
-      myvid.autoplay = true;
-    }
+    myvid.autoplay = true;
+    myvid.muted = true;
+    myvid.controls = true;
+    myvid.setAttribute('playsinline', true);
     document.body.appendChild(myvid);
+
+    setTimeout(function () {
+      myvid.removeAttribute('controls');
+    })
   }
   var myvid = document.getElementById('myvideo');
   attachMediaStream(myvid, stream);

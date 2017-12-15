@@ -5,7 +5,6 @@ var Demo = Demo || {};
 Demo.FILE_SIZE_LIMIT = 1024 * 1024 * 200;
 Demo.Peers = 0;
 Demo.Files = [];
-Demo.Streams = [];
 Demo.Stats = {};
 Demo.Methods = {};
 Demo.Skylink = new Skylink();
@@ -283,22 +282,6 @@ Demo.Skylink.on('peerRestart', function(peerId, peerInfo, isSelf) {
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
-
-  if ($('#video' + peerId).length > 0) {
-    if (!peerInfo.settings.video && !peerInfo.settings.audio) {
-      //$('#video' + peerId + ' .video-obj').hide();
-      $('#video' + peerId + ' .video-obj').replaceWith(
-        '<video class="video-obj" autoplay="true" ' + (isSelf ? 'muted="true"' : '') + ' poster="img/no_profile.jpg"></video>');
-      if (Demo.Streams[peerId]) {
-        delete Demo.Streams[peerId];
-      }
-      return;
-    }
-
-    if (peerInfo.settings.video && peerInfo.mediaStatus.videoMuted && Demo.Streams[peerId]) {
-      attachMediaStream($('#video' + peerId + ' .video-obj')[0], Demo.Streams[peerId]);
-    }
-  }
 });
 
 //---------------------------------------------------
@@ -355,22 +338,17 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
 
     peerVideo = document.createElement('video');
     peerVideo.className = 'video-obj';
+    peerVideo.muted = isSelf;
+    peerVideo.autoplay = true;
+    peerVideo.controls = true;
+    peerVideo.setAttribute('playsinline', true);
+
     if (!peerInfo.settings.audio && !peerInfo.settings.video) {
       peerVideo.poster = 'img/no_profile.jpg';
     }
-    if (window.webrtcDetectedBrowser !== 'IE') {
-      peerVideo.autoplay = 'autoplay';
-    }
-
-    // mutes user's video
-    if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
-      peerVideo.muted = 'muted';
-    }
 
     $('#peer_video_list').append(peerElm);
-
-    peerElm.appendChild(peerVideo);
-
+    $(peerElm).append(peerVideo);
     $(peerElm).append('<div class="connstats-wrapper"><button class="toggle-connstats" data="' + (isSelf ? 'MCU' : peerId) +
       '">See ' + (isSelf ? 'MCU ' : '') + 'Stats</button><div class="row connstats">' +
       '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
@@ -381,6 +359,10 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
         '<p class="col-md-6">Remote: <span class="remote"></span></p></div>' +
       '<div class="certificate row"><b class="col-md-12">Certificates</b><p class="col-md-6"><span class="certleft"></span></p>' +
         '<p class="col-md-6"><span class="certright"></span></p></div></div></div>');
+
+    setTimeout(function () {
+      peerVideo.removeAttribute('controls');
+    });
   }
 });
 //---------------------------------------------------
@@ -388,50 +370,9 @@ Demo.Skylink.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
   if (!isSelf) {
     Demo.Peers += 1;
   }
-  var peerVideo;
 
-  if ($('#video' + peerId).length === 0) {
-    var peerElm = document.createElement('div');
-    peerElm.id = 'video' + peerId;
-    peerElm.className = 'col-md-6 peervideo';
-
-    peerVideo = document.createElement('video');
-    peerVideo.className = 'video-obj';
-
-    if (window.webrtcDetectedBrowser !== 'IE') {
-      peerVideo.autoplay = 'autoplay';
-    }
-
-    // mutes user's video
-    if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
-      peerVideo.muted = 'muted';
-    }
-
-    $('#peer_video_list').append(peerElm);
-
-    peerElm.appendChild(peerVideo);
-
-    if (!isSelf) {
-      $(peerElm).append('<div class="connstats-wrapper"><button class="toggle-connstats" data="' + peerId +
-        '">See Stats</button><div class="row connstats">' +
-        '<div class="agent row"><b class="col-md-12">Agent</b><p class="col-md-6">Name: <span class="upload">' +
-          peerInfo.agent.name + (peerInfo.agent.os ? ' (' + peerInfo.agent.os + ')' : '') + '</span></p>' +
-          '<p class="col-md-6">Version: <span class="download">' + peerInfo.agent.version +
-          (peerInfo.agent.pluginVersion ? ' (Plugin Ver: ' + peerInfo.agent.pluginVersion + ')' : '') + '</span></p></div>' +
-        '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
-        '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
-        '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
-        '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
-        '<div class="candidate row"><b class="col-md-12">Selected Candidate</b><p class="col-md-6">Local: <span class="local"></span></p>' +
-        '<p class="col-md-6">Remote: <span class="remote"></span></p></div></div></div>');
-    }
-
-  } else {
-    peerVideo = $('#video' + peerId + ' .video-obj')[0];
-  }
-
+  var peerVideo = $('#video' + peerId + ' .video-obj')[0];
   attachMediaStream(peerVideo, stream);
-  Demo.Streams[peerId] = stream;
   //$(peerVideo).show();
 
   if (isSelf) {
@@ -486,7 +427,6 @@ Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf){
   Demo.Peers -= 1;
   $('#video' + peerId).remove();
   $('#user' + peerId).remove();
-  delete Demo.Streams[peerId];
   var index = selectedPeers.indexOf(peerId);
 
   if (index > -1) {
@@ -617,22 +557,6 @@ Demo.Skylink.on('peerUpdated', function(peerId, peerInfo, isSelf) {
     $('#user' + peerId + ' .audio').css('color',
       (peerInfo.mediaStatus.audioMuted) ? 'red' : 'green');
     $('#user' + peerId + ' .name').html(peerInfo.userData);
-  }
-
-  if ($('#video' + peerId).length > 0) {
-    if (!peerInfo.settings.video && !peerInfo.settings.audio) {
-      //$('#video' + peerId + ' .video-obj').hide();
-      $('#video' + peerId + ' .video-obj').replaceWith(
-        '<video class="video-obj" autoplay="true" ' + (isSelf ? 'muted="true"' : '') + ' poster="img/no_profile.jpg"></video>');
-      if (Demo.Streams[peerId]) {
-        delete Demo.Streams[peerId];
-      }
-      return;
-    }
-
-    if (peerInfo.settings.video && peerInfo.mediaStatus.videoMuted && Demo.Streams[peerId]) {
-      attachMediaStream($('#video' + peerId)[0], Demo.Streams[peerId]);
-    }
   }
 });
 //---------------------------------------------------
