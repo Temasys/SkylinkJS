@@ -1,280 +1,5 @@
 /**
  * <blockquote class="info">
- *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
- *   <code>"answer"</code> session description to prefer the codec.
- * </blockquote>
- * The list of available video codecs to set as the preferred video codec to use to encode
- * sending video data when available encoded video codec for Peer connections
- * configured in the <a href="#method_init"><code>init()</code> method</a>.
- * @attribute VIDEO_CODEC
- * @param {String} AUTO <small>Value <code>"auto"</code></small>
- *   The value of the option to not prefer any video codec but rather use the created
- *   local <code>"offer"</code> / <code>"answer"</code> session description video codec preference.
- * @param {String} VP8  <small>Value <code>"VP8"</code></small>
- *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/VP8">VP8</a> video codec.
- * @param {String} VP9  <small>Value <code>"VP9"</code></small>
- *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/VP9">VP9</a> video codec.
- * @param {String} H264 <small>Value <code>"H264"</code></small>
- *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/H.264/MPEG-4_AVC">H264</a> video codec.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype.VIDEO_CODEC = {
-  AUTO: 'auto',
-  VP8: 'VP8',
-  H264: 'H264',
-  VP9: 'VP9'
-  //H264UC: 'H264UC'
-};
-
-/**
- * <blockquote class="info">
- *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
- *   <code>"answer"</code> session description to prefer the codec.
- * </blockquote>
- * The list of available audio codecs to set as the preferred audio codec to use to encode
- * sending audio data when available encoded audio codec for Peer connections
- * configured in the <a href="#method_init"><code>init()</code> method</a>.
- * @attribute AUDIO_CODEC
- * @param {String} AUTO <small>Value <code>"auto"</code></small>
- *   The value of the option to not prefer any audio codec but rather use the created
- *   local <code>"offer"</code> / <code>"answer"</code> session description audio codec preference.
- * @param {String} OPUS <small>Value <code>"opus"</code></small>
- *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Opus_(audio_format)">OPUS</a> audio codec.
- * @param {String} ISAC <small>Value <code>"ISAC"</code></small>
- *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Internet_Speech_Audio_Codec">ISAC</a> audio codec.
- * @param {String} ILBC <small>Value <code>"ILBC"</code></small>
- *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/Internet_Low_Bitrate_Codec">iLBC</a> audio codec.
- * @param {String} G722 <small>Value <code>"G722"</code></small>
- *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/G.722">G722</a> audio codec.
- * @param {String} PCMA <small>Value <code>"PCMA"</code></small>
- *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/G.711">G711u</a> audio codec.
- * @param {String} PCMU <small>Value <code>"PCMU"</code></small>
- *   The value of the option to prefer the <a href="https://en.wikipedia.org/wiki/G.711">G711a</a> audio codec.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype.AUDIO_CODEC = {
-  AUTO: 'auto',
-  ISAC: 'ISAC',
-  OPUS: 'opus',
-  ILBC: 'ILBC',
-  G722: 'G722',
-  PCMU: 'PCMU',
-  PCMA: 'PCMA',
-  //SILK: 'SILK'
-};
-
-/**
- * The list of available screensharing media sources configured in the
- * <a href="#method_shareScreen"><code>shareScreen()</code> method</a>.
- * @attribute MEDIA_SOURCE
- * @param {String} SCREEN <small>Value <code>"screen"</code></small>
- *   The value of the option to share entire screen.
- * @param {String} WINDOW <small>Value <code>"window"</code></small>
- *   The value of the option to share application windows.
- * @param {String} TAB <small>Value <code>"tab"</code></small>
- *   The value of the option to share browser tab.
- *   <small>Note that this is only supported by from Chrome 52+ and Opera 39+.</small>
- * @param {String} TAB_AUDIO <small>Value <code>"audio"</code></small>
- *   The value of the option to share browser tab audio.
- *   <small>Note that this is only supported by Chrome 52+ and Opera 39+.</small>
- *   <small><code>options.audio</code> has to be enabled with <code>TAB</code> also requested to enable sharing of tab audio.</small>
- * @param {String} APPLICATION <small>Value <code>"application"</code></small>
- *   The value of the option to share applications.
- *   <small>Note that this is only supported by Firefox currently.</small>
- * @param {String} BROWSER <small>Value <code>"browser"</code></small>
- *   The value of the option to share browser.
- *   <small>Note that this is only supported by Firefox currently, and requires toggling the <code>media.getUserMedia.browser.enabled</code>
- *   in <code>about:config</code>.</small>
- * @param {String} CAMERA <small>Value <code>"camera"</code></small>
- *   The value of the option to share camera.
- *   <small>Note that this is only supported by Firefox currently.</small>
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype.MEDIA_SOURCE = {
-  SCREEN: 'screen',
-  WINDOW: 'window',
-  TAB: 'tab',
-  TAB_AUDIO: 'audio',
-  APPLICATION: 'application',
-  BROWSER: 'browser',
-  CAMERA: 'camera'
-};
-
-/**
- * <blockquote class="info">
- *   Note that currently <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> only configures
- *   the maximum resolution of the Stream due to browser interopability and support.
- * </blockquote>
- * The list of <a href="https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array">
- * video resolutions</a> sets configured in the <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
- * @attribute VIDEO_RESOLUTION
- * @param {JSON} QQVGA <small>Value <code>{ width: 160, height: 120 }</code></small>
- *   The value of the option to configure QQVGA resolution.
- *   <small>Aspect ratio: <code>4:3</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} HQVGA <small>Value <code>{ width: 240, height: 160 }</code></small>
- *   The value of the option to configure HQVGA resolution.
- *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} QVGA <small>Value <code>{ width: 320, height: 240 }</code></small>
- *   The value of the option to configure QVGA resolution.
- *   <small>Aspect ratio: <code>4:3</code></small>
- * @param {JSON} WQVGA <small>Value <code>{ width: 384, height: 240 }</code></small>
- *   The value of the option to configure WQVGA resolution.
- *   <small>Aspect ratio: <code>16:10</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} HVGA <small>Value <code>{ width: 480, height: 320 }</code></small>
- *   The value of the option to configure HVGA resolution.
- *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} VGA <small>Value <code>{ width: 640, height: 480 }</code></small>
- *   The value of the option to configure VGA resolution.
- *   <small>Aspect ratio: <code>4:3</code></small>
- * @param {JSON} WVGA <small>Value <code>{ width: 768, height: 480 }</code></small>
- *   The value of the option to configure WVGA resolution.
- *   <small>Aspect ratio: <code>16:10</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} FWVGA <small>Value <code>{ width: 854, height: 480 }</code></small>
- *   The value of the option to configure FWVGA resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} SVGA <small>Value <code>{ width: 800, height: 600 }</code></small>
- *   The value of the option to configure SVGA resolution.
- *   <small>Aspect ratio: <code>4:3</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} DVGA <small>Value <code>{ width: 960, height: 640 }</code></small>
- *   The value of the option to configure DVGA resolution.
- *   <small>Aspect ratio: <code>3:2</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} WSVGA <small>Value <code>{ width: 1024, height: 576 }</code></small>
- *   The value of the option to configure WSVGA resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- * @param {JSON} HD <small>Value <code>{ width: 1280, height: 720 }</code></small>
- *   The value of the option to configure HD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on device supports.</small>
- * @param {JSON} HDPLUS <small>Value <code>{ width: 1600, height: 900 }</code></small>
- *   The value of the option to configure HDPLUS resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} FHD <small>Value <code>{ width: 1920, height: 1080 }</code></small>
- *   The value of the option to configure FHD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on device supports.</small>
- * @param {JSON} QHD <small>Value <code>{ width: 2560, height: 1440 }</code></small>
- *   The value of the option to configure QHD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} WQXGAPLUS <small>Value <code>{ width: 3200, height: 1800 }</code></small>
- *   The value of the option to configure WQXGAPLUS resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} UHD <small>Value <code>{ width: 3840, height: 2160 }</code></small>
- *   The value of the option to configure UHD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} UHDPLUS <small>Value <code>{ width: 5120, height: 2880 }</code></small>
- *   The value of the option to configure UHDPLUS resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} FUHD <small>Value <code>{ width: 7680, height: 4320 }</code></small>
- *   The value of the option to configure FUHD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @param {JSON} QUHD <small>Value <code>{ width: 15360, height: 8640 }</code></small>
- *   The value of the option to configure QUHD resolution.
- *   <small>Aspect ratio: <code>16:9</code></small>
- *   <small>Note that configurating this resolution may not be supported depending on browser and device supports.</small>
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype.VIDEO_RESOLUTION = {
-  QQVGA: { width: 160, height: 120 /*, aspectRatio: '4:3'*/ },
-  HQVGA: { width: 240, height: 160 /*, aspectRatio: '3:2'*/ },
-  QVGA: { width: 320, height: 240 /*, aspectRatio: '4:3'*/ },
-  WQVGA: { width: 384, height: 240 /*, aspectRatio: '16:10'*/ },
-  HVGA: { width: 480, height: 320 /*, aspectRatio: '3:2'*/ },
-  VGA: { width: 640, height: 480 /*, aspectRatio: '4:3'*/ },
-  WVGA: { width: 768, height: 480 /*, aspectRatio: '16:10'*/ },
-  FWVGA: { width: 854, height: 480 /*, aspectRatio: '16:9'*/ },
-  SVGA: { width: 800, height: 600 /*, aspectRatio: '4:3'*/ },
-  DVGA: { width: 960, height: 640 /*, aspectRatio: '3:2'*/ },
-  WSVGA: { width: 1024, height: 576 /*, aspectRatio: '16:9'*/ },
-  HD: { width: 1280, height: 720 /*, aspectRatio: '16:9'*/ },
-  HDPLUS: { width: 1600, height: 900 /*, aspectRatio: '16:9'*/ },
-  FHD: { width: 1920, height: 1080 /*, aspectRatio: '16:9'*/ },
-  QHD: { width: 2560, height: 1440 /*, aspectRatio: '16:9'*/ },
-  WQXGAPLUS: { width: 3200, height: 1800 /*, aspectRatio: '16:9'*/ },
-  UHD: { width: 3840, height: 2160 /*, aspectRatio: '16:9'*/ },
-  UHDPLUS: { width: 5120, height: 2880 /*, aspectRatio: '16:9'*/ },
-  FUHD: { width: 7680, height: 4320 /*, aspectRatio: '16:9'*/ },
-  QUHD: { width: 15360, height: 8640 /*, aspectRatio: '16:9'*/ }
-};
-
-/**
- * The list of <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> or
- * <a href="#method_shareScreen"><code>shareScreen()</code> method</a> Stream fallback states.
- * @attribute MEDIA_ACCESS_FALLBACK_STATE
- * @param {JSON} FALLBACKING <small>Value <code>0</code></small>
- *   The value of the state when <code>getUserMedia()</code> will retrieve audio track only
- *   when retrieving audio and video tracks failed.
- *   <small>This can be configured by <a href="#method_init"><code>init()</code> method</a>
- *   <code>audioFallback</code> option.</small>
- * @param {JSON} FALLBACKED  <small>Value <code>1</code></small>
- *   The value of the state when <code>getUserMedia()</code> or <code>shareScreen()</code>
- *   retrieves camera / screensharing Stream successfully but with missing originally required audio or video tracks.
- * @param {JSON} ERROR       <small>Value <code>-1</code></small>
- *   The value of the state when <code>getUserMedia()</code> failed to retrieve audio track only
- *   after retrieving audio and video tracks failed.
- * @readOnly
- * @for Skylink
- * @since 0.6.14
- */
-Skylink.prototype.MEDIA_ACCESS_FALLBACK_STATE = {
-  FALLBACKING: 0,
-  FALLBACKED: 1,
-  ERROR: -1
-};
-
-/**
- * The list of recording states.
- * @attribute RECORDING_STATE
- * @param {Number} START <small>Value <code>0</code></small>
- *   The value of the state when recording session has started.
- * @param {Number} STOP <small>Value <code>1</code></small>
- *   The value of the state when recording session has stopped.<br>
- *   <small>At this stage, the recorded videos will go through the mixin server to compile the videos.</small>
- * @param {Number} LINK <small>Value <code>2</code></small>
- *   The value of the state when recording session mixin request has been completed.
- * @param {Number} ERROR <small>Value <code>-1</code></small>
- *   The value of the state state when recording session has errors.
- *   <small>This can happen during recording session or during mixin of recording videos,
- *   and at this stage, any current recording session or mixin is aborted.</small>
- * @type JSON
- * @beta
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype.RECORDING_STATE = {
-  START: 0,
-  STOP: 1,
-  LINK: 2,
-  ERROR: -1
-};
-
-/**
- * <blockquote class="info">
  *   For a better user experience, the functionality is throttled when invoked many times in less
  *   than the milliseconds interval configured in the <a href="#method_init"><code>init()</code> method</a>.
  * </blockquote>
@@ -598,8 +323,8 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 
   self._throttle(function (runFn) {
     if (!runFn) {
-      if (self._throttlingShouldThrowError) {
-        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.getUserMedia + 'ms).';
+      if (self._initOptions.throttlingShouldThrowError) {
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._initOptions.throttleIntervals.getUserMedia + 'ms).';
         log.error(throttleLimitError);
 
         if (typeof callback === 'function') {
@@ -659,7 +384,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
       onErrorCbFn(error);
     }
 
-  }, 'getUserMedia', self._throttlingTimeouts.getUserMedia);
+  }, 'getUserMedia', self._initOptions.throttleIntervals.getUserMedia);
 };
 
 /**
@@ -698,7 +423,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   <small>Object signature is the <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>
  *   Stream object.</small>
  * @example
- *   // Example 1: Send MediaStream object
+ *   // Example 1: Send MediaStream object before being connected to Room
  *   function retrieveStreamBySourceForFirefox (sourceId) {
  *     navigator.mediaDevices.getUserMedia({
  *       audio: true,
@@ -717,29 +442,21 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *     });
  *   }
  *
- *   // Example 2: Send video later
- *   var inRoom = false;
- *
+ *   // Example 2: Send video after being connected to Room
  *   function sendVideo () {
- *     if (!inRoom) return;
- *     skylinkDemo.sendStream({
- *       audio: true,
- *       video: true
- *     }, function (error, success) {
- *       if (error) return;
- *       console.log("getUserMedia() Stream with video is now being sent to Peers");
- *       attachMediaStream(document.getElementById("my-video"), success);
+ *     skylinkDemo.joinRoom(function (jRError, jRSuccess) {
+ *       if (jRError) return;
+ *       skylinkDemo.sendStream({
+ *         audio: true,
+ *         video: true
+ *       }, function (error, success) {
+ *         if (error) return;
+ *         console.log("getUserMedia() Stream with video is now being sent to Peers");
+ *         attachMediaStream(document.getElementById("my-video"), success);
+ *       });
  *     });
  *   }
- *
- *   skylinkDemo.joinRoom({
- *     audio: true
- *   }, function (jRError, jRSuccess) {
- *     if (jRError) return;
- *     inRoom = true;
- *   });
  * @trigger <ol class="desc-seq">
- *   <li>If User is not in Room: <ol><li><b>ABORT</b> and return error.</li></ol></li>
  *   <li>Checks <code>options</code> provided. <ol><li>If provided parameter <code>options</code> is not valid: <ol>
  *   <li><b>ABORT</b> and return error.</li></ol></li>
  *   <li>Else if provided parameter <code>options</code> is a Stream object: <ol>
@@ -758,7 +475,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   <li>Invoke <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> with
  *   <code>options</code> provided in <code>sendStream()</code>. <ol><li>If request has errors: <ol>
  *   <li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>
- *   <li>If there is currently no <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>: <ol>
+ *   <li>If there is currently no <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a> and User is in Room: <ol>
  *   <li><a href="#event_incomingStream"><code>incomingStream</code> event</a> triggers parameter payload
  *   <code>isSelf</code> value as <code>true</code> and <code>stream</code> as
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>.</li>
@@ -801,12 +518,8 @@ Skylink.prototype.sendStream = function(options, callback) {
       } else if (typeof callback === 'function') {
         callback(null, stream);
       }
-    } else {
-      var notInRoomAgainError = 'Unable to send stream as user is not in the Room.';
-      log.error(notInRoomAgainError, stream);
-      if (typeof callback === 'function') {
-        callback(new Error(notInRoomAgainError), null);
-      }
+    } else if (typeof callback === 'function') {
+      callback(null, stream);
     }
   };
 
@@ -822,12 +535,7 @@ Skylink.prototype.sendStream = function(options, callback) {
   }
 
   if (!self._inRoom) {
-    var notInRoomError = 'Unable to send stream as user is not in the Room.';
-    log.error(notInRoomError, options);
-    if (typeof callback === 'function'){
-      callback(new Error(notInRoomError),null);
-    }
-    return;
+    log.warn('There are no peers to send stream to as not in room!');
   }
 
   if (AdapterJS.webrtcDetectedBrowser === 'edge') {
@@ -940,7 +648,7 @@ Skylink.prototype.stopStream = function () {
  * @param {JSON} options The Streams muting options.
  * @param {Boolean} [options.audioMuted=true] The flag if all Streams audio
  *   tracks should be muted or not.
- * @param {Boolean} [options.videoMuted=true] The flag if all Streams video
+ * @param {Boolean} [options.videoMuted=true] The flag if all Strea.ms video
  *   tracks should be muted or not.
  * @example
  *   // Example 1: Mute both audio and video tracks in all Streams
@@ -1227,10 +935,11 @@ Skylink.prototype.disableVideo = function() {
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
  *   <small>Note that this will not be toggled for Chrome/Opera case when `mediaSource` value is `["tab","audio"]`.</small>
- * @param {String|Array} [mediaSource=screen] The screensharing media source to select.
+ * @param {String|Array|JSON} [mediaSource=screen] The screensharing media source to select.
  *   <small>Note that multiple sources are not supported by Firefox as of the time of this release.
  *   Firefox will use the first item specified in the Array in the event that multiple sources are defined.</small>
- *   <small>E.g. <code>["screen", "window"]</code>, <code>["tab", "audio"]</code>, <code>"screen"</code> or <code>"tab"</code>.</small>
+ *   <small>E.g. <code>["screen", "window"]</code>, <code>["tab", "audio"]</code>, <code>"screen"</code> or <code>"tab"</code>
+ *   or <code>{ sourceId: "xxxxx", mediaSource: "screen" }</code>.</small>
  *   [Rel: Skylink.MEDIA_SOURCE]
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
@@ -1273,6 +982,12 @@ Skylink.prototype.disableVideo = function() {
  * 
  *   // Example 5: Share "window" and "screen" media source
  *   skylinkDemo.shareScreen(["window", "screen"], function (error, success) {
+ *     if (error) return;
+ *     attachMediaStream(document.getElementById("my-screen"), success);
+ *   });
+ * 
+ *   // Example 6: Share "window" with specific media source for specific plugin build users.
+ *   skylinkDemo.shareScreen({ mediaSource: "window", sourceId: "xxxxx" }, function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
@@ -1332,6 +1047,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
   var self = this;
   var enableAudioSettings = false;
   var useMediaSource = [self.MEDIA_SOURCE.SCREEN];
+  var useMediaSourceId = null;
   var checkIfSourceExistsFn = function (val) {
     for (var prop in self.MEDIA_SOURCE) {
       if (self.MEDIA_SOURCE.hasOwnProperty(prop) && self.MEDIA_SOURCE[prop] === val) {
@@ -1341,31 +1057,39 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     return false;
   };
 
-  // shareScreen("screen")
-  if (enableAudio && typeof enableAudio === 'string') {
-    if (checkIfSourceExistsFn(enableAudio)) {
-      useMediaSource = [enableAudio];
+  // shareScreen("screen") or shareScreen({ sourceId: "xxxx", mediaSource: "xxxxx" })
+  if (enableAudio && typeof enableAudio === 'string' ||
+    (enableAudio && typeof enableAudio === 'object' && enableAudio.sourceId && enableAudio.mediaSource)) {
+    if (checkIfSourceExistsFn(typeof enableAudio === 'object' ? enableAudio.mediaSource : enableAudio)) {
+      useMediaSource = [typeof enableAudio === 'object' ? enableAudio.mediaSource : enableAudio];
     }
+    useMediaSourceId = typeof enableAudio === 'object' ? enableAudio.sourceId : null;
   // shareScreen(["screen", "window"])
   } else if (Array.isArray(enableAudio)) {
     var enableAudioArr = [];
+
     for (var i = 0; i < enableAudio.length; i++) {
       if (checkIfSourceExistsFn(enableAudio[i])) {
         enableAudioArr.push(enableAudio[i]);
       }
     }
+
     if (enableAudioArr.length > 0) {
       useMediaSource = enableAudioArr;
     }
   // shareScreen({ stereo: true })
   } else if (enableAudio && typeof enableAudio === 'object') {
-    enableAudioSettings = {
-      usedtx: typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null,
-      useinbandfec: typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null,
-      stereo: enableAudio.stereo === true,
-      echoCancellation: enableAudio.echoCancellation !== false,
-      deviceId: enableAudio.deviceId
-    };
+    if (enableAudio.sourceId && enableAudio.mediaSource) {
+
+    } else {
+      enableAudioSettings = {
+        usedtx: typeof enableAudio.usedtx === 'boolean' ? enableAudio.usedtx : null,
+        useinbandfec: typeof enableAudio.useinbandfec === 'boolean' ? enableAudio.useinbandfec : null,
+        stereo: enableAudio.stereo === true,
+        echoCancellation: enableAudio.echoCancellation !== false,
+        deviceId: enableAudio.deviceId
+      };
+    }
   // shareScreen(true)
   } else if (enableAudio === true) {
     enableAudioSettings = enableAudio === true ? {
@@ -1381,11 +1105,13 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     enableAudio = false;
   }
 
-  // shareScreen(.., "screen")
-  if (mediaSource && typeof mediaSource === 'string') {
-    if (checkIfSourceExistsFn(mediaSource)) {
-      useMediaSource = [mediaSource];
+  // shareScreen(.., "screen") or shareScreen({ sourceId: "xxxx", mediaSource: "xxxxx" })
+  if (mediaSource && typeof mediaSource === 'string' ||
+    (mediaSource && typeof mediaSource === 'object' && mediaSource.sourceId && mediaSource.mediaSource)) {
+    if (checkIfSourceExistsFn(typeof mediaSource === 'object' ? mediaSource.mediaSource : mediaSource)) {
+      useMediaSource = [typeof mediaSource === 'object' ? mediaSource.mediaSource : mediaSource];
     }
+    useMediaSourceId = typeof mediaSource === 'object' ? mediaSource.sourceId : null;
   // shareScreen(.., ["screen", "window"])
   } else if (Array.isArray(mediaSource)) {
     var mediaSourceArr = [];
@@ -1411,8 +1137,8 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 
   self._throttle(function (runFn) {
     if (!runFn) {
-      if (self._throttlingShouldThrowError) {
-        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._throttlingTimeouts.shareScreen + 'ms).';
+      if (self._initOptions.throttlingShouldThrowError) {
+        var throttleLimitError = 'Unable to run as throttle interval has not reached (' + self._initOptions.throttleIntervals.shareScreen + 'ms).';
         log.error(throttleLimitError);
 
         if (typeof callback === 'function') {
@@ -1437,6 +1163,12 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         }
       }
     };
+
+    if (AdapterJS.webrtcDetectedType === 'plugin' && useMediaSourceId) {
+      settings.getUserMediaSettings.video.optional = [{
+        screenId: useMediaSourceId
+      }];
+    }
 
     var mediaAccessSuccessFn = function (stream) {
       self.off('mediaAccessError', mediaAccessErrorFn);
@@ -1546,7 +1278,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
-  }, 'shareScreen', self._throttlingTimeouts.shareScreen);
+  }, 'shareScreen', self._initOptions.throttleIntervals.shareScreen);
 };
 
 /**
@@ -1606,6 +1338,219 @@ Skylink.prototype.stopScreen = function () {
       this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
     }
   }
+};
+
+/**
+ * Function that returns the camera and microphone sources.
+ * @method getStreamSources
+ * @param {Function} callback The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (success)</code></small>
+ * @param {JSON} callback.success The success result in request.
+ *   <small>Object signature is the list of sources.</small>
+ * @param {JSON} callback.success.audio The list of audio input (microphone) and output (speakers) sources.
+ * @param {Array} callback.success.audio.input The list of audio input (microphone) sources.
+ * @param {JSON} callback.success.audio.input.#index The audio input source item.
+ * @param {String} callback.success.audio.input.#index.deviceId The audio input source item device ID.
+ * @param {String} callback.success.audio.input.#index.label The audio input source item device label name.
+ * @param {String} [callback.success.audio.input.#index.groupId] The audio input source item device physical device ID.
+ * <small>Note that there can be different <code>deviceId</code> due to differing sources but can share a
+ * <code>groupId</code> because it's the same device.</small>
+ * @param {Array} callback.success.audio.output The list of audio output (speakers) sources.
+ * @param {JSON} callback.success.audio.output.#index The audio output source item.
+ * <small>Object signature matches <code>callback.success.audio.input.#index</code> format.</small>
+ * @param {JSON} callback.success.video The list of video input (camera) sources.
+ * @param {Array} callback.success.video.input The list of video input (camera) sources.
+ * @param {JSON} callback.success.video.input.#index The video input source item.
+ * <small>Object signature matches <code>callback.success.audio.input.#index</code> format.</small>
+ * @example
+ *   // Example 1: Retrieve the getUserMedia() stream with selected source ID.
+ *   skylinkDemo.getStreamSources(function (sources) {
+ *     skylinkDemo.getUserMedia({
+ *       audio: sources.audio.input[0].deviceId,
+ *       video: sources.video.input[0].deviceId
+ *     });
+ *   });
+ *   
+ *   // Example 2: Set the output audio speaker (Chrome 49+ supported only)
+ *   skylinkDemo.getStreamSources(function (sources) {
+ *     var videoElement = document.getElementById('video');
+ *     if (videoElement && typeof videoElement.setSinkId === 'function') {
+ *       videoElement.setSinkId(sources.audio.output[0].deviceId)
+ *     }
+ *   });
+ * @for Skylink
+ * @since 0.6.27
+ */
+Skylink.prototype.getStreamSources = function(callback) {
+  var outputSources = {
+    audio: {
+      input: [],
+      output: []
+    },
+    video: {
+      input: []
+    }
+  };
+
+  if (typeof callback !== 'function') {
+    return log.error('Please provide the callback.');
+  }
+
+  var sourcesListFn = function (sources) {
+    sources.forEach(function (sourceItem) {
+      var item = {
+        deviceId: sourceItem.deviceId || sourceItem.sourceId || 'default',
+        label: sourceItem.label,
+        groupId: sourceItem.groupId || null
+      };
+
+      item.label = item.label || 'Source for ' + item.deviceId;
+
+      if (['audio', 'audioinput'].indexOf(sourceItem.kind) > -1) {
+        outputSources.audio.input.push(item);
+      } else if (['video', 'videoinput'].indexOf(sourceItem.kind) > -1) {
+        outputSources.video.input.push(item);
+      } else if (sourceItem.kind === 'audiooutput') {
+        outputSources.audio.output.push(item);
+      }
+    });
+
+    callback(outputSources);
+  };
+
+  if (navigator.mediaDevices && typeof navigator.mediaDevices.enumerateDevices === 'function') {
+    navigator.mediaDevices.enumerateDevices().then(sourcesListFn);
+  } else if (window.MediaStreamTrack && typeof MediaStreamTrack.getSources === 'function') {
+    MediaStreamTrack.getSources(sourcesListFn);
+  } else if (typeof navigator.getUserMedia === 'function') {
+    sourcesListFn([
+      { deviceId: 'default', kind: 'audioinput', label: 'Default Audio Track' },
+      { deviceId: 'default', kind: 'videoinput', label: 'Default Video Track' }
+    ]);
+  } else {
+    sourcesListFn([]);
+  }
+};
+
+/**
+ * Function that returns the screensharing sources.
+ * @method getScreenSources
+ * @param {Function} callback The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (success)</code></small>
+ * @param {JSON} callback.success The success result in request.
+ *   <small>Object signature is the list of sources.</small>
+ * @param {JSON} callback.success The list of screensharing media sources and screen sources.
+ * @param {Array} callback.success.mediaSource The array of screensharing media sources.
+ * @param {String} callback.success.mediaSource.#index The screensharing media source item.
+ * [Rel: Skylink.MEDIA_SOURCE]
+ * @param {Array} callback.success.mediaSourceInput The list of specific media source screen inputs.
+ * @param {JSON} callback.success.mediaSourceInput.#index The media source screen input item.
+ * @param {String} callback.success.mediaSourceInput.#index.sourceId The screen input item ID.
+ * @param {String} callback.success.mediaSourceInput.#index.label The screen input item label name.
+ * @param {String} callback.success.mediaSourceInput.#index.mediaSource The screen input item media source it belongs to.
+ * [Rel: Skylink.MEDIA_SOURCE]
+ * @example
+ *   // Example 1: Retrieve the list of available shareScreen() sources.
+ *   skylinkDemo.getScreenSources(function (sources) {
+ *     skylinkDemo.shareScreen(sources.mediaSource[0] || null);
+ *   });
+ *   
+ *   // Example 2: Retrieve the list of available shareScreen() sources with a specific item.
+ *   skylinkDemo.getScreenSources(function (sources) {
+ *     if (sources.mediaSourceInput[0]) {
+ *       skylinkDemo.shareScreen({
+ *         mediaSource: mediaSourceInput[0].mediaSource,
+ *         sourceId: mediaSourceInput[0].sourceId
+ *       });
+ *     } else {
+ *       skylinkDemo.shareScreen();
+ *     }
+ *   });
+ * @for Skylink
+ * @since 0.6.27
+ */
+Skylink.prototype.getScreenSources = function(callback) {
+  var outputSources = {
+    mediaSource: [],
+    mediaSourceInput: []
+  };
+
+  if (typeof callback !== 'function') {
+    return log.error('Please provide the callback.');
+  }
+
+  // For chrome android 59+ has screensharing support behind chrome://flags (needs to be enabled by user)
+  // Reference: https://bugs.chromium.org/p/chromium/issues/detail?id=487935
+  if (navigator.userAgent.toLowerCase().indexOf('android') > -1) {
+    if (AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion >= 59) {
+      outputSources.mediaSource = ['screen']; 
+    }
+    callback(outputSources);
+    return;
+  }
+
+  // IE / Safari (plugin) needs commerical screensharing enabled
+  if (AdapterJS.webrtcDetectedType === 'plugin') {
+    AdapterJS.webRTCReady(function () {
+      // IE / Safari (plugin) is not available or do not support screensharing
+      if (AdapterJS.WebRTCPlugin.plugin && AdapterJS.WebRTCPlugin.plugin.isScreensharingAvailable &&
+        AdapterJS.WebRTCPlugin.plugin.HasScreensharingFeature) {
+        outputSources.mediaSource = ['window', 'screen'];
+
+        // Do not provide the error callback as well or it will throw NPError.
+        if (typeof AdapterJS.WebRTCPlugin.plugin.getScreensharingSources === 'function') {
+          AdapterJS.WebRTCPlugin.plugin.getScreensharingSources(function (sources) {
+            sources.forEach(sources, function (sourceItem) {
+              var item = {
+                sourceId: sourceItem.id || sourceItem.sourceId || 'default',
+                label: sourceItem.label,
+                mediaSource: sourceItem.kind || 'screen'
+              };
+
+              item.label = item.label || 'Source for ' + item.sourceId;
+              outputSources.mediaSourceInput.push(item);
+            });
+
+            callback(outputSources);
+          });
+          return;
+        }
+      }
+      
+      callback(outputSources);
+    });
+    return;
+
+  // Chrome 34+ and Opera 21(?)+ supports screensharing
+  // Firefox 38(?)+ supports screensharing
+  } else if ((AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion >= 34) ||
+    (AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion >= 38) ||
+    (AdapterJS.webrtcDetectedBrowser === 'opera' && AdapterJS.webrtcDetectedVersion >= 21)) {
+    // Just warn users for those who did not configure the Opera screensharing extension settings, it will not work!
+    if (AdapterJS.webrtcDetectedBrowser === 'opera' && !(AdapterJS.extensionInfo &&
+      AdapterJS.extensionInfo.opera && AdapterJS.extensionInfo.opera.extensionId)) {
+      log.warn('Please ensure that your application allows Opera screensharing!');
+    }
+
+    outputSources.mediaSource = ['window', 'screen'];
+
+    // Chrome 52+ and Opera 39+ supports tab and audio
+    // Reference: https://developer.chrome.com/extensions/desktopCapture
+    if ((AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion >= 52) ||
+      (AdapterJS.webrtcDetectedBrowser === 'opera' && AdapterJS.webrtcDetectedVersion >= 39)) {
+      outputSources.mediaSource.push('tab', 'audio');
+
+    // Firefox supports some other sources
+    // Reference: http://fluffy.github.io/w3c-screen-share/#screen-based-video-constraints
+    //            https://bugzilla.mozilla.org/show_bug.cgi?id=1313758
+    //            https://bugzilla.mozilla.org/show_bug.cgi?id=1037405
+    //            https://bugzilla.mozilla.org/show_bug.cgi?id=1313758
+    } else if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
+      outputSources.mediaSource.push('browser', 'camera', 'application');
+    }
+  }
+
+  callback(outputSources);
 };
 
 /**
@@ -2048,7 +1993,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 Skylink.prototype._onStreamAccessError = function(error, settings, isScreenSharing) {
   var self = this;
 
-  if (!isScreenSharing && settings.settings.audio && settings.settings.video && self._audioFallback) {
+  if (!isScreenSharing && settings.settings.audio && settings.settings.video && self._initOptions.audioFallback) {
     log.debug('Fallbacking to retrieve audio only Stream');
 
     self._trigger('mediaAccessFallback', {
@@ -2142,7 +2087,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
           if (updatedStream ? (pc.localStreamId ? updatedStream.id !== pc.localStreamId : true) : true) {
-            if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._useEdgeWebRTC && window.msRTCPeerConnection)) {
+            if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
               pc.getSenders().forEach(function (sender) {
                 pc.removeTrack(sender);
               });
@@ -2157,7 +2102,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
             }
 
             if (updatedStream) {
-              if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._useEdgeWebRTC && window.msRTCPeerConnection)) {
+              if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
                 updatedStream.getTracks().forEach(function (track) {
                   if ((track.kind === 'audio' && !offerToReceiveAudio) || (track.kind === 'video' && !offerToReceiveVideo)) {
                     return;

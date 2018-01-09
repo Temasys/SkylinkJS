@@ -1,67 +1,4 @@
 /**
- * <blockquote class="info">
- *   Learn more about how ICE works in this
- *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
- * </blockquote>
- * The list of Peer connection ICE gathering states.
- * @attribute CANDIDATE_GENERATION_STATE
- * @param {String} GATHERING <small>Value <code>"gathering"</code></small>
- *   The value of the state when Peer connection is gathering ICE candidates.
- *   <small>These ICE candidates are sent to Peer for its connection to check for a suitable matching
- *   pair of ICE candidates to establish an ICE connection for stream audio, video and data.
- *   See <a href="#event_iceConnectionState"><code>iceConnectionState</code> event</a> for ICE connection status.</small>
- *   <small>This state cannot happen until Peer connection remote <code>"offer"</code> / <code>"answer"</code>
- *   session description is set. See <a href="#event_peerConnectionState">
- *   <code>peerConnectionState</code> event</a> for session description exchanging status.</small>
- * @param {String} COMPLETED <small>Value <code>"completed"</code></small>
- *   The value of the state when Peer connection gathering of ICE candidates has completed.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.4.1
- */
-Skylink.prototype.CANDIDATE_GENERATION_STATE = {
-  NEW: 'new',
-  GATHERING: 'gathering',
-  COMPLETED: 'completed'
-};
-
-/**
- * <blockquote class="info">
- *   Learn more about how ICE works in this
- *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
- * </blockquote>
- * The list of Peer connection remote ICE candidate processing states for trickle ICE connections.
- * @attribute CANDIDATE_PROCESSING_STATE
- * @param {String} RECEIVED <small>Value <code>"received"</code></small>
- *   The value of the state when the remote ICE candidate was received.
- * @param {String} DROPPED  <small>Value <code>"received"</code></small>
- *   The value of the state when the remote ICE candidate is dropped.
- * @param {String} BUFFERED  <small>Value <code>"buffered"</code></small>
- *   The value of the state when the remote ICE candidate is buffered.
- * @param {String} PROCESSING  <small>Value <code>"processing"</code></small>
- *   The value of the state when the remote ICE candidate is being processed.
- * @param {String} PROCESS_SUCCESS  <small>Value <code>"processSuccess"</code></small>
- *   The value of the state when the remote ICE candidate has been processed successfully.
- *   <small>The ICE candidate that is processed will be used to check against the list of
- *   locally generated ICE candidate to start matching for the suitable pair for the best ICE connection.</small>
- * @param {String} PROCESS_ERROR  <small>Value <code>"processError"</code></small>
- *   The value of the state when the remote ICE candidate has failed to be processed.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype.CANDIDATE_PROCESSING_STATE = {
-  RECEIVED: 'received',
-  DROPPED: 'dropped',
-  BUFFERED: 'buffered',
-  PROCESSING: 'processing',
-  PROCESS_SUCCESS: 'processSuccess',
-  PROCESS_ERROR: 'processError'
-};
-
-/**
  * Function that handles the Peer connection gathered ICE candidate to be sent.
  * @method _onIceCandidate
  * @private
@@ -100,8 +37,8 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       return;
     }
 
-    if (self._filterCandidatesType[candidateType]) {
-      if (!(self._hasMCU && self._forceTURN)) {
+    if (self._initOptions.filterCandidatesType[candidateType]) {
+      if (!(self._hasMCU && self._initOptions.forceTURN)) {
         log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
           'it matches ICE candidate filtering flag ->'], candidate);
         return;
@@ -125,7 +62,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidate: candidate.candidate
     });
 
-    if (!self._enableIceTrickle) {
+    if (!self._initOptions.enableIceTrickle) {
       log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
         'trickle ICE is disabled ->'], candidate);
       return;
@@ -156,7 +93,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED, targetMid);
 
     // Disable Ice trickle option
-    if (!self._enableIceTrickle) {
+    if (!self._initOptions.enableIceTrickle) {
       var sessionDescription = self._peerConnections[targetMid].localDescription;
 
       if (!(sessionDescription && sessionDescription.type && sessionDescription.sdp)) {

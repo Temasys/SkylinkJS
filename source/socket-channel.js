@@ -1,69 +1,4 @@
 /**
- * The list of <a href="#method_joinRoom"><code>joinRoom()</code> method</a> socket connection failure states.
- * @attribute SOCKET_ERROR
- * @param {Number} CONNECTION_FAILED    <small>Value <code>0</code></small>
- *   The value of the failure state when <code>joinRoom()</code> socket connection failed to establish with
- *   the Signaling server at the first attempt.
- * @param {Number} RECONNECTION_FAILED  <small>Value <code>-1</code></small>
- *   The value of the failure state when <code>joinRoom()</code> socket connection failed to establish
- *   the Signaling server after the first attempt.
- * @param {Number} CONNECTION_ABORTED   <small>Value <code>-2</code></small>
- *   The value of the failure state when <code>joinRoom()</code> socket connection will not attempt
- *   to reconnect after the failure of the first attempt in <code>CONNECTION_FAILED</code> as there
- *   are no more ports or transports to attempt for reconnection.
- * @param {Number} RECONNECTION_ABORTED <small>Value <code>-3</code></small>
- *   The value of the failure state when <code>joinRoom()</code> socket connection will not attempt
- *   to reconnect after the failure of several attempts in <code>RECONNECTION_FAILED</code> as there
- *   are no more ports or transports to attempt for reconnection.
- * @param {Number} RECONNECTION_ATTEMPT <small>Value <code>-4</code></small>
- *   The value of the failure state when <code>joinRoom()</code> socket connection is attempting
- *   to reconnect with a new port or transport after the failure of attempts in
- *   <code>CONNECTION_FAILED</code> or <code>RECONNECTED_FAILED</code>.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype.SOCKET_ERROR = {
-  CONNECTION_FAILED: 0,
-  RECONNECTION_FAILED: -1,
-  CONNECTION_ABORTED: -2,
-  RECONNECTION_ABORTED: -3,
-  RECONNECTION_ATTEMPT: -4
-};
-
-/**
- * The list of <a href="#method_joinRoom"><code>joinRoom()</code> method</a> socket connection reconnection states.
- * @attribute SOCKET_FALLBACK
- * @param {String} NON_FALLBACK      <small>Value <code>"nonfallback"</code></small>
- *   The value of the reconnection state when <code>joinRoom()</code> socket connection is at its initial state
- *   without transitioning to any new socket port or transports yet.
- * @param {String} FALLBACK_PORT     <small>Value <code>"fallbackPortNonSSL"</code></small>
- *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
- *   another new HTTP port using WebSocket transports to attempt to establish connection with Signaling server.
- * @param {String} FALLBACK_PORT_SSL <small>Value <code>"fallbackPortSSL"</code></small>
- *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
- *   another new HTTPS port using WebSocket transports to attempt to establish connection with Signaling server.
- * @param {String} LONG_POLLING      <small>Value <code>"fallbackLongPollingNonSSL"</code></small>
- *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
- *   another new HTTP port using Polling transports to attempt to establish connection with Signaling server.
- * @param {String} LONG_POLLING_SSL  <small>Value <code>"fallbackLongPollingSSL"</code></small>
- *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
- *   another new HTTPS port using Polling transports to attempt to establish connection with Signaling server.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.6
- */
-Skylink.prototype.SOCKET_FALLBACK = {
-  NON_FALLBACK: 'nonfallback',
-  FALLBACK_PORT: 'fallbackPortNonSSL',
-  FALLBACK_SSL_PORT: 'fallbackPortSSL',
-  LONG_POLLING: 'fallbackLongPollingNonSSL',
-  LONG_POLLING_SSL: 'fallbackLongPollingSSL'
-};
-
-/**
  * Function that sends a socket message over the socket connection to the Signaling.
  * @method _sendChannelMessage
  * @private
@@ -227,7 +162,7 @@ Skylink.prototype._sendChannelMessage = function(message) {
     }
   };
 
-  if (self._groupMessageList.indexOf(message.type) > -1) {
+  if (self._GROUP_MESSAGE_LIST.indexOf(message.type) > -1) {
     if (!(self._timestamp.socketMessage && ((new Date ()).getTime() - self._timestamp.socketMessage) <= interval)) {
       if (!checkStampFn(message)) {
         log.warn([message.target || 'Server', 'Socket', message.type, 'Dropping of outdated status message ->'], clone(message));
@@ -278,14 +213,14 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   var options = {
     forceNew: true,
     reconnection: true,
-    timeout: self._socketTimeout,
+    timeout: self._initOptions.socketTimeout,
     reconnectionAttempts: 2,
     reconnectionDelayMax: 5000,
     reconnectionDelay: 1000,
     transports: ['websocket']
   };
-  var ports = self._socketServer && typeof self._socketServer === 'object' && Array.isArray(self._socketServer.ports) &&
-    self._socketServer.ports.length > 0 ? self._socketServer.ports : self._socketPorts[self._signalingServerProtocol];
+  var ports = self._initOptions.socketServer && typeof self._initOptions.socketServer === 'object' && Array.isArray(self._initOptions.socketServer.ports) &&
+    self._initOptions.socketServer.ports.length > 0 ? self._initOptions.socketServer.ports : self._socketPorts[self._signalingServerProtocol];
   var fallbackType = null;
 
   // just beginning
@@ -294,7 +229,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
     fallbackType = self.SOCKET_FALLBACK.NON_FALLBACK;
 
   // reached the end of the last port for the protocol type
-  } else if (ports.indexOf(self._signalingServerPort) === ports.length - 1 || typeof self._socketServer === 'string') {
+  } else if (ports.indexOf(self._signalingServerPort) === ports.length - 1 || typeof self._initOptions.socketServer === 'string') {
     // re-refresh to long-polling port
     if (type === 'WebSocket') {
       type = 'Polling';
@@ -316,11 +251,11 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   var url = self._signalingServerProtocol + '//' + self._signalingServer + ':' + self._signalingServerPort + '?rand=' + Date.now();
   var retries = 0;
 
-  if (self._socketServer) {
+  if (self._initOptions.socketServer) {
     // Provided as string, make it as just the fixed server
-    url = typeof self._socketServer === 'string' ? self._socketServer :
-      (self._socketServer.protocol ? self._socketServer.protocol : self._signalingServerProtocol) + '//' +
-      self._socketServer.url + ':' + self._signalingServerPort;
+    url = typeof self._initOptions.socketServer === 'string' ? self._initOptions.socketServer :
+      (self._initOptions.socketServer.protocol ? self._initOptions.socketServer.protocol : self._signalingServerProtocol) + '//' +
+      self._initOptions.socketServer.url + ':' + self._signalingServerPort;
   }
 
   self._socketSession.transportType = type;
@@ -473,7 +408,7 @@ Skylink.prototype._openChannel = function(joinRoomTimestamp) {
   }
 
   // set if forceSSL
-  if (self._forceSSL) {
+  if (self._initOptions.forceSSL) {
     self._signalingServerProtocol = 'https:';
   } else {
     self._signalingServerProtocol = window.location.protocol;

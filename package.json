@@ -16,7 +16,8 @@
     }
   ],
   "scripts": {
-    "prestart": "./start.sh &"
+    "prestart": "./start.sh &",
+    "test": "grunt test && karma start tests/karma.conf.js"
   },
   "dependencies": {
     "socket.io-client": "1.4.8",
@@ -34,16 +35,25 @@
     "grunt-contrib-uglify": "^0.6.0",
     "grunt-contrib-yuidoc": "^0.5.2",
     "grunt-replace": "^0.7.9",
-    "grunt-tape": "^0.0.2",
+    "karma": "1.7.1",
+    "chai": "^4.1.2",
+    "karma-chai": "0.1.0",
+    "karma-chrome-launcher": "2.2.0",
+    "karma-cli": "1.0.1",
+    "karma-edge-launcher": "0.4.2",
+    "karma-firefox-launcher": "1.0.1",
+    "karma-ie-launcher": "1.0.0",
+    "karma-mocha": "^1.3.0",
+    "karma-mocha-reporter": "^2.2.5",
+    "karma-opera-launcher": "1.0.0",
+    "karma-safari-launcher": "1.0.0",
     "load-grunt-tasks": "^3.1.0",
-    "tape": "^4.2.2",
-    "yuidocjs": "^0.3.50",
-    "crypto-js": "*",
-    "seq-queue": "*"
+    "mocha": "^4.0.1",
+    "yuidocjs": "^0.3.50"
   },
   "engines": {
-    "node": ">=0.10.26",
-    "npm": ">=1.4.6"
+    "node": ">=8.7.0",
+    "npm": ">=5.5.1"
   },
   "keywords": [
     "webrtc",

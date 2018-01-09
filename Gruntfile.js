@@ -273,6 +273,14 @@ module.exports = function(grunt) {
         'uglify'
     ]);
 
+    grunt.registerTask('test', [
+        'versionise',
+        'clean:production',
+        'concat',
+        'replace',
+        'uglify'
+    ]);
+
     grunt.registerTask('doc', [
         'yuidoc'
     ]);
