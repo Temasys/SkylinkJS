@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.26</title>
+    <title>SkylinkJS 0.6.27</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.27</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -89,99 +89,6 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-/**
- * The list of Signaling server reaction states during &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.
- * @attribute SYSTEM_ACTION
- * @param {String} WARNING &lt;small&gt;Value &lt;code&gt;&quot;warning&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Room session is about to end.
- * @param {String} REJECT  &lt;small&gt;Value &lt;code&gt;&quot;reject&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Room session has failed to start or has ended.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.1
- */
-Skylink.prototype.SYSTEM_ACTION = {
-  WARNING: &#x27;warning&#x27;,
-  REJECT: &#x27;reject&#x27;
-};
-
-/**
- * The list of Signaling server reaction states reason of action code during
- * &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt;.
- * @attribute SYSTEM_ACTION_REASON
- * @param {String} CREDENTIALS_EXPIRED &lt;small&gt;Value &lt;code&gt;&quot;oldTimeStamp&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the reason code when Room session token has expired.
- *   &lt;small&gt;Happens during &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; request.&lt;/small&gt;
- *   &lt;small&gt;Results with: &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
- * @param {String} CREDENTIALS_ERROR   &lt;small&gt;Value &lt;code&gt;&quot;credentialError&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the reason code when Room session token provided is invalid.
- *   &lt;small&gt;Happens during &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; request.&lt;/small&gt;
- * @param {String} DUPLICATED_LOGIN    &lt;small&gt;Value &lt;code&gt;&quot;duplicatedLogin&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the reason code when Room session token has been used already.
- *   &lt;small&gt;Happens during &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; request.&lt;/small&gt;
- *   &lt;small&gt;Results with: &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
- * @param {String} ROOM_NOT_STARTED    &lt;small&gt;Value &lt;code&gt;&quot;notStart&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the reason code when Room session has not started.
- *   &lt;small&gt;Happens during &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; request.&lt;/small&gt;
- *   &lt;small&gt;Results with: &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
- * @param {String} EXPIRED             &lt;small&gt;Value &lt;code&gt;&quot;expired&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the reason code when Room session has ended already.
- *   &lt;small&gt;Happens during &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; request.&lt;/small&gt;
- *   &lt;small&gt;Results with: &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
- * @param {String} ROOM_LOCKED         &lt;small&gt;Value &lt;code&gt;&quot;locked&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the reason code when Room is locked.
- *   &lt;small&gt;Happens during &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; request.&lt;/small&gt;
- *   &lt;small&gt;Results with: &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
- * @param {String} FAST_MESSAGE        &lt;small&gt;Value &lt;code&gt;&quot;fastmsg&quot;&lt;/code&gt;&lt;/small&gt;
- *    The value of the reason code when User is flooding socket messages to the Signaling server
- *    that is sent too quickly within less than a second interval.
- *    &lt;small&gt;Happens after Room session has started. This can be caused by various methods like
- *    &lt;a href=&quot;#method_sendMessage&quot;&gt;&lt;code&gt;sendMessage()&lt;/code&gt; method&lt;/a&gt;,
- *    &lt;a href=&quot;#method_setUserData&quot;&gt;&lt;code&gt;setUserData()&lt;/code&gt; method&lt;/a&gt;,
- *    &lt;a href=&quot;#method_muteStream&quot;&gt;&lt;code&gt;muteStream()&lt;/code&gt; method&lt;/a&gt;,
- *    &lt;a href=&quot;#method_enableAudio&quot;&gt;&lt;code&gt;enableAudio()&lt;/code&gt; method&lt;/a&gt;,
- *    &lt;a href=&quot;#method_enableVideo&quot;&gt;&lt;code&gt;enableVideo()&lt;/code&gt; method&lt;/a&gt;,
- *    &lt;a href=&quot;#method_disableAudio&quot;&gt;&lt;code&gt;disableAudio()&lt;/code&gt; method&lt;/a&gt; and
- *    &lt;a href=&quot;#method_disableVideo&quot;&gt;&lt;code&gt;disableVideo()&lt;/code&gt; method&lt;/a&gt;&lt;/small&gt;
- *    &lt;small&gt;Results with: &lt;code&gt;WARNING&lt;/code&gt;&lt;/small&gt;
- * @param {String} ROOM_CLOSING        &lt;small&gt;Value &lt;code&gt;&quot;toClose&quot;&lt;/code&gt;&lt;/small&gt;
- *    The value of the reason code when Room session is ending.
- *    &lt;small&gt;Happens after Room session has started. This serves as a prerequisite warning before
- *    &lt;code&gt;ROOM_CLOSED&lt;/code&gt; occurs.&lt;/small&gt;
- *    &lt;small&gt;Results with: &lt;code&gt;WARNING&lt;/code&gt;&lt;/small&gt;
- * @param {String} ROOM_CLOSED         &lt;small&gt;Value &lt;code&gt;&quot;roomclose&quot;&lt;/code&gt;&lt;/small&gt;
- *    The value of the reason code when Room session has just ended.
- *    &lt;small&gt;Happens after Room session has started.&lt;/small&gt;
- *    &lt;small&gt;Results with: &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
- * @param {String} SERVER_ERROR        &lt;small&gt;Value &lt;code&gt;&quot;serverError&quot;&lt;/code&gt;&lt;/small&gt;
- *    The value of the reason code when Room session fails to start due to some technical errors.
- *    &lt;small&gt;Happens during &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; request.&lt;/small&gt;
- *    &lt;small&gt;Results with: &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
- * @param {String} KEY_ERROR           &lt;small&gt;Value &lt;code&gt;&quot;keyFailed&quot;&lt;/code&gt;&lt;/small&gt;
- *    The value of the reason code when Room session fails to start due to some technical error pertaining to
- *    App Key initialization.
- *    &lt;small&gt;Happens during &lt;a href=&quot;#method_joinRoom&quot;&gt;&lt;code&gt;joinRoom()&lt;/code&gt; method&lt;/a&gt; request.&lt;/small&gt;
- *    &lt;small&gt;Results with: &lt;code&gt;REJECT&lt;/code&gt;&lt;/small&gt;
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype.SYSTEM_ACTION_REASON = {
-  CREDENTIALS_EXPIRED: &#x27;oldTimeStamp&#x27;,
-  CREDENTIALS_ERROR: &#x27;credentialError&#x27;,
-  DUPLICATED_LOGIN: &#x27;duplicatedLogin&#x27;,
-  ROOM_NOT_STARTED: &#x27;notStart&#x27;,
-  EXPIRED: &#x27;expired&#x27;,
-  ROOM_LOCKED: &#x27;locked&#x27;,
-  FAST_MESSAGE: &#x27;fastmsg&#x27;,
-  ROOM_CLOSING: &#x27;toclose&#x27;,
-  ROOM_CLOSED: &#x27;roomclose&#x27;,
-  SERVER_ERROR: &#x27;serverError&#x27;,
-  KEY_ERROR: &#x27;keyFailed&#x27;
-};
-
 /**
  * Function that starts the Room session.
  * @method joinRoom
@@ -482,7 +389,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 
 Skylink.prototype.joinRoom = function(room, options, callback) {
   var self = this;
-  var selectedRoom = self._defaultRoom;
+  var selectedRoom = self._initOptions.defaultRoom;
   var previousRoom = self._selectedRoom;
   var mediaOptions = {};
   var timestamp = (new Date()).getTime() + Math.floor(Math.random() * 10000);
@@ -607,7 +514,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           len: self._room.duration,
           isPrivileged: self._isPrivileged === true, // Default to false if undefined
           autoIntroduce: self._autoIntroduce !== false, // Default to true if undefined
-          key: self._appKey
+          key: self._initOptions.appKey
         });
       });
     });

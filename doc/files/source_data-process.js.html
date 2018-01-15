@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.26</title>
+    <title>SkylinkJS 0.6.27</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.27</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -89,96 +89,6 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-/**
- * The list of supported data transfer data types.
- * @attribute DATA_TRANSFER_DATA_TYPE
- * @param {String} BINARY_STRING &lt;small&gt;Value &lt;code&gt;&quot;binaryString&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of data transfer data type when Blob binary data chunks encoded to Base64 encoded string are
- *   sent or received over the Datachannel connection for the data transfer session.
- *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
- *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;false&lt;/code&gt;.&lt;/small&gt;
- * @param {String} ARRAY_BUFFER  &lt;small&gt;Value &lt;code&gt;&quot;arrayBuffer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of data transfer data type when ArrayBuffer binary data chunks are
- *   sent or received over the Datachannel connection for the data transfer session.
- *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
- *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
- * @param {String} BLOB          &lt;small&gt;Value &lt;code&gt;&quot;blob&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of data transfer data type when Blob binary data chunks are
- *   sent or received over the Datachannel connection for the data transfer session.
- *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; when
- *   parameter &lt;code&gt;sendChunksAsBinary&lt;/code&gt; value is &lt;code&gt;true&lt;/code&gt;.&lt;/small&gt;
- * @param {String} STRING        &lt;small&gt;Value &lt;code&gt;&quot;string&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of data transfer data type when only string data chunks are
- *   sent or received over the Datachannel connection for the data transfer session.
- *   &lt;small&gt;Used only in &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.DATA_TRANSFER_DATA_TYPE = {
-  BINARY_STRING: &#x27;binaryString&#x27;,
-  ARRAY_BUFFER: &#x27;arrayBuffer&#x27;,
-  BLOB: &#x27;blob&#x27;,
-  STRING: &#x27;string&#x27;
-};
-
-/**
- * Stores the data chunk size for Blob transfers.
- * @attribute _CHUNK_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._CHUNK_FILE_SIZE = 49152;
-
-/**
- * Stores the data chunk size for Blob transfers transferring from/to
- *   Firefox browsers due to limitation tested in the past in some PCs (linx predominatly).
- * @attribute _MOZ_CHUNK_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._MOZ_CHUNK_FILE_SIZE = 12288;
-
-/**
- * Stores the data chunk size for binary Blob transfers.
- * @attribute _BINARY_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._BINARY_FILE_SIZE = 65456;
-
-/**
- * Stores the data chunk size for binary Blob transfers.
- * @attribute _MOZ_BINARY_FILE_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype._MOZ_BINARY_FILE_SIZE = 16384;
-
-/**
- * Stores the data chunk size for data URI string transfers.
- * @attribute _CHUNK_DATAURL_SIZE
- * @type Number
- * @private
- * @readOnly
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._CHUNK_DATAURL_SIZE = 1212;
-
 /**
  * Function that converts Base64 string into Blob object.
  * This is referenced from devnull69@stackoverflow.com #6850276.
