@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.26</title>
+    <title>SkylinkJS 0.6.27</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.27</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -90,40 +90,6 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * The list of Peer connection states.
- * @attribute HANDSHAKE_PROGRESS
- * @param {String} ENTER   &lt;small&gt;Value &lt;code&gt;&quot;enter&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when Peer has just entered the Room.
- *   &lt;small&gt;At this stage, &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;
- *   is triggered.&lt;/small&gt;
- * @param {String} WELCOME &lt;small&gt;Value &lt;code&gt;&quot;welcome&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when Peer is aware that User has entered the Room.
- *   &lt;small&gt;At this stage, &lt;a href=&quot;#event_peerJoined&quot;&gt;&lt;code&gt;peerJoined&lt;/code&gt; event&lt;/a&gt;
- *   is triggered and Peer connection may commence.&lt;/small&gt;
- * @param {String} OFFER   &lt;small&gt;Value &lt;code&gt;&quot;offer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;offer&quot;&lt;/code&gt;
- *   session description to start streaming connection.
- * @param {String} ANSWER  &lt;small&gt;Value &lt;code&gt;&quot;answer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when Peer connection has set the local / remote &lt;code&gt;&quot;answer&quot;&lt;/code&gt;
- *   session description to establish streaming connection.
- * @param {String} ERROR   &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the connection state when Peer connection has failed to establish streaming connection.
- *   &lt;small&gt;This happens when there are errors that occurs in creating local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; /
- *   &lt;code&gt;&quot;answer&quot;&lt;/code&gt;, or when setting remote / local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; / &lt;code&gt;&quot;answer&quot;&lt;/code&gt;.&lt;/small&gt;
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.HANDSHAKE_PROGRESS = {
-  ENTER: &#x27;enter&#x27;,
-  WELCOME: &#x27;welcome&#x27;,
-  OFFER: &#x27;offer&#x27;,
-  ANSWER: &#x27;answer&#x27;,
-  ERROR: &#x27;error&#x27;
-};
-
-/**
  * Function that creates the Peer connection offer session description.
  * @method _doOffer
  * @private
@@ -162,7 +128,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
     self._addLocalMediaStreams(targetMid);
   }
 
-  if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
+  if (self._initOptions.enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
     self._peerInformations[targetMid].config.enableDataChannel/* &amp;&amp;
     !(!self._sdpSettings.connection.data &amp;&amp; targetMid !== &#x27;MCU&#x27;)*/) {
     // Edge doesn&#x27;t support datachannels yet
@@ -338,7 +304,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       pc.setOffer = &#x27;local&#x27;;
     }
 
-    if (!self._enableIceTrickle &amp;&amp; !pc.gathered) {
+    if (!self._initOptions.enableIceTrickle &amp;&amp; !pc.gathered) {
       log.log([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type,
         &#x27;Local session description sending is halted to complete ICE gathering.&#x27;]);
       return;

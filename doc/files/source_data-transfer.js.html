@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.26</title>
+    <title>SkylinkJS 0.6.27</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.27</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -89,175 +89,6 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-/**
- * &lt;blockquote class=&quot;info&quot;&gt;
- *   Note that this is used only for SDK developer purposes.&lt;br&gt;
- *   Current version: &lt;code&gt;0.1.0&lt;/code&gt;
- * &lt;/blockquote&gt;
- * The value of the current version of the data transfer protocol.
- * @attribute DT_PROTOCOL_VERSION
- * @type String
- * @readOnly
- * @for Skylink
- * @since 0.5.10
- */
-Skylink.prototype.DT_PROTOCOL_VERSION = &#x27;0.1.3&#x27;;
-
-/**
- * The list of data transfers directions.
- * @attribute DATA_TRANSFER_TYPE
- * @param {String} UPLOAD &lt;small&gt;Value &lt;code&gt;&quot;upload&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the data transfer direction when User is uploading data to Peer.
- * @param {String} DOWNLOAD &lt;small&gt;Value &lt;code&gt;&quot;download&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the data transfer direction when User is downloading data from Peer.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.DATA_TRANSFER_TYPE = {
-  UPLOAD: &#x27;upload&#x27;,
-  DOWNLOAD: &#x27;download&#x27;
-};
-
-/**
- * The list of data transfers session types.
- * @attribute DATA_TRANSFER_SESSION_TYPE
- * @param {String} BLOB     &lt;small&gt;Value &lt;code&gt;&quot;blob&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the session type for
- *   &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; data transfer.
- * @param {String} DATA_URL &lt;small&gt;Value &lt;code&gt;&quot;dataURL&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the session type for
- *   &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;method_sendBlobData()&lt;/code&gt; method&lt;/a&gt; data transfer.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.DATA_TRANSFER_SESSION_TYPE = {
-  BLOB: &#x27;blob&#x27;,
-  DATA_URL: &#x27;dataURL&#x27;
-};
-
-/**
- * The list of data transfer states.
- * @attribute DATA_TRANSFER_STATE
- * @param {String} UPLOAD_REQUEST     &lt;small&gt;Value &lt;code&gt;&quot;request&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when receiving an upload data transfer request from Peer to User.
- *   &lt;small&gt;At this stage, the upload data transfer request from Peer may be accepted or rejected with the
- *   &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;&lt;code&gt;acceptDataTransfer()&lt;/code&gt; method&lt;/a&gt; invoked by User.&lt;/small&gt;
- * @parma {String} USER_UPLOAD_REQUEST &lt;small&gt;Value &lt;code&gt;&quot;userRequest&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when User sent an upload data transfer request to Peer.
- *   &lt;small&gt;At this stage, the upload data transfer request to Peer may be accepted or rejected with the
- *   &lt;a href=&quot;#method_acceptDataTransfer&quot;&gt;&lt;code&gt;acceptDataTransfer()&lt;/code&gt; method&lt;/a&gt; invoked by Peer.&lt;/small&gt;
- * @param {String} UPLOAD_STARTED     &lt;small&gt;Value &lt;code&gt;&quot;uploadStarted&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when the data transfer request has been accepted
- *   and data transfer will start uploading data to Peer.
- *   &lt;small&gt;At this stage, the data transfer may be terminated with the
- *   &lt;a href=&quot;#method_cancelDataTransfer&quot;&gt;&lt;code&gt;cancelDataTransfer()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
- * @param {String} DOWNLOAD_STARTED   &lt;small&gt;Value &lt;code&gt;&quot;downloadStarted&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when the data transfer request has been accepted
- *   and data transfer will start downloading data from Peer.
- *   &lt;small&gt;At this stage, the data transfer may be terminated with the
- *   &lt;a href=&quot;#method_cancelDataTransfer&quot;&gt;&lt;code&gt;cancelDataTransfer()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
- * @param {String} REJECTED           &lt;small&gt;Value &lt;code&gt;&quot;rejected&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when upload data transfer request to Peer has been rejected and terminated.
- * @param {String} USER_REJECTED      &lt;small&gt;Value &lt;code&gt;&quot;userRejected&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when User rejected and terminated upload data transfer request from Peer.
- * @param {String} UPLOADING          &lt;small&gt;Value &lt;code&gt;&quot;uploading&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data transfer is uploading data to Peer.
- * @param {String} DOWNLOADING        &lt;small&gt;Value &lt;code&gt;&quot;downloading&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data transfer is downloading data from Peer.
- * @param {String} UPLOAD_COMPLETED   &lt;small&gt;Value &lt;code&gt;&quot;uploadCompleted&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data transfer has uploaded successfully to Peer.
- * @param {String} DOWNLOAD_COMPLETED &lt;small&gt;Value &lt;code&gt;&quot;downloadCompleted&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data transfer has downloaded successfully from Peer.
- * @param {String} CANCEL             &lt;small&gt;Value &lt;code&gt;&quot;cancel&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data transfer has been terminated from / to Peer.
- * @param {String} ERROR              &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data transfer has errors and has been terminated from / to Peer.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.4.0
- */
-Skylink.prototype.DATA_TRANSFER_STATE = {
-  UPLOAD_REQUEST: &#x27;request&#x27;,
-  UPLOAD_STARTED: &#x27;uploadStarted&#x27;,
-  DOWNLOAD_STARTED: &#x27;downloadStarted&#x27;,
-  REJECTED: &#x27;rejected&#x27;,
-  CANCEL: &#x27;cancel&#x27;,
-  ERROR: &#x27;error&#x27;,
-  UPLOADING: &#x27;uploading&#x27;,
-  DOWNLOADING: &#x27;downloading&#x27;,
-  UPLOAD_COMPLETED: &#x27;uploadCompleted&#x27;,
-  DOWNLOAD_COMPLETED: &#x27;downloadCompleted&#x27;,
-  USER_REJECTED: &#x27;userRejected&#x27;,
-  USER_UPLOAD_REQUEST: &#x27;userRequest&#x27;,
-  START_ERROR: &#x27;startError&#x27;
-};
-
-/**
- * The list of data streaming states.
- * @attribute DATA_STREAM_STATE
- * @param {String} SENDING_STARTED   &lt;small&gt;Value &lt;code&gt;&quot;sendStart&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data streaming session has started from User to Peer.
- * @param {String} RECEIVING_STARTED &lt;small&gt;Value &lt;code&gt;&quot;receiveStart&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data streaming session has started from Peer to Peer.
- * @param {String} RECEIVED          &lt;small&gt;Value &lt;code&gt;&quot;received&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data streaming session data chunk has been received from Peer to User.
- * @param {String} SENT              &lt;small&gt;Value &lt;code&gt;&quot;sent&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data streaming session data chunk has been sent from User to Peer.
- * @param {String} SENDING_STOPPED   &lt;small&gt;Value &lt;code&gt;&quot;sendStop&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data streaming session has stopped from User to Peer.
- * @param {String} RECEIVING_STOPPED &lt;small&gt;Value &lt;code&gt;&quot;receivingStop&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data streaming session has stopped from Peer to User.
- * @param {String} ERROR             &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data streaming session has errors.
- *   &lt;small&gt;At this stage, the data streaming state is considered &lt;code&gt;SENDING_STOPPED&lt;/code&gt; or
- *   &lt;code&gt;RECEIVING_STOPPED&lt;/code&gt;.&lt;/small&gt;
- * @param {String} START_ERROR       &lt;small&gt;Value &lt;code&gt;&quot;startError&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when data streaming session failed to start from User to Peer.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.6.18
- */
-Skylink.prototype.DATA_STREAM_STATE = {
-  SENDING_STARTED: &#x27;sendStart&#x27;,
-  SENDING_STOPPED: &#x27;sendStop&#x27;,
-  RECEIVING_STARTED: &#x27;receiveStart&#x27;,
-  RECEIVING_STOPPED: &#x27;receiveStop&#x27;,
-  RECEIVED: &#x27;received&#x27;,
-  SENT: &#x27;sent&#x27;,
-  ERROR: &#x27;error&#x27;,
-  START_ERROR: &#x27;startError&#x27;
-};
-
-/**
- * Stores the list of data transfer protocols.
- * @attribute _DC_PROTOCOL_TYPE
- * @param {String} WRQ The protocol to initiate data transfer.
- * @param {String} ACK The protocol to request for data transfer chunk.
- *   Give &lt;code&gt;-1&lt;/code&gt; to reject the request at the beginning and &lt;code&gt;0&lt;/code&gt; to accept
- *   the data transfer request.
- * @param {String} CANCEL The protocol to terminate data transfer.
- * @param {String} ERROR The protocol when data transfer has errors and has to be terminated.
- * @param {String} MESSAGE The protocol that is used to send P2P messages.
- * @type JSON
- * @readOnly
- * @private
- * @for Skylink
- * @since 0.5.2
- */
-Skylink.prototype._DC_PROTOCOL_TYPE = {
-  WRQ: &#x27;WRQ&#x27;,
-  ACK: &#x27;ACK&#x27;,
-  ERROR: &#x27;ERROR&#x27;,
-  CANCEL: &#x27;CANCEL&#x27;,
-  MESSAGE: &#x27;MESSAGE&#x27;
-};
-
 /**
  * Function that starts an uploading data transfer from User to Peers.
  * @method sendBlobData
@@ -694,54 +525,61 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 
   // Check Datachannel property in _dataChannels[peerId] list
   var channelProp = &#x27;main&#x27;;
+  var dataChannelStateCbFn = null;
 
   if (self._dataChannels[peerId][transferId]) {
     channelProp = transferId;
   }
 
+  // From here we start detecting as completion for data transfer downloads
+  self.once(&#x27;dataTransferState&#x27;, function () {
+    if (dataChannelStateCbFn) {
+      self.off(&#x27;dataChannelState&#x27;, dataChannelStateCbFn);
+    }
+
+    delete self._dataTransfers[transferId];
+
+    if (self._dataChannels[peerId]) {
+      if (channelProp === &#x27;main&#x27; &amp;&amp; self._dataChannels[peerId].main) {
+        self._dataChannels[peerId].main.transferId = null;
+      }
+
+      if (channelProp === transferId) {
+        self._closeDataChannel(peerId, transferId);
+      }
+    }
+  }, function (state, evtTransferId, evtPeerId) {
+    return evtTransferId === transferId &amp;&amp; evtPeerId === peerId &amp;&amp; [
+      self.DATA_TRANSFER_STATE.ERROR,
+      self.DATA_TRANSFER_STATE.CANCEL,
+      self.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
+      self.DATA_TRANSFER_STATE.USER_REJECTED].indexOf(state) &gt; -1;
+  });
+
   if (accept) {
     log.debug([peerId, &#x27;RTCDataChannel&#x27;, transferId, &#x27;Accepted data transfer and starting ...&#x27;]);
 
-    var dataChannelStateCbFn = function (state, evtPeerId, error, cN, cT) {
-      console.info(evtPeerId, error, cN, cT);
+    dataChannelStateCbFn = function (state, evtPeerId, error, cN, cT) {
+      log.error([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Data transfer &quot;&#x27; + transferId + &#x27;&quot; has been terminated due to connection.&#x27;]);
+      
       self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.ERROR, transferId, peerId,
         self._getTransferInfo(transferId, peerId, true, false, false), {
         transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
         message: new Error(&#x27;Data transfer terminated as Peer Datachannel connection closed abruptly.&#x27;)
       });
     };
-
+  
     self.once(&#x27;dataChannelState&#x27;, dataChannelStateCbFn, function (state, evtPeerId, error, channelName, channelType) {
       if (!(self._dataTransfers[transferId] &amp;&amp; self._dataTransfers[transferId].sessions[peerId])) {
         self.off(&#x27;dataChannelState&#x27;, dataChannelStateCbFn);
         return;
       }
-      return evtPeerId === peerId &amp;&amp; (channelProp === &#x27;main&#x27; ? channelType === self.DATA_CHANNEL_STATE.MESSAGING :
-        channelName === transferId) &amp;&amp; [self.DATA_CHANNEL_STATE.CLOSING, self.DATA_CHANNEL_STATE.CLOSED,
+
+      return evtPeerId === peerId &amp;&amp; (channelProp === &#x27;main&#x27; ?
+        channelType === self.DATA_CHANNEL_STATE.MESSAGING : channelName === transferId) &amp;&amp; [
+        self.DATA_CHANNEL_STATE.CLOSING,
+        self.DATA_CHANNEL_STATE.CLOSED,
         self.DATA_CHANNEL_STATE.ERROR].indexOf(state) &gt; -1;
-    });
-
-    // From here we start detecting as completion for data transfer downloads
-    self.once(&#x27;dataTransferState&#x27;, function () {
-      if (dataChannelStateCbFn) {
-        self.off(&#x27;dataChannelState&#x27;, dataChannelStateCbFn);
-      }
-
-      delete self._dataTransfers[transferId];
-
-      if (self._dataChannels[peerId]) {
-        if (channelProp === &#x27;main&#x27; &amp;&amp; self._dataChannels[peerId].main) {
-          self._dataChannels[peerId].main.transferId = null;
-        }
-
-        if (channelProp === transferId) {
-          self._closeDataChannel(peerId, transferId);
-        }
-      }
-    }, function (state, evtTransferId, evtPeerId) {
-      return evtTransferId === transferId &amp;&amp; evtPeerId === peerId &amp;&amp;
-        [self.DATA_TRANSFER_STATE.ERROR, self.DATA_TRANSFER_STATE.CANCEL,
-        self.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED].indexOf(state) &gt; -1;
     });
 
     // Send ACK protocol to start data transfer
@@ -766,18 +604,11 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
       ackN: -1
     }, channelProp);
 
-    // Insanity check
-    if (channelProp === &#x27;main&#x27; &amp;&amp; self._dataChannels[peerId].main) {
-      self._dataChannels[peerId].main.transferId = null;
-    }
-
     self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.USER_REJECTED, transferId, peerId,
       self._getTransferInfo(transferId, peerId, true, false, false), {
       message: new Error(&#x27;Data transfer terminated as User has rejected data transfer request.&#x27;),
       transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD
     });
-
-    delete self._dataTransfers[transferId];
   }
 };
 
@@ -985,7 +816,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
     return;
   }
 
-  if (!this._enableDataChannel) {
+  if (!this._initOptions.enableDataChannel) {
     log.error(&#x27;Unable to send message as User does not have Datachannel enabled. -&gt;&#x27;, message);
     return;
   }
@@ -1224,7 +1055,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     return emitErrorBeforeStreamingFn(&#x27;Unable to start data streaming as User is not in Room.&#x27;);
   }
 
-  if (!this._enableDataChannel) {
+  if (!this._initOptions.enableDataChannel) {
     return emitErrorBeforeStreamingFn(&#x27;Unable to start data streaming as User does not have Datachannel enabled.&#x27;);
   }
 
@@ -1236,7 +1067,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     return emitErrorBeforeStreamingFn(&#x27;Unable to start data streaming as this feature is current not supported by MCU yet.&#x27;);
   }
 
-  if (!self._enableSimultaneousTransfers) {
+  if (!self._initOptions.enableSimultaneousTransfers) {
     return emitErrorBeforeStreamingFn(&#x27;Unable to start data streaming as this feature requires simultaneous data transfers to be enabled&#x27;);
   }
 
@@ -1284,7 +1115,7 @@ Skylink.prototype.startStreamingData = function(isStringStream, targetPeerId) {
     var peerId = listOfPeers[i];
     var error = null;
     var dtProtocolVersion = ((self._peerInformations[peerId] || {}).agent || {}).DTProtocolVersion || &#x27;&#x27;;
-    var channelProp = self._isLowerThanVersion(dtProtocolVersion, &#x27;0.1.2&#x27;) || !self._enableSimultaneousTransfers ? &#x27;main&#x27; : transferId;
+    var channelProp = self._isLowerThanVersion(dtProtocolVersion, &#x27;0.1.2&#x27;) || !self._initOptions.enableSimultaneousTransfers ? &#x27;main&#x27; : transferId;
 
     if (!(self._dataChannels[peerId] &amp;&amp; self._dataChannels[peerId].main)) {
       error = &#x27;Datachannel connection does not exists&#x27;;
@@ -1932,7 +1763,7 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
     return;
   }
 
-  if (!self._enableDataChannel) {
+  if (!self._initOptions.enableDataChannel) {
     emitErrorBeforeDataTransferFn(&#x27;Unable to send any &#x27; +
       sessionType.replace(&#x27;data&#x27;, &#x27;dataURL&#x27;) + &#x27; data. Datachannel is disabled&#x27;);
     return;
@@ -2055,7 +1886,6 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
  */
 Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callback, channelProp, targetPeers) {
   var self = this;
-
   var peerConnectionStateCbFn = null;
   var dataChannelStateCbFn = null;
 
@@ -2145,47 +1975,48 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
         delete self._dataTransfers[transferId].peers[channelProp][peerId];
       }
 
-      if (state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED) {
-        callback(peerId, null);
-      } else {
-        callback(peerId, error.message.message || error.message.toString());
+      callback(peerId, state === self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED ? null :
+        error.message.message || error.message.toString());
+
+      delete self._dataTransfers[transferId].sessions[peerId];
+
+      if (self._hasMCU &amp;&amp; Object.keys(self._dataTransfers[transferId].peers.main).length === 0 &amp;&amp;
+        self._dataChannels.MCU &amp;&amp; self._dataChannels.MCU.main) {
+        self._dataChannels.MCU.main.transferId = null;
+
+      } else if (channelProp === &#x27;main&#x27; &amp;&amp; self._dataChannels[peerId] &amp;&amp; self._dataChannels[peerId].main) {
+        self._dataChannels[peerId].main.transferId = null;
       }
 
-      // Handle Peer uploading to MCU case
-      if (self._hasMCU &amp;&amp; self._dataTransfers[transferId].direction === self.DATA_TRANSFER_TYPE.UPLOAD) {
-        if (!(Object.keys(self._dataTransfers[transferId].peers.main).length === 0 &amp;&amp;
-          Object.keys(self._dataTransfers[transferId].peers[transferId]).length === 0)) {
-          return;
-        }
-
+      if (Object.keys(self._dataTransfers[transferId].sessions).length === 0) {
         delete self._dataTransfers[transferId];
-
-      } else {
-        delete self._dataTransfers[transferId].sessions[peerId];
-
-        if (Object.keys(self._dataTransfers[transferId].sessions).length === 0) {
-          delete self._dataTransfers[transferId];
-        }
       }
     };
 
     self.once(&#x27;dataTransferState&#x27;, dataTransferStateCbFn, function (state, evtTransferId, evtPeerId) {
-      if (!(self._dataTransfers[transferId] &amp;&amp; (self._hasMCU ? (self._dataTransfers[transferId].peers.main[peerId] ||
-        self._dataTransfers[transferId].peers[transferId][peerId]) : self._dataTransfers[transferId].sessions[peerId]))) {
+      if (!(self._dataTransfers[transferId] &amp;&amp; (self._hasMCU ?
+        (self._dataTransfers[transferId].peers.main[peerId] || self._dataTransfers[transferId].peers[transferId][peerId]) :
+        self._dataTransfers[transferId].sessions[peerId]))) {
+
         if (dataTransferStateCbFn) {
           self.off(&#x27;dataTransferState&#x27;, dataTransferStateCbFn);
         }
+
         if (peerConnectionStateCbFn) {
           self.off(&#x27;peerConnectionState&#x27;, peerConnectionStateCbFn);
         }
+
         if (dataChannelStateCbFn) {
           self.off(&#x27;dataChannelState&#x27;, dataChannelStateCbFn);
         }
         return;
       }
-      return evtTransferId === transferId &amp;&amp; evtPeerId === peerId &amp;&amp;
-        [self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED, self.DATA_TRANSFER_STATE.ERROR,
-        self.DATA_TRANSFER_STATE.CANCEL, self.DATA_TRANSFER_STATE.REJECTED].indexOf(state) &gt; -1;
+
+      return evtTransferId === transferId &amp;&amp; evtPeerId === peerId &amp;&amp; [
+        self.DATA_TRANSFER_STATE.UPLOAD_COMPLETED,
+        self.DATA_TRANSFER_STATE.ERROR,
+        self.DATA_TRANSFER_STATE.CANCEL,
+        self.DATA_TRANSFER_STATE.REJECTED].indexOf(state) &gt; -1;
     });
   }
 
@@ -2239,7 +2070,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
   }
 
   var protocolVer = (self._peerInformations[peerId].agent || {}).DTProtocolVersion || &#x27;0.1.0&#x27;;
-  var requireInterop = self._isLowerThanVersion(protocolVer, &#x27;0.1.2&#x27;) || !self._enableSimultaneousTransfers;
+  var requireInterop = self._isLowerThanVersion(protocolVer, &#x27;0.1.2&#x27;) || !self._initOptions.enableSimultaneousTransfers;
 
   // Prevent DATA_URL (or &quot;string&quot; dataType transfers) with Android / iOS / C++ SDKs
   if (self._isLowerThanVersion(protocolVer, &#x27;0.1.2&#x27;) &amp;&amp; self._dataTransfers[transferId].sessionType === &#x27;data&#x27; &amp;&amp;
@@ -2298,16 +2129,22 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       return;
     }
 
-    if (evtPeerId === peerId &amp;&amp; (channelType === self.DATA_CHANNEL_TYPE.DATA ? channelName === transferId : true)) {
-      if (state === self.DATA_CHANNEL_STATE.OPEN &amp;&amp; channelType === self.DATA_CHANNEL_TYPE.DATA &amp;&amp;
-        channelName === transferId) {
-        self._dataChannels[peerId][channelProp].transferId = transferId;
-        sendWRQFn();
-        return false;
-      }
-      return [self.DATA_CHANNEL_STATE.CREATE_ERROR, self.DATA_CHANNEL_STATE.ERROR,
-        self.DATA_CHANNEL_STATE.CLOSING, self.DATA_CHANNEL_STATE.CLOSED].indexOf(state) &gt; -1;
+    if (!(evtPeerId === peerId &amp;&amp; (channelProp === &#x27;main&#x27; ? 
+      channelType === self.DATA_CHANNEL_TYPE.MESSAGING : channelName === transferId))) {
+      return;
     }
+
+    if (state === self.DATA_CHANNEL_STATE.OPEN &amp;&amp; channelProp !== &#x27;main&#x27; &amp;&amp; channelName === transferId) {
+      self._dataChannels[peerId][channelProp].transferId = transferId;
+      sendWRQFn();
+      return false;
+    }
+
+    return [
+      self.DATA_CHANNEL_STATE.CREATE_ERROR,
+      self.DATA_CHANNEL_STATE.ERROR,
+      self.DATA_CHANNEL_STATE.CLOSING,
+      self.DATA_CHANNEL_STATE.CLOSED].indexOf(state) &gt; -1;
   });
 
   // Create new Datachannel for Peer to start data transfer
@@ -2318,6 +2155,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27; ? 16384 : 65546) : // After conversion to base64 string computed size
       (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27; ? self._MOZ_BINARY_FILE_SIZE : self._BINARY_FILE_SIZE)));
   } else {
+    channelProp = &#x27;main&#x27;;
     self._dataChannels[peerId].main.transferId = transferId;
     sendWRQFn();
   }

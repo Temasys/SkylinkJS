@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.26</title>
+    <title>SkylinkJS 0.6.27</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.27</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -158,33 +158,33 @@ Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
     var audioSettings = self._streams.screenshare ? self._streams.screenshare.settings.audio :
       (self._streams.userMedia ? self._streams.userMedia.settings.audio : {});
     audioSettings = audioSettings &amp;&amp; typeof audioSettings === &#x27;object&#x27; ? audioSettings : {};
-    if (typeof self._codecParams.audio.opus.stereo === &#x27;boolean&#x27;) {
-      opusOptions.stereo = self._codecParams.audio.opus.stereo;
+    if (typeof self._initOptions.codecParams.audio.opus.stereo === &#x27;boolean&#x27;) {
+      opusOptions.stereo = self._initOptions.codecParams.audio.opus.stereo;
     } else if (typeof audioSettings.stereo === &#x27;boolean&#x27;) {
       opusOptions.stereo = audioSettings.stereo;
     }
-    if (typeof self._codecParams.audio.opus[&#x27;sprop-stereo&#x27;] === &#x27;boolean&#x27;) {
-      opusOptions[&#x27;sprop-stereo&#x27;] = self._codecParams.audio.opus[&#x27;sprop-stereo&#x27;];
+    if (typeof self._initOptions.codecParams.audio.opus[&#x27;sprop-stereo&#x27;] === &#x27;boolean&#x27;) {
+      opusOptions[&#x27;sprop-stereo&#x27;] = self._initOptions.codecParams.audio.opus[&#x27;sprop-stereo&#x27;];
     } else if (typeof audioSettings.stereo === &#x27;boolean&#x27;) {
       opusOptions[&#x27;sprop-stereo&#x27;] = audioSettings.stereo;
     }
-    if (typeof self._codecParams.audio.opus.usedtx === &#x27;boolean&#x27;) {
-      opusOptions.usedtx = self._codecParams.audio.opus.usedtx;
+    if (typeof self._initOptions.codecParams.audio.opus.usedtx === &#x27;boolean&#x27;) {
+      opusOptions.usedtx = self._initOptions.codecParams.audio.opus.usedtx;
     } else if (typeof audioSettings.usedtx === &#x27;boolean&#x27;) {
       opusOptions.usedtx = audioSettings.usedtx;
     }
-    if (typeof self._codecParams.audio.opus.useinbandfec === &#x27;boolean&#x27;) {
-      opusOptions.useinbandfec = self._codecParams.audio.opus.useinbandfec;
+    if (typeof self._initOptions.codecParams.audio.opus.useinbandfec === &#x27;boolean&#x27;) {
+      opusOptions.useinbandfec = self._initOptions.codecParams.audio.opus.useinbandfec;
     } else if (typeof audioSettings.useinbandfec === &#x27;boolean&#x27;) {
       opusOptions.useinbandfec = audioSettings.useinbandfec;
     }
-    if (typeof self._codecParams.audio.opus.maxplaybackrate === &#x27;number&#x27;) {
-      opusOptions.maxplaybackrate = self._codecParams.audio.opus.maxplaybackrate;
+    if (typeof self._initOptions.codecParams.audio.opus.maxplaybackrate === &#x27;number&#x27;) {
+      opusOptions.maxplaybackrate = self._initOptions.codecParams.audio.opus.maxplaybackrate;
     } else if (typeof audioSettings.maxplaybackrate === &#x27;number&#x27;) {
       opusOptions.maxplaybackrate = audioSettings.maxplaybackrate;
     }
-    if (typeof self._codecParams.audio.opus.minptime === &#x27;number&#x27;) {
-      opusOptions.minptime = self._codecParams.audio.opus.minptime;
+    if (typeof self._initOptions.codecParams.audio.opus.minptime === &#x27;number&#x27;) {
+      opusOptions.minptime = self._initOptions.codecParams.audio.opus.minptime;
     } else if (typeof audioSettings.minptime === &#x27;number&#x27;) {
       opusOptions.minptime = audioSettings.minptime;
     }
@@ -201,11 +201,11 @@ Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
   parseFn(&#x27;video&#x27;, self.VIDEO_CODEC.VP8, null, (function () {
     var vp8Options = {};
     // NOT recommended: max-fr, max-fs (all are codec decoder capabilities)
-    if (typeof self._codecParams.video.vp8.maxFr === &#x27;number&#x27;) {
-      vp8Options[&#x27;max-fr&#x27;] = self._codecParams.video.vp8.maxFr;
+    if (typeof self._initOptions.codecParams.video.vp8.maxFr === &#x27;number&#x27;) {
+      vp8Options[&#x27;max-fr&#x27;] = self._initOptions.codecParams.video.vp8.maxFr;
     }
-    if (typeof self._codecParams.video.vp8.maxFs === &#x27;number&#x27;) {
-      vp8Options[&#x27;max-fs&#x27;] = self._codecParams.video.vp8.maxFs;
+    if (typeof self._initOptions.codecParams.video.vp8.maxFs === &#x27;number&#x27;) {
+      vp8Options[&#x27;max-fs&#x27;] = self._initOptions.codecParams.video.vp8.maxFs;
     }
     return vp8Options;
   })());
@@ -215,11 +215,11 @@ Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
   parseFn(&#x27;video&#x27;, self.VIDEO_CODEC.VP9, null, (function () {
     var vp9Options = {};
     // NOT recommended: max-fr, max-fs (all are codec decoder capabilities)
-    if (typeof self._codecParams.video.vp9.maxFr === &#x27;number&#x27;) {
-      vp9Options[&#x27;max-fr&#x27;] = self._codecParams.video.vp9.maxFr;
+    if (typeof self._initOptions.codecParams.video.vp9.maxFr === &#x27;number&#x27;) {
+      vp9Options[&#x27;max-fr&#x27;] = self._initOptions.codecParams.video.vp9.maxFr;
     }
-    if (typeof self._codecParams.video.vp9.maxFs === &#x27;number&#x27;) {
-      vp9Options[&#x27;max-fs&#x27;] = self._codecParams.video.vp9.maxFs;
+    if (typeof self._initOptions.codecParams.video.vp9.maxFs === &#x27;number&#x27;) {
+      vp9Options[&#x27;max-fs&#x27;] = self._initOptions.codecParams.video.vp9.maxFs;
     }
     return vp9Options;
   })());
@@ -228,14 +228,14 @@ Skylink.prototype._setSDPCodecParams = function(targetMid, sessionDescription) {
   // Set the video codecs -&gt; H264
   parseFn(&#x27;video&#x27;, self.VIDEO_CODEC.H264, null, (function () {
     var h264Options = {};
-    if (typeof self._codecParams.video.h264.levelAsymmetryAllowed === &#x27;string&#x27;) {
-      h264Options[&#x27;profile-level-id&#x27;] = self._codecParams.video.h264.profileLevelId;
+    if (typeof self._initOptions.codecParams.video.h264.levelAsymmetryAllowed === &#x27;string&#x27;) {
+      h264Options[&#x27;profile-level-id&#x27;] = self._initOptions.codecParams.video.h264.profileLevelId;
     }
-    if (typeof self._codecParams.video.h264.levelAsymmetryAllowed === &#x27;boolean&#x27;) {
-      h264Options[&#x27;level-asymmetry-allowed&#x27;] = self._codecParams.video.h264.levelAsymmetryAllowed;
+    if (typeof self._initOptions.codecParams.video.h264.levelAsymmetryAllowed === &#x27;boolean&#x27;) {
+      h264Options[&#x27;level-asymmetry-allowed&#x27;] = self._initOptions.codecParams.video.h264.levelAsymmetryAllowed;
     }
-    if (typeof self._codecParams.video.h264.packetizationMode === &#x27;boolean&#x27;) {
-      h264Options[&#x27;packetization-mode&#x27;] = self._codecParams.video.h264.packetizationMode;
+    if (typeof self._initOptions.codecParams.video.h264.packetizationMode === &#x27;boolean&#x27;) {
+      h264Options[&#x27;packetization-mode&#x27;] = self._initOptions.codecParams.video.h264.packetizationMode;
     }
     // Possible future params (remove if they are decoder/encoder capabilities or info):
     //   max-recv-level, max-mbps, max-smbps, max-fs, max-cpb, max-dpb, max-br,
@@ -478,8 +478,8 @@ Skylink.prototype._setSDPCodec = function(targetMid, sessionDescription, overrid
     setLineFn(sessionDescription.sdp.match(new RegExp(&#x27;a=rtpmap:.*\ &#x27; + codec + &#x27;\/.*\r\n&#x27;, &#x27;gi&#x27;)));
   };
 
-  parseFn(&#x27;audio&#x27;, overrideSettings ? overrideSettings.audio : self._selectedAudioCodec);
-  parseFn(&#x27;video&#x27;, overrideSettings ? overrideSettings.video : self._selectedVideoCodec);
+  parseFn(&#x27;audio&#x27;, overrideSettings ? overrideSettings.audio : self._initOptions.audioCodec);
+  parseFn(&#x27;video&#x27;, overrideSettings ? overrideSettings.video : self._initOptions.videoCodec);
 
   return sessionDescription.sdp;
 };
@@ -611,7 +611,7 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
     }
   };
 
-  if (this._disableVideoFecCodecs) {
+  if (this._initOptions.disableVideoFecCodecs) {
     if (this._hasMCU) {
       log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
         &#x27;Not removing &quot;ulpfec&quot; or &quot;red&quot; codecs as connected to MCU to prevent connectivity issues.&#x27;]);
@@ -621,7 +621,7 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
     }
   }
 
-  if (this._disableComfortNoiseCodec &amp;&amp; audioSettings &amp;&amp; typeof audioSettings === &#x27;object&#x27; &amp;&amp; audioSettings.stereo) {
+  if (this._initOptions.disableComfortNoiseCodec &amp;&amp; audioSettings &amp;&amp; typeof audioSettings === &#x27;object&#x27; &amp;&amp; audioSettings.stereo) {
     parseFn(&#x27;audio&#x27;, &#x27;CN&#x27;);
   }
 
@@ -641,7 +641,7 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
  * @since 0.6.16
  */
 Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescription) {
-  if (!this._disableREMB) {
+  if (!this._initOptions.disableREMB) {
     return sessionDescription.sdp;
   }
 
@@ -732,24 +732,24 @@ Skylink.prototype._removeSDPFilteredCandidates = function (targetMid, sessionDes
     sessionDescription.sdp = sessionDescription.sdp.replace(/ udp /g, &#x27; UDP &#x27;);
   }
 
-  if (this._forceTURN &amp;&amp; this._hasMCU) {
+  if (this._initOptions.forceTURN &amp;&amp; this._hasMCU) {
     log.warn([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Not filtering ICE candidates as &#x27; +
       &#x27;TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate &#x27; +
       &#x27;flags are not honoured&#x27;]);
     return sessionDescription.sdp;
   }
 
-  if (this._filterCandidatesType.host) {
+  if (this._initOptions.filterCandidatesType.host) {
     log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;host&quot; ICE candidates.&#x27;]);
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*host.*\r\n/g, &#x27;&#x27;);
   }
 
-  if (this._filterCandidatesType.srflx) {
+  if (this._initOptions.filterCandidatesType.srflx) {
     log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;srflx&quot; ICE candidates.&#x27;]);
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*srflx.*\r\n/g, &#x27;&#x27;);
   }
 
-  if (this._filterCandidatesType.relay) {
+  if (this._initOptions.filterCandidatesType.relay) {
     log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type, &#x27;Removing &quot;relay&quot; ICE candidates.&#x27;]);
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*relay.*\r\n/g, &#x27;&#x27;);
   }
@@ -1123,7 +1123,7 @@ Skylink.prototype._renderSDPOutput = function (targetMid, sessionDescription) {
   }
 
   // For non-trickle ICE, remove the a=end-of-candidates line first to append it properly later
-  var sdpLines = (!self._enableIceTrickle ? sessionDescription.sdp.replace(/a=end-of-candidates\r\n/g, &#x27;&#x27;) : sessionDescription.sdp).split(&#x27;\r\n&#x27;);
+  var sdpLines = (!self._initOptions.enableIceTrickle ? sessionDescription.sdp.replace(/a=end-of-candidates\r\n/g, &#x27;&#x27;) : sessionDescription.sdp).split(&#x27;\r\n&#x27;);
   var agent = ((self._peerInformations[targetMid] || {}).agent || {}).name || &#x27;&#x27;;
 
   // Parse and replace with the correct msid to prevent unwanted streams.
@@ -1170,7 +1170,7 @@ Skylink.prototype._renderSDPOutput = function (targetMid, sessionDescription) {
   }
 
   // For non-trickle ICE, append the signaling of end-of-candidates properly
-  if (!self._enableIceTrickle){
+  if (!self._initOptions.enableIceTrickle){
     log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
       &#x27;Appending end-of-candidates signal for non-trickle ICE connection.&#x27;]);
 

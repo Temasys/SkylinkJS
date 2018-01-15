@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.26</title>
+    <title>SkylinkJS 0.6.27</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.27</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -89,157 +89,6 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-/**
- * &lt;blockquote class=&quot;info&quot;&gt;
- *   Learn more about how ICE works in this
- *   &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
- * &lt;/blockquote&gt;
- * The list of Peer connection session description exchanging states.
- * @attribute PEER_CONNECTION_STATE
- * @param {String} STABLE            &lt;small&gt;Value &lt;code&gt;&quot;stable&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when there is no session description being exchanged between Peer connection.
- * @param {String} HAVE_LOCAL_OFFER  &lt;small&gt;Value &lt;code&gt;&quot;have-local-offer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when local &lt;code&gt;&quot;offer&quot;&lt;/code&gt; session description is set.
- *   &lt;small&gt;This should transition to &lt;code&gt;STABLE&lt;/code&gt; state after remote &lt;code&gt;&quot;answer&quot;&lt;/code&gt;
- *   session description is set.&lt;/small&gt;
- *   &lt;small&gt;See &lt;a href=&quot;#event_handshakeProgress&quot;&gt;&lt;code&gt;handshakeProgress&lt;/code&gt; event&lt;/a&gt; for a more
- *   detailed exchanging of session description states.&lt;/small&gt;
- * @param {String} HAVE_REMOTE_OFFER &lt;small&gt;Value &lt;code&gt;&quot;have-remote-offer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when remote &lt;code&gt;&quot;offer&quot;&lt;/code&gt; session description is set.
- *   &lt;small&gt;This should transition to &lt;code&gt;STABLE&lt;/code&gt; state after local &lt;code&gt;&quot;answer&quot;&lt;/code&gt;
- *   session description is set.&lt;/small&gt;
- *   &lt;small&gt;See &lt;a href=&quot;#event_handshakeProgress&quot;&gt;&lt;code&gt;handshakeProgress&lt;/code&gt; event&lt;/a&gt; for a more
- *   detailed exchanging of session description states.&lt;/small&gt;
- * @param {String} CLOSED            &lt;small&gt;Value &lt;code&gt;&quot;closed&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Peer connection is closed and no session description can be exchanged and set.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.0
- */
-Skylink.prototype.PEER_CONNECTION_STATE = {
-  STABLE: &#x27;stable&#x27;,
-  HAVE_LOCAL_OFFER: &#x27;have-local-offer&#x27;,
-  HAVE_REMOTE_OFFER: &#x27;have-remote-offer&#x27;,
-  CLOSED: &#x27;closed&#x27;
-};
-
-/**
- * The list of &lt;a href=&quot;#method_getConnectionStatus&quot;&gt;&lt;code&gt;getConnectionStatus()&lt;/code&gt;
- * method&lt;/a&gt; retrieval states.
- * @attribute GET_CONNECTION_STATUS_STATE
- * @param {Number} RETRIEVING &lt;small&gt;Value &lt;code&gt;0&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when &lt;code&gt;getConnectionStatus()&lt;/code&gt; is retrieving the Peer connection stats.
- * @param {Number} RETRIEVE_SUCCESS &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when &lt;code&gt;getConnectionStatus()&lt;/code&gt; has retrieved the Peer connection stats successfully.
- * @param {Number} RETRIEVE_ERROR &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when &lt;code&gt;getConnectionStatus()&lt;/code&gt; has failed retrieving the Peer connection stats.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.GET_CONNECTION_STATUS_STATE = {
-  RETRIEVING: 0,
-  RETRIEVE_SUCCESS: 1,
-  RETRIEVE_ERROR: -1
-};
-
-/**
- * &lt;blockquote class=&quot;info&quot;&gt;
- *  As there are more features getting implemented, there will be eventually more different types of
- *  server Peers.
- * &lt;/blockquote&gt;
- * The list of available types of server Peer connections.
- * @attribute SERVER_PEER_TYPE
- * @param {String} MCU &lt;small&gt;Value &lt;code&gt;&quot;mcu&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the server Peer type that is used for MCU connection.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype.SERVER_PEER_TYPE = {
-  MCU: &#x27;mcu&#x27;
-  //SIP: &#x27;sip&#x27;
-};
-
-/**
- * &lt;blockquote class=&quot;info&quot;&gt;
- *  Learn more about how ICE works in this
- *  &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
- * &lt;/blockquote&gt;
- * The list of available Peer connection bundle policies.
- * @attribute BUNDLE_POLICY
- * @param {String} MAX_COMPAT &lt;small&gt;Value &lt;code&gt;&quot;max-compat&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the bundle policy to generate ICE candidates for each media type
- *   so each media type flows through different transports.
- * @param {String} MAX_BUNDLE &lt;small&gt;Value &lt;code&gt;&quot;max-bundle&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the bundle policy to generate ICE candidates for one media type
- *   so all media type flows through a single transport.
- * @param {String} BALANCED   &lt;small&gt;Value &lt;code&gt;&quot;balanced&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the bundle policy to use &lt;code&gt;MAX_BUNDLE&lt;/code&gt; if Peer supports it,
- *   else fallback to &lt;code&gt;MAX_COMPAT&lt;/code&gt;.
- * @param {String} NONE       &lt;small&gt;Value &lt;code&gt;&quot;none&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the bundle policy to not use any media bundle.
- *   &lt;small&gt;This removes the &lt;code&gt;a=group:BUNDLE&lt;/code&gt; line from session descriptions.&lt;/small&gt;
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.6.18
- */
-Skylink.prototype.BUNDLE_POLICY = {
-  MAX_COMPAT: &#x27;max-compat&#x27;,
-  BALANCED: &#x27;balanced&#x27;,
-  MAX_BUNDLE: &#x27;max-bundle&#x27;,
-  NONE: &#x27;none&#x27;
-};
-
-/**
- * &lt;blockquote class=&quot;info&quot;&gt;
- *  Learn more about how ICE works in this
- *  &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
- * &lt;/blockquote&gt;
- * The list of available Peer connection RTCP mux policies.
- * @attribute RTCP_MUX_POLICY
- * @param {String} REQUIRE   &lt;small&gt;Value &lt;code&gt;&quot;require&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the RTCP mux policy to generate ICE candidates for RTP only and RTCP shares the same ICE candidates.
- * @param {String} NEGOTIATE &lt;small&gt;Value &lt;code&gt;&quot;negotiate&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the RTCP mux policy to generate ICE candidates for both RTP and RTCP each.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.6.18
- */
-Skylink.prototype.RTCP_MUX_POLICY = {
-  REQUIRE: &#x27;require&#x27;,
-  NEGOTIATE: &#x27;negotiate&#x27;
-};
-
-/**
- * &lt;blockquote class=&quot;info&quot;&gt;
- *  Learn more about how ICE works in this
- *  &lt;a href=&quot;https://temasys.com.sg/ice-what-is-this-sorcery/&quot;&gt;article here&lt;/a&gt;.
- * &lt;/blockquote&gt;
- * The list of available Peer connection certificates cryptographic algorithm to use.
- * @attribute PEER_CERTIFICATE
- * @param {String} RSA   &lt;small&gt;Value &lt;code&gt;&quot;RSA&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the Peer connection certificate algorithm to use RSA-1024.
- * @param {String} ECDSA &lt;small&gt;Value &lt;code&gt;&quot;ECDSA&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the Peer connection certificate algorithm to use ECDSA.
- * @param {String} AUTO  &lt;small&gt;Value &lt;code&gt;&quot;AUTO&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the Peer connection to use the default certificate generated.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.6.18
- */
-Skylink.prototype.PEER_CERTIFICATE = {
-  RSA: &#x27;RSA&#x27;,
-  ECDSA: &#x27;ECDSA&#x27;,
-  AUTO: &#x27;AUTO&#x27;
-};
-
 /**
  * &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that Edge browser does not support renegotiation.
@@ -444,7 +293,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, options
     }
   };
 
-  if (listOfPeers.length === 0 &amp;&amp; !(self._hasMCU &amp;&amp; !self._mcuUseRenegoRestart)) {
+  if (listOfPeers.length === 0 &amp;&amp; !(self._hasMCU &amp;&amp; !self._initOptions.mcuUseRenegoRestart)) {
     emitErrorForPeersFn(&#x27;There is currently no peer connections to restart&#x27;);
     return;
   }
@@ -455,14 +304,14 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, options
   }
 
   self._throttle(function (runFn) {
-    if (!runFn &amp;&amp; self._hasMCU &amp;&amp; !self._mcuUseRenegoRestart) {
-      if (self._throttlingShouldThrowError) {
-        emitErrorForPeersFn(&#x27;Unable to run as throttle interval has not reached (&#x27; + self._throttlingTimeouts.refreshConnection + &#x27;ms).&#x27;);
+    if (!runFn &amp;&amp; self._hasMCU &amp;&amp; !self._initOptions.mcuUseRenegoRestart) {
+      if (self._initOptions.throttlingShouldThrowError) {
+        emitErrorForPeersFn(&#x27;Unable to run as throttle interval has not reached (&#x27; + self._initOptions.throttleIntervals.refreshConnection + &#x27;ms).&#x27;);
       }
       return;
     }
     self._refreshPeerConnection(listOfPeers, doIceRestart, bwOptions, callback);
-  }, &#x27;refreshConnection&#x27;, self._throttlingTimeouts.refreshConnection);
+  }, &#x27;refreshConnection&#x27;, self._initOptions.throttleIntervals.refreshConnection);
 
 };
 
@@ -1707,7 +1556,7 @@ Skylink.prototype._addPeer = function(targetMid, cert, peerBrowser, receiveOnly,
   log.log([targetMid, null, null, &#x27;Starting the connection to peer. Options provided:&#x27;], {
     peerBrowser: peerBrowser,
     receiveOnly: receiveOnly,
-    enableDataChannel: self._enableDataChannel
+    enableDataChannel: self._initOptions.enableDataChannel
   });
 
   log.info(&#x27;Adding peer&#x27;, isSS);
@@ -1802,8 +1651,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
       target: peerId,
       weight: self._peerPriorityWeight,
       receiveOnly: self.getPeerInfo().config.receiveOnly,
-      enableIceTrickle: self._enableIceTrickle,
-      enableDataChannel: self._enableDataChannel,
+      enableIceTrickle: self._initOptions.enableIceTrickle,
+      enableDataChannel: self._initOptions.enableDataChannel,
       enableIceRestart: self._enableIceRestart,
       doIceRestart: doIceRestart === true &amp;&amp; self._enableIceRestart &amp;&amp; self._peerInformations[peerId] &amp;&amp;
         self._peerInformations[peerId].config.enableIceRestart,
@@ -2005,8 +1854,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
   var constraints = {
     iceServers: self._room.connection.peerConfig.iceServers,
-    iceTransportPolicy: self._filterCandidatesType.host &amp;&amp; self._filterCandidatesType.srflx &amp;&amp;
-      !self._filterCandidatesType.relay ? &#x27;relay&#x27; : &#x27;all&#x27;,
+    iceTransportPolicy: self._initOptions.filterCandidatesType.host &amp;&amp; self._initOptions.filterCandidatesType.srflx &amp;&amp;
+      !self._initOptions.filterCandidatesType.relay ? &#x27;relay&#x27; : &#x27;all&#x27;,
     bundlePolicy: self._peerConnectionConfig.bundlePolicy === self.BUNDLE_POLICY.NONE ?
       self.BUNDLE_POLICY.BALANCED : self._peerConnectionConfig.bundlePolicy,
     rtcpMuxPolicy: self._peerConnectionConfig.rtcpMuxPolicy,
@@ -2035,7 +1884,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       constraints: constraints,
       optional: optional
     });
-    pc = new (self._useEdgeWebRTC &amp;&amp; window.msRTCPeerConnection ? window.msRTCPeerConnection : RTCPeerConnection)(constraints, optional);
+    pc = new (self._initOptions.useEdgeWebRTC &amp;&amp; window.msRTCPeerConnection ? window.msRTCPeerConnection : RTCPeerConnection)(constraints, optional);
   } catch (error) {
     log.error([targetMid, null, null, &#x27;Failed creating peer connection:&#x27;], error);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
@@ -2077,7 +1926,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
   pc.ondatachannel = function(event) {
     var dc = event.channel || event;
     log.debug([targetMid, &#x27;RTCDataChannel&#x27;, dc.label, &#x27;Received datachannel -&gt;&#x27;], dc);
-    if (self._enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
+    if (self._initOptions.enableDataChannel &amp;&amp; self._peerInformations[targetMid] &amp;&amp;
       self._peerInformations[targetMid].config.enableDataChannel) {
       var channelType = self.DATA_CHANNEL_TYPE.DATA;
       var channelKey = dc.label;
@@ -2161,7 +2010,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     self._trigger(&#x27;iceConnectionState&#x27;, iceConnectionState, targetMid);
 
-    if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED &amp;&amp; self._enableIceTrickle) {
+    if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED &amp;&amp; self._initOptions.enableIceTrickle) {
       self._trigger(&#x27;iceConnectionState&#x27;, self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
     }
 
@@ -2296,10 +2145,10 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
       target: peerId,
       weight: self._peerPriorityWeight,
       receiveOnly: self.getPeerInfo().config.receiveOnly,
-      enableIceTrickle: self._enableIceTrickle,
-      enableDataChannel: self._enableDataChannel,
+      enableIceTrickle: self._initOptions.enableIceTrickle,
+      enableDataChannel: self._initOptions.enableDataChannel,
       enableIceRestart: self._enableIceRestart,
-      doIceRestart: self._mcuUseRenegoRestart &amp;&amp; doIceRestart === true &amp;&amp;
+      doIceRestart: self._initOptions.mcuUseRenegoRestart &amp;&amp; doIceRestart === true &amp;&amp;
         self._enableIceRestart &amp;&amp; self._peerInformations[peerId] &amp;&amp;
         self._peerInformations[peerId].config.enableIceRestart,
       isRestartResend: false,
@@ -2356,7 +2205,7 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
     if (listOfPeers[i] !== &#x27;MCU&#x27;) {
       self._trigger(&#x27;peerRestart&#x27;, listOfPeers[i], self.getPeerInfo(listOfPeers[i]), true, false);
 
-      if (!self._mcuUseRenegoRestart) {
+      if (!self._initOptions.mcuUseRenegoRestart) {
         sendRestartMsgFn(listOfPeers[i]);
       }
     }
@@ -2364,7 +2213,7 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
 
   self._trigger(&#x27;serverPeerRestart&#x27;, &#x27;MCU&#x27;, self.SERVER_PEER_TYPE.MCU);
 
-  if (self._mcuUseRenegoRestart) {
+  if (self._initOptions.mcuUseRenegoRestart) {
     self._peerEndOfCandidatesCounter.MCU = self._peerEndOfCandidatesCounter.MCU || {};
     self._peerEndOfCandidatesCounter.MCU.len = 0;
     sendRestartMsgFn(&#x27;MCU&#x27;);

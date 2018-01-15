@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.26</title>
+    <title>SkylinkJS 0.6.27</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.27</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -89,98 +89,6 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-/**
- * The list of Datachannel connection states.
- * @attribute DATA_CHANNEL_STATE
- * @param {String} CONNECTING          &lt;small&gt;Value &lt;code&gt;&quot;connecting&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Datachannel is attempting to establish a connection.
- * @param {String} OPEN                &lt;small&gt;Value &lt;code&gt;&quot;open&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Datachannel has established a connection.
- * @param {String} CLOSING             &lt;small&gt;Value &lt;code&gt;&quot;closing&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Datachannel connection is closing.
- * @param {String} CLOSED              &lt;small&gt;Value &lt;code&gt;&quot;closed&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Datachannel connection has closed.
- * @param {String} ERROR               &lt;small&gt;Value &lt;code&gt;&quot;error&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Datachannel has encountered an exception during connection.
- * @param {String} CREATE_ERROR        &lt;small&gt;Value &lt;code&gt;&quot;createError&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Datachannel has failed to establish a connection.
- * @param {String} BUFFERED_AMOUNT_LOW &lt;small&gt;Value &lt;code&gt;&quot;bufferedAmountLow&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Datachannel when the amount of data buffered to be sent
- *   falls below the Datachannel threshold.
- *   &lt;small&gt;This state should occur only during after &lt;a href=&quot;#method_sendBlobData&quot;&gt;
- *   &lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; or &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; or
- *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
- * @param {String} SEND_MESSAGE_ERROR  &lt;small&gt;Value &lt;code&gt;&quot;sendMessageError&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the state when Datachannel when data transfer packets or P2P message fails to send.
- *   &lt;small&gt;This state should occur only during after &lt;a href=&quot;#method_sendBlobData&quot;&gt;
- *   &lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt; or &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; or
- *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.&lt;/small&gt;
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.1.0
- */
-Skylink.prototype.DATA_CHANNEL_STATE = {
-  CONNECTING: &#x27;connecting&#x27;,
-  OPEN: &#x27;open&#x27;,
-  CLOSING: &#x27;closing&#x27;,
-  CLOSED: &#x27;closed&#x27;,
-  ERROR: &#x27;error&#x27;,
-  CREATE_ERROR: &#x27;createError&#x27;,
-  BUFFERED_AMOUNT_LOW: &#x27;bufferedAmountLow&#x27;,
-  SEND_MESSAGE_ERROR: &#x27;sendMessageError&#x27;
-};
-
-/**
- * The list of Datachannel types.
- * @attribute DATA_CHANNEL_TYPE
- * @param {String} MESSAGING &lt;small&gt;Value &lt;code&gt;&quot;messaging&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the Datachannel type that is used only for messaging in
- *   &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.
- *   &lt;small&gt;However for Peers that do not support simultaneous data transfers, this Datachannel
- *   type will be used to do data transfers (1 at a time).&lt;/small&gt;
- *   &lt;small&gt;Each Peer connections will only have one of this Datachannel type and the
- *   connection will only close when the Peer connection is closed (happens when &lt;a href=&quot;#event_peerConnectionState&quot;&gt;
- *   &lt;code&gt;peerConnectionState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload &lt;code&gt;state&lt;/code&gt; as
- *   &lt;code&gt;CLOSED&lt;/code&gt; for Peer).&lt;/small&gt;
- * @param {String} DATA &lt;small&gt;Value &lt;code&gt;&quot;data&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the Datachannel type that is used only for a data transfer in
- *   &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; and
- *   &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt;.
- *   &lt;small&gt;The connection will close after the data transfer has been completed or terminated (happens when
- *   &lt;a href=&quot;#event_dataTransferState&quot;&gt;&lt;code&gt;dataTransferState&lt;/code&gt; event&lt;/a&gt; triggers parameter payload
- *   &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;DOWNLOAD_COMPLETED&lt;/code&gt;, &lt;code&gt;UPLOAD_COMPLETED&lt;/code&gt;,
- *   &lt;code&gt;REJECTED&lt;/code&gt;, &lt;code&gt;CANCEL&lt;/code&gt; or &lt;code&gt;ERROR&lt;/code&gt; for Peer).&lt;/small&gt;
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.6.1
- */
-Skylink.prototype.DATA_CHANNEL_TYPE = {
-  MESSAGING: &#x27;messaging&#x27;,
-  DATA: &#x27;data&#x27;
-};
-
-/**
- * The list of Datachannel sending message error types.
- * @attribute DATA_CHANNEL_MESSAGE_ERROR
- * @param {String} MESSAGE  &lt;small&gt;Value &lt;code&gt;&quot;message&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the Datachannel sending message error type when encountered during
- *   sending P2P message from &lt;a href=&quot;#method_sendP2PMessage&quot;&gt;&lt;code&gt;sendP2PMessage()&lt;/code&gt; method&lt;/a&gt;.
- * @param {String} TRANSFER &lt;small&gt;Value &lt;code&gt;&quot;transfer&quot;&lt;/code&gt;&lt;/small&gt;
- *   The value of the Datachannel sending message error type when encountered during
- *   data transfers from &lt;a href=&quot;#method_sendURLData&quot;&gt;&lt;code&gt;sendURLData()&lt;/code&gt; method&lt;/a&gt; or
- *   &lt;a href=&quot;#method_sendBlobData&quot;&gt;&lt;code&gt;sendBlobData()&lt;/code&gt; method&lt;/a&gt;.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.6.16
- */
-Skylink.prototype.DATA_CHANNEL_MESSAGE_ERROR = {
-  MESSAGE: &#x27;message&#x27;,
-  TRANSFER: &#x27;transfer&#x27;
-};
-
 /**
  * Function that starts a Datachannel connection with Peer.
  * @method _createDataChannel
@@ -504,7 +412,7 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
     }
   };
 
-  if (!channelProp) {
+  if (!channelProp || channelProp === &#x27;main&#x27;) {
     for (var channelNameProp in self._dataChannels) {
       if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
         if (self._dataChannels[peerId][channelNameProp]) {

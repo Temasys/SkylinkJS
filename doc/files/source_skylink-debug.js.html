@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.26</title>
+    <title>SkylinkJS 0.6.27</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.26</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.27</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -89,39 +89,6 @@
 
 <div class="file">
     <pre class="code prettyprint linenums">
-/**
- * The list of the SDK &lt;code&gt;console&lt;/code&gt; API log levels.
- * @attribute LOG_LEVEL
- * @param {Number} DEBUG &lt;small&gt;Value &lt;code&gt;4&lt;/code&gt;&lt;/small&gt;
- *   The value of the log level that displays &lt;code&gt;console&lt;/code&gt; &lt;code&gt;debug&lt;/code&gt;,
- *   &lt;code&gt;log&lt;/code&gt;, &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;warn&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; logs.
- * @param {Number} LOG   &lt;small&gt;Value &lt;code&gt;3&lt;/code&gt;&lt;/small&gt;
- *   The value of the log level that displays only &lt;code&gt;console&lt;/code&gt; &lt;code&gt;log&lt;/code&gt;,
- *   &lt;code&gt;info&lt;/code&gt;, &lt;code&gt;warn&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; logs.
- * @param {Number} INFO  &lt;small&gt;Value &lt;code&gt;2&lt;/code&gt;&lt;/small&gt;
- *   The value of the log level that displays only &lt;code&gt;console&lt;/code&gt; &lt;code&gt;info&lt;/code&gt;,
- *   &lt;code&gt;warn&lt;/code&gt; and &lt;code&gt;error&lt;/code&gt; logs.
- * @param {Number} WARN  &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
- *   The value of the log level that displays only &lt;code&gt;console&lt;/code&gt; &lt;code&gt;warn&lt;/code&gt;
- *   and &lt;code&gt;error&lt;/code&gt; logs.
- * @param {Number} ERROR &lt;small&gt;Value &lt;code&gt;0&lt;/code&gt;&lt;/small&gt;
- *   The value of the log level that displays only &lt;code&gt;console&lt;/code&gt; &lt;code&gt;error&lt;/code&gt; logs.
- * @param {Number} NONE &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
- *   The value of the log level that displays no logs.
- * @type JSON
- * @readOnly
- * @for Skylink
- * @since 0.5.4
- */
-Skylink.prototype.LOG_LEVEL = {
-  DEBUG: 4,
-  LOG: 3,
-  INFO: 2,
-  WARN: 1,
-  ERROR: 0,
-  NONE: -1
-};
-
 /**
  * Stores the log message starting header string.
  * E.g. &quot;&lt;header&gt; - &lt;the log message&gt;&quot;.
