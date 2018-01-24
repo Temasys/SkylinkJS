@@ -19,27 +19,6 @@ SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
   //return;
   addMessage(JOINED_NOT_CALLING, peerId, peerInfo.room);
 
-  if(isSelf) {
-    return;
-  }
-
-  //Turns on video only when peer joins
-  SkylinkDemo.enableVideo();
-
-  if(!document.getElementById(peerId)) {
-    var peervid = document.createElement('video');
-    peervid.id = peerId;
-    peervid.autoplay = true;
-    peervid.muted = isSelf;
-    peervid.controls = true;
-    peervid.setAttribute('playsinline', true);
-    document.body.appendChild(peervid);
-
-    setTimeout(function () {
-      peervid.removeAttribute('controls');
-    });
-  }
-
 });
 
 SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
@@ -65,7 +44,21 @@ SkylinkDemo.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
   //Already attached on mediaAccessSuccess
   if(isSelf) {
     return;
-  };
+  }
+
+  if(!document.getElementById(peerId)) {
+    var peervid = document.createElement('video');
+    peervid.id = peerId;
+    peervid.autoplay = true;
+    peervid.muted = isSelf;
+    peervid.controls = true;
+    peervid.setAttribute('playsinline', true);
+    document.body.appendChild(peervid);
+
+    setTimeout(function () {
+      peervid.removeAttribute('controls');
+    });
+  }
 
   var peervid = document.getElementById(peerId);
   attachMediaStream(peervid, stream);
@@ -115,7 +108,7 @@ function call() {
 
   //Join peer's room & send own video stream
   SkylinkDemo.joinRoom(room, {
-    audio: false,
+    audio: true,
     video: true
   });
 }
