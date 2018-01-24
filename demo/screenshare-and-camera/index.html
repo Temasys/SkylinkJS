@@ -84,8 +84,14 @@
       peerVideo.id = 'um_' + peerId + 'video';
       peerVideo.autoplay = true;
       peerVideo.muted = isYou;
+      peerVideo.controls = true;
+      peerVideo.setAttribute('playsinline', true);
 
       peerDom.appendChild(peerVideo);
+
+      setTimeout(function () {
+        peerVideo.removeAttribute('controls');
+      });
     }
 
     attachMediaStream(peerVideo, stream);
@@ -120,8 +126,14 @@
       peerVideo.id = 's_' + peerId + 'video';
       peerVideo.autoplay = true;
       peerVideo.muted = isYou;
+      peerVideo.controls = true;
+      peerVideo.setAttribute('playsinline', true);
 
       peerDom.appendChild(peerVideo);
+
+      setTimeout(function () {
+        peerVideo.removeAttribute('controls');
+      });
     }
 
     attachMediaStream(peerVideo, stream);

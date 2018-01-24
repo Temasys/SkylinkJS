@@ -9,23 +9,31 @@ SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
   peer.style.textAlign = 'center';
   peer.style.fontFamily = 'sans-serif';
   peer.style.marginRight = '15px';
+
   var peerVoice = document.createElement('video');
-  if (window.webrtcDetectedBrowser !== 'IE') {
-    peerVoice.autoplay = 'autoplay';
-  }
+  peerVoice.autoplay = true;
+  peerVoice.controls = true;
+  peerVoice.muted = isSelf;
   peerVoice.poster = 'user.png';
   peerVoice.style.height = '150px';
+  peerVoice.setAttribute('playsinline', true);
+
   var peerName = document.createElement('p');
   peerName.style.background = '#eee';
   peerName.style.margin = '0';
   peerName.style.padding = '12px 0';
   peerName.style.borderTop = 'solid 2px #000';
   peerName.innerHTML = (isSelf) ? 'Me' : peerId;
+
   document.body.appendChild(peer);
   peer.appendChild(peerVoice);
   peer.appendChild(peerName);
+
   attachMediaStream(peerVoice, stream);
-  peerVoice.play();
+
+  setTimeout(function () {
+    peerVoice.removeAttribute('controls');
+  });
 });
 
 SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {
