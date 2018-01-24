@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.28 - Wed Jan 24 2018 15:48:03 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.28 - Wed Jan 24 2018 17:40:48 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -10584,7 +10584,10 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   var defaultRoom = self._initOptions.defaultRoom;
   var options = clone(self._initOptions);
   options.iceServer = options.iceServer ? options.iceServer.urls : null;
-  options.defaultRoom = room;
+
+  if(options.defaultRoom!==room){
+    options.defaultRoom = room;
+  }
 
   self.init(options, function (error, success) {
     self._initOptions.defaultRoom = defaultRoom;

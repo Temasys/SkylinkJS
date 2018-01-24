@@ -1162,7 +1162,10 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   var defaultRoom = self._initOptions.defaultRoom;
   var options = clone(self._initOptions);
   options.iceServer = options.iceServer ? options.iceServer.urls : null;
-  options.defaultRoom = room;
+
+  if(options.defaultRoom!==room){
+    options.defaultRoom = room;
+  }
 
   self.init(options, function (error, success) {
     self._initOptions.defaultRoom = defaultRoom;
