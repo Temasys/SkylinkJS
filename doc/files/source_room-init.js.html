@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.27</title>
+    <title>SkylinkJS 0.6.28</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.27</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.28</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1156,11 +1156,13 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   var self = this;
   if (typeof room === &#x27;function&#x27; || typeof room === &#x27;undefined&#x27;) {
     log.error(&#x27;Invalid room provided. Room:&#x27;, room);
+    callback(new Error(&#x27;Invalid room provided&#x27;), null);
     return;
   }
   var defaultRoom = self._initOptions.defaultRoom;
   var options = clone(self._initOptions);
   options.iceServer = options.iceServer ? options.iceServer.urls : null;
+  options.defaultRoom = room;
 
   self.init(options, function (error, success) {
     self._initOptions.defaultRoom = defaultRoom;
