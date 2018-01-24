@@ -437,10 +437,6 @@ Demo.Skylink.on('peerLeft', function (peerId, peerInfo, isSelf){
   delete Demo.ShowStats[peerId];
 });
 
-Demo.Skylink.on('sessionDisconnect', function (peerId, peerInfo){
-  Demo.Skylink.joinRoom();
-});
-
 //---------------------------------------------------
 Demo.Skylink.on('handshakeProgress', function(state, peerId) {
   var stage = 0;
