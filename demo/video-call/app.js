@@ -9,20 +9,26 @@ SkylinkDemo.on('mediaAccessSuccess', function(stream) {
 SkylinkDemo.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
   if (!isSelf) {
     console.log("addPeerStream");
-    DOMRemoteVideo = document.getElementById("remote_" + peerId);
+    var DOMRemoteVideo = document.getElementById("remote_" + peerId);
 
     if (!DOMRemoteVideo) {
       DOMRemoteVideo = document.createElement('video');
       DOMRemoteVideo.setAttribute("style", "width: 320px; height: 240px;");
-      if (window.webrtcDetectedBrowser !== 'IE') {
-        DOMRemoteVideo.setAttribute("autoplay", "autoplay");
-      }
+      DOMRemoteVideo.autoplay = true;
+      DOMRemoteVideo.controls = true;
+      DOMRemoteVideo.muted = true;//isSelf;
+      DOMRemoteVideo.setAttribute('playsinline', true);
       DOMRemoteVideo.setAttribute("id", "remote_" + peerId);
+
       var DOMcontainer = document.getElementById("remoteContainer");
       DOMcontainer.appendChild(DOMRemoteVideo);
       DOMRemoteVideo.onclick = function() {
         SkylinkDemo.refreshConnection(peerId);
       };
+
+      setTimeout(function () {
+        DOMRemoteVideo.removeAttribute('controls');
+      });
     }
     attachMediaStream(DOMRemoteVideo, stream);
   }
@@ -52,6 +58,10 @@ SkylinkDemo.on('peerLeft', function(peerID) {
     DOMvideo.src = '';
     DOMcontainer.removeChild(DOMvideo);
   }
+});
+
+setTimeout(function () {
+  document.getElementById('myVideo').removeAttribute('controls');
 });
 
 SkylinkDemo.init(config, function (error, success) {

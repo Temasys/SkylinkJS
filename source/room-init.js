@@ -1065,11 +1065,16 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   var self = this;
   if (typeof room === 'function' || typeof room === 'undefined') {
     log.error('Invalid room provided. Room:', room);
+    callback(new Error('Invalid room provided'), null);
     return;
   }
   var defaultRoom = self._initOptions.defaultRoom;
   var options = clone(self._initOptions);
   options.iceServer = options.iceServer ? options.iceServer.urls : null;
+
+  if(options.defaultRoom!==room){
+    options.defaultRoom = room;
+  }
 
   self.init(options, function (error, success) {
     self._initOptions.defaultRoom = defaultRoom;

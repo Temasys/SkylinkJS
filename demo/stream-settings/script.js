@@ -39,19 +39,19 @@ SkylinkDemo.on('peerJoined', function (peerId, peerInfo, isSelf) {
 
 	var peerVideo = document.createElement('video');
 	peerVideo.id = peerId + '_stream';
-
-	if (window.webrtcDetectedBrowser !== 'IE') {
-    peerVideo.autoplay = 'autoplay';
-  }
+	peerVideo.autoplay = true;
+	peerVideo.muted = isSelf;
+	peerVideo.controls = true;
+  peerVideo.setAttribute('playsinline', true);
 
 	document.body.appendChild(peer);
 
 	peer.appendChild(peerStatus);
 	peer.appendChild(peerVideo);
 
-	if (isSelf && window.webrtcDetectedBrowser !== 'IE') {
-		peerVideo.muted = 'muted';
-	}
+	setTimeout(function () {
+    peerVideo.removeAttribute('controls');
+  });
 });
 
 SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {

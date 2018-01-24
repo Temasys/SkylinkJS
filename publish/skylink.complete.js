@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.27 - Tue Jan 16 2018 02:40:11 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.28 - Wed Jan 24 2018 17:40:48 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -13688,7 +13688,7 @@ if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.27 - Tue Jan 16 2018 02:40:11 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.28 - Wed Jan 24 2018 17:40:48 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -15292,7 +15292,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.27';
+Skylink.prototype.VERSION = '0.6.28';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -24268,11 +24268,16 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   var self = this;
   if (typeof room === 'function' || typeof room === 'undefined') {
     log.error('Invalid room provided. Room:', room);
+    callback(new Error('Invalid room provided'), null);
     return;
   }
   var defaultRoom = self._initOptions.defaultRoom;
   var options = clone(self._initOptions);
   options.iceServer = options.iceServer ? options.iceServer.urls : null;
+
+  if(options.defaultRoom!==room){
+    options.defaultRoom = room;
+  }
 
   self.init(options, function (error, success) {
     self._initOptions.defaultRoom = defaultRoom;
