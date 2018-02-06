@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.28 - Wed Jan 24 2018 17:40:48 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.29 - Tue Feb 06 2018 18:44:39 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -1602,7 +1602,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.28';
+Skylink.prototype.VERSION = '0.6.29';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -18013,10 +18013,6 @@ Skylink.prototype._getSDPCodecsSupport = function (targetMid, sessionDescription
   for (var i = 0; i < sdpLines.length; i++) {
     if (sdpLines[i].indexOf('m=') === 0) {
       mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0];
-
-      if (['audio', 'video'].indexOf(mediaType) === -1) {
-        break;
-      }
       continue;
     }
 

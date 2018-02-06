@@ -1316,10 +1316,6 @@ Skylink.prototype._getSDPCodecsSupport = function (targetMid, sessionDescription
   for (var i = 0; i < sdpLines.length; i++) {
     if (sdpLines[i].indexOf('m=') === 0) {
       mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0];
-
-      if (['audio', 'video'].indexOf(mediaType) === -1) {
-        break;
-      }
       continue;
     }
 

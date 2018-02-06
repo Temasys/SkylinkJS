@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.28</title>
+    <title>SkylinkJS 0.6.29</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.28</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.29</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1407,10 +1407,6 @@ Skylink.prototype._getSDPCodecsSupport = function (targetMid, sessionDescription
   for (var i = 0; i &lt; sdpLines.length; i++) {
     if (sdpLines[i].indexOf(&#x27;m=&#x27;) === 0) {
       mediaType = (sdpLines[i].split(&#x27;m=&#x27;)[1] || &#x27;&#x27;).split(&#x27; &#x27;)[0];
-
-      if ([&#x27;audio&#x27;, &#x27;video&#x27;].indexOf(mediaType) === -1) {
-        break;
-      }
       continue;
     }
 

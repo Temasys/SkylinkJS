@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.28",
+        "version": "0.6.29",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -9978,7 +9978,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1347,
+            "line": 1343,
             "description": "Function that checks if there are any common codecs supported for remote end.",
             "itemtype": "method",
             "name": "_getSDPCommonSupports",
