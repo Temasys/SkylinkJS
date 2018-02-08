@@ -1,6 +1,6 @@
 var SkylinkDemo = new Skylink();
 
-SkylinkDemo.on('peerJoined', function(peerId, peerInfo, isSelf) {
+SkylinkDemo.on('peerJoined', function (peerId, peerInfo, isSelf) {
   addPeer(peerId, isSelf);
 });
 
@@ -8,49 +8,40 @@ SkylinkDemo.on('serverPeerJoined', function (peerId, serverPeerType) {
   addPeer(peerId, false, serverPeerType);
 });
 
-SkylinkDemo.on('peerLeft', function(peerId, peerInfo, isSelf) {
+SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {
   removePeer(peerId);
 });
 
-SkylinkDemo.on('serverPeerLeft', function(peerId, serverPeerType) {
+SkylinkDemo.on('serverPeerLeft', function (peerId, serverPeerType) {
   removePeer(peerId);
 });
 
-SkylinkDemo.on('readyStateChange', function(state, error, room) {
+SkylinkDemo.on('readyStateChange', function (state, error, room) {
   for (var stateName in SkylinkDemo.READY_STATE_CHANGE) {
     if (SkylinkDemo.READY_STATE_CHANGE[stateName] === state) {
       document.getElementById('readystate').innerHTML = stateName;
     }
   }
-  if(state === SkylinkDemo.READY_STATE_CHANGE.COMPLETED) {
-    //Skylink has been initialized we can join the default room
-    var displayName = 'User_' + Math.floor((Math.random() * 1000) + 1);
-    SkylinkDemo.joinRoom({
-      userData: displayName,
-      audio: false,
-      video: false
-    });
-  }
 });
 
-SkylinkDemo.on('channelOpen', function() {
+SkylinkDemo.on('channelOpen', function () {
   document.getElementById('channel').innerHTML = 'open';
 });
 
-SkylinkDemo.on('channelMessage', function() {
+SkylinkDemo.on('channelMessage', function () {
   document.getElementById('channel').innerHTML = 'message';
 });
 
-SkylinkDemo.on('channelClose', function() {
+SkylinkDemo.on('channelClose', function () {
   document.getElementById('channel').innerHTML = 'close';
 });
 
-SkylinkDemo.on('channelError', function() {
+SkylinkDemo.on('channelError', function () {
   document.getElementById('channel').innerHTML = 'error';
 });
 
 
-SkylinkDemo.on('handshakeProgress', function(step, peerId) {
+SkylinkDemo.on('handshakeProgress', function (step, peerId) {
   var peerDom = document.getElementById(peerId + '_hsp');
 
   if (peerDom) {
@@ -60,7 +51,7 @@ SkylinkDemo.on('handshakeProgress', function(step, peerId) {
   }
 });
 
-SkylinkDemo.on('peerConnectionState', function(state, peerId) {
+SkylinkDemo.on('peerConnectionState', function (state, peerId) {
   var peerDom = document.getElementById(peerId + '_pcs');
 
   if (peerDom) {
@@ -70,7 +61,7 @@ SkylinkDemo.on('peerConnectionState', function(state, peerId) {
   }
 });
 
-SkylinkDemo.on('candidateGenerationState', function(state, peerId) {
+SkylinkDemo.on('candidateGenerationState', function (state, peerId) {
   var peerDom = document.getElementById(peerId + '_cgs');
 
   if (peerDom) {
@@ -80,7 +71,7 @@ SkylinkDemo.on('candidateGenerationState', function(state, peerId) {
   }
 });
 
-SkylinkDemo.on('dataChannelState', function(state, peerId) {
+SkylinkDemo.on('dataChannelState', function (state, peerId) {
   var peerDom = document.getElementById(peerId + '_dcs');
 
   if (peerDom) {
@@ -90,7 +81,7 @@ SkylinkDemo.on('dataChannelState', function(state, peerId) {
   }
 });
 
-function addPeer (peerId, isSelf) {
+function addPeer(peerId, isSelf) {
   var peers = document.getElementById('peers');
   var peerItem = document.createElement('tr');
   peerItem.id = peerId;
@@ -104,7 +95,7 @@ function addPeer (peerId, isSelf) {
   peers.appendChild(peerItem);
 }
 
-function removePeer (peerId) {
+function removePeer(peerId) {
   var peers = document.getElementById('peers');
   var peerDom = document.getElementById(peerId);
 
@@ -118,4 +109,14 @@ function removePeer (peerId) {
   }
 }
 
-SkylinkDemo.init(config);
+SkylinkDemo.init(config, function (error, success) {
+  //Skylink has been initialized we can join the default room
+  if (success) {
+    var displayName = 'User_' + Math.floor((Math.random() * 1000) + 1);
+    SkylinkDemo.joinRoom({
+      userData: displayName,
+      audio: false,
+      video: false
+    });
+  }
+});
