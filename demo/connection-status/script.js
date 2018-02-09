@@ -114,7 +114,6 @@ SkylinkDemo.init(config, function (error, success) {
   if (success) {
     var displayName = 'User_' + Math.floor((Math.random() * 1000) + 1);
     SkylinkDemo.joinRoom({
-      userData: displayName,
       audio: false,
       video: false
     });
