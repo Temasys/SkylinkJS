@@ -112,7 +112,6 @@ function removePeer(peerId) {
 SkylinkDemo.init(config, function (error, success) {
   //Skylink has been initialized we can join the default room
   if (success) {
-    var displayName = 'User_' + Math.floor((Math.random() * 1000) + 1);
     SkylinkDemo.joinRoom({
       audio: false,
       video: false
