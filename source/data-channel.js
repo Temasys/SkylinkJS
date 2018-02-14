@@ -181,6 +181,53 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
 };
 
 /**
+ * Function that refreshes the main messaging Datachannel.
+ * @method refreshDatachannel
+ * @param {String} [peerId] The target Peer ID to retrieve connection stats from.
+ * @example
+ *   // Example 1: Retrieve offerer and refresh datachannel:
+ *   skylink.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
+ *   if (channelType === skylink.DATA_CHANNEL_TYPE.MESSAGING &&
+ *    state === skylink.DATA_CHANNEL_STATE.CLOSED) {
+ *    var userWeight = skylink.getPeerInfo().config.priorityWeight;
+ *    var peerWeight = skylink.getPeerInfo(peerId).config.priorityWeight;
+ *    // Determine who is offerer because as per SM protocol, higher weight is offerer
+ *    if (userWeight > peerWeight) {
+ *      skylink.refreshDatachannel(peerId);
+ *    }
+ *  }
+ *  });
+ * @for Skylink
+ * @since 0.6.30
+ */
+
+Skylink.prototype.refreshDatachannel = function (peerId) {
+
+  var self = this;
+  if(!self._dataChannels[peerId]) {
+    var channelName = self._dataChannels[peerId].main.channelName;
+    var channelType = self._dataChannels[peerId].main.channelType;
+    var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
+    var bufferThreshold= self._dataChannels[peerId].main.channel.bufferedAmountLowThreshold;
+
+    if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
+      setTimeout(function () {
+        if (self._peerConnections[peerId] &&
+          self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
+          (self._peerConnections[peerId].localDescription &&
+            self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
+          log.debug([peerId, 'RTCDataChannel', channelProp, 'Reviving Datachannel connection']);
+          self._createDataChannel(peerId, channelName, bufferThreshold, true);
+        }
+      }, 100);
+    }
+  }
+  else {
+    log.debug([peerId, 'RTCDataChannel', 'Not a valid Datachannel connection']);
+  }
+};
+
+/**
  * Function that returns the Datachannel buffer threshold and amount.
  * @method _getDataChannelBuffer
  * @return {JSON} The buffered amount information.
