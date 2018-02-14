@@ -204,7 +204,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
 Skylink.prototype.refreshDatachannel = function (peerId) {
 
   var self = this;
-  if(self._dataChannels[peerId] && self._dataChannels[peerId]["mail"]) {
+  if(self._dataChannels[peerId] && self._dataChannels[peerId]["main"]) {
     var channelName = self._dataChannels[peerId].main.channelName;
     var channelType = self._dataChannels[peerId].main.channelType;
     var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
