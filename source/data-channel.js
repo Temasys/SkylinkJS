@@ -216,6 +216,8 @@ Skylink.prototype.refreshDatachannel = function (peerId) {
           self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
           (self._peerConnections[peerId].localDescription &&
             self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
+          log.debug([peerId, 'RTCDataChannel', channelProp, 'Closed existing Datachannel connection']);
+          self._closeDataChannel(peerId, channelProp);
           log.debug([peerId, 'RTCDataChannel', channelProp, 'Reviving Datachannel connection']);
           self._createDataChannel(peerId, channelName, bufferThreshold, true);
         }
