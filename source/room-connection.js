@@ -147,6 +147,8 @@
  *   generate and use when available.
  * - When not provided, its value is <code>AUTO</code>.
  *   [Rel: Skylink.PEER_CERTIFICATE]
+ * @param {String} [options.peerConnection.disableBundle=false] The flag if for each Peer connection instead of bundling all
+ *   media connections into 1 connection, should have all of them negotiated as different separate media connections.
  * @param {Boolean|JSON} [options.autoBandwidthAdjustment=false] <blockquote class="info">
  *   Note that this is an experimental feature which may be removed or changed in the future releases.
  *   This feature is also only available for non-MCU enabled Peer connections and Edge Peer connections.
@@ -691,7 +693,8 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, joinRoomTimestamp
           bundlePolicy: self.BUNDLE_POLICY.BALANCED,
           rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
           iceCandidatePoolSize: 0,
-          certificate: self.PEER_CERTIFICATE.AUTO
+          certificate: self.PEER_CERTIFICATE.AUTO,
+          disableBundle: false
         };
         self._bandwidthAdjuster = null;
 
@@ -791,6 +794,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, joinRoomTimestamp
               }
             }
           }
+          self._peerConnectionConfig.disableBundle = mediaOptions.peerConnection.disableBundle === true;
         }
 
         if (mediaOptions.autoBandwidthAdjustment) {
