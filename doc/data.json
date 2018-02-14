@@ -2744,6 +2744,26 @@
         {
             "file": "source/data-channel.js",
             "line": 183,
+            "description": "Function that refreshes the main messaging Datachannel.",
+            "itemtype": "method",
+            "name": "refreshDatachannel",
+            "params": [
+                {
+                    "name": "peerId",
+                    "description": "The target Peer ID to retrieve connection stats from.",
+                    "type": "String",
+                    "optional": true
+                }
+            ],
+            "example": [
+                "\n  // Example 1: Retrieve offerer and refresh datachannel:\n  skylink.on(\"dataChannelState\", function (state, peerId, error, channelName, channelType) {\n  if (channelType === skylink.DATA_CHANNEL_TYPE.MESSAGING &&\n   state === skylink.DATA_CHANNEL_STATE.CLOSED) {\n   var userWeight = skylink.getPeerInfo().config.priorityWeight;\n   var peerWeight = skylink.getPeerInfo(peerId).config.priorityWeight;\n   // Determine who is offerer because as per SM protocol, higher weight is offerer\n   if (userWeight > peerWeight) {\n     skylink.refreshDatachannel(peerId);\n   }\n }\n });"
+            ],
+            "since": "0.6.30",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/data-channel.js",
+            "line": 230,
             "description": "Function that returns the Datachannel buffer threshold and amount.",
             "itemtype": "method",
             "name": "_getDataChannelBuffer",
@@ -2758,7 +2778,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 217,
+            "line": 264,
             "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
             "name": "_sendMessageToDataChannel",
@@ -2769,7 +2789,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 292,
+            "line": 339,
             "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
