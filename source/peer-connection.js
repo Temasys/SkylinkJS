@@ -2210,8 +2210,11 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     return;
   }
 
+  if (
+  // If peer connection exists first and state is not closed.
+    self._peerConnections[targetMid] && self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
   // If remote description is set
-  if (self._peerConnections[targetMid].remoteDescription && self._peerConnections[targetMid].remoteDescription.sdp &&
+    self._peerConnections[targetMid].remoteDescription && self._peerConnections[targetMid].remoteDescription.sdp &&
   // If end-of-candidates signal is received
     typeof self._peerEndOfCandidatesCounter[targetMid].expectedLen === 'number' &&
   // If all ICE candidates are received
