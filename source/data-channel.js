@@ -204,11 +204,11 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
 Skylink.prototype.refreshDatachannel = function (peerId) {
 
   var self = this;
-  if(self._dataChannels[peerId] && self._dataChannels[peerId]["main"]) {
+  if(self._dataChannels[peerId] && self._dataChannels[peerId]["main"] && self._dataChannels[peerId].main.channel) {
     var channelName = self._dataChannels[peerId].main.channelName;
     var channelType = self._dataChannels[peerId].main.channelType;
     var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
-    var bufferThreshold= self._dataChannels[peerId].main.channel.bufferedAmountLowThreshold;
+    var bufferThreshold= self._dataChannels[peerId].main.channel.bufferedAmountLowThreshold || 0;
 
     if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
       setTimeout(function () {
