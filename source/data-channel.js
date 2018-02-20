@@ -329,6 +329,9 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
         }
       }
     }
+
+    delete self._dataChannels[peerId];
+
   } else {
     if (!self._dataChannels[peerId][channelProp]) {
       log.warn([peerId, 'RTCDataChannel', channelProp, 'Aborting closing Datachannel as it does not exists']);
