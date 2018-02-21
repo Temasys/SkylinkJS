@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.29</title>
+    <title>SkylinkJS 0.6.30</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.29</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.30</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -2301,8 +2301,11 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     return;
   }
 
+  if (
+  // If peer connection exists first and state is not closed.
+    self._peerConnections[targetMid] &amp;&amp; self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &amp;&amp;
   // If remote description is set
-  if (self._peerConnections[targetMid].remoteDescription &amp;&amp; self._peerConnections[targetMid].remoteDescription.sdp &amp;&amp;
+    self._peerConnections[targetMid].remoteDescription &amp;&amp; self._peerConnections[targetMid].remoteDescription.sdp &amp;&amp;
   // If end-of-candidates signal is received
     typeof self._peerEndOfCandidatesCounter[targetMid].expectedLen === &#x27;number&#x27; &amp;&amp;
   // If all ICE candidates are received

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.29</title>
+    <title>SkylinkJS 0.6.30</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.29</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.30</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -238,6 +238,8 @@
  *   generate and use when available.
  * - When not provided, its value is &lt;code&gt;AUTO&lt;/code&gt;.
  *   [Rel: Skylink.PEER_CERTIFICATE]
+ * @param {String} [options.peerConnection.disableBundle=false] The flag if for each Peer connection instead of bundling all
+ *   media connections into 1 connection, should have all of them negotiated as different separate media connections.
  * @param {Boolean|JSON} [options.autoBandwidthAdjustment=false] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this is an experimental feature which may be removed or changed in the future releases.
  *   This feature is also only available for non-MCU enabled Peer connections and Edge Peer connections.
@@ -782,7 +784,8 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, joinRoomTimestamp
           bundlePolicy: self.BUNDLE_POLICY.BALANCED,
           rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
           iceCandidatePoolSize: 0,
-          certificate: self.PEER_CERTIFICATE.AUTO
+          certificate: self.PEER_CERTIFICATE.AUTO,
+          disableBundle: false
         };
         self._bandwidthAdjuster = null;
 
@@ -882,6 +885,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, joinRoomTimestamp
               }
             }
           }
+          self._peerConnectionConfig.disableBundle = mediaOptions.peerConnection.disableBundle === true;
         }
 
         if (mediaOptions.autoBandwidthAdjustment) {
