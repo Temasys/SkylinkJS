@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.29</title>
+    <title>SkylinkJS 0.6.30</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.29</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.30</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -295,11 +295,11 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
 Skylink.prototype.refreshDatachannel = function (peerId) {
 
   var self = this;
-  if(!self._dataChannels[peerId]) {
+  if(self._dataChannels[peerId] &amp;&amp; self._dataChannels[peerId][&quot;main&quot;] &amp;&amp; self._dataChannels[peerId].main.channel) {
     var channelName = self._dataChannels[peerId].main.channelName;
     var channelType = self._dataChannels[peerId].main.channelType;
-    var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? &#x27;main&#x27; : channelName;
-    var bufferThreshold= self._dataChannels[peerId].main.channel.bufferedAmountLowThreshold;
+    var channelProp = &#x27;main&#x27;;
+    var bufferThreshold= self._dataChannels[peerId].main.channel.bufferedAmountLowThreshold || 0;
 
     if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
       setTimeout(function () {
@@ -307,6 +307,7 @@ Skylink.prototype.refreshDatachannel = function (peerId) {
           self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &amp;&amp;
           (self._peerConnections[peerId].localDescription &amp;&amp;
             self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
+          self._closeDataChannel(peerId, &#x27;main&#x27;, true);
           log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Reviving Datachannel connection&#x27;]);
           self._createDataChannel(peerId, channelName, bufferThreshold, true);
         }
@@ -434,7 +435,7 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
+Skylink.prototype._closeDataChannel = function(peerId, channelProp, isCloseMainChannel) {
   var self = this;
 
   if (!self._dataChannels[peerId]) {
@@ -459,7 +460,11 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
     }
   };
 
-  if (!channelProp || channelProp === &#x27;main&#x27;) {
+  if(isCloseMainChannel)
+  {
+    closeFn(channelProp);
+  }
+  else if (!channelProp || channelProp === &#x27;main&#x27;) {
     for (var channelNameProp in self._dataChannels) {
       if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
         if (self._dataChannels[peerId][channelNameProp]) {
@@ -467,6 +472,9 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
         }
       }
     }
+
+    delete self._dataChannels[peerId];
+
   } else {
     if (!self._dataChannels[peerId][channelProp]) {
       log.warn([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Aborting closing Datachannel as it does not exists&#x27;]);

@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.29",
+        "version": "0.6.30",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -2763,7 +2763,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 230,
+            "line": 231,
             "description": "Function that returns the Datachannel buffer threshold and amount.",
             "itemtype": "method",
             "name": "_getDataChannelBuffer",
@@ -2778,7 +2778,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 264,
+            "line": 265,
             "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
             "name": "_sendMessageToDataChannel",
@@ -2789,7 +2789,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 339,
+            "line": 340,
             "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -4283,6 +4283,13 @@
                                     "description": "The type of certificate that Peer connection should\n  generate and use when available.\n- When not provided, its value is <code>AUTO</code>.\n  [Rel: Skylink.PEER_CERTIFICATE]",
                                     "type": "String",
                                     "optional": true
+                                },
+                                {
+                                    "name": "disableBundle",
+                                    "description": "The flag if for each Peer connection instead of bundling all\n  media connections into 1 connection, should have all of them negotiated as different separate media connections.",
+                                    "type": "String",
+                                    "optional": true,
+                                    "optdefault": "false"
                                 }
                             ]
                         },
@@ -4381,7 +4388,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 466,
+            "line": 468,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4446,7 +4453,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 582,
+            "line": 584,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4456,7 +4463,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 616,
+            "line": 618,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4466,7 +4473,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 650,
+            "line": 652,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -10075,15 +10082,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:466"
+            "line": " source/room-connection.js:468"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:582"
+            "line": " source/room-connection.js:584"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:616"
+            "line": " source/room-connection.js:618"
         },
         {
             "message": "unknown tag: trigger",

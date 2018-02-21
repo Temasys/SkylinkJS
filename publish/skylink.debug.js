@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.29 - Tue Feb 06 2018 18:44:39 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.30 - Wed Feb 21 2018 17:48:18 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -1602,7 +1602,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.29';
+Skylink.prototype.VERSION = '0.6.30';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -2472,6 +2472,54 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
 };
 
 /**
+ * Function that refreshes the main messaging Datachannel.
+ * @method refreshDatachannel
+ * @param {String} [peerId] The target Peer ID to retrieve connection stats from.
+ * @example
+ *   // Example 1: Retrieve offerer and refresh datachannel:
+ *   skylink.on("dataChannelState", function (state, peerId, error, channelName, channelType) {
+ *   if (channelType === skylink.DATA_CHANNEL_TYPE.MESSAGING &&
+ *    state === skylink.DATA_CHANNEL_STATE.CLOSED) {
+ *    var userWeight = skylink.getPeerInfo().config.priorityWeight;
+ *    var peerWeight = skylink.getPeerInfo(peerId).config.priorityWeight;
+ *    // Determine who is offerer because as per SM protocol, higher weight is offerer
+ *    if (userWeight > peerWeight) {
+ *      skylink.refreshDatachannel(peerId);
+ *    }
+ *  }
+ *  });
+ * @for Skylink
+ * @since 0.6.30
+ */
+
+Skylink.prototype.refreshDatachannel = function (peerId) {
+
+  var self = this;
+  if(self._dataChannels[peerId] && self._dataChannels[peerId]["main"] && self._dataChannels[peerId].main.channel) {
+    var channelName = self._dataChannels[peerId].main.channelName;
+    var channelType = self._dataChannels[peerId].main.channelType;
+    var channelProp = 'main';
+    var bufferThreshold= self._dataChannels[peerId].main.channel.bufferedAmountLowThreshold || 0;
+
+    if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
+      setTimeout(function () {
+        if (self._peerConnections[peerId] &&
+          self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
+          (self._peerConnections[peerId].localDescription &&
+            self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
+          self._closeDataChannel(peerId, 'main', true);
+          log.debug([peerId, 'RTCDataChannel', channelProp, 'Reviving Datachannel connection']);
+          self._createDataChannel(peerId, channelName, bufferThreshold, true);
+        }
+      }, 100);
+    }
+  }
+  else {
+    log.debug([peerId, 'RTCDataChannel', 'Not a valid Datachannel connection']);
+  }
+};
+
+/**
  * Function that returns the Datachannel buffer threshold and amount.
  * @method _getDataChannelBuffer
  * @return {JSON} The buffered amount information.
@@ -2587,7 +2635,7 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
+Skylink.prototype._closeDataChannel = function(peerId, channelProp, isCloseMainChannel) {
   var self = this;
 
   if (!self._dataChannels[peerId]) {
@@ -2612,7 +2660,11 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
     }
   };
 
-  if (!channelProp || channelProp === 'main') {
+  if(isCloseMainChannel)
+  {
+    closeFn(channelProp);
+  }
+  else if (!channelProp || channelProp === 'main') {
     for (var channelNameProp in self._dataChannels) {
       if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
         if (self._dataChannels[peerId][channelNameProp]) {
@@ -2620,6 +2672,9 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
         }
       }
     }
+
+    delete self._dataChannels[peerId];
+
   } else {
     if (!self._dataChannels[peerId][channelProp]) {
       log.warn([peerId, 'RTCDataChannel', channelProp, 'Aborting closing Datachannel as it does not exists']);
@@ -7826,8 +7881,11 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     return;
   }
 
+  if (
+  // If peer connection exists first and state is not closed.
+    self._peerConnections[targetMid] && self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
   // If remote description is set
-  if (self._peerConnections[targetMid].remoteDescription && self._peerConnections[targetMid].remoteDescription.sdp &&
+    self._peerConnections[targetMid].remoteDescription && self._peerConnections[targetMid].remoteDescription.sdp &&
   // If end-of-candidates signal is received
     typeof self._peerEndOfCandidatesCounter[targetMid].expectedLen === 'number' &&
   // If all ICE candidates are received
@@ -8796,6 +8854,10 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
 
+  if (self._peerConnectionConfig.disableBundle) {
+    sessionDescription.sdp = sessionDescription.sdp.replace(/a=group:BUNDLE.*\r\n/gi, '');
+  }
+
   log.log([targetMid, 'RTCSessionDescription', sessionDescription.type,
     'Local session description updated ->'], sessionDescription.sdp);
 
@@ -9329,7 +9391,8 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, joinRoomTimestamp
           bundlePolicy: self.BUNDLE_POLICY.BALANCED,
           rtcpMuxPolicy: self.RTCP_MUX_POLICY.REQUIRE,
           iceCandidatePoolSize: 0,
-          certificate: self.PEER_CERTIFICATE.AUTO
+          certificate: self.PEER_CERTIFICATE.AUTO,
+          disableBundle: false
         };
         self._bandwidthAdjuster = null;
 
@@ -9429,6 +9492,7 @@ Skylink.prototype._waitForOpenChannel = function(mediaOptions, joinRoomTimestamp
               }
             }
           }
+          self._peerConnectionConfig.disableBundle = mediaOptions.peerConnection.disableBundle === true;
         }
 
         if (mediaOptions.autoBandwidthAdjustment) {
