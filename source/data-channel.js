@@ -207,7 +207,7 @@ Skylink.prototype.refreshDatachannel = function (peerId) {
   if(self._dataChannels[peerId] && self._dataChannels[peerId]["main"] && self._dataChannels[peerId].main.channel) {
     var channelName = self._dataChannels[peerId].main.channelName;
     var channelType = self._dataChannels[peerId].main.channelType;
-    var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
+    var channelProp = 'main';
     var bufferThreshold= self._dataChannels[peerId].main.channel.bufferedAmountLowThreshold || 0;
 
     if (channelType === self.DATA_CHANNEL_TYPE.MESSAGING) {
@@ -216,8 +216,7 @@ Skylink.prototype.refreshDatachannel = function (peerId) {
           self._peerConnections[peerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
           (self._peerConnections[peerId].localDescription &&
             self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
-          log.debug([peerId, 'RTCDataChannel', channelProp, 'Closed existing Datachannel connection']);
-          self._closeDataChannel(peerId, channelProp);
+          self._closeDataChannel(peerId, 'main', true);
           log.debug([peerId, 'RTCDataChannel', channelProp, 'Reviving Datachannel connection']);
           self._createDataChannel(peerId, channelName, bufferThreshold, true);
         }
@@ -345,7 +344,7 @@ Skylink.prototype._sendMessageToDataChannel = function(peerId, data, channelProp
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
+Skylink.prototype._closeDataChannel = function(peerId, channelProp, isCloseMainChannel) {
   var self = this;
 
   if (!self._dataChannels[peerId]) {
@@ -370,7 +369,11 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp) {
     }
   };
 
-  if (!channelProp || channelProp === 'main') {
+  if(isCloseMainChannel)
+  {
+    closeFn(channelProp);
+  }
+  else if (!channelProp || channelProp === 'main') {
     for (var channelNameProp in self._dataChannels) {
       if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
         if (self._dataChannels[peerId][channelNameProp]) {
