@@ -114,3 +114,27 @@ Skylink.prototype._handleStatsAuth = function(result, status) {
 
   self._postStatsToApi('/stats/auth', statsObject);
 };
+
+/**
+ * Function that handles the posting of /stats/client/signaling stats.
+ * @method _handleStatsSignaling
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleStatsSignaling = function(state, socketSession, error) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room && self._room.id,
+    state: state,
+    protocol: self._signalingServerProtocol,
+    server: (socketSession.socketServer.split('//')[1] || '').split(':')[0] || '',
+    port: parseInt(((socketSession.socketServer.split(':') || '')[2] || '').split('?')[0] || '', 10),
+    transport: socketSession.transportType.toLowerCase(),
+    attempts: socketSession.attempts,
+    // TO CHECK: Added new field "error" not documented in specs.
+    error: error || null
+  };
+
+  self._postStatsToApi('/stats/client/signaling', statsObject);
+};
