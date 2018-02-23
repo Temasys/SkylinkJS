@@ -437,7 +437,7 @@ Skylink.prototype.init = function(_options, _callback) {
 
   // `init({ defaultRoom: "xxxxx" })`
   options.defaultRoom = options.defaultRoom && typeof options.defaultRoom === 'string' ? options.defaultRoom : options.appKey;
-  
+
   // `init({ roomServer: "//server.temasys.io" })`
   options.roomServer = options.roomServer && typeof options.roomServer === 'string' ? options.roomServer : '//api.temasys.io';
 
@@ -591,7 +591,7 @@ Skylink.prototype.init = function(_options, _callback) {
       // `init({ videoCodec: { samplingRate: 48000, ... } })`
       samplingRate: typeof options.videoCodec.samplingRate === 'number' ? options.videoCodec.samplingRate : null
     };
-    
+
   // `init({ videoCodec: "xxxx" })`
   } else {
     options.videoCodec = self._containsInList('VIDEO_CODEC', options.videoCodec, 'AUTO');
@@ -638,16 +638,16 @@ Skylink.prototype.init = function(_options, _callback) {
   // `init({ codecParams: { video: { h264: { ... } } } })`
   options.codecParams.video.h264 = options.codecParams.video.h264 &&
     typeof options.codecParams.video.h264 === 'object' ? options.codecParams.video.h264 : {};
-  
+
   // `init({ codecParams: { video: { h264: { profileLevelId: "xxxxxx" } } } })`
   options.codecParams.video.h264.profileLevelId = options.codecParams.video.h264.profileLevelId &&
     typeof options.codecParams.video.h264.profileLevelId === 'string' ?
     options.codecParams.video.h264.profileLevelId : null;
-  
+
   // `init({ codecParams: { video: { h264: { levelAsymmetryAllowed: 1 } } } })`
   options.codecParams.video.h264.levelAsymmetryAllowed = typeof options.codecParams.video.h264.levelAsymmetryAllowed === 'boolean' ?
     options.codecParams.video.h264.levelAsymmetryAllowed : null;
-  
+
   // `init({ codecParams: { video: { h264: { packetizationMode: 1 } } } })` (fallback for number)
   options.codecParams.video.h264.packetizationMode = typeof options.codecParams.video.h264.packetizationMode === 'boolean' ?
     (options.codecParams.video.h264.packetizationMode === true ? 1 : 0) :
@@ -699,13 +699,13 @@ Skylink.prototype.init = function(_options, _callback) {
 
     } else if (state === self.READY_STATE_CHANGE.COMPLETED) {
       log.info('Completed init() successfully ->', options);
-    
+
       var success = clone(self._initOptions);
       success.serverUrl = self._path;
       success.readyState = self._readyState;
       success.selectedRoom = self._selectedRoom;
       success.TURNTransport = success.TURNServerTransport;
-  
+
       callback(null, success);
       return true;
     }
@@ -808,14 +808,13 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
         errorCode: response.error || status
       }, self._selectedRoom);
     };
-  
+
     xhr.onerror = function (error) {
       if (completed) {
         return;
       }
       completed = true;
       log.error([null, 'XMLHttpRequest', method, 'Failed retrieving information with status ->'], xhr.status);
-
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: xhr.status || -1,
@@ -1048,6 +1047,7 @@ Skylink.prototype._loadInfo = function() {
 
       self._readyState = self.READY_STATE_CHANGE.LOADING;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
+      self._handleStatsClient();
       self._requestServerInfo('GET', self._path, function(response) {
         self._parseInfo(response);
       });
