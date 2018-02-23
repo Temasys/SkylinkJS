@@ -138,3 +138,45 @@ Skylink.prototype._handleStatsSignaling = function(state, socketSession, error) 
 
   self._postStatsToApi('/stats/client/signaling', statsObject);
 };
+
+/**
+ * Function that handles the posting of /stats/client/iceconnection stats.
+ * @method _handleStatsIceConnection
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleStatsIceConnection = function(state, peerId) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room && self._room.id,
+    user_id: self._user && self._user.sid,
+    peer_id: peerId,
+    state: state,
+    is_trickle: self._initOptions.enableIceTrickle,
+    local_candidate: {},
+    remote_candidate: {}
+  };
+
+  self.getConnectionStatus(peerId, function (error, success) {
+    if (success && success.connectionStats[peerId]) {
+      ['local', 'remote'].forEach(function (type) {
+        var candidate = success.connectionStats[peerId].selectedCandidate[type];
+
+        if (candidate) {
+          statsObject[type + '_candidate'].address = candidate.ipAddress || null;
+          statsObject[type + '_candidate'].port = candidate.portNumber || null;
+          statsObject[type + '_candidate'].priority = candidate.priority || null;
+          statsObject[type + '_candidate'].transport = candidate.transport || null;
+          statsObject[type + '_candidate'].candidateType = candidate.candidateType || null;
+
+          if (type === 'local') {
+            statsObject[type + '_candidate'].networkType = candidate.networkType || null;
+          }
+        }
+      });
+    }
+
+    self._postStatsToApi('/stats/client/iceconnection', statsObject);
+  });
+};
