@@ -94,3 +94,23 @@ Skylink.prototype._handleStatsClient = function() {
 
   self._postStatsToApi('/stats/client', statsObject);
 };
+
+/**
+ * Function that handles the posting of /stats/auth stats.
+ * @method _handleStatsAuth
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleStatsAuth = function(result, status) {
+  var self = this;
+  var statsObject = {
+    api_url: self._path,
+    api_result: result,
+    room_id: (result && result.room_key) || null,
+    // TO CHECK: Added new field "http_status" not documented in specs.
+    http_status: status || null
+  };
+
+  self._postStatsToApi('/stats/auth', statsObject);
+};

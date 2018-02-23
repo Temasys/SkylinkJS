@@ -788,6 +788,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       completed = true;
       var response = JSON.parse(xhr.responseText || xhr.response || '{}');
       var status = xhr.status || (response.success ? 200 : 400);
+      self._handleStatsAuth(response, xhr.status);
 
       if (response.success) {
       	log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters ->'], response);
@@ -815,6 +816,8 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       }
       completed = true;
       log.error([null, 'XMLHttpRequest', method, 'Failed retrieving information with status ->'], xhr.status);
+      // TO CHECK: Added a new field "web_sdk_error" not documented in specs.
+      self._handleStatsAuth({ success: false, web_sdk_error: 'HTTP request has errors' }, -1);
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: xhr.status || -1,
@@ -840,6 +843,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       }
     } catch (error) {
       completed = true;
+      self._handleStatsAuth({ success: false, web_sdk_error: 'HTTP request returned an exception' }, -1);
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: xhr.status || -1,
@@ -863,6 +867,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
         requestFn();
 
       } else {
+        self._handleStatsAuth({ success: false, web_sdk_error: 'HTTP request timed out' }, -1);
         self._readyState = self.READY_STATE_CHANGE.ERROR;
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: xhr.status || -1,
