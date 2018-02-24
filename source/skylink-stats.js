@@ -436,4 +436,24 @@ Skylink.prototype._handleStatsBandwidth = function (peerId) {
   });
 };
 
+/**
+ * Function that handles the posting of /stats/client/recording stats.
+ * @method _handleStatsRecording
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleStatsRecording = function(state, recordingId, recordings, error) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room && self._room.id,
+    user_id: self._user && self._user.sid,
+    state: state,
+    recording_id: recordingId || null,
+    recordings: recordings,
+    error: error || null
+  };
+
+  self._postStatsToApi('/stats/client/recording', statsObject);
+};
 

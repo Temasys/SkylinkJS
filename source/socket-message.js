@@ -152,6 +152,7 @@ Skylink.prototype.startRecording = function (callback) {
   if (!self._hasMCU) {
     var noMCUError = 'Unable to start recording as MCU is not connected';
     log.error(noMCUError);
+    self._handleStatsRecording('error-no-mcu-start', null, null, noMCUError);
     if (typeof callback === 'function') {
       callback(new Error(noMCUError), null);
     }
@@ -161,6 +162,8 @@ Skylink.prototype.startRecording = function (callback) {
   if (self._currentRecordingId) {
     var hasRecordingSessionError = 'Unable to start recording as there is an existing recording in-progress';
     log.error(hasRecordingSessionError);
+    // TO CHECK: We added new state type "error-start-when-active".
+    self._handleStatsRecording('error-start-when-active', self._currentRecordingId, null, hasRecordingSessionError);
     if (typeof callback === 'function') {
       callback(new Error(hasRecordingSessionError), null);
     }
@@ -180,6 +183,8 @@ Skylink.prototype.startRecording = function (callback) {
     rid: self._room.id,
     target: 'MCU'
   });
+
+  self._handleStatsRecording('request-start');
 
   log.debug(['MCU', 'Recording', null, 'Starting recording']);
 };
@@ -258,6 +263,7 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
   if (!self._hasMCU) {
     var noMCUError = 'Unable to stop recording as MCU is not connected';
     log.error(noMCUError);
+    self._handleStatsRecording('error-no-mcu-stop', null, null, noMCUError);
     if (typeof callback === 'function') {
       callback(new Error(noMCUError), null);
     }
@@ -267,6 +273,8 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
   if (!self._currentRecordingId) {
     var noRecordingSessionError = 'Unable to stop recording as there is no recording in-progress';
     log.error(noRecordingSessionError);
+    // TO CHECK: We added new state type "error-stop-when-inactive".
+    self._handleStatsRecording('error-stop-when-inactive', null, null, noRecordingSessionError);
     if (typeof callback === 'function') {
       callback(new Error(noRecordingSessionError), null);
     }
@@ -276,6 +284,7 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
   if (self._recordingStartInterval) {
     var recordingSecsRequiredError = 'Unable to stop recording as 4 seconds has not been recorded yet';
     log.error(recordingSecsRequiredError);
+    self._handleStatsRecording('error-min-stop', self._currentRecordingId, null, recordingSecsRequiredError);
     if (typeof callback === 'function') {
       callback(new Error(recordingSecsRequiredError), null);
     }
@@ -316,6 +325,8 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
     rid: self._room.id,
     target: 'MCU'
   });
+
+  self._handleStatsRecording('request-stop', self._currentRecordingId);
 
   log.debug(['MCU', 'Recording', null, 'Stopping recording']);
 };
@@ -804,6 +815,8 @@ Skylink.prototype._recordingEventHandler = function (message) {
   log.debug(['MCU', 'Recording', null, 'Received recording message ->'], message);
 
   if (message.action === 'on') {
+    self._handleStatsRecording('start', message.recordingId);
+
     if (!self._recordings[message.recordingId]) {
       log.debug(['MCU', 'Recording', message.recordingId, 'Started recording']);
 
@@ -825,6 +838,8 @@ Skylink.prototype._recordingEventHandler = function (message) {
     }
 
   } else if (message.action === 'off') {
+    self._handleStatsRecording('stop', message.recordingId);
+
     if (!self._recordings[message.recordingId]) {
       log.error(['MCU', 'Recording', message.recordingId, 'Received request of "off" but the session is empty']);
       return;
@@ -846,11 +861,6 @@ Skylink.prototype._recordingEventHandler = function (message) {
     self._trigger('recordingState', self.RECORDING_STATE.STOP, message.recordingId, null, null);
 
   } else if (message.action === 'url') {
-    if (!self._recordings[message.recordingId]) {
-      log.error(['MCU', 'Recording', message.recordingId, 'Received URL but the session is empty']);
-      return;
-    }
-
     var links = {};
 
     if (Array.isArray(message.urls)) {
@@ -861,6 +871,13 @@ Skylink.prototype._recordingEventHandler = function (message) {
       links.mixin = message.url;
     }
 
+    self._handleStatsRecording('mixin', message.recordingId, links);
+
+    if (!self._recordings[message.recordingId]) {
+      log.error(['MCU', 'Recording', message.recordingId, 'Received URL but the session is empty']);
+      return;
+    }
+
     self._recordings[message.recordingId].links = links;
     self._recordings[message.recordingId].state = self.RECORDING_STATE.LINK;
     self._recordings[message.recordingId].mixingDateTime = (new Date()).toISOString();
@@ -868,6 +885,9 @@ Skylink.prototype._recordingEventHandler = function (message) {
 
   } else {
     var recordingError = new Error(message.error || 'Unknown error');
+
+    self._handleStatsRecording('error', message.recordingId, null, recordingError.message);
+
     if (!self._recordings[message.recordingId]) {
       log.error(['MCU', 'Recording', message.recordingId, 'Received error but the session is empty ->'], recordingError);
       return;
