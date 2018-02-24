@@ -180,3 +180,105 @@ Skylink.prototype._handleStatsIceConnection = function(state, peerId) {
     self._postStatsToApi('/stats/client/iceconnection', statsObject);
   });
 };
+
+/**
+ * Function that handles the posting of /stats/client/icecandidate stats.
+ * @method _handleStatsIceCandidate
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleStatsIceCandidate = function(state, peerId, candidateId, candidate, error) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room && self._room.id,
+    user_id: self._user && self._user.sid,
+    peer_id: peerId,
+    state: state,
+    candidate_id: candidateId,
+    sdpMid: candidate.sdpMid,
+    sdpMLineIndex: candidate.sdpMLineIndex,
+    candidate: candidate.candidate,
+    error: error || null
+  };
+
+  self._postStatsToApi('/stats/client/icecandidate', statsObject);
+};
+
+/**
+ * Function that parses the session description and post to stats for every m= line that ICE gathering has completed.
+ * @method _parseStatsIceGatheringCompleted
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._parseStatsIceGatheringCompleted = function(peerId, direction) {
+  var self = this;
+
+  if (!self._peerConnections[peerId]) {
+    return;
+  }
+
+  var sessionDescription = self._peerConnections[peerId][direction + 'Description'];
+
+  if (!(sessionDescription && sessionDescription.sdp)) {
+    return;
+  }
+
+  (sessionDescription.sdp || '').split('m=').forEach(function (lines, index) {
+    if (lines.indexOf('audio ') === 0 || lines.indexOf('video ') === 0 || lines.indexOf('application ') === 0) {
+      // Double check if it is rejected for Edge browser case.
+      if (lines.split(' ')[1] === '0') {
+        return;
+      }
+
+      var mid = (lines.split('a=mid:')[1] || '').split('\r\n')[0];
+      self._handleStatsIceCandidate(null, peerId, direction === 'remote' ? 'endofcan-' + (index - 1) : null, {
+        sdpMid: mid,
+        sdpMLineIndex: index - 1,
+        candidate: null
+      });
+    }
+  });
+};
+
+/**
+ * Function that parses ICE candidates (a=candidate:) from the remote description and post to stats.
+ * @method _parseStatsIceCandidatesFromSDP
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._parseStatsIceCandidatesFromSDP = function(peerId, sessionDescription) {
+  var self = this;
+
+  (sessionDescription.sdp || '').split('m=').forEach(function (lines, index) {
+    if (lines.indexOf('audio ') === 0 || lines.indexOf('video ') === 0 || lines.indexOf('application ') === 0) {
+      // Double check if it is rejected for Edge browser case.
+      if (lines.split(' ')[1] === '0') {
+        return;
+      }
+
+      var mid = null;
+      var candidates = [];
+
+      lines.split('\r\n').forEach(function (line) {
+        if (line.indexOf('a=mid:') === 0) {
+          mid = (lines.split('a=mid:')[1] || '').split('\r\n')[0];
+        } else if (line.indexOf('a=candidate:') === 0) {
+          candidates.push(line.replace(/a=/g, ''));
+        }
+      });
+
+      candidates.forEach(function (candidate, candidateIndex) {
+        self._handleStatsIceCandidate(self.CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS, peerId, mid + '-' + candidateIndex, {
+          sdpMid: mid,
+          sdpMLineIndex: index - 1,
+          candidate: candidate
+        });
+      });
+    }
+  });
+};
+
+

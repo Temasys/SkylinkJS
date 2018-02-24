@@ -1477,8 +1477,8 @@ Skylink.prototype._offerHandler = function(message) {
     type: 'offer',
     sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : message.sdp
   };
-  log.log([targetMid, 'RTCSessionDescription', message.type,
-    'Session description object created'], offer);
+
+  log.log([targetMid, 'RTCSessionDescription', message.type, 'Session description object created'], offer);
 
   offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
   offer.sdp = self._setSDPCodec(targetMid, offer);
@@ -1522,6 +1522,7 @@ Skylink.prototype._offerHandler = function(message) {
     pc.setOffer = 'remote';
     pc.processingRemoteSDP = false;
 
+    self._parseStatsIceCandidatesFromSDP(targetMid, offer);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
     self._doAnswer(targetMid);
@@ -1575,6 +1576,7 @@ Skylink.prototype._candidateHandler = function(message) {
   this._peerEndOfCandidatesCounter[targetMid].hasSet = false;
   this._peerEndOfCandidatesCounter[targetMid].len++;
 
+  this._handleStatsIceCandidate(this.CANDIDATE_PROCESSING_STATE.RECEIVED, targetMid, canId, candidate, null);
   this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.RECEIVED,
     targetMid, canId, candidateType, {
     candidate: candidate.candidate,
@@ -1586,6 +1588,7 @@ Skylink.prototype._candidateHandler = function(message) {
     this._peerConnections[targetMid].signalingState !== this.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
       'as Peer connection does not exists or is closed']);
+    this._handleStatsIceCandidate(this.CANDIDATE_PROCESSING_STATE.DROPPED, targetMid, canId, candidate, 'Peer connection is terminated');
     this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
       targetMid, canId, candidateType, {
       candidate: candidate.candidate,
@@ -1600,6 +1603,7 @@ Skylink.prototype._candidateHandler = function(message) {
     if (!(this._hasMCU && this._initOptions.forceTURN)) {
       log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping received ICE candidate as ' +
         'it matches ICE candidate filtering flag ->'], candidate);
+      this._handleStatsIceCandidate(this.CANDIDATE_PROCESSING_STATE.DROPPED, targetMid, canId, candidate, 'Candidate does not match filtering rules');
       this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.DROPPED,
         targetMid, canId, candidateType, {
         candidate: candidate.candidate,
@@ -1734,6 +1738,7 @@ Skylink.prototype._answerHandler = function(message) {
     pc.setAnswer = 'remote';
     pc.processingRemoteSDP = false;
 
+    self._parseStatsIceCandidatesFromSDP(targetMid, answer);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
 

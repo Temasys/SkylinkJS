@@ -2227,7 +2227,10 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
   // If it has not been set yet
     !self._peerEndOfCandidatesCounter[targetMid].hasSet) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
+
     self._peerEndOfCandidatesCounter[targetMid].hasSet = true;
+    self._parseStatsIceGatheringCompleted(targetMid, 'remote');
+
     try {
       if (AdapterJS.webrtcDetectedBrowser === 'edge') {
         var mLineCounter = -1;
