@@ -57,12 +57,14 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
 
   var onSuccessCbFn = function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
+    self._handleStatsNegotiation('create-offer', targetMid, offer);
     self._setLocalAndSendMessage(targetMid, offer);
   };
 
   var onErrorCbFn = function(error) {
-    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
     log.error([targetMid, null, null, 'Failed creating an offer:'], error);
+    self._handleStatsNegotiation('error-create-offer', targetMid, null, error && error.message);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
   pc.createOffer(onSuccessCbFn, onErrorCbFn, AdapterJS.webrtcDetectedType === 'plugin' ? {
@@ -123,11 +125,13 @@ Skylink.prototype._doAnswer = function(targetMid) {
 
   var onSuccessCbFn = function(answer) {
     log.debug([targetMid, null, null, 'Created answer'], answer);
+    self._handleStatsNegotiation('create-answer', targetMid, answer);
     self._setLocalAndSendMessage(targetMid, answer);
   };
 
   var onErrorCbFn = function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
+    self._handleStatsNegotiation('error-create-answer', targetMid, null, error && error.message);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
@@ -209,6 +213,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     pc.processingLocalSDP = false;
 
+    self._handleStatsNegotiation('local-' + sessionDescription.type, targetMid, sessionDescription);
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
 
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
@@ -238,6 +243,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     pc.processingLocalSDP = false;
 
+    self._handleStatsNegotiation('error-local-' + sessionDescription.type, targetMid, sessionDescription, error && error.message);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 

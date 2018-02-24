@@ -281,4 +281,27 @@ Skylink.prototype._parseStatsIceCandidatesFromSDP = function(peerId, sessionDesc
   });
 };
 
+/**
+ * Function that handles the posting of /stats/client/negotiation stats.
+ * @method _handleStatsNegotiation
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleStatsNegotiation = function(state, peerId, sessionDescription, error) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room && self._room.id,
+    user_id: self._user && self._user.sid,
+    peer_id: peerId,
+    state: state,
+    weight: self._peerPriorityWeight,
+    sdp_type: (sessionDescription && sessionDescription.type) || null,
+    sdp_sdp: (sessionDescription && sessionDescription.sdp) || null,
+    error: error || null
+  };
+
+  self._postStatsToApi('/stats/client/negotiation', statsObject);
+};
+
 

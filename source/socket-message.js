@@ -1008,6 +1008,7 @@ Skylink.prototype._enterHandler = function(message) {
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "enter" received ->'], message);
+  self._handleStatsNegotiation('enter', targetMid);
 
   // Ignore if: User is publishOnly and MCU is enabled
   //          : User is parent and parentId is defined and matches
@@ -1168,6 +1169,7 @@ Skylink.prototype._restartHandler = function(message){
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "restart" received ->'], message);
+  self._handleStatsNegotiation('restart', targetMid);
 
   if (!self._peerInformations[targetMid]) {
     log.error([targetMid, 'RTCPeerConnection', null, 'Peer does not have an existing session. Ignoring restart process.']);
@@ -1310,6 +1312,7 @@ Skylink.prototype._welcomeHandler = function(message) {
   };
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
+  self._handleStatsNegotiation('welcome', targetMid);
 
   // Ignore if: User is publishOnly and MCU is enabled
   //          : User is parent and parentId is defined and matches
@@ -1522,6 +1525,7 @@ Skylink.prototype._offerHandler = function(message) {
     pc.setOffer = 'remote';
     pc.processingRemoteSDP = false;
 
+    self._handleStatsNegotiation('remote-offer', targetMid, offer);
     self._parseStatsIceCandidatesFromSDP(targetMid, offer);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.OFFER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
@@ -1538,6 +1542,7 @@ Skylink.prototype._offerHandler = function(message) {
       state: pc.signalingState,
       offer: offer
     });
+    self._handleStatsNegotiation('error-remote-offer', targetMid, offer, error && error.message);
   };
 
   pc.setRemoteDescription(new RTCSessionDescription(offer), onSuccessCbFn, onErrorCbFn);
@@ -1738,6 +1743,7 @@ Skylink.prototype._answerHandler = function(message) {
     pc.setAnswer = 'remote';
     pc.processingRemoteSDP = false;
 
+    self._handleStatsNegotiation('remote-answer', targetMid, answer);
     self._parseStatsIceCandidatesFromSDP(targetMid, answer);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
@@ -1763,6 +1769,7 @@ Skylink.prototype._answerHandler = function(message) {
       state: pc.signalingState,
       answer: answer
     });
+    self._handleStatsNegotiation('error-remote-answer', targetMid, answer, error && error.message);
   };
 
   pc.setRemoteDescription(new RTCSessionDescription(answer), onSuccessCbFn, onErrorCbFn);
