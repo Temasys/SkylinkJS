@@ -82,14 +82,16 @@ Skylink.prototype._parseStatsMediaTracks = function (callback) {
         resolution_height: video.videoHeight
       });
     });
+
+    callback(tracksStatsObject);
   };
 
-  // Because the plugin does not support the "loaded" event.
+  // Because the plugin does not support the "loadeddata" event.
   if (AdapterJS.webrtcDetectedType === 'plugin') {
     setTimeout(onVideoLoaded, 1500);
 
   } else {
-    video.addEventListener('loaded', onVideoLoaded);
+    video.addEventListener('loadeddata', onVideoLoaded);
   }
 
   AdapterJS.attachMediaStream(video, stream);
