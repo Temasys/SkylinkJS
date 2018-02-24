@@ -304,4 +304,136 @@ Skylink.prototype._handleStatsNegotiation = function(state, peerId, sessionDescr
   self._postStatsToApi('/stats/client/negotiation', statsObject);
 };
 
+/**
+ * Function that handles the posting of /stats/client/bandwidth stats.
+ * @method _handleStatsBandwidth
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleStatsBandwidth = function (peerId) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room && self._room.id,
+    user_id: self._user && self._user.sid,
+    peer_id: peerId,
+    audio: {
+      send: {
+        muted: null,
+        bytes: null,
+        packets: null,
+        round_trip_time: null,
+        nacks: null
+      },
+      recv: {
+        bytes: null,
+        packets: null,
+        packets_lost: null,
+        jitter: null,
+        nacks: null
+      }
+    },
+    video: {
+      send: {
+        muted: null,
+        bytes: null,
+        packets: null,
+        round_trip_time: null,
+        // TO CHECK: Added new field "framesEncoded" etc..
+        framesEncoded: null,
+        framesDropped: null,
+        frameHeight: null,
+        frameWidth: null,
+        frameRate: null,
+        nacks: null,
+        firs: null,
+        plis: null,
+        moz_frameRateMean: null,
+        moz_frameRateStdDev: null,
+        goog_frameRateInput: null,
+        goog_frameRateSent: null,
+        goog_cpuLimitedResolution: null,
+        goog_bandwidthLimitedResolution: null
+      },
+      recv: {
+        bytes: null,
+        packets: null,
+        packets_lost: null,
+        jitter: null,
+        // TO CHECK: Added new field "framesDecoded" etc..
+        framesDecoded: null,
+        frameHeight: null,
+        frameWidth: null,
+        frameRate: null,
+        nacks: null,
+        firs: null,
+        plis: null,
+        qpSum: null,
+        goog_frameRateOutput: null,
+        goog_frameRateReceived: null
+      }
+    }
+  };
+
+  var stream = (self._streams.screenshare && self._streams.screenshare.stream) ||
+    (self._streams.userMedia && self._streams.userMedia.stream) || null;
+
+  if (stream) {
+    statsObject.audio.send.muted = stream.getAudioTracks()[0] ? stream.getAudioTracks()[0].muted : null;
+    statsObject.video.send.muted = stream.getVideoTracks()[0] ? stream.getVideoTracks()[0].muted : null;
+  }
+
+  self.getConnectionStatus(peerId, function (error, success) {
+    if (success && success.connectionStats[peerId]) {
+      statsObject.audio.send.bytes = success.connectionStats[peerId].audio.sending.bytes;
+      statsObject.audio.send.packets = success.connectionStats[peerId].audio.sending.packets;
+      statsObject.audio.send.round_trip_time = success.connectionStats[peerId].audio.sending.rtt;
+      statsObject.audio.send.echoReturnLoss = success.connectionStats[peerId].audio.sending.echoReturnLoss;
+      statsObject.audio.send.echoReturnLossEnhancement = success.connectionStats[peerId].audio.sending.echoReturnLossEnhancement;
+      statsObject.audio.send.nacks = success.connectionStats[peerId].audio.sending.nacks;
+
+      statsObject.audio.recv.bytes = success.connectionStats[peerId].audio.receiving.bytes;
+      statsObject.audio.recv.packets = success.connectionStats[peerId].audio.receiving.packets;
+      statsObject.audio.recv.packets_lost = success.connectionStats[peerId].audio.receiving.packetsLost;
+      statsObject.audio.recv.jitter = success.connectionStats[peerId].audio.receiving.jitter;
+      statsObject.audio.recv.nacks = success.connectionStats[peerId].audio.receiving.nacks;
+
+      statsObject.video.send.bytes = success.connectionStats[peerId].video.sending.bytes;
+      statsObject.video.send.packets = success.connectionStats[peerId].video.sending.packets;
+      statsObject.video.send.round_trip_time = success.connectionStats[peerId].video.sending.rtt;
+      statsObject.video.send.framesEncoded = success.connectionStats[peerId].video.sending.framesEncoded;
+      statsObject.video.send.framesDropped = success.connectionStats[peerId].video.sending.framesDropped;
+      statsObject.video.send.frameHeight = success.connectionStats[peerId].video.sending.frameHeight;
+      statsObject.video.send.frameWidth = success.connectionStats[peerId].video.sending.frameWidth;
+      statsObject.video.send.frameRate = success.connectionStats[peerId].video.sending.frameRate;
+      statsObject.video.send.nacks = success.connectionStats[peerId].video.sending.nacks;
+      statsObject.video.send.firs = success.connectionStats[peerId].video.sending.firs;
+      statsObject.video.send.plis = success.connectionStats[peerId].video.sending.plis;
+      statsObject.video.send.moz_frameRateMean = success.connectionStats[peerId].video.sending.frameRateMean;
+      statsObject.video.send.moz_frameRateStdDev = success.connectionStats[peerId].video.sending.frameRateStdDev;
+      statsObject.video.send.goog_frameRateInput = success.connectionStats[peerId].video.sending.frameRateInput;
+      statsObject.video.recv.goog_frameRateSent = success.connectionStats[peerId].video.receiving.frameRateSent;
+      statsObject.video.send.goog_cpuLimitedResolution = success.connectionStats[peerId].video.sending.cpuLimitedResolution;
+      statsObject.video.send.goog_bandwidthLimitedResolution = success.connectionStats[peerId].video.sending.bandwidthLimitedResolution;
+
+      statsObject.video.recv.bytes = success.connectionStats[peerId].video.receiving.bytes;
+      statsObject.video.recv.packets = success.connectionStats[peerId].video.receiving.packets;
+      statsObject.video.recv.packets_lost = success.connectionStats[peerId].video.receiving.packetsLost;
+      statsObject.video.recv.jitter = success.connectionStats[peerId].video.receiving.jitter;
+      statsObject.video.send.framesDecoded = success.connectionStats[peerId].video.receiving.framesDecoded;
+      statsObject.video.send.frameHeight = success.connectionStats[peerId].video.receiving.frameHeight;
+      statsObject.video.send.frameWidth = success.connectionStats[peerId].video.receiving.frameWidth;
+      statsObject.video.send.frameRate = success.connectionStats[peerId].video.receiving.frameRate;
+      statsObject.video.recv.nacks = success.connectionStats[peerId].video.receiving.nacks;
+      statsObject.video.recv.firs = success.connectionStats[peerId].video.receiving.firs;
+      statsObject.video.recv.plis = success.connectionStats[peerId].video.receiving.plis;
+      statsObject.video.recv.qpSum = success.connectionStats[peerId].video.receiving.qpSum;
+      statsObject.video.recv.goog_frameRateOutput = success.connectionStats[peerId].video.receiving.frameRateOutput;
+      statsObject.video.recv.goog_frameRateReceived = success.connectionStats[peerId].video.receiving.frameRateReceived;
+    }
+
+    self._postStatsToApi('/stats/client/bandwidth', statsObject);
+  });
+};
+
 
