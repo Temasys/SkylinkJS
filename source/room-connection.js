@@ -447,7 +447,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
 
   self._joinRoomManager.socketsFn = [];
 
-  var stopStream = mediaOptions.audio === false && mediaOptions.video === false;  
+  var stopStream = mediaOptions.audio === false && mediaOptions.video === false;
 
   if (self._inRoom) {
     self.leaveRoom({

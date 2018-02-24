@@ -1933,14 +1933,18 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
 
     if (!postBwStatsInterval && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(iceConnectionState) > -1) {
-      postBwStatsInterval = setInterval(function () {
-        if (!(self._peerConnections[targetMid] && self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
-          return;
-        }
+      postBwStatsInterval = true;
+
+      self.getConnectionStatus(targetMid, function () {
+        postBwStatsInterval = setInterval(function () {
+          if (!(self._peerConnections[targetMid] && self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+            return;
+          }
+          self._handleStatsBandwidth(targetMid);
+        // TO CHECK: 30 seconds is too little. Perhaps every 10 seconds?
+        }, 10000);
         self._handleStatsBandwidth(targetMid);
-      // TO CHECK: 30 seconds is too little. Perhaps every 10 seconds?
-      }, 10000);
-      self._handleStatsBandwidth(targetMid);
+      });
     }
 
     if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(

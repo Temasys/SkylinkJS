@@ -852,7 +852,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} XML_HTTP_REQUEST_ERROR      <small>Value <code>-1</code></small>
  *   The value of the failure code when requesting to Auth server has timed out.
  * @param {Number} XML_HTTP_NO_REPONSE_ERROR      <small>Value <code>-2</code></small>
- *   The value of the failure code when response from Auth server is empty or timed out.   
+ *   The value of the failure code when response from Auth server is empty or timed out.
  * @param {Number} NO_SOCKET_IO                <small>Value <code>1</code></small>
  *   The value of the failure code when dependency <a href="http://socket.io/download/">Socket.IO client</a> is not loaded.
  *   <small>To resolve this, ensure that the Socket.IO client dependency is loaded before the Skylink SDK.

@@ -417,7 +417,7 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
  * @since 0.6.18
  */
 Skylink.prototype._removeSDPUnknownAptRtx = function (targetMid, sessionDescription) {
-  var codecsPayload = []; // m=audio 9 UDP/TLS/RTP/SAVPF [Start from index 3] 102 9 0 8 97 13 118 101  
+  var codecsPayload = []; // m=audio 9 UDP/TLS/RTP/SAVPF [Start from index 3] 102 9 0 8 97 13 118 101
   var sdpLines = sessionDescription.sdp.split('\r\n');
   var mediaLines = sessionDescription.sdp.split('m=');
 
@@ -687,10 +687,10 @@ Skylink.prototype._getCodecsSupport = function (callback) {
 
   // Safari 11 REQUIRES a stream first before connection works, hence let's spoof it for now
   if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
-    self._currentCodecSupport.audio = { 
+    self._currentCodecSupport.audio = {
       opus: ['48000/2']
     };
-    self._currentCodecSupport.video = { 
+    self._currentCodecSupport.video = {
       h264: ['48000']
     };
     return callback(null);
@@ -1329,7 +1329,7 @@ Skylink.prototype._getSDPCodecsSupport = function (targetMid, sessionDescription
       }
 
       codecs[mediaType][codec] = codecs[mediaType][codec] || [];
-      
+
       if (codecs[mediaType][codec].indexOf(info) === -1) {
         codecs[mediaType][codec].push(info);
       }

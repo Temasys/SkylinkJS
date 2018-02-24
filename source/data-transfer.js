@@ -470,14 +470,14 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 
     dataChannelStateCbFn = function (state, evtPeerId, error, cN, cT) {
       log.error([peerId, 'RTCDataChannel', channelProp, 'Data transfer "' + transferId + '" has been terminated due to connection.']);
-      
+
       self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR, transferId, peerId,
         self._getTransferInfo(transferId, peerId, true, false, false), {
         transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
         message: new Error('Data transfer terminated as Peer Datachannel connection closed abruptly.')
       });
     };
-  
+
     self.once('dataChannelState', dataChannelStateCbFn, function (state, evtPeerId, error, channelName, channelType) {
       if (!(self._dataTransfers[transferId] && self._dataTransfers[transferId].sessions[peerId])) {
         self.off('dataChannelState', dataChannelStateCbFn);
@@ -2038,7 +2038,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       return;
     }
 
-    if (!(evtPeerId === peerId && (channelProp === 'main' ? 
+    if (!(evtPeerId === peerId && (channelProp === 'main' ?
       channelType === self.DATA_CHANNEL_TYPE.MESSAGING : channelName === transferId))) {
       return;
     }

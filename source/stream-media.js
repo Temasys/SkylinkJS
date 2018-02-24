@@ -967,25 +967,25 @@ Skylink.prototype.disableVideo = function() {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
- * 
+ *
  *   // Example 3: Share "window" media source
  *   skylinkDemo.shareScreen("window", function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
- * 
+ *
  *   // Example 4: Share tab and its audio media source
  *   skylinkDemo.shareScreen(true, ["tab", "audio"], function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
- * 
+ *
  *   // Example 5: Share "window" and "screen" media source
  *   skylinkDemo.shareScreen(["window", "screen"], function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
- * 
+ *
  *   // Example 6: Share "window" with specific media source for specific plugin build users.
  *   skylinkDemo.shareScreen({ mediaSource: "window", sourceId: "xxxxx" }, function (error, success) {
  *     if (error) return;
@@ -1370,7 +1370,7 @@ Skylink.prototype.stopScreen = function () {
  *       video: sources.video.input[0].deviceId
  *     });
  *   });
- *   
+ *
  *   // Example 2: Set the output audio speaker (Chrome 49+ supported only)
  *   skylinkDemo.getStreamSources(function (sources) {
  *     var videoElement = document.getElementById('video');
@@ -1454,7 +1454,7 @@ Skylink.prototype.getStreamSources = function(callback) {
  *   skylinkDemo.getScreenSources(function (sources) {
  *     skylinkDemo.shareScreen(sources.mediaSource[0] || null);
  *   });
- *   
+ *
  *   // Example 2: Retrieve the list of available shareScreen() sources with a specific item.
  *   skylinkDemo.getScreenSources(function (sources) {
  *     if (sources.mediaSourceInput[0]) {
@@ -1483,7 +1483,7 @@ Skylink.prototype.getScreenSources = function(callback) {
   // Reference: https://bugs.chromium.org/p/chromium/issues/detail?id=487935
   if (navigator.userAgent.toLowerCase().indexOf('android') > -1) {
     if (AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion >= 59) {
-      outputSources.mediaSource = ['screen']; 
+      outputSources.mediaSource = ['screen'];
     }
     callback(outputSources);
     return;
@@ -1516,7 +1516,7 @@ Skylink.prototype.getScreenSources = function(callback) {
           return;
         }
       }
-      
+
       callback(outputSources);
     });
     return;
