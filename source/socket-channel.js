@@ -67,8 +67,9 @@ Skylink.prototype._sendChannelMessageQueue = function() {
     // Then start sending normal lane messages.
     // Checks if the first message is a targeted message, in which it will send the targeted message individually first.
     // If the first message is a grouped type of message, queue the rest of the grouped message to be able to do bulk send.
-    } else if (self._socketMessageQueue.normal.length) {
-      if (self._GROUP_MESSAGE_LIST.indexOf(self._socketMessageQueue.normal[0][0].type) === -1) {
+    } else if (self._socketMessageQueue.normal.length || Object.keys(self._socketMessageQueue.status).length > 0) {
+      // In some scenarios where the normal queue is empty, the status messages may be updated.
+      if (self._socketMessageQueue.normal.length && self._GROUP_MESSAGE_LIST.indexOf(self._socketMessageQueue.normal[0][0].type) === -1) {
         message = self._socketMessageQueue.normal.splice(0, 1)[0];
 
       } else {
@@ -82,7 +83,7 @@ Skylink.prototype._sendChannelMessageQueue = function() {
             // Check if the status message is outdated before discarding it.
             if (self._peerMessagesStamps.self[type] < statusMessages[type][0].stamp) {
               self._peerMessagesStamps.self[type] = statusMessages[type][0].stamp;
-              groupedBatch.push(statusMessages[type][0]);
+              groupedBatch.push(JSON.stringify(statusMessages[type][0]));
               groupedCallbacks.push(statusMessages[type][1])
             }
           }
