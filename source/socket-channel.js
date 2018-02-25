@@ -43,9 +43,10 @@ Skylink.prototype._sendChannelMessageQueue = function() {
 
       // Let's drop the message if the room lock signal is sent too quickly, in which the signaling server would
       //   drop the message and the room lock signal would not occur.
-      if (message.type === self._SIG_MESSAGE_TYPE.ROOM_LOCK && lastSentInterval < (1000 + self._socketMessageLatency)) {
-        log.warn(['Server', 'Socket', message.type, 'Dropping room lock event message ->'], message);
+      if (message[0].type === self._SIG_MESSAGE_TYPE.ROOM_LOCK && lastSentInterval < (1000 + self._socketMessageLatency)) {
+        log.warn(['Server', 'Socket', message.type, 'Dropping room lock event message ->'], message[0]);
         self._sendChannelMessageQueue();
+        message[1](new Error('Failed sending room lock event as it is sent too quickly'));
         return;
       }
 
@@ -55,7 +56,7 @@ Skylink.prototype._sendChannelMessageQueue = function() {
         self._SIG_MESSAGE_TYPE.ANSWER,
         self._SIG_MESSAGE_TYPE.ENTER,
         self._SIG_MESSAGE_TYPE.WELCOME,
-        self._SIG_MESSAGE_TYPE.RESTART].indexOf(message.type) > -1) {
+        self._SIG_MESSAGE_TYPE.RESTART].indexOf(message[0].type) > -1) {
 
         self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.UPDATE_USER] = currentTimestamp;
         self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.MUTE_AUDIO] = currentTimestamp;
@@ -67,19 +68,22 @@ Skylink.prototype._sendChannelMessageQueue = function() {
     // Checks if the first message is a targeted message, in which it will send the targeted message individually first.
     // If the first message is a grouped type of message, queue the rest of the grouped message to be able to do bulk send.
     } else if (self._socketMessageQueue.normal.length) {
-      if (self._GROUP_MESSAGE_LIST.indexOf(self._socketMessageQueue.normal[0].type) === -1) {
+      if (self._GROUP_MESSAGE_LIST.indexOf(self._socketMessageQueue.normal[0][0].type) === -1) {
         message = self._socketMessageQueue.normal.splice(0, 1)[0];
 
       } else {
         var groupedBatch = [];
+        var groupedCallbacks = [];
         var statusMessages = self._socketMessageQueue.status;
 
         // Append the statuses types of messages first.
         for (var type in statusMessages) {
           if (statusMessages.hasOwnProperty(type)) {
-            if (self._peerMessagesStamps.self[type] < statusMessages[type].stamp) {
-              self._peerMessagesStamps.self[type] = statusMessages[type].stamp;
-              groupedBatch.push(statusMessages[type]);
+            // Check if the status message is outdated before discarding it.
+            if (self._peerMessagesStamps.self[type] < statusMessages[type][0].stamp) {
+              self._peerMessagesStamps.self[type] = statusMessages[type][0].stamp;
+              groupedBatch.push(statusMessages[type][0]);
+              groupedCallbacks.push(statusMessages[type][1])
             }
           }
         }
@@ -90,7 +94,7 @@ Skylink.prototype._sendChannelMessageQueue = function() {
         for (var i = 0; i < self._socketMessageQueue.normal.length; i++) {
           var messageItem = self._socketMessageQueue.normal[i];
           // Ignore the targeted messages since they cannot be grouped.
-          if (messageItem.target) {
+          if (messageItem[0].target) {
             continue;
           }
 
@@ -99,34 +103,42 @@ Skylink.prototype._sendChannelMessageQueue = function() {
             break;
           }
 
-          groupedBatch.push(JSON.stringify(messageItem));
+          groupedBatch.push(JSON.stringify(messageItem[0]));
+          groupedCallbacks.push(messageItem[1])
           self._socketMessageQueue.normal.splice(i, 1);
           i--;
         }
 
-        message = {
+        message = [{
           type: self._SIG_MESSAGE_TYPE.GROUP,
           lists: groupedBatch,
           mid: userId,
           rid: self._room && self._room.id
-        };
+
+        }, function (error) {
+          groupedCallbacks.forEach(function (callbackItem) {
+            callbackItem(error);
+          });
+        }];
       }
     }
 
     if (message) {
       // Ensure that socket connection is open and available before sending any messages.
       if (!(self._channelOpen && self._socket)) {
-        log.warn([message.target || 'Server', 'Socket', message.type,
-          'Dropping of message as Socket connection is not opened or is at incorrect step ->'], message);
+        log.warn([message[0].target || 'Server', 'Socket', message[0].type,
+          'Dropping of message as Socket connection is not opened or is at incorrect step ->'], message[0]);
+        message[1](new Error('Message failed to be sent as socket is not opened'));
         return;
       }
 
-      self._socket.send(JSON.stringify(message));
+      self._socket.send(JSON.stringify(message[0]));
       self._timestamp.socketMessage = currentTimestamp;
       self._sendChannelMessageQueue();
+      message[1](null);
 
       // If user tampers with the SDK and sends self a "bye" message.
-      if (message.type === self._SIG_MESSAGE_TYPE.BYE && message.mid === userId) {
+      if (message[0].type === self._SIG_MESSAGE_TYPE.BYE && message[0].mid === userId) {
         self.leaveRoom(false);
         self._trigger('sessionDisconnect', userId, self.getPeerInfo());
       }
@@ -142,13 +154,15 @@ Skylink.prototype._sendChannelMessageQueue = function() {
  * @for Skylink
  * @since 0.5.8
  */
-Skylink.prototype._sendChannelMessage = function(message) {
+Skylink.prototype._sendChannelMessage = function(message, callback) {
   var self = this;
+  callback = callback || function () {};
 
   // Ensure that socket connection is open and available before sending any messages.
   if (!(self._channelOpen && self._socket)) {
     log.warn([message.target || 'Server', 'Socket', message.type,
       'Dropping of message as Socket connection is not opened or is at incorrect step ->'], message);
+    callback(new Error('Message failed to be sent as socket is not opened'));
     return;
   }
 
@@ -159,15 +173,16 @@ Skylink.prototype._sendChannelMessage = function(message) {
     self._SIG_MESSAGE_TYPE.MUTE_VIDEO].indexOf(message.type) > -1) {
     // Set these statuses type of messages with the stamps if they are not set - which they should have been.
     message.stamp = Date.now();
-    self._socketMessageQueue.status[message.type] = message;
+    // We are ignoring previous callbacks for status types of messages because it just needs the latest status.
+    self._socketMessageQueue.status[message.type] = [message, callback];
 
   // Start buffering messages that would be dropped from the signaling server when sent too quickly.
   } else if (self._GROUP_MESSAGE_LIST.indexOf(message.type) > -1 || message.type === self._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE) {
-    self._socketMessageQueue.normal.push(message);
+    self._socketMessageQueue.normal.push([message, callback]);
 
   // Start buffering priority lane messages.
   } else {
-    self._socketMessageQueue.priority.push(message);
+    self._socketMessageQueue.priority.push([message, callback]);
   }
 
   self._sendChannelMessageQueue();

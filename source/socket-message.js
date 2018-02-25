@@ -39,8 +39,10 @@
  * @since 0.4.0
  */
 Skylink.prototype.sendMessage = function(message, targetPeerId) {
-  var listOfPeers = Object.keys(this._peerInformations);
+  var self = this;
+  var listOfPeers = Object.keys(self._peerInformations);
   var isPrivate = false;
+  var userId = self._user && self._user.sid;
 
   if (Array.isArray(targetPeerId)) {
     listOfPeers = targetPeerId;
@@ -50,16 +52,37 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     isPrivate = true;
   }
 
-  if (!this._inRoom || !this._socket || !this._user) {
+  if (!self._inRoom || !self._socket || !self._user) {
     log.error('Unable to send message as User is not in Room. ->', message);
     return;
+  }
+
+  var completedPeers = [];
+  var completedCallback = function (peerId) {
+    return function (error) {
+      if (isPrivate) {
+        completedPeers.push(peerId);
+      }
+
+      // Check if the errors is the same as the amount
+      if (isPrivate ? completedPeers.length === listOfPeers.length : !error) {
+        self._trigger('incomingMessage', {
+          content: message,
+          isPrivate: isPrivate,
+          targetPeerId: targetPeerId || null,
+          listOfPeers: listOfPeers,
+          isDataChannel: false,
+          senderPeerId: userId
+        }, userId, self.getPeerInfo(), true);
+      }
+    };
   }
 
   // Loop out unwanted Peers
   for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    if (!this._peerInformations[peerId]) {
+    if (!self._peerInformations[peerId]) {
       log.error([peerId, 'Socket', null, 'Dropping of sending message to Peer as ' +
         'Peer session does not exists']);
       listOfPeers.splice(i, 1);
@@ -70,14 +93,13 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     } else if (isPrivate) {
       log.debug([peerId, 'Socket', null, 'Sending private message to Peer']);
 
-      this._sendChannelMessage({
-        cid: this._key,
+      self._sendChannelMessage({
         data: message,
-        mid: this._user.sid,
-        rid: this._room.id,
+        mid: userId,
+        rid: self._room.id,
         target: peerId,
-        type: this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE
-      });
+        type: self._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE
+      }, completedCallback(peerId));
     }
   }
 
@@ -89,22 +111,12 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   if (!isPrivate) {
     log.debug([null, 'Socket', null, 'Broadcasting message to Peers']);
 
-    this._sendChannelMessage({
-      cid: this._key,
+    self._sendChannelMessage({
       data: message,
-      mid: this._user.sid,
-      rid: this._room.id,
-      type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-    });
-  } else {
-    this._trigger('incomingMessage', {
-      content: message,
-      isPrivate: isPrivate,
-      targetPeerId: targetPeerId || null,
-      listOfPeers: listOfPeers,
-      isDataChannel: false,
-      senderPeerId: this._user.sid
-    }, this._user.sid, this.getPeerInfo(), true);
+      mid: userId,
+      rid: self._room.id,
+      type: self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
+    }, completedCallback());
   }
 };
 

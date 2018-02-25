@@ -601,18 +601,31 @@ Skylink.prototype.leaveRoom = function(stopMediaOptions, callback) {
  * @since 0.5.0
  */
 Skylink.prototype.lockRoom = function() {
-  if (!(this._user && this._user.sid)) {
+  var self = this;
+  var userId = self._user && self._user.sid;
+  var room = self._selectedRoom;
+
+  if (!userId) {
+    log.warn([null, 'Room', null, 'Unable to lock room as user is not in the room']);
     return;
   }
-  log.log('Update to isRoomLocked status ->', true);
-  this._sendChannelMessage({
-    type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
-    mid: this._user.sid,
-    rid: this._room.id,
+
+  log.debug([userId, 'Room', room, 'Update to lock status ->'], true);
+
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.ROOM_LOCK,
+    mid: userId,
+    rid: self._room.id,
     lock: true
+  }, function (error) {
+    if (error) {
+      log.error([userId, 'Room', room, 'Failed locking the room ->'], error);
+      return;
+    }
+
+    self._roomLocked = true;
+    self._trigger('roomLock', true, userId, self.getPeerInfo(), true);
   });
-  this._roomLocked = true;
-  this._trigger('roomLock', true, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**
@@ -635,18 +648,31 @@ Skylink.prototype.lockRoom = function() {
  * @since 0.5.0
  */
 Skylink.prototype.unlockRoom = function() {
-  if (!(this._user && this._user.sid)) {
+  var self = this;
+  var userId = self._user && self._user.sid;
+  var room = self._selectedRoom;
+
+  if (!userId) {
+    log.warn([null, 'Room', null, 'Unable to unlock room as user is not in the room']);
     return;
   }
-  log.log('Update to isRoomLocked status ->', false);
-  this._sendChannelMessage({
-    type: this._SIG_MESSAGE_TYPE.ROOM_LOCK,
-    mid: this._user.sid,
-    rid: this._room.id,
+
+  log.debug([userId, 'Room', room, 'Update to lock status ->'], false);
+
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.ROOM_LOCK,
+    mid: userId,
+    rid: self._room.id,
     lock: false
+  }, function (error) {
+    if (error) {
+      log.error([userId, 'Room', room, 'Failed unlocking the room ->'], error);
+      return;
+    }
+
+    self._roomLocked = false;
+    self._trigger('roomLock', false, userId, self.getPeerInfo(), true);
   });
-  this._roomLocked = false;
-  this._trigger('roomLock', false, this._user.sid, this.getPeerInfo(), true);
 };
 
 /**
