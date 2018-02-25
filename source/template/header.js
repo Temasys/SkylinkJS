@@ -393,7 +393,7 @@ function Skylink() {
   this._onceEvents = {};
 
   /**
-   * Stores the timestamps data used for throttling.
+   * Stores the last active timestamps for throttling or intervals.
    * @attribute _timestamp
    * @type JSON
    * @private
@@ -419,26 +419,39 @@ function Skylink() {
   this._socketSession = {};
 
   /**
-   * Stores the queued socket messages.
-   * This is to prevent too many sent over less than a second interval that might cause dropped messages
-   *   or jams to the Signaling connection.
+   * Stores the buffered socket messages for sending to the signaling server.
    * @attribute _socketMessageQueue
-   * @type Array
+   * @type JSON
    * @private
    * @for Skylink
-   * @since 0.5.8
+   * @since 0.6.31
    */
-  this._socketMessageQueue = [];
+  this._socketMessageQueue = {
+    priority: [],
+    normal: [],
+    status: {}
+  };
 
   /**
-   * Stores the <code>setTimeout</code> to sent queued socket messages.
+   * Stores the timeout interval for sending buffered socket messages.
    * @attribute _socketMessageTimeout
-   * @type Object
+   * @type Number
    * @private
    * @for Skylink
-   * @since 0.5.8
+   * @since 0.6.31
    */
   this._socketMessageTimeout = null;
+
+  /**
+   * Stores the socket connection latency in ms.
+   * For safer checks, make the latency more than 150ms.
+   * @attribute _socketMessageLatency
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.6.31
+   */
+  this._socketMessageLatency = 150;
 
   /**
    * Stores the list of socket ports to use to connect to the Signaling.
@@ -594,7 +607,7 @@ function Skylink() {
   this._room = null;
 
   /**
-   * Stores the list of Peer messages timestamp.
+   * Stores the list of broadcasted user status messages timestamps to prevent updating outdated message statuses.
    * @attribute _peerMessagesStamps
    * @type JSON
    * @private

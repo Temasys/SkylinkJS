@@ -1,5 +1,142 @@
 /**
- * Function that sends a socket message over the socket connection to the Signaling.
+ * Function that starts sending the buffered messages to the signaling server.
+ * @method _sendChannelMessageQueue
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._sendChannelMessageQueue = function() {
+  var self = this;
+  var timeout = 0;
+  var message = null;
+
+  // By default, we set a 0ms timeout interval since we would expect priority messages to be sent quickly.
+  // We should increase the timeout interval when there are non-priority messages in the queue.
+  // For non-priority targeted messages, the interval is smaller compared to broadcasted ones.
+  if (!self._socketMessageQueue.priority.length && self._socketMessageQueue.normal.length) {
+    timeout = 1000 + self._socketMessageLatency;
+  }
+
+  // Clear any existing timeout interval just in the scenario where
+  //   priority messages are in the queue to be sent but the timeout interval is for non-priority messages.
+  if (self._socketMessageTimeout) {
+    clearTimeout(self._socketMessageTimeout);
+  }
+
+  // Configure the timestamps for the statuses types of messages to 0 so it would not result in NaN.
+  if (!self._peerMessagesStamps.self) {
+    self._peerMessagesStamps.self = {};
+    self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.UPDATE_USER] = 0;
+    self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.MUTE_AUDIO] = 0;
+    self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.MUTE_VIDEO] = 0;
+  }
+
+  // Set the interval timeout that would run when needing to send the message.
+  self._socketMessageTimeout = setTimeout(function () {
+    var currentTimestamp = Date.now();
+    var lastSentInterval = currentTimestamp - (self._timestamp.socketMessage || 0);
+    var userId = self._user && self._user.sid;
+
+    // Start sending priority lane messages first.
+    if (self._socketMessageQueue.priority.length) {
+      message = self._socketMessageQueue.priority.splice(0, 1)[0];
+
+      // Let's drop the message if the room lock signal is sent too quickly, in which the signaling server would
+      //   drop the message and the room lock signal would not occur.
+      if (message.type === self._SIG_MESSAGE_TYPE.ROOM_LOCK && lastSentInterval < (1000 + self._socketMessageLatency)) {
+        log.warn(['Server', 'Socket', message.type, 'Dropping room lock event message ->'], message);
+        self._sendChannelMessageQueue();
+        return;
+      }
+
+      // Update the statuses timestamps as the up-to-date statuses are sent (from "userInfo") in these messages types.
+      if ([
+        self._SIG_MESSAGE_TYPE.OFFER,
+        self._SIG_MESSAGE_TYPE.ANSWER,
+        self._SIG_MESSAGE_TYPE.ENTER,
+        self._SIG_MESSAGE_TYPE.WELCOME,
+        self._SIG_MESSAGE_TYPE.RESTART].indexOf(message.type) > -1) {
+
+        self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.UPDATE_USER] = currentTimestamp;
+        self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.MUTE_AUDIO] = currentTimestamp;
+        self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.MUTE_VIDEO] = currentTimestamp;
+        self._socketMessageQueue.status = {};
+      }
+
+    // Then start sending normal lane messages.
+    // Checks if the first message is a targeted message, in which it will send the targeted message individually first.
+    // If the first message is a grouped type of message, queue the rest of the grouped message to be able to do bulk send.
+    } else if (self._socketMessageQueue.normal.length) {
+      if (self._GROUP_MESSAGE_LIST.indexOf(self._socketMessageQueue.normal[0].type) === -1) {
+        message = self._socketMessageQueue.normal.splice(0, 1)[0];
+
+      } else {
+        var groupedBatch = [];
+        var statusMessages = self._socketMessageQueue.status;
+
+        // Append the statuses types of messages first.
+        for (var type in statusMessages) {
+          if (statusMessages.hasOwnProperty(type)) {
+            if (self._peerMessagesStamps.self[type] < statusMessages[type].stamp) {
+              self._peerMessagesStamps.self[type] = statusMessages[type].stamp;
+              groupedBatch.push(statusMessages[type]);
+            }
+          }
+        }
+
+        // Clear the statuses messages buffer.
+        self._socketMessageQueue.status = {};
+
+        for (var i = 0; i < self._socketMessageQueue.normal.length; i++) {
+          var messageItem = self._socketMessageQueue.normal[i];
+          // Ignore the targeted messages since they cannot be grouped.
+          if (messageItem.target) {
+            continue;
+          }
+
+          // The limit for the list is 16 messages in a grouped message.
+          if (groupedBatch.length === 16) {
+            break;
+          }
+
+          groupedBatch.push(JSON.stringify(messageItem));
+          self._socketMessageQueue.normal.splice(i, 1);
+          i--;
+        }
+
+        message = {
+          type: self._SIG_MESSAGE_TYPE.GROUP,
+          lists: groupedBatch,
+          mid: userId,
+          rid: self._room && self._room.id
+        };
+      }
+    }
+
+    if (message) {
+      // Ensure that socket connection is open and available before sending any messages.
+      if (!(self._channelOpen && self._socket)) {
+        log.warn([message.target || 'Server', 'Socket', message.type,
+          'Dropping of message as Socket connection is not opened or is at incorrect step ->'], message);
+        return;
+      }
+
+      self._socket.send(JSON.stringify(message));
+      self._timestamp.socketMessage = currentTimestamp;
+      self._sendChannelMessageQueue();
+
+      // If user tampers with the SDK and sends self a "bye" message.
+      if (message.type === self._SIG_MESSAGE_TYPE.BYE && message.mid === userId) {
+        self.leaveRoom(false);
+        self._trigger('sessionDisconnect', userId, self.getPeerInfo());
+      }
+    }
+
+  }, timeout);
+};
+
+/**
+ * Function that queues the SM protocol messages to a buffer.
  * @method _sendChannelMessage
  * @private
  * @for Skylink
@@ -7,198 +144,33 @@
  */
 Skylink.prototype._sendChannelMessage = function(message) {
   var self = this;
-  var interval = 1000;
-  var throughput = 16;
 
-  if (!self._channelOpen || !self._user || !self._socket) {
-    log.warn([message.target || 'Server', 'Socket', message.type, 'Dropping of message as Socket connection is not opened or is at ' +
-      'incorrect step ->'], message);
+  // Ensure that socket connection is open and available before sending any messages.
+  if (!(self._channelOpen && self._socket)) {
+    log.warn([message.target || 'Server', 'Socket', message.type,
+      'Dropping of message as Socket connection is not opened or is at incorrect step ->'], message);
     return;
   }
 
-  if (self._user.sid && !self._peerMessagesStamps[self._user.sid]) {
-    self._peerMessagesStamps[self._user.sid] = {
-      userData: 0,
-      audioMuted: 0,
-      videoMuted: 0
-    };
-  }
+  // Start buffering statuses messages that would be dropped from the signaling server when sent too quickly.
+  if ([
+    self._SIG_MESSAGE_TYPE.UPDATE_USER,
+    self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
+    self._SIG_MESSAGE_TYPE.MUTE_VIDEO].indexOf(message.type) > -1) {
+    // Set these statuses type of messages with the stamps if they are not set - which they should have been.
+    message.stamp = Date.now();
+    self._socketMessageQueue.status[message.type] = message;
 
-  var checkStampFn = function (statusMessage) {
-    if (statusMessage.type === self._SIG_MESSAGE_TYPE.UPDATE_USER) {
-      if (!self._user.sid) {
-        return false;
-      }
-      return statusMessage.stamp > self._peerMessagesStamps[self._user.sid].userData;
-    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO) {
-      if (!self._user.sid) {
-        return false;
-      }
-      return statusMessage.stamp > self._peerMessagesStamps[self._user.sid].videoMuted;
-    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO) {
-      if (!self._user.sid) {
-        return false;
-      }
-      return statusMessage.stamp > self._peerMessagesStamps[self._user.sid].audioMuted;
-    }
-    return true;
-  };
+  // Start buffering messages that would be dropped from the signaling server when sent too quickly.
+  } else if (self._GROUP_MESSAGE_LIST.indexOf(message.type) > -1 || message.type === self._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE) {
+    self._socketMessageQueue.normal.push(message);
 
-  var setStampFn = function (statusMessage) {
-    if (statusMessage.type === self._SIG_MESSAGE_TYPE.UPDATE_USER) {
-      self._peerMessagesStamps[self._user.sid].userData = statusMessage.stamp;
-    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO) {
-      self._peerMessagesStamps[self._user.sid].videoMuted = statusMessage.stamp;
-    } else if (statusMessage.type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO) {
-      self._peerMessagesStamps[self._user.sid].audioMuted = statusMessage.stamp;
-    }
-  };
-
-  var setQueueFn = function () {
-    log.debug([null, 'Socket', null, 'Starting queue timeout']);
-
-    self._socketMessageTimeout = setTimeout(function () {
-      if (((new Date ()).getTime() - self._timestamp.socketMessage) <= interval) {
-        log.debug([null, 'Socket', null, 'Restarting queue timeout']);
-        setQueueFn();
-        return;
-      }
-      startSendingQueuedMessageFn();
-    }, interval - ((new Date ()).getTime() - self._timestamp.socketMessage));
-  };
-
-  var triggerEventFn = function (eventMessage) {
-    if (eventMessage.type === self._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE) {
-      self._trigger('incomingMessage', {
-        content: eventMessage.data,
-        isPrivate: false,
-        targetPeerId: null,
-        listOfPeers: Object.keys(self._peerInformations),
-        isDataChannel: false,
-        senderPeerId: self._user.sid
-      }, self._user.sid, self.getPeerInfo(), true);
-    }
-  };
-
-  var sendGroupMessageFn = function (groupMessageList) {
-    self._socketMessageTimeout = null;
-
-    if (!self._channelOpen || !(self._user && self._user.sid) || !self._socket) {
-      log.warn([message.target || 'Server', 'Socket', null, 'Dropping of group messages as Socket connection is not opened or is at ' +
-        'incorrect step ->'], groupMessageList);
-      return;
-    }
-
-    var strGroupMessageList = [];
-    var stamps = {
-      userData: 0,
-      audioMuted: 0,
-      videoMuted: 0
-    };
-
-    for (var k = 0; k < groupMessageList.length; k++) {
-      if (checkStampFn(groupMessageList[k])) {
-        if (groupMessageList[k].type === self._SIG_MESSAGE_TYPE.UPDATE_USER &&
-          groupMessageList[k].stamp > self._peerMessagesStamps[self._user.sid].userData &&
-          groupMessageList[k].stamp > stamps.userData) {
-          stamps.userData = groupMessageList[k].stamp;
-        } else if (groupMessageList[k].type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO &&
-          groupMessageList[k].stamp > self._peerMessagesStamps[self._user.sid].audioMuted &&
-          groupMessageList[k].stamp > stamps.audioMuted) {
-          stamps.audioMuted = groupMessageList[k].stamp;
-        } else if (groupMessageList[k].type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO &&
-          groupMessageList[k].stamp > self._peerMessagesStamps[self._user.sid].videoMuted &&
-          groupMessageList[k].stamp > stamps.videoMuted) {
-          stamps.videoMuted = groupMessageList[k].stamp;
-        }
-      }
-    }
-
-    for (var i = 0; i < groupMessageList.length; i++) {
-      if ((groupMessageList[i].type === self._SIG_MESSAGE_TYPE.UPDATE_USER &&
-          groupMessageList[i].stamp < stamps.userData) ||
-          (groupMessageList[i].type === self._SIG_MESSAGE_TYPE.MUTE_AUDIO &&
-          groupMessageList[i].stamp < stamps.audioMuted) ||
-          (groupMessageList[i].type === self._SIG_MESSAGE_TYPE.MUTE_VIDEO &&
-          groupMessageList[i].stamp < stamps.videoMuted)) {
-        log.warn([message.target || 'Server', 'Socket', groupMessageList[i], 'Dropping of outdated status message ->'],
-          clone(groupMessageList[i]));
-        groupMessageList.splice(i, 1);
-        i--;
-        continue;
-      }
-      strGroupMessageList.push(JSON.stringify(groupMessageList[i]));
-    }
-
-    if (strGroupMessageList.length > 0) {
-      var groupMessage = {
-        type: self._SIG_MESSAGE_TYPE.GROUP,
-        lists: strGroupMessageList,
-        mid: self._user.sid,
-        rid: self._room.id
-      };
-
-      log.log([message.target || 'Server', 'Socket', groupMessage.type,
-        'Sending queued grouped message (max: 16 per group) ->'], clone(groupMessage));
-
-      self._socket.send(JSON.stringify(groupMessage));
-      self._timestamp.socketMessage = (new Date()).getTime();
-
-      for (var j = 0; j < groupMessageList.length; j++) {
-        setStampFn(groupMessageList[j]);
-        triggerEventFn(groupMessageList[j]);
-      }
-    }
-  };
-
-  var startSendingQueuedMessageFn = function(){
-    if (self._socketMessageQueue.length > 0){
-      if (self._socketMessageQueue.length < throughput){
-        sendGroupMessageFn(self._socketMessageQueue.splice(0, self._socketMessageQueue.length));
-      } else {
-        sendGroupMessageFn(self._socketMessageQueue.splice(0, throughput));
-        setQueueFn();
-      }
-    }
-  };
-
-  if (self._GROUP_MESSAGE_LIST.indexOf(message.type) > -1) {
-    if (!(self._timestamp.socketMessage && ((new Date ()).getTime() - self._timestamp.socketMessage) <= interval)) {
-      if (!checkStampFn(message)) {
-        log.warn([message.target || 'Server', 'Socket', message.type, 'Dropping of outdated status message ->'], clone(message));
-        return;
-      }
-      if (self._socketMessageTimeout) {
-        clearTimeout(self._socketMessageTimeout);
-      }
-      log.log([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
-      self._socket.send(JSON.stringify(message));
-      setStampFn(message);
-      triggerEventFn(message);
-
-      self._timestamp.socketMessage = (new Date()).getTime();
-
-    } else {
-      log.debug([message.target || 'Server', 'Socket', message.type,
-        'Queueing socket message to prevent message drop ->'], clone(message));
-
-      self._socketMessageQueue.push(message);
-
-      if (!self._socketMessageTimeout) {
-        setQueueFn();
-      }
-    }
+  // Start buffering priority lane messages.
   } else {
-    log.log([message.target || 'Server', 'Socket', message.type, 'Sending message ->'], clone(message));
-    self._socket.send(JSON.stringify(message));
-
-    // If Peer sends "bye" on its own, we trigger it as session disconnected abruptly
-    if (message.type === self._SIG_MESSAGE_TYPE.BYE && self._inRoom &&
-      self._user && self._user.sid && message.mid === self._user.sid) {
-      self.leaveRoom(false);
-      self._trigger('sessionDisconnect', self._user.sid, self.getPeerInfo());
-    }
+    self._socketMessageQueue.priority.push(message);
   }
+
+  self._sendChannelMessageQueue();
 };
 
 /**
@@ -357,6 +329,10 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
         self._trigger('sessionDisconnect', self._user.sid, self.getPeerInfo());
       }
     }
+  });
+
+  socket.on('pong', function (latency) {
+    self._socketMessageLatency = latency >= 150 ? latency : 150;
   });
 
   socket.on('message', function(messageStr) {
