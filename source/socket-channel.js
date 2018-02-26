@@ -9,12 +9,14 @@ Skylink.prototype._sendChannelMessageQueue = function() {
   var self = this;
   var timeout = 0;
   var message = null;
+  var interval = 1000;
 
   // By default, we set a 0ms timeout interval since we would expect priority messages to be sent quickly.
   // We should increase the timeout interval when there are non-priority messages in the queue.
   // For non-priority targeted messages, the interval is smaller compared to broadcasted ones.
-  if (!self._socketMessageQueue.priority.length && self._socketMessageQueue.normal.length) {
-    timeout = 1000 + self._socketMessageLatency;
+  if (!self._socketMessageQueue.priority.length &&
+    (self._socketMessageQueue.normal.length || Object.keys(self._socketMessageQueue.status).length)) {
+    timeout = interval + self._socketMessageLatency;
   }
 
   // Clear any existing timeout interval just in the scenario where
@@ -43,7 +45,7 @@ Skylink.prototype._sendChannelMessageQueue = function() {
 
       // Let's drop the message if the room lock signal is sent too quickly, in which the signaling server would
       //   drop the message and the room lock signal would not occur.
-      if (message[0].type === self._SIG_MESSAGE_TYPE.ROOM_LOCK && lastSentInterval < (1000 + self._socketMessageLatency)) {
+      if (message[0].type === self._SIG_MESSAGE_TYPE.ROOM_LOCK && lastSentInterval < (interval + self._socketMessageLatency)) {
         log.warn(['Server', 'Socket', message.type, 'Dropping room lock event message ->'], message[0]);
         self._sendChannelMessageQueue();
         message[1](new Error('Failed sending room lock event as it is sent too quickly'));
@@ -348,7 +350,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   });
 
   socket.on('pong', function (latency) {
-    self._socketMessageLatency = latency >= 150 ? latency : 150;
+    self._socketMessageLatency = latency || 0;
   });
 
   socket.on('message', function(messageStr) {
