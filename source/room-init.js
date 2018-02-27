@@ -788,7 +788,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       completed = true;
       var response = JSON.parse(xhr.responseText || xhr.response || '{}');
       var status = xhr.status || (response.success ? 200 : 400);
-      self._handleStatsAuth(response.success ? 'success' : 'error', response, status);
+      self._handleAuthStats(response.success ? 'success' : 'error', response, status);
 
       if (response.success) {
       	log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters ->'], response);
@@ -817,7 +817,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       completed = true;
       log.error([null, 'XMLHttpRequest', method, 'Failed retrieving information with status ->'], xhr.status);
       // TO CHECK: Added a new field "web_sdk_error" not documented in specs.
-      self._handleStatsAuth('error', null, -1, 'Failed connecting to server');
+      self._handleAuthStats('error', null, -1, 'Failed connecting to server');
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: xhr.status || -1,
@@ -843,7 +843,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       }
     } catch (error) {
       completed = true;
-      self._handleStatsAuth('error', null, -1, error);
+      self._handleAuthStats('error', null, -1, error);
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: xhr.status || -1,
@@ -868,7 +868,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
 
       } else {
       	var timeoutError = new Error('Response timed out from API server');
-        self._handleStatsAuth('error', null, -1, timeoutError);
+        self._handleAuthStats('error', null, -1, timeoutError);
       	self._readyState = self.READY_STATE_CHANGE.ERROR;
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: xhr.status || -1,
@@ -1053,7 +1053,7 @@ Skylink.prototype._loadInfo = function() {
 
       self._readyState = self.READY_STATE_CHANGE.LOADING;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
-      self._handleStatsClient();
+      self._handleClientStats();
       self._requestServerInfo('GET', self._path, function(response) {
         self._parseInfo(response);
       });

@@ -429,7 +429,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
         };
 
         self._sendChannelMessage(joinRoomMsg);
-        self._handleStatsSession(joinRoomMsg);
+        self._handleSessionStats(joinRoomMsg);
       });
     });
   };

@@ -57,13 +57,13 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
 
   var onSuccessCbFn = function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
-    self._handleStatsNegotiation('create-offer', targetMid, offer);
+    self._handleNegotiationStats('create_offer', targetMid, offer, false);
     self._setLocalAndSendMessage(targetMid, offer);
   };
 
   var onErrorCbFn = function(error) {
     log.error([targetMid, null, null, 'Failed creating an offer:'], error);
-    self._handleStatsNegotiation('error-create-offer', targetMid, null, error);
+    self._handleNegotiationStats('error_create_offer', targetMid, null, false, error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
@@ -125,13 +125,13 @@ Skylink.prototype._doAnswer = function(targetMid) {
 
   var onSuccessCbFn = function(answer) {
     log.debug([targetMid, null, null, 'Created answer'], answer);
-    self._handleStatsNegotiation('create-answer', targetMid, answer);
+    self._handleNegotiationStats('create_answer', targetMid, answer, false);
     self._setLocalAndSendMessage(targetMid, answer);
   };
 
   var onErrorCbFn = function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
-    self._handleStatsNegotiation('error-create-answer', targetMid, null, error);
+    self._handleNegotiationStats('error_create_answer', targetMid, null, false, error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
@@ -163,14 +163,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   if (!pc) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
       'Local session description will not be set as connection does not exists ->'], _sessionDescription);
-    self._handleStatsNegotiation('dropped_local_' + sessionDescription.type, targetMid, sessionDescription, 'Peer connection does not exists');
+    self._handleNegotiationStats('dropped_' + sessionDescription.type, targetMid, sessionDescription, false, 'Peer connection does not exists');
     return;
 
   } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
     pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
       'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
-    self._handleStatsNegotiation('dropped_local_offer', targetMid, sessionDescription, 'Peer connection state is "' + pc.signalingState + '"');
+    self._handleNegotiationStats('dropped_offer', targetMid, sessionDescription, false, 'Peer connection state is "' + pc.signalingState + '"');
     return;
 
   // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
@@ -178,14 +178,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
       'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
-    self._handleStatsNegotiation('dropped_local_answer', targetMid, sessionDescription, 'Peer connection state is "' + pc.signalingState + '"');
+    self._handleNegotiationStats('dropped_answer', targetMid, sessionDescription, false, 'Peer connection state is "' + pc.signalingState + '"');
     return;
 
   // Added checks if there is a current local sessionDescription being processing before processing this one
   } else if (pc.processingLocalSDP) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
       'Local session description will not be set as another is being processed ->'], _sessionDescription);
-    self._handleStatsNegotiation('dropped_local_' + sessionDescription.type, targetMid, sessionDescription, 'Peer connection is currently processing an existing sdp');
+    self._handleNegotiationStats('dropped_' + sessionDescription.type, targetMid, sessionDescription, false, 'Peer connection is currently processing an existing sdp');
     return;
   }
 
@@ -217,7 +217,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     pc.processingLocalSDP = false;
 
-    self._handleStatsNegotiation('local_' + sessionDescription.type, targetMid, sessionDescription);
+    self._handleNegotiationStats('set_' + sessionDescription.type, targetMid, sessionDescription, false);
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
 
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
@@ -240,7 +240,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
     });
-    self._handleStatsNegotiation('sent_local_' + sessionDescription.type, targetMid, sessionDescription);
+    self._handleNegotiationStats(sessionDescription.type, targetMid, sessionDescription, false);
   };
 
   var onErrorCbFn = function(error) {
@@ -248,7 +248,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     pc.processingLocalSDP = false;
 
-    self._handleStatsNegotiation('error_local_' + sessionDescription.type, targetMid, sessionDescription, error);
+    self._handleNegotiationStats('error_set_' + sessionDescription.type, targetMid, sessionDescription, false, error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 

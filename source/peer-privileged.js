@@ -147,7 +147,7 @@ Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
 	};
 
 	self._sendChannelMessage(introduceMsg);
-	self._handleStatsSession(introduceMsg);
+	self._handleSessionStats(introduceMsg);
 	self._trigger('introduceStateChange', self.INTRODUCE_STATE.INTRODUCING, self._user.sid, sendingPeerId, receivingPeerId, null);
 	log.log('Introducing',sendingPeerId,'to',receivingPeerId);
 };

@@ -856,15 +856,15 @@ function Skylink() {
    * @since 0.6.27
    */
   this._initOptions = {};
-  
+
   /**
-   * Stores the client stat ID random string used to concentate the stats.
-   * @attribute _statIdRandomStr
-   * @type String
+   * Stores the unique random number used for generating the "client_id".
+   * @attribute _statIdRandom
+   * @type Number
    * @private
    * @for Skylink
    * @since 0.6.31
    */
-  this._statIdRandomStr = null;
+  this._statIdRandom = Date.now() + Math.floor(Math.random() * 100000000);
 
 }

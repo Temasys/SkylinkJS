@@ -1584,7 +1584,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
     self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
     self._peerEndOfCandidatesCounter[peerId].len = 0;
     self._sendChannelMessage(restartMsg);
-    self._handleStatsNegotiation('sent_restart', peerId, restartMsg);
+    self._handleNegotiationStats('restart', peerId, restartMsg, false);
     self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === 'function') {
@@ -1688,7 +1688,7 @@ Skylink.prototype._removePeer = function(peerId) {
         }
         if (!this._peerConnections[peerId].iceConnectionStateClosed) {
           this._peerConnections[peerId].iceConnectionStateClosed = true;
-          this._handleStatsIceConnection(this.ICE_CONNECTION_STATE.CLOSED, peerId);
+          this._handleIceConnectionStats(this.ICE_CONNECTION_STATE.CLOSED, peerId);
           this._trigger('iceConnectionState', this.ICE_CONNECTION_STATE.CLOSED, peerId);
         }
       }
@@ -1897,7 +1897,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     self._onIceCandidate(targetMid, event.candidate || event);
   };
 
-  var postBwStatsInterval = null;
+  var statsInterval = null;
   pc.oniceconnectionstatechange = function(evt) {
     var iceConnectionState = pc.iceConnectionState;
 
@@ -1914,14 +1914,14 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED) {
       setTimeout(function () {
         if (!pc.iceConnectionStateClosed) {
-          self._handleStatsIceConnection(self.ICE_CONNECTION_STATE.CLOSED, targetMid);
+          self._handleIceConnectionStats(self.ICE_CONNECTION_STATE.CLOSED, targetMid);
           self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.CLOSED, targetMid);
         }
       }, 10);
       return;
     }
 
-    self._handleStatsIceConnection(pc.iceConnectionState, targetMid);
+    self._handleIceConnectionStats(pc.iceConnectionState, targetMid);
     self._trigger('iceConnectionState', iceConnectionState, targetMid);
 
     if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._initOptions.enableIceTrickle) {
@@ -1933,16 +1933,17 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
         self.ICE_CONNECTION_STATE.CONNECTED].indexOf(iceConnectionState) > -1;
     }
 
-    if (!postBwStatsInterval && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(iceConnectionState) > -1) {
-      postBwStatsInterval = true;
+    if (!statsInterval && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(iceConnectionState) > -1) {
+      statsInterval = true;
 
+      // Do an initial getConnectionStatus() to backfill the first retrieval in order to do (currentTotalStats - lastTotalStats).
       self.getConnectionStatus(targetMid, function () {
-        postBwStatsInterval = setInterval(function () {
+        statsInterval = setInterval(function () {
           if (!(self._peerConnections[targetMid] && self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
-            clearInterval(postBwStatsInterval);
+            clearInterval(statsInterval);
             return;
           }
-          self._handleStatsBandwidth(targetMid);
+          self._handleBandwidthStats(targetMid);
         }, 10000);
       });
     }
@@ -2044,8 +2045,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     };
   }
 
-  self._handleStatsIceConnection(pc.iceConnectionState, targetMid);
-  self._handleStatsIceGathering('new', targetMid, false);
+  self._handleIceConnectionStats(pc.iceConnectionState, targetMid);
+  self._handleIceGatheringStats('new', targetMid, false);
   return pc;
 };
 
@@ -2100,7 +2101,7 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
     log.log([peerId, 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
 
     self._sendChannelMessage(restartMsg);
-    self._handleStatsNegotiation('sent_restart', peerId, restartMsg);
+    self._handleNegotiationStats('restart', peerId, restartMsg, false);
   };
 
   // Toggle the main bandwidth options.

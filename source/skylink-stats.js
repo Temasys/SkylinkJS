@@ -1,38 +1,36 @@
 /**
- * Function that posts the stats to API.
- * @method _postStatsToApi
+ * Function that sends the stats to the API server.
+ * @method _postStatsToServer
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._postStatsToApi = function (endpoint, params) {
+Skylink.prototype._postStats = function (endpoint, params) {
   var self = this;
 
-  // The API result returned "username" will change each time a GET /api/:appKey/:room is done.
-  if (!self._statIdRandomStr) {
-    self._statIdRandomStr = (Date.now() + Math.floor(Math.random() * 1000000));
-  }
-
-  params.client_id = ((self._user && self._user.uid) || 'dummy') + '_' + self._statIdRandomStr;
+  params.client_id = ((self._user && self._user.uid) || 'dummy') + '_' + self._statIdRandom;
   params.app_key = self._initOptions.appKey;
   params.timestamp = (new Date()).toISOString();
 
-  // We need not use CORS and do not need to care if API returns success or failure
-  // since we are just endlessly posting it.
-  var xhr = new XMLHttpRequest();
-  xhr.open('POST', 'https://api.temasys.io' + endpoint, true);
-  xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-  xhr.send(JSON.stringify(params));
+  // Simply post the data directly to the API server without caring if it is successful or not.
+  try {
+    var xhr = new XMLHttpRequest();
+    xhr.onerror = function () { };
+    xhr.open('POST', 'https://api.temasys.io' + endpoint, true);
+    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+    xhr.send(JSON.stringify(params));
+
+  } catch (error) { }
 };
 
 /**
- * Function that handles the posting of client information (POST /stats/client) stats.
- * @method _handleStatsClient
+ * Function that handles the posting of client information.
+ * @method _handleClientStats
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._handleStatsClient = function() {
+Skylink.prototype._handleClientStats = function() {
   var self = this;
   var statsObject = {
     username: (self._user && self._user.uid) || null,
@@ -44,17 +42,17 @@ Skylink.prototype._handleStatsClient = function() {
     agent_plugin_version: (AdapterJS.WebRTCPlugin.plugin && AdapterJS.WebRTCPlugin.plugin.VERSION) || null
   };
 
-  self._postStatsToApi('/stats/client', statsObject);
+  self._postStats('/stats/client', statsObject);
 };
 
 /**
- * Function that handles the posting of session information (POST /stats/session) stats.
- * @method _handleStatsSession
+ * Function that handles the posting of session states.
+ * @method _handleSessionStats
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._handleStatsSession = function(message) {
+Skylink.prototype._handleSessionStats = function(message) {
   var self = this;
   var statsObject = {
     room_id: self._room && self._room.id,
@@ -63,17 +61,17 @@ Skylink.prototype._handleStatsSession = function(message) {
     contents: message
   };
 
-  self._postStatsToApi('/stats/session', statsObject);
+  self._postStats('/stats/session', statsObject);
 };
 
 /**
- * Function that handles the posting of appkey authentication (POST /stats/auth) stats.
- * @method _handleStatsAuth
+ * Function that handles the posting of app key authentication states.
+ * @method _handleAuthStats
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._handleStatsAuth = function(state, result, status, error) {
+Skylink.prototype._handleAuthStats = function(state, result, status, error) {
   var self = this;
   var statsObject = {
     room_id: (result && result.room_key) || null,
@@ -84,17 +82,17 @@ Skylink.prototype._handleStatsAuth = function(state, result, status, error) {
     api_result: result
   };
 
-  self._postStatsToApi('/stats/auth', statsObject);
+  self._postStats('/stats/auth', statsObject);
 };
 
 /**
- * Function that handles the posting of socket connection (POST /stats/client/signaling) stats.
- * @method _handleStatsSignaling
+ * Function that handles the posting of socket connection states.
+ * @method _handleSignalingStats
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._handleStatsSignaling = function(state, retries, error) {
+Skylink.prototype._handleSignalingStats = function(state, retries, error) {
   var self = this;
   var socketSession = clone(self._socketSession);
   var statsObject = {
@@ -103,21 +101,22 @@ Skylink.prototype._handleStatsSignaling = function(state, retries, error) {
     state: state,
     signaling_url: socketSession.socketServer,
     signaling_transport: socketSession.transportType.toLowerCase(),
+    // Use the retries from the function itself to prevent non-sequential event calls issues.
     attempts: retries,
     error: (typeof error === 'string' ? error : (error && error.message)) || null
   };
 
-  self._postStatsToApi('/stats/client/signaling', statsObject);
+  self._postStats('/stats/client/signaling', statsObject);
 };
 
 /**
- * Function that handles the posting of peer ICE connection states (POST /stats/client/iceconnection) stats.
- * @method _handleStatsIceConnection
+ * Function that handles the posting of peer ICE connection states.
+ * @method _handleIceConnectionStats
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._handleStatsIceConnection = function(state, peerId) {
+Skylink.prototype._handleIceConnectionStats = function(state, peerId) {
   var self = this;
   var statsObject = {
     room_id: self._room && self._room.id,
@@ -128,49 +127,50 @@ Skylink.prototype._handleStatsIceConnection = function(state, peerId) {
     remote_candidate: {}
   };
 
-  // Set a timeout interval to ensure the stats retrieval does not run at the same time the state is triggered.
-  // This should handle this asyncrohonous issue.
+  // Set a timeout to pause process to ensure the stats retrieval does not run at the same time
+  // when the state is triggered, so that the selected ICE candidate pair information can be returned.
   setTimeout(function () {
     self._retrieveStats(peerId, function (error, stats) {
       if (stats) {
         // Parse the selected ICE candidate pair for both local and remote candidate.
-        ['local', 'remote'].forEach(function (directionType) {
-          var candidate = stats.selectedCandidate[directionType];
+        ['local', 'remote'].forEach(function (dirType) {
+          var candidate = stats.selectedCandidate[dirType];
 
           if (candidate) {
-            statsObject[directionType + '_candidate'].ip_address = candidate.ipAddress || null;
-            statsObject[directionType + '_candidate'].port_number = candidate.portNumber || null;
-            statsObject[directionType + '_candidate'].candidate_type = candidate.candidateType || null;
-            statsObject[directionType + '_candidate'].protocol = candidate.transport || null;
-            statsObject[directionType + '_candidate'].priority = candidate.priority || null;
+            statsObject[dirType + '_candidate'].ip_address = candidate.ipAddress || null;
+            statsObject[dirType + '_candidate'].port_number = candidate.portNumber || null;
+            statsObject[dirType + '_candidate'].candidate_type = candidate.candidateType || null;
+            statsObject[dirType + '_candidate'].protocol = candidate.transport || null;
+            statsObject[dirType + '_candidate'].priority = candidate.priority || null;
 
             // This is only available for the local ICE candidate.
-            if (directionType === 'local') {
+            if (dirType === 'local') {
               statsObject.local_candidate.network_type = candidate.networkType || null;
             }
           }
         });
       }
 
-      self._postStatsToApi('/stats/client/iceconnection', statsObject);
+      self._postStats('/stats/client/iceconnection', statsObject);
     }, true);
   }, 0);
 };
 
 /**
- * Function that handles the posting of peer ICE candidate processing states (POST /stats/client/icecandidate) stats.
- * @method _handleStatsIceCandidate
+ * Function that handles the posting of peer local/remote ICE candidate processing states.
+ * @method _handleIceCandidateStats
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._handleStatsIceCandidate = function(state, peerId, candidateId, candidate, error) {
+Skylink.prototype._handleIceCandidateStats = function(state, peerId, candidateId, candidate, error) {
   var self = this;
   var statsObject = {
     room_id: self._room && self._room.id,
     user_id: self._user && self._user.sid,
     peer_id: peerId,
     state: state,
+    is_remote: !!candidateId,
     candidate_id: candidateId || null,
     candidate_sdp_mid: candidate.sdpMid,
     candidate_sdp_mindex: candidate.sdpMLineIndex,
@@ -178,17 +178,17 @@ Skylink.prototype._handleStatsIceCandidate = function(state, peerId, candidateId
     error: (typeof error === 'string' ? error : (error && error.message)) || null,
   };
 
-  self._postStatsToApi('/stats/client/icecandidate', statsObject);
+  self._postStats('/stats/client/icecandidate', statsObject);
 };
 
 /**
- * Function that handles the posting of peer ICE gathering states (POST /stats/client/icegathering) stats.
- * @method _handleStatsIceGathering
+ * Function that handles the posting of peer local/remote ICE gathering states.
+ * @method _handleIceGatheringStats
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._handleStatsIceGathering = function(state, peerId, isRemote) {
+Skylink.prototype._handleIceGatheringStats = function(state, peerId, isRemote) {
   var self = this;
   var statsObject = {
     room_id: self._room && self._room.id,
@@ -198,47 +198,51 @@ Skylink.prototype._handleStatsIceGathering = function(state, peerId, isRemote) {
     is_remote: isRemote
   };
 
-  self._postStatsToApi('/stats/client/icegathering', statsObject);
+  self._postStats('/stats/client/icegathering', statsObject);
 };
 
 /**
- * Function that handles the posting of peer connection negotiation (POST /stats/client/negotiation) stats.
- * @method _handleStatsNegotiation
+ * Function that handles the posting of peer connection negotiation states.
+ * @method _handleNegotiationStats
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._handleStatsNegotiation = function(state, peerId, sdpOrMessage, error) {
+Skylink.prototype._handleNegotiationStats = function(state, peerId, sdpOrMessage, isRemote, error) {
   var self = this;
   var statsObject = {
     room_id: self._room && self._room.id,
     user_id: self._user && self._user.sid,
     peer_id: peerId,
     state: state,
+    is_remote: isRemote,
+    // Currently sharing a parameter "sdpOrMessage" that indicates a "welcome" message
+    // or session description to save parameters length.
     weight: sdpOrMessage.weight,
     sdp_type: null,
     sdp_sdp: null,
     error: (typeof error === 'string' ? error : (error && error.message)) || null,
   };
 
-  if (['sent_welcome', 'sent_restart', 'received_enter', 'received_welcome', 'received_restart'].indexOf(state) === -1) {
-    var peerInfoId = state.indexOf('remote_') > -1 || state.indexOf('received_') === 0 ? peerId : undefined;
-    statsObject.weight = self.getPeerInfo(peerInfoId).config.priorityWeight;
+  // Retrieve the weight for states where the "weight" field is not available.
+  if (['enter', 'welcome', 'restart'].indexOf(state) === -1) {
+    // Retrieve the peer's weight if it from remote end.
+    statsObject.weight = self.getPeerInfo(isRemote ? peerId : undefined).config.priorityWeight;
     statsObject.sdp_type = (sdpOrMessage && sdpOrMessage.type) || null;
     statsObject.sdp_sdp = (sdpOrMessage && sdpOrMessage.sdp) || null;
   }
 
-  self._postStatsToApi('/stats/client/negotiation', statsObject);
+  self._postStats('/stats/client/negotiation', statsObject);
 };
 
 /**
- * Function that handles the posting of peer connection bandwidth (POST /stats/client/bandwidth) stats.
- * @method _handleStatsBandwidth
+ * Function that handles the posting of peer connection bandwidth information.
+ * @method _handleBandwidthStats
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._handleStatsBandwidth = function (peerId) {
+Skylink.prototype._handleBandwidthStats = function (peerId) {
   var self = this;
   var statsObject = {
     room_id: self._room && self._room.id,
@@ -253,7 +257,8 @@ Skylink.prototype._handleStatsBandwidth = function (peerId) {
   var useStream = self._streams.screenshare || self._streams.userMedia || null;
   var mutedStatus = self.getPeerInfo().mediaStatus;
 
-  // Format the stream tracks information.
+  // When stream is available, format the stream tracks information.
+  // The SDK currently only allows sending of 1 stream at a time that has only 1 audio and video track each.
   if (useStream) {
     // Parse the audio track if it exists only.
     if (useStream.tracks.audio) {
@@ -287,6 +292,7 @@ Skylink.prototype._handleStatsBandwidth = function (peerId) {
       };
     }
 
+    // Common function to parse and handle any `null`/`undefined` values.
     var formatValue = function (mediaType, directionType, itemKey) {
       var value = stats[mediaType][directionType === 'send' ? 'sending' : 'receiving'][itemKey];
       if (['number', 'string', 'boolean'].indexOf(typeof value) > -1) {
@@ -295,6 +301,7 @@ Skylink.prototype._handleStatsBandwidth = function (peerId) {
       return null;
     };
 
+    // Parse bandwidth information for sending audio packets.
     statsObject.audio_send.bytes = formatValue('audio', 'send', 'bytes');
     statsObject.audio_send.packets = formatValue('audio', 'send', 'packets');
     statsObject.audio_send.round_trip_time = formatValue('audio', 'send', 'rtt');
@@ -302,6 +309,7 @@ Skylink.prototype._handleStatsBandwidth = function (peerId) {
     statsObject.audio_send.echo_return_loss = formatValue('audio', 'send', 'echoReturnLoss');
     statsObject.audio_send.echo_return_loss_enhancement = formatValue('audio', 'send', 'echoReturnLossEnhancement');
 
+    // Parse bandwidth information for receiving audio packets.
     statsObject.audio_recv.bytes = formatValue('audio', 'recv', 'bytes');
     statsObject.audio_recv.packets = formatValue('audio', 'recv', 'packets');
     statsObject.audio_recv.packets_lost = formatValue('audio', 'recv', 'packetsLost');
@@ -309,6 +317,7 @@ Skylink.prototype._handleStatsBandwidth = function (peerId) {
     statsObject.audio_recv.jitter = formatValue('audio', 'recv', 'jitter');
     statsObject.audio_recv.nack_count = formatValue('audio', 'recv', 'nacks');
 
+    // Parse bandwidth information for sending video packets.
     statsObject.video_send.bytes = formatValue('video', 'send', 'bytes');
     statsObject.video_send.packets = formatValue('video', 'send', 'packets');
     statsObject.video_send.round_trip_time = formatValue('video', 'send', 'rtt');
@@ -328,6 +337,7 @@ Skylink.prototype._handleStatsBandwidth = function (peerId) {
     statsObject.video_send.cpu_limited_resolution = formatValue('video', 'send', 'cpuLimitedResolution');
     statsObject.video_send.bandwidth_limited_resolution = formatValue('video', 'send', 'bandwidthLimitedResolution');
 
+    // Parse bandwidth information for receiving video packets.
     statsObject.video_recv.bytes = formatValue('video', 'recv', 'bytes');
     statsObject.video_recv.packets = formatValue('video', 'recv', 'packets');
     statsObject.video_recv.packets_lost = formatValue('video', 'recv', 'packetsLost');
@@ -347,18 +357,18 @@ Skylink.prototype._handleStatsBandwidth = function (peerId) {
     statsObject.video_recv.framerate_std_dev = formatValue('video', 'recv', 'frameRateStdDev');
     statsObject.video_recv.qp_sum = formatValue('video', 'recv', 'qpSum');
 
-    self._postStatsToApi('/stats/client/bandwidth', statsObject);
+    self._postStats('/stats/client/bandwidth', statsObject);
   }, true);
 };
 
 /**
- * Function that handles the posting of recording states (POST /stats/client/recording) stats.
- * @method _handleStatsRecording
+ * Function that handles the posting of recording states.
+ * @method _handleRecordingStats
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._handleStatsRecording = function(state, recordingId, recordings, error) {
+Skylink.prototype._handleRecordingStats = function(state, recordingId, recordings, error) {
   var self = this;
   var statsObject = {
     room_id: self._room && self._room.id,
@@ -369,17 +379,17 @@ Skylink.prototype._handleStatsRecording = function(state, recordingId, recording
     error: (typeof error === 'string' ? error : (error && error.message)) || null
   };
 
-  self._postStatsToApi('/stats/client/recording', statsObject);
+  self._postStats('/stats/client/recording', statsObject);
 };
 
 /**
- * Function that handles the posting of datachannel states (POST /stats/client/datachannel) stats.
- * @method _handleStatsDatachannel
+ * Function that handles the posting of datachannel states.
+ * @method _handleDatachannelStats
  * @private
  * @for Skylink
  * @since 0.6.31
  */
-Skylink.prototype._handleStatsDatachannel = function(state, peerId, channel, channelProp, error) {
+Skylink.prototype._handleDatachannelStats = function(state, peerId, channel, channelProp, error) {
   var self = this;
   var statsObject = {
     room_id: self._room && self._room.id,
@@ -394,10 +404,14 @@ Skylink.prototype._handleStatsDatachannel = function(state, peerId, channel, cha
   };
 
   if (channel && AdapterJS.webrtcDetectedType === 'plugin') {
-    statsObject.channel_binary_type = AdapterJS.webrtcDetectedBrowser === 'IE' &&
-      AdapterJS.webrtcDetectedVersion < 11 ? 'none' : 'int8Array';
+    statsObject.channel_binary_type = 'int8Array';
+
+    // For IE 10 and below browsers, binary support is not available.
+    if (AdapterJS.webrtcDetectedBrowser === 'IE' && AdapterJS.webrtcDetectedVersion < 11) {
+      statsObject.channel_binary_type = 'none';
+    }
   }
 
-  self._postStatsToApi('/stats/client/datachannel', statsObject);
+  self._postStats('/stats/client/datachannel', statsObject);
 };
 
