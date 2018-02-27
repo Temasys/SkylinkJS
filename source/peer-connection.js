@@ -1584,6 +1584,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
     self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
     self._peerEndOfCandidatesCounter[peerId].len = 0;
     self._sendChannelMessage(restartMsg);
+    self._handleStatsNegotiation('sent_restart', peerId, restartMsg);
     self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === 'function') {
@@ -1920,7 +1921,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       return;
     }
 
-    self._handleStatsIceConnection(iceConnectionState, targetMid);
+    self._handleStatsIceConnection(pc.iceConnectionState, targetMid);
     self._trigger('iceConnectionState', iceConnectionState, targetMid);
 
     if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._initOptions.enableIceTrickle) {
@@ -1938,12 +1939,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       self.getConnectionStatus(targetMid, function () {
         postBwStatsInterval = setInterval(function () {
           if (!(self._peerConnections[targetMid] && self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+            clearInterval(postBwStatsInterval);
             return;
           }
           self._handleStatsBandwidth(targetMid);
-        // TO CHECK: 30 seconds is too little. Perhaps every 10 seconds?
         }, 10000);
-        self._handleStatsBandwidth(targetMid);
       });
     }
 
@@ -2044,6 +2044,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     };
   }
 
+  self._handleStatsIceConnection(pc.iceConnectionState, targetMid);
+  self._handleStatsIceGathering('new', targetMid, false);
   return pc;
 };
 
@@ -2098,6 +2100,7 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
     log.log([peerId, 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
 
     self._sendChannelMessage(restartMsg);
+    self._handleStatsNegotiation('sent_restart', peerId, restartMsg);
   };
 
   // Toggle the main bandwidth options.
@@ -2245,7 +2248,6 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Signaling of end-of-candidates remote ICE gathering.']);
 
     self._peerEndOfCandidatesCounter[targetMid].hasSet = true;
-    self._parseStatsIceGatheringCompleted(targetMid, 'remote');
 
     try {
       if (AdapterJS.webrtcDetectedBrowser === 'edge') {

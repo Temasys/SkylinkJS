@@ -139,11 +139,15 @@ Skylink.prototype.introducePeer = function(sendingPeerId, receivingPeerId){
 		self._trigger('introduceStateChange', self.INTRODUCE_STATE.ERROR, self._user.sid, sendingPeerId, receivingPeerId, 'notPrivileged');
 		return;
 	}
-	self._sendChannelMessage({
+
+	var introduceMsg = {
 		type: self._SIG_MESSAGE_TYPE.INTRODUCE,
 		sendingPeerId: sendingPeerId,
 		receivingPeerId: receivingPeerId
-	});
+	};
+
+	self._sendChannelMessage(introduceMsg);
+	self._handleStatsSession(introduceMsg);
 	self._trigger('introduceStateChange', self.INTRODUCE_STATE.INTRODUCING, self._user.sid, sendingPeerId, receivingPeerId, null);
 	log.log('Introducing',sendingPeerId,'to',receivingPeerId);
 };

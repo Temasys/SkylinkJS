@@ -856,7 +856,7 @@ function Skylink() {
    * @since 0.6.27
    */
   this._initOptions = {};
-
+  
   /**
    * Stores the client stat ID random string used to concentate the stats.
    * @attribute _statIdRandomStr
@@ -866,4 +866,5 @@ function Skylink() {
    * @since 0.6.31
    */
   this._statIdRandomStr = null;
+
 }

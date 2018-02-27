@@ -300,18 +300,20 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   socket.on('reconnect_attempt', function (attempt) {
     retries++;
     self._socketSession.attempts++;
-    self._handleStatsSignaling('reconnect_attempt', clone(self._socketSession));
+    self._handleStatsSignaling('reconnect_attempt', retries);
     self._trigger('channelRetry', fallbackType, self._socketSession.attempts, clone(self._socketSession));
   });
 
   socket.on('reconnect_failed', function () {
-    self._handleStatsSignaling('reconnect_failed', clone(self._socketSession));
+    var errorMsg = 'Failed reconnection with transport "' + type + '" and port ' + self._signalingServerPort + '.';
+    self._handleStatsSignaling('reconnect_failed', retries, errorMsg);
+
     if (fallbackType === self.SOCKET_FALLBACK.NON_FALLBACK) {
-      self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED, new Error('Failed connection with transport "' +
-        type + '" and port ' + self._signalingServerPort + '.'), fallbackType, clone(self._socketSession));
+      errorMsg = errorMsg.replace(/ reconnection /g, ' connection ');
+      self._trigger('socketError', self.SOCKET_ERROR.CONNECTION_FAILED, new Error(errorMsg), fallbackType, clone(self._socketSession));
+
     } else {
-      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED, new Error('Failed reconnection with transport "' +
-        type + '" and port ' + self._signalingServerPort + '.'), fallbackType, clone(self._socketSession));
+      self._trigger('socketError', self.SOCKET_ERROR.RECONNECTION_FAILED, new Error(errorMsg), fallbackType, clone(self._socketSession));
     }
 
     if (self._socketSession.finalAttempts < 2) {
@@ -323,11 +325,11 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   });
 
   socket.on('reconnect_error', function (error) {
-    self._handleStatsSignaling('reconnect_error', clone(self._socketSession), (error && error.message) || 'Unknown error');
+    self._handleStatsSignaling('reconnect_error', retries, error);
   });
 
   socket.on('connect', function () {
-    self._handleStatsSignaling('connect', clone(self._socketSession));
+    self._handleStatsSignaling('connect', retries);
     if (!self._channelOpen) {
       log.log([null, 'Socket', null, 'Channel opened']);
       self._channelOpen = true;
@@ -336,7 +338,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   });
 
   socket.on('reconnect', function () {
-    self._handleStatsSignaling('reconnect', clone(self._socketSession));
+    self._handleStatsSignaling('reconnect', retries);
     if (!self._channelOpen) {
       log.log([null, 'Socket', null, 'Channel opened']);
       self._channelOpen = true;
@@ -345,7 +347,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   });
 
   socket.on('error', function(error) {
-    self._handleStatsSignaling('error', clone(self._socketSession), (error && error.message) || 'Unknown error');
+    self._handleStatsSignaling('error', retries, error);
     if (error ? error.message.indexOf('xhr poll error') > -1 : false) {
       log.error([null, 'Socket', null, 'XHR poll connection unstable. Disconnecting.. ->'], error);
       self._closeChannel();
@@ -356,7 +358,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   });
 
   socket.on('disconnect', function() {
-    self._handleStatsSignaling('disconnect', clone(self._socketSession));
+    self._handleStatsSignaling('disconnect', retries);
     if (self._channelOpen) {
       self._channelOpen = false;
       self._trigger('channelClose', clone(self._socketSession));

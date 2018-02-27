@@ -22,6 +22,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       pc.gathering = true;
       pc.gathered = false;
 
+      self._handleStatsIceGathering('gathering', targetMid, false);
       self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.GATHERING, targetMid);
     }
 
@@ -34,6 +35,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       self._peerConnections[targetMid].localDescription.sdp.indexOf('\r\na=mid:' + candidate.sdpMid + '\r\n') > -1)) {
       log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate ' +
         'end-of-candidates signal or unused ICE candidates to prevent errors ->'], candidate);
+      self._handleStatsIceCandidate('local_dropped', targetMid, null, candidate);
       return;
     }
 
@@ -41,6 +43,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       if (!(self._hasMCU && self._initOptions.forceTURN)) {
         log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
           'it matches ICE candidate filtering flag ->'], candidate);
+        self._handleStatsIceCandidate('local_dropped', targetMid, null, candidate);
         return;
       }
 
@@ -62,13 +65,10 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       candidate: candidate.candidate
     });
 
-    // TO CHECK: Should we also send dropped local ICE candidates?
-    // TO CHECK: Should define the candidate ID as null?
-    self._handleStatsIceCandidate(null, targetMid, null, candidate);
-
     if (!self._initOptions.enableIceTrickle) {
       log.warn([targetMid, 'RTCIceCandidate', candidateType, 'Dropping of sending ICE candidate as ' +
         'trickle ICE is disabled ->'], candidate);
+      self._handleStatsIceCandidate('local_non_trickle', targetMid, null, candidate);
       return;
     }
 
@@ -83,6 +83,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       target: targetMid,
       rid: self._room.id
     });
+    self._handleStatsIceCandidate('local_sent', targetMid, null, candidate);
 
   } else {
     log.log([targetMid, 'RTCIceCandidate', null, 'ICE gathering has completed.']);
@@ -94,7 +95,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     pc.gathering = false;
     pc.gathered = true;
 
-    self._parseStatsIceGatheringCompleted(targetMid, 'local');
+    self._handleStatsIceGathering('complete', targetMid, false);
     self._trigger('candidateGenerationState', self.CANDIDATE_GENERATION_STATE.COMPLETED, targetMid);
 
     // Disable Ice trickle option
@@ -143,7 +144,7 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, canId, candidate
 
   log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Buffering ICE candidate.']);
 
-  this._handleStatsIceCandidate(this.CANDIDATE_PROCESSING_STATE.BUFFERED, targetMid, canId, candidate);
+  this._handleStatsIceCandidate('remote_buffered', targetMid, canId, candidate);
   this._trigger('candidateProcessingState', this.CANDIDATE_PROCESSING_STATE.BUFFERED,
     targetMid, canId, candidateType, {
     candidate: candidate.candidate,
@@ -206,7 +207,7 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
   var onSuccessCbFn = function () {
     log.log([targetMid, 'RTCIceCandidate', canId + ':' + candidateType,
       'Added ICE candidate successfully.']);
-    self._handleStatsIceCandidate(self.CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS, targetMid, canId, candidate);
+    self._handleStatsIceCandidate('remote_process_success', targetMid, canId, candidate);
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS,
       targetMid, canId, candidateType, {
       candidate: candidate.candidate,
@@ -218,7 +219,7 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
   var onErrorCbFn = function (error) {
     log.error([targetMid, 'RTCIceCandidate', canId + ':' + candidateType,
       'Failed adding ICE candidate ->'], error);
-    self._handleStatsIceCandidate(self.CANDIDATE_PROCESSING_STATE.PROCESS_ERROR, targetMid, canId, candidate, error.message);
+    self._handleStatsIceCandidate('remote_process_failed', targetMid, canId, candidate, error);
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
       targetMid, canId, candidateType, {
       candidate: candidate.candidate,
@@ -229,7 +230,7 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
 
   log.debug([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Adding ICE candidate.']);
 
-  self._handleStatsIceCandidate(this.CANDIDATE_PROCESSING_STATE.PROCESSING, targetMid, canId, candidate);
+  self._handleStatsIceCandidate('remote_processing', targetMid, canId, candidate);
   self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.PROCESSING,
     targetMid, canId, candidateType, {
       candidate: candidate.candidate,
@@ -244,7 +245,7 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     self._peerConnections[targetMid].remoteDescription.sdp.indexOf('\r\na=mid:' + candidate.sdpMid + '\r\n') > -1)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
       'as Peer connection does not exists or is closed']);
-    self._handleStatsIceCandidate(this.CANDIDATE_PROCESSING_STATE.DROPPED, targetMid, canId, candidate, 'Peer connection is terminated');
+    self._handleStatsIceCandidate('remote_process_failed', targetMid, canId, candidate, 'Peer connection does not exist');
     self._trigger('candidateProcessingState', self.CANDIDATE_PROCESSING_STATE.DROPPED,
       targetMid, canId, candidateType, {
       candidate: candidate.candidate,

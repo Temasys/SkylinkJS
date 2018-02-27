@@ -63,7 +63,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
 
   var onErrorCbFn = function(error) {
     log.error([targetMid, null, null, 'Failed creating an offer:'], error);
-    self._handleStatsNegotiation('error-create-offer', targetMid, null, error && error.message);
+    self._handleStatsNegotiation('error-create-offer', targetMid, null, error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
@@ -131,7 +131,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
 
   var onErrorCbFn = function(error) {
     log.error([targetMid, null, null, 'Failed creating an answer:'], error);
-    self._handleStatsNegotiation('error-create-answer', targetMid, null, error && error.message);
+    self._handleStatsNegotiation('error-create-answer', targetMid, null, error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
@@ -163,12 +163,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   if (!pc) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
       'Local session description will not be set as connection does not exists ->'], _sessionDescription);
+    self._handleStatsNegotiation('dropped_local_' + sessionDescription.type, targetMid, sessionDescription, 'Peer connection does not exists');
     return;
 
   } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
     pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
       'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
+    self._handleStatsNegotiation('dropped_local_offer', targetMid, sessionDescription, 'Peer connection state is "' + pc.signalingState + '"');
     return;
 
   // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
@@ -176,12 +178,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
       'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
+    self._handleStatsNegotiation('dropped_local_answer', targetMid, sessionDescription, 'Peer connection state is "' + pc.signalingState + '"');
     return;
 
   // Added checks if there is a current local sessionDescription being processing before processing this one
   } else if (pc.processingLocalSDP) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
       'Local session description will not be set as another is being processed ->'], _sessionDescription);
+    self._handleStatsNegotiation('dropped_local_' + sessionDescription.type, targetMid, sessionDescription, 'Peer connection is currently processing an existing sdp');
     return;
   }
 
@@ -213,7 +217,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     pc.processingLocalSDP = false;
 
-    self._handleStatsNegotiation('local-' + sessionDescription.type, targetMid, sessionDescription);
+    self._handleStatsNegotiation('local_' + sessionDescription.type, targetMid, sessionDescription);
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
 
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
@@ -236,6 +240,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
     });
+    self._handleStatsNegotiation('sent_local_' + sessionDescription.type, targetMid, sessionDescription);
   };
 
   var onErrorCbFn = function(error) {
@@ -243,7 +248,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     pc.processingLocalSDP = false;
 
-    self._handleStatsNegotiation('error-local-' + sessionDescription.type, targetMid, sessionDescription, error && error.message);
+    self._handleStatsNegotiation('error_local_' + sessionDescription.type, targetMid, sessionDescription, error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 

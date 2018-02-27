@@ -1464,3 +1464,17 @@ Skylink.prototype._GROUP_MESSAGE_LIST = [
   Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
 ];
 
+/**
+ * <blockquote class="info">
+ *   Note that this is used only for SDK developer purposes.<br>
+ *   Current version: <code>1.1</code>
+ * </blockquote>
+ * The value of the current version of the stats API used.
+ * @attribute STATS_API_VERSION
+ * @type String
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype.STATS_API_VERSION = '1.1';
+

@@ -788,7 +788,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       completed = true;
       var response = JSON.parse(xhr.responseText || xhr.response || '{}');
       var status = xhr.status || (response.success ? 200 : 400);
-      self._handleStatsAuth(response, xhr.status);
+      self._handleStatsAuth(response.success ? 'success' : 'error', response, status);
 
       if (response.success) {
       	log.debug([null, 'XMLHttpRequest', method, 'Received sessions parameters ->'], response);
@@ -817,7 +817,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       completed = true;
       log.error([null, 'XMLHttpRequest', method, 'Failed retrieving information with status ->'], xhr.status);
       // TO CHECK: Added a new field "web_sdk_error" not documented in specs.
-      self._handleStatsAuth({ success: false, web_sdk_error: 'HTTP request has errors' }, -1);
+      self._handleStatsAuth('error', null, -1, 'Failed connecting to server');
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: xhr.status || -1,
@@ -843,7 +843,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       }
     } catch (error) {
       completed = true;
-      self._handleStatsAuth({ success: false, web_sdk_error: 'HTTP request returned an exception' }, -1);
+      self._handleStatsAuth('error', null, -1, error);
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
         status: xhr.status || -1,
@@ -867,11 +867,12 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
         requestFn();
 
       } else {
-        self._handleStatsAuth({ success: false, web_sdk_error: 'HTTP request timed out' }, -1);
-        self._readyState = self.READY_STATE_CHANGE.ERROR;
+      	var timeoutError = new Error('Response timed out from API server');
+        self._handleStatsAuth('error', null, -1, timeoutError);
+      	self._readyState = self.READY_STATE_CHANGE.ERROR;
         self._trigger('readyStateChange', self.READY_STATE_CHANGE.ERROR, {
           status: xhr.status || -1,
-          content: new Error('Response timed out from API server'),
+          content: timeoutError,
           errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_NO_REPONSE_ERROR
         }, self._selectedRoom);
       }
