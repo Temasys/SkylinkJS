@@ -8,6 +8,8 @@
 Skylink.prototype._sendChannelMessageQueue = function() {
   var self = this;
   var userId = self._user && self._user.sid;
+  var lastSentDiff = Date.now() - (self._timestamp.socketMessage || 0);
+  var timeout = 0;
   // The interval for broadcasted messages is 1000 per interval.
   var broadcastInterval = 1000;
   // The interval for targeted messages is 100 per interval.
@@ -83,22 +85,30 @@ Skylink.prototype._sendChannelMessageQueue = function() {
       }
 
       sendToServer(message, callback);
-    }, 0);
+    }, timeout);
 
   // Send the targeted messages second if it is the first item in the normal queue.
   // Make sure there are no status messages in the current queue first since status should be sent first.
   } else if (self._socketMessageQueue.normal.length && self._socketMessageQueue.normal[0][0].target &&
     !Object.keys(self._socketMessageQueue.status).length) {
+    timeout = latency + targetInterval;
+    // Make the timeout interval 0 if it has already passed the time.
+    timeout = lastSentDiff > timeout ? 0 : timeout;
+
     self._socketMessageInterval = setTimeout(function () {
       var queueItem = self._socketMessageQueue.normal.splice(0, 1)[0];
       var message = queueItem[0];
       var callback = queueItem[1];
 
       sendToServer(message, callback);
-    }, latency + targetInterval);
+    }, timeout);
 
   // Send then the first 16 other broadcasted messages in the normal queue.
   } else if (self._socketMessageQueue.normal.length || Object.keys(self._socketMessageQueue.status).length) {
+    timeout = latency + broadcastInterval;
+    // Make the timeout interval 0 if it has already passed the time.
+    timeout = lastSentDiff > timeout ? 0 : timeout;
+
     self._socketMessageInterval = setTimeout(function () {
       var messages = [];
       var callbacks = [];
@@ -154,8 +164,7 @@ Skylink.prototype._sendChannelMessageQueue = function() {
           callback(error);
         });
       });
-    // The interval timeout is 0ms for priority as it is sent immediately.
-    }, latency + broadcastInterval);
+    }, timeout);
   }
 };
 
