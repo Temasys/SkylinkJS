@@ -7,154 +7,154 @@
  */
 Skylink.prototype._sendChannelMessageQueue = function() {
   var self = this;
-  var timeout = 0;
-  var message = null;
-  var interval = 1000;
+  var userId = self._user && self._user.sid;
+  // The interval for broadcasted messages is 1000 per interval.
+  var broadcastInterval = 1000;
+  // The interval for targeted messages is 100 per interval.
+  var targetInterval = 100;
+  // Set a minimum latency of 150 for safer purposes.
+  var latency = self._socketLatency > 150 ? self._socketLatency : 150;
 
-  // By default, we set a 0ms timeout interval since we would expect priority messages to be sent quickly.
-  if (!self._socketMessageQueue.priority.length &&
-  // We should increase the timeout interval when there are non-priority messages in the queue.
-    (self._socketMessageQueue.normal.length || Object.keys(self._socketMessageQueue.status).length)) {
-    timeout += self._socketMessageLatency;
-
-    // Only append timeout intervals when the last sent is something recorded by the signaling server.
-    if (self._GROUP_MESSAGE_LIST.concat([
-      self._SIG_MESSAGE_TYPE.GROUP,
-      self._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE]).indexOf(self._socketMessageType) > -1) {
-     timeout += interval;
-    }
+  // Remove any existing timeout intervals to replace with a new one later.
+  if (self._socketMessageInterval) {
+    clearTimeout(self._socketMessageInterval);
   }
 
-  // Clear any existing timeout interval just in the scenario where
-  //   priority messages are in the queue to be sent but the timeout interval is for non-priority messages.
-  if (self._socketMessageTimeout) {
-    clearTimeout(self._socketMessageTimeout);
-  }
-
-  // Configure the timestamps for the statuses types of messages to 0 so it would not result in NaN.
+  // Reset the status timestamps to 0.
   if (!self._peerMessagesStamps.self) {
     self._peerMessagesStamps.self = {};
-    self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.UPDATE_USER] = 0;
-    self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.MUTE_AUDIO] = 0;
-    self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.MUTE_VIDEO] = 0;
+    self._peerMessagesStamps.self[ self._SIG_MESSAGE_TYPE.UPDATE_USER ] = 0;
+    self._peerMessagesStamps.self[ self._SIG_MESSAGE_TYPE.MUTE_AUDIO ] = 0;
+    self._peerMessagesStamps.self[ self._SIG_MESSAGE_TYPE.MUTE_VIDEO ] = 0;
   }
 
-  // Set the interval timeout that would run when needing to send the message.
-  self._socketMessageTimeout = setTimeout(function () {
-    var currentTimestamp = Date.now();
-    var lastSentInterval = currentTimestamp - (self._timestamp.socketMessage || 0);
-    var userId = self._user && self._user.sid;
+  // Function that sends the message to the signaling server.
+  var sendToServer = function (message, callback) {
+    // Ensure that socket connection is open and available before sending any messages.
+    if (!(self._channelOpen && self._socket)) {
+      log.warn([message.target || 'Server', 'Socket', message.type,
+        'Dropping of message as Socket connection is not opened or is at incorrect step ->'], message);
+      callback(new Error('Message failed to be sent as socket is not opened'));
+      return;
+    }
 
-    // Start sending priority lane messages first.
-    if (self._socketMessageQueue.priority.length) {
-      message = self._socketMessageQueue.priority.splice(0, 1)[0];
+    self._socket.send(JSON.stringify(message));
+    self._timestamp.socketMessage = Date.now();
+    self._sendChannelMessageQueue();
+    callback(null);
 
-      // Let's drop the message if the room lock signal is sent too quickly, in which the signaling server would
-      //   drop the message and the room lock signal would not occur.
-      if (message[0].type === self._SIG_MESSAGE_TYPE.ROOM_LOCK && lastSentInterval < (interval + self._socketMessageLatency)) {
-        log.warn(['Server', 'Socket', message.type, 'Dropping room lock event message ->'], message[0]);
+    // If user tampers with the SDK and sends self a "bye" message.
+    if (message.type === self._SIG_MESSAGE_TYPE.BYE && message.mid === userId) {
+      self.leaveRoom(false);
+      self._trigger('sessionDisconnect', userId, self.getPeerInfo());
+    }
+  };
+
+  // FORMAT for each message item: [message, callback].
+  // Send messages in the priority queue first.
+  if (self._socketMessageQueue.priority.length) {
+    self._socketMessageInterval = setTimeout(function () {
+      var currentTime = Date.now();
+      var queueItem = self._socketMessageQueue.priority.splice(0, 1)[0];
+      var message = queueItem[0];
+      var callback = queueItem[1];
+
+      // Drop roomLockEvent if it is sent too quickly before the required interval timeout and feedback to user.
+      if (message.type === self._SIG_MESSAGE_TYPE.ROOM_LOCK &&
+        (currentTime - (self._timestamp.socketMessage || 0)) < (latency + broadcastInterval)) {
+        log.warn(['Server', 'Socket', message.type, 'Dropping room lock event message ->'], message);
         self._sendChannelMessageQueue();
-        message[1](new Error('Failed sending room lock event as it is sent too quickly'));
+        callback(new Error('Failed sending room lock event as it is sent too quickly'));
         return;
       }
 
-      // Update the statuses timestamps as the up-to-date statuses are sent (from "userInfo") in these messages types.
+      // Update the status timestamps as the up-to-date info (with "userInfo") are sent in these messages.
       if ([
-        self._SIG_MESSAGE_TYPE.OFFER,
-        self._SIG_MESSAGE_TYPE.ANSWER,
         self._SIG_MESSAGE_TYPE.ENTER,
         self._SIG_MESSAGE_TYPE.WELCOME,
-        self._SIG_MESSAGE_TYPE.RESTART].indexOf(message[0].type) > -1) {
-
-        self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.UPDATE_USER] = currentTimestamp;
-        self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.MUTE_AUDIO] = currentTimestamp;
-        self._peerMessagesStamps.self[self._SIG_MESSAGE_TYPE.MUTE_VIDEO] = currentTimestamp;
+        self._SIG_MESSAGE_TYPE.RESTART,
+        self._SIG_MESSAGE_TYPE.OFFER,
+        self._SIG_MESSAGE_TYPE.ANSWER
+      ].indexOf(message.type) > -1) {
+        self._peerMessagesStamps.self[ self._SIG_MESSAGE_TYPE.UPDATE_USER ] = currentTime;
+        self._peerMessagesStamps.self[ self._SIG_MESSAGE_TYPE.MUTE_AUDIO ] = currentTime;
+        self._peerMessagesStamps.self[ self._SIG_MESSAGE_TYPE.MUTE_VIDEO ] = currentTime;
         self._socketMessageQueue.status = {};
       }
 
-    // Then start sending normal lane messages.
-    // Checks if the first message is a targeted message, in which it will send the targeted message individually first.
-    // If the first message is a grouped type of message, queue the rest of the grouped message to be able to do bulk send.
-    } else if (self._socketMessageQueue.normal.length || Object.keys(self._socketMessageQueue.status).length > 0) {
-      // In some scenarios where the normal queue is empty, the status messages may be updated.
-      if (self._socketMessageQueue.normal.length && self._GROUP_MESSAGE_LIST.indexOf(self._socketMessageQueue.normal[0][0].type) === -1) {
-        message = self._socketMessageQueue.normal.splice(0, 1)[0];
+      sendToServer(message, callback);
+    }, 0);
 
-      } else {
-        var groupedBatch = [];
-        var groupedCallbacks = [];
-        var statusMessages = self._socketMessageQueue.status;
+  // Send the targeted messages second if it is the first item in the normal queue.
+  } else if (self._socketMessageQueue.normal.length && self._socketMessageQueue.normal[0][0].target) {
+    self._socketMessageInterval = setTimeout(function () {
+      var queueItem = self._socketMessageQueue.normal.splice(0, 1)[0];
+      var message = queueItem[0];
+      var callback = queueItem[1];
 
-        // Append the statuses types of messages first.
-        for (var type in statusMessages) {
-          if (statusMessages.hasOwnProperty(type)) {
-            // Check if the status message is outdated before discarding it.
-            if (self._peerMessagesStamps.self[type] < statusMessages[type][0].stamp) {
-              self._peerMessagesStamps.self[type] = statusMessages[type][0].stamp;
-              groupedBatch.push(JSON.stringify(statusMessages[type][0]));
-              groupedCallbacks.push(statusMessages[type][1])
-            }
-          }
+      sendToServer(message, callback);
+    }, latency + targetInterval);
+
+  // Send then the first 16 other broadcasted messages in the normal queue.
+  } else if (self._socketMessageQueue.normal.length || Object.keys(self._socketMessageQueue.status).length) {
+    self._socketMessageInterval = setTimeout(function () {
+      var messages = [];
+      var callbacks = [];
+
+      // Append the status messages to the batch first.
+      Object.keys(self._socketMessageQueue.status).forEach(function (messageType) {
+        var statusItem = self._socketMessageQueue.status[messageType];
+        var message = statusItem[0];
+        var callback = statusItem[1];
+
+        // Append only if the status is not outdated.
+        if (self._peerMessagesStamps.self[messageType] >= message.stamp) {
+          return;
         }
 
-        // Clear the statuses messages buffer.
-        self._socketMessageQueue.status = {};
+        self._peerMessagesStamps.self[messageType] = message.stamp;
+        messages.push(JSON.stringify(message));
+        callbacks.push(callback)
+      });
 
-        for (var i = 0; i < self._socketMessageQueue.normal.length; i++) {
-          var messageItem = self._socketMessageQueue.normal[i];
-          // Ignore the targeted messages since they cannot be grouped.
-          if (messageItem[0].target) {
-            continue;
-          }
+      // Reset the statuses messages buffer.
+      self._socketMessageQueue.status = {};
 
-          // The limit for the list is 16 messages in a grouped message.
-          if (groupedBatch.length === 16) {
-            break;
-          }
+      for (var i = 0; i < self._socketMessageQueue.normal.length; i++) {
+        var queueItem = self._socketMessageQueue.normal[i];
+        var message = queueItem[0];
+        var callback = queueItem[1];
 
-          groupedBatch.push(JSON.stringify(messageItem[0]));
-          groupedCallbacks.push(messageItem[1])
-          self._socketMessageQueue.normal.splice(i, 1);
-          i--;
+        // Ignore the targeted messages since they cannot be grouped since "group" is a broadcasted message.
+        if (message.target) {
+          continue;
         }
 
-        message = [{
-          type: self._SIG_MESSAGE_TYPE.GROUP,
-          lists: groupedBatch,
-          mid: userId,
-          rid: self._room && self._room.id
+        // The limit for the list is 16 messages in a grouped message.
+        if (messages.length === 16) {
+          break;
+        }
 
-        }, function (error) {
-          groupedCallbacks.forEach(function (callbackItem) {
-            callbackItem(error);
-          });
-        }];
-      }
-    }
-
-    if (message) {
-      // Ensure that socket connection is open and available before sending any messages.
-      if (!(self._channelOpen && self._socket)) {
-        log.warn([message[0].target || 'Server', 'Socket', message[0].type,
-          'Dropping of message as Socket connection is not opened or is at incorrect step ->'], message[0]);
-        message[1](new Error('Message failed to be sent as socket is not opened'));
-        return;
+        messages.push(JSON.stringify(message));
+        callbacks.push(callback);
+        self._socketMessageQueue.normal.splice(i, 1);
+        i--;
       }
 
-      self._socket.send(JSON.stringify(message[0]));
-      self._timestamp.socketMessage = currentTimestamp;
-      self._socketMessageType = message[0].type;
-      self._sendChannelMessageQueue();
-      message[1](null);
+      sendToServer({
+        type: self._SIG_MESSAGE_TYPE.GROUP,
+        lists: messages,
+        mid: userId,
+        rid: self._room && self._room.id
 
-      // If user tampers with the SDK and sends self a "bye" message.
-      if (message[0].type === self._SIG_MESSAGE_TYPE.BYE && message[0].mid === userId) {
-        self.leaveRoom(false);
-        self._trigger('sessionDisconnect', userId, self.getPeerInfo());
-      }
-    }
-
-  }, timeout);
+      }, function (error) {
+        callbacks.forEach(function (callback) {
+          callback(error);
+        });
+      });
+    // The interval timeout is 0ms for priority as it is sent immediately.
+    }, latency + broadcastInterval);
+  }
 };
 
 /**
@@ -357,7 +357,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   });
 
   socket.on('pong', function (latency) {
-    self._socketMessageLatency = latency || 0;
+    self._socketLatency = latency || 0;
   });
 
   socket.on('message', function(messageStr) {

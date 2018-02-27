@@ -434,35 +434,23 @@ function Skylink() {
 
   /**
    * Stores the timeout interval for sending buffered socket messages.
-   * @attribute _socketMessageTimeout
+   * @attribute _socketMessageInterval
    * @type Number
    * @private
    * @for Skylink
    * @since 0.6.31
    */
-  this._socketMessageTimeout = null;
+  this._socketMessageInterval = null;
 
   /**
    * Stores the socket connection latency in ms.
-   * For safer checks, make the latency more than 150ms.
-   * @attribute _socketMessageLatency
+   * @attribute _socketLatency
    * @type Number
    * @private
    * @for Skylink
    * @since 0.6.31
    */
-  this._socketMessageLatency = 150;
-
-  /**
-   * Stores the last sent socket message type.
-   * This helps us determine if we should append timeout interval or not.
-   * @attribute _socketMessageType
-   * @type Number
-   * @private
-   * @for Skylink
-   * @since 0.6.31
-   */
-  this._socketMessageType = 150;
+  this._socketLatency = null;
 
   /**
    * Stores the list of socket ports to use to connect to the Signaling.
