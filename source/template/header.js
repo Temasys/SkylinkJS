@@ -454,6 +454,17 @@ function Skylink() {
   this._socketMessageLatency = 150;
 
   /**
+   * Stores the last sent socket message type.
+   * This helps us determine if we should append timeout interval or not.
+   * @attribute _socketMessageType
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.6.31
+   */
+  this._socketMessageType = 150;
+
+  /**
    * Stores the list of socket ports to use to connect to the Signaling.
    * These ports are defined by default which is commonly used currently by the Signaling.
    * Should re-evaluate this sometime.

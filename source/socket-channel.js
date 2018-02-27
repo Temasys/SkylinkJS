@@ -12,11 +12,17 @@ Skylink.prototype._sendChannelMessageQueue = function() {
   var interval = 1000;
 
   // By default, we set a 0ms timeout interval since we would expect priority messages to be sent quickly.
-  // We should increase the timeout interval when there are non-priority messages in the queue.
-  // For non-priority targeted messages, the interval is smaller compared to broadcasted ones.
   if (!self._socketMessageQueue.priority.length &&
+  // We should increase the timeout interval when there are non-priority messages in the queue.
     (self._socketMessageQueue.normal.length || Object.keys(self._socketMessageQueue.status).length)) {
-    timeout = interval + self._socketMessageLatency;
+    timeout += self._socketMessageLatency;
+
+    // Only append timeout intervals when the last sent is something recorded by the signaling server.
+    if (self._GROUP_MESSAGE_LIST.concat([
+      self._SIG_MESSAGE_TYPE.GROUP,
+      self._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE]).indexOf(self._socketMessageType) > -1) {
+     timeout += interval;
+    }
   }
 
   // Clear any existing timeout interval just in the scenario where
@@ -137,6 +143,7 @@ Skylink.prototype._sendChannelMessageQueue = function() {
 
       self._socket.send(JSON.stringify(message[0]));
       self._timestamp.socketMessage = currentTimestamp;
+      self._socketMessageType = message[0].type;
       self._sendChannelMessageQueue();
       message[1](null);
 
