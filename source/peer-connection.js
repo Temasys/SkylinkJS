@@ -851,7 +851,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       output.selectedCandidate.remote.candidateType = remoteCanItem.candidateType;
 
     // Firefox
-    } else if (item.type === 'candidatepair' && item.state === 'succeeded' && item.nominated) {
+    } else if (['candidate-pair', 'candidatepair'].indexOf(item.type) > -1 && item.state === 'succeeded' && item.nominated) {
       output.selectedCandidate.writable = item.writable;
       output.selectedCandidate.readable = item.readable;
 
