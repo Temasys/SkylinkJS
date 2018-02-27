@@ -86,7 +86,9 @@ Skylink.prototype._sendChannelMessageQueue = function() {
     }, 0);
 
   // Send the targeted messages second if it is the first item in the normal queue.
-  } else if (self._socketMessageQueue.normal.length && self._socketMessageQueue.normal[0][0].target) {
+  // Make sure there are no status messages in the current queue first since status should be sent first.
+  } else if (self._socketMessageQueue.normal.length && self._socketMessageQueue.normal[0][0].target &&
+    !Object.keys(self._socketMessageQueue.status).length) {
     self._socketMessageInterval = setTimeout(function () {
       var queueItem = self._socketMessageQueue.normal.splice(0, 1)[0];
       var message = queueItem[0];
