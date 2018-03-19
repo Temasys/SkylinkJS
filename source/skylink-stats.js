@@ -20,7 +20,9 @@ Skylink.prototype._postStats = function (endpoint, params) {
     xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
     xhr.send(JSON.stringify(params));
 
-  } catch (error) { }
+  } catch (error) {
+    console.log("error in posting stats data");
+  }
 };
 
 /**
@@ -42,7 +44,7 @@ Skylink.prototype._handleClientStats = function() {
     agent_plugin_version: (AdapterJS.WebRTCPlugin.plugin && AdapterJS.WebRTCPlugin.plugin.VERSION) || null
   };
 
-  self._postStats('/stats/client', statsObject);
+  self._postStats('/rest/stats/client', statsObject);
 };
 
 /**
@@ -61,7 +63,7 @@ Skylink.prototype._handleSessionStats = function(message) {
     contents: message
   };
 
-  self._postStats('/stats/session', statsObject);
+  //self._postStats('/rest/stats/session', statsObject);
 };
 
 /**
@@ -82,7 +84,7 @@ Skylink.prototype._handleAuthStats = function(state, result, status, error) {
     api_result: result
   };
 
-  self._postStats('/stats/auth', statsObject);
+  self._postStats('/rest/stats/auth', statsObject);
 };
 
 /**
@@ -106,7 +108,7 @@ Skylink.prototype._handleSignalingStats = function(state, retries, error) {
     error: (typeof error === 'string' ? error : (error && error.message)) || null
   };
 
-  self._postStats('/stats/client/signaling', statsObject);
+  self._postStats('/rest/stats/client/signaling', statsObject);
 };
 
 /**
@@ -151,7 +153,7 @@ Skylink.prototype._handleIceConnectionStats = function(state, peerId) {
         });
       }
 
-      self._postStats('/stats/client/iceconnection', statsObject);
+      self._postStats('/rest/stats/client/iceconnection', statsObject);
     }, true);
   }, 0);
 };
@@ -178,7 +180,7 @@ Skylink.prototype._handleIceCandidateStats = function(state, peerId, candidateId
     error: (typeof error === 'string' ? error : (error && error.message)) || null,
   };
 
-  self._postStats('/stats/client/icecandidate', statsObject);
+  self._postStats('/rest/stats/client/icecandidate', statsObject);
 };
 
 /**
@@ -198,7 +200,7 @@ Skylink.prototype._handleIceGatheringStats = function(state, peerId, isRemote) {
     is_remote: isRemote
   };
 
-  self._postStats('/stats/client/icegathering', statsObject);
+  //self._postStats('/rest/stats/client/icegathering', statsObject);
 };
 
 /**
@@ -232,7 +234,7 @@ Skylink.prototype._handleNegotiationStats = function(state, peerId, sdpOrMessage
     statsObject.sdp_sdp = (sdpOrMessage && sdpOrMessage.sdp) || null;
   }
 
-  self._postStats('/stats/client/negotiation', statsObject);
+  self._postStats('/rest/stats/client/negotiation', statsObject);
 };
 
 /**
@@ -357,7 +359,7 @@ Skylink.prototype._handleBandwidthStats = function (peerId) {
     statsObject.video_recv.framerate_std_dev = formatValue('video', 'recv', 'frameRateStdDev');
     statsObject.video_recv.qp_sum = formatValue('video', 'recv', 'qpSum');
 
-    self._postStats('/stats/client/bandwidth', statsObject);
+    self._postStats('/rest/stats/client/bandwidth', statsObject);
   }, true);
 };
 
@@ -379,7 +381,7 @@ Skylink.prototype._handleRecordingStats = function(state, recordingId, recording
     error: (typeof error === 'string' ? error : (error && error.message)) || null
   };
 
-  self._postStats('/stats/client/recording', statsObject);
+  self._postStats('/rest/stats/client/recording', statsObject);
 };
 
 /**
@@ -412,6 +414,6 @@ Skylink.prototype._handleDatachannelStats = function(state, peerId, channel, cha
     }
   }
 
-  self._postStats('/stats/client/datachannel', statsObject);
+  //self._postStats('/rest/stats/client/datachannel', statsObject);
 };
 
