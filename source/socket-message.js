@@ -1729,6 +1729,23 @@ Skylink.prototype._answerHandler = function(message) {
 
   self._parseSDPMediaStreamIDs(targetMid, answer);
 
+  function changeSDPFormat(sdp){
+    if(sdp.indexOf("m=video")>sdp.indexOf("m=audio")){
+      var sIndex = sdp.indexOf("m=video");
+      var eIndex = sdp.lastIndexOf("m=");
+      var mVideoLineStr = sdp.substring(sIndex,eIndex)+"m=audio";
+      sdp = sdp.replace(sdp.substring(sIndex, eIndex), "");
+      sdp = sdp.replace("m=audio", mVideoLineStr);
+    }
+    return sdp;
+  }
+
+  if (self._hasMCU && targetMid !== 'MCU'
+    && AdapterJS.webrtcDetectedBrowser === 'firefox'
+    && AdapterJS.webrtcDetectedVersion >= 59) {
+    answer.sdp = changeSDPFormat(answer.sdp);
+  }
+
   var onSuccessCbFn = function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
