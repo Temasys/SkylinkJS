@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.30",
+        "version": "0.6.31",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -5162,11 +5162,13 @@
             "itemtype": "method",
             "name": "_containsInList",
             "since": "0.6.27",
+            "access": "private",
+            "tagname": "",
             "class": "Skylink"
         },
         {
             "file": "source/room-init.js",
-            "line": 756,
+            "line": 757,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -5177,7 +5179,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 877,
+            "line": 878,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5188,7 +5190,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 945,
+            "line": 946,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5199,7 +5201,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1057,
+            "line": 1058,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -9160,7 +9162,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1766,
+            "line": 1783,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",

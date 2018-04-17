@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.30 - Wed Feb 21 2018 17:48:18 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.31 - Tue Apr 17 2018 18:24:05 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -13688,7 +13688,7 @@ if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.30 - Wed Feb 21 2018 17:48:18 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.31 - Tue Apr 17 2018 18:24:05 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -15292,7 +15292,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.30';
+Skylink.prototype.VERSION = '0.6.31';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -24007,6 +24007,7 @@ Skylink.prototype.init = function(_options, _callback) {
  * @method _containsInList
  * @for Skylink
  * @since 0.6.27
+ * @private
  */
 Skylink.prototype._containsInList = function (listName, value, defaultProperty) {
   var self = this;
@@ -28491,6 +28492,23 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   self._parseSDPMediaStreamIDs(targetMid, answer);
+
+  function changeSDPFormat(sdp){
+    if(sdp.indexOf("m=video")>sdp.indexOf("m=audio")){
+      var sIndex = sdp.indexOf("m=video");
+      var eIndex = sdp.lastIndexOf("m=");
+      var mVideoLineStr = sdp.substring(sIndex,eIndex)+"m=audio";
+      sdp = sdp.replace(sdp.substring(sIndex, eIndex), "");
+      sdp = sdp.replace("m=audio", mVideoLineStr);
+    }
+    return sdp;
+  }
+
+  if (self._hasMCU && targetMid !== 'MCU'
+    && AdapterJS.webrtcDetectedBrowser === 'firefox'
+    && AdapterJS.webrtcDetectedVersion >= 59) {
+    answer.sdp = changeSDPFormat(answer.sdp);
+  }
 
   var onSuccessCbFn = function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
