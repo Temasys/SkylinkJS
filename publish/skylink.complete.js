@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.31 - Tue Apr 17 2018 18:24:05 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.31 - Wed Apr 18 2018 15:58:40 GMT+0800 (+08) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -13688,7 +13688,7 @@ if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.31 - Tue Apr 17 2018 18:24:05 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.31 - Wed Apr 18 2018 15:58:40 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -13745,15 +13745,15 @@ var clone = function (obj) {
  * Before using any Skylink functionalities, you will need to authenticate your App Key using
  *   the <a href="#method_init">`init()` method</a>.
  *
- * To manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).
+ * To manage or create App Keys, you may access the [Temasys Console here](https://console.temasys.io).
  *
  * To view the list of supported browsers, visit [the list here](
  * https://github.com/Temasys/SkylinkJS#supported-browsers).
  *
  * Here are some articles to help you get started:
- * - [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)
- * - [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)
- * - [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)
+ * - [How to setup a simple video call](https://temasys.io/temasys-rtc-getting-started-web-sdk/)
+ * - [How to setup screensharing](https://temasys.io/webrtc-screensharing-temasys-web-sdk/)
+ * - [How to create a chatroom like feature](https://temasys.io/building-a-simple-peer-to-peer-webrtc-chat/)
  *
  * Here are some demos you may use to aid your development:
  * - Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]
