@@ -1,6 +1,6 @@
-> Temasys Web SDK (formerly SkylinkJS) is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
+> Temasys SkylinkJS Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
 
-We've gone to great length to make this library work in as many browsers as possible. Temasys Web SDK is built on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://temasys.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
+We've gone to great length to make this library work in as many browsers as possible. Temasys SkylinkJS Web SDK is built on top of [AdapterJS](http://github.com/Temasys/AdapterJS) and works with our [Temasys WebRTC Plugin](http://temasys.io/plugin/) even in Internet Explorer and Safari on Mac and PC.
 
 You'll need a Temasys Account and an App key to use this. [Register here to get your App key](https://console.temasys.io).
 
@@ -24,11 +24,11 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 - (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.io). For Firefox extensions source code, [you may download from your Application Key in console.temasys.io](https://console.temasys.io).
 
 ##### Installation
-Install Temasys Web SDK (formerly SkylinkJS) with [npm](https://www.npmjs.com/):
+Install Temasys SkylinkJS Web SDK with [npm](https://www.npmjs.com/):
 ```
 npm install skylinkjs@0.6.x
 ```
-Install Temasys Web SDK (formerly SkylinkJS) with [bower](http://bower.io/):
+Install Temasys SkylinkJS Web SDK with [bower](http://bower.io/):
 ```
 bower install skylinkjs
 ```
@@ -38,7 +38,7 @@ bower install skylinkjs
 - [Getting started](https://temasys.io/getting-started-with-webrtc-and-skylinkjs/)
 - [API Docs](http://cdn.temasys.io/skylink/skylinkjs/latest/doc/classes/Skylink.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
-- [Developer Console  - Get your App key](https://console.temasys.io)
+- [Temasys Console  - Get your App key](https://console.temasys.io)
 - [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/master/demo)
 - [Run tests](https://github.com/Temasys/SkylinkJS/tree/master/tests)
 
@@ -48,9 +48,9 @@ bower install skylinkjs
 You can raise tickets on [our support portal](http://support.temasys.io) or on [our Github Page](https://console.temasys.io/support).
 
 ##### Current versions and stability
-We recommend that you always use the latest versions of the Temasys Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
+We recommend that you always use the latest versions of the Temasys SkylinkJS Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: `0.6.30`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.30).
+[Latest version: `0.6.31`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.31).
 
 ##### Setting AdapterJS flags
 If you require to set Temasys AdapterJS flags (e.g. forcing Temasys WebRTC plugin), we recommend the following method:
@@ -105,7 +105,7 @@ sw.on('readyStateChange', function (state) {
 });
 ```
 
-## How to build your own Temasys Web SDK
+## How to build your own Temasys SkylinkJS Web SDK
 Using [Git](http://git-scm.com/download) command line tools, execute the following:
 ```
 # 1. Clone or download this repository via git terminal.

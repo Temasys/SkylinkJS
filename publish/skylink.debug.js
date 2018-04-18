@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.30 - Wed Feb 21 2018 17:48:18 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.31 - Wed Apr 18 2018 15:58:40 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -55,15 +55,15 @@ var clone = function (obj) {
  * Before using any Skylink functionalities, you will need to authenticate your App Key using
  *   the <a href="#method_init">`init()` method</a>.
  *
- * To manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).
+ * To manage or create App Keys, you may access the [Temasys Console here](https://console.temasys.io).
  *
  * To view the list of supported browsers, visit [the list here](
  * https://github.com/Temasys/SkylinkJS#supported-browsers).
  *
  * Here are some articles to help you get started:
- * - [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)
- * - [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)
- * - [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)
+ * - [How to setup a simple video call](https://temasys.io/temasys-rtc-getting-started-web-sdk/)
+ * - [How to setup screensharing](https://temasys.io/webrtc-screensharing-temasys-web-sdk/)
+ * - [How to create a chatroom like feature](https://temasys.io/building-a-simple-peer-to-peer-webrtc-chat/)
  *
  * Here are some demos you may use to aid your development:
  * - Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]
@@ -1602,7 +1602,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.30';
+Skylink.prototype.VERSION = '0.6.31';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -10317,6 +10317,7 @@ Skylink.prototype.init = function(_options, _callback) {
  * @method _containsInList
  * @for Skylink
  * @since 0.6.27
+ * @private
  */
 Skylink.prototype._containsInList = function (listName, value, defaultProperty) {
   var self = this;
@@ -14801,6 +14802,23 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   self._parseSDPMediaStreamIDs(targetMid, answer);
+
+  function changeSDPFormat(sdp){
+    if(sdp.indexOf("m=video")>sdp.indexOf("m=audio")){
+      var sIndex = sdp.indexOf("m=video");
+      var eIndex = sdp.lastIndexOf("m=");
+      var mVideoLineStr = sdp.substring(sIndex,eIndex)+"m=audio";
+      sdp = sdp.replace(sdp.substring(sIndex, eIndex), "");
+      sdp = sdp.replace("m=audio", mVideoLineStr);
+    }
+    return sdp;
+  }
+
+  if (self._hasMCU && targetMid !== 'MCU'
+    && AdapterJS.webrtcDetectedBrowser === 'firefox'
+    && AdapterJS.webrtcDetectedVersion >= 59) {
+    answer.sdp = changeSDPFormat(answer.sdp);
+  }
 
   var onSuccessCbFn = function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);

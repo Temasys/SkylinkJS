@@ -740,6 +740,7 @@ Skylink.prototype.init = function(_options, _callback) {
  * @method _containsInList
  * @for Skylink
  * @since 0.6.27
+ * @private
  */
 Skylink.prototype._containsInList = function (listName, value, defaultProperty) {
   var self = this;

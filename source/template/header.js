@@ -53,15 +53,15 @@ var clone = function (obj) {
  * Before using any Skylink functionalities, you will need to authenticate your App Key using
  *   the <a href="#method_init">`init()` method</a>.
  *
- * To manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).
+ * To manage or create App Keys, you may access the [Temasys Console here](https://console.temasys.io).
  *
  * To view the list of supported browsers, visit [the list here](
  * https://github.com/Temasys/SkylinkJS#supported-browsers).
  *
  * Here are some articles to help you get started:
- * - [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)
- * - [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)
- * - [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)
+ * - [How to setup a simple video call](https://temasys.io/temasys-rtc-getting-started-web-sdk/)
+ * - [How to setup screensharing](https://temasys.io/webrtc-screensharing-temasys-web-sdk/)
+ * - [How to create a chatroom like feature](https://temasys.io/building-a-simple-peer-to-peer-webrtc-chat/)
  *
  * Here are some demos you may use to aid your development:
  * - Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]
