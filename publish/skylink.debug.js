@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.31 - Fri Jul 06 2018 11:20:52 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v0.6.32 - Fri Jul 06 2018 14:50:03 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -1602,7 +1602,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.31';
+Skylink.prototype.VERSION = '0.6.32';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
