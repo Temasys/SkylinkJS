@@ -77,7 +77,7 @@ Skylink.prototype.setUserData = function(userData) {
 Skylink.prototype.getUserData = function(peerId) {
   if (peerId && this._peerInformations[peerId]) {
     var userData = this._peerInformations[peerId].userData;
-    if (!(userData !== null && typeof userData !== 'undefined')) {
+    if (!(userData !== null && typeof userData === 'undefined')) {
       userData = '';
     }
     return userData;
