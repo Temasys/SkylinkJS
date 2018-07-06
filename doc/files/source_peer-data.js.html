@@ -168,7 +168,7 @@ Skylink.prototype.setUserData = function(userData) {
 Skylink.prototype.getUserData = function(peerId) {
   if (peerId &amp;&amp; this._peerInformations[peerId]) {
     var userData = this._peerInformations[peerId].userData;
-    if (!(userData !== null &amp;&amp; typeof userData === &#x27;undefined&#x27;)) {
+    if (!(userData !== null &amp;&amp; typeof userData !== &#x27;undefined&#x27;)) {
       userData = &#x27;&#x27;;
     }
     return userData;
