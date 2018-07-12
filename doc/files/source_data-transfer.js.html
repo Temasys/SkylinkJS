@@ -2371,11 +2371,20 @@ Skylink.prototype._handleDataTransferTimeoutForPeer = function (transferId, peer
  */
 Skylink.prototype._processDataChannelData = function(rawData, peerId, channelName, channelType) {
   var self = this;
-
-  var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? &#x27;main&#x27; : channelName;
-  var transferId = self._dataChannels[peerId][channelProp].transferId || null;
-  var streamId = self._dataChannels[peerId][channelProp].streamId || null;
+  var transferId = null;
+  var streamId = null;
   var isStreamChunk = false;
+  var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? &#x27;main&#x27; : channelName;
+
+  // Safe access of _dataChannel object in case dataChannel has been closed unexpectedly | ESS-983
+  var objPeerDataChannel = self._dataChannels[peerId] || {};
+  if (objPeerDataChannel.hasOwnProperty(channelProp) &amp;&amp; typeof objPeerDataChannel[channelProp] === &#x27;object&#x27;) {
+    transferId = objPeerDataChannel[channelProp].transferId;
+    streamId = objPeerDataChannel[channelProp].streamId;
+  }
+  else {
+    return; // dataChannel not avaialble propbably having being closed abruptly | ESS-983
+  }
 
   if (streamId &amp;&amp; self._dataStreams[streamId]) {
     isStreamChunk = self._dataStreams[streamId].sessionChunkType === &#x27;string&#x27; ? typeof rawData === &#x27;string&#x27; :

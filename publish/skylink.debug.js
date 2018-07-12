@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.32 - Fri Jul 06 2018 14:50:03 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.32 - Thu Jul 12 2018 12:12:00 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -2394,11 +2394,25 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
     dataChannel.onopen = onOpenHandlerFn;
   }
 
+  var getTransferIDByPeerId = function (pid) {
+    for (var transferId in self._dataTransfers) {
+      if (transferId.indexOf(pid) !== -1) {
+        return transferId;
+      }
+    }
+    return null;
+  }
+
   var onCloseHandlerFn = function () {
-    log.debug([peerId, 'RTCDataChannel', channelProp, 'Datachannel has closed']);
+    var dcMessageStr = "Datachannel has closed";
+    var transferId = getTransferIDByPeerId(peerId);
+    log.debug([peerId, 'RTCDataChannel', channelProp, dcMessageStr]);
 
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName,
       channelType, null, self._getDataChannelBuffer(dataChannel));
+
+    // ESS-983 Handling dataChannel unexpected close to trigger dataTransferState Error.
+    transferId && self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, self._getTransferInfo(transferId, peerId, true, false, false), new Error(dcMessageStr));
 
     if (self._peerConnections[peerId] && self._peerConnections[peerId].remoteDescription &&
       self._peerConnections[peerId].remoteDescription.sdp && (self._peerConnections[peerId].remoteDescription.sdp.indexOf(
@@ -4833,11 +4847,20 @@ Skylink.prototype._handleDataTransferTimeoutForPeer = function (transferId, peer
  */
 Skylink.prototype._processDataChannelData = function(rawData, peerId, channelName, channelType) {
   var self = this;
-
-  var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
-  var transferId = self._dataChannels[peerId][channelProp].transferId || null;
-  var streamId = self._dataChannels[peerId][channelProp].streamId || null;
+  var transferId = null;
+  var streamId = null;
   var isStreamChunk = false;
+  var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
+
+  // Safe access of _dataChannel object in case dataChannel has been closed unexpectedly | ESS-983
+  var objPeerDataChannel = self._dataChannels[peerId] || {};
+  if (objPeerDataChannel.hasOwnProperty(channelProp) && typeof objPeerDataChannel[channelProp] === 'object') {
+    transferId = objPeerDataChannel[channelProp].transferId;
+    streamId = objPeerDataChannel[channelProp].streamId;
+  }
+  else {
+    return; // dataChannel not avaialble propbably having being closed abruptly | ESS-983
+  }
 
   if (streamId && self._dataStreams[streamId]) {
     isStreamChunk = self._dataStreams[streamId].sessionChunkType === 'string' ? typeof rawData === 'string' :
