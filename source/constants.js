@@ -1464,3 +1464,25 @@ Skylink.prototype._GROUP_MESSAGE_LIST = [
   Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
 ];
 
+/**
+ * The options available for video and audio bitrates (kbps) quality.
+ * @attribute VIDEO_QUALITY
+ * @param {JSON} HD <small>Value <code>{ video: 3200, audio: 80 }</code></small>
+ *   The value of option to prefer high definition video and audio bitrates.
+ * @param {JSON} HQ <small>Value <code>{ video: 1200, audio: 50 }</code></small>
+ *   The value of option to prefer high quality video and audio bitrates.
+ * @param {JSON} SQ <small>Value <code>{ video: 800, audio: 30 }</code></small>
+ *   The value of option to prefer standard quality video and audio bitrates.
+ * @param {JSON} LQ <small>Value <code>{ video: 500, audio: 20 }</code></small>
+ *   The value of option to prefer low quality video and audio bitrates.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.32
+ */
+Skylink.prototype.VIDEO_QUALITY = {
+  HD: { video: 3200, audio: 150 },
+  HQ: { video: 1200, audio: 80 },
+  SQ: { video: 800, audio: 30 },
+  LQ: { video: 400, audio: 20 }
+};
