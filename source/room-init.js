@@ -833,6 +833,13 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
 
     try {
       xhr.open(method, url, true);
+
+      // ESS-1038: Adding custom headers to signaling
+      if(!self._socketUseXDR) {
+        xhr.setRequestHeader('Skylink_SDK_version', self.VERSION);
+        xhr.setRequestHeader('Skylink_SDK_type', 'WEB_SDK');
+      }
+
       if (params) {
         xhr.setContentType('application/json;charset=UTF-8');
         xhr.send(JSON.stringify(params));
