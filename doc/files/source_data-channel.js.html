@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.32 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.33 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.32</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.33</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -194,11 +194,25 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
     dataChannel.onopen = onOpenHandlerFn;
   }
 
+  var getTransferIDByPeerId = function (pid) {
+    for (var transferId in self._dataTransfers) {
+      if (transferId.indexOf(pid) !== -1) {
+        return transferId;
+      }
+    }
+    return null;
+  }
+
   var onCloseHandlerFn = function () {
-    log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Datachannel has closed&#x27;]);
+    var dcMessageStr = &quot;Datachannel has closed&quot;;
+    var transferId = getTransferIDByPeerId(peerId);
+    log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, dcMessageStr]);
 
     self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName,
       channelType, null, self._getDataChannelBuffer(dataChannel));
+
+    // ESS-983 Handling dataChannel unexpected close to trigger dataTransferState Error.
+    transferId &amp;&amp; self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, self._getTransferInfo(transferId, peerId, true, false, false), new Error(dcMessageStr));
 
     if (self._peerConnections[peerId] &amp;&amp; self._peerConnections[peerId].remoteDescription &amp;&amp;
       self._peerConnections[peerId].remoteDescription.sdp &amp;&amp; (self._peerConnections[peerId].remoteDescription.sdp.indexOf(

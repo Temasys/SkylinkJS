@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.32 - Fri Jul 06 2018 14:50:03 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.33 - Thu Jul 19 2018 10:59:48 GMT+0800 (+08) */
 
 (function(globals) {
 
@@ -1602,7 +1602,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.32';
+Skylink.prototype.VERSION = '0.6.33';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -2295,6 +2295,28 @@ Skylink.prototype._GROUP_MESSAGE_LIST = [
   Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
 ];
 
+/**
+ * The options available for video and audio bitrates (kbps) quality.
+ * @attribute VIDEO_QUALITY
+ * @param {JSON} HD <small>Value <code>{ video: 3200, audio: 80 }</code></small>
+ *   The value of option to prefer high definition video and audio bitrates.
+ * @param {JSON} HQ <small>Value <code>{ video: 1200, audio: 50 }</code></small>
+ *   The value of option to prefer high quality video and audio bitrates.
+ * @param {JSON} SQ <small>Value <code>{ video: 800, audio: 30 }</code></small>
+ *   The value of option to prefer standard quality video and audio bitrates.
+ * @param {JSON} LQ <small>Value <code>{ video: 500, audio: 20 }</code></small>
+ *   The value of option to prefer low quality video and audio bitrates.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.32
+ */
+Skylink.prototype.VIDEO_QUALITY = {
+  HD: { video: 3200, audio: 150 },
+  HQ: { video: 1200, audio: 80 },
+  SQ: { video: 800, audio: 30 },
+  LQ: { video: 400, audio: 20 }
+};
 
 Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThreshold, createAsMessagingChannel) {
   var self = this;
@@ -2394,11 +2416,25 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
     dataChannel.onopen = onOpenHandlerFn;
   }
 
+  var getTransferIDByPeerId = function (pid) {
+    for (var transferId in self._dataTransfers) {
+      if (transferId.indexOf(pid) !== -1) {
+        return transferId;
+      }
+    }
+    return null;
+  }
+
   var onCloseHandlerFn = function () {
-    log.debug([peerId, 'RTCDataChannel', channelProp, 'Datachannel has closed']);
+    var dcMessageStr = "Datachannel has closed";
+    var transferId = getTransferIDByPeerId(peerId);
+    log.debug([peerId, 'RTCDataChannel', channelProp, dcMessageStr]);
 
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName,
       channelType, null, self._getDataChannelBuffer(dataChannel));
+
+    // ESS-983 Handling dataChannel unexpected close to trigger dataTransferState Error.
+    transferId && self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, self._getTransferInfo(transferId, peerId, true, false, false), new Error(dcMessageStr));
 
     if (self._peerConnections[peerId] && self._peerConnections[peerId].remoteDescription &&
       self._peerConnections[peerId].remoteDescription.sdp && (self._peerConnections[peerId].remoteDescription.sdp.indexOf(
@@ -4833,11 +4869,20 @@ Skylink.prototype._handleDataTransferTimeoutForPeer = function (transferId, peer
  */
 Skylink.prototype._processDataChannelData = function(rawData, peerId, channelName, channelType) {
   var self = this;
-
-  var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
-  var transferId = self._dataChannels[peerId][channelProp].transferId || null;
-  var streamId = self._dataChannels[peerId][channelProp].streamId || null;
+  var transferId = null;
+  var streamId = null;
   var isStreamChunk = false;
+  var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
+
+  // Safe access of _dataChannel object in case dataChannel has been closed unexpectedly | ESS-983
+  var objPeerDataChannel = self._dataChannels[peerId] || {};
+  if (objPeerDataChannel.hasOwnProperty(channelProp) && typeof objPeerDataChannel[channelProp] === 'object') {
+    transferId = objPeerDataChannel[channelProp].transferId;
+    streamId = objPeerDataChannel[channelProp].streamId;
+  }
+  else {
+    return; // dataChannel not avaialble propbably having being closed abruptly | ESS-983
+  }
 
   if (streamId && self._dataStreams[streamId]) {
     isStreamChunk = self._dataStreams[streamId].sessionChunkType === 'string' ? typeof rawData === 'string' :
@@ -10410,6 +10455,13 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
 
     try {
       xhr.open(method, url, true);
+
+      // ESS-1038: Adding custom headers to signaling
+      if(!self._socketUseXDR) {
+        xhr.setRequestHeader('Skylink_SDK_version', self.VERSION);
+        xhr.setRequestHeader('Skylink_SDK_type', 'WEB_SDK');
+      }
+
       if (params) {
         xhr.setContentType('application/json;charset=UTF-8');
         xhr.send(JSON.stringify(params));
@@ -12862,7 +12914,11 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
     reconnectionAttempts: 2,
     reconnectionDelayMax: 5000,
     reconnectionDelay: 1000,
-    transports: ['websocket']
+    transports: ['websocket'],
+    query: { // ESS-1038: Adding custom headers to signaling
+      Skylink_SDK_type: 'WEB_SDK',
+      Skylink_SDK_version: self.VERSION
+    }
   };
   var ports = self._initOptions.socketServer && typeof self._initOptions.socketServer === 'object' && Array.isArray(self._initOptions.socketServer.ports) &&
     self._initOptions.socketServer.ports.length > 0 ? self._initOptions.socketServer.ports : self._socketPorts[self._signalingServerProtocol];
@@ -14803,22 +14859,6 @@ Skylink.prototype._answerHandler = function(message) {
 
   self._parseSDPMediaStreamIDs(targetMid, answer);
 
-  function changeSDPFormat(sdp){
-    if(sdp.indexOf("m=video")>sdp.indexOf("m=audio")){
-      var sIndex = sdp.indexOf("m=video");
-      var eIndex = sdp.lastIndexOf("m=");
-      var mVideoLineStr = sdp.substring(sIndex,eIndex)+"m=audio";
-      sdp = sdp.replace(sdp.substring(sIndex, eIndex), "");
-      sdp = sdp.replace("m=audio", mVideoLineStr);
-    }
-    return sdp;
-  }
-
-  if (self._hasMCU && targetMid !== 'MCU'
-    && AdapterJS.webrtcDetectedBrowser === 'firefox'
-    && AdapterJS.webrtcDetectedVersion >= 59) {
-    answer.sdp = changeSDPFormat(answer.sdp);
-  }
 
   var onSuccessCbFn = function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
