@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.32",
+        "version": "0.6.33",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -2725,6 +2725,39 @@
             "class": "Skylink"
         },
         {
+            "file": "source/constants.js",
+            "line": 1467,
+            "description": "The options available for video and audio bitrates (kbps) quality.",
+            "itemtype": "attribute",
+            "name": "VIDEO_QUALITY",
+            "params": [
+                {
+                    "name": "HD",
+                    "description": "<small>Value <code>{ video: 3200, audio: 80 }</code></small>\n  The value of option to prefer high definition video and audio bitrates.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "HQ",
+                    "description": "<small>Value <code>{ video: 1200, audio: 50 }</code></small>\n  The value of option to prefer high quality video and audio bitrates.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "SQ",
+                    "description": "<small>Value <code>{ video: 800, audio: 30 }</code></small>\n  The value of option to prefer standard quality video and audio bitrates.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "LQ",
+                    "description": "<small>Value <code>{ video: 500, audio: 20 }</code></small>\n  The value of option to prefer low quality video and audio bitrates.",
+                    "type": "JSON"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.6.32",
+            "class": "Skylink"
+        },
+        {
             "file": "source/data-channel.js",
             "line": 1,
             "description": "Function that starts a Datachannel connection with Peer.",
@@ -2743,7 +2776,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 183,
+            "line": 197,
             "description": "Function that refreshes the main messaging Datachannel.",
             "itemtype": "method",
             "name": "refreshDatachannel",
@@ -2763,7 +2796,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 231,
+            "line": 245,
             "description": "Function that returns the Datachannel buffer threshold and amount.",
             "itemtype": "method",
             "name": "_getDataChannelBuffer",
@@ -2778,7 +2811,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 265,
+            "line": 279,
             "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
             "name": "_sendMessageToDataChannel",
@@ -2789,7 +2822,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 340,
+            "line": 354,
             "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -3317,7 +3350,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2449,
+            "line": 2458,
             "description": "Function that handles the \"WRQ\" data transfer protocol.",
             "itemtype": "method",
             "name": "_WRQProtocolHandler",
@@ -3328,7 +3361,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2592,
+            "line": 2601,
             "description": "Function that handles the \"ACK\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ACKProtocolHandler",
@@ -3339,13 +3372,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2611,
+            "line": 2620,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2694,
+            "line": 2703,
             "description": "Function that handles the \"MESSAGE\" data transfer protocol.",
             "itemtype": "method",
             "name": "_MESSAGEProtocolHandler",
@@ -3356,7 +3389,7 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2715,
+            "line": 2724,
             "description": "Function that handles the \"ERROR\" data transfer protocol.",
             "itemtype": "method",
             "name": "_ERRORProtocolHandler",
@@ -3367,13 +3400,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2734,
+            "line": 2743,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2766,
+            "line": 2775,
             "description": "Function that handles the \"CANCEL\" data transfer protocol.",
             "itemtype": "method",
             "name": "_CANCELProtocolHandler",
@@ -3384,13 +3417,13 @@
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2783,
+            "line": 2792,
             "description": "Emit event for Peers function.",
             "class": "Skylink"
         },
         {
             "file": "source/data-transfer.js",
-            "line": 2815,
+            "line": 2824,
             "description": "Function that handles the data transfer chunk received.",
             "itemtype": "method",
             "name": "_DATAProtocolHandler",
@@ -4102,7 +4135,7 @@
                         },
                         {
                             "name": "bandwidth",
-                            "description": "<blockquote class=\"info\">Note that this is currently not supported\n  with Firefox browsers versions 48 and below as noted in an existing\n  <a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21\">bugzilla ticket here</a>.</blockquote>\n  The configuration to set the maximum streaming bandwidth to send to Peers.",
+                            "description": "<blockquote class=\"info\">Note that this is currently not supported\n  with Firefox browsers versions 48 and below as noted in an existing\n  <a href=\"https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21\">bugzilla ticket here</a>.</blockquote>\n  The configuration to set the maximum streaming bandwidth to send to Peers. You can also use the preconfigured \n  constant <a href=\"#attr_VIDEO_QUALITY\"><code>VIDEO_QUALITY</code></a> for recommended values.",
                             "type": "JSON",
                             "optional": true,
                             "props": [
@@ -4380,7 +4413,7 @@
                 }
             ],
             "example": [
-                "\n  // Example 1: Connecting to the default Room without Stream\n  skylinkDemo.joinRoom(function (error, success) {\n    if (error) return;\n    console.log(\"User connected.\");\n  });\n\n  // Example 2: Connecting to Room \"testxx\" with Stream\n  skylinkDemo.joinRoom(\"testxx\", {\n    audio: true,\n    video: true\n  }, function (error, success) {\n    if (error) return;\n    console.log(\"User connected with getUserMedia() Stream.\")\n  });\n\n  // Example 3: Connecting to default Room with Stream retrieved earlier\n  skylinkDemo.getUserMedia(function (gUMError, gUMSuccess) {\n    if (gUMError) return;\n    skylinkDemo.joinRoom(function (error, success) {\n      if (error) return;\n      console.log(\"User connected with getUserMedia() Stream.\");\n    });\n  });\n\n  // Example 4: Connecting to \"testxx\" Room with shareScreen() Stream retrieved manually\n  skylinkDemo.on(\"mediaAccessRequired\", function () {\n    skylinkDemo.shareScreen(function (sSError, sSSuccess) {\n      if (sSError) return;\n    });\n  });\n\n  skylinkDemo.joinRoom(\"testxx\", {\n    manualGetUserMedia: true\n  }, function (error, success) {\n    if (error) return;\n    console.log(\"User connected with shareScreen() Stream.\");\n  });\n\n  // Example 5: Connecting to \"testxx\" Room with User custom data\n  var data = { username: \"myusername\" };\n  skylinkDemo.joinRoom(\"testxx\", {\n    userData: data\n  }, function (error, success) {\n    if (error) return;\n    console.log(\"User connected with correct user data?\", success.peerInfo.userData.username === data.username);\n  });"
+                "\n  // Example 1: Connecting to the default Room without Stream\n  skylinkDemo.joinRoom(function (error, success) {\n    if (error) return;\n    console.log(\"User connected.\");\n  });\n\n  // Example 2: Connecting to Room \"testxx\" with Stream\n  skylinkDemo.joinRoom(\"testxx\", {\n    audio: true,\n    video: true\n  }, function (error, success) {\n    if (error) return;\n    console.log(\"User connected with getUserMedia() Stream.\")\n  });\n\n  // Example 3: Connecting to default Room with Stream retrieved earlier\n  skylinkDemo.getUserMedia(function (gUMError, gUMSuccess) {\n    if (gUMError) return;\n    skylinkDemo.joinRoom(function (error, success) {\n      if (error) return;\n      console.log(\"User connected with getUserMedia() Stream.\");\n    });\n  });\n\n  // Example 4: Connecting to \"testxx\" Room with shareScreen() Stream retrieved manually\n  skylinkDemo.on(\"mediaAccessRequired\", function () {\n    skylinkDemo.shareScreen(function (sSError, sSSuccess) {\n      if (sSError) return;\n    });\n  });\n\n  skylinkDemo.joinRoom(\"testxx\", {\n    manualGetUserMedia: true\n  }, function (error, success) {\n    if (error) return;\n    console.log(\"User connected with shareScreen() Stream.\");\n  });\n\n  // Example 5: Connecting to \"testxx\" Room with User custom data\n  var data = { username: \"myusername\" };\n  skylinkDemo.joinRoom(\"testxx\", {\n    userData: data\n  }, function (error, success) {\n    if (error) return;\n    console.log(\"User connected with correct user data?\", success.peerInfo.userData.username === data.username);\n  });\n\n  // Example 6: Connecting to \"testxx\" Room with a pre-configured bandwidth set\n  skylinkDemo.joinRoom(\"testxx\", {\n    bandwidth: skylinkDemo.VIDEO_QUALITY.HD\n  }, function (error, success) {\n    if (error) return;\n    console.log(\"User connected with bandwidth quality HD\");\n  });"
             ],
             "trigger": "<ol class=\"desc-seq\">\n  <li>If User is in a Room: <ol>\n  <li>Invoke <a href=\"#method_leaveRoom\"><code>leaveRoom()</code> method</a>\n  to end current Room connection. <small>Invoked <a href=\"#method_leaveRoom\"><code>leaveRoom()</code>\n  method</a> <code>stopMediaOptions</code> parameter value will be <code>false</code>.</small>\n  <small>Regardless of request errors, <code>joinRoom()</code> will still proceed.</small></li></ol></li>\n  <li>Check if Room name provided matches the Room name of the currently retrieved Room session token. <ol>\n  <li>If Room name does not matches: <ol>\n  <li>Invoke <a href=\"#method_init\"><code>init()</code> method</a> to retrieve new Room session token. <ol>\n  <li>If request has errors: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>\n  <li>Open a new socket connection to Signaling server. <ol><li>If Socket connection fails: <ol>\n  <li><a href=\"#event_socketError\"><code>socketError</code> event</a> triggers parameter payload\n  <code>errorCode</code> as <code>CONNECTION_FAILED</code>. <ol>\n  <li>Checks if there are fallback ports and transports to use. <ol>\n  <li>If there are still fallback ports and transports: <ol>\n  <li>Attempts to retry socket connection to Signaling server. <ol>\n  <li><a href=\"#event_channelRetry\"><code>channelRetry</code> event</a> triggers.</li>\n  <li><a href=\"#event_socketError\"><code>socketError</code> event</a> triggers parameter\n  payload <code>errorCode</code> as <code>RECONNECTION_ATTEMPT</code>.</li>\n  <li>If attempt to retry socket connection to Signaling server has failed: <ol>\n  <li><a href=\"#event_socketError\"><code>socketError</code> event</a> triggers parameter payload\n  <code>errorCode</code> as <code>RECONNECTION_FAILED</code>.</li>\n  <li>Checks if there are still any more fallback ports and transports to use. <ol>\n  <li>If there are is no more fallback ports and transports to use: <ol>\n  <li><a href=\"#event_socketError\"><code>socketError</code> event</a> triggers\n  parameter payload <code>errorCode</code> as <code>RECONNECTION_ABORTED</code>.</li>\n  <li><b>ABORT</b> and return error.</li></ol></li><li>Else: <ol><li><b>REPEAT</b> attempt to retry socket connection\n  to Signaling server step.</li></ol></li></ol></li></ol></li></ol></li></ol></li><li>Else: <ol>\n  <li><a href=\"#event_socketError\"><code>socketError</code> event</a> triggers\n  parameter payload <code>errorCode</code> as <code>CONNECTION_ABORTED</code>.</li>\n  <li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>\n  <li>If socket connection to Signaling server has opened: <ol>\n  <li><a href=\"#event_channelOpen\"><code>channelOpen</code> event</a> triggers.</li></ol></li></ol></li>\n  <li>Checks if there is <code>options.manualGetUserMedia</code> requested <ol><li>If it is requested: <ol>\n  <li><a href=\"#event_mediaAccessRequired\"><code>mediaAccessRequired</code> event</a> triggers.</li>\n  <li>If more than 30 seconds has passed and no <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>\n  or <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>\n  has been retrieved: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li><li>Else: <ol>\n  <li>If there is <code>options.audio</code> or <code>options.video</code> requested: <ol>\n  <li>Invoke <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> method</a>. <ol>\n  <li>If request has errors: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></ol></li>\n  </ol></li><li>Starts the Room session <ol><li>If Room session has started successfully: <ol>\n  <li><a href=\"#event_peerJoined\"><code>peerJoined</code> event</a> triggers parameter payload\n  <code>isSelf</code> value as <code>true</code>.</li>\n  <li>If MCU is enabled for the App Key provided in <a href=\"#method_init\"><code>init()</code>\n  method</a> and connected: <ol><li><a href=\"#event_serverPeerJoined\"><code>serverPeerJoined</code>\n  event</a> triggers <code>serverPeerType</code> as <code>MCU</code>. <small>MCU has\n  to be present in the Room in order for Peer connections to commence.</small></li>\n  <li>Checks for any available Stream <ol>\n  <li>If <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> is available: <ol>\n  <li><a href=\"#event_incomingStream\"><code>incomingStream</code> event</a>\n  triggers parameter payload <code>isSelf</code> value as <code>true</code> and <code>stream</code>\n  as <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.\n  <small>User will be sending <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>\n  to Peers.</small></li></ol></li>\n  <li>Else if <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> is available: <ol>\n  <li><a href=\"#event_incomingStream\"><code>incomingStream</code> event</a> triggers parameter\n  payload <code>isSelf</code> value as <code>true</code> and <code>stream</code> as\n  <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.\n  <small>User will be sending <code>getUserMedia()</code> Stream to Peers.</small></li></ol></li><li>Else: <ol>\n  <li>No Stream will be sent.</li></ol></li></ol></li></ol></li></ol></li><li>Else: <ol>\n  <li><a href=\"#event_systemAction\"><code>systemAction</code> event</a> triggers\n  parameter payload <code>action</code> as <code>REJECT</code>.</li>\n  <li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol>",
             "since": "0.5.5",
@@ -4388,7 +4421,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 468,
+            "line": 477,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4453,7 +4486,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 584,
+            "line": 593,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4463,7 +4496,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 618,
+            "line": 627,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4473,7 +4506,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 652,
+            "line": 661,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -5179,7 +5212,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 878,
+            "line": 885,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5190,7 +5223,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 946,
+            "line": 953,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5201,7 +5234,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1058,
+            "line": 1065,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -8743,7 +8776,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 388,
+            "line": 392,
             "description": "Function that starts the socket connection to the Signaling.\nThis starts creating the socket connection and called at first not when requiring to fallback.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -8754,7 +8787,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 432,
+            "line": 436,
             "description": "Function that stops the socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -9162,7 +9195,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1783,
+            "line": 1767,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -10084,15 +10117,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:468"
+            "line": " source/room-connection.js:477"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:584"
+            "line": " source/room-connection.js:593"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:618"
+            "line": " source/room-connection.js:627"
         },
         {
             "message": "unknown tag: trigger",
@@ -10248,15 +10281,15 @@
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2611"
+            "line": " source/data-transfer.js:2620"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2734"
+            "line": " source/data-transfer.js:2743"
         },
         {
             "message": "Missing item type\nEmit event for Peers function.",
-            "line": " source/data-transfer.js:2783"
+            "line": " source/data-transfer.js:2792"
         }
     ]
 }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.32 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.33 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.32</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.33</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1555,6 +1555,28 @@ Skylink.prototype._GROUP_MESSAGE_LIST = [
   Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
 ];
 
+/**
+ * The options available for video and audio bitrates (kbps) quality.
+ * @attribute VIDEO_QUALITY
+ * @param {JSON} HD &lt;small&gt;Value &lt;code&gt;{ video: 3200, audio: 80 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of option to prefer high definition video and audio bitrates.
+ * @param {JSON} HQ &lt;small&gt;Value &lt;code&gt;{ video: 1200, audio: 50 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of option to prefer high quality video and audio bitrates.
+ * @param {JSON} SQ &lt;small&gt;Value &lt;code&gt;{ video: 800, audio: 30 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of option to prefer standard quality video and audio bitrates.
+ * @param {JSON} LQ &lt;small&gt;Value &lt;code&gt;{ video: 500, audio: 20 }&lt;/code&gt;&lt;/small&gt;
+ *   The value of option to prefer low quality video and audio bitrates.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.32
+ */
+Skylink.prototype.VIDEO_QUALITY = {
+  HD: { video: 3200, audio: 150 },
+  HQ: { video: 1200, audio: 80 },
+  SQ: { video: 800, audio: 30 },
+  LQ: { video: 400, audio: 20 }
+};
 
     </pre>
 </div>

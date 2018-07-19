@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.32 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.33 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.32</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.33</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -134,7 +134,8 @@
  * @param {JSON} [options.bandwidth] &lt;blockquote class=&quot;info&quot;&gt;Note that this is currently not supported
  *   with Firefox browsers versions 48 and below as noted in an existing
  *   &lt;a href=&quot;https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21&quot;&gt;bugzilla ticket here&lt;/a&gt;.&lt;/blockquote&gt;
- *   The configuration to set the maximum streaming bandwidth to send to Peers.
+ *   The configuration to set the maximum streaming bandwidth to send to Peers. You can also use the preconfigured 
+ *   constant &lt;a href=&quot;#attr_VIDEO_QUALITY&quot;&gt;&lt;code&gt;VIDEO_QUALITY&lt;/code&gt;&lt;/a&gt; for recommended values.
  * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers in kbps.
  *   &lt;small&gt;Recommended values are &lt;code&gt;50&lt;/code&gt; to &lt;code&gt;200&lt;/code&gt;. &lt;code&gt;50&lt;/code&gt; is sufficient enough for
  *   an audio call. The higher you go if you want clearer audio and to be able to hear music streaming.&lt;/small&gt;
@@ -320,6 +321,14 @@
  *   }, function (error, success) {
  *     if (error) return;
  *     console.log(&quot;User connected with correct user data?&quot;, success.peerInfo.userData.username === data.username);
+ *   });
+ * 
+ *   // Example 6: Connecting to &quot;testxx&quot; Room with a pre-configured bandwidth set
+ *   skylinkDemo.joinRoom(&quot;testxx&quot;, {
+ *     bandwidth: skylinkDemo.VIDEO_QUALITY.HD
+ *   }, function (error, success) {
+ *     if (error) return;
+ *     console.log(&quot;User connected with bandwidth quality HD&quot;);
  *   });
  * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
  *   &lt;li&gt;If User is in a Room: &lt;ol&gt;

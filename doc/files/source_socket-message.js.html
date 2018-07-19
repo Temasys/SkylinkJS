@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.32 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.33 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.32</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.33</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1820,22 +1820,6 @@ Skylink.prototype._answerHandler = function(message) {
 
   self._parseSDPMediaStreamIDs(targetMid, answer);
 
-  function changeSDPFormat(sdp){
-    if(sdp.indexOf(&quot;m=video&quot;)&gt;sdp.indexOf(&quot;m=audio&quot;)){
-      var sIndex = sdp.indexOf(&quot;m=video&quot;);
-      var eIndex = sdp.lastIndexOf(&quot;m=&quot;);
-      var mVideoLineStr = sdp.substring(sIndex,eIndex)+&quot;m=audio&quot;;
-      sdp = sdp.replace(sdp.substring(sIndex, eIndex), &quot;&quot;);
-      sdp = sdp.replace(&quot;m=audio&quot;, mVideoLineStr);
-    }
-    return sdp;
-  }
-
-  if (self._hasMCU &amp;&amp; targetMid !== &#x27;MCU&#x27;
-    &amp;&amp; AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27;
-    &amp;&amp; AdapterJS.webrtcDetectedVersion &gt;= 59) {
-    answer.sdp = changeSDPFormat(answer.sdp);
-  }
 
   var onSuccessCbFn = function() {
     log.debug([targetMid, null, message.type, &#x27;Remote description set&#x27;]);
