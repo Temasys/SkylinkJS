@@ -632,7 +632,15 @@ Demo.Skylink.on('getConnectionStatusStateChange', function (state, peerId, stats
       } else {
         itemStr += (bits / 1000000).toFixed(2) + ' mbps';
       }
-
+      if (!stats[type][dir].packetsLost || stats[type][dir].packetsLost == 'undefined') {
+        stats[type][dir].packetsLost = 0;
+      }
+      if (!stats[type][dir].jitter || stats[type][dir].jitter == 'undefined') {
+        stats[type][dir].jitter = 0;
+      }
+      if (!stats[type][dir].rtt || stats[type][dir].rtt == 'undefined') {
+        stats[type][dir].rtt = 0;
+      }
       // format packet stats
       itemStr += '<br>Packets - (' + stats[type][dir].packets + ' sent, ' +
         stats[type][dir].packetsLost + ' lost, ' + stats[type][dir].jitter + ' jitter' +
