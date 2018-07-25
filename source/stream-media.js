@@ -957,7 +957,7 @@ Skylink.prototype.disableVideo = function() {
  *   <small>Object signature is the screensharing Stream object.</small>
  * @example
  *   // Example 1: Share screen with audio
- *   skylinkDemo.shareScreen(function (error, success) {
+ *   skylinkDemo.shareScreen(true, function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
