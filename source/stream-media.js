@@ -1776,8 +1776,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
         settings.getUserMediaSettings.video.optional = clone(options.video.optional);
       }
 
-      if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
-        AdapterJS.webrtcDetectedBrowser !== 'firefox') {
+      if (options.video.deviceId && typeof options.video.deviceId === 'string') {
         settings.settings.video.deviceId = options.video.deviceId;
         settings.getUserMediaSettings.video.deviceId = options.useExactConstraints ?
           { exact: options.video.deviceId } : { ideal: options.video.deviceId };
