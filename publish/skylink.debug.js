@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.33 - Thu Jul 19 2018 10:59:48 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.34 - Thu Aug 16 2018 11:21:01 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -1602,7 +1602,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.33';
+Skylink.prototype.VERSION = '0.6.34';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -5603,15 +5603,18 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         rid: self._room.id
       });
     } else if (self._gatheredCandidates[targetMid]) {
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
-        noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
-          self._gatheredCandidates[targetMid].sending.host.length +
-          self._gatheredCandidates[targetMid].sending.relay.length,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
+      var sendEndOfCandidates = function() {
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
+          noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
+            self._gatheredCandidates[targetMid].sending.host.length +
+            self._gatheredCandidates[targetMid].sending.relay.length,
+          mid: self._user.sid,
+          target: targetMid,
+          rid: self._room.id
+        });
+      };
+      setTimeout(sendEndOfCandidates, 6000);
     }
   }
 };
@@ -15595,7 +15598,7 @@ Skylink.prototype.disableVideo = function() {
  *   <small>Object signature is the screensharing Stream object.</small>
  * @example
  *   // Example 1: Share screen with audio
- *   skylinkDemo.shareScreen(function (error, success) {
+ *   skylinkDemo.shareScreen(true, function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
@@ -16414,8 +16417,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
         settings.getUserMediaSettings.video.optional = clone(options.video.optional);
       }
 
-      if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
-        AdapterJS.webrtcDetectedBrowser !== 'firefox') {
+      if (options.video.deviceId && typeof options.video.deviceId === 'string') {
         settings.settings.video.deviceId = options.video.deviceId;
         settings.getUserMediaSettings.video.deviceId = options.useExactConstraints ?
           { exact: options.video.deviceId } : { ideal: options.video.deviceId };

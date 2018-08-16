@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.33 - Thu Jul 19 2018 10:59:48 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.34 - Thu Aug 16 2018 11:21:01 GMT+0800 (Singapore Standard Time) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -13688,7 +13688,7 @@ if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.33 - Thu Jul 19 2018 10:59:48 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.34 - Thu Aug 16 2018 11:21:01 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -15292,7 +15292,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.33';
+Skylink.prototype.VERSION = '0.6.34';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -19293,15 +19293,18 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         rid: self._room.id
       });
     } else if (self._gatheredCandidates[targetMid]) {
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
-        noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
-          self._gatheredCandidates[targetMid].sending.host.length +
-          self._gatheredCandidates[targetMid].sending.relay.length,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
+      var sendEndOfCandidates = function() {
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
+          noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
+            self._gatheredCandidates[targetMid].sending.host.length +
+            self._gatheredCandidates[targetMid].sending.relay.length,
+          mid: self._user.sid,
+          target: targetMid,
+          rid: self._room.id
+        });
+      };
+      setTimeout(sendEndOfCandidates, 6000);
     }
   }
 };
@@ -29285,7 +29288,7 @@ Skylink.prototype.disableVideo = function() {
  *   <small>Object signature is the screensharing Stream object.</small>
  * @example
  *   // Example 1: Share screen with audio
- *   skylinkDemo.shareScreen(function (error, success) {
+ *   skylinkDemo.shareScreen(true, function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
@@ -30104,8 +30107,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
         settings.getUserMediaSettings.video.optional = clone(options.video.optional);
       }
 
-      if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
-        AdapterJS.webrtcDetectedBrowser !== 'firefox') {
+      if (options.video.deviceId && typeof options.video.deviceId === 'string') {
         settings.settings.video.deviceId = options.video.deviceId;
         settings.getUserMediaSettings.video.deviceId = options.useExactConstraints ?
           { exact: options.video.deviceId } : { ideal: options.video.deviceId };

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.33 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.33</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1048,7 +1048,7 @@ Skylink.prototype.disableVideo = function() {
  *   &lt;small&gt;Object signature is the screensharing Stream object.&lt;/small&gt;
  * @example
  *   // Example 1: Share screen with audio
- *   skylinkDemo.shareScreen(function (error, success) {
+ *   skylinkDemo.shareScreen(true, function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById(&quot;my-screen&quot;), success);
  *   });
@@ -1867,8 +1867,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
         settings.getUserMediaSettings.video.optional = clone(options.video.optional);
       }
 
-      if (options.video.deviceId &amp;&amp; typeof options.video.deviceId === &#x27;string&#x27; &amp;&amp;
-        AdapterJS.webrtcDetectedBrowser !== &#x27;firefox&#x27;) {
+      if (options.video.deviceId &amp;&amp; typeof options.video.deviceId === &#x27;string&#x27;) {
         settings.settings.video.deviceId = options.video.deviceId;
         settings.getUserMediaSettings.video.deviceId = options.useExactConstraints ?
           { exact: options.video.deviceId } : { ideal: options.video.deviceId };
