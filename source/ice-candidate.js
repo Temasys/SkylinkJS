@@ -112,15 +112,18 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         rid: self._room.id
       });
     } else if (self._gatheredCandidates[targetMid]) {
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
-        noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
-          self._gatheredCandidates[targetMid].sending.host.length +
-          self._gatheredCandidates[targetMid].sending.relay.length,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
+      var sendEndOfCandidates = function() {
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
+          noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
+            self._gatheredCandidates[targetMid].sending.host.length +
+            self._gatheredCandidates[targetMid].sending.relay.length,
+          mid: self._user.sid,
+          target: targetMid,
+          rid: self._room.id
+        });
+      };
+      setTimeout(sendEndOfCandidates, 6000);
     }
   }
 };

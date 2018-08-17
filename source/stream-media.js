@@ -957,7 +957,7 @@ Skylink.prototype.disableVideo = function() {
  *   <small>Object signature is the screensharing Stream object.</small>
  * @example
  *   // Example 1: Share screen with audio
- *   skylinkDemo.shareScreen(function (error, success) {
+ *   skylinkDemo.shareScreen(true, function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
@@ -1776,8 +1776,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
         settings.getUserMediaSettings.video.optional = clone(options.video.optional);
       }
 
-      if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
-        AdapterJS.webrtcDetectedBrowser !== 'firefox') {
+      if (options.video.deviceId && typeof options.video.deviceId === 'string') {
         settings.settings.video.deviceId = options.video.deviceId;
         settings.getUserMediaSettings.video.deviceId = options.useExactConstraints ?
           { exact: options.video.deviceId } : { ideal: options.video.deviceId };
