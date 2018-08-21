@@ -856,5 +856,15 @@ function Skylink() {
    * @since 0.6.27
    */
   this._initOptions = {};
-  
+
+  /**
+   * Stores the unique random number used for generating the "client_id".
+   * @attribute _statIdRandom
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.6.31
+   */
+  this._statIdRandom = Date.now() + Math.floor(Math.random() * 100000000);
+
 }
