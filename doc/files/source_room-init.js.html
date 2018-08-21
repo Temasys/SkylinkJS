@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>SkylinkJS 0.6.30</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.30</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -831,6 +831,7 @@ Skylink.prototype.init = function(_options, _callback) {
  * @method _containsInList
  * @for Skylink
  * @since 0.6.27
+ * @private
  */
 Skylink.prototype._containsInList = function (listName, value, defaultProperty) {
   var self = this;
@@ -923,6 +924,13 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
 
     try {
       xhr.open(method, url, true);
+
+      // ESS-1038: Adding custom headers to signaling
+      if(!self._socketUseXDR) {
+        xhr.setRequestHeader(&#x27;Skylink_SDK_version&#x27;, self.VERSION);
+        xhr.setRequestHeader(&#x27;Skylink_SDK_type&#x27;, &#x27;WEB_SDK&#x27;);
+      }
+
       if (params) {
         xhr.setContentType(&#x27;application/json;charset=UTF-8&#x27;);
         xhr.send(JSON.stringify(params));

@@ -107,12 +107,26 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
     dataChannel.onopen = onOpenHandlerFn;
   }
 
+  var getTransferIDByPeerId = function (pid) {
+    for (var transferId in self._dataTransfers) {
+      if (transferId.indexOf(pid) !== -1) {
+        return transferId;
+      }
+    }
+    return null;
+  }
+
   var onCloseHandlerFn = function () {
-    log.debug([peerId, 'RTCDataChannel', channelProp, 'Datachannel has closed']);
+    var dcMessageStr = "Datachannel has closed";
+    var transferId = getTransferIDByPeerId(peerId);
+    log.debug([peerId, 'RTCDataChannel', channelProp, dcMessageStr]);
 
     self._handleDatachannelStats('closed', peerId, dataChannel, channelProp);
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName,
       channelType, null, self._getDataChannelBuffer(dataChannel));
+
+    // ESS-983 Handling dataChannel unexpected close to trigger dataTransferState Error.
+    transferId && self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, self._getTransferInfo(transferId, peerId, true, false, false), new Error(dcMessageStr));
 
     if (self._peerConnections[peerId] && self._peerConnections[peerId].remoteDescription &&
       self._peerConnections[peerId].remoteDescription.sdp && (self._peerConnections[peerId].remoteDescription.sdp.indexOf(

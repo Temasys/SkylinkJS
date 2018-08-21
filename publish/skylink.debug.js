@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.30 - Wed Feb 21 2018 17:48:18 GMT+0800 (+08) */
+/*! skylinkjs - v0.6.34 - Thu Aug 16 2018 11:21:01 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -55,15 +55,15 @@ var clone = function (obj) {
  * Before using any Skylink functionalities, you will need to authenticate your App Key using
  *   the <a href="#method_init">`init()` method</a>.
  *
- * To manage or create App Keys, you may access the [Skylink Developer Portal here](https://console.temasys.io).
+ * To manage or create App Keys, you may access the [Temasys Console here](https://console.temasys.io).
  *
  * To view the list of supported browsers, visit [the list here](
  * https://github.com/Temasys/SkylinkJS#supported-browsers).
  *
  * Here are some articles to help you get started:
- * - [How to setup a simple video call](https://temasys.com.sg/getting-started-with-webrtc-and-skylinkjs/)
- * - [How to setup screensharing](https://temasys.com.sg/screensharing-with-skylinkjs/)
- * - [How to create a chatroom like feature](https://temasys.com.sg/building-a-simple-peer-to-peer-webrtc-chat/)
+ * - [How to setup a simple video call](https://temasys.io/temasys-rtc-getting-started-web-sdk/)
+ * - [How to setup screensharing](https://temasys.io/webrtc-screensharing-temasys-web-sdk/)
+ * - [How to create a chatroom like feature](https://temasys.io/building-a-simple-peer-to-peer-webrtc-chat/)
  *
  * Here are some demos you may use to aid your development:
  * - Getaroom.io [[Demo](https://getaroom.io) / [Source code](https://github.com/Temasys/getaroom)]
@@ -1602,7 +1602,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.30';
+Skylink.prototype.VERSION = '0.6.34';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -2295,6 +2295,28 @@ Skylink.prototype._GROUP_MESSAGE_LIST = [
   Skylink.prototype._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
 ];
 
+/**
+ * The options available for video and audio bitrates (kbps) quality.
+ * @attribute VIDEO_QUALITY
+ * @param {JSON} HD <small>Value <code>{ video: 3200, audio: 80 }</code></small>
+ *   The value of option to prefer high definition video and audio bitrates.
+ * @param {JSON} HQ <small>Value <code>{ video: 1200, audio: 50 }</code></small>
+ *   The value of option to prefer high quality video and audio bitrates.
+ * @param {JSON} SQ <small>Value <code>{ video: 800, audio: 30 }</code></small>
+ *   The value of option to prefer standard quality video and audio bitrates.
+ * @param {JSON} LQ <small>Value <code>{ video: 500, audio: 20 }</code></small>
+ *   The value of option to prefer low quality video and audio bitrates.
+ * @type JSON
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.32
+ */
+Skylink.prototype.VIDEO_QUALITY = {
+  HD: { video: 3200, audio: 150 },
+  HQ: { video: 1200, audio: 80 },
+  SQ: { video: 800, audio: 30 },
+  LQ: { video: 400, audio: 20 }
+};
 
 Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThreshold, createAsMessagingChannel) {
   var self = this;
@@ -2394,11 +2416,25 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
     dataChannel.onopen = onOpenHandlerFn;
   }
 
+  var getTransferIDByPeerId = function (pid) {
+    for (var transferId in self._dataTransfers) {
+      if (transferId.indexOf(pid) !== -1) {
+        return transferId;
+      }
+    }
+    return null;
+  }
+
   var onCloseHandlerFn = function () {
-    log.debug([peerId, 'RTCDataChannel', channelProp, 'Datachannel has closed']);
+    var dcMessageStr = "Datachannel has closed";
+    var transferId = getTransferIDByPeerId(peerId);
+    log.debug([peerId, 'RTCDataChannel', channelProp, dcMessageStr]);
 
     self._trigger('dataChannelState', self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName,
       channelType, null, self._getDataChannelBuffer(dataChannel));
+
+    // ESS-983 Handling dataChannel unexpected close to trigger dataTransferState Error.
+    transferId && self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.ERROR, transferId, peerId, self._getTransferInfo(transferId, peerId, true, false, false), new Error(dcMessageStr));
 
     if (self._peerConnections[peerId] && self._peerConnections[peerId].remoteDescription &&
       self._peerConnections[peerId].remoteDescription.sdp && (self._peerConnections[peerId].remoteDescription.sdp.indexOf(
@@ -4833,11 +4869,20 @@ Skylink.prototype._handleDataTransferTimeoutForPeer = function (transferId, peer
  */
 Skylink.prototype._processDataChannelData = function(rawData, peerId, channelName, channelType) {
   var self = this;
-
-  var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
-  var transferId = self._dataChannels[peerId][channelProp].transferId || null;
-  var streamId = self._dataChannels[peerId][channelProp].streamId || null;
+  var transferId = null;
+  var streamId = null;
   var isStreamChunk = false;
+  var channelProp = channelType === self.DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
+
+  // Safe access of _dataChannel object in case dataChannel has been closed unexpectedly | ESS-983
+  var objPeerDataChannel = self._dataChannels[peerId] || {};
+  if (objPeerDataChannel.hasOwnProperty(channelProp) && typeof objPeerDataChannel[channelProp] === 'object') {
+    transferId = objPeerDataChannel[channelProp].transferId;
+    streamId = objPeerDataChannel[channelProp].streamId;
+  }
+  else {
+    return; // dataChannel not avaialble propbably having being closed abruptly | ESS-983
+  }
 
   if (streamId && self._dataStreams[streamId]) {
     isStreamChunk = self._dataStreams[streamId].sessionChunkType === 'string' ? typeof rawData === 'string' :
@@ -5558,15 +5603,18 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
         rid: self._room.id
       });
     } else if (self._gatheredCandidates[targetMid]) {
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
-        noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
-          self._gatheredCandidates[targetMid].sending.host.length +
-          self._gatheredCandidates[targetMid].sending.relay.length,
-        mid: self._user.sid,
-        target: targetMid,
-        rid: self._room.id
-      });
+      var sendEndOfCandidates = function() {
+        self._sendChannelMessage({
+          type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
+          noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
+            self._gatheredCandidates[targetMid].sending.host.length +
+            self._gatheredCandidates[targetMid].sending.relay.length,
+          mid: self._user.sid,
+          target: targetMid,
+          rid: self._room.id
+        });
+      };
+      setTimeout(sendEndOfCandidates, 6000);
     }
   }
 };
@@ -7990,7 +8038,7 @@ Skylink.prototype.setUserData = function(userData) {
 Skylink.prototype.getUserData = function(peerId) {
   if (peerId && this._peerInformations[peerId]) {
     var userData = this._peerInformations[peerId].userData;
-    if (!(userData !== null && typeof userData === 'undefined')) {
+    if (!(userData !== null && typeof userData !== 'undefined')) {
       userData = '';
     }
     return userData;
@@ -10317,6 +10365,7 @@ Skylink.prototype.init = function(_options, _callback) {
  * @method _containsInList
  * @for Skylink
  * @since 0.6.27
+ * @private
  */
 Skylink.prototype._containsInList = function (listName, value, defaultProperty) {
   var self = this;
@@ -10409,6 +10458,13 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
 
     try {
       xhr.open(method, url, true);
+
+      // ESS-1038: Adding custom headers to signaling
+      if(!self._socketUseXDR) {
+        xhr.setRequestHeader('Skylink_SDK_version', self.VERSION);
+        xhr.setRequestHeader('Skylink_SDK_type', 'WEB_SDK');
+      }
+
       if (params) {
         xhr.setContentType('application/json;charset=UTF-8');
         xhr.send(JSON.stringify(params));
@@ -12861,7 +12917,11 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
     reconnectionAttempts: 2,
     reconnectionDelayMax: 5000,
     reconnectionDelay: 1000,
-    transports: ['websocket']
+    transports: ['websocket'],
+    query: { // ESS-1038: Adding custom headers to signaling
+      Skylink_SDK_type: 'WEB_SDK',
+      Skylink_SDK_version: self.VERSION
+    }
   };
   var ports = self._initOptions.socketServer && typeof self._initOptions.socketServer === 'object' && Array.isArray(self._initOptions.socketServer.ports) &&
     self._initOptions.socketServer.ports.length > 0 ? self._initOptions.socketServer.ports : self._socketPorts[self._signalingServerProtocol];
@@ -14802,6 +14862,7 @@ Skylink.prototype._answerHandler = function(message) {
 
   self._parseSDPMediaStreamIDs(targetMid, answer);
 
+
   var onSuccessCbFn = function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';
@@ -15537,7 +15598,7 @@ Skylink.prototype.disableVideo = function() {
  *   <small>Object signature is the screensharing Stream object.</small>
  * @example
  *   // Example 1: Share screen with audio
- *   skylinkDemo.shareScreen(function (error, success) {
+ *   skylinkDemo.shareScreen(true, function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
@@ -16356,8 +16417,7 @@ Skylink.prototype._parseStreamSettings = function(options) {
         settings.getUserMediaSettings.video.optional = clone(options.video.optional);
       }
 
-      if (options.video.deviceId && typeof options.video.deviceId === 'string' &&
-        AdapterJS.webrtcDetectedBrowser !== 'firefox') {
+      if (options.video.deviceId && typeof options.video.deviceId === 'string') {
         settings.settings.video.deviceId = options.video.deviceId;
         settings.getUserMediaSettings.video.deviceId = options.useExactConstraints ?
           { exact: options.video.deviceId } : { ideal: options.video.deviceId };

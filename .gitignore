@@ -33,6 +33,7 @@ lib-cov
 *.out
 *.pid
 *.gz
+package-lock.json
 
 # Dreamweaver added files
 _notes

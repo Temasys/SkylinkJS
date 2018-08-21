@@ -43,7 +43,8 @@
  * @param {JSON} [options.bandwidth] <blockquote class="info">Note that this is currently not supported
  *   with Firefox browsers versions 48 and below as noted in an existing
  *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
- *   The configuration to set the maximum streaming bandwidth to send to Peers.
+ *   The configuration to set the maximum streaming bandwidth to send to Peers. You can also use the preconfigured 
+ *   constant <a href="#attr_VIDEO_QUALITY"><code>VIDEO_QUALITY</code></a> for recommended values.
  * @param {Number} [options.bandwidth.audio] The maximum audio streaming bandwidth sent to Peers in kbps.
  *   <small>Recommended values are <code>50</code> to <code>200</code>. <code>50</code> is sufficient enough for
  *   an audio call. The higher you go if you want clearer audio and to be able to hear music streaming.</small>
@@ -229,6 +230,14 @@
  *   }, function (error, success) {
  *     if (error) return;
  *     console.log("User connected with correct user data?", success.peerInfo.userData.username === data.username);
+ *   });
+ * 
+ *   // Example 6: Connecting to "testxx" Room with a pre-configured bandwidth set
+ *   skylinkDemo.joinRoom("testxx", {
+ *     bandwidth: skylinkDemo.VIDEO_QUALITY.HD
+ *   }, function (error, success) {
+ *     if (error) return;
+ *     console.log("User connected with bandwidth quality HD");
  *   });
  * @trigger <ol class="desc-seq">
  *   <li>If User is in a Room: <ol>

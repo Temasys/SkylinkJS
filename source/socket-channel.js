@@ -217,7 +217,11 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
     reconnectionAttempts: 2,
     reconnectionDelayMax: 5000,
     reconnectionDelay: 1000,
-    transports: ['websocket']
+    transports: ['websocket'],
+    query: { // ESS-1038: Adding custom headers to signaling
+      Skylink_SDK_type: 'WEB_SDK',
+      Skylink_SDK_version: self.VERSION
+    }
   };
   var ports = self._initOptions.socketServer && typeof self._initOptions.socketServer === 'object' && Array.isArray(self._initOptions.socketServer.ports) &&
     self._initOptions.socketServer.ports.length > 0 ? self._initOptions.socketServer.ports : self._socketPorts[self._signalingServerProtocol];
