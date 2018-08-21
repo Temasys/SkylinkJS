@@ -128,7 +128,7 @@ Skylink.prototype._handleIceConnectionStats = function(state, peerId) {
     local_candidate: {},
     remote_candidate: {}
   };
-
+  var postData = [];
   // Set a timeout to pause process to ensure the stats retrieval does not run at the same time
   // when the state is triggered, so that the selected ICE candidate pair information can be returned.
   setTimeout(function () {
@@ -152,10 +152,16 @@ Skylink.prototype._handleIceConnectionStats = function(state, peerId) {
           }
         });
       }
+      postData.push(statsObject);
 
-      self._postStats('/rest/stats/client/iceconnection', statsObject);
     }, true);
-  }, 0);
+
+    if(postData.length>9){
+      self._postStats('/rest/stats/client/iceconnection', postData);
+      postData = [];
+    }
+  }, 1000);
+
 };
 
 /**
@@ -200,7 +206,7 @@ Skylink.prototype._handleIceGatheringStats = function(state, peerId, isRemote) {
     is_remote: isRemote
   };
 
-  //self._postStats('/rest/stats/client/icegathering', statsObject);
+  self._postStats('/rest/stats/client/icegathering', statsObject);
 };
 
 /**
@@ -414,6 +420,6 @@ Skylink.prototype._handleDatachannelStats = function(state, peerId, channel, cha
     }
   }
 
-  //self._postStats('/rest/stats/client/datachannel', statsObject);
+  self._postStats('/rest/stats/client/datachannel', statsObject);
 };
 
