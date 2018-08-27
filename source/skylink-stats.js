@@ -7,21 +7,22 @@
  */
 Skylink.prototype._postStats = function (endpoint, params) {
   var self = this;
+  if(!self._initOptions.enableStats){
+    params.client_id = ((self._user && self._user.uid) || 'dummy') + '_' + self._statIdRandom;
+    params.app_key = self._initOptions.appKey;
+    params.timestamp = (new Date()).toISOString();
 
-  params.client_id = ((self._user && self._user.uid) || 'dummy') + '_' + self._statIdRandom;
-  params.app_key = self._initOptions.appKey;
-  params.timestamp = (new Date()).toISOString();
+    // Simply post the data directly to the API server without caring if it is successful or not.
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.onerror = function () { };
+      xhr.open('POST', 'https://api.temasys.io' + endpoint, true);
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+      xhr.send(JSON.stringify(params));
 
-  // Simply post the data directly to the API server without caring if it is successful or not.
-  try {
-    var xhr = new XMLHttpRequest();
-    xhr.onerror = function () { };
-    xhr.open('POST', 'https://api.temasys.io' + endpoint, true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-    xhr.send(JSON.stringify(params));
-
-  } catch (error) {
-    console.log("error in posting stats data");
+    } catch (error) {
+      log.error([null, 'XMLHttpRequest', "POST", 'Error in posting stats data ->'], error);
+    }
   }
 };
 
@@ -63,7 +64,7 @@ Skylink.prototype._handleSessionStats = function(message) {
     contents: message
   };
 
-  //self._postStats('/rest/stats/session', statsObject);
+  self._postStats('/rest/stats/session', statsObject);
 };
 
 /**
@@ -185,8 +186,7 @@ Skylink.prototype._handleIceCandidateStats = function(state, peerId, candidateId
     candidate_candidate: candidate.candidate,
     error: (typeof error === 'string' ? error : (error && error.message)) || null,
   };
-
-  self._postStats('/rest/stats/client/icecandidate', statsObject);
+  self._manageStatsBuffer('iceCandidate', statsObject, '/rest/stats/client/icecandidate');
 };
 
 /**
@@ -205,8 +205,7 @@ Skylink.prototype._handleIceGatheringStats = function(state, peerId, isRemote) {
     state: state,
     is_remote: isRemote
   };
-
-  self._postStats('/rest/stats/client/icegathering', statsObject);
+  self._manageStatsBuffer('iceGathering', statsObject, '/rest/stats/client/icegathering');
 };
 
 /**
@@ -239,8 +238,7 @@ Skylink.prototype._handleNegotiationStats = function(state, peerId, sdpOrMessage
     statsObject.sdp_type = (sdpOrMessage && sdpOrMessage.type) || null;
     statsObject.sdp_sdp = (sdpOrMessage && sdpOrMessage.sdp) || null;
   }
-
-  self._postStats('/rest/stats/client/negotiation', statsObject);
+  self._manageStatsBuffer('negotiation', statsObject, '/rest/stats/client/negotiation');
 };
 
 /**
@@ -364,7 +362,6 @@ Skylink.prototype._handleBandwidthStats = function (peerId) {
     statsObject.video_recv.framerate_mean = formatValue('video', 'recv', 'frameRateMean');
     statsObject.video_recv.framerate_std_dev = formatValue('video', 'recv', 'frameRateStdDev');
     statsObject.video_recv.qp_sum = formatValue('video', 'recv', 'qpSum');
-
     self._postStats('/rest/stats/client/bandwidth', statsObject);
   }, true);
 };
@@ -423,3 +420,28 @@ Skylink.prototype._handleDatachannelStats = function(state, peerId, channel, cha
   self._postStats('/rest/stats/client/datachannel', statsObject);
 };
 
+Skylink.prototype._stats_buffer = {};
+/**
+ * Function that handles buffer of stats data
+ * @method _handleDatachannelStats
+ * @private
+ * @for Skylink
+ * @since 0.6.35
+ */
+Skylink.prototype._manageStatsBuffer = function(operation, data, url){
+  var self = this;
+  if(self._stats_buffer[operation] === undefined){
+    self._stats_buffer[operation] = {};
+    self._stats_buffer[operation].url = url;
+    self._stats_buffer[operation].data = [];
+  }
+  self._stats_buffer[operation].data.push(data);
+  setInterval(function () {
+    for (var key in self._stats_buffer) {
+      if (self._stats_buffer[key]["data"].length > 0) {
+        self._postStats(self._stats_buffer[key]["url"], self._stats_buffer[key]["data"]);
+        self._stats_buffer[key]["data"] = [];
+      }
+    }
+  }, 5000);
+};
