@@ -7,7 +7,7 @@
  */
 Skylink.prototype._postStats = function (endpoint, params) {
   var self = this;
-  if(!self._initOptions.enableStats){
+  if(self._initOptions.enableStatsGathering){
     params.client_id = ((self._user && self._user.uid) || 'dummy') + '_' + self._statIdRandom;
     params.app_key = self._initOptions.appKey;
     params.timestamp = (new Date()).toISOString();

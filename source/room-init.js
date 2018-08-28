@@ -41,8 +41,10 @@ Skylink.prototype.generateUUID = function() {
  *   <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
- * @param {Boolean} [options.enableStats=true] The flag if SDK should gather stats information
- *   and upload to Temasys server. By default, this option is true.
+ * @param {Boolean} [options.enableStatsGathering=true] Configure the anonymous performance and connectivity statistic collection function.
+ *   Temasys collects encrypted, anonymous performance and connectivity statistics to allow us to improve performance for our customers and identify regional or ISP specific connectivity issues.
+ *   This data does not contain any personal information or session content.
+ *   The default behavior for this option if not specifically configured is true.
  * @param {Boolean} [options.enableDataChannel=true] <blockquote class="info">
  *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
  *   </blockquote> The flag if Datachannel connections should be enabled.
