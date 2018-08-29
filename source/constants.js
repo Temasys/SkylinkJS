@@ -1478,7 +1478,7 @@ Skylink.prototype._GROUP_MESSAGE_LIST = [
  */
 Skylink.prototype.STATS_API_VERSION = '1.1';
 
-
+/*
  * The options available for video and audio bitrates (kbps) quality.
  * @attribute VIDEO_QUALITY
  * @param {JSON} HD <small>Value <code>{ video: 3200, audio: 80 }</code></small>
