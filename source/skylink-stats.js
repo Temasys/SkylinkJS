@@ -7,18 +7,25 @@
  */
 Skylink.prototype._postStats = function (endpoint, params) {
   var self = this;
+  var requestBody = {};
   if(self._initOptions.enableStatsGathering){
-    params.client_id = ((self._user && self._user.uid) || 'dummy') + '_' + self._statIdRandom;
-    params.app_key = self._initOptions.appKey;
-    params.timestamp = (new Date()).toISOString();
+    if(Array.isArray(params)){
+      requestBody.data = params;
+    }
+    else{
+      requestBody = params;
+    }
+    requestBody.client_id = ((self._user && self._user.uid) || 'dummy') + '_' + self._statIdRandom;
+    requestBody.app_key = self._initOptions.appKey;
+    requestBody.timestamp = (new Date()).toISOString();
 
     // Simply post the data directly to the API server without caring if it is successful or not.
     try {
       var xhr = new XMLHttpRequest();
       xhr.onerror = function () { };
-      xhr.open('POST', 'https://api.temasys.io' + endpoint, true);
+      xhr.open('POST',  self._initOptions.statsServer + endpoint, true);
       xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-      xhr.send(JSON.stringify(params));
+      xhr.send(JSON.stringify(requestBody));
 
     } catch (error) {
       log.error([null, 'XMLHttpRequest', "POST", 'Error in posting stats data ->'], error);

@@ -445,6 +445,9 @@ Skylink.prototype.init = function(_options, _callback) {
   // `init({ roomServer: "//server.temasys.io" })`
   options.roomServer = options.roomServer && typeof options.roomServer === 'string' ? options.roomServer : '//api.temasys.io';
 
+  // `init({ statsServer: "//server.temasys.io" })`
+  options.statsServer = options.statsServer && typeof options.statsServer === 'string' ? options.statsServer : '//api.temasys.io';
+
   // `init({ enableIceTrickle: true })`
   options.enableIceTrickle = options.enableIceTrickle !== false;
 
@@ -462,6 +465,9 @@ Skylink.prototype.init = function(_options, _callback) {
 
   // `init({ forceSSL: true })`
   options.forceSSL = options.forceSSL !== false;
+
+  // `init({ enableStatsGathering: true })`
+  options.enableStatsGathering = options.enableStatsGathering !== false;
 
   // `init({ socketTimeout: 20000 })`
   options.socketTimeout = typeof options.socketTimeout === 'number' && options.socketTimeout >= 5000 ? options.socketTimeout : 7000;
