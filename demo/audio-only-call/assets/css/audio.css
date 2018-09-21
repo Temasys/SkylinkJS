@@ -1,0 +1,71 @@
+body {
+    background: white;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+.container {
+    width: 100%;
+    display: flex;
+    margin-top: 30px;
+    margin-bottom: 30px;
+}
+
+.peers-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 20px 20px 20px 20px;
+}
+
+.avatar {
+    background: white;
+    border: 1px dotted;
+    text-align: center;
+    height: 200px;
+    margin: 20px 20px 5px 20px;
+    height: 200px;
+    width: 220px;
+}
+
+.local-avatar {
+    background: #9cbfac;
+    border: 1px dotted;
+}
+
+.remote-avatar {
+    background: white;
+    border: 1px dotted;
+}
+
+.peer {
+    flex: 1;
+}
+
+.peer-video {
+    height: 170px;
+    width: 200px;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.bordered-container {
+    border: 1px solid #7b807f;
+    outline: 2px dashed #c4c5c4;
+    outline-offset: -20px;
+    box-shadow: 5px 2px 4px 3px #e8e8e8;
+    min-height: 88vh;
+}
+
+.stripes-background {
+    background-image: url('../img/stripes.png');
+}
+
+.peer-name {
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 10px 10px 10px 10px;
+    min-width: 100px;
+    text-overflow: ellipsis;
+}
