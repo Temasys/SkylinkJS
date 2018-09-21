@@ -4,21 +4,43 @@
 	<title>Temasys Web SDK Demo : Video Call</title>
   <meta name='viewport' content='width=device-width, initial-scale=1.0'>
   <link rel='shortcut icon' href='../favicon.ico'>
-  <style>
-    #myVideo {
-      width:640px;
-      height: 480px;
-    }
-  </style>
+  <link href="../assets/css/base.css" rel="stylesheet" media="screen">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js" type="text/javascript"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js" type="text/javascript"></script>
 </head>
 <body>
-  <h1>Temasys Web SDK Demo : Video Call</h1>
-  <p>Click on peer video to refresh connection</p>
+    <section>
+      <div>
+        <h1 class='title'>Temasys Web SDK Demo: Video Call</h1>
+        <h3 class='sub-title'>Click on peer video to refresh connection</h3>
+      </div>
 
-  <video id="myVideo" autoplay playsinline muted controls></video>
-  <div id="remoteContainer"></div>
+      <div class='container bordered-container stripes-background'>
+        <div id='js-peers-container' class='peers-container'>
+            <div class='avatar local-avatar'>
+              <video id='myVideo' class='peer-video' autoplay playsinline muted controls></video>
+            </div>
+        </div>
+      </div>
+    </section>
+
+    <footer class='footer navbar-fixed-bottom'>
+      <div class='container'>
+        <p class='muted credit'>
+          &copy; Temasys Communications Pte Ltd 2014. All Rights Reserved.
+        </p>
+      </div>
+    </footer>
+
+
+  <!-- <div>
+    <h1 class='title'>Temasys Web SDK Demo: Video Call</h1>
+    <h3 class='sub-title'>Click on peer video to refresh connection</h3>
+  </div>
+
+  <div id='peers' class='peers-container'>
+      <video id='myVideo' class='video' autoplay playsinline muted controls></video>
+  </div>
 
 	<footer class='footer navbar-fixed-bottom'>
 		<div class='container'>
@@ -26,10 +48,11 @@
         &copy; Temasys Communications Pte Ltd 2014. All Rights Reserved.
       </p>
     </div>
-	</footer>
-  <script src='../../publish/skylink.complete.js'  type='text/javascript'></script>
-  <script src="../edge-attachmediastream.js"   type="text/javascript"></script>
-  <script src='../config.js'   type='text/javascript'></script>
-  <script src='app.js'   type='text/javascript'></script>
-</body>
+  </footer>
+   -->
+    <script src='../../publish/skylink.complete.js' type='text/javascript'></script>
+    <script src="../edge-attachmediastream.js" type="text/javascript"></script>
+    <script src='../config.js'   type='text/javascript'></script>
+    <script src='app.js'   type='text/javascript'></script>
+  </body>
 </html>

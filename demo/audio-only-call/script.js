@@ -8,7 +8,7 @@ SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
   peerVoice.autoplay = true;
   peerVoice.controls = true;
   peerVoice.muted = isSelf;
-  peerVoice.poster = 'assets/img/user.png';
+  peerVoice.poster = '../assets/img/user.png';
   peerVoice.setAttribute('playsinline', true);
 
   var peerName = document.createElement('span');
@@ -38,7 +38,7 @@ SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
 SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {
   var elm = document.getElementById(peerId);
   if (elm) {
-    document.body.removeChild(elm);
+    (elm).remove();
   } else {
     console.error('Peer audio element for ' + peerId + ' does not exists');
   }
