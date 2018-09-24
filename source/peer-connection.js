@@ -1856,13 +1856,33 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
         'is set to false']);
     }
   };
-
+  self.videoRenderers = self.videoRenderers || {};
   pc.onaddstream = function (evt) {
+    // TargetMid goes all the way back to Skylink.prototype._enterHandler
+
     if (!self._peerConnections[targetMid]) {
       return;
     }
 
     var stream = evt.stream || evt;
+
+    // MCU test
+    // function makeFackUserId() {
+    //   var text = "user_";
+    //   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    //   for (var i = 0; i < 20; i++)
+    //     text += possible.charAt(Math.floor(Math.random() * possible.length));
+    //   return text;
+    // }
+    // self.peerStreamTable[stream.id] = makeFackUserId();
+    var video = document.createElement('video');
+    video.autoplay = true;
+    video.id = stream.id;
+    video.peerId = self.streamIdPeerIdMap[stream.id];
+    window.document.body.append(video);
+    self.videoRenderers[stream.id] = attachMediaStream(video, stream);
+    // End of MCU test
+
 
     if (targetMid === 'MCU') {
       log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received remote stream from MCU ->'], stream);
@@ -1891,6 +1911,12 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
 
     self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+  };
+
+  pc.onremovestream = function(evt) {
+    var stream = evt.stream || evt;
+    var renderer = self.videoRenderers[stream.id];
+    document.body.removeChild(renderer);
   };
 
   pc.onicecandidate = function(event) {

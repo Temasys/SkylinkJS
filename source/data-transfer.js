@@ -1583,9 +1583,9 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
   }
 
   // Remove MCU Peer as list of Peers
-  if (listOfPeers.indexOf('MCU') > -1) {
-    listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
-  }
+  // if (listOfPeers.indexOf('MCU') > -1) {
+  //   listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
+  // }
 
   // Function that returns the error emitted before data transfer has started
   var emitErrorBeforeDataTransferFn = function (error) {

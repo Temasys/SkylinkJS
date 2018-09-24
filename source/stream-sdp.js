@@ -792,9 +792,9 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   // Apply as a=inactive when supported
   if (self._hasMCU) {
     var peerStreamSettings = clone(self.getPeerInfo(targetMid)).settings || {};
-    settings.direction.audio.receive = targetMid === 'MCU' ? false : !!peerStreamSettings.audio;
+    settings.direction.audio.receive = targetMid === 'MCU' ? true : !!peerStreamSettings.audio;
     settings.direction.audio.send = targetMid === 'MCU' ? true : false;
-    settings.direction.video.receive = targetMid === 'MCU' ? false : !!peerStreamSettings.video;
+    settings.direction.video.receive = targetMid === 'MCU' ? true : !!peerStreamSettings.video;
     settings.direction.video.send = targetMid === 'MCU' ? true : false;
   }
 

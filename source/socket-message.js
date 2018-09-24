@@ -1698,6 +1698,10 @@ Skylink.prototype._answerHandler = function(message) {
   var targetMid = message.mid;
   var pc = self._peerConnections[targetMid];
 
+  if (targetMid === 'MCU') {
+    self.streamIdPeerIdMap = message.streamIdPeerIdMap || {};
+  }
+
   log.log([targetMid, null, message.type, 'Received answer from peer. Session description:'], clone(message));
 
   var answer = {
