@@ -12,7 +12,7 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 | Features       | Chrome | Firefox | Opera | IE (plugin) | Safari (beta) | Safari (plugin) | Edge (beta) | Bowser (beta) | 
 | -------------- | ---------- | ----------- | --------- | ---------- | ------ | ---------- | ---- | ----- |
 | **Platforms:** | Win, Mac, Ubuntu, Android | Win, Mac, Ubuntu, Android | Win, Mac, Ubuntu, Android | Win | Mac | Mac | Win | iOS |
-| **Minimum Recommended Versions:** | `52` | `48` | `38` | `9` | `11` | `7` | `14.14352` | `0.6.1` |
+| **Minimum Recommended Versions:** | `52` | `48` | `38` | `9` | `11` | `7` | `15` | `0.6.1` |
 | **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing)  | - | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing) | No | No |
 | **Video Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes | Yes [Temasys Plugin](http://temasys.io/plugin/)  | Yes (with H264 flag enabled) | Yes |
 | **Audio Call**     | Yes        | Yes         |  Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/) | Yes | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes | Yes |
