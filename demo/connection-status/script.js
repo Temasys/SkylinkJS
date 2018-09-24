@@ -91,11 +91,11 @@ function addPeer(peerId, isSelf) {
   peerItem.id = peerId;
   peerItem.style.textTransform = 'uppercase';
   peerItem.innerHTML =
-    '<td style="border :solid 1px #444;padding: 12px 15px;text-transform:none;">' + ((isSelf) ? 'You' : peerId) + '</td>' +
-    '<td id="' + peerId + '_hsp" style="border:solid 1px #444;padding: 12px 15px;"></td>' +
-    '<td id="' + peerId + '_pcs" style="border:solid 1px #444;padding: 12px 15px;"></td>' +
-    '<td id="' + peerId + '_cgs" style="border:solid 1px #444;padding: 12px 15px;"></td>' +
-    '<td id="' + peerId + '_dcs" style="border:solid 1px #444;padding: 12px 15px;"></td>';
+    '<td>' + ((isSelf) ? 'You' : peerId) + '</td>' +
+    '<td id="' + peerId + '_hsp"></td>' +
+    '<td id="' + peerId + '_pcs"></td>' +
+    '<td id="' + peerId + '_cgs"></td>' +
+    '<td id="' + peerId + '_dcs"></td>';
   peers.appendChild(peerItem);
 }
 
