@@ -1443,6 +1443,9 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   APPROACH: 'approach',
   START_RECORDING: 'startRecordingRoom',
   STOP_RECORDING: 'stopRecordingRoom',
+  START_RTMP: 'startRTMP',
+  STOP_RTMP: 'stopRTMP',
+  RTMP: 'rtmpEvent',
   RECORDING: 'recordingEvent',
   END_OF_CANDIDATES: 'endOfCandidates'
 };
