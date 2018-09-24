@@ -3,20 +3,34 @@ body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+/* TITLES */
+
+h3 {
+    font-size: 1rem;
+}
+
+/* TABLES */
+.table {
+    border: 1px solid;
+    width: 100%;
+}
+
+th {
+    border: 1px solid;
+}
+
+/* STANDARD ELEMENTS */
 .btn {
     background: #a5005f;
     color: white;
 }
+
 .component {
     height: 2rem;
     border: 2px solid black;
     font-size: 1rem;
     font-weight: 300;
     margin-top: 1rem;
-}
-
-h3 {
-    font-size: 1rem;
 }
 
 .container {
@@ -26,46 +40,7 @@ h3 {
     margin-bottom: 1rem;
 }
 
-.peers-container {
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-    padding: 20px 20px 20px 20px;
-}
-
-.avatar {
-    background: white;
-    border: 1px dotted;
-    text-align: center;
-    height: 200px;
-    margin: 20px 20px 5px 20px;
-    height: 220px;
-    width: 220px;
-}
-
-.local-avatar {
-    background: #fff6ed;
-    border: 1px dotted;
-    border-radius: 30px;
-}
-
-.remote-avatar {
-    background: white;
-    border: 1px dotted;
-}
-
-.peer {
-    flex: 1;
-}
-
-.peer-video {
-    height: 170px;
-    width: 200px;
-    position: relative;
-    left: 0%;
-    top: 7%;
-}
-
+/* HELPERS */
 .text-center {
     text-align: center;
 }
@@ -80,17 +55,4 @@ h3 {
 
 .stripes-background {
     background-image: url('../img/stripes.png');
-}
-
-.peer-name {
-    font-size: 0.8rem;
-    font-weight: bold;
-    padding: 10px 10px 10px 10px;
-    min-width: 100px;
-    text-overflow: ellipsis;
-}
-
-.credit {
-    width: 100%;
-    text-align: center;
 }

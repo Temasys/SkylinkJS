@@ -1,0 +1,53 @@
+.peers-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    padding: 20px 20px 20px 20px;
+}
+
+.avatar {
+    background: white;
+    border: 1px dotted;
+    text-align: center;
+    height: 200px;
+    margin: 20px 20px 5px 20px;
+    height: 220px;
+    width: 220px;
+}
+
+.local-avatar {
+    background: #fff6ed;
+    border: 1px dotted;
+    border-radius: 30px;
+}
+
+.remote-avatar {
+    background: white;
+    border: 1px dotted;
+}
+
+.peer {
+    flex: 1;
+}
+
+.peer-video {
+    height: 170px;
+    width: 200px;
+    position: relative;
+    left: 0%;
+    top: 7%;
+}
+
+.peer-name {
+    font-size: 0.8rem;
+    font-weight: bold;
+    padding: 10px 10px 10px 10px;
+    min-width: 100px;
+    text-overflow: ellipsis;
+}
+
+.credit {
+    width: 100%;
+    text-align: center;
+}
+

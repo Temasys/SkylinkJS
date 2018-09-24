@@ -1,0 +1,32 @@
+
+th {
+    background: #a6e1ff;
+}
+
+.answer, .closed, .offer .completed, .stable, .open, .enter, .error {
+    font-weight: bold;
+}
+
+.answer, .closed, .offer {
+    color: gray;
+}
+
+.completed {
+    color: green;
+}
+
+.stable {
+    color: blue;
+}
+
+.open {
+    color: #8ecc30;
+}
+
+.enter {
+    color: orange;
+}
+
+.error {
+    color: red;
+}
