@@ -3,6 +3,18 @@ body {
     font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
 }
 
+.btn {
+    background: #a5005f;
+    color: white;
+}
+.component {
+    height: 2rem;
+    border: 2px solid black;
+    font-size: 1rem;
+    font-weight: 300;
+    margin-top: 1rem;
+}
+
 h3 {
     font-size: 1rem;
 }

@@ -1,8 +1,22 @@
 header {
-  background: #eee;
+  background: #ffcf06;
   padding: 20px;
-  margin-bottom: .4em;
   font-family: Helvetica, Arial, sans-serif;
+  border-top-left-radius: 20px;
+  border-top-right-radius: 20px;
+  border: 1px solid #0a0a0a;
+}
+
+.component-width {
+  width: 25rem;
+}
+
+.select-size {
+  width: 4rem;
+}
+
+.text-area {
+  height: 5rem;
 }
 
 header a:first-child {
@@ -13,8 +27,9 @@ header a:first-child {
 #container {
   position: relative;
   border: 1px #ddd solid;
-  height: 180px;
+  height: 300px;
   overflow-y: auto;
+  border: 1px solid #0a0a0a;
 }
 
 #chatbox {
@@ -27,6 +42,16 @@ header a:first-child {
   color: gray;
 }
 
+.message, .you, .action {
+  margin-bottom: 0.4rem;
+  margin-top: 0.4rem;
+  padding-left: 1rem;
+}
+
 .you {
   font-weight: bold;
+  margin-bottom: 0.2rem;
+  font-weight: bold;
+  margin-bottom: 0.4rem;
+
 }
