@@ -454,7 +454,7 @@ Skylink.prototype._processSigMessage = function(message, session) {
   case this._SIG_MESSAGE_TYPE.RECORDING:
     this._recordingEventHandler(message);
     break;
-  case this._SIG_MESSAGE_TYPE.rtmpEvent:
+  case this._SIG_MESSAGE_TYPE.RTMP:
     this._rtmpEventHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.END_OF_CANDIDATES:
@@ -1881,7 +1881,7 @@ Skylink.prototype.startRTMPSession = function (streamId, endpoint, callback) {
 
   if (typeof callback === 'function') {
     self.once('RTMPState', function (state, RTMPId) {
-      callback(null, RTMPId);
+      callback(RTMPId);
     }, function (state) {
       return state === self.RTMP_STATE.START;
     });
@@ -1941,7 +1941,7 @@ Skylink.prototype.stopRTMPSession = function (rtmpId, callback) {
 
   if (typeof callback === 'function') {
     self.once('RTMPState', function (state, rtmpId) {
-      callback(null, rtmpId);
+      callback(rtmpId);
     }, function (state) {
       return state === self.RTMP_STATE.STOP;
     });
@@ -1951,6 +1951,7 @@ Skylink.prototype.stopRTMPSession = function (rtmpId, callback) {
     type: self._SIG_MESSAGE_TYPE.STOP_RTMP,
     rid: self._room.id,
     rtmpId: rtmpId,
+    mid: self._user.sid,
     target: 'MCU'
   });
 
@@ -1974,7 +1975,7 @@ Skylink.prototype._rtmpEventHandler = function (message) {
 
   log.debug(['MCU', 'RTMP', null, 'Received RTMP Session message ->'], message);
 
-  if (message.action === 'on') {
+  if (message.action === 'startSuccess') {
     if (!self._rtmpSessions[message.rtmpId]) {
       log.debug(['MCU', 'RTMP', message.rtmpId, 'Started RTMP Session']);
 
@@ -1989,7 +1990,7 @@ Skylink.prototype._rtmpEventHandler = function (message) {
       self._trigger('RTMPState', self.RTMP_STATE.START, message.rtmpId, null, null);
     }
 
-  } else if (message.action === 'off') {
+  } else if (message.action === 'stopSuccess') {
 
     if (!self._rtmpSessions[message.rtmpId]) {
       log.error(['MCU', 'RTMP', message.rtmpId, 'Received request of "off" but the session is empty']);

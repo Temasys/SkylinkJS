@@ -972,11 +972,25 @@ $(document).ready(function() {
   });
 
   $('#live_streaming_btn').click(function() {
-    var rtmpUrl = prompt('Enter your livestream link below');
-    var streamId = Demo.Skylink._streams.userMedia.id;
-    Demo.Skylink.startRTMPSession(streamId, rtmpUrl, function(response) {
-      console.log(response);
-    });
+    var $streamingButton = $(this);
+    var isStreaming = $(this).data('isstreaming');
+    if (isStreaming === false) {
+      var rtmpUrl = prompt('Enter your livestream link below');
+      var streamId = Demo.Skylink._streams.userMedia.id;
+      Demo.Skylink.startRTMPSession(streamId, rtmpUrl, function(rtmpId) {
+        $streamingButton.data('isstreaming', true);
+        $streamingButton.data('rtmpid', rtmpId);
+        $streamingButton.find('.text').text('Stop Streaming');
+      });
+    } else {
+      var rtmpId = $streamingButton.data('rtmpid');
+      Demo.Skylink.stopRTMPSession(rtmpId, function() {
+        $streamingButton.data('isstreaming', false);
+        $streamingButton.data('rtmpid', null);
+        $streamingButton.find('.text').text('Live Streaming');
+      });
+    }
+
   });
 
   window.selectTargetPeer = function(dom) {
