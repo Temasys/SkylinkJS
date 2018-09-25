@@ -971,6 +971,14 @@ $(document).ready(function() {
     });
   });
 
+  $('#live_streaming_btn').click(function() {
+    var rtmpUrl = prompt('Enter your livestream link below');
+    var streamId = Demo.Skylink._streams.userMedia.id;
+    Demo.Skylink.startRTMPSession(streamId, rtmpUrl, function(response) {
+      console.log(response);
+    });
+  });
+
   window.selectTargetPeer = function(dom) {
     var peerId = $(dom).attr('target');
     var panelDom = $('#selected_users_panel');
