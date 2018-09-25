@@ -3,26 +3,28 @@
   <title>Temasys Web SDK Demo : File Transfer</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <link rel='shortcut icon' href='../favicon.ico'>
+  <link href="../assets/css/base.css" rel="stylesheet" media="screen">
+  <link href="../assets/css/messaging.css" rel="stylesheet" media="screen">
   <link href="style.css" rel="stylesheet" media="screen">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js" type="text/javascript"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js" type="text/javascript"></script>
 </head>
 <body>
 
-  <header>
-    <select id="target">
+  <section class="container-header">
+      <select id="target" class="component">
       <option value="group" selected>Send file to Group</option>
     </select>
     <br/><br/>
-    <input type="file" id="file" autofocus multiple />
-    <button onclick="sendFile()">Send file</button>
-  </header>
+    <input type="file" id="file" autofocus multiple class="component file-component"/>
+    <br/>
+    <button onclick="sendFile()" class="component btn">Send file</button>
+  </section>
 
   <div id="container">
-    <div id="infobox"></div>
+    <div id="infobox" class="container-body"></div>
   </div>
-
-  <table id="transfers">
+  <table id="transfers" class="table">
     <tr>
       <th>TransferId</th>
       <th></th>

@@ -3,29 +3,28 @@ var SkylinkDemo = new Skylink();
 SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
   var peer = document.createElement('div');
   peer.id = peerId;
-  peer.style.border = 'solid 2px #444';
-  peer.style.borderRadius = '15px';
-  peer.style.display = 'inline-block';
-  peer.style.textAlign = 'center';
-  peer.style.fontFamily = 'sans-serif';
-  peer.style.marginRight = '15px';
 
   var peerVoice = document.createElement('video');
   peerVoice.autoplay = true;
   peerVoice.controls = true;
   peerVoice.muted = isSelf;
-  peerVoice.poster = 'user.png';
-  peerVoice.style.height = '150px';
+  peerVoice.poster = '../assets/img/user.png';
   peerVoice.setAttribute('playsinline', true);
 
-  var peerName = document.createElement('p');
-  peerName.style.background = '#eee';
-  peerName.style.margin = '0';
-  peerName.style.padding = '12px 0';
-  peerName.style.borderTop = 'solid 2px #000';
+  var peerName = document.createElement('span');
   peerName.innerHTML = (isSelf) ? 'Me' : peerId;
+  peerName.className = 'peer-name';
 
-  document.body.appendChild(peer);
+
+  document.getElementById('js-peers-container').appendChild(peer);
+  peerVoice.className = 'peer-video'
+
+  if (isSelf) {
+    peer.className = "avatar local-avatar"
+  } else {
+    peer.className = "avatar remote-avatar"
+  }
+
   peer.appendChild(peerVoice);
   peer.appendChild(peerName);
 
@@ -39,7 +38,7 @@ SkylinkDemo.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
 SkylinkDemo.on('peerLeft', function (peerId, peerInfo, isSelf) {
   var elm = document.getElementById(peerId);
   if (elm) {
-    document.body.removeChild(elm);
+    (elm).remove();
   } else {
     console.error('Peer audio element for ' + peerId + ' does not exists');
   }

@@ -2,26 +2,33 @@ var SkylinkDemo = new Skylink();
 
 //--------
 SkylinkDemo.on('mediaAccessSuccess', function(stream) {
-  console.log("mediaAccessSuccess");
-  attachMediaStream(document.getElementById("myVideo"), stream);
+  console.log('mediaAccessSuccess');
+  attachMediaStream(document.getElementById('myVideo'), stream);
 });
 //--------
 SkylinkDemo.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
   if (!isSelf) {
-    console.log("addPeerStream");
-    var DOMRemoteVideo = document.getElementById("remote_" + peerId);
+    console.log('addPeerStream');
+    var DOMRemoteVideoContainer = document.getElementById(peerId);
 
-    if (!DOMRemoteVideo) {
+    if (!DOMRemoteVideoContainer) {
+      var DOMRemoteVideoContainer = document.createElement('div');
+      DOMRemoteVideoContainer.setAttribute('id', peerId);
+      DOMRemoteVideoContainer.className = 'avatar remote-avatar';
+
       DOMRemoteVideo = document.createElement('video');
-      DOMRemoteVideo.setAttribute("style", "width: 320px; height: 240px;");
       DOMRemoteVideo.autoplay = true;
-      DOMRemoteVideo.controls = true;
+      DOMRemoteVideo.controls = false;
       DOMRemoteVideo.muted = true;//isSelf;
+      DOMRemoteVideo.poster = '../assets/img/user.png';
       DOMRemoteVideo.setAttribute('playsinline', true);
-      DOMRemoteVideo.setAttribute("id", "remote_" + peerId);
+      DOMRemoteVideo.setAttribute('id', 'remote_' + peerId);
+      DOMRemoteVideo.className = 'peer-video';
 
-      var DOMcontainer = document.getElementById("remoteContainer");
-      DOMcontainer.appendChild(DOMRemoteVideo);
+      DOMRemoteVideoContainer.appendChild(DOMRemoteVideo);
+
+      var DOMcontainer = document.getElementById('js-peers-container');
+      DOMcontainer.appendChild(DOMRemoteVideoContainer);
       DOMRemoteVideo.onclick = function() {
         SkylinkDemo.refreshConnection(peerId);
       };
@@ -32,31 +39,27 @@ SkylinkDemo.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
     }
     attachMediaStream(DOMRemoteVideo, stream);
   }
-
 });
 //--------
 SkylinkDemo.on('streamEnded', function(peerID, peerInfo, isSelf) {
   if (!isSelf) {
-    console.log("streamEnded");
-    var DOMvideo = document.getElementById("remote_" + peerID);
+    console.log('streamEnded');
+    var DOMvideoContainer = document.getElementById(peerID);
     // fix for domvideo not defined
-    if (DOMvideo) {
-      var DOMcontainer = document.getElementById("remoteContainer");
-      DOMvideo.src = '';
-      DOMcontainer.removeChild(DOMvideo);
+    if (DOMvideoContainer) {
+      var DOMcontainer = document.getElementById('js-peers-container');
+      DOMcontainer.removeChild(DOMvideoContainer);
     }
   }
-
 });
 //--------
 SkylinkDemo.on('peerLeft', function(peerID) {
-  console.log("peerLeft");
-  var DOMvideo = document.getElementById("remote_" + peerID);
+  console.log('peerLeft');
+  var DOMvideoContainer = document.getElementById(peerID);
   // fix for domvideo not defined
-  if (DOMvideo) {
-    var DOMcontainer = document.getElementById("remoteContainer");
-    DOMvideo.src = '';
-    DOMcontainer.removeChild(DOMvideo);
+  if (DOMvideoContainer) {
+    var DOMcontainer = document.getElementById('js-peers-container');
+    DOMcontainer.removeChild(DOMvideoContainer);
   }
 });
 
