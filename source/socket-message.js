@@ -1888,7 +1888,7 @@ Skylink.prototype.startRTMPSession = function (streamId, endpoint, callback) {
   }
 
   self._sendChannelMessage({
-    type: self._SIG_MESSAGE_TYPE.startRTMP,
+    type: self._SIG_MESSAGE_TYPE.START_RTMP,
     rid: self._room.id,
     target: 'MCU',
     mid: self._user.sid,
