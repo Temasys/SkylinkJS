@@ -1894,7 +1894,7 @@ Skylink.prototype.startRTMPSession = function (streamId, endpoint, callback) {
     mid: self._user.sid,
     streamId: streamId,
     endpoint: endpoint,
-    rtmpId:rtmpId
+    rtmpId: rtmpId
   });
 
   log.debug(['MCU', 'RTMP', null, 'Starting RTMP Session']);
@@ -1980,7 +1980,7 @@ Skylink.prototype._rtmpEventHandler = function (message) {
 
       self._rtmpSessions[message.rtmpId] = {
         active: true,
-        state: self.RTMPSTATE.START,
+        state: self.RTMP_STATE.START,
         startedDateTime: (new Date()).toISOString(),
         endedDateTime: null,
         peerId: message.peerId,
