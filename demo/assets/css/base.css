@@ -17,7 +17,7 @@ h3 {
 
 th {
     border: 1px solid;
-    background: #b63172;
+    background: #00b6b1;
     color: white;
     height: 4rem;
 }
@@ -36,7 +36,7 @@ button:focus {
 }
 
 .btn {
-    background: #a5005f;
+    background: #7b5a9c;
     color: white;
     border-radius: 8px;
 }
@@ -67,7 +67,7 @@ button:focus {
 }
 
 .container-header  {
-    background: #ffcf06;
+    background: #00b6b1;
     padding: 20px;
     border-top-left-radius: 20px;
     border-top-right-radius: 20px;

@@ -1,9 +1,29 @@
-.navbar-white {
-  background:#fff;
+.navbar {
+  background: #00b6b1;
 }
+
+.navbar-brand {
+  color: white !important;
+}
+
+.btn-rounded {
+  border-radius: 20px !important;
+}
+
+.panel-chat {
+  border: 5px solid black;
+}
+
+input[type="text"] {
+  border: 1px solid;
+  border-radius: 8px !important;
+  background: #f0f7ff;
+  margin-top: 1rem;
+  margin-bottom: 1rem;
+}
+
 #get_user_media_btn,
 #join_room_btn,
-#leave_room_btn,
 #presence_panel,
 #file_panel,
 #file_list_panel {
@@ -79,6 +99,12 @@ object#local_video {
   max-height:200px;
   overflow-y:auto;
 }
+.list-group-item-heading b {
+  color: blue;
+}
+.list-group-item-text {
+  color: green;
+}
 .list-group-item-heading em {
   float:right;
   font-style:normal;
@@ -97,9 +123,6 @@ object#local_video {
 }
 .control_settings .col {
   margin: 7px 0;
-}
-#leave_room_btn {
-  margin-left:12px;
 }
 .control_settings .btn-group {
   width: 100%;
