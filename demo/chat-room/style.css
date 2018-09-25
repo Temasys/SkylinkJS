@@ -9,7 +9,6 @@
 .conversation-wrap {
     box-shadow: -2px 0 3px #ddd;
     padding:0;
-    /* max-height: 400px; */
     overflow: auto;
     background: #f9f7f7;
 }
@@ -35,7 +34,7 @@ small {
 }
 
 .msg-wrap {
-    padding:10px;
+    padding: 10px;
     height: 60%;
     overflow: auto;
     background: #f9f7f7;
@@ -48,7 +47,7 @@ small {
 .send-wrap {
     border-top: 1px solid #eee;
     border-bottom: 1px solid #eee;
-    padding:10px;
+    padding: 10px;
     background: #f9f7f7;
 }
 
@@ -62,10 +61,7 @@ small {
 }
 
 .send-message-btn {
-    border-top-left-radius: 0;
-    border-top-right-radius: 0;
-    border-bottom-left-radius: 0;
-    border-bottom-right-radius: 0;
+    border-radius: 0;
 }
 
 .msg-wrap .media-heading {

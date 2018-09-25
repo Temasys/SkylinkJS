@@ -15,14 +15,14 @@ h3 {
     width: 100%;
 }
 
-th {
+.table th {
     border: 1px solid;
     background: #00b6b1;
     color: white;
     height: 4rem;
 }
 
-tr, td {
+table tr, td {
     border: 1px solid black;
     height: 3rem;
 }
