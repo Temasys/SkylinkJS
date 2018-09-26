@@ -18,7 +18,7 @@ SkylinkDemo.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
 
       DOMRemoteVideo = document.createElement('video');
       DOMRemoteVideo.autoplay = true;
-      DOMRemoteVideo.controls = false;
+      DOMRemoteVideo.controls = true;
       DOMRemoteVideo.muted = true;//isSelf;
       DOMRemoteVideo.poster = '../assets/img/user.png';
       DOMRemoteVideo.setAttribute('playsinline', true);
