@@ -975,7 +975,7 @@ $(document).ready(function() {
     var $streamingButton = $(this);
     var isStreaming = $(this).data('isstreaming');
     if (isStreaming === false) {
-      var rtmpUrl = prompt('Enter your livestream link below');
+      var rtmpUrl = 'rtmp://a.rtmp.youtube.com/live2/q6xg-s0kv-q98q-5kbm'; //prompt('Enter your livestream link below');
       var streamId = Demo.Skylink._streams.userMedia.id;
       Demo.Skylink.startRTMPSession(streamId, rtmpUrl, function(rtmpId) {
         $streamingButton.data('isstreaming', true);

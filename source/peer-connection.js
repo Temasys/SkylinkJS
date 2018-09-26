@@ -1875,22 +1875,22 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     //   return text;
     // }
     // self.peerStreamTable[stream.id] = makeFackUserId();
-    var video = document.createElement('video');
-    video.autoplay = true;
-    video.id = stream.id;
-    video.peerId = self.streamIdPeerIdMap[stream.id];
-    window.document.body.append(video);
-    self.videoRenderers[stream.id] = attachMediaStream(video, stream);
+    // var video = document.createElement('video');
+    // video.autoplay = true;
+    // video.id = stream.id;
+    // video.peerId = self.streamIdPeerIdMap[stream.id];
+    // window.document.body.append(video);
+    // self.videoRenderers[stream.id] = attachMediaStream(video, stream);
     // End of MCU test
 
 
-    if (targetMid === 'MCU') {
-      log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received remote stream from MCU ->'], stream);
-      return;
-    } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
-      log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received empty remote stream ->'], stream);
-      return;
-    }
+    // if (targetMid === 'MCU') {
+    //   log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received remote stream from MCU ->'], stream);
+    //   return;
+    // } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
+    //   log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received empty remote stream ->'], stream);
+    //   return;
+    // }
 
     pc.remoteStream = stream;
     pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
@@ -1910,7 +1910,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasStream = true;
     pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
 
-    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+    self._onRemoteStreamAdded(self.streamIdPeerIdMap[stream.id.split('_MCU_')[0]], stream, !!pc.hasScreen);
   };
 
   pc.onremovestream = function(evt) {

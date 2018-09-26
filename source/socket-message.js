@@ -1053,15 +1053,15 @@ Skylink.prototype._enterHandler = function(message) {
   }
 
   var processPeerFn = function (cert) {
-    if (!self._peerInformations[targetMid]) {
+    if (!self._peerInformations[message.target]) {
       isNewPeer = true;
 
-      self._peerInformations[targetMid] = userInfo;
+      self._peerInformations[message.target] = userInfo;
 
       var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
         !!userInfo.settings.video.screenshare;
 
-      self._addPeer(targetMid, cert || null, {
+      self._addPeer(message.target, cert || null, {
         agent: userInfo.agent.name,
         version: userInfo.agent.version,
         os: userInfo.agent.os
@@ -1071,6 +1071,7 @@ Skylink.prototype._enterHandler = function(message) {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
 
         self._hasMCU = true;
+        self._trigger('peerJoined', message.target, self.getPeerInfo(message.target), false);
         self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
 
       } else {
@@ -1080,7 +1081,7 @@ Skylink.prototype._enterHandler = function(message) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     }
 
-    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
+    self._peerMessagesStamps[message.target] = self._peerMessagesStamps[message.target] || {
       userData: 0,
       audioMuted: 0,
       videoMuted: 0
@@ -1377,6 +1378,10 @@ Skylink.prototype._welcomeHandler = function(message) {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
 
         self._hasMCU = true;
+        for (var peersInRoomIndex = 0; peersInRoomIndex < message.peersInRoom.length; peersInRoomIndex++) {
+          var _PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
+          self._trigger('peerJoined', _PEER_ID, self.getPeerInfo(_PEER_ID), false);
+        }
         self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
 
       } else {

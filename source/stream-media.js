@@ -2111,10 +2111,10 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
   var self = this;
   var streamId = (self._peerConnections[targetMid] && self._peerConnections[targetMid].remoteStreamId) || stream.id || stream.label;
 
-  if (!self._peerInformations[targetMid]) {
-    log.warn([targetMid, 'MediaStream', streamId, 'Received remote stream when peer is not connected. Ignoring stream ->'], stream);
-    return;
-  }
+  // if (!self._peerInformations[targetMid]) {
+  //   log.warn([targetMid, 'MediaStream', streamId, 'Received remote stream when peer is not connected. Ignoring stream ->'], stream);
+  //   return;
+  // }
 
   /*if (!self._peerInformations[targetMid].settings.audio &&
     !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
