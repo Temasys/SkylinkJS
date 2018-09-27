@@ -337,7 +337,7 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
     peerElm.className = 'col-md-6 peervideo';
 
     peerVideo = document.createElement('video');
-    peerVideo.className = 'video-obj';
+    peerVideo.className = 'video-obj col-md-12';
     peerVideo.muted = isSelf;
     peerVideo.autoplay = true;
     peerVideo.controls = true;
@@ -349,8 +349,8 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
 
     $('#peer_video_list').append(peerElm);
     $(peerElm).append(peerVideo);
-    $(peerElm).append('<div class="connstats-wrapper"><button class="toggle-connstats" data="' + (isSelf ? 'MCU' : peerId) +
-      '">See ' + (isSelf ? 'MCU ' : '') + 'Stats</button><div class="row connstats">' +
+    $(peerElm).append('<div class="connstats-wrapper"><button class="toggle-connstats btn btn-sm btn-warning" data="' + (isSelf ? 'MCU' : peerId) +
+      '">See ' + (isSelf ? 'MCU ' : '') + 'Stats</button><br/><br/><div class="connstats">' +
       '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
         '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
       '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
