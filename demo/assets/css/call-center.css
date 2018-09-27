@@ -1,6 +1,7 @@
-.navbar {
+.navbar, .navbar-default {
     background: #00b6b1;
-  }
+    background-color: #00b6b1;
+}
 
 .navbar-brand {
     color: white !important;
@@ -31,89 +32,89 @@ input[type="text"] {
 #presence_panel,
 #file_panel,
 #file_list_panel {
-    display:none;
+    display: none;
 }
 
 .circle {
-    color:red;
-    border:solid 1px;
-    border-radius:50%;
-    padding:5px;
-    margin-bottom:7px;
-    font-size:10px;
+    color: red;
+    border: solid 1px;
+    border-radius: 50%;
+    padding: 5px;
+    margin-bottom: 7px;
+    font-size: 10px;
 }
 
 .table {
-    font-size:12px;
-    word-break:break-word;
+    font-size:  12px;
+    word-break: break-word;
 }
 
 .table td:first-child {
-    font-weight:bold;
-    width:38%;
+    font-weight: bold;
+    width: 38%;
 }
 
 .table.upload-table td:first-child {
-    font-weight:normal;
-    width:85%;
+    font-weight: normal;
+    width: 85%;
 }
 
 #credential_panel {
-    margin-bottom:0;
-    border-left:0;
-    border-right:0;
-    box-shadow:none;
-    border-radius:0;
+    margin-bottom: 0;
+    border-left: 0;
+    border-right: 0;
+    box-shadow: none;
+    border-radius: 0;
 }
 
 #credential_panel .panel-body {
-    padding-bottom:0;
+    padding-bottom: 0;
 }
 
 #credential_panel .panel-body .form-group {
-    text-align:left;
+    text-align: left;
 }
 
 #credential_panel .panel-body .form-group .title,
 #credential_panel .panel-body .form-group .control-group {
-    display:inline-block;
-    vertical-align:top;
+    display: inline-block;
+    vertical-align: top;
 }
 
 #credential_panel .panel-body .form-group .title {
-    margin-top:0;
-    float:left;
+    margin-top: 0;
+    float: left;
 }
 
 #credential_panel .panel-body .form-group .title span {
-    display:block;
-    margin-bottom:5px;
+    display: block;
+    margin-bottom: 5px;
 }
 
 video, object {
-    background:#444;
-    border:solid 2px #fff;
-    padding:0!important;
+    background: #444;
+    border: solid 2px #fff;
+    padding: 0!important;
 }
 
 video#local_video, object#local_video {
-    right:15px;
-    position:absolute;
-    z-index:9999;
+    right: 15px;
+    position: absolute;
+    z-index: 9999;
 }
 
 #file_body {
-    max-height:200px;
-    overflow-y:auto;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 #chat_panel {
-    margin:15px 0 45px;
+    margin: 15px 0 45px;
 }
 
 #chat_body {
-    max-height:200px;
-    overflow-y:auto;
+    max-height: 200px;
+    overflow-y: auto;
 }
 
 .list-group-item-heading b {
@@ -125,23 +126,23 @@ video#local_video, object#local_video {
 }
 
 .list-group-item-heading em {
-    float:right;
-    font-style:normal;
-    color:#888;
+    float: right;
+    font-style :normal;
+    color: #888;
 }
 
 .chat-item {
-    border:0;
-    padding:0 0 15px 0;
+    border: 0;
+    padding: 0 0 15px 0;
 }
 
 .chat-item img {
     width: 250px;
-  }
+}
 
 #chat_input {
-    display:block;
-    width:100%;
+    display: block;
+    width: 100%;
   }
 
 .control_settings .col {
@@ -153,8 +154,8 @@ video#local_video, object#local_video {
 }
 
 footer {
-    background:#f5f5f5;
-    padding:12px 0 0;
+    background: #f5f5f5;
+    padding: 12px 0 0;
     border-top:solid 1px #e0e0e0;
 }
 
@@ -166,22 +167,23 @@ footer {
 
 @media screen and (max-width:1999px){
     #credential_panel .panel-body {
-      margin-bottom:15px;
+      margin-bottom: 15px;
     }
+
     #credential_panel .panel-body button {
-      margin-left:14px;
+      margin-left: 14px;
     }
 }
 
 @media screen and (max-width:991px){
     video, object {
-        display:block;
-        width:100%;
+        display: block;
+        width: 100%;
     }
 
     video#local_video, object#local_video {
-        right:0;
-        position:static;
-        display:block
+        right: 0;
+        position: static;
+        display: block
     }
 }
