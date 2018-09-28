@@ -1,206 +1,196 @@
 <!doctype html>
 <html>
 
-<head>
-  <title>Temasys Web SDK Demo : Screensharing</title>
-  <style>
-    body {
-      font-family: sans-serif;
-    }
-    .room {
-      background: #eee;
-      border: solid 2px #ccc;
-      border-radius: 15px;
-      padding: 10px;
-    }
-    .room div {
-      display: inline-block;
-      vertical-align: top;
-      background: #000;
-      margin:0 5px 5px;
-    }
-    .room video,
-    .room object {
-      width: auto;
-      height: 150px;
-      background: #000;
-    }
-    .room div span {
-      display: block;
-      background: #fafafa;
-      padding: 5px 7px;
-      font-weight: bold;
-      font-size: 12px;
-    }
-    .room div.you span {
-      background: #656565;
-      color: #fff;
-    }
-  </style>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js" type="text/javascript"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js" type="text/javascript"></script>
-</head>
+  <head>
+    <title>Temasys Web SDK Demo : Screensharing</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js" type="text/javascript"></script>
+    <link rel='stylesheet' type='text/css' href='../assets/css/base.css'>
+    <link rel='stylesheet' type='text/css' href='../assets/css/screenshare.css'>
+  </head>
 
-<body>
-<button id="togglebutton" onclick="toggleShareScreen()" disabled>Share screen</button>
-<div id="roomUserMedia" class="room"></div>
-<div id="roomScreenshare" class="room"></div>
+  <body>
+    <section>
+      <div>
+        <h1 class='title'>Temasys Web SDK Demo: Screenshare and Camera</h1>
+      </div>
+    </section>
 
-<script src="../edge-attachmediastream.js"   type="text/javascript"></script>
-<script src="../config.js"></script>
-<script src="../../publish/skylink.complete.js"></script>
-<script>
-  var userMediaRoom = new Skylink();
-  var screenshareRoom = new Skylink();
-  var screensharePeerId = null;
-  var isSharing = false;
-  var inProgress = false;
+    <br/>
 
-  screenshareRoom.setLogLevel(4);
+    <section>
+      <button id="togglebutton" onclick="toggleShareScreen()" class="component btn" disabled>Share screen</button>
+    </section>
 
-  /**
-   * Camera stream room
-   */
-  userMediaRoom.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
-    if (isSelf) {
-      screensharePeerId = peerId;
-      document.getElementById('togglebutton').disabled = false;
-    }
+    <br/>
+    <br/>
+    <br/>
 
-    var peerDom = document.getElementById('um_' + peerId);
-    var peerVideo = document.getElementById('um_' + peerId + 'video');
-    var isYou = isSelf || peerInfo.parentId === screensharePeerId;
+    <div id="roomUserMedia" class="room room-border-top"></div>
+    <div id="roomScreenshare" class="room room-border-bottom"></div>
 
-    if (!peerDom) {
-      peerDom = document.createElement('div');
-      peerDom.id = 'um_' + peerId;
-      peerDom.className = isYou ? 'you' : '';
-      peerDom.innerHTML += '<span>' + (isYou ? 'You ' + (isSelf ? '(camera)' : '(screenshare)') :
-        (peerInfo.parentId ? peerInfo.parentId + ' (screenshare)' : peerId + ' (camera)')) + '</span>';
+    <div class="">
+      <div class="container">
+        <p class="full-with text-center">
+          &copy; Temasys Communications Pte Ltd 2018. All Rights Reserved.
+        </p>
+      </div>
+    </div>
+    <script src="../edge-attachmediastream.js"   type="text/javascript"></script>
+    <script src="../config.js"></script>
+    <script src="../../publish/skylink.complete.js"></script>
+    <script>
+      var userMediaRoom = new Skylink();
+      var screenshareRoom = new Skylink();
+      var screensharePeerId = null;
+      var isSharing = false;
+      var inProgress = false;
 
-      document.getElementById('roomUserMedia').appendChild(peerDom);
+      screenshareRoom.setLogLevel(4);
 
-      peerVideo = document.createElement('video');
-      peerVideo.id = 'um_' + peerId + 'video';
-      peerVideo.autoplay = true;
-      peerVideo.muted = isYou;
-      peerVideo.controls = true;
-      peerVideo.setAttribute('playsinline', true);
-
-      peerDom.appendChild(peerVideo);
-
-      setTimeout(function () {
-        peerVideo.removeAttribute('controls');
-      });
-    }
-
-    attachMediaStream(peerVideo, stream);
-  });
-
-  userMediaRoom.on('peerLeft', function (peerId, peerInfo, isSelf) {
-    var peerDom = document.getElementById('um_' + peerId);
-
-    if (peerDom) {
-      document.getElementById('roomUserMedia').removeChild(peerDom);
-    }
-  });
-
-  /**
-   * Screensharing stream room
-   */
-  screenshareRoom.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
-    var peerDom = document.getElementById('s_' + peerId);
-    var peerVideo = document.getElementById('s_' + peerId + 'video');
-    var isYou = isSelf || peerInfo.parentId === screensharePeerId;
-
-    if (!peerDom) {
-      peerDom = document.createElement('div');
-      peerDom.id = 's_' + peerId;
-      peerDom.className = isYou ? 'you' : '';
-      peerDom.innerHTML += '<span>' + (isYou ? 'You (screenshare)' :
-        (peerInfo.parentId ? peerInfo.parentId + ' (screenshare)' : peerId + ' (camera)')) + '</span>';
-
-      document.getElementById('roomScreenshare').appendChild(peerDom);
-
-      peerVideo = document.createElement('video');
-      peerVideo.id = 's_' + peerId + 'video';
-      peerVideo.autoplay = true;
-      peerVideo.muted = isYou;
-      peerVideo.controls = true;
-      peerVideo.setAttribute('playsinline', true);
-
-      peerDom.appendChild(peerVideo);
-
-      setTimeout(function () {
-        peerVideo.removeAttribute('controls');
-      });
-    }
-
-    attachMediaStream(peerVideo, stream);
-  });
-
-  screenshareRoom.on('peerLeft', function (peerId, peerInfo, isSelf) {
-    var peerDom = document.getElementById('s_' + peerId);
-
-    if (peerDom) {
-      document.getElementById('roomScreenshare').removeChild(peerDom);
-    }
-  });
-
-  /**
-   * Connect to camera stream first
-   */
-  userMediaRoom.init(config, function (initErr) {
-    if (initErr) return;
-    screenshareRoom.init(config, function (initErr2) {
-      if (initErr2) return;
-      userMediaRoom.joinRoom({
-        audio: true,
-        video: true
-      });
-    });
-  });
-
-  function toggleShareScreen () {
-    if (inProgress) return;
-    inProgress = true;
-    document.getElementById('togglebutton').disabled = true;
-    if (!isSharing) {
-      screenshareRoom.shareScreen(function (err) {
-        if (err) {
-          document.getElementById('togglebutton').innerHTML = 'Share screen';
+      /**
+       * Camera stream room
+       */
+      userMediaRoom.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
+        if (isSelf) {
+          screensharePeerId = peerId;
           document.getElementById('togglebutton').disabled = false;
-          inProgress = false;
-          return;
         }
-        screenshareRoom.joinRoom({
-          publishOnly: { parentId: screensharePeerId }
-        }, function (jRErr) {
-          if (jRErr) {
-            screenshareRoom.leaveRoom(function () {
+
+        var peerDom = document.getElementById('um_' + peerId);
+        var peerVideo = document.getElementById('um_' + peerId + 'video');
+        var isYou = isSelf || peerInfo.parentId === screensharePeerId;
+
+        if (!peerDom) {
+          peerDom = document.createElement('div');
+          peerDom.id = 'um_' + peerId;
+          peerDom.className = isYou ? 'you' : '';
+          peerDom.innerHTML += '<span>' + (isYou ? 'You ' + (isSelf ? '(camera)' : '(screenshare)') :
+            (peerInfo.parentId ? peerInfo.parentId + ' (screenshare)' : peerId + ' (camera)')) + '</span>';
+
+          document.getElementById('roomUserMedia').appendChild(peerDom);
+
+          peerVideo = document.createElement('video');
+          peerVideo.id = 'um_' + peerId + 'video';
+          peerVideo.autoplay = true;
+          peerVideo.muted = isYou;
+          peerVideo.controls = true;
+          peerVideo.setAttribute('playsinline', true);
+
+          peerDom.appendChild(peerVideo);
+
+          setTimeout(function () {
+            peerVideo.removeAttribute('controls');
+          });
+        }
+
+        attachMediaStream(peerVideo, stream);
+      });
+
+      userMediaRoom.on('peerLeft', function (peerId, peerInfo, isSelf) {
+        var peerDom = document.getElementById('um_' + peerId);
+
+        if (peerDom) {
+          document.getElementById('roomUserMedia').removeChild(peerDom);
+        }
+      });
+
+      /**
+       * Screensharing stream room
+       */
+      screenshareRoom.on('incomingStream', function (peerId, stream, isSelf, peerInfo) {
+        var peerDom = document.getElementById('s_' + peerId);
+        var peerVideo = document.getElementById('s_' + peerId + 'video');
+        var isYou = isSelf || peerInfo.parentId === screensharePeerId;
+
+        if (!peerDom) {
+          peerDom = document.createElement('div');
+          peerDom.id = 's_' + peerId;
+          peerDom.className = isYou ? 'you' : '';
+          peerDom.innerHTML += '<span>' + (isYou ? 'You (screenshare)' :
+            (peerInfo.parentId ? peerInfo.parentId + ' (screenshare)' : peerId + ' (camera)')) + '</span>';
+
+          document.getElementById('roomScreenshare').appendChild(peerDom);
+
+          peerVideo = document.createElement('video');
+          peerVideo.id = 's_' + peerId + 'video';
+          peerVideo.autoplay = true;
+          peerVideo.muted = isYou;
+          peerVideo.controls = true;
+          peerVideo.setAttribute('playsinline', true);
+
+          peerDom.appendChild(peerVideo);
+
+          setTimeout(function () {
+            peerVideo.removeAttribute('controls');
+          });
+        }
+
+        attachMediaStream(peerVideo, stream);
+      });
+
+      screenshareRoom.on('peerLeft', function (peerId, peerInfo, isSelf) {
+        var peerDom = document.getElementById('s_' + peerId);
+
+        if (peerDom) {
+          document.getElementById('roomScreenshare').removeChild(peerDom);
+        }
+      });
+
+      /**
+       * Connect to camera stream first
+       */
+      userMediaRoom.init(config, function (initErr) {
+        if (initErr) return;
+        screenshareRoom.init(config, function (initErr2) {
+          if (initErr2) return;
+          userMediaRoom.joinRoom({
+            audio: true,
+            video: true
+          });
+        });
+      });
+
+      function toggleShareScreen () {
+        if (inProgress) return;
+        inProgress = true;
+        document.getElementById('togglebutton').disabled = true;
+        if (!isSharing) {
+          screenshareRoom.shareScreen(function (err) {
+            if (err) {
               document.getElementById('togglebutton').innerHTML = 'Share screen';
               document.getElementById('togglebutton').disabled = false;
               inProgress = false;
+              return;
+            }
+            screenshareRoom.joinRoom({
+              publishOnly: { parentId: screensharePeerId }
+            }, function (jRErr) {
+              if (jRErr) {
+                screenshareRoom.leaveRoom(function () {
+                  document.getElementById('togglebutton').innerHTML = 'Share screen';
+                  document.getElementById('togglebutton').disabled = false;
+                  inProgress = false;
+                });
+                return;
+              }
+              document.getElementById('togglebutton').innerHTML = 'Stop screen';
+              document.getElementById('togglebutton').disabled = false;
+              isSharing = true;
+              inProgress = false;
             });
-            return;
-          }
-          document.getElementById('togglebutton').innerHTML = 'Stop screen';
-          document.getElementById('togglebutton').disabled = false;
-          isSharing = true;
-          inProgress = false;
-        });
-      });
-    } else {
-      screenshareRoom.leaveRoom(function () {
-        document.getElementById('togglebutton').innerHTML = 'Share screen';
-        document.getElementById('togglebutton').disabled = false;
-        isSharing = false;
-        inProgress = false;
-      });
-    }
-  }
-</script>
+          });
+        } else {
+          screenshareRoom.leaveRoom(function () {
+            document.getElementById('togglebutton').innerHTML = 'Share screen';
+            document.getElementById('togglebutton').disabled = false;
+            isSharing = false;
+            inProgress = false;
+          });
+        }
+      }
+    </script>
 
-</body>
+  </body>
 
 </html>
