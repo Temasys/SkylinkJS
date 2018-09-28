@@ -11,6 +11,10 @@
     border-radius: 20px !important;
 }
 
+.nav-btn-rounded {
+    margin: 0 3px 0px 0;
+}
+
 .panel-chat {
     border: 5px solid black;
 }
