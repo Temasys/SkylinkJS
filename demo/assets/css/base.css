@@ -106,3 +106,7 @@ button:focus {
 .stripes-background {
     background-image: url('../img/stripes.png');
 }
+
+.margin-right {
+    margin-right: 10px !important;
+}
