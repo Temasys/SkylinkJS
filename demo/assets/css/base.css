@@ -41,6 +41,10 @@ button:focus {
     border-radius: 8px;
 }
 
+.full-width {
+    width: 100%;
+}
+
 .component {
     height: 2rem;
     border: 2px solid black;
