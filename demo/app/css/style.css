@@ -161,7 +161,7 @@ footer {
   text-align: left;
 }
 
-.peervideo .connstats div {
+.peervideo .connstats div:nth-child(2){
   margin-bottom: 15px;
 }
 
@@ -172,7 +172,7 @@ footer {
 .peervideo .connstats div b {
   display: block;
   text-transform: uppercase;
-  font-size: 10px; 
+  font-size: 10px;
   margin-bottom: 5px;
 }
 

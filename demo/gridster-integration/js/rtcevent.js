@@ -155,7 +155,7 @@ Demo.Skylink.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
     '<input type="file" class="form-control" title="Select a file to upload" id="file_input_' + peerId + '">' +
     '</div>' +
     '<span class="input-group-btn">' +
-    '<button id="send_file_' + peerId + '" class="btn btn-default" title="Upload file" type="button">' +
+    '<button id="send_file_' + peerId + '" class="btn btn-primary" title="Upload file" type="button">' +
     '<span class="glyphicon glyphicon-cloud-upload"></span><b>Upload file</b>' +
     '</button> </span>' +
     '</div>' +

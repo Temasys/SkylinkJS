@@ -168,6 +168,7 @@ object#local_video {
   height:50px;
   border:1px solid #00AAA4;
   border-left: 4px solid #00AAA4;
+  background: #f1f1f1;
 }
 .control_settings {
   padding:0;
@@ -179,6 +180,10 @@ footer {
   background:#f5f5f5;
   padding:12px 0 0;
   border-top:solid 1px #e0e0e0;
+}
+
+.background-chat, .chat-item {
+  background: #f1f1f1;
 }
 @media screen and (max-width:1999px){
   .cd-panel-content .panel-body {

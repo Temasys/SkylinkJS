@@ -852,7 +852,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} XML_HTTP_REQUEST_ERROR      <small>Value <code>-1</code></small>
  *   The value of the failure code when requesting to Auth server has timed out.
  * @param {Number} XML_HTTP_NO_REPONSE_ERROR      <small>Value <code>-2</code></small>
- *   The value of the failure code when response from Auth server is empty or timed out.   
+ *   The value of the failure code when response from Auth server is empty or timed out.
  * @param {Number} NO_SOCKET_IO                <small>Value <code>1</code></small>
  *   The value of the failure code when dependency <a href="http://socket.io/download/">Socket.IO client</a> is not loaded.
  *   <small>To resolve this, ensure that the Socket.IO client dependency is loaded before the Skylink SDK.
@@ -1465,6 +1465,20 @@ Skylink.prototype._GROUP_MESSAGE_LIST = [
 ];
 
 /**
+ * <blockquote class="info">
+ *   Note that this is used only for SDK development purposes.<br>
+ *   Current version: <code>1.1</code>
+ * </blockquote>
+ * The value of the current version of the stats API used.
+ * @attribute STATS_API_VERSION
+ * @type String
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype.STATS_API_VERSION = '1.1';
+
+/*
  * The options available for video and audio bitrates (kbps) quality.
  * @attribute VIDEO_QUALITY
  * @param {JSON} HD <small>Value <code>{ video: 3200, audio: 80 }</code></small>

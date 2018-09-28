@@ -421,7 +421,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           self.once('channelClose', peerSocketFailedJoin);
         }
 
-        self._sendChannelMessage({
+        var joinRoomMsg = {
           type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
           uid: self._user.uid,
           cid: self._key,
@@ -435,7 +435,10 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           isPrivileged: self._isPrivileged === true, // Default to false if undefined
           autoIntroduce: self._autoIntroduce !== false, // Default to true if undefined
           key: self._initOptions.appKey
-        });
+        };
+
+        self._sendChannelMessage(joinRoomMsg);
+        self._handleSessionStats(joinRoomMsg);
       });
     });
   };
@@ -456,7 +459,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
 
   self._joinRoomManager.socketsFn = [];
 
-  var stopStream = mediaOptions.audio === false && mediaOptions.video === false;  
+  var stopStream = mediaOptions.audio === false && mediaOptions.video === false;
 
   if (self._inRoom) {
     self.leaveRoom({
