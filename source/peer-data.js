@@ -589,10 +589,10 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
 
 
   if (self._peerConnections[usePeerId] && self._peerConnections[usePeerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-    var stream = self._peerConnections[peerId].localStream;
-    var streamId = self._peerConnections[peerId].localStreamId || (stream && (stream.id || stream.label));
+    var stream = self._peerConnections[usePeerId].localStream;
+    var streamId = self._peerConnections[usePeerId].localStreamId || (stream && (stream.id || stream.label));
 
-    customSettings.settings.data = self._initOptions.enableDataChannel && self._peerInformations[peerId].config.enableDataChannel;
+    customSettings.settings.data = self._initOptions.enableDataChannel && self._peerInformations[usePeerId].config.enableDataChannel;
 
     if (stream) {
       if (self._streams.screenshare && self._streams.screenshare.stream &&
@@ -608,9 +608,9 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
         customSettings.mediaStatus = clone(self._streamsMutedSettings);
       }
 
-      if (typeof self._peerConnections[peerId].getSenders === 'function' &&
+      if (typeof self._peerConnections[usePeerId].getSenders === 'function' &&
         !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
-        var senders = self._peerConnections[peerId].getSenders();
+        var senders = self._peerConnections[usePeerId].getSenders();
         var hasSendAudio = false;
         var hasSendVideo = false;
 

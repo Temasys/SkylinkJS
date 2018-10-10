@@ -182,7 +182,7 @@ Skylink.prototype.generateUUID = function() {
  *   <code>refreshConnection()</code> method</a> is called internally.</small>
  * @param {Boolean} [options.throttleShouldThrowError=false] The flag if throttled methods should throw errors when
  *   method is invoked less than the interval timeout value configured in <code>options.throttleIntervals</code>.
- * @param {Boolean} [options.mcuUseRenegoRestart=false] <blockquote class="info">
+ * @param {Boolean} [options.mcuUseRenegoRestart=true] <blockquote class="info">
  *   Note that this feature is currently is beta and for any enquiries on enabling and its support, please
  *   contact <a href="http://support.temasys.io">our support portal</a>.</blockquote>
  *   The flag if <a href="#method_refreshConnection"><code>
@@ -486,8 +486,8 @@ Skylink.prototype.init = function(_options, _callback) {
   // `init({ throttleShouldThrowError: false })`
   options.throttleShouldThrowError = options.throttleShouldThrowError === true;
 
-  // `init({ mcuUseRenegoRestart: false })`
-  options.mcuUseRenegoRestart = options.mcuUseRenegoRestart === true;
+  // `init({ mcuUseRenegoRestart: true })`
+  options.mcuUseRenegoRestart = options.mcuUseRenegoRestart === false;
 
   // `init({ useEdgeWebRTC: false })`
   options.useEdgeWebRTC = options.useEdgeWebRTC === true;
