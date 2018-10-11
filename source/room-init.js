@@ -913,6 +913,7 @@ Skylink.prototype._parseInfo = function(info) {
   this._signalingServer = info.ipSigserver;
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
+  this._hasMCU = info.hasMCU;
 
   this._user = {
     uid: info.username,

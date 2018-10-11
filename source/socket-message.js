@@ -1053,15 +1053,15 @@ Skylink.prototype._enterHandler = function(message) {
   }
 
   var processPeerFn = function (cert) {
-    if (!self._peerInformations[message.target]) {
+    if ((!self._peerInformations[targetMid] && !self._hasMCU) || (self._hasMCU && !self._peerInformations['MCU'])) {
       isNewPeer = true;
 
-      self._peerInformations[message.target] = userInfo;
+      self._peerInformations[targetMid] = userInfo;
 
       var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
         !!userInfo.settings.video.screenshare;
 
-      self._addPeer(message.target, cert || null, {
+      self._addPeer(targetMid, cert || null, {
         agent: userInfo.agent.name,
         version: userInfo.agent.version,
         os: userInfo.agent.os
@@ -1071,7 +1071,7 @@ Skylink.prototype._enterHandler = function(message) {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
 
         self._hasMCU = true;
-        self._trigger('peerJoined', message.target, self.getPeerInfo(message.target), false);
+        self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
         self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
 
       } else {
@@ -1081,7 +1081,11 @@ Skylink.prototype._enterHandler = function(message) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     }
 
-    self._peerMessagesStamps[message.target] = self._peerMessagesStamps[message.target] || {
+    if (self._hasMCU && targetMid !== self._user.sid) {
+      self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
+    }
+
+    self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
       userData: 0,
       audioMuted: 0,
       videoMuted: 0
@@ -1360,7 +1364,7 @@ Skylink.prototype._welcomeHandler = function(message) {
   }
 
   var processPeerFn = function (cert) {
-    if (!self._peerInformations[targetMid]) {
+    if ((!self._peerInformations[targetMid] && !self._hasMCU) || (self._hasMCU && !self._peerInformations['MCU'])) {
       isNewPeer = true;
 
       self._peerInformations[targetMid] = userInfo;
@@ -1376,12 +1380,7 @@ Skylink.prototype._welcomeHandler = function(message) {
 
       if (targetMid === 'MCU') {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
-
         self._hasMCU = true;
-        for (var peersInRoomIndex = 0; peersInRoomIndex < message.peersInRoom.length; peersInRoomIndex++) {
-          var _PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
-          self._trigger('peerJoined', _PEER_ID, self.getPeerInfo(_PEER_ID), false);
-        }
         self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
 
       } else {
@@ -1390,6 +1389,16 @@ Skylink.prototype._welcomeHandler = function(message) {
 
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    }
+
+    if (self._hasMCU && Array.isArray(message.peersInRoom) && message.peersInRoom.length) {
+      var userId = self._user.sid;
+      for (var peersInRoomIndex = 0; peersInRoomIndex < message.peersInRoom.length; peersInRoomIndex++) {
+        var _PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
+        if (_PEER_ID !== userId) {
+          self._trigger('peerJoined', _PEER_ID, self.getPeerInfo(_PEER_ID), false);
+        }
+      }
     }
 
     self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
