@@ -59,7 +59,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    if (!this._peerInformations[peerId]) {
+    if (!this._hasMCU && !this._peerInformations[peerId]) {
       log.error([peerId, 'Socket', null, 'Dropping of sending message to Peer as ' +
         'Peer session does not exists']);
       listOfPeers.splice(i, 1);

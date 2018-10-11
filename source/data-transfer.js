@@ -734,7 +734,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    if (!this._dataChannels[peerId]) {
+    if (!this._hasMCU && !this._dataChannels[peerId]) {
       log.error([peerId, 'RTCDataChannel', null, 'Dropping of sending message to Peer as ' +
         'Datachannel connection does not exists']);
       listOfPeers.splice(i, 1);
