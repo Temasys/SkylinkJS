@@ -1510,8 +1510,14 @@ Skylink.prototype._offerHandler = function(message) {
   self._handleNegotiationStats('offer', targetMid, offer, true);
 
   if (!pc) {
-    log.error([targetMid, null, message.type, 'Peer connection object ' +
+    if(!self._hasMCU) {
+      log.error([targetMid, null, message.type, 'Peer connection object ' +
       'not found. Unable to setRemoteDescription for offer']);
+    }
+    if (targetMid !== 'MCU' && self._hasMCU && self._peerConnections['MCU']) {
+      log.warn([targetMid, null, message.type, 'Peer connection object with MCU ' +
+      'already exists. Dropping the offer.']);
+    }
     self._handleNegotiationStats('dropped_offer', targetMid, offer, true, 'Peer connection does not exists');
     return;
   }

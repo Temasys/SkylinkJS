@@ -1641,32 +1641,37 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
  * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
-  if (!this._peerConnections[peerId] && !this._peerInformations[peerId]) {
+  if (!this._peerConnections[peerId] && !this._peerInformations[peerId] && !this._hasMCU) {
     log.debug([peerId, 'RTCPeerConnection', null, 'Dropping the hangup from Peer as not connected to Peer at all.']);
     return;
   }
 
-  var peerInfo = clone(this.getPeerInfo(peerId)) || {
-    userData: '',
-    settings: { audio: false, video: false, data: false },
-    mediaStatus: { audioMuted: true, videoMuted: true },
-    agent: {
-      name: 'unknown',
-      version: 0,
-      os: '',
-      pluginVersion: null
-    },
-    config: {
-      enableDataChannel: true,
-      enableIceRestart: false,
-      enableIceTrickle: true,
-      priorityWeight: 0,
-      publishOnly: false,
-      receiveOnly: true
-    },
-    parentId: null,
-    room: clone(this._selectedRoom)
-  };
+  var peerInfo = null;
+
+  if (!this._hasMCU) {
+    peerInfo = clone(this.getPeerInfo(peerId)) || {
+      userData: '',
+      settings: { audio: false, video: false, data: false },
+      mediaStatus: { audioMuted: true, videoMuted: true },
+      agent: {
+        name: 'unknown',
+        version: 0,
+        os: '',
+        pluginVersion: null
+      },
+      config: {
+        enableDataChannel: true,
+        enableIceRestart: false,
+        enableIceTrickle: true,
+        priorityWeight: 0,
+        publishOnly: false,
+        receiveOnly: true
+      },
+      parentId: null,
+      room: clone(this._selectedRoom)
+    };
+  }
+
 
   if (peerId !== 'MCU') {
     this._trigger('peerLeft', peerId, peerInfo, false);
@@ -1866,32 +1871,6 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     var stream = evt.stream || evt;
 
-    // MCU test
-    // function makeFackUserId() {
-    //   var text = "user_";
-    //   var possible = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    //   for (var i = 0; i < 20; i++)
-    //     text += possible.charAt(Math.floor(Math.random() * possible.length));
-    //   return text;
-    // }
-    // self.peerStreamTable[stream.id] = makeFackUserId();
-    // var video = document.createElement('video');
-    // video.autoplay = true;
-    // video.id = stream.id;
-    // video.peerId = self.streamIdPeerIdMap[stream.id];
-    // window.document.body.append(video);
-    // self.videoRenderers[stream.id] = attachMediaStream(video, stream);
-    // End of MCU test
-
-
-    // if (targetMid === 'MCU') {
-    //   log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received remote stream from MCU ->'], stream);
-    //   return;
-    // } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
-    //   log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received empty remote stream ->'], stream);
-    //   return;
-    // }
-
     pc.remoteStream = stream;
     pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
 
@@ -1910,13 +1889,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasStream = true;
     pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
 
-    self._onRemoteStreamAdded(self.streamIdPeerIdMap[stream.id.split('_MCU_')[0]], stream, !!pc.hasScreen);
+    self._onRemoteStreamAdded(self._hasMCU ? self.streamIdPeerIdMap[stream.id.split('_MCU_')[0]] : targetMid, stream, !!pc.hasScreen);
   };
 
   pc.onremovestream = function(evt) {
     var stream = evt.stream || evt;
-    var renderer = self.videoRenderers[stream.id];
-    document.body.removeChild(renderer);
   };
 
   pc.onicecandidate = function(event) {
