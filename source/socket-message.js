@@ -257,7 +257,7 @@ Skylink.prototype.startRecording = function (callback) {
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
+Skylink.prototype.stopRecording = function (callback) {
   var self = this;
 
   if (!self._hasMCU) {
@@ -295,26 +295,10 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
     var expectedRecordingId = self._currentRecordingId;
 
     self.once('recordingState', function (state, recordingId, link, error) {
-      if (callbackSuccessWhenLink) {
-        if (error) {
-          callback(error, null);
-          return;
-        }
-
-        callback(null, {
-          link: link,
-          recordingId: recordingId
-        });
-        return;
-      }
-
       callback(null, recordingId);
 
     }, function (state, recordingId) {
       if (expectedRecordingId === recordingId) {
-        if (callbackSuccessWhenLink) {
-          return [self.RECORDING_STATE.LINK, self.RECORDING_STATE.ERROR].indexOf(state) > -1;
-        }
         return state === self.RECORDING_STATE.STOP;
       }
     });
@@ -868,29 +852,6 @@ Skylink.prototype._recordingEventHandler = function (message) {
     self._recordings[message.recordingId].state = self.RECORDING_STATE.STOP;
     self._recordings[message.recordingId].endedDateTime = (new Date()).toISOString();
     self._trigger('recordingState', self.RECORDING_STATE.STOP, message.recordingId, null, null);
-
-  } else if (message.action === 'url') {
-    var links = {};
-
-    if (Array.isArray(message.urls)) {
-      for (var i = 0; i < message.urls.length; i++) {
-        links[messages.urls[i].id || ''] = messages.urls[i].url || '';
-      }
-    } else if (typeof message.url === 'string') {
-      links.mixin = message.url;
-    }
-
-    self._handleRecordingStats('mixin', message.recordingId, links);
-
-    if (!self._recordings[message.recordingId]) {
-      log.error(['MCU', 'Recording', message.recordingId, 'Received URL but the session is empty']);
-      return;
-    }
-
-    self._recordings[message.recordingId].links = links;
-    self._recordings[message.recordingId].state = self.RECORDING_STATE.LINK;
-    self._recordings[message.recordingId].mixingDateTime = (new Date()).toISOString();
-    self._trigger('recordingState', self.RECORDING_STATE.LINK, message.recordingId, links, null);
 
   } else {
     var recordingError = new Error(message.error || 'Unknown error');
