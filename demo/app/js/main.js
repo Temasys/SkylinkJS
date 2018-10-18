@@ -593,7 +593,7 @@ Demo.Skylink.on('recordingState', function(state, recordingId, url, error) {
       break;
     case Demo.Skylink.RECORDING_STATE.STOP:
       $('#recording_' + recordingId + '_state_icon').attr('class', 'glyphicon glyphicon-refresh');
-      $('#recording_' + recordingId + '_state').html('STOPPED / PROCESSING VIDEO');
+      $('#recording_' + recordingId + '_state').html('RECORDING STOPPED');
       $('#recording_' + recordingId + '_error').html('');
       break;
     case Demo.Skylink.RECORDING_STATE.LINK:
