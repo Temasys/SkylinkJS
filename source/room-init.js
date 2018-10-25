@@ -924,8 +924,8 @@ Skylink.prototype._parseInfo = function(info) {
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
 
-  if(info.enable_stats_config !== true){
-    this.options.enableStatsGathering = true;
+  if(!info.enable_stats_config){
+    this._initOptions.enableStatsGathering = false;
   }
 
   this._user = {
