@@ -44,7 +44,7 @@ Skylink.prototype.generateUUID = function() {
  * @param {Boolean} [options.enableStatsGathering=true] Configure the anonymous performance and connectivity statistic collection function.
  *   Temasys collects encrypted, anonymous performance and connectivity statistics to allow us to improve performance for our customers and identify regional or ISP specific connectivity issues.
  *   This data does not contain any personal information or session content.
- *   The default behavior for this option if not specifically configured is true.
+ *   To enable the configuration of this option, you need to enable stats option on the Temasys console Website. The default behavior for this option if not specifically configured is true.
  * @param {Boolean} [options.enableDataChannel=true] <blockquote class="info">
  *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
  *   </blockquote> The flag if Datachannel connections should be enabled.
@@ -923,6 +923,10 @@ Skylink.prototype._parseInfo = function(info) {
   this._signalingServer = info.ipSigserver;
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
+
+  if(info.enable_stats_config !== true){
+    this.options.enableStatsGathering = true;
+  }
 
   this._user = {
     uid: info.username,
