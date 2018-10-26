@@ -136,10 +136,8 @@ Skylink.prototype._handleIceConnectionStats = function(state, peerId) {
     local_candidate: {},
     remote_candidate: {}
   };
-  var postData = [];
   // Set a timeout to pause process to ensure the stats retrieval does not run at the same time
   // when the state is triggered, so that the selected ICE candidate pair information can be returned.
-  setTimeout(function () {
     self._retrieveStats(peerId, function (error, stats) {
       if (stats) {
         // Parse the selected ICE candidate pair for both local and remote candidate.
@@ -160,16 +158,9 @@ Skylink.prototype._handleIceConnectionStats = function(state, peerId) {
           }
         });
       }
-      postData.push(statsObject);
+      self._postStats('/rest/stats/client/iceconnection', statsObject);
 
     }, true);
-
-    if(postData.length>9){
-      self._postStats('/rest/stats/client/iceconnection', postData);
-      postData = [];
-    }
-  }, 1000);
-
 };
 
 /**
