@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.35 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.35</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -132,6 +132,10 @@ Skylink.prototype.generateUUID = function() {
  *   &lt;small&gt;Note that this is a debugging feature and is only used when instructed for debugging purposes.&lt;/small&gt;
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
+ * @param {Boolean} [options.enableStatsGathering=true] Configure the anonymous performance and connectivity statistic collection function.
+ *   Temasys collects encrypted, anonymous performance and connectivity statistics to allow us to improve performance for our customers and identify regional or ISP specific connectivity issues.
+ *   This data does not contain any personal information or session content.
+ *   To enable the configuration of this option, you need to &quot;Collect Quality Statistics&quot; option on the Temasys console Website under App key settings section. The default behavior for this option if not specifically configured is true.
  * @param {Boolean} [options.enableDataChannel=true] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that for Edge browsers, this value is overriden as &lt;code&gt;false&lt;/code&gt; due to its supports.
  *   &lt;/blockquote&gt; The flag if Datachannel connections should be enabled.
@@ -528,9 +532,12 @@ Skylink.prototype.init = function(_options, _callback) {
 
   // &#x60;init({ defaultRoom: &quot;xxxxx&quot; })&#x60;
   options.defaultRoom = options.defaultRoom &amp;&amp; typeof options.defaultRoom === &#x27;string&#x27; ? options.defaultRoom : options.appKey;
-  
+
   // &#x60;init({ roomServer: &quot;//server.temasys.io&quot; })&#x60;
   options.roomServer = options.roomServer &amp;&amp; typeof options.roomServer === &#x27;string&#x27; ? options.roomServer : &#x27;//api.temasys.io&#x27;;
+
+  // &#x60;init({ statsServer: &quot;//server.temasys.io&quot; })&#x60;
+  options.statsServer = options.statsServer &amp;&amp; typeof options.statsServer === &#x27;string&#x27; ? options.statsServer : &#x27;//api.temasys.io&#x27;;
 
   // &#x60;init({ enableIceTrickle: true })&#x60;
   options.enableIceTrickle = options.enableIceTrickle !== false;
@@ -549,6 +556,9 @@ Skylink.prototype.init = function(_options, _callback) {
 
   // &#x60;init({ forceSSL: true })&#x60;
   options.forceSSL = options.forceSSL !== false;
+
+  // &#x60;init({ enableStatsGathering: true })&#x60;
+  options.enableStatsGathering = options.enableStatsGathering !== false;
 
   // &#x60;init({ socketTimeout: 20000 })&#x60;
   options.socketTimeout = typeof options.socketTimeout === &#x27;number&#x27; &amp;&amp; options.socketTimeout &gt;= 5000 ? options.socketTimeout : 7000;
@@ -682,7 +692,7 @@ Skylink.prototype.init = function(_options, _callback) {
       // &#x60;init({ videoCodec: { samplingRate: 48000, ... } })&#x60;
       samplingRate: typeof options.videoCodec.samplingRate === &#x27;number&#x27; ? options.videoCodec.samplingRate : null
     };
-    
+
   // &#x60;init({ videoCodec: &quot;xxxx&quot; })&#x60;
   } else {
     options.videoCodec = self._containsInList(&#x27;VIDEO_CODEC&#x27;, options.videoCodec, &#x27;AUTO&#x27;);
@@ -729,16 +739,16 @@ Skylink.prototype.init = function(_options, _callback) {
   // &#x60;init({ codecParams: { video: { h264: { ... } } } })&#x60;
   options.codecParams.video.h264 = options.codecParams.video.h264 &amp;&amp;
     typeof options.codecParams.video.h264 === &#x27;object&#x27; ? options.codecParams.video.h264 : {};
-  
+
   // &#x60;init({ codecParams: { video: { h264: { profileLevelId: &quot;xxxxxx&quot; } } } })&#x60;
   options.codecParams.video.h264.profileLevelId = options.codecParams.video.h264.profileLevelId &amp;&amp;
     typeof options.codecParams.video.h264.profileLevelId === &#x27;string&#x27; ?
     options.codecParams.video.h264.profileLevelId : null;
-  
+
   // &#x60;init({ codecParams: { video: { h264: { levelAsymmetryAllowed: 1 } } } })&#x60;
   options.codecParams.video.h264.levelAsymmetryAllowed = typeof options.codecParams.video.h264.levelAsymmetryAllowed === &#x27;boolean&#x27; ?
     options.codecParams.video.h264.levelAsymmetryAllowed : null;
-  
+
   // &#x60;init({ codecParams: { video: { h264: { packetizationMode: 1 } } } })&#x60; (fallback for number)
   options.codecParams.video.h264.packetizationMode = typeof options.codecParams.video.h264.packetizationMode === &#x27;boolean&#x27; ?
     (options.codecParams.video.h264.packetizationMode === true ? 1 : 0) :
@@ -790,13 +800,13 @@ Skylink.prototype.init = function(_options, _callback) {
 
     } else if (state === self.READY_STATE_CHANGE.COMPLETED) {
       log.info(&#x27;Completed init() successfully -&gt;&#x27;, options);
-    
+
       var success = clone(self._initOptions);
       success.serverUrl = self._path;
       success.readyState = self._readyState;
       success.selectedRoom = self._selectedRoom;
       success.TURNTransport = success.TURNServerTransport;
-  
+
       callback(null, success);
       return true;
     }
@@ -879,6 +889,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       completed = true;
       var response = JSON.parse(xhr.responseText || xhr.response || &#x27;{}&#x27;);
       var status = xhr.status || (response.success ? 200 : 400);
+      self._handleAuthStats(response.success ? &#x27;success&#x27; : &#x27;error&#x27;, response, status);
 
       if (response.success) {
       	log.debug([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Received sessions parameters -&gt;&#x27;], response);
@@ -899,14 +910,15 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
         errorCode: response.error || status
       }, self._selectedRoom);
     };
-  
+
     xhr.onerror = function (error) {
       if (completed) {
         return;
       }
       completed = true;
       log.error([null, &#x27;XMLHttpRequest&#x27;, method, &#x27;Failed retrieving information with status -&gt;&#x27;], xhr.status);
-
+      // TO CHECK: Added a new field &quot;web_sdk_error&quot; not documented in specs.
+      self._handleAuthStats(&#x27;error&#x27;, null, -1, &#x27;Failed connecting to server&#x27;);
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
         status: xhr.status || -1,
@@ -939,6 +951,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       }
     } catch (error) {
       completed = true;
+      self._handleAuthStats(&#x27;error&#x27;, null, -1, error);
       self._readyState = self.READY_STATE_CHANGE.ERROR;
       self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
         status: xhr.status || -1,
@@ -962,10 +975,12 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
         requestFn();
 
       } else {
-        self._readyState = self.READY_STATE_CHANGE.ERROR;
+      	var timeoutError = new Error(&#x27;Response timed out from API server&#x27;);
+        self._handleAuthStats(&#x27;error&#x27;, null, -1, timeoutError);
+      	self._readyState = self.READY_STATE_CHANGE.ERROR;
         self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.ERROR, {
           status: xhr.status || -1,
-          content: new Error(&#x27;Response timed out from API server&#x27;),
+          content: timeoutError,
           errorCode: self.READY_STATE_CHANGE_ERROR.XML_HTTP_NO_REPONSE_ERROR
         }, self._selectedRoom);
       }
@@ -999,6 +1014,10 @@ Skylink.prototype._parseInfo = function(info) {
   this._signalingServer = info.ipSigserver;
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
+
+  if(!info.enable_stats_config){
+    this._initOptions.enableStatsGathering = false;
+  }
 
   this._user = {
     uid: info.username,
@@ -1146,6 +1165,7 @@ Skylink.prototype._loadInfo = function() {
 
       self._readyState = self.READY_STATE_CHANGE.LOADING;
       self._trigger(&#x27;readyStateChange&#x27;, self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
+      self._handleClientStats();
       self._requestServerInfo(&#x27;GET&#x27;, self._path, function(response) {
         self._parseInfo(response);
       });
@@ -1172,8 +1192,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   options.iceServer = options.iceServer ? options.iceServer.urls : null;
 
   if(options.defaultRoom!==room){
-    options.defaultRoom = room;
-  }
+    options.defaultRoom = room;
+  }
 
   self.init(options, function (error, success) {
     self._initOptions.defaultRoom = defaultRoom;
