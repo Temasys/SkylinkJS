@@ -586,7 +586,7 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
   if (!self._peerInformations[usePeerId]) {
     return customSettings;
   }
-  
+
 
   if (self._peerConnections[usePeerId] && self._peerConnections[usePeerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
     var stream = self._peerConnections[peerId].localStream;

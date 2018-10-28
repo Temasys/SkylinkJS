@@ -967,25 +967,25 @@ Skylink.prototype.disableVideo = function() {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
- * 
+ *
  *   // Example 3: Share "window" media source
  *   skylinkDemo.shareScreen("window", function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
- * 
+ *
  *   // Example 4: Share tab and its audio media source
  *   skylinkDemo.shareScreen(true, ["tab", "audio"], function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
- * 
+ *
  *   // Example 5: Share "window" and "screen" media source
  *   skylinkDemo.shareScreen(["window", "screen"], function (error, success) {
  *     if (error) return;
  *     attachMediaStream(document.getElementById("my-screen"), success);
  *   });
- * 
+ *
  *   // Example 6: Share "window" with specific media source for specific plugin build users.
  *   skylinkDemo.shareScreen({ mediaSource: "window", sourceId: "xxxxx" }, function (error, success) {
  *     if (error) return;
@@ -1370,7 +1370,7 @@ Skylink.prototype.stopScreen = function () {
  *       video: sources.video.input[0].deviceId
  *     });
  *   });
- *   
+ *
  *   // Example 2: Set the output audio speaker (Chrome 49+ supported only)
  *   skylinkDemo.getStreamSources(function (sources) {
  *     var videoElement = document.getElementById('video');
@@ -1454,7 +1454,7 @@ Skylink.prototype.getStreamSources = function(callback) {
  *   skylinkDemo.getScreenSources(function (sources) {
  *     skylinkDemo.shareScreen(sources.mediaSource[0] || null);
  *   });
- *   
+ *
  *   // Example 2: Retrieve the list of available shareScreen() sources with a specific item.
  *   skylinkDemo.getScreenSources(function (sources) {
  *     if (sources.mediaSourceInput[0]) {
@@ -1483,7 +1483,7 @@ Skylink.prototype.getScreenSources = function(callback) {
   // Reference: https://bugs.chromium.org/p/chromium/issues/detail?id=487935
   if (navigator.userAgent.toLowerCase().indexOf('android') > -1) {
     if (AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion >= 59) {
-      outputSources.mediaSource = ['screen']; 
+      outputSources.mediaSource = ['screen'];
     }
     callback(outputSources);
     return;
@@ -1516,7 +1516,7 @@ Skylink.prototype.getScreenSources = function(callback) {
           return;
         }
       }
-      
+
       callback(outputSources);
     });
     return;
@@ -1837,6 +1837,79 @@ Skylink.prototype._parseStreamSettings = function(options) {
 };
 
 /**
+ * Function that parses the mediastream tracks for details.
+ * @method _parseStreamTracksInfo
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
+	var self = this;
+	var stream = self._streams[streamKey].stream;
+
+	if (!stream) {
+		log.warn('Unable to parse stream tracks information as the stream is not defined');
+		return callback();
+	}
+
+	self._streams[streamKey].tracks = {
+ 		audio: null,
+ 		video: null
+ 	};
+
+	// Currently, we are sending 1 audio and video track.
+  var audioTracks = stream.getAudioTracks();
+  var videoTracks = stream.getVideoTracks();
+
+  if (audioTracks.length > 0) {
+  	self._streams[streamKey].tracks.audio = {
+  		id: audioTracks[0].id || '',
+  		label: audioTracks[0].label || 'audio_track_0'
+  	};
+  }
+
+  if (videoTracks.length === 0) {
+  	return callback();
+  }
+
+  self._streams[streamKey].tracks.video = {
+		id: videoTracks[0].id || '',
+		label: videoTracks[0].label || 'video_track_0',
+		width: null,
+		height: null
+	};
+
+	// Append the stream to a dummy <video> element to retrieve the resolution width and height.
+  var videoElement = document.createElement('video');
+  videoElement.autoplay = true;
+  // Mute the audio of the <video> element to prevent feedback.
+  videoElement.muted = true;
+  videoElement.volume = 0;
+
+  var onVideoLoaded = function () {
+  	if (!self._streams[streamKey]) {
+  		return;
+  	}
+  	self._streams[streamKey].tracks.video.width = videoElement.videoWidth;
+  	self._streams[streamKey].tracks.video.height = videoElement.videoHeight;
+
+  	videoElement.src = '';
+  	videoElement.srcObject = null;
+  	callback();
+  };
+
+  // Because the plugin does not support the "loadeddata" event.
+  if (AdapterJS.webrtcDetectedType === 'plugin') {
+    setTimeout(onVideoLoaded, 1500);
+
+  } else {
+    videoElement.addEventListener('loadeddata', onVideoLoaded);
+  }
+
+  AdapterJS.attachMediaStream(videoElement, stream);
+}
+
+/**
  * Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.
  * @method _onStreamAccessSuccess
  * @private
@@ -1974,12 +2047,16 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   }
 
   self._streams[ isScreenSharing ? 'screenshare' : 'userMedia' ] = {
+  	id: streamId,
     stream: stream,
     settings: settings.settings,
     constraints: settings.getUserMediaSettings
   };
   self._muteStreams();
-  self._trigger('mediaAccessSuccess', stream, !!isScreenSharing, !!isAudioFallback, streamId);
+
+  self._parseStreamTracksInfo(isScreenSharing ? 'screenshare' : 'userMedia', function () {
+  	self._trigger('mediaAccessSuccess', stream, !!isScreenSharing, !!isAudioFallback, streamId);
+  });
 };
 
 /**

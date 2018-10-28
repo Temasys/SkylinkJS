@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.35 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.35</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -508,7 +508,7 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
  * @since 0.6.18
  */
 Skylink.prototype._removeSDPUnknownAptRtx = function (targetMid, sessionDescription) {
-  var codecsPayload = []; // m=audio 9 UDP/TLS/RTP/SAVPF [Start from index 3] 102 9 0 8 97 13 118 101  
+  var codecsPayload = []; // m=audio 9 UDP/TLS/RTP/SAVPF [Start from index 3] 102 9 0 8 97 13 118 101
   var sdpLines = sessionDescription.sdp.split(&#x27;\r\n&#x27;);
   var mediaLines = sessionDescription.sdp.split(&#x27;m=&#x27;);
 
@@ -778,10 +778,10 @@ Skylink.prototype._getCodecsSupport = function (callback) {
 
   // Safari 11 REQUIRES a stream first before connection works, hence let&#x27;s spoof it for now
   if (AdapterJS.webrtcDetectedType === &#x27;AppleWebKit&#x27;) {
-    self._currentCodecSupport.audio = { 
+    self._currentCodecSupport.audio = {
       opus: [&#x27;48000/2&#x27;]
     };
-    self._currentCodecSupport.video = { 
+    self._currentCodecSupport.video = {
       h264: [&#x27;48000&#x27;]
     };
     return callback(null);
@@ -1420,7 +1420,7 @@ Skylink.prototype._getSDPCodecsSupport = function (targetMid, sessionDescription
       }
 
       codecs[mediaType][codec] = codecs[mediaType][codec] || [];
-      
+
       if (codecs[mediaType][codec].indexOf(info) === -1) {
         codecs[mediaType][codec].push(info);
       }

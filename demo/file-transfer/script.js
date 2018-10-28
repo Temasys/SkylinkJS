@@ -57,6 +57,8 @@ SkylinkDemo.on('dataTransferState', function(state, transferId, peerId, transfer
     case SkylinkDemo.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED:
       var transferStatus = document.getElementById(peerId + '_' + transferId);
       transferStatus.innerHTML = 'Completed';
+      transferStatus.className = 'completed';
+
       var transferStatus = document.getElementById(transferId);
       transferStatus.href = URL.createObjectURL(transferInfo.data);
       transferStatus.style.display = 'block';
@@ -64,6 +66,7 @@ SkylinkDemo.on('dataTransferState', function(state, transferId, peerId, transfer
     case SkylinkDemo.DATA_TRANSFER_STATE.UPLOAD_COMPLETED:
       var transferStatus = document.getElementById(peerId + '_' + transferId);
       transferStatus.innerHTML = 'Completed';
+      transferStatus.className = 'completed';
       break;
     case SkylinkDemo.DATA_TRANSFER_STATE.REJECTED:
       alert(displayName + ' has rejected your request.\n\nFile: ' + transferInfo.name +
@@ -74,12 +77,14 @@ SkylinkDemo.on('dataTransferState', function(state, transferId, peerId, transfer
         error.message);
       var transferStatus = document.getElementById(peerId + '_' + transferId);
       transferStatus.innerHTML = 'Failed';
+      transferStatus.className = 'failed';
       break;
     case SkylinkDemo.DATA_TRANSFER_STATE.CANCEL:
       addMessage(transferId + ' canceled. Reason: \n' +
         error.message);
       var transferStatus = document.getElementById(peerId + '_' + transferId);
       transferStatus.innerHTML = 'Canceled';
+      transferStatus.className = 'canceled';
   }
 });
 
@@ -102,8 +107,8 @@ function sendFile() {
 
 function addMessage(message, className) {
   var infobox = document.getElementById('infobox'),
-    div = document.createElement('div');
-  div.className = className;
+  div = document.createElement('div');
+  div.className = className || 'default';
   div.innerHTML = message;
   infobox.appendChild(div);
 }
@@ -111,10 +116,10 @@ function addMessage(message, className) {
 function addFile(transferId, peerId, displayName, transferInfo, isUpload) {
   var transfers = document.getElementById('transfers'),
     item = document.createElement('tr');
-  item.innerHTML = '<td>' + transferId + '</td><td>' +
+  item.innerHTML = '<td>' + transferId + '</td><td class="text-center">' +
     ((isUpload) ? '&#8657;' : '&#8659;') + '</td>' +
-    '<td>' + displayName + '</td><td>' + transferInfo.name +
-    '</td><td><span id="' + peerId + '_' + transferId + '"></span>' +
+    '<td class="text-center">' + displayName + '</td><td class="text-center">' + transferInfo.name +
+    '</td><td class="text-center"><span id="' + peerId + '_' + transferId + '"></span>' +
     ((!isUpload) ? '<a id="' + transferId + '" href="#" download="' +
       transferInfo.name + '" style="display:none">Download</a>' : '') + '</td>';
   transfers.appendChild(item);

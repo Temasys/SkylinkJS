@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.35 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.35</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -943,7 +943,7 @@ Skylink.prototype.READY_STATE_CHANGE = {
  * @param {Number} XML_HTTP_REQUEST_ERROR      &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when requesting to Auth server has timed out.
  * @param {Number} XML_HTTP_NO_REPONSE_ERROR      &lt;small&gt;Value &lt;code&gt;-2&lt;/code&gt;&lt;/small&gt;
- *   The value of the failure code when response from Auth server is empty or timed out.   
+ *   The value of the failure code when response from Auth server is empty or timed out.
  * @param {Number} NO_SOCKET_IO                &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
  *   The value of the failure code when dependency &lt;a href=&quot;http://socket.io/download/&quot;&gt;Socket.IO client&lt;/a&gt; is not loaded.
  *   &lt;small&gt;To resolve this, ensure that the Socket.IO client dependency is loaded before the Skylink SDK.
@@ -1556,6 +1556,20 @@ Skylink.prototype._GROUP_MESSAGE_LIST = [
 ];
 
 /**
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this is used only for SDK development purposes.&lt;br&gt;
+ *   Current version: &lt;code&gt;1.1&lt;/code&gt;
+ * &lt;/blockquote&gt;
+ * The value of the current version of the stats API used.
+ * @attribute STATS_API_VERSION
+ * @type String
+ * @readOnly
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype.STATS_API_VERSION = &#x27;1.1&#x27;;
+
+/*
  * The options available for video and audio bitrates (kbps) quality.
  * @attribute VIDEO_QUALITY
  * @param {JSON} HD &lt;small&gt;Value &lt;code&gt;{ video: 3200, audio: 80 }&lt;/code&gt;&lt;/small&gt;

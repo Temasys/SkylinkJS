@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.35 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.35</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -561,14 +561,14 @@ Skylink.prototype.acceptDataTransfer = function (peerId, transferId, accept) {
 
     dataChannelStateCbFn = function (state, evtPeerId, error, cN, cT) {
       log.error([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Data transfer &quot;&#x27; + transferId + &#x27;&quot; has been terminated due to connection.&#x27;]);
-      
+
       self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.ERROR, transferId, peerId,
         self._getTransferInfo(transferId, peerId, true, false, false), {
         transferType: self.DATA_TRANSFER_TYPE.DOWNLOAD,
         message: new Error(&#x27;Data transfer terminated as Peer Datachannel connection closed abruptly.&#x27;)
       });
     };
-  
+
     self.once(&#x27;dataChannelState&#x27;, dataChannelStateCbFn, function (state, evtPeerId, error, channelName, channelType) {
       if (!(self._dataTransfers[transferId] &amp;&amp; self._dataTransfers[transferId].sessions[peerId])) {
         self.off(&#x27;dataChannelState&#x27;, dataChannelStateCbFn);
@@ -2129,7 +2129,7 @@ Skylink.prototype._startDataTransferToPeer = function (transferId, peerId, callb
       return;
     }
 
-    if (!(evtPeerId === peerId &amp;&amp; (channelProp === &#x27;main&#x27; ? 
+    if (!(evtPeerId === peerId &amp;&amp; (channelProp === &#x27;main&#x27; ?
       channelType === self.DATA_CHANNEL_TYPE.MESSAGING : channelName === transferId))) {
       return;
     }
