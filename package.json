@@ -20,8 +20,8 @@
     "test": "grunt test && karma start tests/karma.conf.js"
   },
   "dependencies": {
-    "socket.io-client": "1.4.8",
-    "adapterjs": "0.15.0"
+    "adapterjs": "0.15.0",
+    "socket.io-client": "2.1.1"
   },
   "devDependencies": {
     "connect": "2.x.x",
