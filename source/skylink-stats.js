@@ -249,6 +249,7 @@ Skylink.prototype._handleNegotiationStats = function(state, peerId, sdpOrMessage
 Skylink.prototype._handleBandwidthStats = function (peerId) {
   var self = this;
   var statsObject = {
+    app_key: self._initOptions.appKey,
     room_id: self._room && self._room.id,
     user_id: self._user && self._user.sid,
     peer_id: peerId,
