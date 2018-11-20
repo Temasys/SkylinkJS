@@ -736,6 +736,8 @@ Skylink.prototype.init = function(_options, _callback) {
     return;
   }
 
+  self._setClientInfoForLogging();
+
   // Format: https://api.temasys.io/api/<appKey>/<room>[/<creds.start>][/<creds.duration>][?cred=<creds.hash>]&rand=<rand>
   self._path = self._initOptions.roomServer + '/api/' + self._initOptions.appKey + '/' + self._selectedRoom +
     (self._initOptions.credentials ? '/' + self._initOptions.credentials.startDateTime + '/' +
