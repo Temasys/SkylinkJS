@@ -395,7 +395,7 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp, isCloseMainC
     closeFn(channelProp);
   }
   else if (!channelProp || channelProp === 'main') {
-    for (var channelNameProp in self._dataChannels) {
+    for (var channelNameProp in self._dataChannels[peerId]) {
       if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
         if (self._dataChannels[peerId][channelNameProp]) {
           closeFn(channelNameProp);
