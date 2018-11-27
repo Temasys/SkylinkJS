@@ -1415,11 +1415,14 @@ Skylink.prototype._setSCTPport = function (targetMid, sessionDescription) {
         // Saving m=application line when creating offer into instance variable
         if (sdpType === 'offer') {
           self._mline = sdpLines[mLineIndex];
+          break;
         }
 
         // Replacing m=application line from instance variable
         if (sdpType === 'answer') {
           sdpLines[mLineIndex] = self._mline;
+          sdpLines.splice(mLineIndex + 1, 0, 'a=sctp-port:5000');
+          break;
         }
       }
     }
