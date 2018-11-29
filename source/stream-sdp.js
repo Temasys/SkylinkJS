@@ -1388,3 +1388,47 @@ Skylink.prototype._getSDPCommonSupports = function (targetMid, sessionDescriptio
 
   return offer;
 };
+
+/**
+ * Function adds SCTP port number for Firefox 63.0.3 and above if its missing in the answer from MCU
+ * @method _setSCTPport
+ * @private
+ * @for Skylink
+ * @since 0.6.35
+ */
+Skylink.prototype._setSCTPport = function (targetMid, sessionDescription) {
+  var self = this;
+  if (AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion >= 63 && self._hasMCU === true) {
+    var sdpLines = sessionDescription.sdp.split('\r\n');
+    var mLineType = 'application';
+    var mLineIndex = -1;
+    var sdpType = sessionDescription.type;
+
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('m=' + mLineType) === 0) {
+        mLineIndex = i;
+      } else if (mLineIndex > 0) {
+        if (sdpLines[i].indexOf('m=') === 0) {
+          break;
+        }
+
+        // Saving m=application line when creating offer into instance variable
+        if (sdpType === 'offer') {
+          self._mline = sdpLines[mLineIndex];
+          break;
+        }
+
+        // Replacing m=application line from instance variable
+        if (sdpType === 'answer') {
+          sdpLines[mLineIndex] = self._mline;
+          sdpLines.splice(mLineIndex + 1, 0, 'a=sctp-port:5000');
+          break;
+        }
+      }
+    }
+
+    return sdpLines.join('\r\n');
+  }
+
+  return sessionDescription.sdp;
+};
