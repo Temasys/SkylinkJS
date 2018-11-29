@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.35 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.35</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1120,6 +1120,15 @@ Before using any Skylink functionalities, you will need to authenticate your App
                 
                   <a href="#method__setLocalAndSendMessage" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_setLocalAndSendMessage
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__setSCTPport" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_setSCTPport
                     <span class="settings">
                       
                       
@@ -8698,7 +8707,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1812"><code>source&#x2F;socket-message.js:1812</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1813"><code>source&#x2F;socket-message.js:1813</code></a>
       </small>
     
 
@@ -12577,6 +12586,91 @@ See confluence docs for the &quot;roomLockEvent&quot; expected properties to be 
     <p>Function that sets the local session description and sends to Peer.
 If trickle ICE is disabled, the local session description will be sent after
   ICE gathering has been completed.</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+
+  <hr>
+</div>
+            
+              <div id="method__setSCTPport" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_setSCTPport</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l1392"><code>source&#x2F;stream-sdp.js:1392</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.35</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function adds SCTP port number for Firefox 63.0.3 and above if its missing in the answer from MCU</p>
 
   </div>
 

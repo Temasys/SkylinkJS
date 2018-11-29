@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.35 - Fri Oct 26 2018 14:37:27 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v0.6.36 - Thu Nov 29 2018 15:21:19 GMT+0800 (Singapore Standard Time) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -13688,7 +13688,7 @@ if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.35 - Fri Oct 26 2018 14:37:27 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v0.6.36 - Thu Nov 29 2018 15:21:19 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -15302,7 +15302,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.35';
+Skylink.prototype.VERSION = '0.6.36';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -16422,7 +16422,7 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp, isCloseMainC
     closeFn(channelProp);
   }
   else if (!channelProp || channelProp === 'main') {
-    for (var channelNameProp in self._dataChannels) {
+    for (var channelNameProp in self._dataChannels[peerId]) {
       if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
         if (self._dataChannels[peerId][channelNameProp]) {
           closeFn(channelNameProp);
@@ -22666,6 +22666,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
 
   if (self._peerConnectionConfig.disableBundle) {
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=group:BUNDLE.*\r\n/gi, '');
@@ -29120,6 +29121,7 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
   answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
+  answer.sdp = self._setSCTPport(targetMid, answer);
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
@@ -32577,6 +32579,50 @@ Skylink.prototype._getSDPCommonSupports = function (targetMid, sessionDescriptio
   }
 
   return offer;
+};
+
+/**
+ * Function adds SCTP port number for Firefox 63.0.3 and above if its missing in the answer from MCU
+ * @method _setSCTPport
+ * @private
+ * @for Skylink
+ * @since 0.6.35
+ */
+Skylink.prototype._setSCTPport = function (targetMid, sessionDescription) {
+  var self = this;
+  if (AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion >= 63 && self._hasMCU === true) {
+    var sdpLines = sessionDescription.sdp.split('\r\n');
+    var mLineType = 'application';
+    var mLineIndex = -1;
+    var sdpType = sessionDescription.type;
+
+    for (var i = 0; i < sdpLines.length; i++) {
+      if (sdpLines[i].indexOf('m=' + mLineType) === 0) {
+        mLineIndex = i;
+      } else if (mLineIndex > 0) {
+        if (sdpLines[i].indexOf('m=') === 0) {
+          break;
+        }
+
+        // Saving m=application line when creating offer into instance variable
+        if (sdpType === 'offer') {
+          self._mline = sdpLines[mLineIndex];
+          break;
+        }
+
+        // Replacing m=application line from instance variable
+        if (sdpType === 'answer') {
+          sdpLines[mLineIndex] = self._mline;
+          sdpLines.splice(mLineIndex + 1, 0, 'a=sctp-port:5000');
+          break;
+        }
+      }
+    }
+
+    return sdpLines.join('\r\n');
+  }
+
+  return sessionDescription.sdp;
 };
 
   if(typeof exports !== 'undefined') {

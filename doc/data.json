@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.35",
+        "version": "0.6.36",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -9344,7 +9344,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1812,
+            "line": 1813,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -10207,6 +10207,17 @@
             "access": "private",
             "tagname": "",
             "since": "0.6.25",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 1392,
+            "description": "Function adds SCTP port number for Firefox 63.0.3 and above if its missing in the answer from MCU",
+            "itemtype": "method",
+            "name": "_setSCTPport",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.35",
             "class": "Skylink"
         }
     ],
