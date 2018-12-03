@@ -341,10 +341,14 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
     }
   };
 
+  var resolveAsWarningFn = function(error, tryRoom) {
+    log.warn(error + ' ' + 'room: ' + tryRoom);
+  };
+
   var joinRoomFn = function () {
     // If room has been stopped but does not matches timestamp skip.
     if (self._joinRoomManager.timestamp !== timestamp) {
-      resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+      resolveAsWarningFn('joinRoom() process did not complete', selectedRoom);
       return;
     }
 
@@ -354,7 +358,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
         return;
       // If details has been initialised but does not matches timestamp skip.
       } else if (self._joinRoomManager.timestamp !== timestamp) {
-        resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+        resolveAsWarningFn('joinRoom() process did not complete', selectedRoom);
         return;
       }
 
@@ -364,7 +368,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           return;
         // If socket and stream has been retrieved but socket connection does not matches timestamp skip.
         } else if (self._joinRoomManager.timestamp !== timestamp) {
-          resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+          resolveAsWarningFn('joinRoom() process did not complete', selectedRoom);
           return;
         }
 
