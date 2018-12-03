@@ -741,6 +741,17 @@ function Skylink() {
   this._recordings = {};
 
   /**
+   * Stores the list of RTMP Sessions.
+   * @attribute _rtmpSessions
+   * @type JSON
+   * @private
+   * @beta
+   * @for Skylink
+   * @since 0.6.36
+   */
+  this._rtmpSessions = {};
+
+  /**
    * Stores the current active recording session ID.
    * There can only be 1 recording session at a time in a Room
    * @attribute _currentRecordingId

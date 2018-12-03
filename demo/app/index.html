@@ -75,7 +75,7 @@
               </table>
             </div>
           </div>
-          <div id="presence_panel" class="panel panel-default">
+          <div id="presence_panel" class="panel panel-default hidden">
             <div class="panel-heading">Connected Peers</div>
             <div class="panel-body">
               <table id="presence_list" class="table">
@@ -169,6 +169,11 @@
                   <button id="message_btn" type="button" title="Message" class="btn btn-default">
                     <span class="glyphicon glyphicon-log-out"></span>
                     <b>Message</b>
+                  </button>
+
+                  <button data-isstreaming="false" id="live_streaming_btn" type="button" title="Start a live stream" class="btn btn-default">
+                    <span class="glyphicon glyphicon-bullhorn"></span>
+                    <b class="text">Live Streaming</b>
                   </button>
                 </span>
               </div>

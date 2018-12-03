@@ -1443,6 +1443,9 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   APPROACH: 'approach',
   START_RECORDING: 'startRecordingRoom',
   STOP_RECORDING: 'stopRecordingRoom',
+  START_RTMP: 'startRTMP',
+  STOP_RTMP: 'stopRTMP',
+  RTMP: 'rtmpEvent',
   RECORDING: 'recordingEvent',
   END_OF_CANDIDATES: 'endOfCandidates'
 };
@@ -1478,7 +1481,7 @@ Skylink.prototype._GROUP_MESSAGE_LIST = [
  */
 Skylink.prototype.STATS_API_VERSION = '1.1';
 
-/*
+/**
  * The options available for video and audio bitrates (kbps) quality.
  * @attribute VIDEO_QUALITY
  * @param {JSON} HD <small>Value <code>{ video: 3200, audio: 80 }</code></small>
@@ -1499,4 +1502,25 @@ Skylink.prototype.VIDEO_QUALITY = {
   HQ: { video: 1200, audio: 80 },
   SQ: { video: 800, audio: 30 },
   LQ: { video: 400, audio: 20 }
+};
+
+/**
+ * The list of RTMP states.
+ * @attribute RTMP_STATE
+ * @param {Number} START <small>Value <code>0</code></small>
+ *   The value of the state when live streaming session has started.
+ * @param {Number} STOP <small>Value <code>1</code></small>
+ *   The value of the state when live streaming session has stopped.<br>
+ *   <small>At this stage, the recorded videos will go through the mixin server to compile the videos.</small>
+ * @param {Number} ERROR <small>Value <code>-1</code></small>
+ *   The value of the state state when live streaming session has errors.
+ * @type JSON
+ * @beta
+ * @for Skylink
+ * @since 0.6.34
+ */
+Skylink.prototype.RTMP_STATE = {
+  START: 0,
+  STOP: 1,
+  ERROR: -1
 };

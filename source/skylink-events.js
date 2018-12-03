@@ -797,6 +797,21 @@ var _eventsDocs = {
   recordingState: [],
 
   /**
+   * Event triggered when RTMP session state has changed.
+   * @event rtmpState
+   * @param {Number} state The current RTMP session state.
+   *   [Rel: Skylink.RTMP_STATE]
+   * @param {String} rtmpId The rtmp session ID.
+   * @param {Error|String} error The error object.
+   *   <small>Defined only when <code>state</code> payload is <code>ERROR</code>.</small>
+   * @beta
+   * @for Skylink
+   * @since 0.6.36
+   */
+
+  RTMPState: [],
+
+  /**
    * Event triggered when <a href="#method_getConnectionStatus"><code>getConnectionStatus()</code> method</a>
    * retrieval state changes.
    * @event getConnectionStatusStateChange

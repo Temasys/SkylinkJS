@@ -734,7 +734,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    if (!this._dataChannels[peerId]) {
+    if (!this._hasMCU && !this._dataChannels[peerId]) {
       log.error([peerId, 'RTCDataChannel', null, 'Dropping of sending message to Peer as ' +
         'Datachannel connection does not exists']);
       listOfPeers.splice(i, 1);
@@ -1583,9 +1583,9 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
   }
 
   // Remove MCU Peer as list of Peers
-  if (listOfPeers.indexOf('MCU') > -1) {
-    listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
-  }
+  // if (listOfPeers.indexOf('MCU') > -1) {
+  //   listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
+  // }
 
   // Function that returns the error emitted before data transfer has started
   var emitErrorBeforeDataTransferFn = function (error) {

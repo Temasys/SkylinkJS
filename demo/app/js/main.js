@@ -593,7 +593,7 @@ Demo.Skylink.on('recordingState', function(state, recordingId, url, error) {
       break;
     case Demo.Skylink.RECORDING_STATE.STOP:
       $('#recording_' + recordingId + '_state_icon').attr('class', 'glyphicon glyphicon-refresh');
-      $('#recording_' + recordingId + '_state').html('STOPPED / PROCESSING VIDEO');
+      $('#recording_' + recordingId + '_state').html('RECORDING STOPPED');
       $('#recording_' + recordingId + '_error').html('');
       break;
     case Demo.Skylink.RECORDING_STATE.LINK:
@@ -969,6 +969,28 @@ $(document).ready(function() {
       $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
       $(this).html($(this).attr('toggled') ? 'Hide Stats' : 'Show Stats');
     });
+  });
+
+  $('#live_streaming_btn').click(function() {
+    var $streamingButton = $(this);
+    var isStreaming = $(this).data('isstreaming');
+    if (isStreaming === false) {
+      var rtmpUrl = 'rtmp://a.rtmp.youtube.com/live2/q6xg-s0kv-q98q-5kbm'; //prompt('Enter your livestream link below');
+      var streamId = Demo.Skylink._streams.userMedia.id;
+      Demo.Skylink.startRTMPSession(streamId, rtmpUrl, function(rtmpId) {
+        $streamingButton.data('isstreaming', true);
+        $streamingButton.data('rtmpid', rtmpId);
+        $streamingButton.find('.text').text('Stop Streaming');
+      });
+    } else {
+      var rtmpId = $streamingButton.data('rtmpid');
+      Demo.Skylink.stopRTMPSession(rtmpId, function() {
+        $streamingButton.data('isstreaming', false);
+        $streamingButton.data('rtmpid', null);
+        $streamingButton.find('.text').text('Live Streaming');
+      });
+    }
+
   });
 
   window.selectTargetPeer = function(dom) {
