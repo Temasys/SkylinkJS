@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -883,9 +883,9 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   // Apply as a=inactive when supported
   if (self._hasMCU) {
     var peerStreamSettings = clone(self.getPeerInfo(targetMid)).settings || {};
-    settings.direction.audio.receive = targetMid === &#x27;MCU&#x27; ? false : !!peerStreamSettings.audio;
+    settings.direction.audio.receive = targetMid === &#x27;MCU&#x27; ? true : !!peerStreamSettings.audio;
     settings.direction.audio.send = targetMid === &#x27;MCU&#x27; ? true : false;
-    settings.direction.video.receive = targetMid === &#x27;MCU&#x27; ? false : !!peerStreamSettings.video;
+    settings.direction.video.receive = targetMid === &#x27;MCU&#x27; ? true : !!peerStreamSettings.video;
     settings.direction.video.send = targetMid === &#x27;MCU&#x27; ? true : false;
   }
 

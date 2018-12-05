@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1732,32 +1732,37 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
  * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
-  if (!this._peerConnections[peerId] &amp;&amp; !this._peerInformations[peerId]) {
+  if (!this._peerConnections[peerId] &amp;&amp; !this._peerInformations[peerId] &amp;&amp; !this._hasMCU) {
     log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Dropping the hangup from Peer as not connected to Peer at all.&#x27;]);
     return;
   }
 
-  var peerInfo = clone(this.getPeerInfo(peerId)) || {
-    userData: &#x27;&#x27;,
-    settings: { audio: false, video: false, data: false },
-    mediaStatus: { audioMuted: true, videoMuted: true },
-    agent: {
-      name: &#x27;unknown&#x27;,
-      version: 0,
-      os: &#x27;&#x27;,
-      pluginVersion: null
-    },
-    config: {
-      enableDataChannel: true,
-      enableIceRestart: false,
-      enableIceTrickle: true,
-      priorityWeight: 0,
-      publishOnly: false,
-      receiveOnly: true
-    },
-    parentId: null,
-    room: clone(this._selectedRoom)
-  };
+  var peerInfo = null;
+
+  if (!this._hasMCU) {
+    peerInfo = clone(this.getPeerInfo(peerId)) || {
+      userData: &#x27;&#x27;,
+      settings: { audio: false, video: false, data: false },
+      mediaStatus: { audioMuted: true, videoMuted: true },
+      agent: {
+        name: &#x27;unknown&#x27;,
+        version: 0,
+        os: &#x27;&#x27;,
+        pluginVersion: null
+      },
+      config: {
+        enableDataChannel: true,
+        enableIceRestart: false,
+        enableIceTrickle: true,
+        priorityWeight: 0,
+        publishOnly: false,
+        receiveOnly: true
+      },
+      parentId: null,
+      room: clone(this._selectedRoom)
+    };
+  }
+
 
   if (peerId !== &#x27;MCU&#x27;) {
     this._trigger(&#x27;peerLeft&#x27;, peerId, peerInfo, false);
@@ -1947,21 +1952,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
         &#x27;is set to false&#x27;]);
     }
   };
-
+  self.videoRenderers = self.videoRenderers || {};
   pc.onaddstream = function (evt) {
+    // TargetMid goes all the way back to Skylink.prototype._enterHandler
+
     if (!self._peerConnections[targetMid]) {
       return;
     }
 
     var stream = evt.stream || evt;
-
-    if (targetMid === &#x27;MCU&#x27;) {
-      log.warn([targetMid, &#x27;MediaStream&#x27;, pc.remoteStreamId, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
-      return;
-    } else if (!self._sdpSettings.direction.audio.receive &amp;&amp; !self._sdpSettings.direction.video.receive) {
-      log.warn([targetMid, &#x27;MediaStream&#x27;, pc.remoteStreamId, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
-      return;
-    }
 
     pc.remoteStream = stream;
     pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
@@ -1981,7 +1980,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasStream = true;
     pc.hasScreen = peerSettings.video &amp;&amp; typeof peerSettings.video === &#x27;object&#x27; &amp;&amp; peerSettings.video.screenshare;
 
-    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+    self._onRemoteStreamAdded(self._hasMCU ? self.streamIdPeerIdMap[stream.id] : targetMid, stream, !!pc.hasScreen);
+  };
+
+  pc.onremovestream = function(evt) {
+    var stream = evt.stream || evt;
   };
 
   pc.onicecandidate = function(event) {

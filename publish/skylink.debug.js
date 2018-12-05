@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.36 - Thu Nov 29 2018 15:21:19 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v1.0.0 - Wed Dec 05 2018 15:27:42 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -741,6 +741,17 @@ function Skylink() {
    * @since 0.6.16
    */
   this._recordings = {};
+
+  /**
+   * Stores the list of RTMP Sessions.
+   * @attribute _rtmpSessions
+   * @type JSON
+   * @private
+   * @beta
+   * @for Skylink
+   * @since 0.6.36
+   */
+  this._rtmpSessions = {};
 
   /**
    * Stores the current active recording session ID.
@@ -1612,7 +1623,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.36';
+Skylink.prototype.VERSION = '1.0.0';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -2284,6 +2295,9 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   APPROACH: 'approach',
   START_RECORDING: 'startRecordingRoom',
   STOP_RECORDING: 'stopRecordingRoom',
+  START_RTMP: 'startRTMP',
+  STOP_RTMP: 'stopRTMP',
+  RTMP: 'rtmpEvent',
   RECORDING: 'recordingEvent',
   END_OF_CANDIDATES: 'endOfCandidates'
 };
@@ -2319,7 +2333,7 @@ Skylink.prototype._GROUP_MESSAGE_LIST = [
  */
 Skylink.prototype.STATS_API_VERSION = '1.1';
 
-/*
+/**
  * The options available for video and audio bitrates (kbps) quality.
  * @attribute VIDEO_QUALITY
  * @param {JSON} HD <small>Value <code>{ video: 3200, audio: 80 }</code></small>
@@ -2342,6 +2356,26 @@ Skylink.prototype.VIDEO_QUALITY = {
   LQ: { video: 400, audio: 20 }
 };
 
+/**
+ * The list of RTMP states.
+ * @attribute RTMP_STATE
+ * @param {Number} START <small>Value <code>0</code></small>
+ *   The value of the state when live streaming session has started.
+ * @param {Number} STOP <small>Value <code>1</code></small>
+ *   The value of the state when live streaming session has stopped.<br>
+ *   <small>At this stage, the recorded videos will go through the mixin server to compile the videos.</small>
+ * @param {Number} ERROR <small>Value <code>-1</code></small>
+ *   The value of the state state when live streaming session has errors.
+ * @type JSON
+ * @beta
+ * @for Skylink
+ * @since 0.6.34
+ */
+Skylink.prototype.RTMP_STATE = {
+  START: 0,
+  STOP: 1,
+  ERROR: -1
+};
 Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThreshold, createAsMessagingChannel) {
   var self = this;
   var channelName = (self._user && self._user.sid ? self._user.sid : '-') + '_' + peerId;
@@ -3354,7 +3388,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    if (!this._dataChannels[peerId]) {
+    if (!this._hasMCU && !this._dataChannels[peerId]) {
       log.error([peerId, 'RTCDataChannel', null, 'Dropping of sending message to Peer as ' +
         'Datachannel connection does not exists']);
       listOfPeers.splice(i, 1);
@@ -4203,9 +4237,9 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
   }
 
   // Remove MCU Peer as list of Peers
-  if (listOfPeers.indexOf('MCU') > -1) {
-    listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
-  }
+  // if (listOfPeers.indexOf('MCU') > -1) {
+  //   listOfPeers.splice(listOfPeers.indexOf('MCU'), 1);
+  // }
 
   // Function that returns the error emitted before data transfer has started
   var emitErrorBeforeDataTransferFn = function (error) {
@@ -5641,15 +5675,17 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       });
     } else if (self._gatheredCandidates[targetMid]) {
       var sendEndOfCandidates = function() {
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
-          noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
-            self._gatheredCandidates[targetMid].sending.host.length +
-            self._gatheredCandidates[targetMid].sending.relay.length,
-          mid: self._user.sid,
-          target: targetMid,
-          rid: self._room.id
-        });
+        if (self._gatheredCandidates[targetMid] && self._gatheredCandidates[targetMid].sending) {
+          self._sendChannelMessage({
+            type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
+            noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
+              self._gatheredCandidates[targetMid].sending.host.length +
+              self._gatheredCandidates[targetMid].sending.relay.length,
+            mid: self._user.sid,
+            target: targetMid,
+            rid: self._room.id
+          });
+        }
       };
       setTimeout(sendEndOfCandidates, 6000);
     }
@@ -7402,32 +7438,37 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
  * @since 0.5.5
  */
 Skylink.prototype._removePeer = function(peerId) {
-  if (!this._peerConnections[peerId] && !this._peerInformations[peerId]) {
+  if (!this._peerConnections[peerId] && !this._peerInformations[peerId] && !this._hasMCU) {
     log.debug([peerId, 'RTCPeerConnection', null, 'Dropping the hangup from Peer as not connected to Peer at all.']);
     return;
   }
 
-  var peerInfo = clone(this.getPeerInfo(peerId)) || {
-    userData: '',
-    settings: { audio: false, video: false, data: false },
-    mediaStatus: { audioMuted: true, videoMuted: true },
-    agent: {
-      name: 'unknown',
-      version: 0,
-      os: '',
-      pluginVersion: null
-    },
-    config: {
-      enableDataChannel: true,
-      enableIceRestart: false,
-      enableIceTrickle: true,
-      priorityWeight: 0,
-      publishOnly: false,
-      receiveOnly: true
-    },
-    parentId: null,
-    room: clone(this._selectedRoom)
-  };
+  var peerInfo = null;
+
+  if (!this._hasMCU) {
+    peerInfo = clone(this.getPeerInfo(peerId)) || {
+      userData: '',
+      settings: { audio: false, video: false, data: false },
+      mediaStatus: { audioMuted: true, videoMuted: true },
+      agent: {
+        name: 'unknown',
+        version: 0,
+        os: '',
+        pluginVersion: null
+      },
+      config: {
+        enableDataChannel: true,
+        enableIceRestart: false,
+        enableIceTrickle: true,
+        priorityWeight: 0,
+        publishOnly: false,
+        receiveOnly: true
+      },
+      parentId: null,
+      room: clone(this._selectedRoom)
+    };
+  }
+
 
   if (peerId !== 'MCU') {
     this._trigger('peerLeft', peerId, peerInfo, false);
@@ -7617,21 +7658,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
         'is set to false']);
     }
   };
-
+  self.videoRenderers = self.videoRenderers || {};
   pc.onaddstream = function (evt) {
+    // TargetMid goes all the way back to Skylink.prototype._enterHandler
+
     if (!self._peerConnections[targetMid]) {
       return;
     }
 
     var stream = evt.stream || evt;
-
-    if (targetMid === 'MCU') {
-      log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received remote stream from MCU ->'], stream);
-      return;
-    } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
-      log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received empty remote stream ->'], stream);
-      return;
-    }
 
     pc.remoteStream = stream;
     pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
@@ -7651,7 +7686,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasStream = true;
     pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
 
-    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+    self._onRemoteStreamAdded(self._hasMCU ? self.streamIdPeerIdMap[stream.id] : targetMid, stream, !!pc.hasScreen);
+  };
+
+  pc.onremovestream = function(evt) {
+    var stream = evt.stream || evt;
   };
 
   pc.onicecandidate = function(event) {
@@ -8617,10 +8656,10 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
 
 
   if (self._peerConnections[usePeerId] && self._peerConnections[usePeerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-    var stream = self._peerConnections[peerId].localStream;
-    var streamId = self._peerConnections[peerId].localStreamId || (stream && (stream.id || stream.label));
+    var stream = self._peerConnections[usePeerId].localStream;
+    var streamId = self._peerConnections[usePeerId].localStreamId || (stream && (stream.id || stream.label));
 
-    customSettings.settings.data = self._initOptions.enableDataChannel && self._peerInformations[peerId].config.enableDataChannel;
+    customSettings.settings.data = self._initOptions.enableDataChannel && self._peerInformations[usePeerId].config.enableDataChannel;
 
     if (stream) {
       if (self._streams.screenshare && self._streams.screenshare.stream &&
@@ -8636,9 +8675,9 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
         customSettings.mediaStatus = clone(self._streamsMutedSettings);
       }
 
-      if (typeof self._peerConnections[peerId].getSenders === 'function' &&
+      if (typeof self._peerConnections[usePeerId].getSenders === 'function' &&
         !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
-        var senders = self._peerConnections[peerId].getSenders();
+        var senders = self._peerConnections[usePeerId].getSenders();
         var hasSendAudio = false;
         var hasSendVideo = false;
 
@@ -8976,7 +9015,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
-  sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
+  //sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
 
   if (self._peerConnectionConfig.disableBundle) {
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=group:BUNDLE.*\r\n/gi, '');
@@ -9161,10 +9200,14 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
     }
   };
 
+  var resolveAsWarningFn = function(error, tryRoom) {
+    log.warn(error + ' ' + 'room: ' + tryRoom);
+  };
+
   var joinRoomFn = function () {
     // If room has been stopped but does not matches timestamp skip.
     if (self._joinRoomManager.timestamp !== timestamp) {
-      resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+      resolveAsWarningFn('joinRoom() process did not complete', selectedRoom);
       return;
     }
 
@@ -9174,7 +9217,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
         return;
       // If details has been initialised but does not matches timestamp skip.
       } else if (self._joinRoomManager.timestamp !== timestamp) {
-        resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+        resolveAsWarningFn('joinRoom() process did not complete', selectedRoom);
         return;
       }
 
@@ -9184,7 +9227,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           return;
         // If socket and stream has been retrieved but socket connection does not matches timestamp skip.
         } else if (self._joinRoomManager.timestamp !== timestamp) {
-          resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+          resolveAsWarningFn('joinRoom() process did not complete', selectedRoom);
           return;
         }
 
@@ -9897,7 +9940,7 @@ Skylink.prototype.generateUUID = function() {
  *   <code>refreshConnection()</code> method</a> is called internally.</small>
  * @param {Boolean} [options.throttleShouldThrowError=false] The flag if throttled methods should throw errors when
  *   method is invoked less than the interval timeout value configured in <code>options.throttleIntervals</code>.
- * @param {Boolean} [options.mcuUseRenegoRestart=false] <blockquote class="info">
+ * @param {Boolean} [options.mcuUseRenegoRestart=true] <blockquote class="info">
  *   Note that this feature is currently is beta and for any enquiries on enabling and its support, please
  *   contact <a href="http://support.temasys.io">our support portal</a>.</blockquote>
  *   The flag if <a href="#method_refreshConnection"><code>
@@ -10207,8 +10250,8 @@ Skylink.prototype.init = function(_options, _callback) {
   // `init({ throttleShouldThrowError: false })`
   options.throttleShouldThrowError = options.throttleShouldThrowError === true;
 
-  // `init({ mcuUseRenegoRestart: false })`
-  options.mcuUseRenegoRestart = options.mcuUseRenegoRestart === true;
+  // `init({ mcuUseRenegoRestart: true })`
+  options.mcuUseRenegoRestart = options.mcuUseRenegoRestart === false;
 
   // `init({ useEdgeWebRTC: false })`
   options.useEdgeWebRTC = options.useEdgeWebRTC === true;
@@ -10634,6 +10677,7 @@ Skylink.prototype._parseInfo = function(info) {
   this._signalingServer = info.ipSigserver;
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
+  this._hasMCU = info.hasMCU;
 
   if(!info.enable_stats_config){
     this._initOptions.enableStatsGathering = false;
@@ -12032,6 +12076,21 @@ var _eventsDocs = {
    * @since 0.6.16
    */
   recordingState: [],
+
+  /**
+   * Event triggered when RTMP session state has changed.
+   * @event rtmpState
+   * @param {Number} state The current RTMP session state.
+   *   [Rel: Skylink.RTMP_STATE]
+   * @param {String} rtmpId The rtmp session ID.
+   * @param {Error|String} error The error object.
+   *   <small>Defined only when <code>state</code> payload is <code>ERROR</code>.</small>
+   * @beta
+   * @for Skylink
+   * @since 0.6.36
+   */
+
+  RTMPState: [],
 
   /**
    * Event triggered when <a href="#method_getConnectionStatus"><code>getConnectionStatus()</code> method</a>
@@ -13749,7 +13808,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   for (var i = 0; i < listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    if (!this._peerInformations[peerId]) {
+    if (!this._hasMCU && !this._peerInformations[peerId]) {
       log.error([peerId, 'Socket', null, 'Dropping of sending message to Peer as ' +
         'Peer session does not exists']);
       listOfPeers.splice(i, 1);
@@ -13947,7 +14006,7 @@ Skylink.prototype.startRecording = function (callback) {
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
+Skylink.prototype.stopRecording = function (callback) {
   var self = this;
 
   if (!self._hasMCU) {
@@ -13985,26 +14044,10 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
     var expectedRecordingId = self._currentRecordingId;
 
     self.once('recordingState', function (state, recordingId, link, error) {
-      if (callbackSuccessWhenLink) {
-        if (error) {
-          callback(error, null);
-          return;
-        }
-
-        callback(null, {
-          link: link,
-          recordingId: recordingId
-        });
-        return;
-      }
-
       callback(null, recordingId);
 
     }, function (state, recordingId) {
       if (expectedRecordingId === recordingId) {
-        if (callbackSuccessWhenLink) {
-          return [self.RECORDING_STATE.LINK, self.RECORDING_STATE.ERROR].indexOf(state) > -1;
-        }
         return state === self.RECORDING_STATE.STOP;
       }
     });
@@ -14143,6 +14186,9 @@ Skylink.prototype._processSigMessage = function(message, session) {
     break;
   case this._SIG_MESSAGE_TYPE.RECORDING:
     this._recordingEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.RTMP:
+    this._rtmpEventHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.END_OF_CANDIDATES:
     this._endOfCandidatesHandler(message);
@@ -14556,29 +14602,6 @@ Skylink.prototype._recordingEventHandler = function (message) {
     self._recordings[message.recordingId].endedDateTime = (new Date()).toISOString();
     self._trigger('recordingState', self.RECORDING_STATE.STOP, message.recordingId, null, null);
 
-  } else if (message.action === 'url') {
-    var links = {};
-
-    if (Array.isArray(message.urls)) {
-      for (var i = 0; i < message.urls.length; i++) {
-        links[messages.urls[i].id || ''] = messages.urls[i].url || '';
-      }
-    } else if (typeof message.url === 'string') {
-      links.mixin = message.url;
-    }
-
-    self._handleRecordingStats('mixin', message.recordingId, links);
-
-    if (!self._recordings[message.recordingId]) {
-      log.error(['MCU', 'Recording', message.recordingId, 'Received URL but the session is empty']);
-      return;
-    }
-
-    self._recordings[message.recordingId].links = links;
-    self._recordings[message.recordingId].state = self.RECORDING_STATE.LINK;
-    self._recordings[message.recordingId].mixingDateTime = (new Date()).toISOString();
-    self._trigger('recordingState', self.RECORDING_STATE.LINK, message.recordingId, links, null);
-
   } else {
     var recordingError = new Error(message.error || 'Unknown error');
 
@@ -14740,7 +14763,7 @@ Skylink.prototype._enterHandler = function(message) {
   }
 
   var processPeerFn = function (cert) {
-    if (!self._peerInformations[targetMid]) {
+    if ((!self._peerInformations[targetMid] && !self._hasMCU) || (self._hasMCU && !self._peerInformations['MCU'])) {
       isNewPeer = true;
 
       self._peerInformations[targetMid] = userInfo;
@@ -14758,6 +14781,7 @@ Skylink.prototype._enterHandler = function(message) {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
 
         self._hasMCU = true;
+        self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
         self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
 
       } else {
@@ -14765,6 +14789,10 @@ Skylink.prototype._enterHandler = function(message) {
       }
 
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+    }
+
+    if (self._hasMCU && targetMid !== self._user.sid) {
+      self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
     }
 
     self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
@@ -15046,7 +15074,7 @@ Skylink.prototype._welcomeHandler = function(message) {
   }
 
   var processPeerFn = function (cert) {
-    if (!self._peerInformations[targetMid]) {
+    if ((!self._peerInformations[targetMid] && !self._hasMCU) || (self._hasMCU && !self._peerInformations['MCU'])) {
       isNewPeer = true;
 
       self._peerInformations[targetMid] = userInfo;
@@ -15062,7 +15090,6 @@ Skylink.prototype._welcomeHandler = function(message) {
 
       if (targetMid === 'MCU') {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
-
         self._hasMCU = true;
         self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
 
@@ -15072,6 +15099,16 @@ Skylink.prototype._welcomeHandler = function(message) {
 
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    }
+
+    if (self._hasMCU && Array.isArray(message.peersInRoom) && message.peersInRoom.length) {
+      var userId = self._user.sid;
+      for (var peersInRoomIndex = 0; peersInRoomIndex < message.peersInRoom.length; peersInRoomIndex++) {
+        var _PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
+        if (_PEER_ID !== userId) {
+          self._trigger('peerJoined', _PEER_ID, self.getPeerInfo(_PEER_ID), false);
+        }
+      }
     }
 
     self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
@@ -15183,8 +15220,14 @@ Skylink.prototype._offerHandler = function(message) {
   self._handleNegotiationStats('offer', targetMid, offer, true);
 
   if (!pc) {
-    log.error([targetMid, null, message.type, 'Peer connection object ' +
+    if(!self._hasMCU) {
+      log.error([targetMid, null, message.type, 'Peer connection object ' +
       'not found. Unable to setRemoteDescription for offer']);
+    }
+    if (targetMid !== 'MCU' && self._hasMCU && self._peerConnections['MCU']) {
+      log.warn([targetMid, null, message.type, 'Peer connection object with MCU ' +
+      'already exists. Dropping the offer.']);
+    }
     self._handleNegotiationStats('dropped_offer', targetMid, offer, true, 'Peer connection does not exists');
     return;
   }
@@ -15385,6 +15428,10 @@ Skylink.prototype._answerHandler = function(message) {
   var targetMid = message.mid;
   var pc = self._peerConnections[targetMid];
 
+  if (targetMid === 'MCU') {
+    self.streamIdPeerIdMap = message.streamIdPeerIdMap || {};
+  }
+
   log.log([targetMid, null, message.type, 'Received answer from peer. Session description:'], clone(message));
 
   var answer = {
@@ -15431,7 +15478,7 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
   answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
-  answer.sdp = self._setSCTPport(targetMid, answer);
+  //answer.sdp = self._setSCTPport(targetMid, answer);
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
@@ -15498,6 +15545,216 @@ Skylink.prototype._answerHandler = function(message) {
   };
 
   pc.setRemoteDescription(new RTCSessionDescription(answer), onSuccessCbFn, onErrorCbFn);
+};
+
+/**
+ * <blockquote class="info">
+ *   Note that this feature requires MCU to be enabled for the App Key provided in the
+ *   <a href="#method_init"><code>init()</code> method</a>.
+ * </blockquote>
+ * Starts a RTMP session.
+ * @method startRTMPSession
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ *   <small>Function request completion is determined by the <a href="#event_RTMPState">
+ *   <code>rtmpState</code> event</a> triggering <code>state</code> parameter payload as <code>START</code>.</small>
+ * @param {Error|String} callback.error The error result in request.
+ *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ *   <small>Object signature is the <code>startRTMPSession()</code> error when starting a new rtmp session.</small>
+ * @param {String|JSON} callback.success The success result in request.
+ *   <small>Defined as <code>null</code> when there are errors in request</small>
+ *   <small>Object signature is the <a href="#event_RTMPState">
+ *   <code>RTMPState</code> event</a> triggered <code>RTMPId</code> parameter payload.</small>
+ * @example
+ *   // Example 1: Start RTMP session
+ *   skylinkDemo.startRTMPSession(function (error, success) {
+ *     if (error) return;
+ *     console.info("RTMP session has started. ID ->", success);
+ *   });
+ * @trigger <ol class="desc-seq">
+ *   <li>If MCU is not connected: <ol><li><b>ABORT</b> and return error.</li></ol></li>
+ *   <li>Sends to MCU via Signaling server to start RTMP session. <ol>
+ *   <li>If RTMP session has been started successfully: <ol>
+ *   <li><a href="#event_RTMPState"><code>RTMPState</code> event</a> triggers
+ *   parameter payload <code>state</code> as <code>START</code>.</li></ol></li></ol></li></ol>
+ * @beta
+ * @for Skylink
+ * @since 0.6.36
+ */
+Skylink.prototype.startRTMPSession = function (streamId, endpoint, callback) {
+  var self = this;
+
+  if (!self._hasMCU) {
+    var noMCUError = 'Unable to start RTMP session as MCU is not connected';
+    log.error(noMCUError);
+    if (typeof callback === 'function') {
+      callback(new Error(noMCUError), null);
+    }
+    return;
+  }
+  if (!streamId) {
+    var nostreamIdError = 'Unable to start RTMP Session stream id is missing';
+    log.error(nostreamIdError);
+    if (typeof callback === 'function') {
+      callback(new Error(nostreamIdError), null);
+    }
+    return;
+  }
+  if (!endpoint) {
+    var noEndpointError = 'Unable to start RTMP Session as Endpoint is missing';
+    log.error(noEndpointError);
+    if (typeof callback === 'function') {
+      callback(new Error(noEndpointError), null);
+    }
+    return;
+  }
+  var rtmpId = self.generateUUID();
+
+  if (typeof callback === 'function') {
+    self.once('RTMPState', function (state, RTMPId) {
+      callback(RTMPId);
+    }, function (state) {
+      return state === self.RTMP_STATE.START;
+    });
+  }
+
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.START_RTMP,
+    rid: self._room.id,
+    target: 'MCU',
+    mid: self._user.sid,
+    streamId: streamId,
+    endpoint: endpoint,
+    rtmpId: rtmpId
+  });
+
+  log.debug(['MCU', 'RTMP', null, 'Starting RTMP Session']);
+};
+
+
+
+/**
+ * <blockquote class="info">
+ *   Note that this feature requires MCU to be enabled for the App Key provided in the
+ *   <a href="#method_init"><code>init()</code> method</a>.
+ * </blockquote>
+ * Stops a RTMP session.
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ *   <small>Function request completion is determined by the <a href="#event_RTMPState">
+ *   <code>RTMPState</code> event</a> triggering <code>state</code> parameter payload as <code>STOP</code>
+ * @param {Error|String} callback.error The error result in request.
+ *   <small>Defined as <code>null</code> when there are no errors in request</small>
+ *   <small>Object signature is the <code>stopRTMPSession()</code> error when stopping current RTMP session.</small>
+ * @param {String|JSON} callback.success The success result in request.
+ * @method stopRTMPSession
+ * @example
+ *   // Example 1: Stop RTMP session
+ *   skylinkDemo.stopRTMPSession(function (error, success) {
+ *     if (error) return;
+ *     console.info("RTMP session has stopped. ID ->", success);
+ *   });
+ * @beta
+ * @for Skylink
+ * @since 0.6.36
+ */
+Skylink.prototype.stopRTMPSession = function (rtmpId, callback) {
+  var self = this;
+
+  if (!self._hasMCU) {
+    var noMCUError = 'Unable to stop RTMP as MCU is not connected';
+    log.error(noMCUError);
+    if (typeof callback === 'function') {
+      callback(new Error(noMCUError), null);
+    }
+    return;
+  }
+
+  if (typeof callback === 'function') {
+    self.once('RTMPState', function (state, rtmpId) {
+      callback(rtmpId);
+    }, function (state) {
+      return state === self.RTMP_STATE.STOP;
+    });
+  }
+
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.STOP_RTMP,
+    rid: self._room.id,
+    rtmpId: rtmpId,
+    mid: self._user.sid,
+    target: 'MCU'
+  });
+
+  log.debug(['MCU', 'RTMP', null, 'Stopping RTMP Session']);
+};
+
+/**
+ * Handles the RTMP Protocol message event received from the platform signaling.
+ * @method _rtmpEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the <code>RTMP</code> payload.
+ * @param {String} message.action The RTMP action received.
+ * @param {String} message.error The RTMP error exception received.
+ * @private
+ * @beta
+ * @for Skylink
+ * @since 0.6.36
+ */
+Skylink.prototype._rtmpEventHandler = function (message) {
+  var self = this;
+
+  log.debug(['MCU', 'RTMP', null, 'Received RTMP Session message ->'], message);
+
+  if (message.action === 'startSuccess') {
+    if (!self._rtmpSessions[message.rtmpId]) {
+      log.debug(['MCU', 'RTMP', message.rtmpId, 'Started RTMP Session']);
+
+      self._rtmpSessions[message.rtmpId] = {
+        active: true,
+        state: self.RTMP_STATE.START,
+        startedDateTime: (new Date()).toISOString(),
+        endedDateTime: null,
+        peerId: message.peerId,
+        streamId: message.streamId
+      };
+      self._trigger('RTMPState', self.RTMP_STATE.START, message.rtmpId, null, null);
+    }
+
+  } else if (message.action === 'stopSuccess') {
+
+    if (!self._rtmpSessions[message.rtmpId]) {
+      log.error(['MCU', 'RTMP', message.rtmpId, 'Received request of "off" but the session is empty']);
+      return;
+    }
+
+    log.debug(['MCU', 'RTMP', message.rtmpId, 'Stopped RTMP Session']);
+
+    self._rtmpSessions[message.rtmpId].active = false;
+    self._rtmpSessions[message.rtmpId].state = self.RTMP_STATE.STOP;
+    self._rtmpSessions[message.rtmpId].endedDateTime = (new Date()).toISOString();
+    self._trigger('RTMPState', self.RTMP_STATE.STOP, message.rtmpId, null, null);
+
+  }  else {
+    var rtmpError = new Error(message.error || 'Unknown error');
+
+    if (!self._rtmpSessions[message.rtmpId]) {
+      log.error(['MCU', 'RTMP', message.rtmpId, 'Received error but the session is empty ->'], rtmpError);
+      return;
+    }
+
+    log.error(['MCU', 'RTMP', message.rtmpId, 'RTMP session failure ->'], rtmpError);
+
+    self._rtmpSessions[message.rtmpId].state = self.RTMP_STATE.ERROR;
+    self._rtmpSessions[message.rtmpId].error = rtmpError;
+
+    if (self._rtmpSessions[message.rtmpId].active) {
+      log.debug(['MCU', 'RTMP', message.rtmpId, 'Stopped RTMP session abruptly']);
+      self._rtmpSessions[message.rtmpId].active = false;
+    }
+
+    self._trigger('RTMPState', self.RTMP_STATE.ERROR, message.rtmpId, null, rtmpError);
+  }
 };
 
 /**
@@ -17355,10 +17612,10 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
   var self = this;
   var streamId = (self._peerConnections[targetMid] && self._peerConnections[targetMid].remoteStreamId) || stream.id || stream.label;
 
-  if (!self._peerInformations[targetMid]) {
-    log.warn([targetMid, 'MediaStream', streamId, 'Received remote stream when peer is not connected. Ignoring stream ->'], stream);
-    return;
-  }
+  // if (!self._peerInformations[targetMid]) {
+  //   log.warn([targetMid, 'MediaStream', streamId, 'Received remote stream when peer is not connected. Ignoring stream ->'], stream);
+  //   return;
+  // }
 
   /*if (!self._peerInformations[targetMid].settings.audio &&
     !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
@@ -18294,9 +18551,9 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
   // Apply as a=inactive when supported
   if (self._hasMCU) {
     var peerStreamSettings = clone(self.getPeerInfo(targetMid)).settings || {};
-    settings.direction.audio.receive = targetMid === 'MCU' ? false : !!peerStreamSettings.audio;
+    settings.direction.audio.receive = targetMid === 'MCU' ? true : !!peerStreamSettings.audio;
     settings.direction.audio.send = targetMid === 'MCU' ? true : false;
-    settings.direction.video.receive = targetMid === 'MCU' ? false : !!peerStreamSettings.video;
+    settings.direction.video.receive = targetMid === 'MCU' ? true : !!peerStreamSettings.video;
     settings.direction.video.send = targetMid === 'MCU' ? true : false;
   }
 

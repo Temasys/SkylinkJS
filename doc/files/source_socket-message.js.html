@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -150,7 +150,7 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   for (var i = 0; i &lt; listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    if (!this._peerInformations[peerId]) {
+    if (!this._hasMCU &amp;&amp; !this._peerInformations[peerId]) {
       log.error([peerId, &#x27;Socket&#x27;, null, &#x27;Dropping of sending message to Peer as &#x27; +
         &#x27;Peer session does not exists&#x27;]);
       listOfPeers.splice(i, 1);
@@ -348,7 +348,7 @@ Skylink.prototype.startRecording = function (callback) {
  * @for Skylink
  * @since 0.6.16
  */
-Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
+Skylink.prototype.stopRecording = function (callback) {
   var self = this;
 
   if (!self._hasMCU) {
@@ -386,26 +386,10 @@ Skylink.prototype.stopRecording = function (callback, callbackSuccessWhenLink) {
     var expectedRecordingId = self._currentRecordingId;
 
     self.once(&#x27;recordingState&#x27;, function (state, recordingId, link, error) {
-      if (callbackSuccessWhenLink) {
-        if (error) {
-          callback(error, null);
-          return;
-        }
-
-        callback(null, {
-          link: link,
-          recordingId: recordingId
-        });
-        return;
-      }
-
       callback(null, recordingId);
 
     }, function (state, recordingId) {
       if (expectedRecordingId === recordingId) {
-        if (callbackSuccessWhenLink) {
-          return [self.RECORDING_STATE.LINK, self.RECORDING_STATE.ERROR].indexOf(state) &gt; -1;
-        }
         return state === self.RECORDING_STATE.STOP;
       }
     });
@@ -544,6 +528,9 @@ Skylink.prototype._processSigMessage = function(message, session) {
     break;
   case this._SIG_MESSAGE_TYPE.RECORDING:
     this._recordingEventHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.RTMP:
+    this._rtmpEventHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.END_OF_CANDIDATES:
     this._endOfCandidatesHandler(message);
@@ -957,29 +944,6 @@ Skylink.prototype._recordingEventHandler = function (message) {
     self._recordings[message.recordingId].endedDateTime = (new Date()).toISOString();
     self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.STOP, message.recordingId, null, null);
 
-  } else if (message.action === &#x27;url&#x27;) {
-    var links = {};
-
-    if (Array.isArray(message.urls)) {
-      for (var i = 0; i &lt; message.urls.length; i++) {
-        links[messages.urls[i].id || &#x27;&#x27;] = messages.urls[i].url || &#x27;&#x27;;
-      }
-    } else if (typeof message.url === &#x27;string&#x27;) {
-      links.mixin = message.url;
-    }
-
-    self._handleRecordingStats(&#x27;mixin&#x27;, message.recordingId, links);
-
-    if (!self._recordings[message.recordingId]) {
-      log.error([&#x27;MCU&#x27;, &#x27;Recording&#x27;, message.recordingId, &#x27;Received URL but the session is empty&#x27;]);
-      return;
-    }
-
-    self._recordings[message.recordingId].links = links;
-    self._recordings[message.recordingId].state = self.RECORDING_STATE.LINK;
-    self._recordings[message.recordingId].mixingDateTime = (new Date()).toISOString();
-    self._trigger(&#x27;recordingState&#x27;, self.RECORDING_STATE.LINK, message.recordingId, links, null);
-
   } else {
     var recordingError = new Error(message.error || &#x27;Unknown error&#x27;);
 
@@ -1141,7 +1105,7 @@ Skylink.prototype._enterHandler = function(message) {
   }
 
   var processPeerFn = function (cert) {
-    if (!self._peerInformations[targetMid]) {
+    if ((!self._peerInformations[targetMid] &amp;&amp; !self._hasMCU) || (self._hasMCU &amp;&amp; !self._peerInformations[&#x27;MCU&#x27;])) {
       isNewPeer = true;
 
       self._peerInformations[targetMid] = userInfo;
@@ -1159,6 +1123,7 @@ Skylink.prototype._enterHandler = function(message) {
         log.info([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;MCU feature has been enabled&#x27;]);
 
         self._hasMCU = true;
+        self._trigger(&#x27;peerJoined&#x27;, targetMid, self.getPeerInfo(targetMid), false);
         self._trigger(&#x27;serverPeerJoined&#x27;, targetMid, self.SERVER_PEER_TYPE.MCU);
 
       } else {
@@ -1166,6 +1131,10 @@ Skylink.prototype._enterHandler = function(message) {
       }
 
       self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+    }
+
+    if (self._hasMCU &amp;&amp; targetMid !== self._user.sid) {
+      self._trigger(&#x27;peerJoined&#x27;, targetMid, self.getPeerInfo(targetMid), false);
     }
 
     self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
@@ -1447,7 +1416,7 @@ Skylink.prototype._welcomeHandler = function(message) {
   }
 
   var processPeerFn = function (cert) {
-    if (!self._peerInformations[targetMid]) {
+    if ((!self._peerInformations[targetMid] &amp;&amp; !self._hasMCU) || (self._hasMCU &amp;&amp; !self._peerInformations[&#x27;MCU&#x27;])) {
       isNewPeer = true;
 
       self._peerInformations[targetMid] = userInfo;
@@ -1463,7 +1432,6 @@ Skylink.prototype._welcomeHandler = function(message) {
 
       if (targetMid === &#x27;MCU&#x27;) {
         log.info([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;MCU feature has been enabled&#x27;]);
-
         self._hasMCU = true;
         self._trigger(&#x27;serverPeerJoined&#x27;, targetMid, self.SERVER_PEER_TYPE.MCU);
 
@@ -1473,6 +1441,16 @@ Skylink.prototype._welcomeHandler = function(message) {
 
       self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ENTER, targetMid);
       self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
+    }
+
+    if (self._hasMCU &amp;&amp; Array.isArray(message.peersInRoom) &amp;&amp; message.peersInRoom.length) {
+      var userId = self._user.sid;
+      for (var peersInRoomIndex = 0; peersInRoomIndex &lt; message.peersInRoom.length; peersInRoomIndex++) {
+        var _PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
+        if (_PEER_ID !== userId) {
+          self._trigger(&#x27;peerJoined&#x27;, _PEER_ID, self.getPeerInfo(_PEER_ID), false);
+        }
+      }
     }
 
     self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
@@ -1584,8 +1562,14 @@ Skylink.prototype._offerHandler = function(message) {
   self._handleNegotiationStats(&#x27;offer&#x27;, targetMid, offer, true);
 
   if (!pc) {
-    log.error([targetMid, null, message.type, &#x27;Peer connection object &#x27; +
+    if(!self._hasMCU) {
+      log.error([targetMid, null, message.type, &#x27;Peer connection object &#x27; +
       &#x27;not found. Unable to setRemoteDescription for offer&#x27;]);
+    }
+    if (targetMid !== &#x27;MCU&#x27; &amp;&amp; self._hasMCU &amp;&amp; self._peerConnections[&#x27;MCU&#x27;]) {
+      log.warn([targetMid, null, message.type, &#x27;Peer connection object with MCU &#x27; +
+      &#x27;already exists. Dropping the offer.&#x27;]);
+    }
     self._handleNegotiationStats(&#x27;dropped_offer&#x27;, targetMid, offer, true, &#x27;Peer connection does not exists&#x27;);
     return;
   }
@@ -1786,6 +1770,10 @@ Skylink.prototype._answerHandler = function(message) {
   var targetMid = message.mid;
   var pc = self._peerConnections[targetMid];
 
+  if (targetMid === &#x27;MCU&#x27;) {
+    self.streamIdPeerIdMap = message.streamIdPeerIdMap || {};
+  }
+
   log.log([targetMid, null, message.type, &#x27;Received answer from peer. Session description:&#x27;], clone(message));
 
   var answer = {
@@ -1832,7 +1820,7 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
   answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, &#x27;remote&#x27;);
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
-  answer.sdp = self._setSCTPport(targetMid, answer);
+  //answer.sdp = self._setSCTPport(targetMid, answer);
 
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Updated remote answer -&gt;&#x27;], answer.sdp);
 
@@ -1899,6 +1887,216 @@ Skylink.prototype._answerHandler = function(message) {
   };
 
   pc.setRemoteDescription(new RTCSessionDescription(answer), onSuccessCbFn, onErrorCbFn);
+};
+
+/**
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this feature requires MCU to be enabled for the App Key provided in the
+ *   &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
+ * &lt;/blockquote&gt;
+ * Starts a RTMP session.
+ * @method startRTMPSession
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_RTMPState&quot;&gt;
+ *   &lt;code&gt;rtmpState&lt;/code&gt; event&lt;/a&gt; triggering &lt;code&gt;state&lt;/code&gt; parameter payload as &lt;code&gt;START&lt;/code&gt;.&lt;/small&gt;
+ * @param {Error|String} callback.error The error result in request.
+ *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
+ *   &lt;small&gt;Object signature is the &lt;code&gt;startRTMPSession()&lt;/code&gt; error when starting a new rtmp session.&lt;/small&gt;
+ * @param {String|JSON} callback.success The success result in request.
+ *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are errors in request&lt;/small&gt;
+ *   &lt;small&gt;Object signature is the &lt;a href=&quot;#event_RTMPState&quot;&gt;
+ *   &lt;code&gt;RTMPState&lt;/code&gt; event&lt;/a&gt; triggered &lt;code&gt;RTMPId&lt;/code&gt; parameter payload.&lt;/small&gt;
+ * @example
+ *   // Example 1: Start RTMP session
+ *   skylinkDemo.startRTMPSession(function (error, success) {
+ *     if (error) return;
+ *     console.info(&quot;RTMP session has started. ID -&gt;&quot;, success);
+ *   });
+ * @trigger &lt;ol class=&quot;desc-seq&quot;&gt;
+ *   &lt;li&gt;If MCU is not connected: &lt;ol&gt;&lt;li&gt;&lt;b&gt;ABORT&lt;/b&gt; and return error.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;
+ *   &lt;li&gt;Sends to MCU via Signaling server to start RTMP session. &lt;ol&gt;
+ *   &lt;li&gt;If RTMP session has been started successfully: &lt;ol&gt;
+ *   &lt;li&gt;&lt;a href=&quot;#event_RTMPState&quot;&gt;&lt;code&gt;RTMPState&lt;/code&gt; event&lt;/a&gt; triggers
+ *   parameter payload &lt;code&gt;state&lt;/code&gt; as &lt;code&gt;START&lt;/code&gt;.&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;&lt;/li&gt;&lt;/ol&gt;
+ * @beta
+ * @for Skylink
+ * @since 0.6.36
+ */
+Skylink.prototype.startRTMPSession = function (streamId, endpoint, callback) {
+  var self = this;
+
+  if (!self._hasMCU) {
+    var noMCUError = &#x27;Unable to start RTMP session as MCU is not connected&#x27;;
+    log.error(noMCUError);
+    if (typeof callback === &#x27;function&#x27;) {
+      callback(new Error(noMCUError), null);
+    }
+    return;
+  }
+  if (!streamId) {
+    var nostreamIdError = &#x27;Unable to start RTMP Session stream id is missing&#x27;;
+    log.error(nostreamIdError);
+    if (typeof callback === &#x27;function&#x27;) {
+      callback(new Error(nostreamIdError), null);
+    }
+    return;
+  }
+  if (!endpoint) {
+    var noEndpointError = &#x27;Unable to start RTMP Session as Endpoint is missing&#x27;;
+    log.error(noEndpointError);
+    if (typeof callback === &#x27;function&#x27;) {
+      callback(new Error(noEndpointError), null);
+    }
+    return;
+  }
+  var rtmpId = self.generateUUID();
+
+  if (typeof callback === &#x27;function&#x27;) {
+    self.once(&#x27;RTMPState&#x27;, function (state, RTMPId) {
+      callback(RTMPId);
+    }, function (state) {
+      return state === self.RTMP_STATE.START;
+    });
+  }
+
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.START_RTMP,
+    rid: self._room.id,
+    target: &#x27;MCU&#x27;,
+    mid: self._user.sid,
+    streamId: streamId,
+    endpoint: endpoint,
+    rtmpId: rtmpId
+  });
+
+  log.debug([&#x27;MCU&#x27;, &#x27;RTMP&#x27;, null, &#x27;Starting RTMP Session&#x27;]);
+};
+
+
+
+/**
+ * &lt;blockquote class=&quot;info&quot;&gt;
+ *   Note that this feature requires MCU to be enabled for the App Key provided in the
+ *   &lt;a href=&quot;#method_init&quot;&gt;&lt;code&gt;init()&lt;/code&gt; method&lt;/a&gt;.
+ * &lt;/blockquote&gt;
+ * Stops a RTMP session.
+ * @param {Function} [callback] The callback function fired when request has completed.
+ *   &lt;small&gt;Function parameters signature is &lt;code&gt;function (error, success)&lt;/code&gt;&lt;/small&gt;
+ *   &lt;small&gt;Function request completion is determined by the &lt;a href=&quot;#event_RTMPState&quot;&gt;
+ *   &lt;code&gt;RTMPState&lt;/code&gt; event&lt;/a&gt; triggering &lt;code&gt;state&lt;/code&gt; parameter payload as &lt;code&gt;STOP&lt;/code&gt;
+ * @param {Error|String} callback.error The error result in request.
+ *   &lt;small&gt;Defined as &lt;code&gt;null&lt;/code&gt; when there are no errors in request&lt;/small&gt;
+ *   &lt;small&gt;Object signature is the &lt;code&gt;stopRTMPSession()&lt;/code&gt; error when stopping current RTMP session.&lt;/small&gt;
+ * @param {String|JSON} callback.success The success result in request.
+ * @method stopRTMPSession
+ * @example
+ *   // Example 1: Stop RTMP session
+ *   skylinkDemo.stopRTMPSession(function (error, success) {
+ *     if (error) return;
+ *     console.info(&quot;RTMP session has stopped. ID -&gt;&quot;, success);
+ *   });
+ * @beta
+ * @for Skylink
+ * @since 0.6.36
+ */
+Skylink.prototype.stopRTMPSession = function (rtmpId, callback) {
+  var self = this;
+
+  if (!self._hasMCU) {
+    var noMCUError = &#x27;Unable to stop RTMP as MCU is not connected&#x27;;
+    log.error(noMCUError);
+    if (typeof callback === &#x27;function&#x27;) {
+      callback(new Error(noMCUError), null);
+    }
+    return;
+  }
+
+  if (typeof callback === &#x27;function&#x27;) {
+    self.once(&#x27;RTMPState&#x27;, function (state, rtmpId) {
+      callback(rtmpId);
+    }, function (state) {
+      return state === self.RTMP_STATE.STOP;
+    });
+  }
+
+  self._sendChannelMessage({
+    type: self._SIG_MESSAGE_TYPE.STOP_RTMP,
+    rid: self._room.id,
+    rtmpId: rtmpId,
+    mid: self._user.sid,
+    target: &#x27;MCU&#x27;
+  });
+
+  log.debug([&#x27;MCU&#x27;, &#x27;RTMP&#x27;, null, &#x27;Stopping RTMP Session&#x27;]);
+};
+
+/**
+ * Handles the RTMP Protocol message event received from the platform signaling.
+ * @method _rtmpEventHandler
+ * @param {JSON} message The message object received from platform signaling.
+ *    This should contain the &lt;code&gt;RTMP&lt;/code&gt; payload.
+ * @param {String} message.action The RTMP action received.
+ * @param {String} message.error The RTMP error exception received.
+ * @private
+ * @beta
+ * @for Skylink
+ * @since 0.6.36
+ */
+Skylink.prototype._rtmpEventHandler = function (message) {
+  var self = this;
+
+  log.debug([&#x27;MCU&#x27;, &#x27;RTMP&#x27;, null, &#x27;Received RTMP Session message -&gt;&#x27;], message);
+
+  if (message.action === &#x27;startSuccess&#x27;) {
+    if (!self._rtmpSessions[message.rtmpId]) {
+      log.debug([&#x27;MCU&#x27;, &#x27;RTMP&#x27;, message.rtmpId, &#x27;Started RTMP Session&#x27;]);
+
+      self._rtmpSessions[message.rtmpId] = {
+        active: true,
+        state: self.RTMP_STATE.START,
+        startedDateTime: (new Date()).toISOString(),
+        endedDateTime: null,
+        peerId: message.peerId,
+        streamId: message.streamId
+      };
+      self._trigger(&#x27;RTMPState&#x27;, self.RTMP_STATE.START, message.rtmpId, null, null);
+    }
+
+  } else if (message.action === &#x27;stopSuccess&#x27;) {
+
+    if (!self._rtmpSessions[message.rtmpId]) {
+      log.error([&#x27;MCU&#x27;, &#x27;RTMP&#x27;, message.rtmpId, &#x27;Received request of &quot;off&quot; but the session is empty&#x27;]);
+      return;
+    }
+
+    log.debug([&#x27;MCU&#x27;, &#x27;RTMP&#x27;, message.rtmpId, &#x27;Stopped RTMP Session&#x27;]);
+
+    self._rtmpSessions[message.rtmpId].active = false;
+    self._rtmpSessions[message.rtmpId].state = self.RTMP_STATE.STOP;
+    self._rtmpSessions[message.rtmpId].endedDateTime = (new Date()).toISOString();
+    self._trigger(&#x27;RTMPState&#x27;, self.RTMP_STATE.STOP, message.rtmpId, null, null);
+
+  }  else {
+    var rtmpError = new Error(message.error || &#x27;Unknown error&#x27;);
+
+    if (!self._rtmpSessions[message.rtmpId]) {
+      log.error([&#x27;MCU&#x27;, &#x27;RTMP&#x27;, message.rtmpId, &#x27;Received error but the session is empty -&gt;&#x27;], rtmpError);
+      return;
+    }
+
+    log.error([&#x27;MCU&#x27;, &#x27;RTMP&#x27;, message.rtmpId, &#x27;RTMP session failure -&gt;&#x27;], rtmpError);
+
+    self._rtmpSessions[message.rtmpId].state = self.RTMP_STATE.ERROR;
+    self._rtmpSessions[message.rtmpId].error = rtmpError;
+
+    if (self._rtmpSessions[message.rtmpId].active) {
+      log.debug([&#x27;MCU&#x27;, &#x27;RTMP&#x27;, message.rtmpId, &#x27;Stopped RTMP session abruptly&#x27;]);
+      self._rtmpSessions[message.rtmpId].active = false;
+    }
+
+    self._trigger(&#x27;RTMPState&#x27;, self.RTMP_STATE.ERROR, message.rtmpId, null, rtmpError);
+  }
 };
 
 /**

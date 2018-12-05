@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1534,6 +1534,9 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   APPROACH: &#x27;approach&#x27;,
   START_RECORDING: &#x27;startRecordingRoom&#x27;,
   STOP_RECORDING: &#x27;stopRecordingRoom&#x27;,
+  START_RTMP: &#x27;startRTMP&#x27;,
+  STOP_RTMP: &#x27;stopRTMP&#x27;,
+  RTMP: &#x27;rtmpEvent&#x27;,
   RECORDING: &#x27;recordingEvent&#x27;,
   END_OF_CANDIDATES: &#x27;endOfCandidates&#x27;
 };
@@ -1569,7 +1572,7 @@ Skylink.prototype._GROUP_MESSAGE_LIST = [
  */
 Skylink.prototype.STATS_API_VERSION = &#x27;1.1&#x27;;
 
-/*
+/**
  * The options available for video and audio bitrates (kbps) quality.
  * @attribute VIDEO_QUALITY
  * @param {JSON} HD &lt;small&gt;Value &lt;code&gt;{ video: 3200, audio: 80 }&lt;/code&gt;&lt;/small&gt;
@@ -1592,6 +1595,26 @@ Skylink.prototype.VIDEO_QUALITY = {
   LQ: { video: 400, audio: 20 }
 };
 
+/**
+ * The list of RTMP states.
+ * @attribute RTMP_STATE
+ * @param {Number} START &lt;small&gt;Value &lt;code&gt;0&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when live streaming session has started.
+ * @param {Number} STOP &lt;small&gt;Value &lt;code&gt;1&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state when live streaming session has stopped.&lt;br&gt;
+ *   &lt;small&gt;At this stage, the recorded videos will go through the mixin server to compile the videos.&lt;/small&gt;
+ * @param {Number} ERROR &lt;small&gt;Value &lt;code&gt;-1&lt;/code&gt;&lt;/small&gt;
+ *   The value of the state state when live streaming session has errors.
+ * @type JSON
+ * @beta
+ * @for Skylink
+ * @since 0.6.34
+ */
+Skylink.prototype.RTMP_STATE = {
+  START: 0,
+  STOP: 1,
+  ERROR: -1
+};
     </pre>
 </div>
 

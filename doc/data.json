@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.36",
+        "version": "1.0.0",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -1047,6 +1047,19 @@
         {
             "file": "source/template/header.js",
             "line": 743,
+            "description": "Stores the list of RTMP Sessions.",
+            "itemtype": "attribute",
+            "name": "_rtmpSessions",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "beta": 1,
+            "since": "0.6.36",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 754,
             "description": "Stores the current active recording session ID.\nThere can only be 1 recording session at a time in a Room",
             "itemtype": "attribute",
             "name": "_currentRecordingId",
@@ -1059,7 +1072,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 755,
+            "line": 766,
             "description": "Stores the recording session timeout to ensure 4 seconds has been recorded.",
             "itemtype": "attribute",
             "name": "_recordingStartInterval",
@@ -1072,7 +1085,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 766,
+            "line": 777,
             "description": "Stores the currently supported codecs.",
             "itemtype": "attribute",
             "name": "_currentCodecSupport",
@@ -1084,7 +1097,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 776,
+            "line": 787,
             "description": "Stores the session description orders and info.",
             "itemtype": "attribute",
             "name": "_sdpSessions",
@@ -1096,7 +1109,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 786,
+            "line": 797,
             "description": "Stores the flag if voice activity detection should be enabled.",
             "itemtype": "attribute",
             "name": "_voiceActivityDetection",
@@ -1109,7 +1122,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 797,
+            "line": 808,
             "description": "Stores the datachannel binary data chunk type.",
             "itemtype": "attribute",
             "name": "_binaryChunkType",
@@ -1121,7 +1134,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 807,
+            "line": 818,
             "description": "Stores the RTCPeerConnection configuration.",
             "itemtype": "attribute",
             "name": "_peerConnectionConfig",
@@ -1133,7 +1146,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 817,
+            "line": 828,
             "description": "Stores the auto bandwidth settings.",
             "itemtype": "attribute",
             "name": "_bandwidthAdjuster",
@@ -1145,7 +1158,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 827,
+            "line": 838,
             "description": "Stores the Peer connection status.",
             "itemtype": "attribute",
             "name": "_peerConnStatus",
@@ -1157,7 +1170,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 837,
+            "line": 848,
             "description": "Stores the flag to temporarily halt joinRoom() from processing.",
             "itemtype": "attribute",
             "name": "_joinRoomManager",
@@ -1169,7 +1182,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 850,
+            "line": 861,
             "description": "Stores the `init()` configuration.",
             "itemtype": "attribute",
             "name": "_initOptions",
@@ -1181,7 +1194,7 @@
         },
         {
             "file": "source/template/header.js",
-            "line": 860,
+            "line": 871,
             "description": "Stores the unique random number used for generating the \"client_id\".",
             "itemtype": "attribute",
             "name": "_statIdRandom",
@@ -2734,7 +2747,7 @@
         },
         {
             "file": "source/constants.js",
-            "line": 1450,
+            "line": 1453,
             "description": "Stores the list of socket messaging protocol types to queue when sent less than a second interval.",
             "itemtype": "attribute",
             "name": "_GROUP_MESSAGE_LIST",
@@ -2747,13 +2760,74 @@
         },
         {
             "file": "source/constants.js",
-            "line": 1467,
+            "line": 1470,
             "description": "<blockquote class=\"info\">\n  Note that this is used only for SDK development purposes.<br>\n  Current version: <code>1.1</code>\n</blockquote>\nThe value of the current version of the stats API used.",
             "itemtype": "attribute",
             "name": "STATS_API_VERSION",
             "type": "String",
             "readonly": "",
             "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/constants.js",
+            "line": 1484,
+            "description": "The options available for video and audio bitrates (kbps) quality.",
+            "itemtype": "attribute",
+            "name": "VIDEO_QUALITY",
+            "params": [
+                {
+                    "name": "HD",
+                    "description": "<small>Value <code>{ video: 3200, audio: 80 }</code></small>\n  The value of option to prefer high definition video and audio bitrates.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "HQ",
+                    "description": "<small>Value <code>{ video: 1200, audio: 50 }</code></small>\n  The value of option to prefer high quality video and audio bitrates.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "SQ",
+                    "description": "<small>Value <code>{ video: 800, audio: 30 }</code></small>\n  The value of option to prefer standard quality video and audio bitrates.",
+                    "type": "JSON"
+                },
+                {
+                    "name": "LQ",
+                    "description": "<small>Value <code>{ video: 500, audio: 20 }</code></small>\n  The value of option to prefer low quality video and audio bitrates.",
+                    "type": "JSON"
+                }
+            ],
+            "type": "JSON",
+            "readonly": "",
+            "since": "0.6.32",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/constants.js",
+            "line": 1507,
+            "description": "The list of RTMP states.",
+            "itemtype": "attribute",
+            "name": "RTMP_STATE",
+            "params": [
+                {
+                    "name": "START",
+                    "description": "<small>Value <code>0</code></small>\n  The value of the state when live streaming session has started.",
+                    "type": "Number"
+                },
+                {
+                    "name": "STOP",
+                    "description": "<small>Value <code>1</code></small>\n  The value of the state when live streaming session has stopped.<br>\n  <small>At this stage, the recorded videos will go through the mixin server to compile the videos.</small>",
+                    "type": "Number"
+                },
+                {
+                    "name": "ERROR",
+                    "description": "<small>Value <code>-1</code></small>\n  The value of the state state when live streaming session has errors.",
+                    "type": "Number"
+                }
+            ],
+            "type": "JSON",
+            "beta": 1,
+            "since": "0.6.34",
             "class": "Skylink"
         },
         {
@@ -3444,7 +3518,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 137,
+            "line": 139,
             "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -3455,7 +3529,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 162,
+            "line": 164,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -3466,7 +3540,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 199,
+            "line": 201,
             "description": "Function that adds the ICE candidate to Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidate",
@@ -3756,7 +3830,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1752,
+            "line": 1757,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -3767,7 +3841,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2053,
+            "line": 2056,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3778,7 +3852,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2202,
+            "line": 2205,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3789,7 +3863,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2222,
+            "line": 2225,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -4420,7 +4494,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 480,
+            "line": 484,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4485,7 +4559,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 596,
+            "line": 600,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4495,7 +4569,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 630,
+            "line": 634,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4505,7 +4579,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 664,
+            "line": 668,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4804,7 +4878,7 @@
                             "description": "<blockquote class=\"info\">\n  Note that this feature is currently is beta and for any enquiries on enabling and its support, please\n  contact <a href=\"http://support.temasys.io\">our support portal</a>.</blockquote>\n  The flag if <a href=\"#method_refreshConnection\"><code>\n  refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU\n  enabled Peer connections instead of invoking <a href=\"#method_joinRoom\"><code>joinRoom()</code> method</a> again.",
                             "type": "Boolean",
                             "optional": true,
-                            "optdefault": "false"
+                            "optdefault": "true"
                         },
                         {
                             "name": "iceServer",
@@ -5229,7 +5303,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 972,
+            "line": 973,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5240,7 +5314,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1085,
+            "line": 1086,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -7266,6 +7340,33 @@
         {
             "file": "source/skylink-events.js",
             "line": 799,
+            "description": "Event triggered when RTMP session state has changed.",
+            "itemtype": "event",
+            "name": "rtmpState",
+            "params": [
+                {
+                    "name": "state",
+                    "description": "The current RTMP session state.\n  [Rel: Skylink.RTMP_STATE]",
+                    "type": "Number"
+                },
+                {
+                    "name": "rtmpId",
+                    "description": "The rtmp session ID.",
+                    "type": "String"
+                },
+                {
+                    "name": "error",
+                    "description": "The error object.\n  <small>Defined only when <code>state</code> payload is <code>ERROR</code>.</small>",
+                    "type": "Error|String"
+                }
+            ],
+            "beta": 1,
+            "since": "0.6.36",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-events.js",
+            "line": 814,
             "description": "Event triggered when <a href=\"#method_getConnectionStatus\"><code>getConnectionStatus()</code> method</a>\nretrieval state changes.",
             "itemtype": "event",
             "name": "getConnectionStatusStateChange",
@@ -8504,7 +8605,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1242,
+            "line": 1257,
             "description": "Event triggered when <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> changes\nUser Streams audio and video tracks muted status.",
             "itemtype": "event",
             "name": "localMediaMuted",
@@ -8532,7 +8633,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1259,
+            "line": 1274,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.",
             "itemtype": "event",
             "name": "candidateProcessingState",
@@ -8591,7 +8692,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1287,
+            "line": 1302,
             "description": "<blockquote class=\"info\">\n  Learn more about how ICE works in this\n  <a href=\"https://temasys.com.sg/ice-what-is-this-sorcery/\">article here</a>.<br>\n  Note that this event may not be triggered for MCU enabled Peer connections as ICE candidates\n  may be received in the session description instead.\n</blockquote>\nEvent triggered when all remote ICE candidates gathering has completed and been processed.",
             "itemtype": "event",
             "name": "candidatesGathered",
@@ -8629,7 +8730,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1307,
+            "line": 1322,
             "description": "Function that subscribes a listener to an event.",
             "itemtype": "method",
             "name": "on",
@@ -8653,7 +8754,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1331,
+            "line": 1346,
             "description": "Function that subscribes a listener to an event once.",
             "itemtype": "method",
             "name": "once",
@@ -8690,7 +8791,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1386,
+            "line": 1401,
             "description": "Function that unsubscribes listeners from an event.",
             "itemtype": "method",
             "name": "off",
@@ -8716,7 +8817,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1441,
+            "line": 1456,
             "description": "Function that triggers an event.\nThe rest of the parameters after the <code>eventName</code> parameter is considered as the event parameter payloads.",
             "itemtype": "method",
             "name": "_trigger",
@@ -8727,7 +8828,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1494,
+            "line": 1509,
             "description": "Function that checks if the current state condition is met before subscribing\n  event handler to wait for condition to be fulfilled.",
             "itemtype": "method",
             "name": "_condition",
@@ -8738,7 +8839,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1520,
+            "line": 1535,
             "description": "Function that starts an interval check to wait for a condition to be resolved.",
             "itemtype": "method",
             "name": "_wait",
@@ -8749,7 +8850,7 @@
         },
         {
             "file": "source/skylink-events.js",
-            "line": 1558,
+            "line": 1573,
             "description": "Function that throttles a method function to prevent multiple invokes over a specified amount of time.\nReturns a function to be invoked <code>._throttle(fn, 1000)()</code> to make throttling functionality work.",
             "itemtype": "method",
             "name": "_throttle",
@@ -9060,7 +9161,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 334,
+            "line": 318,
             "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.io\">contact us on our support portal</a>.\n</blockquote>\nGets the list of current recording sessions since User has connected to the Room.",
             "itemtype": "method",
             "name": "getRecordings",
@@ -9077,7 +9178,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 375,
+            "line": 359,
             "description": "Function that handles and processes the socket message received.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -9088,7 +9189,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 466,
+            "line": 453,
             "description": "Function that handles the \"peerList\" socket message received.\nSee confluence docs for the \"peerList\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_peerListEventHandler",
@@ -9099,7 +9200,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 482,
+            "line": 469,
             "description": "Function that handles the \"endOfCandidates\" socket message received.\nSee confluence docs for the \"endOfCandidates\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_endOfCandidatesHandler",
@@ -9110,7 +9211,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 505,
+            "line": 492,
             "description": "Function that handles the \"introduceError\" socket message received.\nSee confluence docs for the \"introduceError\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -9121,7 +9222,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 522,
+            "line": 509,
             "description": "Function that handles the \"approach\" socket message received.\nSee confluence docs for the \"approach\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -9132,7 +9233,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 572,
+            "line": 559,
             "description": "Function that handles the \"redirect\" socket message received.\nSee confluence docs for the \"redirect\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -9143,7 +9244,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 606,
+            "line": 593,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -9154,7 +9255,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 633,
+            "line": 620,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -9165,7 +9266,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 648,
+            "line": 635,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -9176,7 +9277,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 678,
+            "line": 665,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -9187,7 +9288,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 708,
+            "line": 695,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -9198,7 +9299,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 740,
+            "line": 727,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -9209,7 +9310,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 761,
+            "line": 748,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -9220,7 +9321,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 783,
+            "line": 770,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -9231,7 +9332,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 805,
+            "line": 792,
             "description": "Handles the RECORDING Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_recordingEventHandler",
@@ -9267,7 +9368,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 917,
+            "line": 881,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -9278,7 +9379,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 986,
+            "line": 950,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -9289,7 +9390,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1149,
+            "line": 1118,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -9300,7 +9401,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1292,
+            "line": 1261,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -9311,7 +9412,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1472,
+            "line": 1450,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -9322,7 +9423,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1586,
+            "line": 1570,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -9333,7 +9434,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1684,
+            "line": 1668,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -9344,7 +9445,105 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1813,
+            "line": 1801,
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nStarts a RTMP session.",
+            "itemtype": "method",
+            "name": "startRTMPSession",
+            "params": [
+                {
+                    "name": "callback",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_RTMPState\">\n  <code>rtmpState</code> event</a> triggering <code>state</code> parameter payload as <code>START</code>.</small>",
+                    "type": "Function",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>\n  <small>Object signature is the <code>startRTMPSession()</code> error when starting a new rtmp session.</small>",
+                            "type": "Error|String"
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success result in request.\n  <small>Defined as <code>null</code> when there are errors in request</small>\n  <small>Object signature is the <a href=\"#event_RTMPState\">\n  <code>RTMPState</code> event</a> triggered <code>RTMPId</code> parameter payload.</small>",
+                            "type": "String|JSON"
+                        }
+                    ]
+                }
+            ],
+            "example": [
+                "\n  // Example 1: Start RTMP session\n  skylinkDemo.startRTMPSession(function (error, success) {\n    if (error) return;\n    console.info(\"RTMP session has started. ID ->\", success);\n  });"
+            ],
+            "trigger": "<ol class=\"desc-seq\">\n  <li>If MCU is not connected: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>Sends to MCU via Signaling server to start RTMP session. <ol>\n  <li>If RTMP session has been started successfully: <ol>\n  <li><a href=\"#event_RTMPState\"><code>RTMPState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>START</code>.</li></ol></li></ol></li></ol>",
+            "beta": 1,
+            "since": "0.6.36",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 1887,
+            "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nStops a RTMP session.",
+            "params": [
+                {
+                    "name": "callback",
+                    "description": "The callback function fired when request has completed.\n  <small>Function parameters signature is <code>function (error, success)</code></small>\n  <small>Function request completion is determined by the <a href=\"#event_RTMPState\">\n  <code>RTMPState</code> event</a> triggering <code>state</code> parameter payload as <code>STOP</code>",
+                    "type": "Function",
+                    "optional": true,
+                    "props": [
+                        {
+                            "name": "error",
+                            "description": "The error result in request.\n  <small>Defined as <code>null</code> when there are no errors in request</small>\n  <small>Object signature is the <code>stopRTMPSession()</code> error when stopping current RTMP session.</small>",
+                            "type": "Error|String"
+                        },
+                        {
+                            "name": "success",
+                            "description": "The success result in request.",
+                            "type": "String|JSON"
+                        }
+                    ]
+                }
+            ],
+            "itemtype": "method",
+            "name": "stopRTMPSession",
+            "example": [
+                "\n  // Example 1: Stop RTMP session\n  skylinkDemo.stopRTMPSession(function (error, success) {\n    if (error) return;\n    console.info(\"RTMP session has stopped. ID ->\", success);\n  });"
+            ],
+            "beta": 1,
+            "since": "0.6.36",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 1943,
+            "description": "Handles the RTMP Protocol message event received from the platform signaling.",
+            "itemtype": "method",
+            "name": "_rtmpEventHandler",
+            "params": [
+                {
+                    "name": "message",
+                    "description": "The message object received from platform signaling.\n   This should contain the <code>RTMP</code> payload.",
+                    "type": "JSON",
+                    "props": [
+                        {
+                            "name": "action",
+                            "description": "The RTMP action received.",
+                            "type": "String"
+                        },
+                        {
+                            "name": "error",
+                            "description": "The RTMP error exception received.",
+                            "type": "String"
+                        }
+                    ]
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "beta": 1,
+            "since": "0.6.36",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 2011,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -10288,15 +10487,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:480"
+            "line": " source/room-connection.js:484"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:596"
+            "line": " source/room-connection.js:600"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:630"
+            "line": " source/room-connection.js:634"
         },
         {
             "message": "unknown tag: trigger",
@@ -10377,6 +10576,10 @@
         {
             "message": "unknown tag: trigger",
             "line": " source/socket-message.js:192"
+        },
+        {
+            "message": "unknown tag: trigger",
+            "line": " source/socket-message.js:1801"
         },
         {
             "message": "unknown tag: trigger",

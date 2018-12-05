@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -2202,10 +2202,10 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
   var self = this;
   var streamId = (self._peerConnections[targetMid] &amp;&amp; self._peerConnections[targetMid].remoteStreamId) || stream.id || stream.label;
 
-  if (!self._peerInformations[targetMid]) {
-    log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Received remote stream when peer is not connected. Ignoring stream -&gt;&#x27;], stream);
-    return;
-  }
+  // if (!self._peerInformations[targetMid]) {
+  //   log.warn([targetMid, &#x27;MediaStream&#x27;, streamId, &#x27;Received remote stream when peer is not connected. Ignoring stream -&gt;&#x27;], stream);
+  //   return;
+  // }
 
   /*if (!self._peerInformations[targetMid].settings.audio &amp;&amp;
     !self._peerInformations[targetMid].settings.video &amp;&amp; !isScreenSharing) {

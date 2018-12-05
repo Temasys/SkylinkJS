@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -825,7 +825,7 @@ Skylink.prototype.sendP2PMessage = function(message, targetPeerId) {
   for (var i = 0; i &lt; listOfPeers.length; i++) {
     var peerId = listOfPeers[i];
 
-    if (!this._dataChannels[peerId]) {
+    if (!this._hasMCU &amp;&amp; !this._dataChannels[peerId]) {
       log.error([peerId, &#x27;RTCDataChannel&#x27;, null, &#x27;Dropping of sending message to Peer as &#x27; +
         &#x27;Datachannel connection does not exists&#x27;]);
       listOfPeers.splice(i, 1);
@@ -1674,9 +1674,9 @@ Skylink.prototype._startDataTransfer = function(data, timeout, targetPeerId, sen
   }
 
   // Remove MCU Peer as list of Peers
-  if (listOfPeers.indexOf(&#x27;MCU&#x27;) &gt; -1) {
-    listOfPeers.splice(listOfPeers.indexOf(&#x27;MCU&#x27;), 1);
-  }
+  // if (listOfPeers.indexOf(&#x27;MCU&#x27;) &gt; -1) {
+  //   listOfPeers.splice(listOfPeers.indexOf(&#x27;MCU&#x27;), 1);
+  // }
 
   // Function that returns the error emitted before data transfer has started
   var emitErrorBeforeDataTransferFn = function (error) {

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -432,10 +432,14 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
     }
   };
 
+  var resolveAsWarningFn = function(error, tryRoom) {
+    log.warn(error + &#x27; &#x27; + &#x27;room: &#x27; + tryRoom);
+  };
+
   var joinRoomFn = function () {
     // If room has been stopped but does not matches timestamp skip.
     if (self._joinRoomManager.timestamp !== timestamp) {
-      resolveAsErrorFn(&#x27;joinRoom() process did not complete&#x27;, selectedRoom);
+      resolveAsWarningFn(&#x27;joinRoom() process did not complete&#x27;, selectedRoom);
       return;
     }
 
@@ -445,7 +449,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
         return;
       // If details has been initialised but does not matches timestamp skip.
       } else if (self._joinRoomManager.timestamp !== timestamp) {
-        resolveAsErrorFn(&#x27;joinRoom() process did not complete&#x27;, selectedRoom);
+        resolveAsWarningFn(&#x27;joinRoom() process did not complete&#x27;, selectedRoom);
         return;
       }
 
@@ -455,7 +459,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           return;
         // If socket and stream has been retrieved but socket connection does not matches timestamp skip.
         } else if (self._joinRoomManager.timestamp !== timestamp) {
-          resolveAsErrorFn(&#x27;joinRoom() process did not complete&#x27;, selectedRoom);
+          resolveAsWarningFn(&#x27;joinRoom() process did not complete&#x27;, selectedRoom);
           return;
         }
 

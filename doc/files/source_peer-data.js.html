@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -680,10 +680,10 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
 
 
   if (self._peerConnections[usePeerId] &amp;&amp; self._peerConnections[usePeerId].signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
-    var stream = self._peerConnections[peerId].localStream;
-    var streamId = self._peerConnections[peerId].localStreamId || (stream &amp;&amp; (stream.id || stream.label));
+    var stream = self._peerConnections[usePeerId].localStream;
+    var streamId = self._peerConnections[usePeerId].localStreamId || (stream &amp;&amp; (stream.id || stream.label));
 
-    customSettings.settings.data = self._initOptions.enableDataChannel &amp;&amp; self._peerInformations[peerId].config.enableDataChannel;
+    customSettings.settings.data = self._initOptions.enableDataChannel &amp;&amp; self._peerInformations[usePeerId].config.enableDataChannel;
 
     if (stream) {
       if (self._streams.screenshare &amp;&amp; self._streams.screenshare.stream &amp;&amp;
@@ -699,9 +699,9 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
         customSettings.mediaStatus = clone(self._streamsMutedSettings);
       }
 
-      if (typeof self._peerConnections[peerId].getSenders === &#x27;function&#x27; &amp;&amp;
+      if (typeof self._peerConnections[usePeerId].getSenders === &#x27;function&#x27; &amp;&amp;
         !(self._initOptions.useEdgeWebRTC &amp;&amp; window.msRTCPeerConnection)) {
-        var senders = self._peerConnections[peerId].getSenders();
+        var senders = self._peerConnections[usePeerId].getSenders();
         var hasSendAudio = false;
         var hasSendVideo = false;
 

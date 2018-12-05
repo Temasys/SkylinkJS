@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -277,7 +277,7 @@ Skylink.prototype.generateUUID = function() {
  *   &lt;code&gt;refreshConnection()&lt;/code&gt; method&lt;/a&gt; is called internally.&lt;/small&gt;
  * @param {Boolean} [options.throttleShouldThrowError=false] The flag if throttled methods should throw errors when
  *   method is invoked less than the interval timeout value configured in &lt;code&gt;options.throttleIntervals&lt;/code&gt;.
- * @param {Boolean} [options.mcuUseRenegoRestart=false] &lt;blockquote class=&quot;info&quot;&gt;
+ * @param {Boolean} [options.mcuUseRenegoRestart=true] &lt;blockquote class=&quot;info&quot;&gt;
  *   Note that this feature is currently is beta and for any enquiries on enabling and its support, please
  *   contact &lt;a href=&quot;http://support.temasys.io&quot;&gt;our support portal&lt;/a&gt;.&lt;/blockquote&gt;
  *   The flag if &lt;a href=&quot;#method_refreshConnection&quot;&gt;&lt;code&gt;
@@ -587,8 +587,8 @@ Skylink.prototype.init = function(_options, _callback) {
   // &#x60;init({ throttleShouldThrowError: false })&#x60;
   options.throttleShouldThrowError = options.throttleShouldThrowError === true;
 
-  // &#x60;init({ mcuUseRenegoRestart: false })&#x60;
-  options.mcuUseRenegoRestart = options.mcuUseRenegoRestart === true;
+  // &#x60;init({ mcuUseRenegoRestart: true })&#x60;
+  options.mcuUseRenegoRestart = options.mcuUseRenegoRestart === false;
 
   // &#x60;init({ useEdgeWebRTC: false })&#x60;
   options.useEdgeWebRTC = options.useEdgeWebRTC === true;
@@ -1014,6 +1014,7 @@ Skylink.prototype._parseInfo = function(info) {
   this._signalingServer = info.ipSigserver;
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
+  this._hasMCU = info.hasMCU;
 
   if(!info.enable_stats_config){
     this._initOptions.enableStatsGathering = false;
