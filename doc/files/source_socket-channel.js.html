@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -395,16 +395,20 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   socket.on(&#x27;reconnect_attempt&#x27;, function (attempt) {
     retries++;
     self._socketSession.attempts++;
+    self._handleSignalingStats(&#x27;reconnect_attempt&#x27;, retries);
     self._trigger(&#x27;channelRetry&#x27;, fallbackType, self._socketSession.attempts, clone(self._socketSession));
   });
 
   socket.on(&#x27;reconnect_failed&#x27;, function () {
+    var errorMsg = &#x27;Failed reconnection with transport &quot;&#x27; + type + &#x27;&quot; and port &#x27; + self._signalingServerPort + &#x27;.&#x27;;
+    self._handleSignalingStats(&#x27;reconnect_failed&#x27;, retries, errorMsg);
+
     if (fallbackType === self.SOCKET_FALLBACK.NON_FALLBACK) {
-      self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.CONNECTION_FAILED, new Error(&#x27;Failed connection with transport &quot;&#x27; +
-        type + &#x27;&quot; and port &#x27; + self._signalingServerPort + &#x27;.&#x27;), fallbackType, clone(self._socketSession));
+      errorMsg = errorMsg.replace(/ reconnection /g, &#x27; connection &#x27;);
+      self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.CONNECTION_FAILED, new Error(errorMsg), fallbackType, clone(self._socketSession));
+
     } else {
-      self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.RECONNECTION_FAILED, new Error(&#x27;Failed reconnection with transport &quot;&#x27; +
-        type + &#x27;&quot; and port &#x27; + self._signalingServerPort + &#x27;.&#x27;), fallbackType, clone(self._socketSession));
+      self._trigger(&#x27;socketError&#x27;, self.SOCKET_ERROR.RECONNECTION_FAILED, new Error(errorMsg), fallbackType, clone(self._socketSession));
     }
 
     if (self._socketSession.finalAttempts &lt; 2) {
@@ -415,7 +419,12 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
     }
   });
 
+  socket.on(&#x27;reconnect_error&#x27;, function (error) {
+    self._handleSignalingStats(&#x27;reconnect_error&#x27;, retries, error);
+  });
+
   socket.on(&#x27;connect&#x27;, function () {
+    self._handleSignalingStats(&#x27;connect&#x27;, retries);
     if (!self._channelOpen) {
       log.log([null, &#x27;Socket&#x27;, null, &#x27;Channel opened&#x27;]);
       self._channelOpen = true;
@@ -424,6 +433,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   });
 
   socket.on(&#x27;reconnect&#x27;, function () {
+    self._handleSignalingStats(&#x27;reconnect&#x27;, retries);
     if (!self._channelOpen) {
       log.log([null, &#x27;Socket&#x27;, null, &#x27;Channel opened&#x27;]);
       self._channelOpen = true;
@@ -432,6 +442,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   });
 
   socket.on(&#x27;error&#x27;, function(error) {
+    self._handleSignalingStats(&#x27;error&#x27;, retries, error);
     if (error ? error.message.indexOf(&#x27;xhr poll error&#x27;) &gt; -1 : false) {
       log.error([null, &#x27;Socket&#x27;, null, &#x27;XHR poll connection unstable. Disconnecting.. -&gt;&#x27;], error);
       self._closeChannel();
@@ -442,6 +453,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
   });
 
   socket.on(&#x27;disconnect&#x27;, function() {
+    self._handleSignalingStats(&#x27;disconnect&#x27;, retries);
     if (self._channelOpen) {
       self._channelOpen = false;
       self._trigger(&#x27;channelClose&#x27;, clone(self._socketSession));

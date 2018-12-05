@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.34",
+        "version": "0.6.36",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -136,6 +136,15 @@
         },
         "source/skylink-events.js": {
             "name": "source/skylink-events.js",
+            "modules": {},
+            "classes": {},
+            "fors": {
+                "Skylink": 1
+            },
+            "namespaces": {}
+        },
+        "source/skylink-stats.js": {
+            "name": "source/skylink-stats.js",
             "modules": {},
             "classes": {},
             "fors": {
@@ -1168,6 +1177,18 @@
             "access": "private",
             "tagname": "",
             "since": "0.6.27",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 860,
+            "description": "Stores the unique random number used for generating the \"client_id\".",
+            "itemtype": "attribute",
+            "name": "_statIdRandom",
+            "type": "Number",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
             "class": "Skylink"
         },
         {
@@ -2727,34 +2748,12 @@
         {
             "file": "source/constants.js",
             "line": 1467,
-            "description": "The options available for video and audio bitrates (kbps) quality.",
+            "description": "<blockquote class=\"info\">\n  Note that this is used only for SDK development purposes.<br>\n  Current version: <code>1.1</code>\n</blockquote>\nThe value of the current version of the stats API used.",
             "itemtype": "attribute",
-            "name": "VIDEO_QUALITY",
-            "params": [
-                {
-                    "name": "HD",
-                    "description": "<small>Value <code>{ video: 3200, audio: 80 }</code></small>\n  The value of option to prefer high definition video and audio bitrates.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "HQ",
-                    "description": "<small>Value <code>{ video: 1200, audio: 50 }</code></small>\n  The value of option to prefer high quality video and audio bitrates.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "SQ",
-                    "description": "<small>Value <code>{ video: 800, audio: 30 }</code></small>\n  The value of option to prefer standard quality video and audio bitrates.",
-                    "type": "JSON"
-                },
-                {
-                    "name": "LQ",
-                    "description": "<small>Value <code>{ video: 500, audio: 20 }</code></small>\n  The value of option to prefer low quality video and audio bitrates.",
-                    "type": "JSON"
-                }
-            ],
-            "type": "JSON",
+            "name": "STATS_API_VERSION",
+            "type": "String",
             "readonly": "",
-            "since": "0.6.32",
+            "since": "0.6.31",
             "class": "Skylink"
         },
         {
@@ -2770,13 +2769,13 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 61,
+            "line": 62,
             "description": "Subscribe to events",
             "class": "Skylink"
         },
         {
             "file": "source/data-channel.js",
-            "line": 197,
+            "line": 203,
             "description": "Function that refreshes the main messaging Datachannel.",
             "itemtype": "method",
             "name": "refreshDatachannel",
@@ -2796,7 +2795,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 245,
+            "line": 251,
             "description": "Function that returns the Datachannel buffer threshold and amount.",
             "itemtype": "method",
             "name": "_getDataChannelBuffer",
@@ -2811,7 +2810,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 279,
+            "line": 285,
             "description": "Function that sends data over the Datachannel connection.",
             "itemtype": "method",
             "name": "_sendMessageToDataChannel",
@@ -2822,7 +2821,7 @@
         },
         {
             "file": "source/data-channel.js",
-            "line": 354,
+            "line": 360,
             "description": "Function that stops the Datachannel connection and removes object references.",
             "itemtype": "method",
             "name": "_closeDataChannel",
@@ -3445,7 +3444,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 131,
+            "line": 137,
             "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -3456,7 +3455,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 155,
+            "line": 162,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -3467,7 +3466,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 192,
+            "line": 199,
             "description": "Function that adds the ICE candidate to Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidate",
@@ -3746,7 +3745,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1635,
+            "line": 1636,
             "description": "Function that ends the Peer connection session.",
             "itemtype": "method",
             "name": "_removePeer",
@@ -3757,7 +3756,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 1750,
+            "line": 1752,
             "description": "Function that creates the Peer connection.",
             "itemtype": "method",
             "name": "_createPeerConnection",
@@ -3768,7 +3767,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2031,
+            "line": 2053,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3779,7 +3778,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2179,
+            "line": 2202,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3790,7 +3789,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2199,
+            "line": 2222,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -3998,7 +3997,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 78,
+            "line": 80,
             "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -4009,7 +4008,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 139,
+            "line": 143,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -4421,7 +4420,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 477,
+            "line": 480,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4486,7 +4485,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 593,
+            "line": 596,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4496,7 +4495,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 627,
+            "line": 630,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4506,7 +4505,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 661,
+            "line": 664,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -4560,6 +4559,13 @@
                         {
                             "name": "enableIceTrickle",
                             "description": "The flag if Peer connections should\n  trickle ICE for faster connectivity.",
+                            "type": "Boolean",
+                            "optional": true,
+                            "optdefault": "true"
+                        },
+                        {
+                            "name": "enableStatsGathering",
+                            "description": "Configure the anonymous performance and connectivity statistic collection function.\n  Temasys collects encrypted, anonymous performance and connectivity statistics to allow us to improve performance for our customers and identify regional or ISP specific connectivity issues.\n  This data does not contain any personal information or session content.\n  To enable the configuration of this option, you need to \"Collect Quality Statistics\" option on the Temasys console Website under App key settings section. The default behavior for this option if not specifically configured is true.",
                             "type": "Boolean",
                             "optional": true,
                             "optdefault": "true"
@@ -5190,7 +5196,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 738,
+            "line": 748,
             "description": "Function that checks if value is contained in a SDK constant.",
             "itemtype": "method",
             "name": "_containsInList",
@@ -5201,7 +5207,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 757,
+            "line": 767,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -5212,7 +5218,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 885,
+            "line": 900,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5223,7 +5229,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 953,
+            "line": 972,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5234,7 +5240,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1065,
+            "line": 1085,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -8753,6 +8759,149 @@
             "class": "Skylink"
         },
         {
+            "file": "source/skylink-stats.js",
+            "line": 1,
+            "description": "Function that sends the stats to the API server.",
+            "itemtype": "method",
+            "name": "_postStatsToServer",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 36,
+            "description": "Function that handles the posting of client information.",
+            "itemtype": "method",
+            "name": "_handleClientStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 58,
+            "description": "Function that handles the posting of session states.",
+            "itemtype": "method",
+            "name": "_handleSessionStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 77,
+            "description": "Function that handles the posting of app key authentication states.",
+            "itemtype": "method",
+            "name": "_handleAuthStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 98,
+            "description": "Function that handles the posting of socket connection states.",
+            "itemtype": "method",
+            "name": "_handleSignalingStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 122,
+            "description": "Function that handles the posting of peer ICE connection states.",
+            "itemtype": "method",
+            "name": "_handleIceConnectionStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 166,
+            "description": "Function that handles the posting of peer local/remote ICE candidate processing states.",
+            "itemtype": "method",
+            "name": "_handleIceCandidateStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 190,
+            "description": "Function that handles the posting of peer local/remote ICE gathering states.",
+            "itemtype": "method",
+            "name": "_handleIceGatheringStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 209,
+            "description": "Function that handles the posting of peer connection negotiation states.",
+            "itemtype": "method",
+            "name": "_handleNegotiationStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 242,
+            "description": "Function that handles the posting of peer connection bandwidth information.",
+            "itemtype": "method",
+            "name": "_handleBandwidthStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 367,
+            "description": "Function that handles the posting of recording states.",
+            "itemtype": "method",
+            "name": "_handleRecordingStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 388,
+            "description": "Function that handles the posting of datachannel states.",
+            "itemtype": "method",
+            "name": "_handleDatachannelStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-stats.js",
+            "line": 422,
+            "description": "Function that handles buffer of stats data",
+            "itemtype": "method",
+            "name": "_handleDatachannelStats",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.35",
+            "class": "Skylink"
+        },
+        {
             "file": "source/socket-channel.js",
             "line": 1,
             "description": "Function that sends a socket message over the socket connection to the Signaling.",
@@ -8776,7 +8925,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 392,
+            "line": 404,
             "description": "Function that starts the socket connection to the Signaling.\nThis starts creating the socket connection and called at first not when requiring to fallback.",
             "itemtype": "method",
             "name": "_openChannel",
@@ -8787,7 +8936,7 @@
         },
         {
             "file": "source/socket-channel.js",
-            "line": 436,
+            "line": 448,
             "description": "Function that stops the socket connection to the Signaling.",
             "itemtype": "method",
             "name": "_closeChannel",
@@ -8858,7 +9007,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 187,
+            "line": 192,
             "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.io\">contact us on our support portal</a>.\n</blockquote>\nStops a recording session.",
             "params": [
                 {
@@ -8911,7 +9060,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 323,
+            "line": 334,
             "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.io\">contact us on our support portal</a>.\n</blockquote>\nGets the list of current recording sessions since User has connected to the Room.",
             "itemtype": "method",
             "name": "getRecordings",
@@ -8928,7 +9077,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 364,
+            "line": 375,
             "description": "Function that handles and processes the socket message received.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -8939,7 +9088,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 455,
+            "line": 466,
             "description": "Function that handles the \"peerList\" socket message received.\nSee confluence docs for the \"peerList\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_peerListEventHandler",
@@ -8950,7 +9099,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 471,
+            "line": 482,
             "description": "Function that handles the \"endOfCandidates\" socket message received.\nSee confluence docs for the \"endOfCandidates\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_endOfCandidatesHandler",
@@ -8961,7 +9110,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 493,
+            "line": 505,
             "description": "Function that handles the \"introduceError\" socket message received.\nSee confluence docs for the \"introduceError\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -8972,7 +9121,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 509,
+            "line": 522,
             "description": "Function that handles the \"approach\" socket message received.\nSee confluence docs for the \"approach\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -8983,7 +9132,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 557,
+            "line": 572,
             "description": "Function that handles the \"redirect\" socket message received.\nSee confluence docs for the \"redirect\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -8994,7 +9143,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 589,
+            "line": 606,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -9005,7 +9154,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 616,
+            "line": 633,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -9016,7 +9165,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 631,
+            "line": 648,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -9027,7 +9176,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 661,
+            "line": 678,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -9038,7 +9187,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 691,
+            "line": 708,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -9049,7 +9198,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 723,
+            "line": 740,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -9060,7 +9209,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 744,
+            "line": 761,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -9071,7 +9220,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 766,
+            "line": 783,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -9082,7 +9231,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 788,
+            "line": 805,
             "description": "Handles the RECORDING Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_recordingEventHandler",
@@ -9118,7 +9267,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 891,
+            "line": 917,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -9129,7 +9278,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 958,
+            "line": 986,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -9140,7 +9289,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1119,
+            "line": 1149,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -9151,7 +9300,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1260,
+            "line": 1292,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -9162,7 +9311,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1438,
+            "line": 1472,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -9173,7 +9322,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1546,
+            "line": 1586,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -9184,7 +9333,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1641,
+            "line": 1684,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -9195,7 +9344,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1767,
+            "line": 1813,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -9690,7 +9839,7 @@
                 }
             ],
             "example": [
-                "\n  // Example 1: Retrieve the getUserMedia() stream with selected source ID.\n  skylinkDemo.getStreamSources(function (sources) {\n    skylinkDemo.getUserMedia({\n      audio: sources.audio.input[0].deviceId,\n      video: sources.video.input[0].deviceId\n    });\n  });\n  \n  // Example 2: Set the output audio speaker (Chrome 49+ supported only)\n  skylinkDemo.getStreamSources(function (sources) {\n    var videoElement = document.getElementById('video');\n    if (videoElement && typeof videoElement.setSinkId === 'function') {\n      videoElement.setSinkId(sources.audio.output[0].deviceId)\n    }\n  });"
+                "\n  // Example 1: Retrieve the getUserMedia() stream with selected source ID.\n  skylinkDemo.getStreamSources(function (sources) {\n    skylinkDemo.getUserMedia({\n      audio: sources.audio.input[0].deviceId,\n      video: sources.video.input[0].deviceId\n    });\n  });\n\n  // Example 2: Set the output audio speaker (Chrome 49+ supported only)\n  skylinkDemo.getStreamSources(function (sources) {\n    var videoElement = document.getElementById('video');\n    if (videoElement && typeof videoElement.setSinkId === 'function') {\n      videoElement.setSinkId(sources.audio.output[0].deviceId)\n    }\n  });"
             ],
             "since": "0.6.27",
             "class": "Skylink"
@@ -9758,7 +9907,7 @@
                 }
             ],
             "example": [
-                "\n  // Example 1: Retrieve the list of available shareScreen() sources.\n  skylinkDemo.getScreenSources(function (sources) {\n    skylinkDemo.shareScreen(sources.mediaSource[0] || null);\n  });\n  \n  // Example 2: Retrieve the list of available shareScreen() sources with a specific item.\n  skylinkDemo.getScreenSources(function (sources) {\n    if (sources.mediaSourceInput[0]) {\n      skylinkDemo.shareScreen({\n        mediaSource: mediaSourceInput[0].mediaSource,\n        sourceId: mediaSourceInput[0].sourceId\n      });\n    } else {\n      skylinkDemo.shareScreen();\n    }\n  });"
+                "\n  // Example 1: Retrieve the list of available shareScreen() sources.\n  skylinkDemo.getScreenSources(function (sources) {\n    skylinkDemo.shareScreen(sources.mediaSource[0] || null);\n  });\n\n  // Example 2: Retrieve the list of available shareScreen() sources with a specific item.\n  skylinkDemo.getScreenSources(function (sources) {\n    if (sources.mediaSourceInput[0]) {\n      skylinkDemo.shareScreen({\n        mediaSource: mediaSourceInput[0].mediaSource,\n        sourceId: mediaSourceInput[0].sourceId\n      });\n    } else {\n      skylinkDemo.shareScreen();\n    }\n  });"
             ],
             "since": "0.6.27",
             "class": "Skylink"
@@ -9799,6 +9948,17 @@
         {
             "file": "source/stream-media.js",
             "line": 1839,
+            "description": "Function that parses the mediastream tracks for details.",
+            "itemtype": "method",
+            "name": "_parseStreamTracksInfo",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-media.js",
+            "line": 1912,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -9809,7 +9969,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1985,
+            "line": 2062,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -9820,7 +9980,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2026,
+            "line": 2103,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -9831,7 +9991,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2060,
+            "line": 2137,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -9842,7 +10002,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2155,
+            "line": 2232,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -10048,6 +10208,17 @@
             "tagname": "",
             "since": "0.6.25",
             "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 1392,
+            "description": "Function adds SCTP port number for Firefox 63.0.3 and above if its missing in the answer from MCU",
+            "itemtype": "method",
+            "name": "_setSCTPport",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.35",
+            "class": "Skylink"
         }
     ],
     "warnings": [
@@ -10117,15 +10288,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:477"
+            "line": " source/room-connection.js:480"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:593"
+            "line": " source/room-connection.js:596"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:627"
+            "line": " source/room-connection.js:630"
         },
         {
             "message": "unknown tag: trigger",
@@ -10205,7 +10376,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:187"
+            "line": " source/socket-message.js:192"
         },
         {
             "message": "unknown tag: trigger",
@@ -10253,7 +10424,7 @@
         },
         {
             "message": "Missing item type\nSubscribe to events",
-            "line": " source/data-channel.js:61"
+            "line": " source/data-channel.js:62"
         },
         {
             "message": "Missing item type\nEmit data state event function.",

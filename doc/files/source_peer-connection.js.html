@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -741,7 +741,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
   output.video.sending.codec = self._getSDPSelectedCodec(peerId, pc.remoteDescription, &#x27;video&#x27;, beSilentOnLogs);
   output.audio.receiving.codec = self._getSDPSelectedCodec(peerId, pc.localDescription, &#x27;audio&#x27;, beSilentOnLogs);
   output.video.receiving.codec = self._getSDPSelectedCodec(peerId, pc.localDescription, &#x27;video&#x27;, beSilentOnLogs);
-  
+
   // Parse workaround possible certificate details
   output.certificate.local = self._getSDPFingerprint(peerId, pc.localDescription, beSilentOnLogs);
   output.certificate.remote = self._getSDPFingerprint(peerId, pc.remoteDescription, beSilentOnLogs);
@@ -790,7 +790,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       output.certificate.local.fingerprint = localCertItem.googFingerprint;
       output.certificate.local.fingerprintAlgorithm = localCertItem.googFingerprintAlgorithm;
       output.certificate.local.derBase64 = localCertItem.googDerBase64;
-      
+
       var remoteCertItem = output.raw[pairItem.remoteCertificateId || &#x27;&#x27;] || {};
       output.certificate.remote.fingerprint = remoteCertItem.googFingerprint;
       output.certificate.remote.fingerprintAlgorithm = remoteCertItem.googFingerprintAlgorithm;
@@ -878,15 +878,15 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       var consentResponsesReceived = parseInt(item.consentResponsesReceived || &#x27;0&#x27;, 10);
       output.selectedCandidate.consentResponses.totalReceived = consentResponsesReceived;
       output.selectedCandidate.consentResponses.received = self._parseConnectionStats(prevStats, item, &#x27;consentResponsesReceived&#x27;);
-       
+
       var consentResponsesSent = parseInt(item.consentResponsesSent || &#x27;0&#x27;, 10);
       output.selectedCandidate.consentResponses.totalSent = consentResponsesSent;
       output.selectedCandidate.consentResponses.sent = self._parseConnectionStats(prevStats, item, &#x27;consentResponsesSent&#x27;);
-      
+
       var responsesReceived = parseInt(item.responsesReceived || &#x27;0&#x27;, 10);
       output.selectedCandidate.responses.totalReceived = responsesReceived;
       output.selectedCandidate.responses.received = self._parseConnectionStats(prevStats, item, &#x27;responsesReceived&#x27;);
-      
+
       var responsesSent = parseInt(item.responsesSent || &#x27;0&#x27;, 10);
       output.selectedCandidate.responses.totalSent = responsesSent;
       output.selectedCandidate.responses.sent = self._parseConnectionStats(prevStats, item, &#x27;responsesSent&#x27;);
@@ -978,7 +978,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
   // Format audio stats
   var audioStatsFn = function (item, prop) {
     var prevStats = isAutoBwStats ? self._peerBandwidth[peerId][prop] : self._peerStats[peerId][prop];
-    
+
     // Safari 11 (Inbound stats)
     if (prop.indexOf(&#x27;RTCInboundRTPAudioStream&#x27;) === 0) {
       output.audio.receiving.fractionLost = item.fractionLost;
@@ -1068,7 +1068,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
         var bytesReceived = parseInt(item.bytesReceived || &#x27;0&#x27;, 10);
         output.audio.receiving.totalBytes = bytesReceived;
         output.audio.receiving.bytes = self._parseConnectionStats(prevStats, item, &#x27;bytesReceived&#x27;);
-  
+
         var packetsReceived = parseInt(item.packetsReceived || &#x27;0&#x27;, 10);
         output.audio.receiving.totalPackets = packetsReceived;
         output.audio.receiving.packets = self._parseConnectionStats(prevStats, item, &#x27;packetsReceived&#x27;);
@@ -1087,12 +1087,12 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
         var bytesSent = parseInt(item.bytesSent || &#x27;0&#x27;, 10);
         output.audio.sending.totalBytes = bytesSent;
         output.audio.sending.bytes = self._parseConnectionStats(prevStats, item, &#x27;bytesSent&#x27;);
-  
+
         var packetsSent = parseInt(item.packetsSent || &#x27;0&#x27;, 10);
         output.audio.sending.totalPackets = packetsSent;
         output.audio.sending.packets = self._parseConnectionStats(prevStats, item, &#x27;packetsSent&#x27;);
       }
-    
+
     // Firefox (Inbound stats)
     } else if (prop.indexOf(&#x27;inbound_rtp_audio&#x27;) === 0) {
       output.audio.receiving.jitter = item.jitter || 0;
@@ -1128,7 +1128,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
   // Format video stats
   var videoStatsFn = function (item, prop) {
     var prevStats = isAutoBwStats ? self._peerBandwidth[peerId][prop] : self._peerStats[peerId][prop];
-    
+
     // Safari 11 (Inbound stats)
     if (prop.indexOf(&#x27;RTCInboundRTPVideoStream&#x27;) === 0) {
       output.video.receiving.fractionLost = item.fractionLost;
@@ -1156,7 +1156,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
 
       output.video.receiving.totalSlis = item.sliCount;
       output.video.receiving.slis = self._parseConnectionStats(prevStats, item, &#x27;sliCount&#x27;);
-    
+
     // Safari 11 (Inbound track stats)
     } else if (prop.indexOf(&#x27;RTCMediaStreamTrack_remote_video_&#x27;) === 0) {
       output.video.receiving.frameHeight = item.frameHeight;
@@ -1273,7 +1273,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
         var bytesReceived = parseInt(item.bytesReceived || &#x27;0&#x27;, 10);
         output.video.receiving.totalBytes = bytesReceived;
         output.video.receiving.bytes = self._parseConnectionStats(prevStats, item, &#x27;bytesReceived&#x27;);
-  
+
         var packetsReceived = parseInt(item.packetsReceived || &#x27;0&#x27;, 10);
         output.video.receiving.totalPackets = packetsReceived;
         output.video.receiving.packets = self._parseConnectionStats(prevStats, item, &#x27;packetsReceived&#x27;);
@@ -1309,7 +1309,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
         var bytesSent = parseInt(item.bytesSent || &#x27;0&#x27;, 10);
         output.video.sending.totalBytes = bytesSent;
         output.video.sending.bytes = self._parseConnectionStats(prevStats, item, &#x27;bytesSent&#x27;);
-  
+
         var packetsSent = parseInt(item.packetsSent || &#x27;0&#x27;, 10);
         output.video.sending.totalPackets = packetsSent;
         output.video.sending.packets = self._parseConnectionStats(prevStats, item, &#x27;packetsSent&#x27;);
@@ -1326,7 +1326,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
         output.video.sending.totalFirs = firsReceived;
         output.video.sending.firs = self._parseConnectionStats(prevStats, item, &#x27;googFirsReceived&#x27;);
       }
-    
+
     // Firefox (Inbound stats)
     } else if (prop.indexOf(&#x27;inbound_rtp_video&#x27;) === 0) {
       output.video.receiving.jitter = item.jitter || 0;
@@ -1409,14 +1409,14 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
               break;
             }
 
-            // Retrieve the &quot;streamId&quot; parameter 
+            // Retrieve the &quot;streamId&quot; parameter
             for (var ec = 0; ec &lt; elements[e].children.length; ec++) {
               if (elements[e].children[ec].name === &#x27;streamId&#x27;) {
                 videoStreamId = elements[e].children[ec].value || null;
                 break;
               }
             }
-          
+
           // For Chrome case where the srcObject can be obtained and determine the streamId
           } else {
             videoStreamId = (elements[e].srcObject &amp;&amp; (elements[e].srcObject.id || elements[e].srcObject.label)) || null;
@@ -1473,7 +1473,7 @@ Skylink.prototype._retrieveStats = function (peerId, callback, beSilentOnLogs, i
       } else if (AdapterJS.webrtcDetectedBrowser === &#x27;edge&#x27; &amp;&amp; !output.raw[prop].mediaType &amp;&amp;
         [&#x27;inboundrtp&#x27;, &#x27;outboundrtp&#x27;].indexOf(output.raw[prop].type) &gt; -1) {
         var trackItem = output.raw[ output.raw[prop].mediaTrackId ] || {};
-        output.raw[prop].mediaType = edgeTracksKind[ output.raw[prop].isRemote ? &#x27;remote&#x27; : &#x27;local&#x27; ][ trackItem.trackIdentifier ] || &#x27;&#x27;; 
+        output.raw[prop].mediaType = edgeTracksKind[ output.raw[prop].isRemote ? &#x27;remote&#x27; : &#x27;local&#x27; ][ trackItem.trackIdentifier ] || &#x27;&#x27;;
       }
 
       certificateFn(output.raw[prop], prop);
@@ -1675,6 +1675,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
     self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
     self._peerEndOfCandidatesCounter[peerId].len = 0;
     self._sendChannelMessage(restartMsg);
+    self._handleNegotiationStats(&#x27;restart&#x27;, peerId, restartMsg, false);
     self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === &#x27;function&#x27;) {
@@ -1778,6 +1779,7 @@ Skylink.prototype._removePeer = function(peerId) {
         }
         if (!this._peerConnections[peerId].iceConnectionStateClosed) {
           this._peerConnections[peerId].iceConnectionStateClosed = true;
+          this._handleIceConnectionStats(this.ICE_CONNECTION_STATE.CLOSED, peerId);
           this._trigger(&#x27;iceConnectionState&#x27;, this.ICE_CONNECTION_STATE.CLOSED, peerId);
         }
       }
@@ -1965,9 +1967,9 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
 
     var peerSettings = clone(self.getPeerInfo(targetMid).settings);
-    
+
     self._streamsSession[targetMid][pc.remoteStreamId] = peerSettings;
-    
+
     if (stream.getAudioTracks().length === 0) {
       self._streamsSession[targetMid][pc.remoteStreamId].audio = false;
     }
@@ -1986,6 +1988,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     self._onIceCandidate(targetMid, event.candidate || event);
   };
 
+  var statsInterval = null;
   pc.oniceconnectionstatechange = function(evt) {
     var iceConnectionState = pc.iceConnectionState;
 
@@ -2002,12 +2005,14 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     if (AdapterJS.webrtcDetectedType === &#x27;AppleWebKit&#x27; &amp;&amp; iceConnectionState === self.ICE_CONNECTION_STATE.CLOSED) {
       setTimeout(function () {
         if (!pc.iceConnectionStateClosed) {
+          self._handleIceConnectionStats(self.ICE_CONNECTION_STATE.CLOSED, targetMid);
           self._trigger(&#x27;iceConnectionState&#x27;, self.ICE_CONNECTION_STATE.CLOSED, targetMid);
         }
       }, 10);
       return;
     }
 
+    self._handleIceConnectionStats(pc.iceConnectionState, targetMid);
     self._trigger(&#x27;iceConnectionState&#x27;, iceConnectionState, targetMid);
 
     if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED &amp;&amp; self._initOptions.enableIceTrickle) {
@@ -2017,6 +2022,21 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     if (self._peerConnStatus[targetMid]) {
       self._peerConnStatus[targetMid].connected = [self.ICE_CONNECTION_STATE.COMPLETED,
         self.ICE_CONNECTION_STATE.CONNECTED].indexOf(iceConnectionState) &gt; -1;
+    }
+
+    if (!statsInterval &amp;&amp; [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(iceConnectionState) &gt; -1) {
+      statsInterval = true;
+
+      // Do an initial getConnectionStatus() to backfill the first retrieval in order to do (currentTotalStats - lastTotalStats).
+      self.getConnectionStatus(targetMid, function () {
+        statsInterval = setInterval(function () {
+          if (!(self._peerConnections[targetMid] &amp;&amp; self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+            clearInterval(statsInterval);
+            return;
+          }
+          self._handleBandwidthStats(targetMid);
+        }, 20000);
+      });
     }
 
     if (!self._hasMCU &amp;&amp; [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
@@ -2085,7 +2105,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
   pc.onsignalingstatechange = function() {
     log.debug([targetMid, &#x27;RTCSignalingState&#x27;, null, &#x27;Peer connection state changed -&gt;&#x27;], pc.signalingState);
-    
+
     if (AdapterJS.webrtcDetectedType === &#x27;AppleWebKit&#x27; &amp;&amp; pc.signalingState === self.PEER_CONNECTION_STATE.CLOSED) {
       setTimeout(function () {
         if (!pc.signalingStateClosed) {
@@ -2116,6 +2136,8 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     };
   }
 
+  self._handleIceConnectionStats(pc.iceConnectionState, targetMid);
+  self._handleIceGatheringStats(&#x27;new&#x27;, targetMid, false);
   return pc;
 };
 
@@ -2170,6 +2192,7 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
     log.log([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Sending restart message to signaling server -&gt;&#x27;], restartMsg);
 
     self._sendChannelMessage(restartMsg);
+    self._handleNegotiationStats(&#x27;restart&#x27;, peerId, restartMsg, false);
   };
 
   // Toggle the main bandwidth options.
@@ -2315,7 +2338,9 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
   // If it has not been set yet
     !self._peerEndOfCandidatesCounter[targetMid].hasSet) {
     log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Signaling of end-of-candidates remote ICE gathering.&#x27;]);
+
     self._peerEndOfCandidatesCounter[targetMid].hasSet = true;
+
     try {
       if (AdapterJS.webrtcDetectedBrowser === &#x27;edge&#x27;) {
         var mLineCounter = -1;

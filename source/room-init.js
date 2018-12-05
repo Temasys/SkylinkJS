@@ -41,6 +41,10 @@ Skylink.prototype.generateUUID = function() {
  *   <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
  * @param {Boolean} [options.enableIceTrickle=true] The flag if Peer connections should
  *   trickle ICE for faster connectivity.
+ * @param {Boolean} [options.enableStatsGathering=true] Configure the anonymous performance and connectivity statistic collection function.
+ *   Temasys collects encrypted, anonymous performance and connectivity statistics to allow us to improve performance for our customers and identify regional or ISP specific connectivity issues.
+ *   This data does not contain any personal information or session content.
+ *   To enable the configuration of this option, you need to "Collect Quality Statistics" option on the Temasys console Website under App key settings section. The default behavior for this option if not specifically configured is true.
  * @param {Boolean} [options.enableDataChannel=true] <blockquote class="info">
  *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
  *   </blockquote> The flag if Datachannel connections should be enabled.
@@ -441,6 +445,9 @@ Skylink.prototype.init = function(_options, _callback) {
   // `init({ roomServer: "//server.temasys.io" })`
   options.roomServer = options.roomServer && typeof options.roomServer === 'string' ? options.roomServer : '//api.temasys.io';
 
+  // `init({ statsServer: "//server.temasys.io" })`
+  options.statsServer = options.statsServer && typeof options.statsServer === 'string' ? options.statsServer : '//api.temasys.io';
+
   // `init({ enableIceTrickle: true })`
   options.enableIceTrickle = options.enableIceTrickle !== false;
 
@@ -458,6 +465,9 @@ Skylink.prototype.init = function(_options, _callback) {
 
   // `init({ forceSSL: true })`
   options.forceSSL = options.forceSSL !== false;
+
+  // `init({ enableStatsGathering: true })`
+  options.enableStatsGathering = options.enableStatsGathering !== false;
 
   // `init({ socketTimeout: 20000 })`
   options.socketTimeout = typeof options.socketTimeout === 'number' && options.socketTimeout >= 5000 ? options.socketTimeout : 7000;
@@ -915,6 +925,10 @@ Skylink.prototype._parseInfo = function(info) {
   this._autoIntroduce = info.autoIntroduce;
   this._hasMCU = info.hasMCU;
 
+  if(!info.enable_stats_config){
+    this._initOptions.enableStatsGathering = false;
+  }
+
   this._user = {
     uid: info.username,
     token: info.userCred,
@@ -1088,8 +1102,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   options.iceServer = options.iceServer ? options.iceServer.urls : null;
 
   if(options.defaultRoom!==room){
-    options.defaultRoom = room;
-  }
+    options.defaultRoom = room;
+  }
 
   self.init(options, function (error, success) {
     self._initOptions.defaultRoom = defaultRoom;

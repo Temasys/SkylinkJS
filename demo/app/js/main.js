@@ -337,7 +337,7 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
     peerElm.className = 'col-md-6 peervideo';
 
     peerVideo = document.createElement('video');
-    peerVideo.className = 'video-obj';
+    peerVideo.className = 'video-obj col-md-12';
     peerVideo.muted = isSelf;
     peerVideo.autoplay = true;
     peerVideo.controls = true;
@@ -350,15 +350,16 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
     $('#peer_video_list').append(peerElm);
     $(peerElm).append(peerVideo);
     $(peerElm).append('<div class="connstats-wrapper"><button class="toggle-connstats" data="' + (isSelf ? 'MCU' : peerId) +
-      '">See ' + (isSelf ? 'MCU ' : '') + 'Stats</button><div class="row connstats">' +
-      '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
-        '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
-      '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
-        '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
-      '<div class="candidate row"><b class="col-md-12">Selected Candidate</b><p class="col-md-6">Local: <span class="local"></span></p>' +
-        '<p class="col-md-6">Remote: <span class="remote"></span></p></div>' +
-      '<div class="certificate row"><b class="col-md-12">Certificates</b><p class="col-md-6"><span class="certleft"></span></p>' +
-        '<p class="col-md-6"><span class="certright"></span></p></div></div></div>');
+    '">See ' + (isSelf ? 'MCU ' : '') + 'Stats</button><div class="row connstats">' +
+    '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
+      '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
+    '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
+      '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
+    '<div class="candidate row"><b class="col-md-12">Selected Candidate</b><p class="col-md-6">Local: <span class="local"></span></p>' +
+      '<p class="col-md-6">Remote: <span class="remote"></span></p></div>' +
+    '<div class="certificate row"><b class="col-md-12">Certificates</b><p class="col-md-6"><span class="certleft"></span></p>' +
+      '<p class="col-md-6"><span class="certright"></span></p></div></div></div>');
+
 
     setTimeout(function () {
       peerVideo.removeAttribute('controls');

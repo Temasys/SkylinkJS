@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -124,21 +124,6 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
     dataChannel = null;
   }
 
-  if (!dataChannel) {
-    try {
-      dataChannel = self._peerConnections[peerId].createDataChannel(channelName, {
-        reliable: true,
-        ordered: true
-      });
-
-    } catch (error) {
-      log.error([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Failed creating Datachannel -&gt;&#x27;], error);
-      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CREATE_ERROR, peerId, error, channelName,
-        channelType, null, self._getDataChannelBuffer(dataChannel));
-      return;
-    }
-  }
-
   if (!self._dataChannels[peerId]) {
     channelProp = &#x27;main&#x27;;
     channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
@@ -149,6 +134,22 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
     channelType = self.DATA_CHANNEL_TYPE.MESSAGING;
   }
 
+  if (!dataChannel) {
+    try {
+      dataChannel = self._peerConnections[peerId].createDataChannel(channelName, {
+        reliable: true,
+        ordered: true
+      });
+
+    } catch (error) {
+      log.error([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Failed creating Datachannel -&gt;&#x27;], error);
+      self._handleDatachannelStats(&#x27;error&#x27;, peerId, { label: channelName }, channelProp, error);
+      self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CREATE_ERROR, peerId, error, channelName,
+        channelType, null, self._getDataChannelBuffer(dataChannel));
+      return;
+    }
+  }
+
   /**
    * Subscribe to events
    */
@@ -157,6 +158,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
 
     log.error([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Datachannel has an exception -&gt;&#x27;], channelError);
 
+    self._handleDatachannelStats(&#x27;error&#x27;, peerId, dataChannel, channelProp, channelError);
     self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.ERROR, peerId, channelError, channelName,
       channelType, null, self._getDataChannelBuffer(dataChannel));
   };
@@ -180,6 +182,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
 
     dataChannel.bufferedAmountLowThreshold = bufferThreshold || 0;
 
+    self._handleDatachannelStats(&#x27;open&#x27;, peerId, dataChannel, channelProp);
     self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.OPEN, peerId, null, channelName,
       channelType, null, self._getDataChannelBuffer(dataChannel));
   };
@@ -188,6 +191,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
     setTimeout(onOpenHandlerFn, 1); // 500);
 
   } else {
+    self._handleDatachannelStats(&#x27;connecting&#x27;, peerId, dataChannel, channelProp);
     self._trigger(&#x27;dataChannelState&#x27;, dataChannel.readyState, peerId, null, channelName,
       channelType, null, self._getDataChannelBuffer(dataChannel));
 
@@ -208,6 +212,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
     var transferId = getTransferIDByPeerId(peerId);
     log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, dcMessageStr]);
 
+    self._handleDatachannelStats(&#x27;closed&#x27;, peerId, dataChannel, channelProp);
     self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSED, peerId, null, channelName,
       channelType, null, self._getDataChannelBuffer(dataChannel));
 
@@ -227,6 +232,7 @@ Skylink.prototype._createDataChannel = function(peerId, dataChannel, bufferThres
           (self._peerConnections[peerId].localDescription &amp;&amp;
           self._peerConnections[peerId].localDescription.type === self.HANDSHAKE_PROGRESS.OFFER)) {
           log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Reviving Datachannel connection&#x27;]);
+          self._handleDatachannelStats(&#x27;reconnecting&#x27;, peerId, { label: channelName }, &#x27;main&#x27;);
           self._createDataChannel(peerId, channelName, bufferThreshold, true);
         }
       }, 100);
@@ -465,6 +471,7 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp, isCloseMainC
     if (self._dataChannels[peerId][rChannelProp].readyState !== self.DATA_CHANNEL_STATE.CLOSED) {
       log.debug([peerId, &#x27;RTCDataChannel&#x27;, channelProp, &#x27;Closing Datachannel&#x27;]);
 
+      self._handleDatachannelStats(&#x27;closing&#x27;, peerId, self._dataChannels[peerId][rChannelProp].channel, rChannelProp);
       self._trigger(&#x27;dataChannelState&#x27;, self.DATA_CHANNEL_STATE.CLOSING, peerId, null, channelName, channelType,
         null, self._getDataChannelBuffer(peerId, rChannelProp));
 
@@ -479,7 +486,7 @@ Skylink.prototype._closeDataChannel = function(peerId, channelProp, isCloseMainC
     closeFn(channelProp);
   }
   else if (!channelProp || channelProp === &#x27;main&#x27;) {
-    for (var channelNameProp in self._dataChannels) {
+    for (var channelNameProp in self._dataChannels[peerId]) {
       if (self._dataChannels[peerId].hasOwnProperty(channelNameProp)) {
         if (self._dataChannels[peerId][channelNameProp]) {
           closeFn(channelNameProp);

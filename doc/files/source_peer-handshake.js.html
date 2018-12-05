@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -148,12 +148,14 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
 
   var onSuccessCbFn = function(offer) {
     log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
+    self._handleNegotiationStats(&#x27;create_offer&#x27;, targetMid, offer, false);
     self._setLocalAndSendMessage(targetMid, offer);
   };
 
   var onErrorCbFn = function(error) {
-    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
     log.error([targetMid, null, null, &#x27;Failed creating an offer:&#x27;], error);
+    self._handleNegotiationStats(&#x27;error_create_offer&#x27;, targetMid, null, false, error);
+    self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
   pc.createOffer(onSuccessCbFn, onErrorCbFn, AdapterJS.webrtcDetectedType === &#x27;plugin&#x27; ? {
@@ -214,11 +216,13 @@ Skylink.prototype._doAnswer = function(targetMid) {
 
   var onSuccessCbFn = function(answer) {
     log.debug([targetMid, null, null, &#x27;Created answer&#x27;], answer);
+    self._handleNegotiationStats(&#x27;create_answer&#x27;, targetMid, answer, false);
     self._setLocalAndSendMessage(targetMid, answer);
   };
 
   var onErrorCbFn = function(error) {
     log.error([targetMid, null, null, &#x27;Failed creating an answer:&#x27;], error);
+    self._handleNegotiationStats(&#x27;error_create_answer&#x27;, targetMid, null, false, error);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
@@ -250,12 +254,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   if (!pc) {
     log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type,
       &#x27;Local session description will not be set as connection does not exists -&gt;&#x27;], _sessionDescription);
+    self._handleNegotiationStats(&#x27;dropped_&#x27; + sessionDescription.type, targetMid, sessionDescription, false, &#x27;Peer connection does not exists&#x27;);
     return;
 
   } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &amp;&amp;
     pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type, &#x27;Local session description &#x27; +
       &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], _sessionDescription);
+    self._handleNegotiationStats(&#x27;dropped_offer&#x27;, targetMid, sessionDescription, false, &#x27;Peer connection state is &quot;&#x27; + pc.signalingState + &#x27;&quot;&#x27;);
     return;
 
   // Added checks to ensure that state is &quot;have-remote-offer&quot; if setting local &quot;answer&quot;
@@ -263,12 +269,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
     log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type, &#x27;Local session description &#x27; +
       &#x27;will not be set as signaling state is &quot;&#x27; + pc.signalingState + &#x27;&quot; -&gt;&#x27;], _sessionDescription);
+    self._handleNegotiationStats(&#x27;dropped_answer&#x27;, targetMid, sessionDescription, false, &#x27;Peer connection state is &quot;&#x27; + pc.signalingState + &#x27;&quot;&#x27;);
     return;
 
   // Added checks if there is a current local sessionDescription being processing before processing this one
   } else if (pc.processingLocalSDP) {
     log.warn([targetMid, &#x27;RTCSessionDescription&#x27;, _sessionDescription.type,
       &#x27;Local session description will not be set as another is being processed -&gt;&#x27;], _sessionDescription);
+    self._handleNegotiationStats(&#x27;dropped_&#x27; + sessionDescription.type, targetMid, sessionDescription, false, &#x27;Peer connection is currently processing an existing sdp&#x27;);
     return;
   }
 
@@ -286,6 +294,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, &#x27;local&#x27;);
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
 
   if (self._peerConnectionConfig.disableBundle) {
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=group:BUNDLE.*\r\n/gi, &#x27;&#x27;);
@@ -300,6 +309,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     pc.processingLocalSDP = false;
 
+    self._handleNegotiationStats(&#x27;set_&#x27; + sessionDescription.type, targetMid, sessionDescription, false);
     self._trigger(&#x27;handshakeProgress&#x27;, sessionDescription.type, targetMid);
 
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.ANSWER) {
@@ -322,6 +332,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
     });
+    self._handleNegotiationStats(sessionDescription.type, targetMid, sessionDescription, false);
   };
 
   var onErrorCbFn = function(error) {
@@ -329,6 +340,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     pc.processingLocalSDP = false;
 
+    self._handleNegotiationStats(&#x27;error_set_&#x27; + sessionDescription.type, targetMid, sessionDescription, false, error);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 

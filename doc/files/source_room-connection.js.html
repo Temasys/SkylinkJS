@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -512,7 +512,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           self.once(&#x27;channelClose&#x27;, peerSocketFailedJoin);
         }
 
-        self._sendChannelMessage({
+        var joinRoomMsg = {
           type: self._SIG_MESSAGE_TYPE.JOIN_ROOM,
           uid: self._user.uid,
           cid: self._key,
@@ -526,7 +526,10 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           isPrivileged: self._isPrivileged === true, // Default to false if undefined
           autoIntroduce: self._autoIntroduce !== false, // Default to true if undefined
           key: self._initOptions.appKey
-        });
+        };
+
+        self._sendChannelMessage(joinRoomMsg);
+        self._handleSessionStats(joinRoomMsg);
       });
     });
   };
@@ -547,7 +550,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
 
   self._joinRoomManager.socketsFn = [];
 
-  var stopStream = mediaOptions.audio === false &amp;&amp; mediaOptions.video === false;  
+  var stopStream = mediaOptions.audio === false &amp;&amp; mediaOptions.video === false;
 
   if (self._inRoom) {
     self.leaveRoom({

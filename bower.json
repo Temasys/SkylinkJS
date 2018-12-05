@@ -1,7 +1,7 @@
 {
   "name": "skylinkjs",
   "description": "WebRTC real-time video conversation library",
-  "version": "0.6.34",
+  "version": "0.6.36",
   "homepage": "https://temasys.io",
   "author": {
     "name": "Temasys Communications Pte. Ltd.",
