@@ -306,19 +306,9 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
       '<td><span class="name">' + peerInfo.userData + '</span><br>' +
       '<input class="select-user" target="' + peerId + '" type="checkbox" onclick="selectTargetPeer(this);"></td><td>';
-    var titleList = [
-      'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
-      'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
-      'Peer Connection state', 'Data Channel Connection state',
-      'MediaStream: Video', 'MediaStream: Audio'
-    ];
-    var glyphiconList = [
-      'glyphicon-log-in', 'glyphicon-hand-right', 'glyphicon-hand-left',
-      'glyphicon-thumbs-up', 'glyphicon-flash', 'glyphicon-magnet',
-      'glyphicon-user', 'glyphicon-transfer', 'glyphicon-facetime-video video',
-      'glyphicon-volume-up audio'
-    ];
-    for (var i = 0; i < 10; i++) {
+    var titleList = ['Joined Room', 'MediaStream: Video', 'MediaStream: Audio'];
+    var glyphiconList = ['glyphicon-log-in', 'glyphicon-facetime-video video', 'glyphicon-volume-up audio'];
+    for (var i = 0; i < 3; i++) {
       newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
         i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
     }
@@ -337,7 +327,7 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
     peerElm.className = 'col-md-6 peervideo';
 
     peerVideo = document.createElement('video');
-    peerVideo.className = 'video-obj';
+    peerVideo.className = 'video-obj col-md-12';
     peerVideo.muted = isSelf;
     peerVideo.autoplay = true;
     peerVideo.controls = true;
@@ -350,15 +340,16 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
     $('#peer_video_list').append(peerElm);
     $(peerElm).append(peerVideo);
     $(peerElm).append('<div class="connstats-wrapper"><button class="toggle-connstats" data="' + (isSelf ? 'MCU' : peerId) +
-      '">See ' + (isSelf ? 'MCU ' : '') + 'Stats</button><div class="row connstats">' +
-      '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
-        '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
-      '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
-        '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
-      '<div class="candidate row"><b class="col-md-12">Selected Candidate</b><p class="col-md-6">Local: <span class="local"></span></p>' +
-        '<p class="col-md-6">Remote: <span class="remote"></span></p></div>' +
-      '<div class="certificate row"><b class="col-md-12">Certificates</b><p class="col-md-6"><span class="certleft"></span></p>' +
-        '<p class="col-md-6"><span class="certright"></span></p></div></div></div>');
+    '">See ' + (isSelf ? 'MCU ' : '') + 'Stats</button><div class="row connstats">' +
+    '<div class="audio row"><b class="col-md-12">Audio</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
+      '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
+    '<div class="video row"><b class="col-md-12">Video</b><p class="col-md-6">Uploading: <span class="upload"></span></p>' +
+      '<p class="col-md-6">Downloading: <span class="download"></span></p></div>' +
+    '<div class="candidate row"><b class="col-md-12">Selected Candidate</b><p class="col-md-6">Local: <span class="local"></span></p>' +
+      '<p class="col-md-6">Remote: <span class="remote"></span></p></div>' +
+    '<div class="certificate row"><b class="col-md-12">Certificates</b><p class="col-md-6"><span class="certleft"></span></p>' +
+      '<p class="col-md-6"><span class="certright"></span></p></div></div></div>');
+
 
     setTimeout(function () {
       peerVideo.removeAttribute('controls');

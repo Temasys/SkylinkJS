@@ -1,0 +1,556 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <!-- font and icon -->
+    <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
+    <link rel="stylesheet" href="../assets/vendor/prettify/prettify-min.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Sans+Pro" type="text/css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,600,700|Source+Code+Pro" type="text/css">
+    <!-- styling -->
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap.min.css">
+    <link rel="stylesheet" href="../assets/vendor/css/bootstrap-theme.min.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.2.0/css/font-awesome.min.css" rel="stylesheet" type="text/css">
+    <link rel="stylesheet" href="../assets/css/style.css">
+    <!-- scripts -->
+    <script src="../assets/vendor/js/jquery.min.js"></script>
+    <script src="../assets/vendor/js/bootstrap.min.js"></script>
+    <script src="../assets/js/script.js"></script>
+    <script src="http://yui.yahooapis.com/combo?3.9.1/build/yui/yui-min.js"></script>
+</head>
+<body>
+
+<div id="doc">
+  <nav id="hd" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+    <div class="container">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        <a href="" class="navbar-brand">
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
+        </a>
+      </div>
+      <div id="navbar" class="navbar-collapse collapse">
+        <ul id="api-list" class="nav navbar-nav navbar-right">
+  <li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Getting Started Examples <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="https://temasys.io/getting-started-with-webrtc-and-skylinkjs/">Setting up a Video Call</a></li>
+      <li><a href="https://temasys.io/screensharing-with-skylinkjs/">Setting up Screensharing</a></li>
+      <li><a href="https://temasys.io/building-a-simple-peer-to-peer-webrtc-chat/">Setting up a Chatroom</a></li>
+    </ul>
+  </li>
+  
+    <li><a href="../classes/Skylink.html">Documentation</a></li>
+  
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Classes <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      
+        <li><a href="../classes/Skylink.html">Skylink</a></li>
+      
+    </ul>
+  </li>-->
+  <li><a class="btn btn-info btn-navbar" href="https://console.temasys.io/">Developer Console</a></li>
+  <li><a class="btn btn-info btn-navbar" href="http://support.temasys.io/">Support</a></li>
+  <!--<li class="dropdown">
+    <a href="#" class="dropdown-toggle" data-toggle="dropdown">Modules <span class="caret"></span></a>
+    <ul class="dropdown-menu" role="menu">
+      <li><a href="#api-modules">View all Modules</a></li>
+      
+    </ul>
+  </li>-->
+</ul>
+<!--<form id="api-tabview" class="navbar-form navbar-right" role="form">
+  <div id="api-tabview-filter" class="form-group">
+    <input type="search" id="api-filter" placeholder="Type to filter APIs">
+  </div>
+</form>-->
+      </div><!--/.navbar-collapse -->
+    </div>
+  </nav>
+  <div id="bd" class="yui3-g">
+
+      <div class="yui3-u-1-4">
+
+      </div>
+      <div class="yui3-u-3-4">
+          
+          <div class="apidocs">
+              <div id="docs-main">
+                  <div class="content content-main">
+                      <h1 class="file-heading">File: source/skylink-stats.js</h1>
+
+<div class="file">
+    <pre class="code prettyprint linenums">
+/**
+ * Function that sends the stats to the API server.
+ * @method _postStatsToServer
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._postStats = function (endpoint, params) {
+  var self = this;
+  var requestBody = {};
+  if(self._initOptions.enableStatsGathering){
+    if(Array.isArray(params)){
+      requestBody.data = params;
+    }
+    else{
+      requestBody = params;
+    }
+    requestBody.client_id = ((self._user &amp;&amp; self._user.uid) || &#x27;dummy&#x27;) + &#x27;_&#x27; + self._statIdRandom;
+    requestBody.app_key = self._initOptions.appKey;
+    requestBody.timestamp = (new Date()).toISOString();
+
+    // Simply post the data directly to the API server without caring if it is successful or not.
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.onerror = function () { };
+      xhr.open(&#x27;POST&#x27;,  self._initOptions.statsServer + endpoint, true);
+      xhr.setRequestHeader(&#x27;Content-Type&#x27;, &#x27;application/json;charset=UTF-8&#x27;);
+      xhr.send(JSON.stringify(requestBody));
+
+    } catch (error) {
+      log.error([null, &#x27;XMLHttpRequest&#x27;, &quot;POST&quot;, &#x27;Error in posting stats data -&gt;&#x27;], error);
+    }
+  }
+};
+
+/**
+ * Function that handles the posting of client information.
+ * @method _handleClientStats
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleClientStats = function() {
+  var self = this;
+  var statsObject = {
+    username: (self._user &amp;&amp; self._user.uid) || null,
+    sdk_name: &#x27;web&#x27;,
+    sdk_version: self.VERSION,
+    agent_name: AdapterJS.webrtcDetectedBrowser,
+    agent_version: AdapterJS.webrtcDetectedVersion,
+    agent_platform: navigator.platform,
+    agent_plugin_version: (AdapterJS.WebRTCPlugin.plugin &amp;&amp; AdapterJS.WebRTCPlugin.plugin.VERSION) || null
+  };
+
+  self._postStats(&#x27;/rest/stats/client&#x27;, statsObject);
+};
+
+/**
+ * Function that handles the posting of session states.
+ * @method _handleSessionStats
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleSessionStats = function(message) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room &amp;&amp; self._room.id,
+    user_id: (self._user &amp;&amp; self._user.sid) || null,
+    state: message.type,
+    contents: message
+  };
+
+  self._postStats(&#x27;/rest/stats/session&#x27;, statsObject);
+};
+
+/**
+ * Function that handles the posting of app key authentication states.
+ * @method _handleAuthStats
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleAuthStats = function(state, result, status, error) {
+  var self = this;
+  var statsObject = {
+    room_id: (result &amp;&amp; result.room_key) || null,
+    state: state,
+    http_status: status,
+    http_error: (typeof error === &#x27;string&#x27; ? error : (error &amp;&amp; error.message)) || null,
+    api_url: self._path,
+    api_result: result
+  };
+
+  self._postStats(&#x27;/rest/stats/auth&#x27;, statsObject);
+};
+
+/**
+ * Function that handles the posting of socket connection states.
+ * @method _handleSignalingStats
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleSignalingStats = function(state, retries, error) {
+  var self = this;
+  var socketSession = clone(self._socketSession);
+  var statsObject = {
+    room_id: self._room &amp;&amp; self._room.id,
+    user_id: (self._user &amp;&amp; self._user.sid) || null,
+    state: state,
+    signaling_url: socketSession.socketServer,
+    signaling_transport: socketSession.transportType.toLowerCase(),
+    // Use the retries from the function itself to prevent non-sequential event calls issues.
+    attempts: retries,
+    error: (typeof error === &#x27;string&#x27; ? error : (error &amp;&amp; error.message)) || null
+  };
+
+  self._postStats(&#x27;/rest/stats/client/signaling&#x27;, statsObject);
+};
+
+/**
+ * Function that handles the posting of peer ICE connection states.
+ * @method _handleIceConnectionStats
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleIceConnectionStats = function(state, peerId) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room &amp;&amp; self._room.id,
+    user_id: self._user &amp;&amp; self._user.sid,
+    peer_id: peerId,
+    state: state,
+    local_candidate: {},
+    remote_candidate: {}
+  };
+  // Set a timeout to pause process to ensure the stats retrieval does not run at the same time
+  // when the state is triggered, so that the selected ICE candidate pair information can be returned.
+    self._retrieveStats(peerId, function (error, stats) {
+      if (stats) {
+        // Parse the selected ICE candidate pair for both local and remote candidate.
+        [&#x27;local&#x27;, &#x27;remote&#x27;].forEach(function (dirType) {
+          var candidate = stats.selectedCandidate[dirType];
+
+          if (candidate) {
+            statsObject[dirType + &#x27;_candidate&#x27;].ip_address = candidate.ipAddress || null;
+            statsObject[dirType + &#x27;_candidate&#x27;].port_number = candidate.portNumber || null;
+            statsObject[dirType + &#x27;_candidate&#x27;].candidate_type = candidate.candidateType || null;
+            statsObject[dirType + &#x27;_candidate&#x27;].protocol = candidate.transport || null;
+            statsObject[dirType + &#x27;_candidate&#x27;].priority = candidate.priority || null;
+
+            // This is only available for the local ICE candidate.
+            if (dirType === &#x27;local&#x27;) {
+              statsObject.local_candidate.network_type = candidate.networkType || null;
+            }
+          }
+        });
+      }
+      self._postStats(&#x27;/rest/stats/client/iceconnection&#x27;, statsObject);
+
+    }, true);
+};
+
+/**
+ * Function that handles the posting of peer local/remote ICE candidate processing states.
+ * @method _handleIceCandidateStats
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleIceCandidateStats = function(state, peerId, candidateId, candidate, error) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room &amp;&amp; self._room.id,
+    user_id: self._user &amp;&amp; self._user.sid,
+    peer_id: peerId,
+    state: state,
+    is_remote: !!candidateId,
+    candidate_id: candidateId || null,
+    candidate_sdp_mid: candidate.sdpMid,
+    candidate_sdp_mindex: candidate.sdpMLineIndex,
+    candidate_candidate: candidate.candidate,
+    error: (typeof error === &#x27;string&#x27; ? error : (error &amp;&amp; error.message)) || null,
+  };
+  self._manageStatsBuffer(&#x27;iceCandidate&#x27;, statsObject, &#x27;/rest/stats/client/icecandidate&#x27;);
+};
+
+/**
+ * Function that handles the posting of peer local/remote ICE gathering states.
+ * @method _handleIceGatheringStats
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleIceGatheringStats = function(state, peerId, isRemote) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room &amp;&amp; self._room.id,
+    user_id: self._user &amp;&amp; self._user.sid,
+    peer_id: peerId,
+    state: state,
+    is_remote: isRemote
+  };
+  self._manageStatsBuffer(&#x27;iceGathering&#x27;, statsObject, &#x27;/rest/stats/client/icegathering&#x27;);
+};
+
+/**
+ * Function that handles the posting of peer connection negotiation states.
+ * @method _handleNegotiationStats
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleNegotiationStats = function(state, peerId, sdpOrMessage, isRemote, error) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room &amp;&amp; self._room.id,
+    user_id: self._user &amp;&amp; self._user.sid,
+    peer_id: peerId,
+    state: state,
+    is_remote: isRemote,
+    // Currently sharing a parameter &quot;sdpOrMessage&quot; that indicates a &quot;welcome&quot; message
+    // or session description to save parameters length.
+    weight: sdpOrMessage.weight,
+    sdp_type: null,
+    sdp_sdp: null,
+    error: (typeof error === &#x27;string&#x27; ? error : (error &amp;&amp; error.message)) || null,
+  };
+
+  // Retrieve the weight for states where the &quot;weight&quot; field is not available.
+  if ([&#x27;enter&#x27;, &#x27;welcome&#x27;, &#x27;restart&#x27;].indexOf(state) === -1) {
+    // Retrieve the peer&#x27;s weight if it from remote end.
+    statsObject.weight = self.getPeerInfo(isRemote ? peerId : undefined).config.priorityWeight;
+    statsObject.sdp_type = (sdpOrMessage &amp;&amp; sdpOrMessage.type) || null;
+    statsObject.sdp_sdp = (sdpOrMessage &amp;&amp; sdpOrMessage.sdp) || null;
+  }
+  self._manageStatsBuffer(&#x27;negotiation&#x27;, statsObject, &#x27;/rest/stats/client/negotiation&#x27;);
+};
+
+/**
+ * Function that handles the posting of peer connection bandwidth information.
+ * @method _handleBandwidthStats
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleBandwidthStats = function (peerId) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room &amp;&amp; self._room.id,
+    user_id: self._user &amp;&amp; self._user.sid,
+    peer_id: peerId,
+    audio_send: { tracks: [] },
+    audio_recv: {},
+    video_send: { tracks: [] },
+    video_recv: {}
+  };
+
+  var useStream = self._streams.screenshare || self._streams.userMedia || null;
+  var mutedStatus = self.getPeerInfo().mediaStatus;
+
+  // When stream is available, format the stream tracks information.
+  // The SDK currently only allows sending of 1 stream at a time that has only 1 audio and video track each.
+  if (useStream) {
+    // Parse the audio track if it exists only.
+    if (useStream.tracks.audio) {
+      statsObject.audio_send.tracks = [{
+        stream_id: useStream.id,
+        id: useStream.tracks.audio.id,
+        label: useStream.tracks.audio.label,
+        muted: mutedStatus.audioMuted
+      }];
+    }
+
+    // Parse the video track if it exists only.
+    if (useStream.tracks.video) {
+      statsObject.video_send.tracks = [{
+        stream_id: useStream.id,
+        id: useStream.tracks.video.id,
+        label: useStream.tracks.video.label,
+        height: useStream.tracks.video.height,
+        width: useStream.tracks.video.width,
+        muted: mutedStatus.videoMuted
+      }];
+    }
+  }
+
+  self._retrieveStats(peerId, function (error, stats) {
+    if (error) {
+      statsObject.error = error &amp;&amp; error.message;
+      stats = {
+        audio: { sending: {}, receiving: {} },
+        video: { sending: {}, receiving: {} }
+      };
+    }
+
+    // Common function to parse and handle any &#x60;null&#x60;/&#x60;undefined&#x60; values.
+    var formatValue = function (mediaType, directionType, itemKey) {
+      var value = stats[mediaType][directionType === &#x27;send&#x27; ? &#x27;sending&#x27; : &#x27;receiving&#x27;][itemKey];
+      if ([&#x27;number&#x27;, &#x27;string&#x27;, &#x27;boolean&#x27;].indexOf(typeof value) &gt; -1) {
+        return value;
+      }
+      return null;
+    };
+
+    // Parse bandwidth information for sending audio packets.
+    statsObject.audio_send.bytes = formatValue(&#x27;audio&#x27;, &#x27;send&#x27;, &#x27;bytes&#x27;);
+    statsObject.audio_send.packets = formatValue(&#x27;audio&#x27;, &#x27;send&#x27;, &#x27;packets&#x27;);
+    statsObject.audio_send.round_trip_time = formatValue(&#x27;audio&#x27;, &#x27;send&#x27;, &#x27;rtt&#x27;);
+    statsObject.audio_send.nack_count = formatValue(&#x27;audio&#x27;, &#x27;send&#x27;, &#x27;nacks&#x27;);
+    statsObject.audio_send.echo_return_loss = formatValue(&#x27;audio&#x27;, &#x27;send&#x27;, &#x27;echoReturnLoss&#x27;);
+    statsObject.audio_send.echo_return_loss_enhancement = formatValue(&#x27;audio&#x27;, &#x27;send&#x27;, &#x27;echoReturnLossEnhancement&#x27;);
+
+    // Parse bandwidth information for receiving audio packets.
+    statsObject.audio_recv.bytes = formatValue(&#x27;audio&#x27;, &#x27;recv&#x27;, &#x27;bytes&#x27;);
+    statsObject.audio_recv.packets = formatValue(&#x27;audio&#x27;, &#x27;recv&#x27;, &#x27;packets&#x27;);
+    statsObject.audio_recv.packets_lost = formatValue(&#x27;audio&#x27;, &#x27;recv&#x27;, &#x27;packetsLost&#x27;);
+    statsObject.video_recv.packets_discarded = formatValue(&#x27;audio&#x27;, &#x27;recv&#x27;, &#x27;packetsDiscarded&#x27;);
+    statsObject.audio_recv.jitter = formatValue(&#x27;audio&#x27;, &#x27;recv&#x27;, &#x27;jitter&#x27;);
+    statsObject.audio_recv.nack_count = formatValue(&#x27;audio&#x27;, &#x27;recv&#x27;, &#x27;nacks&#x27;);
+
+    // Parse bandwidth information for sending video packets.
+    statsObject.video_send.bytes = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;bytes&#x27;);
+    statsObject.video_send.packets = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;packets&#x27;);
+    statsObject.video_send.round_trip_time = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;rtt&#x27;);
+    statsObject.video_send.nack_count = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;nacks&#x27;);
+    statsObject.video_send.firs_count = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;firs&#x27;);
+    statsObject.video_send.plis_count = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;plis&#x27;);
+    statsObject.video_send.frames = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;frames&#x27;);
+    statsObject.video_send.frames_encoded = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;framesEncoded&#x27;);
+    statsObject.video_send.frames_dropped = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;framesDropped&#x27;);
+    statsObject.video_send.frame_width = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;frameWidth&#x27;);
+    statsObject.video_send.frame_height = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;frameHeight&#x27;);
+    statsObject.video_send.framerate = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;frameRate&#x27;);
+    statsObject.video_send.framerate_input = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;frameRateInput&#x27;);
+    statsObject.video_send.framerate_encoded = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;frameRateEncoded&#x27;);
+    statsObject.video_send.framerate_mean = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;frameRateMean&#x27;);
+    statsObject.video_send.framerate_std_dev = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;frameRateStdDev&#x27;);
+    statsObject.video_send.cpu_limited_resolution = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;cpuLimitedResolution&#x27;);
+    statsObject.video_send.bandwidth_limited_resolution = formatValue(&#x27;video&#x27;, &#x27;send&#x27;, &#x27;bandwidthLimitedResolution&#x27;);
+
+    // Parse bandwidth information for receiving video packets.
+    statsObject.video_recv.bytes = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;bytes&#x27;);
+    statsObject.video_recv.packets = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;packets&#x27;);
+    statsObject.video_recv.packets_lost = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;packetsLost&#x27;);
+    statsObject.video_recv.packets_discarded = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;packetsDiscarded&#x27;);
+    statsObject.video_recv.jitter = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;jitter&#x27;);
+    statsObject.video_recv.nack_count = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;nacks&#x27;);
+    statsObject.video_recv.firs_count = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;firs&#x27;);
+    statsObject.video_recv.plis_count = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;plis&#x27;);
+    statsObject.video_recv.frames = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;frames&#x27;);
+    statsObject.video_recv.frames_decoded = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;framesDecoded&#x27;);
+    statsObject.video_recv.frame_width = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;frameWidth&#x27;);
+    statsObject.video_recv.frame_height = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;frameHeight&#x27;);
+    statsObject.video_recv.framerate = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;frameRate&#x27;);
+    statsObject.video_recv.framerate_output = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;frameRateOutput&#x27;);
+    statsObject.video_recv.framerate_decoded = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;frameRateDecoded&#x27;);
+    statsObject.video_recv.framerate_mean = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;frameRateMean&#x27;);
+    statsObject.video_recv.framerate_std_dev = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;frameRateStdDev&#x27;);
+    statsObject.video_recv.qp_sum = formatValue(&#x27;video&#x27;, &#x27;recv&#x27;, &#x27;qpSum&#x27;);
+    self._postStats(&#x27;/rest/stats/client/bandwidth&#x27;, statsObject);
+  }, true);
+};
+
+/**
+ * Function that handles the posting of recording states.
+ * @method _handleRecordingStats
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleRecordingStats = function(state, recordingId, recordings, error) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room &amp;&amp; self._room.id,
+    user_id: self._user &amp;&amp; self._user.sid,
+    state: state,
+    recording_id: recordingId || null,
+    recordings: recordings,
+    error: (typeof error === &#x27;string&#x27; ? error : (error &amp;&amp; error.message)) || null
+  };
+
+  self._postStats(&#x27;/rest/stats/client/recording&#x27;, statsObject);
+};
+
+/**
+ * Function that handles the posting of datachannel states.
+ * @method _handleDatachannelStats
+ * @private
+ * @for Skylink
+ * @since 0.6.31
+ */
+Skylink.prototype._handleDatachannelStats = function(state, peerId, channel, channelProp, error) {
+  var self = this;
+  var statsObject = {
+    room_id: self._room &amp;&amp; self._room.id,
+    user_id: self._user &amp;&amp; self._user.sid,
+    peer_id: peerId,
+    state: state,
+    channel_id: channel &amp;&amp; channel.id,
+    channel_label: channel &amp;&amp; channel.label,
+    channel_type: channelProp === &#x27;main&#x27; ? &#x27;persistent&#x27; : &#x27;temporal&#x27;,
+    channel_binary_type: channel &amp;&amp; channel.binaryType,
+    error: (typeof error === &#x27;string&#x27; ? error : (error &amp;&amp; error.message)) || null
+  };
+
+  if (channel &amp;&amp; AdapterJS.webrtcDetectedType === &#x27;plugin&#x27;) {
+    statsObject.channel_binary_type = &#x27;int8Array&#x27;;
+
+    // For IE 10 and below browsers, binary support is not available.
+    if (AdapterJS.webrtcDetectedBrowser === &#x27;IE&#x27; &amp;&amp; AdapterJS.webrtcDetectedVersion &lt; 11) {
+      statsObject.channel_binary_type = &#x27;none&#x27;;
+    }
+  }
+
+  self._postStats(&#x27;/rest/stats/client/datachannel&#x27;, statsObject);
+};
+
+Skylink.prototype._stats_buffer = {};
+/**
+ * Function that handles buffer of stats data
+ * @method _handleDatachannelStats
+ * @private
+ * @for Skylink
+ * @since 0.6.35
+ */
+Skylink.prototype._manageStatsBuffer = function(operation, data, url){
+  var self = this;
+  if(self._stats_buffer[operation] === undefined){
+    self._stats_buffer[operation] = {};
+    self._stats_buffer[operation].url = url;
+    self._stats_buffer[operation].data = [];
+  }
+  self._stats_buffer[operation].data.push(data);
+  setInterval(function () {
+    for (var key in self._stats_buffer) {
+      if (self._stats_buffer[key][&quot;data&quot;].length &gt; 0) {
+        self._postStats(self._stats_buffer[key][&quot;url&quot;], self._stats_buffer[key][&quot;data&quot;]);
+        self._stats_buffer[key][&quot;data&quot;] = [];
+      }
+    }
+  }, 5000);
+};
+
+    </pre>
+</div>
+
+                  </div>
+              </div>
+          </div>
+      </div>
+  </div>
+</div>
+<script src="../assets/vendor/prettify/prettify-min.js"></script>
+<script>prettyPrint();</script>
+<script src="../assets/js/yui-prettify.js"></script>
+<script src="../assets/../api.js"></script>
+<script src="../assets/js/api-filter.js"></script>
+<script src="../assets/js/api-list.js"></script>
+<script src="../assets/js/api-search.js"></script>
+<script src="../assets/js/apidocs.js"></script>
+</body>
+</html>

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -832,6 +832,17 @@ function Skylink() {
   this._recordings = {};
 
   /**
+   * Stores the list of RTMP Sessions.
+   * @attribute _rtmpSessions
+   * @type JSON
+   * @private
+   * @beta
+   * @for Skylink
+   * @since 0.6.36
+   */
+  this._rtmpSessions = {};
+
+  /**
    * Stores the current active recording session ID.
    * There can only be 1 recording session at a time in a Room
    * @attribute _currentRecordingId
@@ -947,7 +958,17 @@ function Skylink() {
    * @since 0.6.27
    */
   this._initOptions = {};
-  
+
+  /**
+   * Stores the unique random number used for generating the &quot;client_id&quot;.
+   * @attribute _statIdRandom
+   * @type Number
+   * @private
+   * @for Skylink
+   * @since 0.6.31
+   */
+  this._statIdRandom = Date.now() + Math.floor(Math.random() * 100000000);
+
 }
     </pre>
 </div>

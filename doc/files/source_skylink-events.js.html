@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -886,6 +886,21 @@ var _eventsDocs = {
    * @since 0.6.16
    */
   recordingState: [],
+
+  /**
+   * Event triggered when RTMP session state has changed.
+   * @event rtmpState
+   * @param {Number} state The current RTMP session state.
+   *   [Rel: Skylink.RTMP_STATE]
+   * @param {String} rtmpId The rtmp session ID.
+   * @param {Error|String} error The error object.
+   *   &lt;small&gt;Defined only when &lt;code&gt;state&lt;/code&gt; payload is &lt;code&gt;ERROR&lt;/code&gt;.&lt;/small&gt;
+   * @beta
+   * @for Skylink
+   * @since 0.6.36
+   */
+
+  RTMPState: [],
 
   /**
    * Event triggered when &lt;a href=&quot;#method_getConnectionStatus&quot;&gt;&lt;code&gt;getConnectionStatus()&lt;/code&gt; method&lt;/a&gt;

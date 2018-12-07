@@ -1947,7 +1947,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
             return;
           }
           self._handleBandwidthStats(targetMid);
-        }, 10000);
+        }, 20000);
       });
     }
 

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.34 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.34</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -113,6 +113,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       pc.gathering = true;
       pc.gathered = false;
 
+      self._handleIceGatheringStats(&#x27;gathering&#x27;, targetMid, false);
       self._trigger(&#x27;candidateGenerationState&#x27;, self.CANDIDATE_GENERATION_STATE.GATHERING, targetMid);
     }
 
@@ -125,6 +126,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       self._peerConnections[targetMid].localDescription.sdp.indexOf(&#x27;\r\na=mid:&#x27; + candidate.sdpMid + &#x27;\r\n&#x27;) &gt; -1)) {
       log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, candidateType, &#x27;Dropping of sending ICE candidate &#x27; +
         &#x27;end-of-candidates signal or unused ICE candidates to prevent errors -&gt;&#x27;], candidate);
+      self._handleIceCandidateStats(&#x27;dropped&#x27;, targetMid, null, candidate);
       return;
     }
 
@@ -132,6 +134,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       if (!(self._hasMCU &amp;&amp; self._initOptions.forceTURN)) {
         log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, candidateType, &#x27;Dropping of sending ICE candidate as &#x27; +
           &#x27;it matches ICE candidate filtering flag -&gt;&#x27;], candidate);
+        self._handleIceCandidateStats(&#x27;dropped&#x27;, targetMid, null, candidate);
         return;
       }
 
@@ -156,6 +159,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     if (!self._initOptions.enableIceTrickle) {
       log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, candidateType, &#x27;Dropping of sending ICE candidate as &#x27; +
         &#x27;trickle ICE is disabled -&gt;&#x27;], candidate);
+      self._handleIceCandidateStats(&#x27;non_trickle&#x27;, targetMid, null, candidate);
       return;
     }
 
@@ -170,6 +174,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       target: targetMid,
       rid: self._room.id
     });
+    self._handleIceCandidateStats(&#x27;received&#x27;, targetMid, null, candidate);
 
   } else {
     log.log([targetMid, &#x27;RTCIceCandidate&#x27;, null, &#x27;ICE gathering has completed.&#x27;]);
@@ -181,6 +186,7 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
     pc.gathering = false;
     pc.gathered = true;
 
+    self._handleIceGatheringStats(&#x27;complete&#x27;, targetMid, false);
     self._trigger(&#x27;candidateGenerationState&#x27;, self.CANDIDATE_GENERATION_STATE.COMPLETED, targetMid);
 
     // Disable Ice trickle option
@@ -204,15 +210,17 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       });
     } else if (self._gatheredCandidates[targetMid]) {
       var sendEndOfCandidates = function() {
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
-          noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
-            self._gatheredCandidates[targetMid].sending.host.length +
-            self._gatheredCandidates[targetMid].sending.relay.length,
-          mid: self._user.sid,
-          target: targetMid,
-          rid: self._room.id
-        });
+        if (self._gatheredCandidates[targetMid] &amp;&amp; self._gatheredCandidates[targetMid].sending) {
+          self._sendChannelMessage({
+            type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
+            noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
+              self._gatheredCandidates[targetMid].sending.host.length +
+              self._gatheredCandidates[targetMid].sending.relay.length,
+            mid: self._user.sid,
+            target: targetMid,
+            rid: self._room.id
+          });
+        }
       };
       setTimeout(sendEndOfCandidates, 6000);
     }
@@ -232,6 +240,7 @@ Skylink.prototype._addIceCandidateToQueue = function(targetMid, canId, candidate
 
   log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Buffering ICE candidate.&#x27;]);
 
+  this._handleIceCandidateStats(&#x27;buffered&#x27;, targetMid, canId, candidate);
   this._trigger(&#x27;candidateProcessingState&#x27;, this.CANDIDATE_PROCESSING_STATE.BUFFERED,
     targetMid, canId, candidateType, {
     candidate: candidate.candidate,
@@ -294,6 +303,7 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
   var onSuccessCbFn = function () {
     log.log([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType,
       &#x27;Added ICE candidate successfully.&#x27;]);
+    self._handleIceCandidateStats(&#x27;process_success&#x27;, targetMid, canId, candidate);
     self._trigger(&#x27;candidateProcessingState&#x27;, self.CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS,
       targetMid, canId, candidateType, {
       candidate: candidate.candidate,
@@ -305,6 +315,7 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
   var onErrorCbFn = function (error) {
     log.error([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType,
       &#x27;Failed adding ICE candidate -&gt;&#x27;], error);
+    self._handleIceCandidateStats(&#x27;process_failed&#x27;, targetMid, canId, candidate, error);
     self._trigger(&#x27;candidateProcessingState&#x27;, self.CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
       targetMid, canId, candidateType, {
       candidate: candidate.candidate,
@@ -315,6 +326,7 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
 
   log.debug([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Adding ICE candidate.&#x27;]);
 
+  self._handleIceCandidateStats(&#x27;processing&#x27;, targetMid, canId, candidate);
   self._trigger(&#x27;candidateProcessingState&#x27;, self.CANDIDATE_PROCESSING_STATE.PROCESSING,
     targetMid, canId, candidateType, {
       candidate: candidate.candidate,
@@ -329,6 +341,7 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     self._peerConnections[targetMid].remoteDescription.sdp.indexOf(&#x27;\r\na=mid:&#x27; + candidate.sdpMid + &#x27;\r\n&#x27;) &gt; -1)) {
     log.warn([targetMid, &#x27;RTCIceCandidate&#x27;, canId + &#x27;:&#x27; + candidateType, &#x27;Dropping ICE candidate &#x27; +
       &#x27;as Peer connection does not exists or is closed&#x27;]);
+    self._handleIceCandidateStats(&#x27;process_failed&#x27;, targetMid, canId, candidate, &#x27;Peer connection does not exist&#x27;);
     self._trigger(&#x27;candidateProcessingState&#x27;, self.CANDIDATE_PROCESSING_STATE.DROPPED,
       targetMid, canId, candidateType, {
       candidate: candidate.candidate,
