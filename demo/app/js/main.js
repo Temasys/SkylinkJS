@@ -306,19 +306,9 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
       '<td><span class="name">' + peerInfo.userData + '</span><br>' +
       '<input class="select-user" target="' + peerId + '" type="checkbox" onclick="selectTargetPeer(this);"></td><td>';
-    var titleList = [
-      'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
-      'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
-      'Peer Connection state', 'Data Channel Connection state',
-      'MediaStream: Video', 'MediaStream: Audio'
-    ];
-    var glyphiconList = [
-      'glyphicon-log-in', 'glyphicon-hand-right', 'glyphicon-hand-left',
-      'glyphicon-thumbs-up', 'glyphicon-flash', 'glyphicon-magnet',
-      'glyphicon-user', 'glyphicon-transfer', 'glyphicon-facetime-video video',
-      'glyphicon-volume-up audio'
-    ];
-    for (var i = 0; i < 10; i++) {
+    var titleList = ['Joined Room', 'MediaStream: Video', 'MediaStream: Audio'];
+    var glyphiconList = ['glyphicon-log-in', 'glyphicon-facetime-video video', 'glyphicon-volume-up audio'];
+    for (var i = 0; i < 3; i++) {
       newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
         i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
     }
