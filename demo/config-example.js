@@ -17,12 +17,13 @@ if (!getParameterByName('room')) {
 }
 
 var config = {
-  appKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
-  defaultRoom: getParameterByName('room'),
-  enableDataChannel: true, // Disable this and sendBlobData(), sendP2PMessage() and sendURLData() will NOT work!
-  enableIceTrickle: true,
-  audioFallback: true,
-  forceSSL: true
+    appKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXXXXXX',
+    defaultRoom: getParameterByName('room'),
+    enableDataChannel: true, // Disable this and sendBlobData(), sendP2PMessage() and sendURLData() will NOT work!
+    enableIceTrickle: true,
+    audioFallback: true,
+    forceSSL: true,
+    roomServer: '//staging-api.temasys.io'
 };
 
 /**
