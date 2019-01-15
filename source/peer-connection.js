@@ -1790,6 +1790,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
+
+  if (AdapterJS.webrtcDetectedBrowser === 'chrome') {
+    constraints.sdpSemantics = 'plan-b';
+  }
+
   try {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Creating peer connection ->'], {
       constraints: constraints,
