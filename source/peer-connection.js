@@ -519,8 +519,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
   var statsFn = function (peerId) {
     var retrieveFn = function (firstRetrieval, nextCb) {
-      return function (err, result) {
-        if (err) {
+      return function (error, result) {
+        if (error) {
           log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], error);
           listOfPeerErrors[peerId] = error;
           self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
