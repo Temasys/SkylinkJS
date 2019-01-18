@@ -271,7 +271,8 @@ module.exports = function(grunt) {
         'concat',
         'replace',
         'uglify',
-        'yuidoc:doc'
+        'yuidoc:doc',
+        'comments'
     ]);
 
     grunt.registerTask('dev', [
