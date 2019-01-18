@@ -190,6 +190,16 @@ module.exports = function(grunt) {
                 src: ['**/*.js'],
                 dest: 'bamboo/skylinkjsgz/'
             }
+        },
+
+        comments: {
+            js: {
+                options: {
+                    singleline: true,
+                    multiline: true
+                },
+                src: ['<%= production %>/skylink.complete.js']
+            },
         }
     });
 
