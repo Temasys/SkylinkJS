@@ -3444,7 +3444,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 139,
+            "line": 137,
             "description": "Function that buffers the Peer connection ICE candidate when received\n  before remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateToQueue",
@@ -3455,7 +3455,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 164,
+            "line": 162,
             "description": "Function that adds all the Peer connection buffered ICE candidates received.\nThis should be called only after the remote session description is received and set.",
             "itemtype": "method",
             "name": "_addIceCandidateFromQueue",
@@ -3466,7 +3466,7 @@
         },
         {
             "file": "source/ice-candidate.js",
-            "line": 201,
+            "line": 199,
             "description": "Function that adds the ICE candidate to Peer connection.",
             "itemtype": "method",
             "name": "_addIceCandidate",
@@ -3767,7 +3767,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2058,
+            "line": 2053,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3778,7 +3778,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2207,
+            "line": 2202,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3789,7 +3789,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2227,
+            "line": 2222,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -4420,7 +4420,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 484,
+            "line": 480,
             "description": "<blockquote class=\"info\">\n  Note that this method will close any existing socket channel connection despite not being in the Room.\n</blockquote>\nFunction that stops Room session.",
             "itemtype": "method",
             "name": "leaveRoom",
@@ -4485,7 +4485,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 600,
+            "line": 596,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that locks the current Room when in session to prevent other Peers from joining the Room.",
             "itemtype": "method",
             "name": "lockRoom",
@@ -4495,7 +4495,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 634,
+            "line": 630,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that unlocks the current Room when in session to allow other Peers to join the Room.",
             "itemtype": "method",
             "name": "unlockRoom",
@@ -4505,7 +4505,7 @@
         },
         {
             "file": "source/room-connection.js",
-            "line": 668,
+            "line": 664,
             "description": "Function that waits for Socket connection to Signaling to be opened.",
             "itemtype": "method",
             "name": "_waitForOpenChannel",
@@ -5196,7 +5196,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 750,
+            "line": 748,
             "description": "Function that checks if value is contained in a SDK constant.",
             "itemtype": "method",
             "name": "_containsInList",
@@ -5207,7 +5207,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 769,
+            "line": 767,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -5218,7 +5218,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 902,
+            "line": 900,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5229,7 +5229,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 974,
+            "line": 972,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5240,7 +5240,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1087,
+            "line": 1085,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5361,19 +5361,6 @@
         {
             "file": "source/skylink-debug.js",
             "line": 98,
-            "description": "Stores the user's info for reporting error to API",
-            "itemtype": "attribute",
-            "name": "_userInfo",
-            "type": "JSON",
-            "access": "private",
-            "tagname": "",
-            "scoped": "true",
-            "since": "0.6.35",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/skylink-debug.js",
-            "line": 112,
             "description": "Function that gets the stored logs.",
             "itemtype": "method",
             "name": "_getStoredLogsFn",
@@ -5385,7 +5372,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 133,
+            "line": 119,
             "description": "Function that clears the stored logs.",
             "itemtype": "method",
             "name": "_clearAllStoredLogsFn",
@@ -5397,7 +5384,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 145,
+            "line": 131,
             "description": "Function that prints in the Web Console interface the stored logs.",
             "itemtype": "method",
             "name": "_printAllStoredLogsFn",
@@ -5409,7 +5396,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 169,
+            "line": 155,
             "description": "<blockquote class=\"info\">\n  To utilise and enable the <code>SkylinkLogs</code> API functionalities, the\n  <a href=\"#method_setDebugMode\"><code>setDebugMode()</code> method</a>\n  <code>options.storeLogs</code> parameter has to be enabled.\n</blockquote>\nThe object interface to manage the SDK <a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">\nJavascript Web Console</a> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs",
@@ -5420,7 +5407,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 184,
+            "line": 170,
             "description": "Function that gets the current stored SDK <code>console</code> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.getLogs",
@@ -5447,7 +5434,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 211,
+            "line": 197,
             "description": "Function that clears all the current stored SDK <code>console</code> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.clearAllLogs",
@@ -5462,7 +5449,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 225,
+            "line": 211,
             "description": "Function that prints all the current stored SDK <code>console</code> logs into the\n<a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">Javascript Web Console</a>.",
             "itemtype": "property",
             "name": "SkylinkLogs.printAllLogs",
@@ -5477,20 +5464,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 241,
-            "description": "Function that will send the log to an API endpoint for persistence",
-            "itemtype": "method",
-            "name": "_reportToAPI",
-            "access": "private",
-            "tagname": "",
-            "required": 1,
-            "scoped": "true",
-            "since": "0.6.35",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/skylink-debug.js",
-            "line": 270,
+            "line": 227,
             "description": "Function that handles the logs received and prints in the Web Console interface according to the log level set.",
             "itemtype": "method",
             "name": "_logFn",
@@ -5503,7 +5477,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 342,
+            "line": 299,
             "description": "Stores the logging functions.",
             "itemtype": "attribute",
             "name": "log",
@@ -5543,7 +5517,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 379,
+            "line": 335,
             "description": "Function that configures the level of <code>console</code> API logs to be printed in the\n<a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">Javascript Web Console</a>.",
             "itemtype": "method",
             "name": "setLogLevel",
@@ -5563,7 +5537,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 416,
+            "line": 372,
             "description": "Function that configures the debugging mode of the SDK.",
             "itemtype": "method",
             "name": "setDebugMode",
@@ -5603,27 +5577,6 @@
                 "\n  // Example 1: Enable both options.storeLogs and options.trace\n  skylinkDemo.setDebugMode(true);\n\n  // Example 2: Enable only options.storeLogs\n  skylinkDemo.setDebugMode({ storeLogs: true });\n\n  // Example 3: Disable debugging mode\n  skylinkDemo.setDebugMode();"
             ],
             "since": "0.5.2",
-            "class": "Skylink"
-        },
-        {
-            "file": "source/skylink-debug.js",
-            "line": 466,
-            "description": "Function that populates the userInfo object with appKey and client ID used for logging an error and reporting to API server",
-            "itemtype": "method",
-            "name": "_setClientInfoForLogging",
-            "params": [
-                {
-                    "name": "appKey",
-                    "description": "",
-                    "type": "String"
-                },
-                {
-                    "name": "clientId",
-                    "description": "",
-                    "type": "String"
-                }
-            ],
-            "since": "0.5.5",
             "class": "Skylink"
         },
         {
@@ -9048,12 +9001,13 @@
                 "\n  // Example 1: Start recording session\n  skylinkDemo.startRecording(function (error, success) {\n    if (error) return;\n    console.info(\"Recording session has started. ID ->\", success);\n  });"
             ],
             "trigger": "<ol class=\"desc-seq\">\n  <li>If MCU is not connected: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>If there is an existing recording session currently going on: <ol>\n  <li><b>ABORT</b> and return error.</li></ol></li>\n  <li>Sends to MCU via Signaling server to start recording session. <ol>\n  <li>If recording session has been started successfully: <ol>\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>START</code>.</li></ol></li></ol></li></ol>",
+            "beta": 1,
             "since": "0.6.16",
             "class": "Skylink"
         },
         {
             "file": "source/socket-message.js",
-            "line": 191,
+            "line": 192,
             "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.io\">contact us on our support portal</a>.\n</blockquote>\nStops a recording session.",
             "params": [
                 {
@@ -9100,12 +9054,13 @@
                 "\n  // Example 1: Stop recording session\n  skylinkDemo.stopRecording(function (error, success) {\n    if (error) return;\n    console.info(\"Recording session has stopped. ID ->\", success);\n  });\n\n  // Example 2: Stop recording session with mixin videos link\n  skylinkDemo.stopRecording(function (error, success) {\n    if (error) return;\n    console.info(\"Recording session has compiled with links ->\", success.link);\n  }, true);"
             ],
             "trigger": "<ol class=\"desc-seq\">\n  <li>If MCU is not connected: <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>If there is no existing recording session currently going on: <ol>\n  <li><b>ABORT</b> and return error.</li></ol></li>\n  <li>If existing recording session recording time has not elapsed more than 4 seconds:\n  <small>4 seconds is mandatory for recording session to ensure better recording\n  experience and stability.</small> <ol><li><b>ABORT</b> and return error.</li></ol></li>\n  <li>Sends to MCU via Signaling server to stop recording session: <ol>\n  <li>If recording session has been stopped successfully: <ol>\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>START</code>.\n  <li>MCU starts mixin recorded session videos: <ol>\n  <li>If recording session has been mixin successfully with links: <ol>\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>LINK</code>.<li>Else: <ol>\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a> triggers\n  parameter payload <code>state</code> as <code>ERROR</code>.<li><b>ABORT</b> and return error.</ol></li>\n  </ol></li></ol></li><li>Else: <ol>\n  <li><a href=\"#event_recordingState\"><code>recordingState</code> event</a>\n  triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li>\n  </ol></li></ol></li></ol>",
+            "beta": 1,
             "since": "0.6.16",
             "class": "Skylink"
         },
         {
             "file": "source/socket-message.js",
-            "line": 332,
+            "line": 334,
             "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU and recording to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>. If recording feature is not available to\n  be enabled in the <a href=\"https://console.temasys.io\">Developer Console</a>, please\n  <a href=\"http://support.temasys.io\">contact us on our support portal</a>.\n</blockquote>\nGets the list of current recording sessions since User has connected to the Room.",
             "itemtype": "method",
             "name": "getRecordings",
@@ -9122,7 +9077,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 373,
+            "line": 375,
             "description": "Function that handles and processes the socket message received.",
             "itemtype": "method",
             "name": "_processSigMessage",
@@ -9133,7 +9088,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 464,
+            "line": 466,
             "description": "Function that handles the \"peerList\" socket message received.\nSee confluence docs for the \"peerList\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_peerListEventHandler",
@@ -9144,7 +9099,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 480,
+            "line": 482,
             "description": "Function that handles the \"endOfCandidates\" socket message received.\nSee confluence docs for the \"endOfCandidates\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_endOfCandidatesHandler",
@@ -9155,7 +9110,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 503,
+            "line": 505,
             "description": "Function that handles the \"introduceError\" socket message received.\nSee confluence docs for the \"introduceError\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_introduceErrorEventHandler",
@@ -9166,7 +9121,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 520,
+            "line": 522,
             "description": "Function that handles the \"approach\" socket message received.\nSee confluence docs for the \"approach\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_approachEventHandler",
@@ -9177,7 +9132,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 570,
+            "line": 572,
             "description": "Function that handles the \"redirect\" socket message received.\nSee confluence docs for the \"redirect\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -9188,7 +9143,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 604,
+            "line": 606,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -9199,7 +9154,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 631,
+            "line": 633,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -9210,7 +9165,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 646,
+            "line": 648,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -9221,7 +9176,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 676,
+            "line": 678,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -9232,7 +9187,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 706,
+            "line": 708,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -9243,7 +9198,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 738,
+            "line": 740,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -9254,7 +9209,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 759,
+            "line": 761,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -9265,7 +9220,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 781,
+            "line": 783,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -9276,7 +9231,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 803,
+            "line": 805,
             "description": "Handles the RECORDING Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_recordingEventHandler",
@@ -9312,7 +9267,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 915,
+            "line": 917,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -9323,7 +9278,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 984,
+            "line": 986,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -9334,7 +9289,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1147,
+            "line": 1149,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -9345,7 +9300,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1290,
+            "line": 1292,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -9356,7 +9311,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1470,
+            "line": 1472,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -9367,7 +9322,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1584,
+            "line": 1586,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -9378,7 +9333,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1682,
+            "line": 1684,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -9389,7 +9344,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1811,
+            "line": 1813,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -10333,15 +10288,15 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:484"
+            "line": " source/room-connection.js:480"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:600"
+            "line": " source/room-connection.js:596"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/room-connection.js:634"
+            "line": " source/room-connection.js:630"
         },
         {
             "message": "unknown tag: trigger",
@@ -10385,39 +10340,31 @@
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:112"
+            "line": " source/skylink-debug.js:119"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:133"
-        },
-        {
-            "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:145"
+            "line": " source/skylink-debug.js:131"
         },
         {
             "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:184"
+            "line": " source/skylink-debug.js:170"
+        },
+        {
+            "message": "unknown tag: triggerforprophacknone",
+            "line": " source/skylink-debug.js:197"
         },
         {
             "message": "unknown tag: triggerforprophacknone",
             "line": " source/skylink-debug.js:211"
         },
         {
-            "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:225"
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:227"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:241"
-        },
-        {
-            "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:270"
-        },
-        {
-            "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:342"
+            "line": " source/skylink-debug.js:299"
         },
         {
             "message": "unknown tag: trigger",
@@ -10429,7 +10376,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:191"
+            "line": " source/socket-message.js:192"
         },
         {
             "message": "unknown tag: trigger",
