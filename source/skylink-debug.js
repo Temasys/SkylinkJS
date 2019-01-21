@@ -249,22 +249,24 @@ var SkylinkLogs = {
  */
 var _reportToAPI = function(message, object) {
   var endpoint = '/rest/stats/sessionerror';
-  var statsServer = _reportErrorConfig.statsServer;
-  var requestBody = {
-    data: {
-      message: message,
-      object: object,
-    }
-  };
-  requestBody.app_key = _reportErrorConfig.app_key;
-  requestBody.timestamp = (new Date()).toISOString();
-  try {
-    var xhr = new XMLHttpRequest();
-    xhr.onerror = function () { };
-    xhr.open('POST', statsServer + endpoint, true);
-    xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-    xhr.send(JSON.stringify(requestBody));
-  } catch (error) {}
+  if(_reportErrorConfig.statsServer){
+    var statsServer = _reportErrorConfig.statsServer;
+    var requestBody = {
+      data: {
+        message: message,
+        object: object,
+      }
+    };
+    requestBody.app_key = _reportErrorConfig.app_key;
+    requestBody.timestamp = (new Date()).toISOString();
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.onerror = function () { };
+      xhr.open('POST', statsServer + endpoint, true);
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+      xhr.send(JSON.stringify(requestBody));
+    } catch (error) {}
+  }
 };
 
 /**
