@@ -34,6 +34,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
 
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === 'MCU') {
+    self._compareTrackCounts(targetMid);
     self._addLocalMediaStreams(targetMid);
   }
 

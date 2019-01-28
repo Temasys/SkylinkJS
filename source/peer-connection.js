@@ -1862,14 +1862,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
   };
   self.videoRenderers = self.videoRenderers || {};
-  pc.onaddstream = function (evt) {
+  pc.ontrack = function (rtcTrackEvent) {
     // TargetMid goes all the way back to Skylink.prototype._enterHandler
 
     if (!self._peerConnections[targetMid]) {
       return;
     }
 
-    var stream = evt.stream || evt;
+    var stream = rtcTrackEvent.streams[0];
+    var transceiverMid = rtcTrackEvent.transceiver.mid;
 
     pc.remoteStream = stream;
     pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
@@ -1889,7 +1890,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasStream = true;
     pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
 
-    self._onRemoteStreamAdded(self._hasMCU ? self.streamIdPeerIdMap[stream.id] : targetMid, stream, !!pc.hasScreen);
+    self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, !!pc.hasScreen);
   };
 
   pc.onremovestream = function(evt) {
@@ -2298,6 +2299,47 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     } catch (error) {
       log.error([targetMid, 'RTCPeerConnection', null, 'Failed signaling end-of-candidates ->'], error);
     }
+  }
+};
+
+/**
+ * Function that compares trackCount sent by MCU and decides wether to add new Transceivers based on count differences
+ * @method _compareTrackCounts
+ * @param {String} targetMid
+ * @private
+ */
+Skylink.prototype._compareTrackCounts = function (targetMid) {
+  var self = this;
+  var pc = self._peerConnections[targetMid];
+
+  if (pc && typeof pc.getTransceivers === 'function') {
+    var transceivers = pc.getTransceivers();
+    var transceiverTypeCount = {
+      audio: 0,
+      video: 0
+    };
+
+    var checkDiffAndAddTransceivers = function (kind, requestedKindCount, actualKindCount, peerConnection) {
+      if (requestedKindCount > actualKindCount) {
+        var diff = requestedKindCount - actualKindCount;
+        while (diff) {
+          peerConnection.addTransceiver(kind);
+          diff = diff - 1;
+        }
+      }
+    };
+
+    if (transceivers && transceivers.length) {
+      for (var i = 0; i < transceivers.length; i++) {
+        if (transceivers[i] && transceivers[i].receiver && transceivers[i].receiver.track) {
+          var kind = transceivers[i].receiver.track.kind;
+          transceiverTypeCount[kind] += 1;
+        }
+      }
+    }
+
+    checkDiffAndAddTransceivers('video', self._currentRequestedTracks['video'], transceiverTypeCount.video, pc);
+    checkDiffAndAddTransceivers('audio', self._currentRequestedTracks['audio'], transceiverTypeCount.audio, pc);
   }
 };
 

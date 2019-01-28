@@ -878,4 +878,24 @@ function Skylink() {
    */
   this._statIdRandom = Date.now() + Math.floor(Math.random() * 100000000);
 
+  /**
+   * A mapping of transceiverIds and peer IDs (only when new MCU is in effect)
+   * @attribute _transceiverIdPeerIdMap
+   * @type Object
+   * @private
+   * @for Skylink
+   * @since 0.6.31
+   */
+  this._transceiverIdPeerIdMap = {};
+
+  /**
+   * (Extra) Tracks requested by the Peer/MCU in welcome/restart message. Used to create transceivers before createOffer.
+   * @attribute _transceiverIdPeerIdMap
+   * @type Object
+   * @private
+   * @for Skylink
+   * @since 0.6.31
+   */
+  this._currentRequestedTracks = { audio: 0, video: 0 };
+
 }
