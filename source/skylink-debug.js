@@ -96,6 +96,20 @@ var _printTimestamp = false;
 var _storedLogs = [];
 
 /**
+ * Stores the user's info for reporting error to API
+ * @attribute _userInfo
+ * @type JSON
+ * @private
+ * @scoped true
+ * @for Skylink
+ * @since 0.6.35
+ */
+var _reportErrorConfig = {
+  app_key: null,
+  statsServer: null
+};
+
+/**
  * Function that gets the stored logs.
  * @method _getStoredLogsFn
  * @private
@@ -225,6 +239,37 @@ var SkylinkLogs = {
 };
 
 /**
+ * Function that will send the log to an API endpoint for persistence
+ * @method _reportToAPI
+ * @private
+ * @required
+ * @scoped true
+ * @for Skylink
+ * @since 0.6.35
+ */
+var _reportToAPI = function(message, object) {
+  var endpoint = '/rest/stats/sessionerror';
+  if(_reportErrorConfig.statsServer){
+    var statsServer = _reportErrorConfig.statsServer;
+    var requestBody = {
+      data: {
+        message: message,
+        object: object,
+      }
+    };
+    requestBody.app_key = _reportErrorConfig.app_key;
+    requestBody.timestamp = (new Date()).toISOString();
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.onerror = function () { };
+      xhr.open('POST', statsServer + endpoint, true);
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+      xhr.send(JSON.stringify(requestBody));
+    } catch (error) {}
+  }
+};
+
+/**
  * Function that handles the logs received and prints in the Web Console interface according to the log level set.
  * @method _logFn
  * @private
@@ -328,6 +373,7 @@ var log = {
   },
 
   error: function (message, object) {
+    _reportToAPI(message, object);
     _logFn(0, message, object);
   }
 };
@@ -416,4 +462,19 @@ Skylink.prototype.setDebugMode = function(isDebugMode) {
     _enableDebugStack = false;
     _printTimestamp = false;
   }
+};
+
+
+/**
+ * Function that populates the userInfo object with appKey and client ID used for logging an error and reporting to API server
+ * @method _setClientInfoForLogging
+ * @param {String} appKey
+ * @param {String} clientId
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._setClientInfoForLogging = function() {
+  var initOptions = this._initOptions;
+  _reportErrorConfig.app_key = initOptions.appKey;
+  _reportErrorConfig.statsServer = initOptions.statsServer;
 };

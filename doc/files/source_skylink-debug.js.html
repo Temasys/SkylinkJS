@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.37 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.37</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -187,6 +187,20 @@ var _printTimestamp = false;
 var _storedLogs = [];
 
 /**
+ * Stores the user&#x27;s info for reporting error to API
+ * @attribute _userInfo
+ * @type JSON
+ * @private
+ * @scoped true
+ * @for Skylink
+ * @since 0.6.35
+ */
+var _reportErrorConfig = {
+  app_key: null,
+  statsServer: null
+};
+
+/**
  * Function that gets the stored logs.
  * @method _getStoredLogsFn
  * @private
@@ -316,6 +330,37 @@ var SkylinkLogs = {
 };
 
 /**
+ * Function that will send the log to an API endpoint for persistence
+ * @method _reportToAPI
+ * @private
+ * @required
+ * @scoped true
+ * @for Skylink
+ * @since 0.6.35
+ */
+var _reportToAPI = function(message, object) {
+  var endpoint = &#x27;/rest/stats/sessionerror&#x27;;
+  if(_reportErrorConfig.statsServer){
+    var statsServer = _reportErrorConfig.statsServer;
+    var requestBody = {
+      data: {
+        message: message,
+        object: object,
+      }
+    };
+    requestBody.app_key = _reportErrorConfig.app_key;
+    requestBody.timestamp = (new Date()).toISOString();
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.onerror = function () { };
+      xhr.open(&#x27;POST&#x27;, statsServer + endpoint, true);
+      xhr.setRequestHeader(&#x27;Content-Type&#x27;, &#x27;application/json;charset=UTF-8&#x27;);
+      xhr.send(JSON.stringify(requestBody));
+    } catch (error) {}
+  }
+};
+
+/**
  * Function that handles the logs received and prints in the Web Console interface according to the log level set.
  * @method _logFn
  * @private
@@ -419,6 +464,7 @@ var log = {
   },
 
   error: function (message, object) {
+    _reportToAPI(message, object);
     _logFn(0, message, object);
   }
 };
@@ -507,6 +553,21 @@ Skylink.prototype.setDebugMode = function(isDebugMode) {
     _enableDebugStack = false;
     _printTimestamp = false;
   }
+};
+
+
+/**
+ * Function that populates the userInfo object with appKey and client ID used for logging an error and reporting to API server
+ * @method _setClientInfoForLogging
+ * @param {String} appKey
+ * @param {String} clientId
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._setClientInfoForLogging = function() {
+  var initOptions = this._initOptions;
+  _reportErrorConfig.app_key = initOptions.appKey;
+  _reportErrorConfig.statsServer = initOptions.statsServer;
 };
     </pre>
 </div>

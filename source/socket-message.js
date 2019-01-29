@@ -142,7 +142,6 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
  *   <li>If recording session has been started successfully: <ol>
  *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers
  *   parameter payload <code>state</code> as <code>START</code>.</li></ol></li></ol></li></ol>
- * @beta
  * @for Skylink
  * @since 0.6.16
  */
@@ -253,7 +252,6 @@ Skylink.prototype.startRecording = function (callback) {
  *   <li><a href="#event_recordingState"><code>recordingState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li>
  *   </ol></li></ol></li></ol>
- * @beta
  * @for Skylink
  * @since 0.6.16
  */
