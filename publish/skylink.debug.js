@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.36 - Thu Nov 29 2018 15:21:19 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v0.6.37 - Tue Jan 29 2019 12:09:38 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -1612,7 +1612,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.36';
+Skylink.prototype.VERSION = '0.6.37';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -5641,15 +5641,17 @@ Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
       });
     } else if (self._gatheredCandidates[targetMid]) {
       var sendEndOfCandidates = function() {
-        self._sendChannelMessage({
-          type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
-          noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
-            self._gatheredCandidates[targetMid].sending.host.length +
-            self._gatheredCandidates[targetMid].sending.relay.length,
-          mid: self._user.sid,
-          target: targetMid,
-          rid: self._room.id
-        });
+        if (self._gatheredCandidates[targetMid] && self._gatheredCandidates[targetMid].sending) {
+          self._sendChannelMessage({
+            type: self._SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
+            noOfExpectedCandidates: self._gatheredCandidates[targetMid].sending.srflx.length +
+              self._gatheredCandidates[targetMid].sending.host.length +
+              self._gatheredCandidates[targetMid].sending.relay.length,
+            mid: self._user.sid,
+            target: targetMid,
+            rid: self._room.id
+          });
+        }
       };
       setTimeout(sendEndOfCandidates, 6000);
     }
@@ -6280,8 +6282,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
   var statsFn = function (peerId) {
     var retrieveFn = function (firstRetrieval, nextCb) {
-      return function (err, result) {
-        if (err) {
+      return function (error, result) {
+        if (error) {
           log.error([peerId, 'RTCStatsReport', null, 'Retrieval failure ->'], error);
           listOfPeerErrors[peerId] = error;
           self._trigger('getConnectionStatusStateChange', self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
@@ -7551,6 +7553,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
+
+  if (AdapterJS.webrtcDetectedBrowser === 'chrome') {
+    constraints.sdpSemantics = 'plan-b';
+  }
+
   try {
     log.debug([targetMid, 'RTCPeerConnection', null, 'Creating peer connection ->'], {
       constraints: constraints,
@@ -9161,10 +9168,14 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
     }
   };
 
+  var resolveAsWarningFn = function(error, tryRoom) {
+    log.warn(error + ' ' + 'room: ' + tryRoom);
+  };
+
   var joinRoomFn = function () {
     // If room has been stopped but does not matches timestamp skip.
     if (self._joinRoomManager.timestamp !== timestamp) {
-      resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+      resolveAsWarningFn('joinRoom() process did not complete', selectedRoom);
       return;
     }
 
@@ -9174,7 +9185,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
         return;
       // If details has been initialised but does not matches timestamp skip.
       } else if (self._joinRoomManager.timestamp !== timestamp) {
-        resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+        resolveAsWarningFn('joinRoom() process did not complete', selectedRoom);
         return;
       }
 
@@ -9184,7 +9195,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
           return;
         // If socket and stream has been retrieved but socket connection does not matches timestamp skip.
         } else if (self._joinRoomManager.timestamp !== timestamp) {
-          resolveAsErrorFn('joinRoom() process did not complete', selectedRoom);
+          resolveAsWarningFn('joinRoom() process did not complete', selectedRoom);
           return;
         }
 
@@ -10447,6 +10458,8 @@ Skylink.prototype.init = function(_options, _callback) {
     return;
   }
 
+  self._setClientInfoForLogging();
+
   // Format: https://api.temasys.io/api/<appKey>/<room>[/<creds.start>][/<creds.duration>][?cred=<creds.hash>]&rand=<rand>
   self._path = self._initOptions.roomServer + '/api/' + self._initOptions.appKey + '/' + self._selectedRoom +
     (self._initOptions.credentials ? '/' + self._initOptions.credentials.startDateTime + '/' +
@@ -10914,6 +10927,20 @@ var _printTimestamp = false;
 var _storedLogs = [];
 
 /**
+ * Stores the user's info for reporting error to API
+ * @attribute _userInfo
+ * @type JSON
+ * @private
+ * @scoped true
+ * @for Skylink
+ * @since 0.6.35
+ */
+var _reportErrorConfig = {
+  app_key: null,
+  statsServer: null
+};
+
+/**
  * Function that gets the stored logs.
  * @method _getStoredLogsFn
  * @private
@@ -11043,6 +11070,37 @@ var SkylinkLogs = {
 };
 
 /**
+ * Function that will send the log to an API endpoint for persistence
+ * @method _reportToAPI
+ * @private
+ * @required
+ * @scoped true
+ * @for Skylink
+ * @since 0.6.35
+ */
+var _reportToAPI = function(message, object) {
+  var endpoint = '/rest/stats/sessionerror';
+  if(_reportErrorConfig.statsServer){
+    var statsServer = _reportErrorConfig.statsServer;
+    var requestBody = {
+      data: {
+        message: message,
+        object: object,
+      }
+    };
+    requestBody.app_key = _reportErrorConfig.app_key;
+    requestBody.timestamp = (new Date()).toISOString();
+    try {
+      var xhr = new XMLHttpRequest();
+      xhr.onerror = function () { };
+      xhr.open('POST', statsServer + endpoint, true);
+      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
+      xhr.send(JSON.stringify(requestBody));
+    } catch (error) {}
+  }
+};
+
+/**
  * Function that handles the logs received and prints in the Web Console interface according to the log level set.
  * @method _logFn
  * @private
@@ -11146,6 +11204,7 @@ var log = {
   },
 
   error: function (message, object) {
+    _reportToAPI(message, object);
     _logFn(0, message, object);
   }
 };
@@ -11234,6 +11293,21 @@ Skylink.prototype.setDebugMode = function(isDebugMode) {
     _enableDebugStack = false;
     _printTimestamp = false;
   }
+};
+
+
+/**
+ * Function that populates the userInfo object with appKey and client ID used for logging an error and reporting to API server
+ * @method _setClientInfoForLogging
+ * @param {String} appKey
+ * @param {String} clientId
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._setClientInfoForLogging = function() {
+  var initOptions = this._initOptions;
+  _reportErrorConfig.app_key = initOptions.appKey;
+  _reportErrorConfig.statsServer = initOptions.statsServer;
 };
 var _eventsDocs = {
   /**
@@ -13832,7 +13906,6 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
  *   <li>If recording session has been started successfully: <ol>
  *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers
  *   parameter payload <code>state</code> as <code>START</code>.</li></ol></li></ol></li></ol>
- * @beta
  * @for Skylink
  * @since 0.6.16
  */
@@ -13943,7 +14016,6 @@ Skylink.prototype.startRecording = function (callback) {
  *   <li><a href="#event_recordingState"><code>recordingState</code> event</a>
  *   triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li>
  *   </ol></li></ol></li></ol>
- * @beta
  * @for Skylink
  * @since 0.6.16
  */

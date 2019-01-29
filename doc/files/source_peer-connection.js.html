@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.36 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.37 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.36</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.37</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -610,8 +610,8 @@ Skylink.prototype.getConnectionStatus = function (targetPeerId, callback) {
 
   var statsFn = function (peerId) {
     var retrieveFn = function (firstRetrieval, nextCb) {
-      return function (err, result) {
-        if (err) {
+      return function (error, result) {
+        if (error) {
           log.error([peerId, &#x27;RTCStatsReport&#x27;, null, &#x27;Retrieval failure -&gt;&#x27;], error);
           listOfPeerErrors[peerId] = error;
           self._trigger(&#x27;getConnectionStatusStateChange&#x27;, self.GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
@@ -1881,6 +1881,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
   // currently the AdapterJS 0.12.1-2 causes an issue to prevent firefox from
   // using .urls feature
+
+  if (AdapterJS.webrtcDetectedBrowser === &#x27;chrome&#x27;) {
+    constraints.sdpSemantics = &#x27;plan-b&#x27;;
+  }
+
   try {
     log.debug([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Creating peer connection -&gt;&#x27;], {
       constraints: constraints,
