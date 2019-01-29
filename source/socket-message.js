@@ -1127,6 +1127,7 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
+  var trackCount = message.trackCount;
   var userInfo = message.userInfo || {};
   userInfo.settings = userInfo.settings || {};
   userInfo.mediaStatus = userInfo.mediaStatus || {};
@@ -1165,6 +1166,10 @@ Skylink.prototype._restartHandler = function(message){
     DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
       message.DTProtocolVersion : (self._hasMCU || targetMid === 'MCU' ? '0.1.2' : '0.1.0')
   };
+
+  if (trackCount) {
+    self._currentRequestedTracks = trackCount;
+  }
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "restart" received ->'], message);
   self._handleNegotiationStats('restart', targetMid, message, true);
@@ -1271,6 +1276,7 @@ Skylink.prototype._welcomeHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
   var isNewPeer = false;
+  var trackCount = message.trackCount;
   var userInfo = message.userInfo || {};
   userInfo.settings = userInfo.settings || {};
   userInfo.mediaStatus = userInfo.mediaStatus || {};
@@ -1309,6 +1315,10 @@ Skylink.prototype._welcomeHandler = function(message) {
     DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
       message.DTProtocolVersion : (self._hasMCU || targetMid === 'MCU' ? '0.1.2' : '0.1.0')
   };
+
+  if (trackCount) {
+    self._currentRequestedTracks = trackCount;
+  }
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
   self._handleNegotiationStats('welcome', targetMid, message, true);
@@ -1680,7 +1690,7 @@ Skylink.prototype._answerHandler = function(message) {
   var pc = self._peerConnections[targetMid];
 
   if (targetMid === 'MCU') {
-    self.streamIdPeerIdMap = message.streamIdPeerIdMap || {};
+    self._transceiverIdPeerIdMap = message.transceiverIdPeerIdMap || {};
   }
 
   log.log([targetMid, null, message.type, 'Received answer from peer. Session description:'], clone(message));
