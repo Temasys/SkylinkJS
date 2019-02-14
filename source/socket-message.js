@@ -1083,9 +1083,8 @@ Skylink.prototype._enterHandler = function(message) {
       }
 
       self._sendChannelMessage(welcomeMsg);
+      self._handleNegotiationStats('welcome', targetMid, welcomeMsg, false);
     }
-
-    self._handleNegotiationStats('welcome', targetMid, welcomeMsg, false);
 
     if (isNewPeer) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
