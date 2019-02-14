@@ -198,13 +198,13 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     sdp: _sessionDescription.sdp
   };
 
-  sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
-  sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
-  sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
-  sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
-  sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
-  sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
-  sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
+  // sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
+  // sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
+  // sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
+  // sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
+  // sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
+  // sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
+  // sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
 
   if (self._peerConnectionConfig.disableBundle) {
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=group:BUNDLE.*\r\n/gi, '');
@@ -236,7 +236,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
     self._sendChannelMessage({
       type: sessionDescription.type,
-      sdp: self._renderSDPOutput(targetMid, sessionDescription),
+      sdp: sessionDescription.sdp,
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,

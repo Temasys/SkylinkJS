@@ -1052,37 +1052,39 @@ Skylink.prototype._enterHandler = function(message) {
       videoMuted: 0
     };
 
-    var welcomeMsg = {
-      type: self._SIG_MESSAGE_TYPE.WELCOME,
-      mid: self._user.sid,
-      rid: self._room.id,
-      enableIceTrickle: self._initOptions.enableIceTrickle,
-      enableDataChannel: self._initOptions.enableDataChannel,
-      enableIceRestart: self._enableIceRestart,
-      agent: AdapterJS.webrtcDetectedBrowser,
-      version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
-      receiveOnly: self.getPeerInfo().config.receiveOnly,
-      os: window.navigator.platform,
-      userInfo: self._getUserInfo(targetMid),
-      target: targetMid,
-      weight: self._peerPriorityWeight,
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
-      DTProtocolVersion: self.DT_PROTOCOL_VERSION
-    };
-
-    if (self._publishOnly) {
-      welcomeMsg.publishOnly = {
-        type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+    if (self._hasMCU !== true) {
+      var welcomeMsg = {
+        type: self._SIG_MESSAGE_TYPE.WELCOME,
+        mid: self._user.sid,
+        rid: self._room.id,
+        enableIceTrickle: self._initOptions.enableIceTrickle,
+        enableDataChannel: self._initOptions.enableDataChannel,
+        enableIceRestart: self._enableIceRestart,
+        agent: AdapterJS.webrtcDetectedBrowser,
+        version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
+        receiveOnly: self.getPeerInfo().config.receiveOnly,
+        os: window.navigator.platform,
+        userInfo: self._getUserInfo(targetMid),
+        target: targetMid,
+        weight: self._peerPriorityWeight,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+        DTProtocolVersion: self.DT_PROTOCOL_VERSION
       };
-    }
 
-    if (self._parentId) {
-      welcomeMsg.parentId = self._parentId;
-    }
+      if (self._publishOnly) {
+        welcomeMsg.publishOnly = {
+          type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+        };
+      }
 
-    self._sendChannelMessage(welcomeMsg);
-    self._handleNegotiationStats('welcome', targetMid, welcomeMsg, false);
+      if (self._parentId) {
+        welcomeMsg.parentId = self._parentId;
+      }
+
+      self._sendChannelMessage(welcomeMsg);
+      self._handleNegotiationStats('welcome', targetMid, welcomeMsg, false);
+    }
 
     if (isNewPeer) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
@@ -1510,14 +1512,14 @@ Skylink.prototype._offerHandler = function(message) {
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Session description object created'], offer);
 
-  offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
-  offer.sdp = self._setSDPCodec(targetMid, offer);
-  offer.sdp = self._setSDPBitrate(targetMid, offer);
-  offer.sdp = self._setSDPCodecParams(targetMid, offer);
-  offer.sdp = self._removeSDPCodecs(targetMid, offer);
-  offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
-  offer.sdp = self._handleSDPConnectionSettings(targetMid, offer, 'remote');
-  offer.sdp = self._removeSDPUnknownAptRtx(targetMid, offer);
+  // offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
+  // offer.sdp = self._setSDPCodec(targetMid, offer);
+  // offer.sdp = self._setSDPBitrate(targetMid, offer);
+  // offer.sdp = self._setSDPCodecParams(targetMid, offer);
+  // offer.sdp = self._removeSDPCodecs(targetMid, offer);
+  // offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
+  // offer.sdp = self._handleSDPConnectionSettings(targetMid, offer, 'remote');
+  // offer.sdp = self._removeSDPUnknownAptRtx(targetMid, offer);
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote offer ->'], offer.sdp);
 
@@ -1547,7 +1549,7 @@ Skylink.prototype._offerHandler = function(message) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  self._parseSDPMediaStreamIDs(targetMid, offer);
+  // self._parseSDPMediaStreamIDs(targetMid, offer);
 
   var onSuccessCbFn = function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
@@ -1731,15 +1733,15 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }*/
 
-  answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
-  answer.sdp = self._setSDPCodec(targetMid, answer);
-  answer.sdp = self._setSDPBitrate(targetMid, answer);
-  answer.sdp = self._setSDPCodecParams(targetMid, answer);
-  answer.sdp = self._removeSDPCodecs(targetMid, answer);
-  answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
-  answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
-  answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
-  answer.sdp = self._setSCTPport(targetMid, answer);
+  // answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
+  // answer.sdp = self._setSDPCodec(targetMid, answer);
+  // answer.sdp = self._setSDPBitrate(targetMid, answer);
+  // answer.sdp = self._setSDPCodecParams(targetMid, answer);
+  // answer.sdp = self._removeSDPCodecs(targetMid, answer);
+  // answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
+  // answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
+  // answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
+  // answer.sdp = self._setSCTPport(targetMid, answer);
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
@@ -1769,7 +1771,7 @@ Skylink.prototype._answerHandler = function(message) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  self._parseSDPMediaStreamIDs(targetMid, answer);
+  // self._parseSDPMediaStreamIDs(targetMid, answer);
 
 
   var onSuccessCbFn = function() {
