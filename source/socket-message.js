@@ -1052,7 +1052,7 @@ Skylink.prototype._enterHandler = function(message) {
       videoMuted: 0
     };
 
-    if (self._hasMCU === true) {
+    if (self._hasMCU !== true) {
       var welcomeMsg = {
         type: self._SIG_MESSAGE_TYPE.WELCOME,
         mid: self._user.sid,
