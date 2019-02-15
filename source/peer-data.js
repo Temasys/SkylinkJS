@@ -749,3 +749,29 @@ Skylink.prototype._getUserInfo = function(peerId) {
   delete userInfo.settings.data;
   return userInfo;
 };
+
+/**
+ * Iterates through all connected peers to find the greatest peerPriorityWeight and sets the current users peerPriorityWeight to max.
+ * @method _setGreatestPeerPriorityWeight
+ * @private
+ * @for Skylink
+ * @since 1.0.0
+ */
+Skylink.prototype._setGreatestPeerPriorityWeight = function() {
+  var self = this;
+  var peerInfoKeys = Object.keys(self._peerInformations);
+  var selfPriorityWeight = self._peerPriorityWeight;
+
+  var maxPeerPriority = selfPriorityWeight;
+  for (var i = 0; i < peerInfoKeys.length; i++) {
+    var peerInformation = self._peerInformations[peerInfoKeys[i]];
+    var priorityWeight = peerInformation.config.priorityWeight;
+
+    if (priorityWeight > maxPeerPriority) {
+      maxPeerPriority = priorityWeight;
+    }
+  }
+
+  self._peerPriorityWeight = maxPeerPriority + 1;
+  log.debug('Users priorityWeight is set to -->', maxPeerPriority);
+};
