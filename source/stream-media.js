@@ -1266,6 +1266,9 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 
       var onErrorCbFn = function (error) {
         self._onStreamAccessError(error, settings, true, false);
+        if (typeof callback === 'function') {
+          callback(error, null);
+        }
       };
 
       if (typeof (AdapterJS || {}).webRTCReady !== 'function') {
@@ -1273,7 +1276,15 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       }
 
       AdapterJS.webRTCReady(function () {
-        navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+        if (typeof navigator.mediaDevices.getDisplayMedia === 'function') {
+          navigator.mediaDevices.getDisplayMedia(settings.getUserMediaSettings).then(function(stream) {
+            onSuccessCbFn(stream);
+          }).catch(function(err) {
+            onErrorCbFn(err);
+          });
+        } else {
+          navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+        }
       });
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
