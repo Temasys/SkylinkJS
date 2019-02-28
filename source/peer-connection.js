@@ -389,7 +389,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, b
  *
  *   // Example 2: Retrieve a list of Peer connection stats
  *   function printConnStats (peerId, data) {
- *     if (!data.connectionStats[peerId]) return;
+ *     if (!data[peerId]) return;
  *     var sendVideoBytes  = data[peerId].video.sending.bytes;
  *     var sendAudioBytes  = data[peerId].audio.sending.bytes;
  *     var recvVideoBytes  = data[peerId].video.receiving.bytes;
@@ -421,7 +421,7 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, b
  *   // Example 3: Retrieve all Peer connection stats
  *   function printConnStats (listOfPeers, data) {
  *     listOfPeers.forEach(function (peerId) {
- *       if (!data.connectionStats[peerId]) return;
+ *       if (!data[peerId]) return;
  *       var sendVideoBytes  = data[peerId].video.sending.bytes;
  *       var sendAudioBytes  = data[peerId].audio.sending.bytes;
  *       var recvVideoBytes  = data[peerId].video.receiving.bytes;
