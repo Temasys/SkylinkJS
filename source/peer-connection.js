@@ -390,12 +390,12 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, b
  *   // Example 2: Retrieve a list of Peer connection stats
  *   function printConnStats (peerId, data) {
  *     if (!data.connectionStats[peerId]) return;
- *     var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;
- *     var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;
- *     var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;
- *     var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;
- *     var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;
- *     var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;
+ *     var sendVideoBytes  = data[peerId].video.sending.bytes;
+ *     var sendAudioBytes  = data[peerId].audio.sending.bytes;
+ *     var recvVideoBytes  = data[peerId].video.receiving.bytes;
+ *     var recvAudioBytes  = data[peerId].audio.receiving.bytes;
+ *     var localCandidate  = data[peerId].selectedCandidate.local;
+ *     var remoteCandidate = data[peerId].selectedCandidate.remote;
  *     console.log(peerId + " - Sending audio (" + sendAudioBytes + "bps) video (" + sendVideoBytes + ")");
  *     console.log(peerId + " - Receiving audio (" + recvAudioBytes + "bps) video (" + recvVideoBytes + ")");
  *     console.log(peerId + " - Local candidate: " + localCandidate.ipAddress + ":" + localCandidate.portNumber +
@@ -422,12 +422,12 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, b
  *   function printConnStats (listOfPeers, data) {
  *     listOfPeers.forEach(function (peerId) {
  *       if (!data.connectionStats[peerId]) return;
- *       var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;
- *       var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;
- *       var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;
- *       var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;
- *       var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;
- *       var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;
+ *       var sendVideoBytes  = data[peerId].video.sending.bytes;
+ *       var sendAudioBytes  = data[peerId].audio.sending.bytes;
+ *       var recvVideoBytes  = data[peerId].video.receiving.bytes;
+ *       var recvAudioBytes  = data[peerId].audio.receiving.bytes;
+ *       var localCandidate  = data[peerId].selectedCandidate.local;
+ *       var remoteCandidate = data[peerId].selectedCandidate.remote;
  *       console.log(peerId + " - Sending audio (" + sendAudioBytes + "bps) video (" + sendVideoBytes + ")");
  *       console.log(peerId + " - Receiving audio (" + recvAudioBytes + "bps) video (" + recvVideoBytes + ")");
  *       console.log(peerId + " - Local candidate: " + localCandidate.ipAddress + ":" + localCandidate.portNumber +
