@@ -1679,6 +1679,61 @@ Skylink.prototype._candidateHandler = function(message) {
   });
 };
 
+
+function _reorderAudioVideoInSDP(sdp, audioFirst){
+  // if the sdp is missing the audio or video line we don't need to reorder
+  if(sdp.indexOf('m=video') === -1 || sdp.indexOf('m=audio') === -1) {
+    return sdp;
+  }
+
+  var mContent = sdp.split('m=');
+  var sdpResult = [];
+  var pos = 3;
+
+  sdpResult[0] = mContent[0];
+
+  for ( var i = 1 ; i < mContent.length; i++){
+    var type = mContent[i].substring(0,5);
+    if(type === 'audio') {
+      if(audioFirst) {
+        sdpResult[1] = mContent[i];
+      }
+      else {
+        sdpResult[2] = mContent[i];
+      }
+    }
+    else if(type === 'video') {
+      if(audioFirst) {
+        sdpResult[2] = mContent[i];
+      }
+      else {
+        sdpResult[1] = mContent[i];
+      }
+    }
+    else{
+      sdpResult[pos] = mContent[i];
+      pos++;
+    }
+  }
+
+  return sdpResult.join('m=');
+}
+
+function _changeSDPFormat(sdpAnswer, sdpOffer){
+  var SDPAnswerAVIndex = sdpAnswer.indexOf('m=video') - sdpAnswer.indexOf('m=audio');
+  var SDPOfferAVIndex  = sdpOffer.indexOf('m=video') - sdpOffer.indexOf('m=audio');
+
+  if((SDPAnswerAVIndex>=0 && SDPOfferAVIndex >=0) || (SDPAnswerAVIndex<=0 && SDPOfferAVIndex <=0) ){
+    //both answer and offerer are same
+    return sdpAnswer;
+  }
+  else{
+    sdpAnswer = (SDPOfferAVIndex>=0 && SDPAnswerAVIndex<=0) ? _reorderAudioVideoInSDP(sdpAnswer, true) : _reorderAudioVideoInSDP(sdpAnswer, false);
+  }
+  return sdpAnswer;
+}
+
+
 /**
  * Function that handles the "answer" socket message received.
  * See confluence docs for the "answer" expected properties to be received
@@ -1770,6 +1825,10 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   self._parseSDPMediaStreamIDs(targetMid, answer);
+
+  if(self._hasMCU && AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion >= 59) {
+    answer.sdp = _changeSDPFormat(answer.sdp, pc.localDescription.sdp);
+  }
 
 
   var onSuccessCbFn = function() {
