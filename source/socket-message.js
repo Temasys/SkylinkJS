@@ -1779,6 +1779,7 @@ Skylink.prototype._answerHandler = function(message) {
     pc.setAnswer = 'remote';
     pc.processingRemoteSDP = false;
 
+    self._acknowledgeAnswer(targetMid, true, null);
     self._handleNegotiationStats('set_answer', targetMid, answer, true);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
@@ -1795,6 +1796,7 @@ Skylink.prototype._answerHandler = function(message) {
   };
 
   var onErrorCbFn = function(error) {
+    self._acknowledgeAnswer(targetMid, false, error);
     self._handleNegotiationStats('error_set_answer', targetMid, answer, true, error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
@@ -2039,3 +2041,29 @@ Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
 
   return false;
 };
+
+/**
+ * Function that sends a SIG_MESSAGE_TYPE.ANSWER_ACK message to MCU to denote that SDP negotiation has completed (either with success or error)
+ * @method _acknowledgeAnswer
+ * @private
+ * @for Skylink
+ * @since 1.0.0
+ */
+Skylink.prototype._acknowledgeAnswer = function (targetMid, isSuccess, error) {
+  var self = this;
+  if (self._hasMCU) {
+    var statsStateKey = isSuccess ? 'set_answer_ack' : 'error_set_answer_ack';
+    var answerAckMessage = {
+      rid: self._room.id,
+      mid: self._user.sid,
+      target: targetMid,
+      success: isSuccess,
+      type: self._SIG_MESSAGE_TYPE.ANSWER_ACK,
+    };
+    self._sendChannelMessage(answerAckMessage);
+    log.debug(['MCU', 'Remote Description', null, 'Answer acknowledgement message sent to MCU via SIG. Message body -->'], answerAckMessage);
+    self._handleNegotiationStats(statsStateKey, targetMid, answerAckMessage, true, error);
+  }
+  return false;
+};
+

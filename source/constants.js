@@ -1425,6 +1425,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   RESTART: 'restart',
   OFFER: 'offer',
   ANSWER: 'answer',
+  ANSWER_ACK: 'answerAck',
   CANDIDATE: 'candidate',
   BYE: 'bye',
   REDIRECT: 'redirect',
