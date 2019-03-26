@@ -1480,6 +1480,10 @@ Skylink.prototype._offerHandler = function(message) {
     sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : message.sdp
   };
 
+  if (targetMid === 'MCU') {
+    self._transceiverIdPeerIdMap = message.transceiverIdPeerIdMap || {};
+  }
+
   self._handleNegotiationStats('offer', targetMid, offer, true);
 
   if (!pc) {
