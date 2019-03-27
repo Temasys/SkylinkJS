@@ -1584,8 +1584,8 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
     self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
     self._peerEndOfCandidatesCounter[peerId].len = 0;
     self._doOffer(peerId, doIceRestart, restartMsg);
-    self._handleNegotiationStats('restart', peerId, restartMsg, false);
-    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
+    //self._handleNegotiationStats('restart', peerId, restartMsg, false);
+    //self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === 'function') {
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
@@ -2102,10 +2102,10 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
       restartMsg.parentId = self._parentId;
     }
 
-    log.log([peerId, 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
+    // log.log([peerId, 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
 
     self._doOffer('MCU', doIceRestart, restartMsg);
-    self._handleNegotiationStats('restart', peerId, restartMsg, false);
+    //self._handleNegotiationStats('restart', peerId, restartMsg, false);
   };
 
   // Toggle the main bandwidth options.
