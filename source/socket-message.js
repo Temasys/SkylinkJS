@@ -1733,15 +1733,15 @@ Skylink.prototype._answerHandler = function(message) {
     return;
   }*/
 
-  // answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
-  // answer.sdp = self._setSDPCodec(targetMid, answer);
-  // answer.sdp = self._setSDPBitrate(targetMid, answer);
-  // answer.sdp = self._setSDPCodecParams(targetMid, answer);
-  // answer.sdp = self._removeSDPCodecs(targetMid, answer);
-  // answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
-  // answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
-  // answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
-  // answer.sdp = self._setSCTPport(targetMid, answer);
+  answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
+  answer.sdp = self._setSDPCodec(targetMid, answer);
+  answer.sdp = self._setSDPBitrate(targetMid, answer);
+  answer.sdp = self._setSDPCodecParams(targetMid, answer);
+  answer.sdp = self._removeSDPCodecs(targetMid, answer);
+  answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
+  answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
+  answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
+  answer.sdp = self._setSCTPport(targetMid, answer);
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
@@ -1771,7 +1771,7 @@ Skylink.prototype._answerHandler = function(message) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  // self._parseSDPMediaStreamIDs(targetMid, answer);
+  self._parseSDPMediaStreamIDs(targetMid, answer);
 
 
   var onSuccessCbFn = function() {

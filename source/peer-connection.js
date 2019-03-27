@@ -1583,7 +1583,7 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
 
     self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
     self._peerEndOfCandidatesCounter[peerId].len = 0;
-    self._sendChannelMessage(restartMsg);
+    self._doOffer(peerId, doIceRestart, restartMsg);
     self._handleNegotiationStats('restart', peerId, restartMsg, false);
     self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
