@@ -1048,6 +1048,8 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
   var enableAudioSettings = false;
   var useMediaSource = [self.MEDIA_SOURCE.SCREEN];
   var useMediaSourceId = null;
+  var listOfPeers = Object.keys(self._peerConnections);
+  var listOfPeerRestartErrors = {};
   var checkIfSourceExistsFn = function (val) {
     for (var prop in self.MEDIA_SOURCE) {
       if (self.MEDIA_SOURCE.hasOwnProperty(prop) && self.MEDIA_SOURCE[prop] === val) {
@@ -1064,7 +1066,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       useMediaSource = [typeof enableAudio === 'object' ? enableAudio.mediaSource : enableAudio];
     }
     useMediaSourceId = typeof enableAudio === 'object' ? enableAudio.sourceId : null;
-  // shareScreen(["screen", "window"])
+    // shareScreen(["screen", "window"])
   } else if (Array.isArray(enableAudio)) {
     var enableAudioArr = [];
 
@@ -1077,7 +1079,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     if (enableAudioArr.length > 0) {
       useMediaSource = enableAudioArr;
     }
-  // shareScreen({ stereo: true })
+    // shareScreen({ stereo: true })
   } else if (enableAudio && typeof enableAudio === 'object') {
     if (enableAudio.sourceId && enableAudio.mediaSource) {
 
@@ -1090,7 +1092,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         deviceId: enableAudio.deviceId
       };
     }
-  // shareScreen(true)
+    // shareScreen(true)
   } else if (enableAudio === true) {
     enableAudioSettings = enableAudio === true ? {
       usedtx: null,
@@ -1099,7 +1101,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       echoCancellation: true,
       deviceId: null
     } : false;
-  // shareScreen(function () {})
+    // shareScreen(function () {})
   } else if (typeof enableAudio === 'function') {
     callback = enableAudio;
     enableAudio = false;
@@ -1112,7 +1114,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       useMediaSource = [typeof mediaSource === 'object' ? mediaSource.mediaSource : mediaSource];
     }
     useMediaSourceId = typeof mediaSource === 'object' ? mediaSource.sourceId : null;
-  // shareScreen(.., ["screen", "window"])
+    // shareScreen(.., ["screen", "window"])
   } else if (Array.isArray(mediaSource)) {
     var mediaSourceArr = [];
     for (var i = 0; i < mediaSource.length; i++) {
@@ -1123,7 +1125,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
     if (mediaSourceArr.length > 0) {
       useMediaSource = mediaSourceArr;
     }
-  // shareScreen(.., function () {})
+    // shareScreen(.., function () {})
   } else if (typeof mediaSource === 'function') {
     callback = mediaSource;
   }
@@ -1178,18 +1180,70 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
-          self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
-            if (err) {
-              log.error('Failed refreshing connections for shareScreen() ->', err);
+          if (self._initOptions.mcuUseRenegoRestart) {
+            self._peerEndOfCandidatesCounter.MCU = self._peerEndOfCandidatesCounter.MCU || {};
+            self._peerEndOfCandidatesCounter.MCU.len = 0;
+            sendRestartMsgFn('MCU');
+          } else {
+            // Restart with MCU = peer leaves then rejoins room
+            var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+              log.log([null, 'PeerConnection', null, 'Invoked all peers to restart with MCU. Firing callback']);
+
               if (typeof callback === 'function') {
-                callback(new Error('Failed refreshing connections.'), null);
+                if (Object.keys(listOfPeerRestartErrors).length > 0) {
+                  callback({
+                    refreshErrors: listOfPeerRestartErrors,
+                    listOfPeers: listOfPeers
+                  }, null);
+                } else {
+                  callback(null, {
+                    listOfPeers: listOfPeers
+                  });
+                }
               }
-              return;
-            }
-            if (typeof callback === 'function') {
-              callback(null, stream);
-            }
-          });
+            };
+
+            self.once('peerJoined', peerJoinedFn, function (peerId, peerInfo, isSelf) {
+              return isSelf;
+            });
+
+            self.leaveRoom(false, function (error, success) {
+              if (error) {
+                if (typeof callback === 'function') {
+                  for (var i = 0; i < listOfPeers.length; i++) {
+                    listOfPeerRestartErrors[listOfPeers[i]] = error;
+                  }
+                  callback({
+                    refreshErrors: listOfPeerRestartErrors,
+                    listOfPeers: listOfPeers
+                  }, null);
+                }
+              } else {
+                //self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
+                self.joinRoom(self._selectedRoom, {
+                  bandwidth: {},
+                  googleXBandwidth: {},
+                  sdpSettings: clone(self._sdpSettings),
+                  voiceActivityDetection: self._voiceActivityDetection,
+                  publishOnly: !!self._publishOnly,
+                  parentId: self._parentId || null,
+                  autoBandwidthAdjustment: self._bandwidthAdjuster
+                });
+              }
+            });
+          }
+          // self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
+          //   if (err) {
+          //     log.error('Failed refreshing connections for shareScreen() ->', err);
+          //     if (typeof callback === 'function') {
+          //       callback(new Error('Failed refreshing connections.'), null);
+          //     }
+          //     return;
+          //   }
+          //   if (typeof callback === 'function') {
+          //     callback(null, stream);
+          //   }
+          // });
         } else if (typeof callback === 'function') {
           callback(null, stream);
         }
@@ -1335,6 +1389,9 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
+  var self = this;
+  var listOfPeers = Object.keys(self._peerConnections);
+  var listOfPeerRestartErrors = {};
   if (this._streams.screenshare) {
     this._stopStreams({
       screenshare: true
@@ -1346,7 +1403,56 @@ Skylink.prototype.stopScreen = function () {
           false, this._streams.userMedia.stream.id || this._streams.userMedia.stream.label);
         this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
       }
-      this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
+      self.once('peerJoined', peerJoinedFn, function (peerId, peerInfo, isSelf) {
+        return isSelf;
+      });
+
+      var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+        log.log([null, 'PeerConnection', null, 'Invoked all peers to restart with MCU. Firing callback']);
+
+        if (typeof callback === 'function') {
+          if (Object.keys(listOfPeerRestartErrors).length > 0) {
+            callback({
+              refreshErrors: listOfPeerRestartErrors,
+              listOfPeers: listOfPeers
+            }, null);
+          } else {
+            callback(null, {
+              listOfPeers: listOfPeers
+            });
+          }
+        }
+      };
+
+      self.once('peerJoined', peerJoinedFn, function (peerId, peerInfo, isSelf) {
+        return isSelf;
+      });
+
+      self.leaveRoom(false, function (error, success) {
+        if (error) {
+          if (typeof callback === 'function') {
+            for (var i = 0; i < listOfPeers.length; i++) {
+              listOfPeerRestartErrors[listOfPeers[i]] = error;
+            }
+            callback({
+              refreshErrors: listOfPeerRestartErrors,
+              listOfPeers: listOfPeers
+            }, null);
+          }
+        } else {
+          //self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
+          self.joinRoom(self._selectedRoom, {
+            bandwidth: {},
+            googleXBandwidth: {},
+            sdpSettings: clone(self._sdpSettings),
+            voiceActivityDetection: self._voiceActivityDetection,
+            publishOnly: !!self._publishOnly,
+            parentId: self._parentId || null,
+            autoBandwidthAdjustment: self._bandwidthAdjuster
+          });
+        }
+      });
+      //this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
     }
   }
 };
