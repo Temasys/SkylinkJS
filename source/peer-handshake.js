@@ -5,7 +5,7 @@
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._doOffer = function(targetMid, iceRestart) {
+Skylink.prototype._doOffer = function(targetMid, iceRestart, mergeMessageWithOffer) {
   var self = this;
   var pc = self._peerConnections[targetMid];
 
@@ -34,7 +34,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
 
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === 'MCU') {
-    self._compareTrackCounts(targetMid);
+    //self._compareTrackCounts(targetMid);
     self._addLocalMediaStreams(targetMid);
   }
 
@@ -59,7 +59,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
   var onSuccessCbFn = function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
     self._handleNegotiationStats('create_offer', targetMid, offer, false);
-    self._setLocalAndSendMessage(targetMid, offer);
+    self._setLocalAndSendMessage(targetMid, offer, mergeMessageWithOffer);
   };
 
   var onErrorCbFn = function(error) {
@@ -150,7 +150,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescription) {
+Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescription, mergeMessage) {
   var self = this;
   var pc = self._peerConnections[targetMid];
 
@@ -198,13 +198,13 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     sdp: _sessionDescription.sdp
   };
 
-  // sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
-  // sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
-  // sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
-  // sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
-  // sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
-  // sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
-  // sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
+  sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
+  sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
 
   if (self._peerConnectionConfig.disableBundle) {
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=group:BUNDLE.*\r\n/gi, '');
@@ -234,14 +234,29 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       return;
     }
 
-    self._sendChannelMessage({
+    var messageToSend = {
       type: sessionDescription.type,
       sdp: sessionDescription.sdp,
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
-    });
+    };
+
+    // Merging Restart and Offer messages. The already present keys in offer message will not be overwritten.
+    // Only news keys from mergeMessage are added.
+    if (mergeMessage && Object.keys(mergeMessage).length) {
+      var keys = Object.keys(mergeMessage);
+      var currentMessageKeys = Object.keys(messageToSend);
+      for (var keyIndex = 0; keyIndex < keys.length; keyIndex++) {
+        var key = keys[keyIndex];
+        if (currentMessageKeys.indexOf(key) === -1) {
+          messageToSend[key] = mergeMessage[key];
+        }
+      }
+    }
+
+    self._sendChannelMessage(messageToSend);
     self._handleNegotiationStats(sessionDescription.type, targetMid, sessionDescription, false);
   };
 

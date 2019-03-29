@@ -1583,9 +1583,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
 
     self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
     self._peerEndOfCandidatesCounter[peerId].len = 0;
-    self._sendChannelMessage(restartMsg);
-    self._handleNegotiationStats('restart', peerId, restartMsg, false);
-    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
+    self._doOffer(peerId, doIceRestart, restartMsg);
+    //self._handleNegotiationStats('restart', peerId, restartMsg, false);
+    //self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === 'function') {
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
@@ -2102,10 +2102,10 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
       restartMsg.parentId = self._parentId;
     }
 
-    log.log([peerId, 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
+    // log.log([peerId, 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
 
-    self._sendChannelMessage(restartMsg);
-    self._handleNegotiationStats('restart', peerId, restartMsg, false);
+    self._doOffer('MCU', doIceRestart, restartMsg);
+    //self._handleNegotiationStats('restart', peerId, restartMsg, false);
   };
 
   // Toggle the main bandwidth options.
@@ -2130,24 +2130,27 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
     }
   }
 
-  for (var i = 0; i < listOfPeers.length; i++) {
-    if (!self._peerConnections[listOfPeers[i]]) {
-      var error = 'Peer connection with peer does not exists. Unable to restart';
-      log.error([listOfPeers[i], 'PeerConnection', null, error]);
-      listOfPeerRestartErrors[listOfPeers[i]] = new Error(error);
-      continue;
-    }
 
-    if (listOfPeers[i] !== 'MCU') {
-      self._trigger('peerRestart', listOfPeers[i], self.getPeerInfo(listOfPeers[i]), true, false);
+  // Below commented since with new MCU only peer connected is MCU
 
-      if (!self._initOptions.mcuUseRenegoRestart) {
-        sendRestartMsgFn(listOfPeers[i]);
-      }
-    }
-  }
+  // for (var i = 0; i < listOfPeers.length; i++) {
+  //   if (!self._peerConnections[listOfPeers[i]]) {
+  //     var error = 'Peer connection with peer does not exists. Unable to restart';
+  //     log.error([listOfPeers[i], 'PeerConnection', null, error]);
+  //     listOfPeerRestartErrors[listOfPeers[i]] = new Error(error);
+  //     continue;
+  //   }
+  //
+  //   if (listOfPeers[i] !== 'MCU') {
+  //     self._trigger('peerRestart', listOfPeers[i], self.getPeerInfo(listOfPeers[i]), true, false);
+  //
+  //     if (!self._initOptions.mcuUseRenegoRestart) {
+  //       sendRestartMsgFn(listOfPeers[i]);
+  //     }
+  //   }
+  // }
 
-  self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
+  // self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
 
   if (self._initOptions.mcuUseRenegoRestart) {
     self._peerEndOfCandidatesCounter.MCU = self._peerEndOfCandidatesCounter.MCU || {};
