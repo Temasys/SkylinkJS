@@ -1178,18 +1178,21 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
         if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
-          self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
-            if (err) {
-              log.error('Failed refreshing connections for shareScreen() ->', err);
-              if (typeof callback === 'function') {
-                callback(new Error('Failed refreshing connections.'), null);
+          var peerIds = Object.keys(self._peerConnections);
+          var gDMVideoTrack = stream.getVideoTracks()[0];
+          var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
+
+          for (var i = 0; i < peerIds.length; i++) {
+            var pc = self._peerConnections[peerIds[i]];
+            var senders = pc.getSenders();
+
+            for (var y = 0; y < senders.length; y++) {
+              var sender = senders[y];
+              if (sender.track && sender.track.id === gUMVideoTrack.id) {
+                sender.replaceTrack(gDMVideoTrack);
               }
-              return;
             }
-            if (typeof callback === 'function') {
-              callback(null, stream);
-            }
-          });
+          }
         } else if (typeof callback === 'function') {
           callback(null, stream);
         }
@@ -1266,6 +1269,9 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 
       var onErrorCbFn = function (error) {
         self._onStreamAccessError(error, settings, true, false);
+        if (typeof callback === 'function') {
+          callback(error, null);
+        }
       };
 
       if (typeof (AdapterJS || {}).webRTCReady !== 'function') {
@@ -1273,7 +1279,15 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       }
 
       AdapterJS.webRTCReady(function () {
-        navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+        if (typeof navigator.mediaDevices.getDisplayMedia === 'function') {
+          navigator.mediaDevices.getDisplayMedia(settings.getUserMediaSettings).then(function(stream) {
+            onSuccessCbFn(stream);
+          }).catch(function(err) {
+            onErrorCbFn(err);
+          });
+        } else {
+          navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+        }
       });
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
@@ -1324,19 +1338,36 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
-  if (this._streams.screenshare) {
-    this._stopStreams({
+  var self = this;
+  if (self._streams.screenshare) {
+    if (self._inRoom) {
+      if (self._streams.userMedia && self._streams.userMedia.stream) {
+        self._trigger('incomingStream', self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo(),
+          false, self._streams.userMedia.stream.id || self._streams.userMedia.stream.label);
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      }
+      //this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
+      if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
+        var peerIds = Object.keys(self._peerConnections);
+        var gDMVideoTrack = self._streams.screenshare.stream.getVideoTracks()[0];
+        var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
+
+        for (var i = 0; i < peerIds.length; i++) {
+          var pc = self._peerConnections[peerIds[i]];
+          var senders = pc.getSenders();
+
+          for (var y = 0; y < senders.length; y++) {
+            var sender = senders[y];
+            if (sender.track && sender.track.id === gDMVideoTrack.id) {
+              sender.replaceTrack(gUMVideoTrack);
+            }
+          }
+        }
+      }
+    }
+    self._stopStreams({
       screenshare: true
     });
-
-    if (this._inRoom) {
-      if (this._streams.userMedia && this._streams.userMedia.stream) {
-        this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo(),
-          false, this._streams.userMedia.stream.id || this._streams.userMedia.stream.label);
-        this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
-      }
-      this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
-    }
   }
 };
 
@@ -2052,6 +2083,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     settings: settings.settings,
     constraints: settings.getUserMediaSettings
   };
+
   self._muteStreams();
 
   self._parseStreamTracksInfo(isScreenSharing ? 'screenshare' : 'userMedia', function () {
@@ -2094,8 +2126,12 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
     navigator.getUserMedia({ audio: true }, onAudioSuccessCbFn, onAudioErrorCbFn);
     return;
   }
+  if (isScreenSharing) {
+    log.error('Failed retrieving screensharing Stream ->', error);
+  } else {
+    log.error('Failed retrieving camera Stream ->', error);
+  }
 
-  log.error('Failed retrieving ' + (isScreenSharing ? 'screensharing' : 'camera') + ' Stream ->', error);
 
   self._trigger('mediaAccessError', error, !!isScreenSharing, false);
 };
