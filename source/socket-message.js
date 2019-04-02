@@ -552,6 +552,10 @@ Skylink.prototype._approachEventHandler = function(message){
     enterMsg.parentId = self._parentId;
   }
 
+  if (self._hasMCU) {
+    enterMsg.target = 'MCU';
+  }
+
   self._sendChannelMessage(enterMsg);
   self._handleSessionStats(enterMsg);
 };
@@ -941,6 +945,10 @@ Skylink.prototype._inRoomHandler = function(message) {
 
   if (self._parentId) {
     enterMsg.parentId = self._parentId;
+  }
+
+  if (self._hasMCU) {
+    enterMsg.target = 'MCU';
   }
 
   self._sendChannelMessage(enterMsg);
