@@ -2346,4 +2346,29 @@ Skylink.prototype._compareTrackCounts = function (targetMid) {
   }
 };
 
+/**
+ * Function that iterates the Peer Connections and replaces track using the RTCRTPSender.replaceTrack
+ * @method _replaceTrack
+ * @param {String} trackIDToCompare - ID of the track whose RTCRTPSenders needs to be used
+ * @param {MediaStreamTrack} trackToReplace - The new track which will replace the old track
+ * @private
+ */
+Skylink.prototype._replaceTrack = function (trackIDToCompare, trackToReplace) {
+  var self = this;
+  if (Object.keys(self._peerConnections).length > 0) {
+    var peerIds = Object.keys(self._peerConnections);
+    for (var i = 0; i < peerIds.length; i++) {
+      var pc = self._peerConnections[peerIds[i]];
+      var senders = pc.getSenders();
+
+      for (var y = 0; y < senders.length; y++) {
+        var sender = senders[y];
+        if (sender.track && sender.track.id === trackIDToCompare) {
+          sender.replaceTrack(trackToReplace);
+        }
+      }
+    }
+  }
+};
+
 
