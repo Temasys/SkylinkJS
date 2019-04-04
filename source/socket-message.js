@@ -1587,6 +1587,10 @@ Skylink.prototype._offerHandler = function(message) {
     });
   };
 
+  if (self.getPeerInfo(targetMid).agent.name === 'edge' && offer.sdp[offer.sdp.length - 1] !== '\n' && offer.sdp[offer.sdp.length - 2] !== '\r') {
+    offer.sdp = offer.sdp + '\r\n';
+  }
+
   pc.setRemoteDescription(new RTCSessionDescription(offer), onSuccessCbFn, onErrorCbFn);
 };
 

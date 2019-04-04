@@ -1226,6 +1226,10 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
           shouldRenegotiate = false;
         }
 
+        if (AdapterJS.webrtcDetectedBrowser === 'edge') {
+          shouldRenegotiate = true;
+        }
+
         if (shouldRenegotiate) {
           if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
             stream.wasNegotiated = true;
@@ -1332,7 +1336,13 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       }
 
       AdapterJS.webRTCReady(function () {
-        if (typeof navigator.mediaDevices.getDisplayMedia === 'function') {
+        if (AdapterJS.webrtcDetectedBrowser === 'edge' && typeof navigator.getDisplayMedia === 'function') {
+          navigator.getDisplayMedia(settings.getUserMediaSettings).then(function(stream) {
+            onSuccessCbFn(stream);
+          }).catch(function(err) {
+            onErrorCbFn(err);
+          });
+        } else if (typeof navigator.mediaDevices.getDisplayMedia === 'function') {
           navigator.mediaDevices.getDisplayMedia(settings.getUserMediaSettings).then(function(stream) {
             onSuccessCbFn(stream);
           }).catch(function(err) {
