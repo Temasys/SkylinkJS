@@ -495,29 +495,63 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 Skylink.prototype.sendStream = function(options, callback) {
   var self = this;
 
-  var restartFn = function (stream) {
+  var renegotiate = function(newStream, cb) {
+    if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
+      self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
+        if (err) {
+          log.error('Failed refreshing connections for sendStream() ->', err);
+          if (typeof cb === 'function') {
+            cb(new Error('Failed refreshing connections.'), null);
+          }
+          return;
+        }
+        if (typeof cb === 'function') {
+          cb(null, newStream);
+        }
+      });
+    } else if (typeof cb === 'function') {
+      cb(null, newStream);
+    }
+  }
+
+  var performReplaceTracks = function (originalStream, newStream, cb) {
+    if (!originalStream) {
+      renegotiate(newStream, cb);
+      return;
+    }
+    var newStreamHasVideoTrack = Array.isArray(newStream.getVideoTracks()) && newStream.getVideoTracks().length;
+    var newStreamHasAudioTrack = Array.isArray(newStream.getAudioTracks()) && newStream.getAudioTracks().length;
+    var originalStreamHasVideoTrack = Array.isArray(originalStream.getVideoTracks()) && originalStream.getVideoTracks().length;
+    var originalStreamHasAudioTrack = Array.isArray(originalStream.getAudioTracks()) && originalStream.getAudioTracks().length;
+
+    if ((newStreamHasVideoTrack && !originalStreamHasVideoTrack) || (newStreamHasAudioTrack && !originalStreamHasAudioTrack)) {
+      renegotiate(newStream, cb);
+      return;
+    }
+
+    if (newStreamHasVideoTrack && originalStreamHasVideoTrack) {
+      self._replaceTrack(originalStream.getVideoTracks()[0].id, newStream.getVideoTracks()[0]);
+    }
+
+    if (newStreamHasAudioTrack && originalStreamHasAudioTrack) {
+      self._replaceTrack(originalStream.getAudioTracks()[0].id, newStream.getAudioTracks()[0]);
+    }
+  };
+
+  var restartFn = function (originalStream, stream) {
     if (self._inRoom) {
+
       if (!self._streams.screenshare) {
         self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo(), false, stream.id || stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      } else {
+        performReplaceTracks(originalStream, stream, callback);
       }
 
-      if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
-        self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
-          if (err) {
-            log.error('Failed refreshing connections for sendStream() ->', err);
-            if (typeof callback === 'function') {
-              callback(new Error('Failed refreshing connections.'), null);
-            }
-            return;
-          }
-          if (typeof callback === 'function') {
-            callback(null, stream);
-          }
-        });
-      } else if (typeof callback === 'function') {
-        callback(null, stream);
+      if (self._streams.userMedia) {
+        performReplaceTracks(originalStream, stream, callback);
       }
+
     } else if (typeof callback === 'function') {
       callback(null, stream);
     }
@@ -545,6 +579,16 @@ Skylink.prototype.sendStream = function(options, callback) {
       callback(new Error(edgeNotSupportError),null);
     }
     return;
+  }
+
+  var origStream = null;
+
+  if (self._streams.userMedia) {
+    origStream = self._streams.userMedia.stream;
+  }
+
+  if (self._streams.screenshare) {
+    origStream = self._streams.screenshare.stream;
   }
 
   if (typeof options.getAudioTracks === 'function' || typeof options.getVideoTracks === 'function') {
@@ -578,7 +622,7 @@ Skylink.prototype.sendStream = function(options, callback) {
       }
     }, false, false);
 
-    restartFn(options);
+    restartFn(origStream, options);
 
   } else {
     self.getUserMedia(options, function (err, stream) {
@@ -588,7 +632,7 @@ Skylink.prototype.sendStream = function(options, callback) {
         }
         return;
       }
-      restartFn(stream);
+      restartFn(origStream, stream);
     });
   }
 };
@@ -1177,25 +1221,11 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo(), true, stream.id || stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
-        if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
-          var peerIds = Object.keys(self._peerConnections);
-          var gDMVideoTrack = stream.getVideoTracks()[0];
-          var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
+        var gDMVideoTrack = stream.getVideoTracks()[0];
+        var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
 
-          for (var i = 0; i < peerIds.length; i++) {
-            var pc = self._peerConnections[peerIds[i]];
-            var senders = pc.getSenders();
+        self._replaceTrack(gUMVideoTrack.id, gDMVideoTrack);
 
-            for (var y = 0; y < senders.length; y++) {
-              var sender = senders[y];
-              if (sender.track && sender.track.id === gUMVideoTrack.id) {
-                sender.replaceTrack(gDMVideoTrack);
-              }
-            }
-          }
-        } else if (typeof callback === 'function') {
-          callback(null, stream);
-        }
       } else if (typeof callback === 'function') {
         callback(null, stream);
       }
@@ -1347,23 +1377,11 @@ Skylink.prototype.stopScreen = function () {
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
       }
       //this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
-      if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
-        var peerIds = Object.keys(self._peerConnections);
-        var gDMVideoTrack = self._streams.screenshare.stream.getVideoTracks()[0];
-        var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
 
-        for (var i = 0; i < peerIds.length; i++) {
-          var pc = self._peerConnections[peerIds[i]];
-          var senders = pc.getSenders();
+      var gDMVideoTrack = self._streams.screenshare.stream.getVideoTracks()[0];
+      var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
 
-          for (var y = 0; y < senders.length; y++) {
-            var sender = senders[y];
-            if (sender.track && sender.track.id === gDMVideoTrack.id) {
-              sender.replaceTrack(gUMVideoTrack);
-            }
-          }
-        }
-      }
+      self._replaceTrack(gDMVideoTrack.id, gUMVideoTrack);
     }
     self._stopStreams({
       screenshare: true
