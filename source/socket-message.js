@@ -1587,6 +1587,10 @@ Skylink.prototype._offerHandler = function(message) {
     });
   };
 
+  if (self.getPeerInfo(targetMid).agent.name === 'edge' && offer.sdp[offer.sdp.length - 1] !== '\n' && offer.sdp[offer.sdp.length - 2] !== '\r') {
+    offer.sdp = offer.sdp + '\r\n';
+  }
+
   pc.setRemoteDescription(new RTCSessionDescription(offer), onSuccessCbFn, onErrorCbFn);
 };
 
@@ -1754,6 +1758,10 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
   answer.sdp = self._setSCTPport(targetMid, answer);
+
+  if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
+    self._setOriginalDTLSRole(answer, true);
+  }
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 

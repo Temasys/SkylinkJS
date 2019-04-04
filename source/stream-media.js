@@ -1220,12 +1220,39 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       if (self._inRoom) {
         self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo(), true, stream.id || stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+        var shouldRenegotiate = true;
 
-        var gDMVideoTrack = stream.getVideoTracks()[0];
-        var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
+        if (self._streams.userMedia && self._streams.userMedia.stream && Array.isArray(self._streams.userMedia.stream.getVideoTracks()) && self._streams.userMedia.stream.getVideoTracks().length) {
+          shouldRenegotiate = false;
+        }
 
-        self._replaceTrack(gUMVideoTrack.id, gDMVideoTrack);
+        if (AdapterJS.webrtcDetectedBrowser === 'edge') {
+          shouldRenegotiate = true;
+        }
 
+        if (shouldRenegotiate) {
+          if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
+            stream.wasNegotiated = true;
+            self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
+              if (err) {
+                log.error('Failed refreshing connections for shareScreen() ->', err);
+                if (typeof callback === 'function') {
+                  callback(new Error('Failed refreshing connections.'), null);
+                }
+                return;
+              }
+              if (typeof callback === 'function') {
+                callback(null, stream);
+              }
+            });
+          } else if (typeof callback === 'function') {
+            callback(null, stream);
+          }
+        } else {
+          var gDMVideoTrack = stream.getVideoTracks()[0];
+          var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
+          self._replaceTrack(gUMVideoTrack.id, gDMVideoTrack);
+        }
       } else if (typeof callback === 'function') {
         callback(null, stream);
       }
@@ -1309,7 +1336,13 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       }
 
       AdapterJS.webRTCReady(function () {
-        if (typeof navigator.mediaDevices.getDisplayMedia === 'function') {
+        if (AdapterJS.webrtcDetectedBrowser === 'edge' && typeof navigator.getDisplayMedia === 'function') {
+          navigator.getDisplayMedia(settings.getUserMediaSettings).then(function(stream) {
+            onSuccessCbFn(stream);
+          }).catch(function(err) {
+            onErrorCbFn(err);
+          });
+        } else if (typeof navigator.mediaDevices.getDisplayMedia === 'function') {
           navigator.mediaDevices.getDisplayMedia(settings.getUserMediaSettings).then(function(stream) {
             onSuccessCbFn(stream);
           }).catch(function(err) {
@@ -1376,12 +1409,15 @@ Skylink.prototype.stopScreen = function () {
           false, self._streams.userMedia.stream.id || self._streams.userMedia.stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
       }
-      //this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
 
-      var gDMVideoTrack = self._streams.screenshare.stream.getVideoTracks()[0];
-      var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
+      if (self._streams.screenshare.stream.wasNegotiated === true) {
+        this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
+      } else {
+        var gDMVideoTrack = self._streams.screenshare.stream.getVideoTracks()[0];
+        var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
 
-      self._replaceTrack(gDMVideoTrack.id, gUMVideoTrack);
+        self._replaceTrack(gDMVideoTrack.id, gUMVideoTrack);
+      }
     }
     self._stopStreams({
       screenshare: true
