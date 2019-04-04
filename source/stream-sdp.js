@@ -1432,3 +1432,55 @@ Skylink.prototype._setSCTPport = function (targetMid, sessionDescription) {
 
   return sessionDescription.sdp;
 };
+
+/**
+ * Function sets the original DTLS role which was negotiated on first offer/ansswer exchange
+ * This needs to be done until https://bugzilla.mozilla.org/show_bug.cgi?id=1240897 is released in Firefox 68
+ * Estimated release date for Firefox 68 : 2019-07-09 (https://wiki.mozilla.org/Release_Management/Calendar)
+ * @method _setOriginalDTLSRole
+ * @private
+ * @for Skylink
+ * @since 0.6.35
+ */
+Skylink.prototype._setOriginalDTLSRole = function (sessionDescription, isRemote) {
+  var self = this;
+  var sdpType = sessionDescription.type;
+  var role = null;
+  var aSetupPattern = null;
+  var invertRoleMap = { active: 'passive', passive: 'active' };
+
+  if (self._originalDTLSRole !== null || sdpType === 'offer') {
+    return;
+  }
+
+  aSetupPattern = sessionDescription.sdp.match(/a=setup:([a-z]+)/);
+
+  if (!aSetupPattern) {
+    return;
+  }
+
+  role = aSetupPattern[1];
+  self._originalDTLSRole = isRemote ? invertRoleMap[role] : role;
+};
+
+
+/**
+ * Function that modifies the DTLS role in answer sdp
+ * This needs to be done until https://bugzilla.mozilla.org/show_bug.cgi?id=1240897 is released in Firefox 68
+ * Estimated release date for Firefox 68 : 2019-07-09 (https://wiki.mozilla.org/Release_Management/Calendar)
+ * @method _modifyDTLSRole
+ * @private
+ * @for Skylink
+ * @since 1.0.0
+ */
+Skylink.prototype._modifyDTLSRole = function (sessionDescription) {
+  var self = this;
+  var sdpType = sessionDescription.type;
+
+  if (self._originalDTLSRole === null || sdpType === 'offer') {
+    return;
+  }
+
+  sessionDescription.sdp = sessionDescription.sdp.replace(/a=setup:[a-z]+/g, 'a=setup:' + self._originalDTLSRole);
+  return sessionDescription.sdp;
+};

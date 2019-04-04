@@ -127,6 +127,12 @@ Skylink.prototype._doAnswer = function(targetMid) {
   var onSuccessCbFn = function(answer) {
     log.debug([targetMid, null, null, 'Created answer'], answer);
     self._handleNegotiationStats('create_answer', targetMid, answer, false);
+
+    if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
+      self._setOriginalDTLSRole(answer, false);
+      answer.sdp = self._modifyDTLSRole(answer);
+    }
+
     self._setLocalAndSendMessage(targetMid, answer);
   };
 

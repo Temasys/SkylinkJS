@@ -1755,6 +1755,10 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
   answer.sdp = self._setSCTPport(targetMid, answer);
 
+  if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
+    self._setOriginalDTLSRole(answer, true);
+  }
+
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
   // This should be the state after offer is received. or even after negotiation is successful
