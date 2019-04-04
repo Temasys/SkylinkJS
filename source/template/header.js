@@ -898,4 +898,13 @@ function Skylink() {
    */
   this._currentRequestedTracks = { audio: 0, video: 0 };
 
+  /**
+   * Originally negotiated DTLS role of this peer.
+   * @attribute _originalDTLSRole
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 1.0.0
+   */
+  this._originalDTLSRole = null;
 }
