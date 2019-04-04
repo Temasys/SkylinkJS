@@ -495,11 +495,39 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 Skylink.prototype.sendStream = function(options, callback) {
   var self = this;
 
-  var performReplaceTracks = function (originalStream, newStream) {
+  var renegotiate = function(newStream, cb) {
+    if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
+      self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
+        if (err) {
+          log.error('Failed refreshing connections for sendStream() ->', err);
+          if (typeof cb === 'function') {
+            cb(new Error('Failed refreshing connections.'), null);
+          }
+          return;
+        }
+        if (typeof cb === 'function') {
+          cb(null, newStream);
+        }
+      });
+    } else if (typeof cb === 'function') {
+      cb(null, newStream);
+    }
+  }
+
+  var performReplaceTracks = function (originalStream, newStream, cb) {
+    if (!originalStream) {
+      renegotiate(newStream, cb);
+      return;
+    }
     var newStreamHasVideoTrack = Array.isArray(newStream.getVideoTracks()) && newStream.getVideoTracks().length;
     var newStreamHasAudioTrack = Array.isArray(newStream.getAudioTracks()) && newStream.getAudioTracks().length;
     var originalStreamHasVideoTrack = Array.isArray(originalStream.getVideoTracks()) && originalStream.getVideoTracks().length;
     var originalStreamHasAudioTrack = Array.isArray(originalStream.getAudioTracks()) && originalStream.getAudioTracks().length;
+
+    if ((newStreamHasVideoTrack && !originalStreamHasVideoTrack) || (newStreamHasAudioTrack && !originalStreamHasAudioTrack)) {
+      renegotiate(newStream, cb);
+      return;
+    }
 
     if (newStreamHasVideoTrack && originalStreamHasVideoTrack) {
       self._replaceTrack(originalStream.getVideoTracks()[0].id, newStream.getVideoTracks()[0]);
@@ -517,11 +545,11 @@ Skylink.prototype.sendStream = function(options, callback) {
         self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo(), false, stream.id || stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
       } else {
-        performReplaceTracks(originalStream, stream);
+        performReplaceTracks(originalStream, stream, callback);
       }
 
       if (self._streams.userMedia) {
-        performReplaceTracks(originalStream, stream);
+        performReplaceTracks(originalStream, stream, callback);
       }
 
     } else if (typeof callback === 'function') {
