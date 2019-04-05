@@ -2252,31 +2252,21 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
           if (updatedStream ? (pc.localStreamId ? updatedStream.id !== pc.localStreamId : true) : true) {
-            if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
-              pc.getSenders().forEach(function (sender) {
-                pc.removeTrack(sender);
-              });
-            } else {
-              pc.getLocalStreams().forEach(function (stream) {
-                pc.removeStream(stream);
-              });
-            }
+            pc.getSenders().forEach(function (sender) {
+              pc.removeTrack(sender);
+            });
 
             if (!offerToReceiveAudio && !offerToReceiveVideo) {
               return;
             }
 
             if (updatedStream) {
-              if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
                 updatedStream.getTracks().forEach(function (track) {
                   if ((track.kind === 'audio' && !offerToReceiveAudio) || (track.kind === 'video' && !offerToReceiveVideo)) {
                     return;
                   }
                   pc.addTrack(track, updatedStream);
                 });
-              } else {
-                pc.addStream(updatedStream);
-              }
 
               pc.localStreamId = updatedStream.id || updatedStream.label;
               pc.localStream = updatedStream;
