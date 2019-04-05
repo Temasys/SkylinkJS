@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.9.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.9.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1674,9 +1674,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
 
     self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
     self._peerEndOfCandidatesCounter[peerId].len = 0;
-    self._sendChannelMessage(restartMsg);
-    self._handleNegotiationStats(&#x27;restart&#x27;, peerId, restartMsg, false);
-    self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
+    self._doOffer(peerId, doIceRestart, restartMsg);
+    //self._handleNegotiationStats(&#x27;restart&#x27;, peerId, restartMsg, false);
+    //self._trigger(&#x27;peerRestart&#x27;, peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === &#x27;function&#x27;) {
       log.debug([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Firing restart callback&#x27;]);
@@ -1953,14 +1953,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
   };
   self.videoRenderers = self.videoRenderers || {};
-  pc.onaddstream = function (evt) {
+  pc.ontrack = function (rtcTrackEvent) {
     // TargetMid goes all the way back to Skylink.prototype._enterHandler
 
     if (!self._peerConnections[targetMid]) {
       return;
     }
 
-    var stream = evt.stream || evt;
+    var stream = rtcTrackEvent.streams[0];
+    var transceiverMid = rtcTrackEvent.transceiver.mid;
 
     pc.remoteStream = stream;
     pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
@@ -1980,7 +1981,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasStream = true;
     pc.hasScreen = peerSettings.video &amp;&amp; typeof peerSettings.video === &#x27;object&#x27; &amp;&amp; peerSettings.video.screenshare;
 
-    self._onRemoteStreamAdded(self._hasMCU ? self.streamIdPeerIdMap[stream.id] : targetMid, stream, !!pc.hasScreen);
+    self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, !!pc.hasScreen);
   };
 
   pc.onremovestream = function(evt) {
@@ -2192,10 +2193,10 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
       restartMsg.parentId = self._parentId;
     }
 
-    log.log([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Sending restart message to signaling server -&gt;&#x27;], restartMsg);
+    // log.log([peerId, &#x27;RTCPeerConnection&#x27;, null, &#x27;Sending restart message to signaling server -&gt;&#x27;], restartMsg);
 
-    self._sendChannelMessage(restartMsg);
-    self._handleNegotiationStats(&#x27;restart&#x27;, peerId, restartMsg, false);
+    self._doOffer(&#x27;MCU&#x27;, doIceRestart, restartMsg);
+    //self._handleNegotiationStats(&#x27;restart&#x27;, peerId, restartMsg, false);
   };
 
   // Toggle the main bandwidth options.
@@ -2220,24 +2221,27 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
     }
   }
 
-  for (var i = 0; i &lt; listOfPeers.length; i++) {
-    if (!self._peerConnections[listOfPeers[i]]) {
-      var error = &#x27;Peer connection with peer does not exists. Unable to restart&#x27;;
-      log.error([listOfPeers[i], &#x27;PeerConnection&#x27;, null, error]);
-      listOfPeerRestartErrors[listOfPeers[i]] = new Error(error);
-      continue;
-    }
 
-    if (listOfPeers[i] !== &#x27;MCU&#x27;) {
-      self._trigger(&#x27;peerRestart&#x27;, listOfPeers[i], self.getPeerInfo(listOfPeers[i]), true, false);
+  // Below commented since with new MCU only peer connected is MCU
 
-      if (!self._initOptions.mcuUseRenegoRestart) {
-        sendRestartMsgFn(listOfPeers[i]);
-      }
-    }
-  }
+  // for (var i = 0; i &lt; listOfPeers.length; i++) {
+  //   if (!self._peerConnections[listOfPeers[i]]) {
+  //     var error = &#x27;Peer connection with peer does not exists. Unable to restart&#x27;;
+  //     log.error([listOfPeers[i], &#x27;PeerConnection&#x27;, null, error]);
+  //     listOfPeerRestartErrors[listOfPeers[i]] = new Error(error);
+  //     continue;
+  //   }
+  //
+  //   if (listOfPeers[i] !== &#x27;MCU&#x27;) {
+  //     self._trigger(&#x27;peerRestart&#x27;, listOfPeers[i], self.getPeerInfo(listOfPeers[i]), true, false);
+  //
+  //     if (!self._initOptions.mcuUseRenegoRestart) {
+  //       sendRestartMsgFn(listOfPeers[i]);
+  //     }
+  //   }
+  // }
 
-  self._trigger(&#x27;serverPeerRestart&#x27;, &#x27;MCU&#x27;, self.SERVER_PEER_TYPE.MCU);
+  // self._trigger(&#x27;serverPeerRestart&#x27;, &#x27;MCU&#x27;, self.SERVER_PEER_TYPE.MCU);
 
   if (self._initOptions.mcuUseRenegoRestart) {
     self._peerEndOfCandidatesCounter.MCU = self._peerEndOfCandidatesCounter.MCU || {};
@@ -2388,6 +2392,72 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
 
     } catch (error) {
       log.error([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Failed signaling end-of-candidates -&gt;&#x27;], error);
+    }
+  }
+};
+
+/**
+ * Function that compares trackCount sent by MCU and decides wether to add new Transceivers based on count differences
+ * @method _compareTrackCounts
+ * @param {String} targetMid
+ * @private
+ */
+Skylink.prototype._compareTrackCounts = function (targetMid) {
+  var self = this;
+  var pc = self._peerConnections[targetMid];
+
+  if (pc &amp;&amp; typeof pc.getTransceivers === &#x27;function&#x27;) {
+    var transceivers = pc.getTransceivers();
+    var transceiverTypeCount = {
+      audio: 0,
+      video: 0
+    };
+
+    var checkDiffAndAddTransceivers = function (kind, requestedKindCount, actualKindCount, peerConnection) {
+      if (requestedKindCount &gt; actualKindCount) {
+        var diff = requestedKindCount - actualKindCount;
+        while (diff) {
+          peerConnection.addTransceiver(kind);
+          diff = diff - 1;
+        }
+      }
+    };
+
+    if (transceivers &amp;&amp; transceivers.length) {
+      for (var i = 0; i &lt; transceivers.length; i++) {
+        if (transceivers[i] &amp;&amp; transceivers[i].receiver &amp;&amp; transceivers[i].receiver.track) {
+          var kind = transceivers[i].receiver.track.kind;
+          transceiverTypeCount[kind] += 1;
+        }
+      }
+    }
+
+    checkDiffAndAddTransceivers(&#x27;video&#x27;, self._currentRequestedTracks[&#x27;video&#x27;], transceiverTypeCount.video, pc);
+    checkDiffAndAddTransceivers(&#x27;audio&#x27;, self._currentRequestedTracks[&#x27;audio&#x27;], transceiverTypeCount.audio, pc);
+  }
+};
+
+/**
+ * Function that iterates the Peer Connections and replaces track using the RTCRTPSender.replaceTrack
+ * @method _replaceTrack
+ * @param {String} trackIDToCompare - ID of the track whose RTCRTPSenders needs to be used
+ * @param {MediaStreamTrack} trackToReplace - The new track which will replace the old track
+ * @private
+ */
+Skylink.prototype._replaceTrack = function (trackIDToCompare, trackToReplace) {
+  var self = this;
+  if (Object.keys(self._peerConnections).length &gt; 0) {
+    var peerIds = Object.keys(self._peerConnections);
+    for (var i = 0; i &lt; peerIds.length; i++) {
+      var pc = self._peerConnections[peerIds[i]];
+      var senders = pc.getSenders();
+
+      for (var y = 0; y &lt; senders.length; y++) {
+        var sender = senders[y];
+        if (sender.track &amp;&amp; sender.track.id === trackIDToCompare) {
+          sender.replaceTrack(trackToReplace);
+        }
+      }
     }
   }
 };

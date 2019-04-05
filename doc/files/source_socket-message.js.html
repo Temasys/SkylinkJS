@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.9.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.9.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -643,6 +643,10 @@ Skylink.prototype._approachEventHandler = function(message){
     enterMsg.parentId = self._parentId;
   }
 
+  if (self._hasMCU) {
+    enterMsg.target = &#x27;MCU&#x27;;
+  }
+
   self._sendChannelMessage(enterMsg);
   self._handleSessionStats(enterMsg);
 };
@@ -1034,6 +1038,10 @@ Skylink.prototype._inRoomHandler = function(message) {
     enterMsg.parentId = self._parentId;
   }
 
+  if (self._hasMCU) {
+    enterMsg.target = &#x27;MCU&#x27;;
+  }
+
   self._sendChannelMessage(enterMsg);
   self._handleSessionStats(enterMsg);
 };
@@ -1143,37 +1151,39 @@ Skylink.prototype._enterHandler = function(message) {
       videoMuted: 0
     };
 
-    var welcomeMsg = {
-      type: self._SIG_MESSAGE_TYPE.WELCOME,
-      mid: self._user.sid,
-      rid: self._room.id,
-      enableIceTrickle: self._initOptions.enableIceTrickle,
-      enableDataChannel: self._initOptions.enableDataChannel,
-      enableIceRestart: self._enableIceRestart,
-      agent: AdapterJS.webrtcDetectedBrowser,
-      version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
-      receiveOnly: self.getPeerInfo().config.receiveOnly,
-      os: window.navigator.platform,
-      userInfo: self._getUserInfo(targetMid),
-      target: targetMid,
-      weight: self._peerPriorityWeight,
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
-      DTProtocolVersion: self.DT_PROTOCOL_VERSION
-    };
-
-    if (self._publishOnly) {
-      welcomeMsg.publishOnly = {
-        type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
+    if (self._hasMCU !== true) {
+      var welcomeMsg = {
+        type: self._SIG_MESSAGE_TYPE.WELCOME,
+        mid: self._user.sid,
+        rid: self._room.id,
+        enableIceTrickle: self._initOptions.enableIceTrickle,
+        enableDataChannel: self._initOptions.enableDataChannel,
+        enableIceRestart: self._enableIceRestart,
+        agent: AdapterJS.webrtcDetectedBrowser,
+        version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
+        receiveOnly: self.getPeerInfo().config.receiveOnly,
+        os: window.navigator.platform,
+        userInfo: self._getUserInfo(targetMid),
+        target: targetMid,
+        weight: self._peerPriorityWeight,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+        DTProtocolVersion: self.DT_PROTOCOL_VERSION
       };
-    }
 
-    if (self._parentId) {
-      welcomeMsg.parentId = self._parentId;
-    }
+      if (self._publishOnly) {
+        welcomeMsg.publishOnly = {
+          type: self._streams.screenshare &amp;&amp; self._streams.screenshare.stream ? &#x27;screenshare&#x27; : &#x27;video&#x27;
+        };
+      }
 
-    self._sendChannelMessage(welcomeMsg);
-    self._handleNegotiationStats(&#x27;welcome&#x27;, targetMid, welcomeMsg, false);
+      if (self._parentId) {
+        welcomeMsg.parentId = self._parentId;
+      }
+
+      self._sendChannelMessage(welcomeMsg);
+      self._handleNegotiationStats(&#x27;welcome&#x27;, targetMid, welcomeMsg, false);
+    }
 
     if (isNewPeer) {
       self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
@@ -1218,6 +1228,7 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
+  var trackCount = message.trackCount;
   var userInfo = message.userInfo || {};
   userInfo.settings = userInfo.settings || {};
   userInfo.mediaStatus = userInfo.mediaStatus || {};
@@ -1256,6 +1267,10 @@ Skylink.prototype._restartHandler = function(message){
     DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.DTProtocolVersion === &#x27;string&#x27; ?
       message.DTProtocolVersion : (self._hasMCU || targetMid === &#x27;MCU&#x27; ? &#x27;0.1.2&#x27; : &#x27;0.1.0&#x27;)
   };
+
+  if (trackCount) {
+    self._currentRequestedTracks = trackCount;
+  }
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;restart&quot; received -&gt;&#x27;], message);
   self._handleNegotiationStats(&#x27;restart&#x27;, targetMid, message, true);
@@ -1362,6 +1377,7 @@ Skylink.prototype._welcomeHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
   var isNewPeer = false;
+  var trackCount = message.trackCount;
   var userInfo = message.userInfo || {};
   userInfo.settings = userInfo.settings || {};
   userInfo.mediaStatus = userInfo.mediaStatus || {};
@@ -1400,6 +1416,10 @@ Skylink.prototype._welcomeHandler = function(message) {
     DTProtocolVersion: message.DTProtocolVersion &amp;&amp; typeof message.DTProtocolVersion === &#x27;string&#x27; ?
       message.DTProtocolVersion : (self._hasMCU || targetMid === &#x27;MCU&#x27; ? &#x27;0.1.2&#x27; : &#x27;0.1.0&#x27;)
   };
+
+  if (trackCount) {
+    self._currentRequestedTracks = trackCount;
+  }
 
   log.log([targetMid, &#x27;RTCPeerConnection&#x27;, null, &#x27;Peer &quot;welcome&quot; received -&gt;&#x27;], message);
   self._handleNegotiationStats(&#x27;welcome&#x27;, targetMid, message, true);
@@ -1559,6 +1579,10 @@ Skylink.prototype._offerHandler = function(message) {
     sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, &#x27;\n&#x27;).split(&#x27;\n&#x27;).join(&#x27;\r\n&#x27;) : message.sdp
   };
 
+  if (targetMid === &#x27;MCU&#x27;) {
+    self._transceiverIdPeerIdMap = message.transceiverIdPeerIdMap || {};
+  }
+
   self._handleNegotiationStats(&#x27;offer&#x27;, targetMid, offer, true);
 
   if (!pc) {
@@ -1591,14 +1615,14 @@ Skylink.prototype._offerHandler = function(message) {
 
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Session description object created&#x27;], offer);
 
-  offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
-  offer.sdp = self._setSDPCodec(targetMid, offer);
-  offer.sdp = self._setSDPBitrate(targetMid, offer);
-  offer.sdp = self._setSDPCodecParams(targetMid, offer);
-  offer.sdp = self._removeSDPCodecs(targetMid, offer);
-  offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
-  offer.sdp = self._handleSDPConnectionSettings(targetMid, offer, &#x27;remote&#x27;);
-  offer.sdp = self._removeSDPUnknownAptRtx(targetMid, offer);
+  // offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
+  // offer.sdp = self._setSDPCodec(targetMid, offer);
+  // offer.sdp = self._setSDPBitrate(targetMid, offer);
+  // offer.sdp = self._setSDPCodecParams(targetMid, offer);
+  // offer.sdp = self._removeSDPCodecs(targetMid, offer);
+  // offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
+  // offer.sdp = self._handleSDPConnectionSettings(targetMid, offer, &#x27;remote&#x27;);
+  // offer.sdp = self._removeSDPUnknownAptRtx(targetMid, offer);
 
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Updated remote offer -&gt;&#x27;], offer.sdp);
 
@@ -1628,7 +1652,7 @@ Skylink.prototype._offerHandler = function(message) {
     self._trigger(&#x27;peerUpdated&#x27;, targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  self._parseSDPMediaStreamIDs(targetMid, offer);
+  // self._parseSDPMediaStreamIDs(targetMid, offer);
 
   var onSuccessCbFn = function() {
     log.debug([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Remote description set&#x27;]);
@@ -1653,6 +1677,10 @@ Skylink.prototype._offerHandler = function(message) {
       offer: offer
     });
   };
+
+  if (self.getPeerInfo(targetMid).agent.name === &#x27;edge&#x27; &amp;&amp; offer.sdp[offer.sdp.length - 1] !== &#x27;\n&#x27; &amp;&amp; offer.sdp[offer.sdp.length - 2] !== &#x27;\r&#x27;) {
+    offer.sdp = offer.sdp + &#x27;\r\n&#x27;;
+  }
 
   pc.setRemoteDescription(new RTCSessionDescription(offer), onSuccessCbFn, onErrorCbFn);
 };
@@ -1771,7 +1799,7 @@ Skylink.prototype._answerHandler = function(message) {
   var pc = self._peerConnections[targetMid];
 
   if (targetMid === &#x27;MCU&#x27;) {
-    self.streamIdPeerIdMap = message.streamIdPeerIdMap || {};
+    self._transceiverIdPeerIdMap = message.transceiverIdPeerIdMap || {};
   }
 
   log.log([targetMid, null, message.type, &#x27;Received answer from peer. Session description:&#x27;], clone(message));
@@ -1820,7 +1848,11 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
   answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, &#x27;remote&#x27;);
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
-  //answer.sdp = self._setSCTPport(targetMid, answer);
+  answer.sdp = self._setSCTPport(targetMid, answer);
+
+  if (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+    self._setOriginalDTLSRole(answer, true);
+  }
 
   log.log([targetMid, &#x27;RTCSessionDescription&#x27;, message.type, &#x27;Updated remote answer -&gt;&#x27;], answer.sdp);
 
@@ -1858,6 +1890,7 @@ Skylink.prototype._answerHandler = function(message) {
     pc.setAnswer = &#x27;remote&#x27;;
     pc.processingRemoteSDP = false;
 
+    self._acknowledgeAnswer(targetMid, true, null);
     self._handleNegotiationStats(&#x27;set_answer&#x27;, targetMid, answer, true);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
@@ -1874,6 +1907,7 @@ Skylink.prototype._answerHandler = function(message) {
   };
 
   var onErrorCbFn = function(error) {
+    self._acknowledgeAnswer(targetMid, false, error);
     self._handleNegotiationStats(&#x27;error_set_answer&#x27;, targetMid, answer, true, error);
     self._trigger(&#x27;handshakeProgress&#x27;, self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
@@ -2118,6 +2152,32 @@ Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
 
   return false;
 };
+
+/**
+ * Function that sends a SIG_MESSAGE_TYPE.ANSWER_ACK message to MCU to denote that SDP negotiation has completed (either with success or error)
+ * @method _acknowledgeAnswer
+ * @private
+ * @for Skylink
+ * @since 1.0.0
+ */
+Skylink.prototype._acknowledgeAnswer = function (targetMid, isSuccess, error) {
+  var self = this;
+  if (self._hasMCU) {
+    var statsStateKey = isSuccess ? &#x27;set_answer_ack&#x27; : &#x27;error_set_answer_ack&#x27;;
+    var answerAckMessage = {
+      rid: self._room.id,
+      mid: self._user.sid,
+      target: targetMid,
+      success: isSuccess,
+      type: self._SIG_MESSAGE_TYPE.ANSWER_ACK,
+    };
+    self._sendChannelMessage(answerAckMessage);
+    log.debug([&#x27;MCU&#x27;, &#x27;Remote Description&#x27;, null, &#x27;Answer acknowledgement message sent to MCU via SIG. Message body --&gt;&#x27;], answerAckMessage);
+    self._handleNegotiationStats(statsStateKey, targetMid, answerAckMessage, true, error);
+  }
+  return false;
+};
+
 
     </pre>
 </div>
