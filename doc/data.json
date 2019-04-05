@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "1.0.0",
+        "version": "0.9.0",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -1202,6 +1202,42 @@
             "access": "private",
             "tagname": "",
             "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 881,
+            "description": "A mapping of transceiverIds and peer IDs (only when new MCU is in effect)",
+            "itemtype": "attribute",
+            "name": "_transceiverIdPeerIdMap",
+            "type": "Object",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 891,
+            "description": "(Extra) Tracks requested by the Peer/MCU in welcome/restart message. Used to create transceivers before createOffer.",
+            "itemtype": "attribute",
+            "name": "_transceiverIdPeerIdMap",
+            "type": "Object",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.31",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/template/header.js",
+            "line": 901,
+            "description": "Originally negotiated DTLS role of this peer.",
+            "itemtype": "attribute",
+            "name": "_originalDTLSRole",
+            "type": "String",
+            "access": "private",
+            "tagname": "",
+            "since": "1.0.0",
             "class": "Skylink"
         },
         {
@@ -2747,7 +2783,7 @@
         },
         {
             "file": "source/constants.js",
-            "line": 1453,
+            "line": 1454,
             "description": "Stores the list of socket messaging protocol types to queue when sent less than a second interval.",
             "itemtype": "attribute",
             "name": "_GROUP_MESSAGE_LIST",
@@ -2760,7 +2796,7 @@
         },
         {
             "file": "source/constants.js",
-            "line": 1470,
+            "line": 1471,
             "description": "<blockquote class=\"info\">\n  Note that this is used only for SDK development purposes.<br>\n  Current version: <code>1.1</code>\n</blockquote>\nThe value of the current version of the stats API used.",
             "itemtype": "attribute",
             "name": "STATS_API_VERSION",
@@ -2771,7 +2807,7 @@
         },
         {
             "file": "source/constants.js",
-            "line": 1484,
+            "line": 1485,
             "description": "The options available for video and audio bitrates (kbps) quality.",
             "itemtype": "attribute",
             "name": "VIDEO_QUALITY",
@@ -2804,7 +2840,7 @@
         },
         {
             "file": "source/constants.js",
-            "line": 1507,
+            "line": 1508,
             "description": "The list of RTMP states.",
             "itemtype": "attribute",
             "name": "RTMP_STATE",
@@ -3841,7 +3877,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2056,
+            "line": 2057,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3852,7 +3888,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2205,
+            "line": 2209,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3863,13 +3899,52 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2225,
+            "line": 2229,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 2308,
+            "description": "Function that compares trackCount sent by MCU and decides wether to add new Transceivers based on count differences",
+            "itemtype": "method",
+            "name": "_compareTrackCounts",
+            "params": [
+                {
+                    "name": "targetMid",
+                    "description": "",
+                    "type": "String"
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/peer-connection.js",
+            "line": 2349,
+            "description": "Function that iterates the Peer Connections and replaces track using the RTCRTPSender.replaceTrack",
+            "itemtype": "method",
+            "name": "_replaceTrack",
+            "params": [
+                {
+                    "name": "trackIDToCompare",
+                    "description": "- ID of the track whose RTCRTPSenders needs to be used",
+                    "type": "String"
+                },
+                {
+                    "name": "trackToReplace",
+                    "description": "- The new track which will replace the old track",
+                    "type": "MediaStreamTrack"
+                }
+            ],
+            "access": "private",
+            "tagname": "",
             "class": "Skylink"
         },
         {
@@ -4071,7 +4146,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 80,
+            "line": 81,
             "description": "Function that creates the Peer connection answer session description.\nThis comes after receiving and setting the offer session description.",
             "itemtype": "method",
             "name": "_doAnswer",
@@ -4082,7 +4157,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 143,
+            "line": 150,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -9233,7 +9308,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 559,
+            "line": 563,
             "description": "Function that handles the \"redirect\" socket message received.\nSee confluence docs for the \"redirect\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_redirectHandler",
@@ -9244,7 +9319,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 593,
+            "line": 597,
             "description": "Function that handles the \"updateUserEvent\" socket message received.\nSee confluence docs for the \"updateUserEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_updateUserEventHandler",
@@ -9255,7 +9330,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 620,
+            "line": 624,
             "description": "Function that handles the \"roomLockEvent\" socket message received.\nSee confluence docs for the \"roomLockEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_roomLockEventHandler",
@@ -9266,7 +9341,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 635,
+            "line": 639,
             "description": "Function that handles the \"muteAudioEvent\" socket message received.\nSee confluence docs for the \"muteAudioEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteAudioEventHandler",
@@ -9277,7 +9352,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 665,
+            "line": 669,
             "description": "Function that handles the \"muteVideoEvent\" socket message received.\nSee confluence docs for the \"muteVideoEvent\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_muteVideoEventHandler",
@@ -9288,7 +9363,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 695,
+            "line": 699,
             "description": "Function that handles the \"stream\" socket message received.\nSee confluence docs for the \"stream\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_streamEventHandler",
@@ -9299,7 +9374,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 727,
+            "line": 731,
             "description": "Function that handles the \"bye\" socket message received.\nSee confluence docs for the \"bye\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_byeHandler",
@@ -9310,7 +9385,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 748,
+            "line": 752,
             "description": "Function that handles the \"private\" socket message received.\nSee confluence docs for the \"private\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_privateMessageHandler",
@@ -9321,7 +9396,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 770,
+            "line": 774,
             "description": "Function that handles the \"public\" socket message received.\nSee confluence docs for the \"public\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_publicMessageHandler",
@@ -9332,7 +9407,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 792,
+            "line": 796,
             "description": "Handles the RECORDING Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_recordingEventHandler",
@@ -9368,7 +9443,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 881,
+            "line": 885,
             "description": "Function that handles the \"inRoom\" socket message received.\nSee confluence docs for the \"inRoom\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_inRoomHandler",
@@ -9379,7 +9454,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 950,
+            "line": 958,
             "description": "Function that handles the \"enter\" socket message received.\nSee confluence docs for the \"enter\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_enterHandler",
@@ -9390,7 +9465,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1118,
+            "line": 1128,
             "description": "Function that handles the \"restart\" socket message received.\nSee confluence docs for the \"restart\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_restartHandler",
@@ -9401,7 +9476,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1261,
+            "line": 1276,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -9412,7 +9487,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1450,
+            "line": 1470,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -9423,7 +9498,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1570,
+            "line": 1598,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -9434,7 +9509,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1668,
+            "line": 1696,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -9445,7 +9520,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1801,
+            "line": 1835,
             "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nStarts a RTMP session.",
             "itemtype": "method",
             "name": "startRTMPSession",
@@ -9479,7 +9554,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1887,
+            "line": 1921,
             "description": "<blockquote class=\"info\">\n  Note that this feature requires MCU to be enabled for the App Key provided in the\n  <a href=\"#method_init\"><code>init()</code> method</a>.\n</blockquote>\nStops a RTMP session.",
             "params": [
                 {
@@ -9512,7 +9587,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1943,
+            "line": 1977,
             "description": "Handles the RTMP Protocol message event received from the platform signaling.",
             "itemtype": "method",
             "name": "_rtmpEventHandler",
@@ -9543,13 +9618,24 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 2011,
+            "line": 2045,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 2065,
+            "description": "Function that sends a SIG_MESSAGE_TYPE.ANSWER_ACK message to MCU to denote that SDP negotiation has completed (either with success or error)",
+            "itemtype": "method",
+            "name": "_acknowledgeAnswer",
+            "access": "private",
+            "tagname": "",
+            "since": "1.0.0",
             "class": "Skylink"
         },
         {
@@ -9758,7 +9844,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 596,
+            "line": 640,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopStream",
@@ -9771,7 +9857,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 635,
+            "line": 679,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio or video tracks.",
             "itemtype": "method",
             "name": "muteStream",
@@ -9807,7 +9893,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 773,
+            "line": 817,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "enableAudio",
@@ -9822,7 +9908,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 800,
+            "line": 844,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> audio tracks.",
             "itemtype": "method",
             "name": "disableAudio",
@@ -9837,7 +9923,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 827,
+            "line": 871,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that unmutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "enableVideo",
@@ -9852,7 +9938,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 854,
+            "line": 898,
             "description": "<blockquote class=\"info\"><b>Deprecation Warning!</b>\n  This method has been deprecated. Use <a href=\"#method_muteStream\"><code>muteStream()</code> method</a> instead.\n</blockquote>\nFunction that mutes both <a href=\"#method_getUserMedia\"><code>getUserMedia()</code> Stream</a> and\n<a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a> video tracks.",
             "itemtype": "method",
             "name": "disableVideo",
@@ -9867,7 +9953,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 881,
+            "line": 925,
             "description": "<blockquote class=\"info\">\n  For a better user experience, the functionality is throttled when invoked many times in less\n  than the milliseconds interval configured in the <a href=\"#method_init\"><code>init()</code> method</a>.\n  Note that the Opera and Edge browser does not support screensharing, and as for IE / Safari browsers using\n  the Temasys Plugin screensharing support, check out the <a href=\"https://temasys.com.sg/plugin/#commercial-licensing\">\n  commercial licensing</a> for more options.\n</blockquote>\nFunction that retrieves screensharing Stream.",
             "itemtype": "method",
             "name": "shareScreen",
@@ -9948,7 +10034,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1284,
+            "line": 1361,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -9961,7 +10047,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1343,
+            "line": 1428,
             "description": "Function that returns the camera and microphone sources.",
             "itemtype": "method",
             "name": "getStreamSources",
@@ -10045,7 +10131,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1435,
+            "line": 1520,
             "description": "Function that returns the screensharing sources.",
             "itemtype": "method",
             "name": "getScreenSources",
@@ -10113,7 +10199,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1556,
+            "line": 1641,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -10124,7 +10210,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1614,
+            "line": 1699,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -10135,7 +10221,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1687,
+            "line": 1772,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -10146,7 +10232,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1839,
+            "line": 1924,
             "description": "Function that parses the mediastream tracks for details.",
             "itemtype": "method",
             "name": "_parseStreamTracksInfo",
@@ -10157,7 +10243,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1912,
+            "line": 1996,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -10168,7 +10254,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2062,
+            "line": 2147,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -10179,7 +10265,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2103,
+            "line": 2192,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -10190,7 +10276,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2137,
+            "line": 2226,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -10201,7 +10287,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2232,
+            "line": 2312,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -10418,6 +10504,28 @@
             "tagname": "",
             "since": "0.6.35",
             "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 1436,
+            "description": "Function sets the original DTLS role which was negotiated on first offer/ansswer exchange\nThis needs to be done until https://bugzilla.mozilla.org/show_bug.cgi?id=1240897 is released in Firefox 68\nEstimated release date for Firefox 68 : 2019-07-09 (https://wiki.mozilla.org/Release_Management/Calendar)",
+            "itemtype": "method",
+            "name": "_setOriginalDTLSRole",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.35",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 1467,
+            "description": "Function that modifies the DTLS role in answer sdp\nThis needs to be done until https://bugzilla.mozilla.org/show_bug.cgi?id=1240897 is released in Firefox 68\nEstimated release date for Firefox 68 : 2019-07-09 (https://wiki.mozilla.org/Release_Management/Calendar)",
+            "itemtype": "method",
+            "name": "_modifyDTLSRole",
+            "access": "private",
+            "tagname": "",
+            "since": "1.0.0",
+            "class": "Skylink"
         }
     ],
     "warnings": [
@@ -10579,7 +10687,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/socket-message.js:1801"
+            "line": " source/socket-message.js:1835"
         },
         {
             "message": "unknown tag: trigger",
@@ -10591,35 +10699,35 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:596"
+            "line": " source/stream-media.js:640"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:635"
+            "line": " source/stream-media.js:679"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:773"
+            "line": " source/stream-media.js:817"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:800"
+            "line": " source/stream-media.js:844"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:827"
+            "line": " source/stream-media.js:871"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:854"
+            "line": " source/stream-media.js:898"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:881"
+            "line": " source/stream-media.js:925"
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1284"
+            "line": " source/stream-media.js:1361"
         },
         {
             "message": "Missing item type\nGlobal function that clones an object.",

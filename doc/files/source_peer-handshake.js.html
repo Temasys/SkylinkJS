@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.9.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.9.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -96,7 +96,7 @@
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._doOffer = function(targetMid, iceRestart) {
+Skylink.prototype._doOffer = function(targetMid, iceRestart, mergeMessageWithOffer) {
   var self = this;
   var pc = self._peerConnections[targetMid];
 
@@ -125,6 +125,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
 
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === &#x27;MCU&#x27;) {
+    //self._compareTrackCounts(targetMid);
     self._addLocalMediaStreams(targetMid);
   }
 
@@ -149,7 +150,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
   var onSuccessCbFn = function(offer) {
     log.debug([targetMid, null, null, &#x27;Created offer&#x27;], offer);
     self._handleNegotiationStats(&#x27;create_offer&#x27;, targetMid, offer, false);
-    self._setLocalAndSendMessage(targetMid, offer);
+    self._setLocalAndSendMessage(targetMid, offer, mergeMessageWithOffer);
   };
 
   var onErrorCbFn = function(error) {
@@ -217,6 +218,12 @@ Skylink.prototype._doAnswer = function(targetMid) {
   var onSuccessCbFn = function(answer) {
     log.debug([targetMid, null, null, &#x27;Created answer&#x27;], answer);
     self._handleNegotiationStats(&#x27;create_answer&#x27;, targetMid, answer, false);
+
+    if (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+      self._setOriginalDTLSRole(answer, false);
+      answer.sdp = self._modifyDTLSRole(answer);
+    }
+
     self._setLocalAndSendMessage(targetMid, answer);
   };
 
@@ -240,7 +247,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescription) {
+Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescription, mergeMessage) {
   var self = this;
   var pc = self._peerConnections[targetMid];
 
@@ -294,7 +301,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, &#x27;local&#x27;);
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
-  //sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
 
   if (self._peerConnectionConfig.disableBundle) {
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=group:BUNDLE.*\r\n/gi, &#x27;&#x27;);
@@ -324,14 +331,29 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       return;
     }
 
-    self._sendChannelMessage({
+    var messageToSend = {
       type: sessionDescription.type,
-      sdp: self._renderSDPOutput(targetMid, sessionDescription),
+      sdp: sessionDescription.sdp,
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
-    });
+    };
+
+    // Merging Restart and Offer messages. The already present keys in offer message will not be overwritten.
+    // Only news keys from mergeMessage are added.
+    if (mergeMessage &amp;&amp; Object.keys(mergeMessage).length) {
+      var keys = Object.keys(mergeMessage);
+      var currentMessageKeys = Object.keys(messageToSend);
+      for (var keyIndex = 0; keyIndex &lt; keys.length; keyIndex++) {
+        var key = keys[keyIndex];
+        if (currentMessageKeys.indexOf(key) === -1) {
+          messageToSend[key] = mergeMessage[key];
+        }
+      }
+    }
+
+    self._sendChannelMessage(messageToSend);
     self._handleNegotiationStats(sessionDescription.type, targetMid, sessionDescription, false);
   };
 

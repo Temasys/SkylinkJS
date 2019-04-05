@@ -1,4 +1,4 @@
-/*! skylinkjs - v1.0.0 - Wed Dec 05 2018 15:27:42 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v0.9.0 - Fri Apr 05 2019 14:26:53 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -880,6 +880,35 @@ function Skylink() {
    */
   this._statIdRandom = Date.now() + Math.floor(Math.random() * 100000000);
 
+  /**
+   * A mapping of transceiverIds and peer IDs (only when new MCU is in effect)
+   * @attribute _transceiverIdPeerIdMap
+   * @type Object
+   * @private
+   * @for Skylink
+   * @since 0.6.31
+   */
+  this._transceiverIdPeerIdMap = {};
+
+  /**
+   * (Extra) Tracks requested by the Peer/MCU in welcome/restart message. Used to create transceivers before createOffer.
+   * @attribute _transceiverIdPeerIdMap
+   * @type Object
+   * @private
+   * @for Skylink
+   * @since 0.6.31
+   */
+  this._currentRequestedTracks = { audio: 0, video: 0 };
+
+  /**
+   * Originally negotiated DTLS role of this peer.
+   * @attribute _originalDTLSRole
+   * @type String
+   * @private
+   * @for Skylink
+   * @since 1.0.0
+   */
+  this._originalDTLSRole = null;
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
@@ -1623,7 +1652,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '1.0.0';
+Skylink.prototype.VERSION = '0.9.0';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -2277,6 +2306,7 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   RESTART: 'restart',
   OFFER: 'offer',
   ANSWER: 'answer',
+  ANSWER_ACK: 'answerAck',
   CANDIDATE: 'candidate',
   BYE: 'bye',
   REDIRECT: 'redirect',
@@ -7380,9 +7410,9 @@ Skylink.prototype._restartPeerConnection = function (peerId, doIceRestart, bwOpt
 
     self._peerEndOfCandidatesCounter[peerId] = self._peerEndOfCandidatesCounter[peerId] || {};
     self._peerEndOfCandidatesCounter[peerId].len = 0;
-    self._sendChannelMessage(restartMsg);
-    self._handleNegotiationStats('restart', peerId, restartMsg, false);
-    self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
+    self._doOffer(peerId, doIceRestart, restartMsg);
+    //self._handleNegotiationStats('restart', peerId, restartMsg, false);
+    //self._trigger('peerRestart', peerId, self.getPeerInfo(peerId), true, doIceRestart === true);
 
     if (typeof callback === 'function') {
       log.debug([peerId, 'RTCPeerConnection', null, 'Firing restart callback']);
@@ -7659,14 +7689,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
   };
   self.videoRenderers = self.videoRenderers || {};
-  pc.onaddstream = function (evt) {
+  pc.ontrack = function (rtcTrackEvent) {
     // TargetMid goes all the way back to Skylink.prototype._enterHandler
 
     if (!self._peerConnections[targetMid]) {
       return;
     }
 
-    var stream = evt.stream || evt;
+    var stream = rtcTrackEvent.streams[0];
+    var transceiverMid = rtcTrackEvent.transceiver.mid;
 
     pc.remoteStream = stream;
     pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
@@ -7686,7 +7717,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasStream = true;
     pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
 
-    self._onRemoteStreamAdded(self._hasMCU ? self.streamIdPeerIdMap[stream.id] : targetMid, stream, !!pc.hasScreen);
+    self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, !!pc.hasScreen);
   };
 
   pc.onremovestream = function(evt) {
@@ -7898,10 +7929,10 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
       restartMsg.parentId = self._parentId;
     }
 
-    log.log([peerId, 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
+    // log.log([peerId, 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
 
-    self._sendChannelMessage(restartMsg);
-    self._handleNegotiationStats('restart', peerId, restartMsg, false);
+    self._doOffer('MCU', doIceRestart, restartMsg);
+    //self._handleNegotiationStats('restart', peerId, restartMsg, false);
   };
 
   // Toggle the main bandwidth options.
@@ -7926,24 +7957,27 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
     }
   }
 
-  for (var i = 0; i < listOfPeers.length; i++) {
-    if (!self._peerConnections[listOfPeers[i]]) {
-      var error = 'Peer connection with peer does not exists. Unable to restart';
-      log.error([listOfPeers[i], 'PeerConnection', null, error]);
-      listOfPeerRestartErrors[listOfPeers[i]] = new Error(error);
-      continue;
-    }
 
-    if (listOfPeers[i] !== 'MCU') {
-      self._trigger('peerRestart', listOfPeers[i], self.getPeerInfo(listOfPeers[i]), true, false);
+  // Below commented since with new MCU only peer connected is MCU
 
-      if (!self._initOptions.mcuUseRenegoRestart) {
-        sendRestartMsgFn(listOfPeers[i]);
-      }
-    }
-  }
+  // for (var i = 0; i < listOfPeers.length; i++) {
+  //   if (!self._peerConnections[listOfPeers[i]]) {
+  //     var error = 'Peer connection with peer does not exists. Unable to restart';
+  //     log.error([listOfPeers[i], 'PeerConnection', null, error]);
+  //     listOfPeerRestartErrors[listOfPeers[i]] = new Error(error);
+  //     continue;
+  //   }
+  //
+  //   if (listOfPeers[i] !== 'MCU') {
+  //     self._trigger('peerRestart', listOfPeers[i], self.getPeerInfo(listOfPeers[i]), true, false);
+  //
+  //     if (!self._initOptions.mcuUseRenegoRestart) {
+  //       sendRestartMsgFn(listOfPeers[i]);
+  //     }
+  //   }
+  // }
 
-  self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
+  // self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
 
   if (self._initOptions.mcuUseRenegoRestart) {
     self._peerEndOfCandidatesCounter.MCU = self._peerEndOfCandidatesCounter.MCU || {};
@@ -8094,6 +8128,72 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
 
     } catch (error) {
       log.error([targetMid, 'RTCPeerConnection', null, 'Failed signaling end-of-candidates ->'], error);
+    }
+  }
+};
+
+/**
+ * Function that compares trackCount sent by MCU and decides wether to add new Transceivers based on count differences
+ * @method _compareTrackCounts
+ * @param {String} targetMid
+ * @private
+ */
+Skylink.prototype._compareTrackCounts = function (targetMid) {
+  var self = this;
+  var pc = self._peerConnections[targetMid];
+
+  if (pc && typeof pc.getTransceivers === 'function') {
+    var transceivers = pc.getTransceivers();
+    var transceiverTypeCount = {
+      audio: 0,
+      video: 0
+    };
+
+    var checkDiffAndAddTransceivers = function (kind, requestedKindCount, actualKindCount, peerConnection) {
+      if (requestedKindCount > actualKindCount) {
+        var diff = requestedKindCount - actualKindCount;
+        while (diff) {
+          peerConnection.addTransceiver(kind);
+          diff = diff - 1;
+        }
+      }
+    };
+
+    if (transceivers && transceivers.length) {
+      for (var i = 0; i < transceivers.length; i++) {
+        if (transceivers[i] && transceivers[i].receiver && transceivers[i].receiver.track) {
+          var kind = transceivers[i].receiver.track.kind;
+          transceiverTypeCount[kind] += 1;
+        }
+      }
+    }
+
+    checkDiffAndAddTransceivers('video', self._currentRequestedTracks['video'], transceiverTypeCount.video, pc);
+    checkDiffAndAddTransceivers('audio', self._currentRequestedTracks['audio'], transceiverTypeCount.audio, pc);
+  }
+};
+
+/**
+ * Function that iterates the Peer Connections and replaces track using the RTCRTPSender.replaceTrack
+ * @method _replaceTrack
+ * @param {String} trackIDToCompare - ID of the track whose RTCRTPSenders needs to be used
+ * @param {MediaStreamTrack} trackToReplace - The new track which will replace the old track
+ * @private
+ */
+Skylink.prototype._replaceTrack = function (trackIDToCompare, trackToReplace) {
+  var self = this;
+  if (Object.keys(self._peerConnections).length > 0) {
+    var peerIds = Object.keys(self._peerConnections);
+    for (var i = 0; i < peerIds.length; i++) {
+      var pc = self._peerConnections[peerIds[i]];
+      var senders = pc.getSenders();
+
+      for (var y = 0; y < senders.length; y++) {
+        var sender = senders[y];
+        if (sender.track && sender.track.id === trackIDToCompare) {
+          sender.replaceTrack(trackToReplace);
+        }
+      }
     }
   }
 };
@@ -8817,7 +8917,7 @@ Skylink.prototype._getUserInfo = function(peerId) {
   return userInfo;
 };
 
-Skylink.prototype._doOffer = function(targetMid, iceRestart) {
+Skylink.prototype._doOffer = function(targetMid, iceRestart, mergeMessageWithOffer) {
   var self = this;
   var pc = self._peerConnections[targetMid];
 
@@ -8846,6 +8946,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
 
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === 'MCU') {
+    //self._compareTrackCounts(targetMid);
     self._addLocalMediaStreams(targetMid);
   }
 
@@ -8870,7 +8971,7 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart) {
   var onSuccessCbFn = function(offer) {
     log.debug([targetMid, null, null, 'Created offer'], offer);
     self._handleNegotiationStats('create_offer', targetMid, offer, false);
-    self._setLocalAndSendMessage(targetMid, offer);
+    self._setLocalAndSendMessage(targetMid, offer, mergeMessageWithOffer);
   };
 
   var onErrorCbFn = function(error) {
@@ -8938,6 +9039,12 @@ Skylink.prototype._doAnswer = function(targetMid) {
   var onSuccessCbFn = function(answer) {
     log.debug([targetMid, null, null, 'Created answer'], answer);
     self._handleNegotiationStats('create_answer', targetMid, answer, false);
+
+    if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
+      self._setOriginalDTLSRole(answer, false);
+      answer.sdp = self._modifyDTLSRole(answer);
+    }
+
     self._setLocalAndSendMessage(targetMid, answer);
   };
 
@@ -8961,7 +9068,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescription) {
+Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescription, mergeMessage) {
   var self = this;
   var pc = self._peerConnections[targetMid];
 
@@ -9015,7 +9122,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
-  //sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
+  sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
 
   if (self._peerConnectionConfig.disableBundle) {
     sessionDescription.sdp = sessionDescription.sdp.replace(/a=group:BUNDLE.*\r\n/gi, '');
@@ -9045,14 +9152,29 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       return;
     }
 
-    self._sendChannelMessage({
+    var messageToSend = {
       type: sessionDescription.type,
-      sdp: self._renderSDPOutput(targetMid, sessionDescription),
+      sdp: sessionDescription.sdp,
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
-    });
+    };
+
+    // Merging Restart and Offer messages. The already present keys in offer message will not be overwritten.
+    // Only news keys from mergeMessage are added.
+    if (mergeMessage && Object.keys(mergeMessage).length) {
+      var keys = Object.keys(mergeMessage);
+      var currentMessageKeys = Object.keys(messageToSend);
+      for (var keyIndex = 0; keyIndex < keys.length; keyIndex++) {
+        var key = keys[keyIndex];
+        if (currentMessageKeys.indexOf(key) === -1) {
+          messageToSend[key] = mergeMessage[key];
+        }
+      }
+    }
+
+    self._sendChannelMessage(messageToSend);
     self._handleNegotiationStats(sessionDescription.type, targetMid, sessionDescription, false);
   };
 
@@ -14301,6 +14423,10 @@ Skylink.prototype._approachEventHandler = function(message){
     enterMsg.parentId = self._parentId;
   }
 
+  if (self._hasMCU) {
+    enterMsg.target = 'MCU';
+  }
+
   self._sendChannelMessage(enterMsg);
   self._handleSessionStats(enterMsg);
 };
@@ -14692,6 +14818,10 @@ Skylink.prototype._inRoomHandler = function(message) {
     enterMsg.parentId = self._parentId;
   }
 
+  if (self._hasMCU) {
+    enterMsg.target = 'MCU';
+  }
+
   self._sendChannelMessage(enterMsg);
   self._handleSessionStats(enterMsg);
 };
@@ -14801,37 +14931,39 @@ Skylink.prototype._enterHandler = function(message) {
       videoMuted: 0
     };
 
-    var welcomeMsg = {
-      type: self._SIG_MESSAGE_TYPE.WELCOME,
-      mid: self._user.sid,
-      rid: self._room.id,
-      enableIceTrickle: self._initOptions.enableIceTrickle,
-      enableDataChannel: self._initOptions.enableDataChannel,
-      enableIceRestart: self._enableIceRestart,
-      agent: AdapterJS.webrtcDetectedBrowser,
-      version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
-      receiveOnly: self.getPeerInfo().config.receiveOnly,
-      os: window.navigator.platform,
-      userInfo: self._getUserInfo(targetMid),
-      target: targetMid,
-      weight: self._peerPriorityWeight,
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
-      DTProtocolVersion: self.DT_PROTOCOL_VERSION
-    };
-
-    if (self._publishOnly) {
-      welcomeMsg.publishOnly = {
-        type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+    if (self._hasMCU !== true) {
+      var welcomeMsg = {
+        type: self._SIG_MESSAGE_TYPE.WELCOME,
+        mid: self._user.sid,
+        rid: self._room.id,
+        enableIceTrickle: self._initOptions.enableIceTrickle,
+        enableDataChannel: self._initOptions.enableDataChannel,
+        enableIceRestart: self._enableIceRestart,
+        agent: AdapterJS.webrtcDetectedBrowser,
+        version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
+        receiveOnly: self.getPeerInfo().config.receiveOnly,
+        os: window.navigator.platform,
+        userInfo: self._getUserInfo(targetMid),
+        target: targetMid,
+        weight: self._peerPriorityWeight,
+        temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+        SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+        DTProtocolVersion: self.DT_PROTOCOL_VERSION
       };
-    }
 
-    if (self._parentId) {
-      welcomeMsg.parentId = self._parentId;
-    }
+      if (self._publishOnly) {
+        welcomeMsg.publishOnly = {
+          type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
+        };
+      }
 
-    self._sendChannelMessage(welcomeMsg);
-    self._handleNegotiationStats('welcome', targetMid, welcomeMsg, false);
+      if (self._parentId) {
+        welcomeMsg.parentId = self._parentId;
+      }
+
+      self._sendChannelMessage(welcomeMsg);
+      self._handleNegotiationStats('welcome', targetMid, welcomeMsg, false);
+    }
 
     if (isNewPeer) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
@@ -14876,6 +15008,7 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._restartHandler = function(message){
   var self = this;
   var targetMid = message.mid;
+  var trackCount = message.trackCount;
   var userInfo = message.userInfo || {};
   userInfo.settings = userInfo.settings || {};
   userInfo.mediaStatus = userInfo.mediaStatus || {};
@@ -14914,6 +15047,10 @@ Skylink.prototype._restartHandler = function(message){
     DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
       message.DTProtocolVersion : (self._hasMCU || targetMid === 'MCU' ? '0.1.2' : '0.1.0')
   };
+
+  if (trackCount) {
+    self._currentRequestedTracks = trackCount;
+  }
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "restart" received ->'], message);
   self._handleNegotiationStats('restart', targetMid, message, true);
@@ -15020,6 +15157,7 @@ Skylink.prototype._welcomeHandler = function(message) {
   var self = this;
   var targetMid = message.mid;
   var isNewPeer = false;
+  var trackCount = message.trackCount;
   var userInfo = message.userInfo || {};
   userInfo.settings = userInfo.settings || {};
   userInfo.mediaStatus = userInfo.mediaStatus || {};
@@ -15058,6 +15196,10 @@ Skylink.prototype._welcomeHandler = function(message) {
     DTProtocolVersion: message.DTProtocolVersion && typeof message.DTProtocolVersion === 'string' ?
       message.DTProtocolVersion : (self._hasMCU || targetMid === 'MCU' ? '0.1.2' : '0.1.0')
   };
+
+  if (trackCount) {
+    self._currentRequestedTracks = trackCount;
+  }
 
   log.log([targetMid, 'RTCPeerConnection', null, 'Peer "welcome" received ->'], message);
   self._handleNegotiationStats('welcome', targetMid, message, true);
@@ -15217,6 +15359,10 @@ Skylink.prototype._offerHandler = function(message) {
     sdp: self._hasMCU ? message.sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : message.sdp
   };
 
+  if (targetMid === 'MCU') {
+    self._transceiverIdPeerIdMap = message.transceiverIdPeerIdMap || {};
+  }
+
   self._handleNegotiationStats('offer', targetMid, offer, true);
 
   if (!pc) {
@@ -15249,14 +15395,14 @@ Skylink.prototype._offerHandler = function(message) {
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Session description object created'], offer);
 
-  offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
-  offer.sdp = self._setSDPCodec(targetMid, offer);
-  offer.sdp = self._setSDPBitrate(targetMid, offer);
-  offer.sdp = self._setSDPCodecParams(targetMid, offer);
-  offer.sdp = self._removeSDPCodecs(targetMid, offer);
-  offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
-  offer.sdp = self._handleSDPConnectionSettings(targetMid, offer, 'remote');
-  offer.sdp = self._removeSDPUnknownAptRtx(targetMid, offer);
+  // offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
+  // offer.sdp = self._setSDPCodec(targetMid, offer);
+  // offer.sdp = self._setSDPBitrate(targetMid, offer);
+  // offer.sdp = self._setSDPCodecParams(targetMid, offer);
+  // offer.sdp = self._removeSDPCodecs(targetMid, offer);
+  // offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
+  // offer.sdp = self._handleSDPConnectionSettings(targetMid, offer, 'remote');
+  // offer.sdp = self._removeSDPUnknownAptRtx(targetMid, offer);
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote offer ->'], offer.sdp);
 
@@ -15286,7 +15432,7 @@ Skylink.prototype._offerHandler = function(message) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
   }
 
-  self._parseSDPMediaStreamIDs(targetMid, offer);
+  // self._parseSDPMediaStreamIDs(targetMid, offer);
 
   var onSuccessCbFn = function() {
     log.debug([targetMid, 'RTCSessionDescription', message.type, 'Remote description set']);
@@ -15311,6 +15457,10 @@ Skylink.prototype._offerHandler = function(message) {
       offer: offer
     });
   };
+
+  if (self.getPeerInfo(targetMid).agent.name === 'edge' && offer.sdp[offer.sdp.length - 1] !== '\n' && offer.sdp[offer.sdp.length - 2] !== '\r') {
+    offer.sdp = offer.sdp + '\r\n';
+  }
 
   pc.setRemoteDescription(new RTCSessionDescription(offer), onSuccessCbFn, onErrorCbFn);
 };
@@ -15429,7 +15579,7 @@ Skylink.prototype._answerHandler = function(message) {
   var pc = self._peerConnections[targetMid];
 
   if (targetMid === 'MCU') {
-    self.streamIdPeerIdMap = message.streamIdPeerIdMap || {};
+    self._transceiverIdPeerIdMap = message.transceiverIdPeerIdMap || {};
   }
 
   log.log([targetMid, null, message.type, 'Received answer from peer. Session description:'], clone(message));
@@ -15478,7 +15628,11 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
   answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
-  //answer.sdp = self._setSCTPport(targetMid, answer);
+  answer.sdp = self._setSCTPport(targetMid, answer);
+
+  if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
+    self._setOriginalDTLSRole(answer, true);
+  }
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
@@ -15516,6 +15670,7 @@ Skylink.prototype._answerHandler = function(message) {
     pc.setAnswer = 'remote';
     pc.processingRemoteSDP = false;
 
+    self._acknowledgeAnswer(targetMid, true, null);
     self._handleNegotiationStats('set_answer', targetMid, answer, true);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
     self._addIceCandidateFromQueue(targetMid);
@@ -15532,6 +15687,7 @@ Skylink.prototype._answerHandler = function(message) {
   };
 
   var onErrorCbFn = function(error) {
+    self._acknowledgeAnswer(targetMid, false, error);
     self._handleNegotiationStats('error_set_answer', targetMid, answer, true, error);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
 
@@ -15777,6 +15933,32 @@ Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
   return false;
 };
 
+/**
+ * Function that sends a SIG_MESSAGE_TYPE.ANSWER_ACK message to MCU to denote that SDP negotiation has completed (either with success or error)
+ * @method _acknowledgeAnswer
+ * @private
+ * @for Skylink
+ * @since 1.0.0
+ */
+Skylink.prototype._acknowledgeAnswer = function (targetMid, isSuccess, error) {
+  var self = this;
+  if (self._hasMCU) {
+    var statsStateKey = isSuccess ? 'set_answer_ack' : 'error_set_answer_ack';
+    var answerAckMessage = {
+      rid: self._room.id,
+      mid: self._user.sid,
+      target: targetMid,
+      success: isSuccess,
+      type: self._SIG_MESSAGE_TYPE.ANSWER_ACK,
+    };
+    self._sendChannelMessage(answerAckMessage);
+    log.debug(['MCU', 'Remote Description', null, 'Answer acknowledgement message sent to MCU via SIG. Message body -->'], answerAckMessage);
+    self._handleNegotiationStats(statsStateKey, targetMid, answerAckMessage, true, error);
+  }
+  return false;
+};
+
+
 Skylink.prototype.getUserMedia = function(options,callback) {
   var self = this;
 
@@ -15996,29 +16178,63 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 Skylink.prototype.sendStream = function(options, callback) {
   var self = this;
 
-  var restartFn = function (stream) {
+  var renegotiate = function(newStream, cb) {
+    if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
+      self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
+        if (err) {
+          log.error('Failed refreshing connections for sendStream() ->', err);
+          if (typeof cb === 'function') {
+            cb(new Error('Failed refreshing connections.'), null);
+          }
+          return;
+        }
+        if (typeof cb === 'function') {
+          cb(null, newStream);
+        }
+      });
+    } else if (typeof cb === 'function') {
+      cb(null, newStream);
+    }
+  }
+
+  var performReplaceTracks = function (originalStream, newStream, cb) {
+    if (!originalStream) {
+      renegotiate(newStream, cb);
+      return;
+    }
+    var newStreamHasVideoTrack = Array.isArray(newStream.getVideoTracks()) && newStream.getVideoTracks().length;
+    var newStreamHasAudioTrack = Array.isArray(newStream.getAudioTracks()) && newStream.getAudioTracks().length;
+    var originalStreamHasVideoTrack = Array.isArray(originalStream.getVideoTracks()) && originalStream.getVideoTracks().length;
+    var originalStreamHasAudioTrack = Array.isArray(originalStream.getAudioTracks()) && originalStream.getAudioTracks().length;
+
+    if ((newStreamHasVideoTrack && !originalStreamHasVideoTrack) || (newStreamHasAudioTrack && !originalStreamHasAudioTrack)) {
+      renegotiate(newStream, cb);
+      return;
+    }
+
+    if (newStreamHasVideoTrack && originalStreamHasVideoTrack) {
+      self._replaceTrack(originalStream.getVideoTracks()[0].id, newStream.getVideoTracks()[0]);
+    }
+
+    if (newStreamHasAudioTrack && originalStreamHasAudioTrack) {
+      self._replaceTrack(originalStream.getAudioTracks()[0].id, newStream.getAudioTracks()[0]);
+    }
+  };
+
+  var restartFn = function (originalStream, stream) {
     if (self._inRoom) {
+
       if (!self._streams.screenshare) {
         self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo(), false, stream.id || stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      } else {
+        performReplaceTracks(originalStream, stream, callback);
       }
 
-      if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
-        self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
-          if (err) {
-            log.error('Failed refreshing connections for sendStream() ->', err);
-            if (typeof callback === 'function') {
-              callback(new Error('Failed refreshing connections.'), null);
-            }
-            return;
-          }
-          if (typeof callback === 'function') {
-            callback(null, stream);
-          }
-        });
-      } else if (typeof callback === 'function') {
-        callback(null, stream);
+      if (self._streams.userMedia) {
+        performReplaceTracks(originalStream, stream, callback);
       }
+
     } else if (typeof callback === 'function') {
       callback(null, stream);
     }
@@ -16046,6 +16262,16 @@ Skylink.prototype.sendStream = function(options, callback) {
       callback(new Error(edgeNotSupportError),null);
     }
     return;
+  }
+
+  var origStream = null;
+
+  if (self._streams.userMedia) {
+    origStream = self._streams.userMedia.stream;
+  }
+
+  if (self._streams.screenshare) {
+    origStream = self._streams.screenshare.stream;
   }
 
   if (typeof options.getAudioTracks === 'function' || typeof options.getVideoTracks === 'function') {
@@ -16079,7 +16305,7 @@ Skylink.prototype.sendStream = function(options, callback) {
       }
     }, false, false);
 
-    restartFn(options);
+    restartFn(origStream, options);
 
   } else {
     self.getUserMedia(options, function (err, stream) {
@@ -16089,7 +16315,7 @@ Skylink.prototype.sendStream = function(options, callback) {
         }
         return;
       }
-      restartFn(stream);
+      restartFn(origStream, stream);
     });
   }
 };
@@ -16677,22 +16903,38 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       if (self._inRoom) {
         self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo(), true, stream.id || stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+        var shouldRenegotiate = true;
 
-        if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
-          self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
-            if (err) {
-              log.error('Failed refreshing connections for shareScreen() ->', err);
-              if (typeof callback === 'function') {
-                callback(new Error('Failed refreshing connections.'), null);
+        if (self._streams.userMedia && self._streams.userMedia.stream && Array.isArray(self._streams.userMedia.stream.getVideoTracks()) && self._streams.userMedia.stream.getVideoTracks().length) {
+          shouldRenegotiate = false;
+        }
+
+        if (AdapterJS.webrtcDetectedBrowser === 'edge') {
+          shouldRenegotiate = true;
+        }
+
+        if (shouldRenegotiate) {
+          if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
+            stream.wasNegotiated = true;
+            self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
+              if (err) {
+                log.error('Failed refreshing connections for shareScreen() ->', err);
+                if (typeof callback === 'function') {
+                  callback(new Error('Failed refreshing connections.'), null);
+                }
+                return;
               }
-              return;
-            }
-            if (typeof callback === 'function') {
-              callback(null, stream);
-            }
-          });
-        } else if (typeof callback === 'function') {
-          callback(null, stream);
+              if (typeof callback === 'function') {
+                callback(null, stream);
+              }
+            });
+          } else if (typeof callback === 'function') {
+            callback(null, stream);
+          }
+        } else {
+          var gDMVideoTrack = stream.getVideoTracks()[0];
+          var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
+          self._replaceTrack(gUMVideoTrack.id, gDMVideoTrack);
         }
       } else if (typeof callback === 'function') {
         callback(null, stream);
@@ -16767,6 +17009,9 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 
       var onErrorCbFn = function (error) {
         self._onStreamAccessError(error, settings, true, false);
+        if (typeof callback === 'function') {
+          callback(error, null);
+        }
       };
 
       if (typeof (AdapterJS || {}).webRTCReady !== 'function') {
@@ -16774,7 +17019,21 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       }
 
       AdapterJS.webRTCReady(function () {
-        navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+        if (AdapterJS.webrtcDetectedBrowser === 'edge' && typeof navigator.getDisplayMedia === 'function') {
+          navigator.getDisplayMedia(settings.getUserMediaSettings).then(function(stream) {
+            onSuccessCbFn(stream);
+          }).catch(function(err) {
+            onErrorCbFn(err);
+          });
+        } else if (typeof navigator.mediaDevices.getDisplayMedia === 'function') {
+          navigator.mediaDevices.getDisplayMedia(settings.getUserMediaSettings).then(function(stream) {
+            onSuccessCbFn(stream);
+          }).catch(function(err) {
+            onErrorCbFn(err);
+          });
+        } else {
+          navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+        }
       });
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
@@ -16825,19 +17084,27 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
-  if (this._streams.screenshare) {
-    this._stopStreams({
+  var self = this;
+  if (self._streams.screenshare) {
+    if (self._inRoom) {
+      if (self._streams.userMedia && self._streams.userMedia.stream) {
+        self._trigger('incomingStream', self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo(),
+          false, self._streams.userMedia.stream.id || self._streams.userMedia.stream.label);
+        self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+      }
+
+      if (self._streams.screenshare.stream.wasNegotiated === true) {
+        this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
+      } else {
+        var gDMVideoTrack = self._streams.screenshare.stream.getVideoTracks()[0];
+        var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
+
+        self._replaceTrack(gDMVideoTrack.id, gUMVideoTrack);
+      }
+    }
+    self._stopStreams({
       screenshare: true
     });
-
-    if (this._inRoom) {
-      if (this._streams.userMedia && this._streams.userMedia.stream) {
-        this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo(),
-          false, this._streams.userMedia.stream.id || this._streams.userMedia.stream.label);
-        this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
-      }
-      this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
-    }
   }
 };
 
@@ -17393,8 +17660,7 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
   	}
   	self._streams[streamKey].tracks.video.width = videoElement.videoWidth;
   	self._streams[streamKey].tracks.video.height = videoElement.videoHeight;
-
-  	videoElement.src = '';
+  	
   	videoElement.srcObject = null;
   	callback();
   };
@@ -17553,6 +17819,7 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     settings: settings.settings,
     constraints: settings.getUserMediaSettings
   };
+
   self._muteStreams();
 
   self._parseStreamTracksInfo(isScreenSharing ? 'screenshare' : 'userMedia', function () {
@@ -17595,8 +17862,12 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
     navigator.getUserMedia({ audio: true }, onAudioSuccessCbFn, onAudioErrorCbFn);
     return;
   }
+  if (isScreenSharing) {
+    log.error('Failed retrieving screensharing Stream ->', error);
+  } else {
+    log.error('Failed retrieving camera Stream ->', error);
+  }
 
-  log.error('Failed retrieving ' + (isScreenSharing ? 'screensharing' : 'camera') + ' Stream ->', error);
 
   self._trigger('mediaAccessError', error, !!isScreenSharing, false);
 };
@@ -17664,31 +17935,22 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
           if (updatedStream ? (pc.localStreamId ? updatedStream.id !== pc.localStreamId : true) : true) {
-            if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
-              pc.getSenders().forEach(function (sender) {
-                pc.removeTrack(sender);
-              });
-            } else {
-              pc.getLocalStreams().forEach(function (stream) {
-                pc.removeStream(stream);
-              });
-            }
+
+            pc.getSenders().forEach(function (sender) {
+              pc.removeTrack(sender);
+            });
 
             if (!offerToReceiveAudio && !offerToReceiveVideo) {
               return;
             }
 
             if (updatedStream) {
-              if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
-                updatedStream.getTracks().forEach(function (track) {
-                  if ((track.kind === 'audio' && !offerToReceiveAudio) || (track.kind === 'video' && !offerToReceiveVideo)) {
-                    return;
-                  }
-                  pc.addTrack(track, updatedStream);
-                });
-              } else {
-                pc.addStream(updatedStream);
-              }
+              updatedStream.getTracks().forEach(function (track) {
+                if ((track.kind === 'audio' && !offerToReceiveAudio) || (track.kind === 'video' && !offerToReceiveVideo)) {
+                  return;
+                }
+                pc.addTrack(track, updatedStream);
+              });
 
               pc.localStreamId = updatedStream.id || updatedStream.label;
               pc.localStream = updatedStream;
@@ -19189,6 +19451,58 @@ Skylink.prototype._setSCTPport = function (targetMid, sessionDescription) {
     return sdpLines.join('\r\n');
   }
 
+  return sessionDescription.sdp;
+};
+
+/**
+ * Function sets the original DTLS role which was negotiated on first offer/ansswer exchange
+ * This needs to be done until https://bugzilla.mozilla.org/show_bug.cgi?id=1240897 is released in Firefox 68
+ * Estimated release date for Firefox 68 : 2019-07-09 (https://wiki.mozilla.org/Release_Management/Calendar)
+ * @method _setOriginalDTLSRole
+ * @private
+ * @for Skylink
+ * @since 0.6.35
+ */
+Skylink.prototype._setOriginalDTLSRole = function (sessionDescription, isRemote) {
+  var self = this;
+  var sdpType = sessionDescription.type;
+  var role = null;
+  var aSetupPattern = null;
+  var invertRoleMap = { active: 'passive', passive: 'active' };
+
+  if (self._originalDTLSRole !== null || sdpType === 'offer') {
+    return;
+  }
+
+  aSetupPattern = sessionDescription.sdp.match(/a=setup:([a-z]+)/);
+
+  if (!aSetupPattern) {
+    return;
+  }
+
+  role = aSetupPattern[1];
+  self._originalDTLSRole = isRemote ? invertRoleMap[role] : role;
+};
+
+
+/**
+ * Function that modifies the DTLS role in answer sdp
+ * This needs to be done until https://bugzilla.mozilla.org/show_bug.cgi?id=1240897 is released in Firefox 68
+ * Estimated release date for Firefox 68 : 2019-07-09 (https://wiki.mozilla.org/Release_Management/Calendar)
+ * @method _modifyDTLSRole
+ * @private
+ * @for Skylink
+ * @since 1.0.0
+ */
+Skylink.prototype._modifyDTLSRole = function (sessionDescription) {
+  var self = this;
+  var sdpType = sessionDescription.type;
+
+  if (self._originalDTLSRole === null || sdpType === 'offer') {
+    return;
+  }
+
+  sessionDescription.sdp = sessionDescription.sdp.replace(/a=setup:[a-z]+/g, 'a=setup:' + self._originalDTLSRole);
   return sessionDescription.sdp;
 };
 

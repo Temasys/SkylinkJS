@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 1.0.0 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.9.0 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 1.0.0</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.9.0</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -170,6 +170,15 @@ Before using any Skylink functionalities, you will need to authenticate your App
                 &nbsp;&nbsp;Skylink ()
               </a>
               
+                
+                  <a href="#method__acknowledgeAnswer" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_acknowledgeAnswer
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
                 
                   <a href="#method__ACKProtocolHandler" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_ACKProtocolHandler
@@ -335,6 +344,15 @@ Before using any Skylink functionalities, you will need to authenticate your App
                 
                   <a href="#method__closeDataChannel" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_closeDataChannel
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__compareTrackCounts" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_compareTrackCounts
                     <span class="settings">
                       
                       
@@ -756,6 +774,15 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
+                  <a href="#method__modifyDTLSRole" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_modifyDTLSRole
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method__muteAudioEventHandler" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_muteAudioEventHandler
                     <span class="settings">
@@ -1037,6 +1064,15 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
+                  <a href="#method__replaceTrack" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_replaceTrack
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#method__requestServerInfo" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_requestServerInfo
                     <span class="settings">
@@ -1131,6 +1167,15 @@ Before using any Skylink functionalities, you will need to authenticate your App
                 
                   <a href="#method__setLocalAndSendMessage" class="list-group-item code-menu-item  private-method-item ">
                     &nbsp;&nbsp;_setLocalAndSendMessage
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#method__setOriginalDTLSRole" class="list-group-item code-menu-item  private-method-item ">
+                    &nbsp;&nbsp;_setOriginalDTLSRole
                     <span class="settings">
                       
                       
@@ -2093,6 +2138,15 @@ Before using any Skylink functionalities, you will need to authenticate your App
                     </span>
                   </a>
                 
+                  <a href="#attr__originalDTLSRole" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_originalDTLSRole
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
                   <a href="#attr__parentId" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_parentId
                     <span class="settings">
@@ -2497,6 +2551,24 @@ Before using any Skylink functionalities, you will need to authenticate your App
                 
                   <a href="#attr__timestamp" class="list-group-item code-menu-item  private-attr-item ">
                     &nbsp;&nbsp;_timestamp
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__transceiverIdPeerIdMap" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_transceiverIdPeerIdMap
+                    <span class="settings">
+                      
+                      
+                      
+                    </span>
+                  </a>
+                
+                  <a href="#attr__transceiverIdPeerIdMap" class="list-group-item code-menu-item  private-attr-item ">
+                    &nbsp;&nbsp;_transceiverIdPeerIdMap
                     <span class="settings">
                       
                       
@@ -3502,6 +3574,91 @@ Before using any Skylink functionalities, you will need to authenticate your App
         
           <section id="methods">
             
+              <div id="method__acknowledgeAnswer" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_acknowledgeAnswer</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l2065"><code>source&#x2F;socket-message.js:2065</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">1.0.0</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that sends a SIG_MESSAGE_TYPE.ANSWER_ACK message to MCU to denote that SDP negotiation has completed (either with success or error)</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+
+  <hr>
+</div>
+            
               <div id="method__ACKProtocolHandler" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_ACKProtocolHandler</code></h3>
   
@@ -3893,7 +4050,7 @@ This should be called only after the remote session description is received and 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2137"><code>source&#x2F;stream-media.js:2137</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2226"><code>source&#x2F;stream-media.js:2226</code></a>
       </small>
     
 
@@ -4065,7 +4222,7 @@ Remember to remove previous method of reconnection (re-creating the Peer connect
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1668"><code>source&#x2F;socket-message.js:1668</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1696"><code>source&#x2F;socket-message.js:1696</code></a>
       </small>
     
 
@@ -4495,7 +4652,7 @@ This is referenced from devnull69@stackoverflow.com #6850276.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l727"><code>source&#x2F;socket-message.js:727</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l731"><code>source&#x2F;socket-message.js:731</code></a>
       </small>
     
 
@@ -4667,7 +4824,7 @@ See confluence docs for the &quot;bye&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1570"><code>source&#x2F;socket-message.js:1570</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1598"><code>source&#x2F;socket-message.js:1598</code></a>
       </small>
     
 
@@ -5129,6 +5286,121 @@ If provided string length is lesser than or equals to the chunk size, it should 
   </div>
   
 
+  
+
+  
+
+  <hr>
+</div>
+            
+              <div id="method__compareTrackCounts" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_compareTrackCounts</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>targetMid</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l2308"><code>source&#x2F;peer-connection.js:2308</code></a>
+      </small>
+    
+
+    <small>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that compares trackCount sent by MCU and decides wether to add new Transceivers based on count differences</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">targetMid</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+               
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
   
 
   
@@ -5696,7 +5968,7 @@ If provided string length is lesser than or equals to the chunk size, it should 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l80"><code>source&#x2F;peer-handshake.js:80</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l81"><code>source&#x2F;peer-handshake.js:81</code></a>
       </small>
     
 
@@ -5954,7 +6226,7 @@ See confluence docs for the &quot;endOfCandidates&quot; expected properties to b
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l950"><code>source&#x2F;socket-message.js:950</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l958"><code>source&#x2F;socket-message.js:958</code></a>
       </small>
     
 
@@ -7757,7 +8029,7 @@ See confluence docs for the &quot;enter&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2232"><code>source&#x2F;stream-media.js:2232</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2312"><code>source&#x2F;stream-media.js:2312</code></a>
       </small>
     
 
@@ -8608,7 +8880,7 @@ This is experimental and never recommended to end-users.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l881"><code>source&#x2F;socket-message.js:881</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l885"><code>source&#x2F;socket-message.js:885</code></a>
       </small>
     
 
@@ -8782,7 +9054,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l2011"><code>source&#x2F;socket-message.js:2011</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l2045"><code>source&#x2F;socket-message.js:2045</code></a>
       </small>
     
 
@@ -9075,6 +9347,93 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
   <hr>
 </div>
             
+              <div id="method__modifyDTLSRole" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_modifyDTLSRole</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l1467"><code>source&#x2F;stream-sdp.js:1467</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">1.0.0</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that modifies the DTLS role in answer sdp
+This needs to be done until <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1240897">https://bugzilla.mozilla.org/show_bug.cgi?id=1240897</a> is released in Firefox 68
+Estimated release date for Firefox 68 : 2019-07-09 (<a href="https://wiki.mozilla.org/Release_Management/Calendar">https://wiki.mozilla.org/Release_Management/Calendar</a>)</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+
+  <hr>
+</div>
+            
               <div id="method__muteAudioEventHandler" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_muteAudioEventHandler</code></h3>
   
@@ -9124,7 +9483,7 @@ See confluence docs for the &quot;introduceError&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l635"><code>source&#x2F;socket-message.js:635</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l639"><code>source&#x2F;socket-message.js:639</code></a>
       </small>
     
 
@@ -9211,7 +9570,7 @@ See confluence docs for the &quot;muteAudioEvent&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1556"><code>source&#x2F;stream-media.js:1556</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1641"><code>source&#x2F;stream-media.js:1641</code></a>
       </small>
     
 
@@ -9296,7 +9655,7 @@ See confluence docs for the &quot;muteAudioEvent&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l665"><code>source&#x2F;socket-message.js:665</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l669"><code>source&#x2F;socket-message.js:669</code></a>
       </small>
     
 
@@ -9383,7 +9742,7 @@ See confluence docs for the &quot;muteVideoEvent&quot; expected properties to be
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1450"><code>source&#x2F;socket-message.js:1450</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1470"><code>source&#x2F;socket-message.js:1470</code></a>
       </small>
     
 
@@ -9555,7 +9914,7 @@ See confluence docs for the &quot;offer&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2103"><code>source&#x2F;stream-media.js:2103</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2192"><code>source&#x2F;stream-media.js:2192</code></a>
       </small>
     
 
@@ -9640,7 +9999,7 @@ See confluence docs for the &quot;offer&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2062"><code>source&#x2F;stream-media.js:2062</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l2147"><code>source&#x2F;stream-media.js:2147</code></a>
       </small>
     
 
@@ -9725,7 +10084,7 @@ See confluence docs for the &quot;offer&quot; expected properties to be received
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1912"><code>source&#x2F;stream-media.js:1912</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1996"><code>source&#x2F;stream-media.js:1996</code></a>
       </small>
     
 
@@ -9896,7 +10255,7 @@ This starts creating the socket connection and called at first not when requirin
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l2205"><code>source&#x2F;peer-connection.js:2205</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l2209"><code>source&#x2F;peer-connection.js:2209</code></a>
       </small>
     
 
@@ -10152,7 +10511,7 @@ NOTE: It might not completely accurate if the setRemoteDescription() fails..</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1687"><code>source&#x2F;stream-media.js:1687</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1772"><code>source&#x2F;stream-media.js:1772</code></a>
       </small>
     
 
@@ -10237,7 +10596,7 @@ NOTE: It might not completely accurate if the setRemoteDescription() fails..</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1839"><code>source&#x2F;stream-media.js:1839</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1924"><code>source&#x2F;stream-media.js:1924</code></a>
       </small>
     
 
@@ -10581,7 +10940,7 @@ See confluence docs for the &quot;peerList&quot; expected properties to be recei
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l748"><code>source&#x2F;socket-message.js:748</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l752"><code>source&#x2F;socket-message.js:752</code></a>
       </small>
     
 
@@ -10839,7 +11198,7 @@ routes to the relevant data transfer protocol handler.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l770"><code>source&#x2F;socket-message.js:770</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l774"><code>source&#x2F;socket-message.js:774</code></a>
       </small>
     
 
@@ -10937,7 +11296,7 @@ See confluence docs for the &quot;public&quot; expected properties to be receive
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l792"><code>source&#x2F;socket-message.js:792</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l796"><code>source&#x2F;socket-message.js:796</code></a>
       </small>
     
 
@@ -11099,7 +11458,7 @@ See confluence docs for the &quot;public&quot; expected properties to be receive
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l559"><code>source&#x2F;socket-message.js:559</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l563"><code>source&#x2F;socket-message.js:563</code></a>
       </small>
     
 
@@ -11820,6 +12179,147 @@ to be missing from Firefox answer session description to Chrome connection causi
   <hr>
 </div>
             
+              <div id="method__replaceTrack" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_replaceTrack</code></h3>
+  
+    <div class="args">
+      <span class="paren">(</span>
+      
+        
+          <code>trackIDToCompare</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+        
+          <code>trackToReplace</code>
+        
+        <i class="seperator">,&nbsp;&nbsp;</i>
+      
+      <span class="paren">)</span>
+    </div>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l2349"><code>source&#x2F;peer-connection.js:2349</code></a>
+      </small>
+    
+
+    <small>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function that iterates the Peer Connections and replaces track using the RTCRTPSender.replaceTrack</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+    <div class="code-item-section">
+      <h4>Parameters:</h4>
+
+      <ul class="params-list">
+      
+          <li class="param">
+            <code class="param-name">trackIDToCompare</code>
+            <span class="type"><b>{</b>String<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <ul>
+<li>ID of the track whose RTCRTPSenders needs to be used</li>
+</ul>
+
+            </div>
+
+            
+          </li>
+      
+          <li class="param">
+            <code class="param-name">trackToReplace</code>
+            <span class="type"><b>{</b>MediaStreamTrack<b>}</b></span>
+
+            
+            
+
+            <div class="param-description">
+              
+              <ul>
+<li>The new track which will replace the old track</li>
+</ul>
+
+            </div>
+
+            
+          </li>
+      
+      </ul>
+    </div>
+  
+
+  
+
+  <hr>
+</div>
+            
               <div id="method__requestServerInfo" class="code-item method item private-method-item ">
   <h3 class="code-item-name"><code>_requestServerInfo</code></h3>
   
@@ -11954,7 +12454,7 @@ to be missing from Firefox answer session description to Chrome connection causi
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1118"><code>source&#x2F;socket-message.js:1118</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1128"><code>source&#x2F;socket-message.js:1128</code></a>
       </small>
     
 
@@ -12041,7 +12541,7 @@ See confluence docs for the &quot;restart&quot; expected properties to be receiv
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l2056"><code>source&#x2F;peer-connection.js:2056</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l2057"><code>source&#x2F;peer-connection.js:2057</code></a>
       </small>
     
 
@@ -12300,7 +12800,7 @@ Remember to remove previous method of reconnection (re-creating the Peer connect
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l620"><code>source&#x2F;socket-message.js:620</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l624"><code>source&#x2F;socket-message.js:624</code></a>
       </small>
     
 
@@ -12398,7 +12898,7 @@ See confluence docs for the &quot;roomLockEvent&quot; expected properties to be 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1943"><code>source&#x2F;socket-message.js:1943</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1977"><code>source&#x2F;socket-message.js:1977</code></a>
       </small>
     
 
@@ -12801,7 +13301,7 @@ See confluence docs for the &quot;roomLockEvent&quot; expected properties to be 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l143"><code>source&#x2F;peer-handshake.js:143</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-handshake.js.html#l150"><code>source&#x2F;peer-handshake.js:150</code></a>
       </small>
     
 
@@ -12818,6 +13318,93 @@ See confluence docs for the &quot;roomLockEvent&quot; expected properties to be 
     <p>Function that sets the local session description and sends to Peer.
 If trickle ICE is disabled, the local session description will be sent after
   ICE gathering has been completed.</p>
+
+  </div>
+
+  
+
+  
+
+  
+  <div class="code-item-section">
+    <h4>Events Sequence:</h4>
+    <span class="code-item-trigger"><small>There is no event sequence for this method.</small></span>
+  </div>
+  
+
+  
+
+  
+
+  <hr>
+</div>
+            
+              <div id="method__setOriginalDTLSRole" class="code-item method item private-method-item ">
+  <h3 class="code-item-name"><code>_setOriginalDTLSRole</code></h3>
+  
+    <span class="paren">()</span>
+  
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This method is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-sdp.js.html#l1436"><code>source&#x2F;stream-sdp.js:1436</code></a>
+      </small>
+    
+
+    <small>
+      
+        <i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.35</span>
+      
+
+      
+    </small>
+  </div>
+
+  <div class="code-item-description">
+    <p>Function sets the original DTLS role which was negotiated on first offer/ansswer exchange
+This needs to be done until <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=1240897">https://bugzilla.mozilla.org/show_bug.cgi?id=1240897</a> is released in Firefox 68
+Estimated release date for Firefox 68 : 2019-07-09 (<a href="https://wiki.mozilla.org/Release_Management/Calendar">https://wiki.mozilla.org/Release_Management/Calendar</a>)</p>
 
   </div>
 
@@ -13229,7 +13816,7 @@ Setting this may not necessarily work in Firefox.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l2225"><code>source&#x2F;peer-connection.js:2225</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_peer-connection.js.html#l2229"><code>source&#x2F;peer-connection.js:2229</code></a>
       </small>
     
 
@@ -13500,7 +14087,7 @@ This reacts differently during MCU environment.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1614"><code>source&#x2F;stream-media.js:1614</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1699"><code>source&#x2F;stream-media.js:1699</code></a>
       </small>
     
 
@@ -13585,7 +14172,7 @@ This reacts differently during MCU environment.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l695"><code>source&#x2F;socket-message.js:695</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l699"><code>source&#x2F;socket-message.js:699</code></a>
       </small>
     
 
@@ -13844,7 +14431,7 @@ The rest of the parameters after the <code>eventName</code> parameter is conside
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l593"><code>source&#x2F;socket-message.js:593</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l597"><code>source&#x2F;socket-message.js:597</code></a>
       </small>
     
 
@@ -14101,7 +14688,7 @@ See confluence docs for the &quot;updateUserEvent&quot; expected properties to b
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1261"><code>source&#x2F;socket-message.js:1261</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1276"><code>source&#x2F;socket-message.js:1276</code></a>
       </small>
     
 
@@ -14618,7 +15205,7 @@ Function that terminates a currently uploading / downloading data transfer from 
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l800"><code>source&#x2F;stream-media.js:800</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l844"><code>source&#x2F;stream-media.js:844</code></a>
       </small>
     
 
@@ -14723,7 +15310,7 @@ Function that mutes both <a href="#method_getUserMedia"><code>getUserMedia()</co
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l854"><code>source&#x2F;stream-media.js:854</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l898"><code>source&#x2F;stream-media.js:898</code></a>
       </small>
     
 
@@ -14828,7 +15415,7 @@ Function that mutes both <a href="#method_getUserMedia"><code>getUserMedia()</co
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l773"><code>source&#x2F;stream-media.js:773</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l817"><code>source&#x2F;stream-media.js:817</code></a>
       </small>
     
 
@@ -14933,7 +15520,7 @@ Function that unmutes both <a href="#method_getUserMedia"><code>getUserMedia()</
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l827"><code>source&#x2F;stream-media.js:827</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l871"><code>source&#x2F;stream-media.js:871</code></a>
       </small>
     
 
@@ -16742,7 +17329,7 @@ Gets the list of current recording sessions since User has connected to the Room
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1435"><code>source&#x2F;stream-media.js:1435</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1520"><code>source&#x2F;stream-media.js:1520</code></a>
       </small>
     
 
@@ -17015,7 +17602,7 @@ Gets the list of current recording sessions since User has connected to the Room
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1343"><code>source&#x2F;stream-media.js:1343</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1428"><code>source&#x2F;stream-media.js:1428</code></a>
       </small>
     
 
@@ -21759,7 +22346,7 @@ Function that locks the current Room when in session to prevent other Peers from
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l635"><code>source&#x2F;stream-media.js:635</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l679"><code>source&#x2F;stream-media.js:679</code></a>
       </small>
     
 
@@ -25305,7 +25892,7 @@ and <code>options.storeLogs</code> to its boolean value.</li>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l881"><code>source&#x2F;stream-media.js:881</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l925"><code>source&#x2F;stream-media.js:925</code></a>
       </small>
     
 
@@ -25911,7 +26498,7 @@ Starts a recording session.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1801"><code>source&#x2F;socket-message.js:1801</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1835"><code>source&#x2F;socket-message.js:1835</code></a>
       </small>
     
 
@@ -26614,7 +27201,7 @@ the recording session information.
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1887"><code>source&#x2F;socket-message.js:1887</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_socket-message.js.html#l1921"><code>source&#x2F;socket-message.js:1921</code></a>
       </small>
     
 
@@ -26778,7 +27365,7 @@ Stops a RTMP session.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1284"><code>source&#x2F;stream-media.js:1284</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l1361"><code>source&#x2F;stream-media.js:1361</code></a>
       </small>
     
 
@@ -26901,7 +27488,7 @@ Function that stops <a href="#method_shareScreen"><code>shareScreen()</code> Str
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l596"><code>source&#x2F;stream-media.js:596</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_stream-media.js.html#l640"><code>source&#x2F;stream-media.js:640</code></a>
       </small>
     
 
@@ -29667,7 +30254,7 @@ This uses the <code>console.trace</code> API.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_constants.js.html#l1453"><code>source&#x2F;constants.js:1453</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_constants.js.html#l1454"><code>source&#x2F;constants.js:1454</code></a>
       </small>
     
 
@@ -30582,6 +31169,82 @@ These events are only triggered once.</p>
       
       </ul>
     </div>
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__originalDTLSRole" class="code-item attr item private-attr-item ">
+  <a name="config__originalDTLSRole"></a> 
+  <h3 class="code-item-name"><code>_originalDTLSRole</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>String<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l901"><code>source&#x2F;template&#x2F;header.js:901</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">1.0.0</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>Originally negotiated DTLS role of this peer.</p>
+
+  </div>
+
+  
+
+  
+
   
 
   
@@ -34341,6 +35004,158 @@ Defined as <code>false</code> when Stream has already ended.</p>
 
   <div class="code-item-description">
     <p>Stores the timestamps data used for throttling.</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__transceiverIdPeerIdMap" class="code-item attr item private-attr-item ">
+  <a name="config__transceiverIdPeerIdMap"></a> 
+  <h3 class="code-item-name"><code>_transceiverIdPeerIdMap</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Object<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l881"><code>source&#x2F;template&#x2F;header.js:881</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.31</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>A mapping of transceiverIds and peer IDs (only when new MCU is in effect)</p>
+
+  </div>
+
+  
+
+  
+
+  
+
+  
+
+  
+  <hr>
+</div>
+            
+              <div id="attr__transceiverIdPeerIdMap" class="code-item attr item private-attr-item ">
+  <a name="config__transceiverIdPeerIdMap"></a> 
+  <h3 class="code-item-name"><code>_transceiverIdPeerIdMap</code></h3>
+  <span class="code-item-type"><i>Attribute Type</i>: <b>{</b>Object<b>}</b></span>
+
+  <div class="code-item-properties">
+    <div class="properties-wrapper">
+      
+
+      
+
+      
+
+      
+
+      
+        <span class="label label-default" title="This attribute is private.">private</span>
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+
+      
+    </div>
+
+    <div class="code-item-information">
+      
+        
+          
+        
+      
+      <!---->
+      
+    </div>
+
+    
+      <small>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_template_header.js.html#l891"><code>source&#x2F;template&#x2F;header.js:891</code></a>
+      </small>
+    
+
+    
+      <small><i class="fa">&nbsp;&nbsp;&nbsp;</i>&nbsp;&nbsp;Available since <span class="badge">0.6.31</span></small>
+    
+  </div>
+
+  <div class="code-item-description">
+    <p>(Extra) Tracks requested by the Peer/MCU in welcome/restart message. Used to create transceivers before createOffer.</p>
 
   </div>
 
@@ -39710,7 +40525,7 @@ The list of available Peer connection RTCP mux policies.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_constants.js.html#l1507"><code>source&#x2F;constants.js:1507</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_constants.js.html#l1508"><code>source&#x2F;constants.js:1508</code></a>
       </small>
     
 
@@ -40366,7 +41181,7 @@ The value of the current version of the Signaling socket message protocol.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_constants.js.html#l1470"><code>source&#x2F;constants.js:1470</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_constants.js.html#l1471"><code>source&#x2F;constants.js:1471</code></a>
       </small>
     
 
@@ -41271,7 +42086,7 @@ configured in the <a href="#method_init"><code>init()</code> method</a>.</p>
 
     
       <small>
-        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_constants.js.html#l1484"><code>source&#x2F;constants.js:1484</code></a>
+        <i class="fa fa-chevron-right"></i>&nbsp;&nbsp;Defined in: <a href="../files/source_constants.js.html#l1485"><code>source&#x2F;constants.js:1485</code></a>
       </small>
     
 
