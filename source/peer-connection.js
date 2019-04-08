@@ -1872,6 +1872,17 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     var stream = rtcTrackEvent.streams[0];
     var transceiverMid = rtcTrackEvent.transceiver.mid;
 
+    if (!transceiverMid && self._hasMCU && rtcTrackEvent.transceiver.receiver) {
+      var mcuTransceivers = self._peerConnections['MCU'].getTransceivers();
+      for (var i = 0; i < mcuTransceivers.length; i++) {
+        var receiver = mcuTransceivers[i].receiver;
+        if (receiver === rtcTrackEvent.transceiver.receiver) {
+          transceiverMid = mcuTransceivers[i].mid;
+          break;
+        }
+      }
+    }
+
     pc.remoteStream = stream;
     pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
 
