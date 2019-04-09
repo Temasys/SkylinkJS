@@ -1964,6 +1964,8 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
 		height: null
 	};
 
+  callback();
+  /**
 	// Append the stream to a dummy <video> element to retrieve the resolution width and height.
   var videoElement = document.createElement('video');
   videoElement.autoplay = true;
@@ -1977,7 +1979,7 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
   	}
   	self._streams[streamKey].tracks.video.width = videoElement.videoWidth;
   	self._streams[streamKey].tracks.video.height = videoElement.videoHeight;
-  	
+
   	videoElement.srcObject = null;
   	callback();
   };
@@ -1991,6 +1993,7 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
   }
 
   AdapterJS.attachMediaStream(videoElement, stream);
+   */
 }
 
 /**
