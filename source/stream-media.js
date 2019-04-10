@@ -2182,7 +2182,7 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
     return;
   }
   if (isScreenSharing) {
-    log.error('Failed retrieving screensharing Stream ->', error);
+    log.warn('Failed retrieving screensharing Stream ->', error);
   } else {
     log.error('Failed retrieving camera Stream ->', error);
   }
