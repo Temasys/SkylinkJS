@@ -1525,3 +1525,26 @@ Skylink.prototype.RTMP_STATE = {
   STOP: 1,
   ERROR: -1
 };
+
+/**
+ * The different sizes of room that can be passed to API server to invoke a MCU Container [MCU ONLY OPTION].
+ * @attribute ROOM_SIZE
+ * @param {string} SMALL <small>Value <code>small</code></small>
+ *   The size of the room as small
+ * @param {string} MEDIUM <small>Value <code>medium</code></small>
+ *   The size of the room as medium
+ * @param {string} LARGE <small>Value <code>-large</code></small>
+ *   The size of the room as large
+ * @param {string} EXTRA_LARGE <small>Value <code>-extraLarge</code></small>
+ *   The size of the room as extra large
+ * @type JSON
+ * @beta
+ * @for Skylink
+ * @since 0.6.34
+ */
+Skylink.prototype.ROOM_SIZE = {
+  SMALL: 'small',
+  MEDIUM: 'medium',
+  LARGE: 'large',
+  EXTRA_LARGE: 'extraLarge'
+};

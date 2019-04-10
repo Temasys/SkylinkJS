@@ -697,6 +697,8 @@ Skylink.prototype.init = function(_options, _callback) {
     options.filterCandidatesType.relay = false;
   }
 
+  options.roomSize = options.roomSize || self.ROOM_SIZE.SMALL;
+
   self.once('readyStateChange', function () { }, function (state, error) {
     if (state === self.READY_STATE_CHANGE.ERROR) {
       log.error('Failed init() process ->', error);
