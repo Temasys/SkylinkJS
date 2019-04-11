@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.9.0 - Fri Apr 05 2019 14:26:53 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v0.9.1 - Thu Apr 11 2019 11:46:32 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -1652,7 +1652,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.9.0';
+Skylink.prototype.VERSION = '0.9.1';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -17647,6 +17647,8 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
 		height: null
 	};
 
+  callback();
+  /**
 	// Append the stream to a dummy <video> element to retrieve the resolution width and height.
   var videoElement = document.createElement('video');
   videoElement.autoplay = true;
@@ -17660,7 +17662,7 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
   	}
   	self._streams[streamKey].tracks.video.width = videoElement.videoWidth;
   	self._streams[streamKey].tracks.video.height = videoElement.videoHeight;
-  	
+
   	videoElement.srcObject = null;
   	callback();
   };
@@ -17674,6 +17676,7 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
   }
 
   AdapterJS.attachMediaStream(videoElement, stream);
+   */
 }
 
 /**
