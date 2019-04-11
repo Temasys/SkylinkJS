@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.9.0",
+        "version": "0.9.1",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -10243,7 +10243,13 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1996,
+            "line": 1968,
+            "description": "// Append the stream to a dummy <video> element to retrieve the resolution width and height.\n  var videoElement = document.createElement('video');\n  videoElement.autoplay = true;\n  // Mute the audio of the <video> element to prevent feedback.\n  videoElement.muted = true;\n  videoElement.volume = 0;\n\n  var onVideoLoaded = function () {\n  \tif (!self._streams[streamKey]) {\n  \t\treturn;\n  \t}\n  \tself._streams[streamKey].tracks.video.width = videoElement.videoWidth;\n  \tself._streams[streamKey].tracks.video.height = videoElement.videoHeight;\n\n  \tvideoElement.srcObject = null;\n  \tcallback();\n  };\n\n  // Because the plugin does not support the \"loadeddata\" event.\n  if (AdapterJS.webrtcDetectedType === 'plugin') {\n    setTimeout(onVideoLoaded, 1500);\n\n  } else {\n    videoElement.addEventListener('loadeddata', onVideoLoaded);\n  }\n\n  AdapterJS.attachMediaStream(videoElement, stream);",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-media.js",
+            "line": 1999,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -10254,7 +10260,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2147,
+            "line": 2150,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -10265,7 +10271,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2192,
+            "line": 2195,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -10276,7 +10282,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2226,
+            "line": 2229,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -10287,7 +10293,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2312,
+            "line": 2315,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -10772,6 +10778,10 @@
         {
             "message": "Missing item type\nEmit event for Peers function.",
             "line": " source/data-transfer.js:2792"
+        },
+        {
+            "message": "Missing item type\n// Append the stream to a dummy <video> element to retrieve the resolution width and height.\n  var videoElement = document.createElement('video');\n  videoElement.autoplay = true;\n  // Mute the audio of the <video> element to prevent feedback.\n  videoElement.muted = true;\n  videoElement.volume = 0;\n\n  var onVideoLoaded = function () {\n  \tif (!self._streams[streamKey]) {\n  \t\treturn;\n  \t}\n  \tself._streams[streamKey].tracks.video.width = videoElement.videoWidth;\n  \tself._streams[streamKey].tracks.video.height = videoElement.videoHeight;\n\n  \tvideoElement.srcObject = null;\n  \tcallback();\n  };\n\n  // Because the plugin does not support the \"loadeddata\" event.\n  if (AdapterJS.webrtcDetectedType === 'plugin') {\n    setTimeout(onVideoLoaded, 1500);\n\n  } else {\n    videoElement.addEventListener('loadeddata', onVideoLoaded);\n  }\n\n  AdapterJS.attachMediaStream(videoElement, stream);",
+            "line": " source/stream-media.js:1968"
         }
     ]
 }
