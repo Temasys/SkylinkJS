@@ -536,7 +536,7 @@ Skylink.prototype.init = function(_options, _callback) {
 
   // `init({ throttleIntervals: { shareScreen: 10000 } })`
   options.throttleIntervals.shareScreen = typeof options.throttleIntervals.shareScreen === 'number' ?
-    options.throttleIntervals.shareScreen : 10000;
+    options.throttleIntervals.shareScreen : 1000;
 
   // `init({ throttleIntervals: { refreshConnection: 5000 } })`
   options.throttleIntervals.refreshConnection = typeof options.throttleIntervals.refreshConnection === 'number' ?

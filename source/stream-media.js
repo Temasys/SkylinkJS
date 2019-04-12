@@ -1964,33 +1964,35 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
 		height: null
 	};
 
-	// Append the stream to a dummy <video> element to retrieve the resolution width and height.
-  var videoElement = document.createElement('video');
-  videoElement.autoplay = true;
-  // Mute the audio of the <video> element to prevent feedback.
-  videoElement.muted = true;
-  videoElement.volume = 0;
+  callback();
 
-  var onVideoLoaded = function () {
-  	if (!self._streams[streamKey]) {
-  		return;
-  	}
-  	self._streams[streamKey].tracks.video.width = videoElement.videoWidth;
-  	self._streams[streamKey].tracks.video.height = videoElement.videoHeight;
-  	
-  	videoElement.srcObject = null;
-  	callback();
-  };
-
-  // Because the plugin does not support the "loadeddata" event.
-  if (AdapterJS.webrtcDetectedType === 'plugin') {
-    setTimeout(onVideoLoaded, 1500);
-
-  } else {
-    videoElement.addEventListener('loadeddata', onVideoLoaded);
-  }
-
-  AdapterJS.attachMediaStream(videoElement, stream);
+  // // Append the stream to a dummy <video> element to retrieve the resolution width and height.
+  // var videoElement = document.createElement('video');
+  // videoElement.autoplay = true;
+  // // Mute the audio of the <video> element to prevent feedback.
+  // //videoElement.muted = true;
+  // videoElement.volume = 0;
+  //
+  // var onVideoLoaded = function () {
+  // 	if (!self._streams[streamKey]) {
+  // 		return;
+  // 	}
+  // 	self._streams[streamKey].tracks.video.width = videoElement.videoWidth;
+  // 	self._streams[streamKey].tracks.video.height = videoElement.videoHeight;
+  //
+  // 	videoElement.srcObject = null;
+  // 	callback();
+  // };
+  //
+  // // Because the plugin does not support the "loadeddata" event.
+  // if (AdapterJS.webrtcDetectedType === 'plugin') {
+  //   setTimeout(onVideoLoaded, 1500);
+  //
+  // } else {
+  //   videoElement.addEventListener('loadeddata', onVideoLoaded);
+  // }
+  //
+  // AdapterJS.attachMediaStream(videoElement, stream);
 }
 
 /**
@@ -2180,7 +2182,7 @@ Skylink.prototype._onStreamAccessError = function(error, settings, isScreenShari
     return;
   }
   if (isScreenSharing) {
-    log.error('Failed retrieving screensharing Stream ->', error);
+    log.warn('Failed retrieving screensharing Stream ->', error);
   } else {
     log.error('Failed retrieving camera Stream ->', error);
   }
