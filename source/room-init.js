@@ -414,6 +414,7 @@ Skylink.prototype.init = function(_options, _callback) {
   var self = this;
   var options = {};
   var callback = function () {};
+  var isCalledFromJoinRoomFn = false;
 
   // `init(function () {})`
   if (typeof _options === 'function'){
@@ -437,6 +438,11 @@ Skylink.prototype.init = function(_options, _callback) {
   // `init(.., function () {})`
   if (typeof _callback === 'function') {
     callback = _callback;
+  }
+
+  if (_options && typeof _options === 'object' && typeof _options.isCalledFromJoinRoomFn === 'boolean') {
+    isCalledFromJoinRoomFn = _options.isCalledFromJoinRoomFn;
+    delete _options.isCalledFromJoinRoomFn;
   }
 
   // `init({ defaultRoom: "xxxxx" })`
@@ -697,6 +703,8 @@ Skylink.prototype.init = function(_options, _callback) {
     options.filterCandidatesType.relay = false;
   }
 
+  options.roomSize = options.roomSize || self.ROOM_SIZE.SMALL;
+
   self.once('readyStateChange', function () { }, function (state, error) {
     if (state === self.READY_STATE_CHANGE.ERROR) {
       log.error('Failed init() process ->', error);
@@ -742,7 +750,7 @@ Skylink.prototype.init = function(_options, _callback) {
     self._initOptions.credentials.duration + '?cred=' + self._initOptions.credentials.credentials : '') +
     (self._initOptions.credentials ? '&' : '?') + 'rand=' + Date.now();
 
-  self._loadInfo();
+  self._loadInfo(isCalledFromJoinRoomFn);
 };
 
 /**
@@ -977,7 +985,7 @@ Skylink.prototype._parseInfo = function(info) {
  * @for Skylink
  * @since 0.5.2
  */
-Skylink.prototype._loadInfo = function() {
+Skylink.prototype._loadInfo = function(isCalledFromJoinRoomFn) {
   var self = this;
 
   if (typeof (globals.AdapterJS || window.AdapterJS || {}).webRTCReady !== 'function') {
@@ -1076,7 +1084,9 @@ Skylink.prototype._loadInfo = function() {
       self._readyState = self.READY_STATE_CHANGE.LOADING;
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
       self._handleClientStats();
-      self._requestServerInfo('GET', self._path, function(response) {
+
+      var endpoint = isCalledFromJoinRoomFn && self._hasMCU ? self._path + '&room-size=' + self._initOptions.roomSize : self._path;
+      self._requestServerInfo('GET', endpoint, function(response) {
         self._parseInfo(response);
       });
     });
@@ -1090,7 +1100,7 @@ Skylink.prototype._loadInfo = function() {
  * @for Skylink
  * @since 0.5.5
  */
-Skylink.prototype._initSelectedRoom = function(room, callback) {
+Skylink.prototype._initSelectedRoom = function(room, isCalledFromJoinRoomFn, callback) {
   var self = this;
   if (typeof room === 'function' || typeof room === 'undefined') {
     log.error('Invalid room provided. Room:', room);
@@ -1104,6 +1114,8 @@ Skylink.prototype._initSelectedRoom = function(room, callback) {
   if(options.defaultRoom!==room){
     options.defaultRoom = room;
   }
+
+  options.isCalledFromJoinRoomFn = isCalledFromJoinRoomFn;
 
   self.init(options, function (error, success) {
     self._initOptions.defaultRoom = defaultRoom;

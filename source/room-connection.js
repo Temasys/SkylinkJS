@@ -352,7 +352,7 @@ Skylink.prototype.joinRoom = function(room, options, callback) {
       return;
     }
 
-    self._initSelectedRoom(selectedRoom, function(initError, initSuccess) {
+    self._initSelectedRoom(selectedRoom, true, function(initError, initSuccess) {
       if (initError) {
         resolveAsErrorFn(initError.error, self._selectedRoom, self._readyState);
         return;
