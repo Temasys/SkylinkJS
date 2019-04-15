@@ -1837,6 +1837,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
   self._peerBandwidth[targetMid] = {};
   var bandwidth = null;
 
+  if (targetMid === 'MCU') {
+    log.info('Creating an empty transceiver of kind video with MCU');
+    pc.addTransceiver('video');
+  }
+
   // callbacks
   // standard not implemented: onnegotiationneeded,
   pc.ondatachannel = function(event) {
@@ -2302,47 +2307,6 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
     } catch (error) {
       log.error([targetMid, 'RTCPeerConnection', null, 'Failed signaling end-of-candidates ->'], error);
     }
-  }
-};
-
-/**
- * Function that compares trackCount sent by MCU and decides wether to add new Transceivers based on count differences
- * @method _compareTrackCounts
- * @param {String} targetMid
- * @private
- */
-Skylink.prototype._compareTrackCounts = function (targetMid) {
-  var self = this;
-  var pc = self._peerConnections[targetMid];
-
-  if (pc && typeof pc.getTransceivers === 'function') {
-    var transceivers = pc.getTransceivers();
-    var transceiverTypeCount = {
-      audio: 0,
-      video: 0
-    };
-
-    var checkDiffAndAddTransceivers = function (kind, requestedKindCount, actualKindCount, peerConnection) {
-      if (requestedKindCount > actualKindCount) {
-        var diff = requestedKindCount - actualKindCount;
-        while (diff) {
-          peerConnection.addTransceiver(kind);
-          diff = diff - 1;
-        }
-      }
-    };
-
-    if (transceivers && transceivers.length) {
-      for (var i = 0; i < transceivers.length; i++) {
-        if (transceivers[i] && transceivers[i].receiver && transceivers[i].receiver.track) {
-          var kind = transceivers[i].receiver.track.kind;
-          transceiverTypeCount[kind] += 1;
-        }
-      }
-    }
-
-    checkDiffAndAddTransceivers('video', self._currentRequestedTracks['video'], transceiverTypeCount.video, pc);
-    checkDiffAndAddTransceivers('audio', self._currentRequestedTracks['audio'], transceiverTypeCount.audio, pc);
   }
 };
 
