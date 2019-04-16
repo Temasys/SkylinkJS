@@ -870,13 +870,13 @@ function Skylink() {
 
   /**
    * Stores the unique random number used for generating the "client_id".
-   * @attribute _statIdRandom
+   * @attribute _clientId
    * @type Number
    * @private
    * @for Skylink
    * @since 0.6.31
    */
-  this._statIdRandom = Date.now() + Math.floor(Math.random() * 100000000);
+  this._clientId = this.generateUUID();
 
   /**
    * A mapping of transceiverIds and peer IDs (only when new MCU is in effect)
