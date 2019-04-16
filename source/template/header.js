@@ -907,4 +907,14 @@ function Skylink() {
    * @since 1.0.0
    */
   this._originalDTLSRole = null;
+
+  /**
+   * Offer bufferred in order to apply when received answer
+   * @attribute _bufferedLocalOffer
+   * @type Object
+   * @private
+   * @for Skylink
+   * @since 1.0.0
+   */
+  this._bufferedLocalOffer = {};
 }

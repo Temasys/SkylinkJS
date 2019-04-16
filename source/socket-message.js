@@ -1546,6 +1546,17 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
+  if (self._bufferedLocalOffer[targetMid] && self._peerPriorityWeight > message.weight) {
+    log.warn([targetMid, null, message.type, 'Dropping the received offer with self.weight greater than incoming offer weight'], {
+      selfWeight: self._peerPriorityWeight,
+      messageWeight: message.weight
+    });
+    self._handleNegotiationStats('dropped_offer', targetMid, offer, true, 'self weight is greater than incoming offer weight.');
+    return;
+  }
+
+  self._bufferedLocalOffer[targetMid] = null;
+
   // Added checks if there is a current remote sessionDescription being processing before processing this one
   if (pc.processingRemoteSDP) {
     log.warn([targetMid, 'RTCSessionDescription', 'offer',
@@ -1670,8 +1681,9 @@ Skylink.prototype._candidateHandler = function(message) {
       'flags are not honoured ->'], candidate);
   }
 
-  if (this._peerConnections[targetMid].remoteDescription && this._peerConnections[targetMid].remoteDescription.sdp &&
-    this._peerConnections[targetMid].localDescription && this._peerConnections[targetMid].localDescription.sdp) {
+  // if (this._peerConnections[targetMid].remoteDescription && this._peerConnections[targetMid].remoteDescription.sdp &&
+  //   this._peerConnections[targetMid].localDescription && this._peerConnections[targetMid].localDescription.sdp) {
+  if (this._peerConnections[targetMid].signalingState === this.PEER_CONNECTION_STATE.STABLE) {
     this._addIceCandidate(targetMid, canId, candidate);
   } else {
     this._addIceCandidateToQueue(targetMid, canId, candidate);
@@ -1765,16 +1777,19 @@ Skylink.prototype._answerHandler = function(message) {
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
+  /*
+    Removeing this below if condition in favor of this ticket: https://jira.temasys.com.sg/browse/ESS-1632
+  */
   // This should be the state after offer is received. or even after negotiation is successful
-  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
-    log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"have-local-offer" state for re-negotiation. Dropping message.'], {
-        signalingState: pc.signalingState,
-        isRestart: !!message.restart
-      });
-    self._handleNegotiationStats('dropped_answer', targetMid, answer, true, 'Peer connection state is "' + pc.signalingState + '"');
-    return;
-  }
+  // if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
+  //   log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
+  //     '"have-local-offer" state for re-negotiation. Dropping message.'], {
+  //       signalingState: pc.signalingState,
+  //       isRestart: !!message.restart
+  //     });
+  //   self._handleNegotiationStats('dropped_answer', targetMid, answer, true, 'Peer connection state is "' + pc.signalingState + '"');
+  //   return;
+  // }
 
   // Added checks if there is a current remote sessionDescription being processing before processing this one
   if (pc.processingRemoteSDP) {
@@ -1786,6 +1801,7 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   pc.processingRemoteSDP = true;
+  pc.processingLocalSDP = true;
 
   if (message.userInfo) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
@@ -1829,7 +1845,28 @@ Skylink.prototype._answerHandler = function(message) {
     });
   };
 
-  pc.setRemoteDescription(new RTCSessionDescription(answer), onSuccessCbFn, onErrorCbFn);
+  var onLocalOfferSetSuccess = function() {
+    pc.processingLocalSDP = false;
+    self._bufferedLocalOffer[targetMid] = null;
+    pc.setRemoteDescription(new RTCSessionDescription(answer), onSuccessCbFn, onErrorCbFn);
+  };
+
+  var onLocalOfferSetError = function (sdpError) {
+    log.error([targetMid, 'RTCSessionDescription', 'offer', 'Local description failed setting ->'], sdpError);
+
+    pc.processingLocalSDP = false;
+    pc.processingRemoteSDP = false;
+
+    self._handleNegotiationStats('error_set_offer', targetMid, self._bufferedLocalOffer[targetMid], false, sdpError);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, sdpError);
+  };
+
+  if (self._bufferedLocalOffer[targetMid]) {
+    pc.setLocalDescription(new RTCSessionDescription(self._bufferedLocalOffer[targetMid]), onLocalOfferSetSuccess, onLocalOfferSetError);
+  } else {
+    log.error([targetMid, 'RTCPeerConnection', null, 'FATAL: No buffered local offer found. Unable to setLocalDescription.']);
+  }
+
 };
 
 /**

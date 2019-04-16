@@ -248,6 +248,10 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       userInfo: self._getUserInfo(targetMid)
     };
 
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER) {
+      messageToSend.weight = self._peerPriorityWeight;
+    }
+
     // Merging Restart and Offer messages. The already present keys in offer message will not be overwritten.
     // Only news keys from mergeMessage are added.
     if (mergeMessage && Object.keys(mergeMessage).length) {
@@ -274,5 +278,12 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
-  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), onSuccessCbFn, onErrorCbFn);
+  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER) {
+    self._bufferedLocalOffer[targetMid] = sessionDescription;
+    onSuccessCbFn();
+  } else {
+    pc.setLocalDescription(new RTCSessionDescription(sessionDescription), onSuccessCbFn, onErrorCbFn);
+  }
+
+
 };
