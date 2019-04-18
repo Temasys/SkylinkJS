@@ -303,7 +303,6 @@ Skylink.prototype.renegotiateIfNeeded = function (peerId) {
 
   Promise.all(senderGetStatsPromises).then(function(reslovedResults) {
     reslovedResults.forEach(function(reports, senderIndex) {
-      console.log(reports);
       reports.forEach(function(report) {
         if (report && report.ssrc) {
           transmittingSenders[report.ssrc] = pcSenders[senderIndex];
