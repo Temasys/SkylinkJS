@@ -917,4 +917,14 @@ function Skylink() {
    * @since 1.0.0
    */
   this._bufferedLocalOffer = {};
+
+  /**
+   * Map of RTCRTPSenders that are added via addTrack
+   * @attribute _currentRTCRTPSenders
+   * @type Object
+   * @private
+   * @for Skylink
+   * @since 1.0.0
+   */
+  this._currentRTCRTPSenders = {};
 }

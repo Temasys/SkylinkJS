@@ -2048,6 +2048,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
         for (var t = 0; t < tracks.length; t++) {
           if (tracks[t] === senders[s].track) {
             pc.removeTrack(senders[s]);
+            self._removeSenderFromList(targetMid, senders[s]);
           }
         }
       }

@@ -287,3 +287,49 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
 
 
 };
+
+Skylink.prototype.renegotiateIfNeeded = function (peerId) {
+  var self = this;
+  var peerConnection = self._peerConnections[peerId];
+  var pcSenders = peerConnection.getSenders();
+  var senderGetStatsPromises = [];
+  var savedSenders = self._currentRTCRTPSenders[peerId];
+  var isRenegoNeeded = false;
+
+  pcSenders.forEach(function(pcSender) {
+    senderGetStatsPromises.push(pcSender.getStats());
+  });
+  var transmittingSenders = {};
+
+  Promise.all(senderGetStatsPromises).then(function(reslovedResults) {
+    reslovedResults.forEach(function(reports, senderIndex) {
+      console.log(reports);
+      reports.forEach(function(report) {
+        if (report && report.ssrc) {
+          transmittingSenders[report.ssrc] = pcSenders[senderIndex];
+        }
+      });
+    });
+  });
+
+  var transmittingSendersKeys = Object.keys(transmittingSenders);
+
+  if (transmittingSendersKeys.length !== savedSenders.length) {
+    isRenegoNeeded = true;
+  } else {
+    var senderMatchedCount = 0;
+    for (var tKey = 0; tKey < transmittingSendersKeys.length; tKey++) {
+      var tSender = transmittingSenders[tKey];
+      for (var sIndex = 0; sIndex < savedSenders.length; sIndex++) {
+        var sSender = savedSenders[sIndex];
+        if (tSender === sSender) {
+          senderMatchedCount++;
+          break;
+        }
+      }
+    }
+    isRenegoNeeded = senderMatchedCount !== transmittingSendersKeys.length;
+  }
+
+  return isRenegoNeeded;
+};
