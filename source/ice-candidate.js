@@ -244,10 +244,7 @@ Skylink.prototype._addIceCandidate = function (targetMid, canId, candidate) {
     }, null);
 
   if (!(self._peerConnections[targetMid] &&
-    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED &&
-    self._peerConnections[targetMid].remoteDescription &&
-    self._peerConnections[targetMid].remoteDescription.sdp &&
-    self._peerConnections[targetMid].remoteDescription.sdp.indexOf('\r\na=mid:' + candidate.sdpMid + '\r\n') > -1)) {
+    self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
     log.warn([targetMid, 'RTCIceCandidate', canId + ':' + candidateType, 'Dropping ICE candidate ' +
       'as Peer connection does not exists or is closed']);
     self._handleIceCandidateStats('process_failed', targetMid, canId, candidate, 'Peer connection does not exist');

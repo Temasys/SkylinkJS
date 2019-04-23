@@ -444,6 +444,9 @@ Skylink.prototype._processSigMessage = function(message, session) {
   case this._SIG_MESSAGE_TYPE.END_OF_CANDIDATES:
     this._endOfCandidatesHandler(message);
     break;
+  case this._SIG_MESSAGE_TYPE.ANSWER_ACK:
+    this._answerAckHandler(message);
+    break;
   default:
     log.error([message.mid, 'Socket', message.type, 'Unsupported message ->'], clone(message));
     break;
@@ -1683,7 +1686,9 @@ Skylink.prototype._candidateHandler = function(message) {
 
   // if (this._peerConnections[targetMid].remoteDescription && this._peerConnections[targetMid].remoteDescription.sdp &&
   //   this._peerConnections[targetMid].localDescription && this._peerConnections[targetMid].localDescription.sdp) {
-  if (this._peerConnections[targetMid].signalingState === this.PEER_CONNECTION_STATE.STABLE) {
+
+  var pc = this._peerConnections[targetMid];
+  if (pc.signalingState === this.PEER_CONNECTION_STATE.STABLE && pc.processingLocalSDP === false && pc.processingRemoteSDP === false) {
     this._addIceCandidate(targetMid, canId, candidate);
   } else {
     this._addIceCandidateToQueue(targetMid, canId, candidate);
@@ -1702,6 +1707,25 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMid: candidate.sdpMid,
     sdpMLineIndex: candidate.sdpMLineIndex,
     candidate: candidate.candidate
+  });
+};
+
+/**
+ * Function that handles the "answerAck" socket message received.
+ * See confluence docs for the "answerAck" expected properties to be received
+ *   based on the current <code>SM_PROTOCOL_VERSION</code>.
+ * @method _answerAckHandler
+ * @private
+ * @for Skylink
+ * @since 1.0.0
+ */
+Skylink.prototype._answerAckHandler = function(message) {
+  var self = this;
+  var targetMid = message.mid;
+  self.renegotiateIfNeeded(targetMid).then(function(shouldRenegotiate) {
+    if (shouldRenegotiate) {
+     self.refreshConnection(targetMid);
+    }
   });
 };
 
@@ -2108,7 +2132,6 @@ Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
  */
 Skylink.prototype._acknowledgeAnswer = function (targetMid, isSuccess, error) {
   var self = this;
-  if (self._hasMCU) {
     var statsStateKey = isSuccess ? 'set_answer_ack' : 'error_set_answer_ack';
     var answerAckMessage = {
       rid: self._room.id,
@@ -2117,10 +2140,10 @@ Skylink.prototype._acknowledgeAnswer = function (targetMid, isSuccess, error) {
       success: isSuccess,
       type: self._SIG_MESSAGE_TYPE.ANSWER_ACK,
     };
-    self._sendChannelMessage(answerAckMessage);
-    log.debug(['MCU', 'Remote Description', null, 'Answer acknowledgement message sent to MCU via SIG. Message body -->'], answerAckMessage);
-    self._handleNegotiationStats(statsStateKey, targetMid, answerAckMessage, true, error);
-  }
+  self._sendChannelMessage(answerAckMessage);
+  log.debug([targetMid, 'Remote Description', null, 'Answer acknowledgement message sent to' + targetMid + ' via SIG. Message body -->'], answerAckMessage);
+  self._handleNegotiationStats(statsStateKey, targetMid, answerAckMessage, true, error);
+
   return false;
 };
 
