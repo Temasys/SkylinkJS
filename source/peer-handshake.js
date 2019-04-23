@@ -32,6 +32,10 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, mergeMessageWithOff
     voiceActivityDetection: self._voiceActivityDetection
   };
 
+  if (self._hasMCU && typeof pc.addTransceiver !== 'function') {
+    offerConstraints.offerToReceiveVideo = true;
+  }
+
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === 'MCU') {
     self._addLocalMediaStreams(targetMid);
