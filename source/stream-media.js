@@ -2354,7 +2354,6 @@ Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
 Skylink.prototype._removeSenderFromList = function(peerId, sender) {
   var indexToRemove = -1;
   if (!this._currentRTCRTPSenders[peerId]) {
-    log.warn([peerId, null, null, 'The _currentRTCRTPSenders map for peer does not exist ']);
     return;
   }
   var listOfSenders = this._currentRTCRTPSenders[peerId];
