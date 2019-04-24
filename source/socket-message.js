@@ -1570,6 +1570,7 @@ Skylink.prototype._offerHandler = function(message) {
   }
 
   pc.processingRemoteSDP = true;
+  pc.processingLocalSDP = false;
 
   if (message.userInfo) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);

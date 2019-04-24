@@ -226,7 +226,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     log.debug([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Local session description has been set ->'], sessionDescription);
 
-    pc.processingLocalSDP = false;
+
 
     self._handleNegotiationStats('set_' + sessionDescription.type, targetMid, sessionDescription, false);
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
@@ -251,6 +251,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
     };
+
+    pc.processingLocalSDP = messageToSend.type === self.HANDSHAKE_PROGRESS.OFFER;
 
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER) {
       messageToSend.weight = self._peerPriorityWeight;
