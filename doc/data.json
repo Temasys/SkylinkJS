@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.9.1",
+        "version": "0.9.2",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -1197,7 +1197,7 @@
             "line": 871,
             "description": "Stores the unique random number used for generating the \"client_id\".",
             "itemtype": "attribute",
-            "name": "_statIdRandom",
+            "name": "_clientId",
             "type": "Number",
             "access": "private",
             "tagname": "",
@@ -5345,7 +5345,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 748,
+            "line": 749,
             "description": "Function that checks if value is contained in a SDK constant.",
             "itemtype": "method",
             "name": "_containsInList",
@@ -5356,7 +5356,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 767,
+            "line": 768,
             "description": "Starts retrieving Room credentials information from API server.",
             "itemtype": "method",
             "name": "_requestServerInfo",
@@ -5367,7 +5367,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 900,
+            "line": 901,
             "description": "Parses the Room credentials information retrieved from API server.",
             "itemtype": "method",
             "name": "_parseInfo",
@@ -5378,7 +5378,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 973,
+            "line": 974,
             "description": "Loads and checks the dependencies if they are loaded correctly.",
             "itemtype": "method",
             "name": "_loadInfo",
@@ -5389,7 +5389,7 @@
         },
         {
             "file": "source/room-init.js",
-            "line": 1086,
+            "line": 1087,
             "description": "Starts initialising for Room credentials for room name provided in <code>joinRoom()</code> method.",
             "itemtype": "method",
             "name": "_initSelectedRoom",
@@ -5510,6 +5510,19 @@
         {
             "file": "source/skylink-debug.js",
             "line": 98,
+            "description": "Stores the user's info for reporting error to API",
+            "itemtype": "attribute",
+            "name": "_userInfo",
+            "type": "JSON",
+            "access": "private",
+            "tagname": "",
+            "scoped": "true",
+            "since": "0.6.35",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-debug.js",
+            "line": 112,
             "description": "Function that gets the stored logs.",
             "itemtype": "method",
             "name": "_getStoredLogsFn",
@@ -5521,7 +5534,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 119,
+            "line": 133,
             "description": "Function that clears the stored logs.",
             "itemtype": "method",
             "name": "_clearAllStoredLogsFn",
@@ -5533,7 +5546,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 131,
+            "line": 145,
             "description": "Function that prints in the Web Console interface the stored logs.",
             "itemtype": "method",
             "name": "_printAllStoredLogsFn",
@@ -5545,7 +5558,16 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 155,
+            "line": 169,
+            "description": "Variable to will store the bounded function between Skylink instance and _reportToAPI function",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.37",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-debug.js",
+            "line": 177,
             "description": "<blockquote class=\"info\">\n  To utilise and enable the <code>SkylinkLogs</code> API functionalities, the\n  <a href=\"#method_setDebugMode\"><code>setDebugMode()</code> method</a>\n  <code>options.storeLogs</code> parameter has to be enabled.\n</blockquote>\nThe object interface to manage the SDK <a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">\nJavascript Web Console</a> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs",
@@ -5556,7 +5578,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 170,
+            "line": 192,
             "description": "Function that gets the current stored SDK <code>console</code> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.getLogs",
@@ -5583,7 +5605,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 197,
+            "line": 219,
             "description": "Function that clears all the current stored SDK <code>console</code> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.clearAllLogs",
@@ -5598,7 +5620,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 211,
+            "line": 233,
             "description": "Function that prints all the current stored SDK <code>console</code> logs into the\n<a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">Javascript Web Console</a>.",
             "itemtype": "property",
             "name": "SkylinkLogs.printAllLogs",
@@ -5613,7 +5635,20 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 227,
+            "line": 249,
+            "description": "Function that will send the log to an API endpoint for persistence",
+            "itemtype": "method",
+            "name": "_reportToAPI",
+            "access": "private",
+            "tagname": "",
+            "required": 1,
+            "scoped": "true",
+            "since": "0.6.35",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-debug.js",
+            "line": 277,
             "description": "Function that handles the logs received and prints in the Web Console interface according to the log level set.",
             "itemtype": "method",
             "name": "_logFn",
@@ -5626,7 +5661,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 299,
+            "line": 349,
             "description": "Stores the logging functions.",
             "itemtype": "attribute",
             "name": "log",
@@ -5666,7 +5701,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 335,
+            "line": 386,
             "description": "Function that configures the level of <code>console</code> API logs to be printed in the\n<a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">Javascript Web Console</a>.",
             "itemtype": "method",
             "name": "setLogLevel",
@@ -5686,7 +5721,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 372,
+            "line": 423,
             "description": "Function that configures the debugging mode of the SDK.",
             "itemtype": "method",
             "name": "setDebugMode",
@@ -5726,6 +5761,15 @@
                 "\n  // Example 1: Enable both options.storeLogs and options.trace\n  skylinkDemo.setDebugMode(true);\n\n  // Example 2: Enable only options.storeLogs\n  skylinkDemo.setDebugMode({ storeLogs: true });\n\n  // Example 3: Disable debugging mode\n  skylinkDemo.setDebugMode();"
             ],
             "since": "0.5.2",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-debug.js",
+            "line": 473,
+            "description": "Function that binds the SKylink instance to reportAPI instance and returns a new bound function",
+            "itemtype": "method",
+            "name": "_setClientInfoForLogging",
+            "since": "0.5.5",
             "class": "Skylink"
         },
         {
@@ -8958,7 +9002,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 58,
+            "line": 59,
             "description": "Function that handles the posting of session states.",
             "itemtype": "method",
             "name": "_handleSessionStats",
@@ -8969,7 +9013,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 77,
+            "line": 78,
             "description": "Function that handles the posting of app key authentication states.",
             "itemtype": "method",
             "name": "_handleAuthStats",
@@ -8980,7 +9024,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 98,
+            "line": 99,
             "description": "Function that handles the posting of socket connection states.",
             "itemtype": "method",
             "name": "_handleSignalingStats",
@@ -8991,7 +9035,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 122,
+            "line": 123,
             "description": "Function that handles the posting of peer ICE connection states.",
             "itemtype": "method",
             "name": "_handleIceConnectionStats",
@@ -9002,7 +9046,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 166,
+            "line": 167,
             "description": "Function that handles the posting of peer local/remote ICE candidate processing states.",
             "itemtype": "method",
             "name": "_handleIceCandidateStats",
@@ -9013,7 +9057,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 190,
+            "line": 191,
             "description": "Function that handles the posting of peer local/remote ICE gathering states.",
             "itemtype": "method",
             "name": "_handleIceGatheringStats",
@@ -9024,7 +9068,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 209,
+            "line": 210,
             "description": "Function that handles the posting of peer connection negotiation states.",
             "itemtype": "method",
             "name": "_handleNegotiationStats",
@@ -9035,7 +9079,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 242,
+            "line": 243,
             "description": "Function that handles the posting of peer connection bandwidth information.",
             "itemtype": "method",
             "name": "_handleBandwidthStats",
@@ -9046,7 +9090,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 367,
+            "line": 368,
             "description": "Function that handles the posting of recording states.",
             "itemtype": "method",
             "name": "_handleRecordingStats",
@@ -9057,7 +9101,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 388,
+            "line": 389,
             "description": "Function that handles the posting of datachannel states.",
             "itemtype": "method",
             "name": "_handleDatachannelStats",
@@ -9068,7 +9112,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 422,
+            "line": 423,
             "description": "Function that handles buffer of stats data",
             "itemtype": "method",
             "name": "_handleDatachannelStats",
@@ -10653,31 +10697,39 @@
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:119"
+            "line": " source/skylink-debug.js:112"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:131"
-        },
-        {
-            "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:170"
-        },
-        {
-            "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:197"
-        },
-        {
-            "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:211"
+            "line": " source/skylink-debug.js:133"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:227"
+            "line": " source/skylink-debug.js:145"
+        },
+        {
+            "message": "unknown tag: triggerforprophacknone",
+            "line": " source/skylink-debug.js:192"
+        },
+        {
+            "message": "unknown tag: triggerforprophacknone",
+            "line": " source/skylink-debug.js:219"
+        },
+        {
+            "message": "unknown tag: triggerforprophacknone",
+            "line": " source/skylink-debug.js:233"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:299"
+            "line": " source/skylink-debug.js:249"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:277"
+        },
+        {
+            "message": "unknown tag: scoped",
+            "line": " source/skylink-debug.js:349"
         },
         {
             "message": "unknown tag: trigger",
@@ -10778,6 +10830,10 @@
         {
             "message": "Missing item type\nEmit event for Peers function.",
             "line": " source/data-transfer.js:2792"
+        },
+        {
+            "message": "Missing item type\nVariable to will store the bounded function between Skylink instance and _reportToAPI function",
+            "line": " source/skylink-debug.js:169"
         },
         {
             "message": "Missing item type\n// Append the stream to a dummy <video> element to retrieve the resolution width and height.\n  var videoElement = document.createElement('video');\n  videoElement.autoplay = true;\n  // Mute the audio of the <video> element to prevent feedback.\n  videoElement.muted = true;\n  videoElement.volume = 0;\n\n  var onVideoLoaded = function () {\n  \tif (!self._streams[streamKey]) {\n  \t\treturn;\n  \t}\n  \tself._streams[streamKey].tracks.video.width = videoElement.videoWidth;\n  \tself._streams[streamKey].tracks.video.height = videoElement.videoHeight;\n\n  \tvideoElement.srcObject = null;\n  \tcallback();\n  };\n\n  // Because the plugin does not support the \"loadeddata\" event.\n  if (AdapterJS.webrtcDetectedType === 'plugin') {\n    setTimeout(onVideoLoaded, 1500);\n\n  } else {\n    videoElement.addEventListener('loadeddata', onVideoLoaded);\n  }\n\n  AdapterJS.attachMediaStream(videoElement, stream);",
