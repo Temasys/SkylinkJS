@@ -96,6 +96,20 @@ var _printTimestamp = false;
 var _storedLogs = [];
 
 /**
+ * Stores the user's info for reporting error to API
+ * @attribute _userInfo
+ * @type JSON
+ * @private
+ * @scoped true
+ * @for Skylink
+ * @since 0.6.35
+ */
+var _reportErrorConfig = {
+  app_key: null,
+  statsServer: null
+};
+
+/**
  * Function that gets the stored logs.
  * @method _getStoredLogsFn
  * @private
@@ -151,6 +165,14 @@ var _printAllStoredLogsFn = function () {
     }
   }
 };
+
+/**
+ * Variable to will store the bounded function between Skylink instance and _reportToAPI function
+ * @private
+ * @for Skylink
+ * @since 0.6.37
+ */
+var _instanceBoundReportToAPI = null;
 
 /**
  * <blockquote class="info">
@@ -222,6 +244,34 @@ var SkylinkLogs = {
    * @since 0.5.5
    */
   printAllLogs: _printAllStoredLogsFn
+};
+
+/**
+ * Function that will send the log to an API endpoint for persistence
+ * @method _reportToAPI
+ * @private
+ * @required
+ * @scoped true
+ * @for Skylink
+ * @since 0.6.35
+ */
+var _reportToAPI = function(message, object) {
+  if (this instanceof Skylink) {
+    var self = this;
+    var endpoint = '/rest/stats/sessionerror';
+    var params = {
+      message: message,
+      object: object,
+      room_id: self._room ? self._room.id : self._selectedRoom,
+    };
+
+    if (object && object instanceof Error) {
+      params.object = object.toString();
+    } else if (typeof object === 'object') {
+      params.object = JSON.stringify(object);
+    }
+    self._postStats(endpoint, params);
+  }
 };
 
 /**
@@ -328,6 +378,7 @@ var log = {
   },
 
   error: function (message, object) {
+    _instanceBoundReportToAPI && _instanceBoundReportToAPI(message, object);
     _logFn(0, message, object);
   }
 };
@@ -403,17 +454,28 @@ Skylink.prototype.setDebugMode = function(isDebugMode) {
     _enableDebugTrace = isDebugMode.trace === true;
     _enableDebugStack = isDebugMode.storeLogs === true;
     _printTimestamp = isDebugMode.printTimestamp === true;
-  // setDebugMode(true)
+    // setDebugMode(true)
   } else if (isDebugMode === true) {
     _enableDebugMode = true;
     _enableDebugTrace = true;
     _enableDebugStack = true;
     _printTimestamp = false;
-  // setDebugMode()
+    // setDebugMode()
   } else {
     _enableDebugMode = false;
     _enableDebugTrace = false;
     _enableDebugStack = false;
     _printTimestamp = false;
   }
+};
+
+
+/**
+ * Function that binds the SKylink instance to reportAPI instance and returns a new bound function
+ * @method _setClientInfoForLogging
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._setClientInfoForLogging = function() {
+  _instanceBoundReportToAPI = _reportToAPI.bind(this);
 };
