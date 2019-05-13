@@ -1086,7 +1086,7 @@ Skylink.prototype._loadInfo = function(isCalledFromJoinRoomFn) {
       self._trigger('readyStateChange', self.READY_STATE_CHANGE.LOADING, null, self._selectedRoom);
       self._handleClientStats();
 
-      var endpoint = isCalledFromJoinRoomFn && self._hasMCU ? self._path + '&room-size=' + self._initOptions.roomSize : self._path;
+      var endpoint = isCalledFromJoinRoomFn && self._hasMCU ? self._path + '&room_size=' + self._initOptions.roomSize : self._path;
       self._requestServerInfo('GET', endpoint, function(response) {
         self._parseInfo(response);
       });
