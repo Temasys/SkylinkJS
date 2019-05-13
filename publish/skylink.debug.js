@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.9.1 - Thu Apr 11 2019 11:46:32 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v0.9.2 - Tue May 07 2019 11:00:47 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -872,13 +872,13 @@ function Skylink() {
 
   /**
    * Stores the unique random number used for generating the "client_id".
-   * @attribute _statIdRandom
+   * @attribute _clientId
    * @type Number
    * @private
    * @for Skylink
    * @since 0.6.31
    */
-  this._statIdRandom = Date.now() + Math.floor(Math.random() * 100000000);
+  this._clientId = this.generateUUID();
 
   /**
    * A mapping of transceiverIds and peer IDs (only when new MCU is in effect)
@@ -1652,7 +1652,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.9.1';
+Skylink.prototype.VERSION = '0.9.2';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -10612,6 +10612,7 @@ Skylink.prototype.init = function(_options, _callback) {
     return;
   }
 
+  self._setClientInfoForLogging();
   // Format: https://api.temasys.io/api/<appKey>/<room>[/<creds.start>][/<creds.duration>][?cred=<creds.hash>]&rand=<rand>
   self._path = self._initOptions.roomServer + '/api/' + self._initOptions.appKey + '/' + self._selectedRoom +
     (self._initOptions.credentials ? '/' + self._initOptions.credentials.startDateTime + '/' +
@@ -11080,6 +11081,20 @@ var _printTimestamp = false;
 var _storedLogs = [];
 
 /**
+ * Stores the user's info for reporting error to API
+ * @attribute _userInfo
+ * @type JSON
+ * @private
+ * @scoped true
+ * @for Skylink
+ * @since 0.6.35
+ */
+var _reportErrorConfig = {
+  app_key: null,
+  statsServer: null
+};
+
+/**
  * Function that gets the stored logs.
  * @method _getStoredLogsFn
  * @private
@@ -11135,6 +11150,14 @@ var _printAllStoredLogsFn = function () {
     }
   }
 };
+
+/**
+ * Variable to will store the bounded function between Skylink instance and _reportToAPI function
+ * @private
+ * @for Skylink
+ * @since 0.6.37
+ */
+var _instanceBoundReportToAPI = null;
 
 /**
  * <blockquote class="info">
@@ -11206,6 +11229,34 @@ var SkylinkLogs = {
    * @since 0.5.5
    */
   printAllLogs: _printAllStoredLogsFn
+};
+
+/**
+ * Function that will send the log to an API endpoint for persistence
+ * @method _reportToAPI
+ * @private
+ * @required
+ * @scoped true
+ * @for Skylink
+ * @since 0.6.35
+ */
+var _reportToAPI = function(message, object) {
+  if (this instanceof Skylink) {
+    var self = this;
+    var endpoint = '/rest/stats/sessionerror';
+    var params = {
+      message: message,
+      object: object,
+      room_id: self._room ? self._room.id : self._selectedRoom,
+    };
+
+    if (object && object instanceof Error) {
+      params.object = object.toString();
+    } else if (typeof object === 'object') {
+      params.object = JSON.stringify(object);
+    }
+    self._postStats(endpoint, params);
+  }
 };
 
 /**
@@ -11312,6 +11363,7 @@ var log = {
   },
 
   error: function (message, object) {
+    _instanceBoundReportToAPI && _instanceBoundReportToAPI(message, object);
     _logFn(0, message, object);
   }
 };
@@ -11387,19 +11439,30 @@ Skylink.prototype.setDebugMode = function(isDebugMode) {
     _enableDebugTrace = isDebugMode.trace === true;
     _enableDebugStack = isDebugMode.storeLogs === true;
     _printTimestamp = isDebugMode.printTimestamp === true;
-  // setDebugMode(true)
+    // setDebugMode(true)
   } else if (isDebugMode === true) {
     _enableDebugMode = true;
     _enableDebugTrace = true;
     _enableDebugStack = true;
     _printTimestamp = false;
-  // setDebugMode()
+    // setDebugMode()
   } else {
     _enableDebugMode = false;
     _enableDebugTrace = false;
     _enableDebugStack = false;
     _printTimestamp = false;
   }
+};
+
+
+/**
+ * Function that binds the SKylink instance to reportAPI instance and returns a new bound function
+ * @method _setClientInfoForLogging
+ * @for Skylink
+ * @since 0.5.5
+ */
+Skylink.prototype._setClientInfoForLogging = function() {
+  _instanceBoundReportToAPI = _reportToAPI.bind(this);
 };
 var _eventsDocs = {
   /**
@@ -13002,7 +13065,7 @@ Skylink.prototype._postStats = function (endpoint, params) {
     else{
       requestBody = params;
     }
-    requestBody.client_id = ((self._user && self._user.uid) || 'dummy') + '_' + self._statIdRandom;
+    requestBody.client_id = self._clientId;
     requestBody.app_key = self._initOptions.appKey;
     requestBody.timestamp = (new Date()).toISOString();
 
@@ -13032,6 +13095,7 @@ Skylink.prototype._handleClientStats = function() {
   var statsObject = {
     username: (self._user && self._user.uid) || null,
     sdk_name: 'web',
+    room_id: self._room ? self._room.id : self._selectedRoom,
     sdk_version: self.VERSION,
     agent_name: AdapterJS.webrtcDetectedBrowser,
     agent_version: AdapterJS.webrtcDetectedVersion,

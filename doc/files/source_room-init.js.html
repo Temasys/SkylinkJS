@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.9.1 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.9.2 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.9.1</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.9.2</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -827,6 +827,7 @@ Skylink.prototype.init = function(_options, _callback) {
     return;
   }
 
+  self._setClientInfoForLogging();
   // Format: https://api.temasys.io/api/&lt;appKey&gt;/&lt;room&gt;[/&lt;creds.start&gt;][/&lt;creds.duration&gt;][?cred=&lt;creds.hash&gt;]&amp;rand=&lt;rand&gt;
   self._path = self._initOptions.roomServer + &#x27;/api/&#x27; + self._initOptions.appKey + &#x27;/&#x27; + self._selectedRoom +
     (self._initOptions.credentials ? &#x27;/&#x27; + self._initOptions.credentials.startDateTime + &#x27;/&#x27; +

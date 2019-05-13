@@ -15,7 +15,7 @@ Skylink.prototype._postStats = function (endpoint, params) {
     else{
       requestBody = params;
     }
-    requestBody.client_id = ((self._user && self._user.uid) || 'dummy') + '_' + self._statIdRandom;
+    requestBody.client_id = self._clientId;
     requestBody.app_key = self._initOptions.appKey;
     requestBody.timestamp = (new Date()).toISOString();
 
@@ -45,6 +45,7 @@ Skylink.prototype._handleClientStats = function() {
   var statsObject = {
     username: (self._user && self._user.uid) || null,
     sdk_name: 'web',
+    room_id: self._room ? self._room.id : self._selectedRoom,
     sdk_version: self.VERSION,
     agent_name: AdapterJS.webrtcDetectedBrowser,
     agent_version: AdapterJS.webrtcDetectedVersion,

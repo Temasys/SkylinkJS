@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.9.1 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.9.2 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.9.1</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.9.2</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -106,7 +106,7 @@ Skylink.prototype._postStats = function (endpoint, params) {
     else{
       requestBody = params;
     }
-    requestBody.client_id = ((self._user &amp;&amp; self._user.uid) || &#x27;dummy&#x27;) + &#x27;_&#x27; + self._statIdRandom;
+    requestBody.client_id = self._clientId;
     requestBody.app_key = self._initOptions.appKey;
     requestBody.timestamp = (new Date()).toISOString();
 
@@ -136,6 +136,7 @@ Skylink.prototype._handleClientStats = function() {
   var statsObject = {
     username: (self._user &amp;&amp; self._user.uid) || null,
     sdk_name: &#x27;web&#x27;,
+    room_id: self._room ? self._room.id : self._selectedRoom,
     sdk_version: self.VERSION,
     agent_name: AdapterJS.webrtcDetectedBrowser,
     agent_version: AdapterJS.webrtcDetectedVersion,
