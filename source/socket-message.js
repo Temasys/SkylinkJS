@@ -1840,6 +1840,110 @@ Skylink.prototype._answerHandler = function(message) {
     pc.setAnswer = 'remote';
     pc.processingRemoteSDP = false;
 
+    // FIX for Chrome 75
+    if (AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion === 75 && pc.getSenders()[0].transport) {
+        var statsInterval = null;
+        pc.getSenders()[0].transport.onstatechange = function(evt) {
+            var iceConnectionState = evt.target.state;
+
+            if (iceConnectionState === 'connecting') {
+                iceConnectionState = self.ICE_CONNECTION_STATE.CHECKING;
+            }
+
+            log.debug([targetMid, 'RTCIceConnectionState', null, 'Ice connection state changed ->'], iceConnectionState);
+
+            self._handleIceConnectionStats(pc.iceConnectionState, targetMid);
+            self._trigger('iceConnectionState', iceConnectionState, targetMid);
+
+            if (iceConnectionState === self.ICE_CONNECTION_STATE.FAILED && self._initOptions.enableIceTrickle) {
+                self._trigger('iceConnectionState', self.ICE_CONNECTION_STATE.TRICKLE_FAILED, targetMid);
+            }
+
+            if (self._peerConnStatus[targetMid]) {
+                self._peerConnStatus[targetMid].connected = [self.ICE_CONNECTION_STATE.COMPLETED,
+                    self.ICE_CONNECTION_STATE.CONNECTED].indexOf(iceConnectionState) > -1;
+            }
+
+            if (!statsInterval && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(iceConnectionState) > -1) {
+                statsInterval = true;
+
+                // Do an initial getConnectionStatus() to backfill the first retrieval in order to do (currentTotalStats - lastTotalStats).
+                self.getConnectionStatus(targetMid, function () {
+                    statsInterval = setInterval(function () {
+                        if (!(self._peerConnections[targetMid] && self._peerConnections[targetMid].signalingState !== self.PEER_CONNECTION_STATE.CLOSED)) {
+                            clearInterval(statsInterval);
+                            return;
+                        }
+                        self._handleBandwidthStats(targetMid);
+                    }, 20000);
+                });
+            }
+
+            if (!self._hasMCU && [self.ICE_CONNECTION_STATE.CONNECTED, self.ICE_CONNECTION_STATE.COMPLETED].indexOf(
+                iceConnectionState) > -1 && !!self._bandwidthAdjuster && !bandwidth && AdapterJS.webrtcDetectedBrowser !== 'edge' &&
+                (((self._peerInformations[targetMid] || {}).agent || {}).name || 'edge') !== 'edge') {
+                var currentBlock = 0;
+                var formatTotalFn = function (arr) {
+                    var total = 0;
+                    for (var i = 0; i < arr.length; i++) {
+                        total += arr[i];
+                    }
+                    return total / arr.length;
+                };
+                bandwidth = {
+                    audio: { send: [], recv: [] },
+                    video: { send: [], recv: [] }
+                };
+                var pullInterval = setInterval(function () {
+                    if (!(self._peerConnections[targetMid] && self._peerConnections[targetMid].signalingState !==
+                        self.PEER_CONNECTION_STATE.CLOSED) || !self._bandwidthAdjuster || !self._peerBandwidth[targetMid]) {
+                        clearInterval(pullInterval);
+                        return;
+                    }
+                    self._retrieveStats(targetMid, function (err, stats) {
+                        if (!(self._peerConnections[targetMid] && self._peerConnections[targetMid].signalingState !==
+                            self.PEER_CONNECTION_STATE.CLOSED) || !self._bandwidthAdjuster) {
+                            clearInterval(pullInterval);
+                            return;
+                        }
+                        if (err) {
+                            bandwidth.audio.send.push(0);
+                            bandwidth.audio.recv.push(0);
+                            bandwidth.video.send.push(0);
+                            bandwidth.video.recv.push(0);
+                        } else {
+                            bandwidth.audio.send.push(stats.audio.sending.bytes * 8);
+                            bandwidth.audio.recv.push(stats.audio.receiving.bytes * 8);
+                            bandwidth.video.send.push(stats.video.sending.bytes * 8);
+                            bandwidth.video.recv.push(stats.video.receiving.bytes * 8);
+                        }
+                        currentBlock++;
+                        if (currentBlock === self._bandwidthAdjuster.interval) {
+                            currentBlock = 0;
+                            var totalAudioBw = formatTotalFn(bandwidth.audio.send);
+                            var totalVideoBw = formatTotalFn(bandwidth.video.send);
+                            if (!self._bandwidthAdjuster.useUploadBwOnly) {
+                                totalAudioBw += formatTotalFn(bandwidth.audio.recv);
+                                totalVideoBw += formatTotalFn(bandwidth.video.recv);
+                                totalAudioBw = totalAudioBw / 2;
+                                totalVideoBw = totalVideoBw / 2;
+                            }
+                            totalAudioBw = parseInt((totalAudioBw * (self._bandwidthAdjuster.limitAtPercentage / 100)) / 1000, 10);
+                            totalVideoBw = parseInt((totalVideoBw * (self._bandwidthAdjuster.limitAtPercentage / 100)) / 1000, 10);
+                            bandwidth = {
+                                audio: { send: [], recv: [] },
+                                video: { send: [], recv: [] }
+                            };
+                            self.refreshConnection(targetMid, {
+                                bandwidth: { audio: totalAudioBw, video: totalVideoBw }
+                            });
+                        }
+                    }, true, true);
+                }, 1000);
+            }
+        };
+    }
+
     self._acknowledgeAnswer(targetMid, true, null);
     self._handleNegotiationStats('set_answer', targetMid, answer, true);
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ANSWER, targetMid);
