@@ -444,6 +444,9 @@ Skylink.prototype._processSigMessage = function(message, session) {
   case this._SIG_MESSAGE_TYPE.END_OF_CANDIDATES:
     this._endOfCandidatesHandler(message);
     break;
+  case this._SIG_MESSAGE_TYPE.ANSWER_ACK:
+    this._answerAckHandler(message);
+    break;
   default:
     log.error([message.mid, 'Socket', message.type, 'Unsupported message ->'], clone(message));
     break;
@@ -1546,6 +1549,17 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
+  if (self._bufferedLocalOffer[targetMid] && self._peerPriorityWeight > message.weight) {
+    log.warn([targetMid, null, message.type, 'Dropping the received offer with self.weight greater than incoming offer weight'], {
+      selfWeight: self._peerPriorityWeight,
+      messageWeight: message.weight
+    });
+    self._handleNegotiationStats('dropped_offer', targetMid, offer, true, 'self weight is greater than incoming offer weight.');
+    return;
+  }
+
+  self._bufferedLocalOffer[targetMid] = null;
+
   // Added checks if there is a current remote sessionDescription being processing before processing this one
   if (pc.processingRemoteSDP) {
     log.warn([targetMid, 'RTCSessionDescription', 'offer',
@@ -1556,6 +1570,7 @@ Skylink.prototype._offerHandler = function(message) {
   }
 
   pc.processingRemoteSDP = true;
+  pc.processingLocalSDP = false;
 
   if (message.userInfo) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
@@ -1670,8 +1685,11 @@ Skylink.prototype._candidateHandler = function(message) {
       'flags are not honoured ->'], candidate);
   }
 
-  if (this._peerConnections[targetMid].remoteDescription && this._peerConnections[targetMid].remoteDescription.sdp &&
-    this._peerConnections[targetMid].localDescription && this._peerConnections[targetMid].localDescription.sdp) {
+  // if (this._peerConnections[targetMid].remoteDescription && this._peerConnections[targetMid].remoteDescription.sdp &&
+  //   this._peerConnections[targetMid].localDescription && this._peerConnections[targetMid].localDescription.sdp) {
+
+  var pc = this._peerConnections[targetMid];
+  if (pc.signalingState === this.PEER_CONNECTION_STATE.STABLE && pc.processingLocalSDP === false && pc.processingRemoteSDP === false) {
     this._addIceCandidate(targetMid, canId, candidate);
   } else {
     this._addIceCandidateToQueue(targetMid, canId, candidate);
@@ -1690,6 +1708,25 @@ Skylink.prototype._candidateHandler = function(message) {
     sdpMid: candidate.sdpMid,
     sdpMLineIndex: candidate.sdpMLineIndex,
     candidate: candidate.candidate
+  });
+};
+
+/**
+ * Function that handles the "answerAck" socket message received.
+ * See confluence docs for the "answerAck" expected properties to be received
+ *   based on the current <code>SM_PROTOCOL_VERSION</code>.
+ * @method _answerAckHandler
+ * @private
+ * @for Skylink
+ * @since 1.0.0
+ */
+Skylink.prototype._answerAckHandler = function(message) {
+  var self = this;
+  var targetMid = message.mid;
+  self.renegotiateIfNeeded(targetMid).then(function(shouldRenegotiate) {
+    if (shouldRenegotiate) {
+     self.refreshConnection(targetMid);
+    }
   });
 };
 
@@ -1765,16 +1802,19 @@ Skylink.prototype._answerHandler = function(message) {
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
+  /*
+    Removeing this below if condition in favor of this ticket: https://jira.temasys.com.sg/browse/ESS-1632
+  */
   // This should be the state after offer is received. or even after negotiation is successful
-  if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
-    log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
-      '"have-local-offer" state for re-negotiation. Dropping message.'], {
-        signalingState: pc.signalingState,
-        isRestart: !!message.restart
-      });
-    self._handleNegotiationStats('dropped_answer', targetMid, answer, true, 'Peer connection state is "' + pc.signalingState + '"');
-    return;
-  }
+  // if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
+  //   log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
+  //     '"have-local-offer" state for re-negotiation. Dropping message.'], {
+  //       signalingState: pc.signalingState,
+  //       isRestart: !!message.restart
+  //     });
+  //   self._handleNegotiationStats('dropped_answer', targetMid, answer, true, 'Peer connection state is "' + pc.signalingState + '"');
+  //   return;
+  // }
 
   // Added checks if there is a current remote sessionDescription being processing before processing this one
   if (pc.processingRemoteSDP) {
@@ -1786,6 +1826,7 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   pc.processingRemoteSDP = true;
+  pc.processingLocalSDP = true;
 
   if (message.userInfo) {
     self._trigger('peerUpdated', targetMid, self.getPeerInfo(targetMid), false);
@@ -1829,7 +1870,28 @@ Skylink.prototype._answerHandler = function(message) {
     });
   };
 
-  pc.setRemoteDescription(new RTCSessionDescription(answer), onSuccessCbFn, onErrorCbFn);
+  var onLocalOfferSetSuccess = function() {
+    pc.processingLocalSDP = false;
+    self._bufferedLocalOffer[targetMid] = null;
+    pc.setRemoteDescription(new RTCSessionDescription(answer), onSuccessCbFn, onErrorCbFn);
+  };
+
+  var onLocalOfferSetError = function (sdpError) {
+    log.error([targetMid, 'RTCSessionDescription', 'offer', 'Local description failed setting ->'], sdpError);
+
+    pc.processingLocalSDP = false;
+    pc.processingRemoteSDP = false;
+
+    self._handleNegotiationStats('error_set_offer', targetMid, self._bufferedLocalOffer[targetMid], false, sdpError);
+    self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, sdpError);
+  };
+
+  if (self._bufferedLocalOffer[targetMid]) {
+    pc.setLocalDescription(new RTCSessionDescription(self._bufferedLocalOffer[targetMid]), onLocalOfferSetSuccess, onLocalOfferSetError);
+  } else {
+    log.error([targetMid, 'RTCPeerConnection', null, 'FATAL: No buffered local offer found. Unable to setLocalDescription.']);
+  }
+
 };
 
 /**
@@ -2071,7 +2133,6 @@ Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
  */
 Skylink.prototype._acknowledgeAnswer = function (targetMid, isSuccess, error) {
   var self = this;
-  if (self._hasMCU) {
     var statsStateKey = isSuccess ? 'set_answer_ack' : 'error_set_answer_ack';
     var answerAckMessage = {
       rid: self._room.id,
@@ -2080,10 +2141,10 @@ Skylink.prototype._acknowledgeAnswer = function (targetMid, isSuccess, error) {
       success: isSuccess,
       type: self._SIG_MESSAGE_TYPE.ANSWER_ACK,
     };
-    self._sendChannelMessage(answerAckMessage);
-    log.debug(['MCU', 'Remote Description', null, 'Answer acknowledgement message sent to MCU via SIG. Message body -->'], answerAckMessage);
-    self._handleNegotiationStats(statsStateKey, targetMid, answerAckMessage, true, error);
-  }
+  self._sendChannelMessage(answerAckMessage);
+  log.debug([targetMid, 'Remote Description', null, 'Answer acknowledgement message sent to' + targetMid + ' via SIG. Message body -->'], answerAckMessage);
+  self._handleNegotiationStats(statsStateKey, targetMid, answerAckMessage, true, error);
+
   return false;
 };
 

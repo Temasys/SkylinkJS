@@ -32,6 +32,10 @@ Skylink.prototype._doOffer = function(targetMid, iceRestart, mergeMessageWithOff
     voiceActivityDetection: self._voiceActivityDetection
   };
 
+  if (self._hasMCU && typeof pc.addTransceiver !== 'function') {
+    offerConstraints.offerToReceiveVideo = true;
+  }
+
   // Add stream only at offer/answer end
   if (!self._hasMCU || targetMid === 'MCU') {
     self._addLocalMediaStreams(targetMid);
@@ -222,7 +226,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     log.debug([targetMid, 'RTCSessionDescription', sessionDescription.type,
       'Local session description has been set ->'], sessionDescription);
 
-    pc.processingLocalSDP = false;
+
 
     self._handleNegotiationStats('set_' + sessionDescription.type, targetMid, sessionDescription, false);
     self._trigger('handshakeProgress', sessionDescription.type, targetMid);
@@ -247,6 +251,12 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       rid: self._room.id,
       userInfo: self._getUserInfo(targetMid)
     };
+
+    pc.processingLocalSDP = messageToSend.type === self.HANDSHAKE_PROGRESS.OFFER;
+
+    if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER) {
+      messageToSend.weight = self._peerPriorityWeight;
+    }
 
     // Merging Restart and Offer messages. The already present keys in offer message will not be overwritten.
     // Only news keys from mergeMessage are added.
@@ -274,5 +284,59 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ERROR, targetMid, error);
   };
 
-  pc.setLocalDescription(new RTCSessionDescription(sessionDescription), onSuccessCbFn, onErrorCbFn);
+  if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER) {
+    self._bufferedLocalOffer[targetMid] = sessionDescription;
+    onSuccessCbFn();
+  } else {
+    pc.setLocalDescription(new RTCSessionDescription(sessionDescription), onSuccessCbFn, onErrorCbFn);
+  }
+
+
+};
+
+Skylink.prototype.renegotiateIfNeeded = function (peerId) {
+  var self = this;
+  return new Promise(function(resolve, reject) {
+    var peerConnection = self._peerConnections[peerId];
+    var pcSenders = peerConnection.getSenders();
+    var senderGetStatsPromises = [];
+    var savedSenders = self._currentRTCRTPSenders[peerId];
+    var isRenegoNeeded = false;
+
+    pcSenders.forEach(function(pcSender) {
+      senderGetStatsPromises.push(pcSender.getStats());
+    });
+    var transmittingSenders = {};
+
+    Promise.all(senderGetStatsPromises).then(function(reslovedResults) {
+      reslovedResults.forEach(function(reports, senderIndex) {
+        reports.forEach(function(report) {
+          if (report && report.ssrc) {
+            transmittingSenders[report.ssrc] = pcSenders[senderIndex];
+          }
+        });
+      });
+
+      var transmittingSendersKeys = Object.keys(transmittingSenders);
+
+      if (transmittingSendersKeys.length !== savedSenders.length) {
+        isRenegoNeeded = true;
+      } else {
+        var senderMatchedCount = 0;
+        for (var tKey = 0; tKey < transmittingSendersKeys.length; tKey++) {
+          var tSender = transmittingSenders[transmittingSendersKeys[tKey]];
+          for (var sIndex = 0; sIndex < savedSenders.length; sIndex++) {
+            var sSender = savedSenders[sIndex];
+            if (tSender === sSender) {
+              senderMatchedCount++;
+              break;
+            }
+          }
+        }
+        isRenegoNeeded = senderMatchedCount !== transmittingSendersKeys.length;
+      }
+      resolve(isRenegoNeeded);
+    });
+  });
+
 };

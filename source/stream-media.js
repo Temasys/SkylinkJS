@@ -2256,6 +2256,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
           if (updatedStream ? (pc.localStreamId ? updatedStream.id !== pc.localStreamId : true) : true) {
             pc.getSenders().forEach(function (sender) {
               pc.removeTrack(sender);
+              self._removeSenderFromList(peerId, sender);
             });
 
             if (!offerToReceiveAudio && !offerToReceiveVideo) {
@@ -2267,7 +2268,13 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
                   if ((track.kind === 'audio' && !offerToReceiveAudio) || (track.kind === 'video' && !offerToReceiveVideo)) {
                     return;
                   }
-                  pc.addTrack(track, updatedStream);
+                  var sender = pc.addTrack(track, updatedStream);
+
+                  if (!self._currentRTCRTPSenders[peerId]) {
+                    self._currentRTCRTPSenders[peerId] = [];
+                  }
+
+                  self._currentRTCRTPSenders[peerId].push(sender);
                 });
 
               pc.localStreamId = updatedStream.id || updatedStream.label;
@@ -2343,3 +2350,23 @@ Skylink.prototype._handleEndedStreams = function (peerId, checkStreamId) {
     }
   }
 };
+
+Skylink.prototype._removeSenderFromList = function(peerId, sender) {
+  var indexToRemove = -1;
+  if (!this._currentRTCRTPSenders[peerId]) {
+    return;
+  }
+  var listOfSenders = this._currentRTCRTPSenders[peerId];
+  for (var i = 0; i < listOfSenders.length; i++) {
+    if (sender === listOfSenders[i]) {
+      indexToRemove = i;
+      break;
+    }
+  }
+  if (indexToRemove !== -1) {
+    listOfSenders.splice(i, 1);
+    this._currentRTCRTPSenders[peerId] = listOfSenders;
+  } else {
+    log.warn([peerId, null, null, 'No matching sender was found for the peer'], sender);
+  }
+}

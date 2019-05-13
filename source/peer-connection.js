@@ -1839,7 +1839,9 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
   if (targetMid === 'MCU') {
     log.info('Creating an empty transceiver of kind video with MCU');
-    pc.addTransceiver('video');
+    if (typeof pc.addTransceiver === 'function') {
+      pc.addTransceiver('video');
+    }
   }
 
   // callbacks
@@ -2048,6 +2050,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
         for (var t = 0; t < tracks.length; t++) {
           if (tracks[t] === senders[s].track) {
             pc.removeTrack(senders[s]);
+            self._removeSenderFromList(targetMid, senders[s]);
           }
         }
       }
