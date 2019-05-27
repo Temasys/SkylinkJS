@@ -1793,7 +1793,6 @@ Skylink.prototype._answerHandler = function(message) {
 
   self._parseSDPMediaStreamIDs(targetMid, answer);
 
-
   var onSuccessCbFn = function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
     pc.setAnswer = 'remote';

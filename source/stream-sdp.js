@@ -926,13 +926,17 @@ Skylink.prototype._handleSDPConnectionSettings = function (targetMid, sessionDes
               (sdpLines[i] === 'a=sendonly' ? 'a=inactive' : 'a=recvonly') : sdpLines[i];
           // Parse a=recvonly
           } else if (localOfferRes === 'a=recvonly') {
-            sdpLines[i] = ['a=inactive', 'a=sendonly'].indexOf(sdpLines[i]) === -1 ?
-              (sdpLines[i] === 'a=recvonly' ? 'a=inactive' : 'a=sendonly') : sdpLines[i];
+            // TODO: remove once tested with Safari, Edge // Tested and works on FF and Chrome
+            // commenting out because transceiver current direction was set to a=inactive and muting the track on the receiver side
+            // sdpLines[i] = ['a=inactive', 'a=sendonly'].indexOf(sdpLines[i]) === -1 ?
+            //   (sdpLines[i] === 'a=recvonly' ? 'a=inactive' : 'a=sendonly') : sdpLines[i];
+            // console.log("CHANGED ---- ", sdpLines[i])
           // Parse a=sendrecv
           } else if (localOfferRes === 'a=inactive') {
             sdpLines[i] = 'a=inactive';
           }
         }
+
         self._sdpSessions[targetMid][direction].connection[mediaType] = sdpLines[i];
       }
     }

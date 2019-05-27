@@ -1862,6 +1862,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
   };
   self.videoRenderers = self.videoRenderers || {};
+
   pc.ontrack = function (rtcTrackEvent) {
     // TargetMid goes all the way back to Skylink.prototype._enterHandler
 
@@ -1869,7 +1870,12 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
       return;
     }
 
-    var stream = rtcTrackEvent.streams[0];
+    var stream = rtcTrackEvent.streams ? rtcTrackEvent.streams[0] : null;
+
+    if (!stream) {
+      return;
+    }
+
     var transceiverMid = rtcTrackEvent.transceiver.mid;
 
     pc.remoteStream = stream;
@@ -1890,7 +1896,9 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasStream = true;
     pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
 
-    self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, !!pc.hasScreen);
+    rtcTrackEvent.track.onunmute = function() {
+      self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, !!pc.hasScreen);
+    }
   };
 
   pc.onremovestream = function(evt) {
