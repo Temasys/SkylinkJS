@@ -1899,6 +1899,11 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     rtcTrackEvent.track.onunmute = function() {
       self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, !!pc.hasScreen);
     }
+
+    // Safari tracks come in as muted=false
+    if (!rtcTrackEvent.track.muted){
+      self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, !!pc.hasScreen);
+    }
   };
 
   pc.onremovestream = function(evt) {
