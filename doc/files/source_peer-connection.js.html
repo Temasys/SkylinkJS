@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.37 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.38 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.37</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.38</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -480,13 +480,13 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, b
  *
  *   // Example 2: Retrieve a list of Peer connection stats
  *   function printConnStats (peerId, data) {
- *     if (!data.connectionStats[peerId]) return;
- *     var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;
- *     var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;
- *     var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;
- *     var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;
- *     var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;
- *     var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;
+ *     if (!data[peerId]) return;
+ *     var sendVideoBytes  = data[peerId].video.sending.bytes;
+ *     var sendAudioBytes  = data[peerId].audio.sending.bytes;
+ *     var recvVideoBytes  = data[peerId].video.receiving.bytes;
+ *     var recvAudioBytes  = data[peerId].audio.receiving.bytes;
+ *     var localCandidate  = data[peerId].selectedCandidate.local;
+ *     var remoteCandidate = data[peerId].selectedCandidate.remote;
  *     console.log(peerId + &quot; - Sending audio (&quot; + sendAudioBytes + &quot;bps) video (&quot; + sendVideoBytes + &quot;)&quot;);
  *     console.log(peerId + &quot; - Receiving audio (&quot; + recvAudioBytes + &quot;bps) video (&quot; + recvVideoBytes + &quot;)&quot;);
  *     console.log(peerId + &quot; - Local candidate: &quot; + localCandidate.ipAddress + &quot;:&quot; + localCandidate.portNumber +
@@ -512,13 +512,13 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, b
  *   // Example 3: Retrieve all Peer connection stats
  *   function printConnStats (listOfPeers, data) {
  *     listOfPeers.forEach(function (peerId) {
- *       if (!data.connectionStats[peerId]) return;
- *       var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;
- *       var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;
- *       var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;
- *       var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;
- *       var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;
- *       var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;
+ *       if (!data[peerId]) return;
+ *       var sendVideoBytes  = data[peerId].video.sending.bytes;
+ *       var sendAudioBytes  = data[peerId].audio.sending.bytes;
+ *       var recvVideoBytes  = data[peerId].video.receiving.bytes;
+ *       var recvAudioBytes  = data[peerId].audio.receiving.bytes;
+ *       var localCandidate  = data[peerId].selectedCandidate.local;
+ *       var remoteCandidate = data[peerId].selectedCandidate.remote;
  *       console.log(peerId + &quot; - Sending audio (&quot; + sendAudioBytes + &quot;bps) video (&quot; + sendVideoBytes + &quot;)&quot;);
  *       console.log(peerId + &quot; - Receiving audio (&quot; + recvAudioBytes + &quot;bps) video (&quot; + recvVideoBytes + &quot;)&quot;);
  *       console.log(peerId + &quot; - Local candidate: &quot; + localCandidate.ipAddress + &quot;:&quot; + localCandidate.portNumber +

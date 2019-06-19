@@ -167,6 +167,14 @@ var _printAllStoredLogsFn = function () {
 };
 
 /**
+ * Variable to will store the bounded function between Skylink instance and _reportToAPI function
+ * @private
+ * @for Skylink
+ * @since 0.6.37
+ */
+var _instanceBoundReportToAPI = null;
+
+/**
  * <blockquote class="info">
  *   To utilise and enable the <code>SkylinkLogs</code> API functionalities, the
  *   <a href="#method_setDebugMode"><code>setDebugMode()</code> method</a>
@@ -248,24 +256,21 @@ var SkylinkLogs = {
  * @since 0.6.35
  */
 var _reportToAPI = function(message, object) {
-  var endpoint = '/rest/stats/sessionerror';
-  if(_reportErrorConfig.statsServer){
-    var statsServer = _reportErrorConfig.statsServer;
-    var requestBody = {
-      data: {
-        message: message,
-        object: object,
-      }
+  if (this instanceof Skylink) {
+    var self = this;
+    var endpoint = '/rest/stats/sessionerror';
+    var params = {
+      message: message,
+      object: object,
+      room_id: self._room ? self._room.id : self._selectedRoom,
     };
-    requestBody.app_key = _reportErrorConfig.app_key;
-    requestBody.timestamp = (new Date()).toISOString();
-    try {
-      var xhr = new XMLHttpRequest();
-      xhr.onerror = function () { };
-      xhr.open('POST', statsServer + endpoint, true);
-      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-      xhr.send(JSON.stringify(requestBody));
-    } catch (error) {}
+
+    if (object && object instanceof Error) {
+      params.object = object.toString();
+    } else if (typeof object === 'object') {
+      params.object = JSON.stringify(object);
+    }
+    self._postStats(endpoint, params);
   }
 };
 
@@ -373,7 +378,7 @@ var log = {
   },
 
   error: function (message, object) {
-    _reportToAPI(message, object);
+    _instanceBoundReportToAPI && _instanceBoundReportToAPI(message, object);
     _logFn(0, message, object);
   }
 };
@@ -466,15 +471,11 @@ Skylink.prototype.setDebugMode = function(isDebugMode) {
 
 
 /**
- * Function that populates the userInfo object with appKey and client ID used for logging an error and reporting to API server
+ * Function that binds the SKylink instance to reportAPI instance and returns a new bound function
  * @method _setClientInfoForLogging
- * @param {String} appKey
- * @param {String} clientId
  * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype._setClientInfoForLogging = function() {
-  var initOptions = this._initOptions;
-  _reportErrorConfig.app_key = initOptions.appKey;
-  _reportErrorConfig.statsServer = initOptions.statsServer;
+  _instanceBoundReportToAPI = _reportToAPI.bind(this);
 };

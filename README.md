@@ -50,7 +50,7 @@ You can raise tickets on [our support portal](http://support.temasys.io) or on [
 ##### Current versions and stability
 We recommend that you always use the latest versions of the Temasys SkylinkJS Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: `0.6.37`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.37).
+[Latest version: `0.6.38`](https://github.com/Temasys/SkylinkJS/releases/tag/0.6.38).
 
 ##### Setting AdapterJS flags
 If you require to set Temasys AdapterJS flags (e.g. forcing Temasys WebRTC plugin), we recommend the following method:

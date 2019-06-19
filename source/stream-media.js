@@ -1892,8 +1892,7 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
   	}
   	self._streams[streamKey].tracks.video.width = videoElement.videoWidth;
   	self._streams[streamKey].tracks.video.height = videoElement.videoHeight;
-
-  	videoElement.src = '';
+  	
   	videoElement.srcObject = null;
   	callback();
   };

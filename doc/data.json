@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.37",
+        "version": "0.6.38",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -1184,7 +1184,7 @@
             "line": 860,
             "description": "Stores the unique random number used for generating the \"client_id\".",
             "itemtype": "attribute",
-            "name": "_statIdRandom",
+            "name": "_clientId",
             "type": "Number",
             "access": "private",
             "tagname": "",
@@ -3705,7 +3705,7 @@
             ],
             "trigger": "<ol class=\"desc-seq\">\n  <li>Retrieves Peer connection stats for all targeted Peers. <ol>\n  <li>If Peer connection has closed or does not exists: <small>This can be checked with\n  <a href=\"#event_peerConnectionState\"><code>peerConnectionState</code> event</a>\n  triggering parameter payload <code>state</code> as <code>CLOSED</code> for Peer.</small> <ol>\n  <li><a href=\"#event_getConnectionStatusStateChange\"> <code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>\n  <li><b>ABORT</b> and return error.</li></ol></li>\n  <li><a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVING</code>.</li>\n  <li>Received response from retrieval. <ol>\n  <li>If retrieval was successful: <ol>\n  <li><a href=\"#event_getConnectionStatusStateChange\"><code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVE_SUCCESS</code>.</li></ol></li>\n  <li>Else: <ol>\n  <li><a href=\"#event_getConnectionStatusStateChange\"> <code>getConnectionStatusStateChange</code> event</a>\n  triggers parameter payload <code>state</code> as <code>RETRIEVE_ERROR</code>.</li>\n  </ol></li></ol></li></ol></li></ol>",
             "example": [
-                "\n  // Example 1: Retrieve a Peer connection stats\n  function startBWStatsInterval (peerId) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus(peerId, function (error, success) {\n        if (error) return;\n        var sendVideoBytes  = success.connectionStats[peerId].video.sending.bytes;\n        var sendAudioBytes  = success.connectionStats[peerId].audio.sending.bytes;\n        var recvVideoBytes  = success.connectionStats[peerId].video.receiving.bytes;\n        var recvAudioBytes  = success.connectionStats[peerId].audio.receiving.bytes;\n        var localCandidate  = success.connectionStats[peerId].selectedCandidate.local;\n        var remoteCandidate = success.connectionStats[peerId].selectedCandidate.remote;\n        console.log(\"Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n        console.log(\"Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n        console.log(\"Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n          \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n        console.log(\"Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n          \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n      });\n    }, 1000);\n  }\n\n  // Example 2: Retrieve a list of Peer connection stats\n  function printConnStats (peerId, data) {\n    if (!data.connectionStats[peerId]) return;\n    var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;\n    var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;\n    var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;\n    var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;\n    var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;\n    var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;\n    console.log(peerId + \" - Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n    console.log(peerId + \" - Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n    console.log(peerId + \" - Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n      \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n    console.log(peerId + \" - Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n      \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n  }\n\n  function startBWStatsInterval (peerIdA, peerIdB) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus([peerIdA, peerIdB], function (error, success) {\n        if (error) {\n          printConnStats(peerIdA, error.connectionStats);\n          printConnStats(peerIdB, error.connectionStats);\n        } else {\n          printConnStats(peerIdA, success.connectionStats);\n          printConnStats(peerIdB, success.connectionStats);\n        }\n      });\n    }, 1000);\n  }\n\n  // Example 3: Retrieve all Peer connection stats\n  function printConnStats (listOfPeers, data) {\n    listOfPeers.forEach(function (peerId) {\n      if (!data.connectionStats[peerId]) return;\n      var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;\n      var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;\n      var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;\n      var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;\n      var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;\n      var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;\n      console.log(peerId + \" - Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n      console.log(peerId + \" - Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n      console.log(peerId + \" - Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n        \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n      console.log(peerId + \" - Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n        \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n    });\n  }\n\n  function startBWStatsInterval (peerIdA, peerIdB) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus(function (error, success) {\n        if (error) {\n          printConnStats(error.listOfPeers, error.connectionStats);\n        } else {\n          printConnStats(success.listOfPeers, success.connectionStats);\n        }\n      });\n    }, 1000);\n  }"
+                "\n  // Example 1: Retrieve a Peer connection stats\n  function startBWStatsInterval (peerId) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus(peerId, function (error, success) {\n        if (error) return;\n        var sendVideoBytes  = success.connectionStats[peerId].video.sending.bytes;\n        var sendAudioBytes  = success.connectionStats[peerId].audio.sending.bytes;\n        var recvVideoBytes  = success.connectionStats[peerId].video.receiving.bytes;\n        var recvAudioBytes  = success.connectionStats[peerId].audio.receiving.bytes;\n        var localCandidate  = success.connectionStats[peerId].selectedCandidate.local;\n        var remoteCandidate = success.connectionStats[peerId].selectedCandidate.remote;\n        console.log(\"Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n        console.log(\"Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n        console.log(\"Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n          \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n        console.log(\"Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n          \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n      });\n    }, 1000);\n  }\n\n  // Example 2: Retrieve a list of Peer connection stats\n  function printConnStats (peerId, data) {\n    if (!data[peerId]) return;\n    var sendVideoBytes  = data[peerId].video.sending.bytes;\n    var sendAudioBytes  = data[peerId].audio.sending.bytes;\n    var recvVideoBytes  = data[peerId].video.receiving.bytes;\n    var recvAudioBytes  = data[peerId].audio.receiving.bytes;\n    var localCandidate  = data[peerId].selectedCandidate.local;\n    var remoteCandidate = data[peerId].selectedCandidate.remote;\n    console.log(peerId + \" - Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n    console.log(peerId + \" - Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n    console.log(peerId + \" - Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n      \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n    console.log(peerId + \" - Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n      \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n  }\n\n  function startBWStatsInterval (peerIdA, peerIdB) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus([peerIdA, peerIdB], function (error, success) {\n        if (error) {\n          printConnStats(peerIdA, error.connectionStats);\n          printConnStats(peerIdB, error.connectionStats);\n        } else {\n          printConnStats(peerIdA, success.connectionStats);\n          printConnStats(peerIdB, success.connectionStats);\n        }\n      });\n    }, 1000);\n  }\n\n  // Example 3: Retrieve all Peer connection stats\n  function printConnStats (listOfPeers, data) {\n    listOfPeers.forEach(function (peerId) {\n      if (!data[peerId]) return;\n      var sendVideoBytes  = data[peerId].video.sending.bytes;\n      var sendAudioBytes  = data[peerId].audio.sending.bytes;\n      var recvVideoBytes  = data[peerId].video.receiving.bytes;\n      var recvAudioBytes  = data[peerId].audio.receiving.bytes;\n      var localCandidate  = data[peerId].selectedCandidate.local;\n      var remoteCandidate = data[peerId].selectedCandidate.remote;\n      console.log(peerId + \" - Sending audio (\" + sendAudioBytes + \"bps) video (\" + sendVideoBytes + \")\");\n      console.log(peerId + \" - Receiving audio (\" + recvAudioBytes + \"bps) video (\" + recvVideoBytes + \")\");\n      console.log(peerId + \" - Local candidate: \" + localCandidate.ipAddress + \":\" + localCandidate.portNumber +\n        \"?transport=\" + localCandidate.transport + \" (type: \" + localCandidate.candidateType + \")\");\n      console.log(peerId + \" - Remote candidate: \" + remoteCandidate.ipAddress + \":\" + remoteCandidate.portNumber +\n        \"?transport=\" + remoteCandidate.transport + \" (type: \" + remoteCandidate.candidateType + \")\");\n    });\n  }\n\n  function startBWStatsInterval (peerIdA, peerIdB) {\n    setInterval(function () {\n      skylinkDemo.getConnectionStatus(function (error, success) {\n        if (error) {\n          printConnStats(error.listOfPeers, error.connectionStats);\n        } else {\n          printConnStats(success.listOfPeers, success.connectionStats);\n        }\n      });\n    }, 1000);\n  }"
             ],
             "since": "0.6.14",
             "class": "Skylink"
@@ -4008,7 +4008,7 @@
         },
         {
             "file": "source/peer-handshake.js",
-            "line": 143,
+            "line": 144,
             "description": "Function that sets the local session description and sends to Peer.\nIf trickle ICE is disabled, the local session description will be sent after\n  ICE gathering has been completed.",
             "itemtype": "method",
             "name": "_setLocalAndSendMessage",
@@ -5410,6 +5410,15 @@
         {
             "file": "source/skylink-debug.js",
             "line": 169,
+            "description": "Variable to will store the bounded function between Skylink instance and _reportToAPI function",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.37",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/skylink-debug.js",
+            "line": 177,
             "description": "<blockquote class=\"info\">\n  To utilise and enable the <code>SkylinkLogs</code> API functionalities, the\n  <a href=\"#method_setDebugMode\"><code>setDebugMode()</code> method</a>\n  <code>options.storeLogs</code> parameter has to be enabled.\n</blockquote>\nThe object interface to manage the SDK <a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">\nJavascript Web Console</a> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs",
@@ -5420,7 +5429,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 184,
+            "line": 192,
             "description": "Function that gets the current stored SDK <code>console</code> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.getLogs",
@@ -5447,7 +5456,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 211,
+            "line": 219,
             "description": "Function that clears all the current stored SDK <code>console</code> logs.",
             "itemtype": "property",
             "name": "SkylinkLogs.clearAllLogs",
@@ -5462,7 +5471,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 225,
+            "line": 233,
             "description": "Function that prints all the current stored SDK <code>console</code> logs into the\n<a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">Javascript Web Console</a>.",
             "itemtype": "property",
             "name": "SkylinkLogs.printAllLogs",
@@ -5477,7 +5486,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 241,
+            "line": 249,
             "description": "Function that will send the log to an API endpoint for persistence",
             "itemtype": "method",
             "name": "_reportToAPI",
@@ -5490,7 +5499,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 272,
+            "line": 277,
             "description": "Function that handles the logs received and prints in the Web Console interface according to the log level set.",
             "itemtype": "method",
             "name": "_logFn",
@@ -5503,7 +5512,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 344,
+            "line": 349,
             "description": "Stores the logging functions.",
             "itemtype": "attribute",
             "name": "log",
@@ -5543,7 +5552,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 381,
+            "line": 386,
             "description": "Function that configures the level of <code>console</code> API logs to be printed in the\n<a href=\"https://developer.mozilla.org/en/docs/Web/API/console\">Javascript Web Console</a>.",
             "itemtype": "method",
             "name": "setLogLevel",
@@ -5563,7 +5572,7 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 418,
+            "line": 423,
             "description": "Function that configures the debugging mode of the SDK.",
             "itemtype": "method",
             "name": "setDebugMode",
@@ -5607,22 +5616,10 @@
         },
         {
             "file": "source/skylink-debug.js",
-            "line": 468,
-            "description": "Function that populates the userInfo object with appKey and client ID used for logging an error and reporting to API server",
+            "line": 473,
+            "description": "Function that binds the SKylink instance to reportAPI instance and returns a new bound function",
             "itemtype": "method",
             "name": "_setClientInfoForLogging",
-            "params": [
-                {
-                    "name": "appKey",
-                    "description": "",
-                    "type": "String"
-                },
-                {
-                    "name": "clientId",
-                    "description": "",
-                    "type": "String"
-                }
-            ],
             "since": "0.5.5",
             "class": "Skylink"
         },
@@ -8829,7 +8826,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 58,
+            "line": 59,
             "description": "Function that handles the posting of session states.",
             "itemtype": "method",
             "name": "_handleSessionStats",
@@ -8840,7 +8837,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 77,
+            "line": 78,
             "description": "Function that handles the posting of app key authentication states.",
             "itemtype": "method",
             "name": "_handleAuthStats",
@@ -8851,7 +8848,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 98,
+            "line": 99,
             "description": "Function that handles the posting of socket connection states.",
             "itemtype": "method",
             "name": "_handleSignalingStats",
@@ -8862,7 +8859,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 122,
+            "line": 123,
             "description": "Function that handles the posting of peer ICE connection states.",
             "itemtype": "method",
             "name": "_handleIceConnectionStats",
@@ -8873,7 +8870,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 166,
+            "line": 167,
             "description": "Function that handles the posting of peer local/remote ICE candidate processing states.",
             "itemtype": "method",
             "name": "_handleIceCandidateStats",
@@ -8884,7 +8881,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 190,
+            "line": 191,
             "description": "Function that handles the posting of peer local/remote ICE gathering states.",
             "itemtype": "method",
             "name": "_handleIceGatheringStats",
@@ -8895,7 +8892,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 209,
+            "line": 210,
             "description": "Function that handles the posting of peer connection negotiation states.",
             "itemtype": "method",
             "name": "_handleNegotiationStats",
@@ -8906,7 +8903,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 242,
+            "line": 243,
             "description": "Function that handles the posting of peer connection bandwidth information.",
             "itemtype": "method",
             "name": "_handleBandwidthStats",
@@ -8917,7 +8914,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 367,
+            "line": 368,
             "description": "Function that handles the posting of recording states.",
             "itemtype": "method",
             "name": "_handleRecordingStats",
@@ -8928,7 +8925,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 388,
+            "line": 389,
             "description": "Function that handles the posting of datachannel states.",
             "itemtype": "method",
             "name": "_handleDatachannelStats",
@@ -8939,7 +8936,7 @@
         },
         {
             "file": "source/skylink-stats.js",
-            "line": 422,
+            "line": 423,
             "description": "Function that handles buffer of stats data",
             "itemtype": "method",
             "name": "_handleDatachannelStats",
@@ -10003,7 +10000,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1912,
+            "line": 1911,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -10014,7 +10011,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2062,
+            "line": 2061,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -10025,7 +10022,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2103,
+            "line": 2102,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -10036,7 +10033,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2137,
+            "line": 2136,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -10047,7 +10044,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2232,
+            "line": 2231,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -10103,6 +10100,17 @@
         {
             "file": "source/stream-sdp.js",
             "line": 412,
+            "description": "Function that modifies the session description to remove the urn:3gpp:video-orientation",
+            "itemtype": "method",
+            "name": "_removeSDPVideoRotation",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.38",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 426,
             "description": "Function that modifies the session description to remove apt/rtx lines that does exists.",
             "itemtype": "method",
             "name": "_removeSDPUnknownAptRtx",
@@ -10113,7 +10121,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 471,
+            "line": 485,
             "description": "Function that modifies the session description to remove codecs.",
             "itemtype": "method",
             "name": "_removeSDPCodecs",
@@ -10124,7 +10132,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 545,
+            "line": 559,
             "description": "Function that modifies the session description to remove REMB packets fb.",
             "itemtype": "method",
             "name": "_removeSDPREMBPackets",
@@ -10135,7 +10143,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 561,
+            "line": 575,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -10146,7 +10154,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 629,
+            "line": 643,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -10157,7 +10165,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 671,
+            "line": 685,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -10168,7 +10176,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 754,
+            "line": 768,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -10179,7 +10187,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 971,
+            "line": 985,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
@@ -10190,7 +10198,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1008,
+            "line": 1022,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_renderSDPOutput",
@@ -10201,7 +10209,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1156,
+            "line": 1170,
             "description": "Function that parses the session description to get the MediaStream IDs.\nNOTE: It might not completely accurate if the setRemoteDescription() fails..",
             "itemtype": "method",
             "name": "_parseSDPMediaStreamIDs",
@@ -10212,7 +10220,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1203,
+            "line": 1217,
             "description": "Function that parses and retrieves the session description ICE candidates.",
             "itemtype": "method",
             "name": "_getSDPICECandidates",
@@ -10223,7 +10231,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1252,
+            "line": 1266,
             "description": "Function that gets each media line SSRCs.",
             "itemtype": "method",
             "name": "_getSDPMediaSSRC",
@@ -10234,7 +10242,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1295,
+            "line": 1309,
             "description": "Function that parses the current list of supported codecs from session description.",
             "itemtype": "method",
             "name": "_getSDPCodecsSupport",
@@ -10245,7 +10253,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1343,
+            "line": 1357,
             "description": "Function that checks if there are any common codecs supported for remote end.",
             "itemtype": "method",
             "name": "_getSDPCommonSupports",
@@ -10256,7 +10264,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1392,
+            "line": 1406,
             "description": "Function adds SCTP port number for Firefox 63.0.3 and above if its missing in the answer from MCU",
             "itemtype": "method",
             "name": "_setSCTPport",
@@ -10397,27 +10405,27 @@
         },
         {
             "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:184"
+            "line": " source/skylink-debug.js:192"
         },
         {
             "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:211"
+            "line": " source/skylink-debug.js:219"
         },
         {
             "message": "unknown tag: triggerforprophacknone",
-            "line": " source/skylink-debug.js:225"
+            "line": " source/skylink-debug.js:233"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:241"
+            "line": " source/skylink-debug.js:249"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:272"
+            "line": " source/skylink-debug.js:277"
         },
         {
             "message": "unknown tag: scoped",
-            "line": " source/skylink-debug.js:344"
+            "line": " source/skylink-debug.js:349"
         },
         {
             "message": "unknown tag: trigger",
@@ -10514,6 +10522,10 @@
         {
             "message": "Missing item type\nEmit event for Peers function.",
             "line": " source/data-transfer.js:2792"
+        },
+        {
+            "message": "Missing item type\nVariable to will store the bounded function between Skylink instance and _reportToAPI function",
+            "line": " source/skylink-debug.js:169"
         }
     ]
 }
