@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.37 - Tue Jan 29 2019 12:09:38 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v0.6.38 - Wed Jun 19 2019 12:06:58 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -861,13 +861,13 @@ function Skylink() {
 
   /**
    * Stores the unique random number used for generating the "client_id".
-   * @attribute _statIdRandom
+   * @attribute _clientId
    * @type Number
    * @private
    * @for Skylink
    * @since 0.6.31
    */
-  this._statIdRandom = Date.now() + Math.floor(Math.random() * 100000000);
+  this._clientId = this.generateUUID();
 
 }
 Skylink.prototype.DATA_CHANNEL_STATE = {
@@ -1612,7 +1612,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.37';
+Skylink.prototype.VERSION = '0.6.38';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -6152,13 +6152,13 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, b
  *
  *   // Example 2: Retrieve a list of Peer connection stats
  *   function printConnStats (peerId, data) {
- *     if (!data.connectionStats[peerId]) return;
- *     var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;
- *     var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;
- *     var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;
- *     var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;
- *     var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;
- *     var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;
+ *     if (!data[peerId]) return;
+ *     var sendVideoBytes  = data[peerId].video.sending.bytes;
+ *     var sendAudioBytes  = data[peerId].audio.sending.bytes;
+ *     var recvVideoBytes  = data[peerId].video.receiving.bytes;
+ *     var recvAudioBytes  = data[peerId].audio.receiving.bytes;
+ *     var localCandidate  = data[peerId].selectedCandidate.local;
+ *     var remoteCandidate = data[peerId].selectedCandidate.remote;
  *     console.log(peerId + " - Sending audio (" + sendAudioBytes + "bps) video (" + sendVideoBytes + ")");
  *     console.log(peerId + " - Receiving audio (" + recvAudioBytes + "bps) video (" + recvVideoBytes + ")");
  *     console.log(peerId + " - Local candidate: " + localCandidate.ipAddress + ":" + localCandidate.portNumber +
@@ -6184,13 +6184,13 @@ Skylink.prototype._refreshPeerConnection = function(listOfPeers, doIceRestart, b
  *   // Example 3: Retrieve all Peer connection stats
  *   function printConnStats (listOfPeers, data) {
  *     listOfPeers.forEach(function (peerId) {
- *       if (!data.connectionStats[peerId]) return;
- *       var sendVideoBytes  = data.connectionStats[peerId].video.sending.bytes;
- *       var sendAudioBytes  = data.connectionStats[peerId].audio.sending.bytes;
- *       var recvVideoBytes  = data.connectionStats[peerId].video.receiving.bytes;
- *       var recvAudioBytes  = data.connectionStats[peerId].audio.receiving.bytes;
- *       var localCandidate  = data.connectionStats[peerId].selectedCandidate.local;
- *       var remoteCandidate = data.connectionStats[peerId].selectedCandidate.remote;
+ *       if (!data[peerId]) return;
+ *       var sendVideoBytes  = data[peerId].video.sending.bytes;
+ *       var sendAudioBytes  = data[peerId].audio.sending.bytes;
+ *       var recvVideoBytes  = data[peerId].video.receiving.bytes;
+ *       var recvAudioBytes  = data[peerId].audio.receiving.bytes;
+ *       var localCandidate  = data[peerId].selectedCandidate.local;
+ *       var remoteCandidate = data[peerId].selectedCandidate.remote;
  *       console.log(peerId + " - Sending audio (" + sendAudioBytes + "bps) video (" + sendVideoBytes + ")");
  *       console.log(peerId + " - Receiving audio (" + recvAudioBytes + "bps) video (" + recvVideoBytes + ")");
  *       console.log(peerId + " - Local candidate: " + localCandidate.ipAddress + ":" + localCandidate.portNumber +
@@ -8920,6 +8920,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
   pc.createAnswer(onSuccessCbFn, onErrorCbFn, answerConstraints);
 };
 
+
 /**
  * Function that sets the local session description and sends to Peer.
  * If trickle ICE is disabled, the local session description will be sent after
@@ -8977,6 +8978,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     sdp: _sessionDescription.sdp
   };
 
+  sessionDescription.sdp = self._removeSDPVideoRotation(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
   sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
@@ -10998,6 +11000,14 @@ var _printAllStoredLogsFn = function () {
 };
 
 /**
+ * Variable to will store the bounded function between Skylink instance and _reportToAPI function
+ * @private
+ * @for Skylink
+ * @since 0.6.37
+ */
+var _instanceBoundReportToAPI = null;
+
+/**
  * <blockquote class="info">
  *   To utilise and enable the <code>SkylinkLogs</code> API functionalities, the
  *   <a href="#method_setDebugMode"><code>setDebugMode()</code> method</a>
@@ -11079,24 +11089,21 @@ var SkylinkLogs = {
  * @since 0.6.35
  */
 var _reportToAPI = function(message, object) {
-  var endpoint = '/rest/stats/sessionerror';
-  if(_reportErrorConfig.statsServer){
-    var statsServer = _reportErrorConfig.statsServer;
-    var requestBody = {
-      data: {
-        message: message,
-        object: object,
-      }
+  if (this instanceof Skylink) {
+    var self = this;
+    var endpoint = '/rest/stats/sessionerror';
+    var params = {
+      message: message,
+      object: object,
+      room_id: self._room ? self._room.id : self._selectedRoom,
     };
-    requestBody.app_key = _reportErrorConfig.app_key;
-    requestBody.timestamp = (new Date()).toISOString();
-    try {
-      var xhr = new XMLHttpRequest();
-      xhr.onerror = function () { };
-      xhr.open('POST', statsServer + endpoint, true);
-      xhr.setRequestHeader('Content-Type', 'application/json;charset=UTF-8');
-      xhr.send(JSON.stringify(requestBody));
-    } catch (error) {}
+
+    if (object && object instanceof Error) {
+      params.object = object.toString();
+    } else if (typeof object === 'object') {
+      params.object = JSON.stringify(object);
+    }
+    self._postStats(endpoint, params);
   }
 };
 
@@ -11204,7 +11211,7 @@ var log = {
   },
 
   error: function (message, object) {
-    _reportToAPI(message, object);
+    _instanceBoundReportToAPI && _instanceBoundReportToAPI(message, object);
     _logFn(0, message, object);
   }
 };
@@ -11297,17 +11304,13 @@ Skylink.prototype.setDebugMode = function(isDebugMode) {
 
 
 /**
- * Function that populates the userInfo object with appKey and client ID used for logging an error and reporting to API server
+ * Function that binds the SKylink instance to reportAPI instance and returns a new bound function
  * @method _setClientInfoForLogging
- * @param {String} appKey
- * @param {String} clientId
  * @for Skylink
  * @since 0.5.5
  */
 Skylink.prototype._setClientInfoForLogging = function() {
-  var initOptions = this._initOptions;
-  _reportErrorConfig.app_key = initOptions.appKey;
-  _reportErrorConfig.statsServer = initOptions.statsServer;
+  _instanceBoundReportToAPI = _reportToAPI.bind(this);
 };
 var _eventsDocs = {
   /**
@@ -12895,7 +12898,7 @@ Skylink.prototype._postStats = function (endpoint, params) {
     else{
       requestBody = params;
     }
-    requestBody.client_id = ((self._user && self._user.uid) || 'dummy') + '_' + self._statIdRandom;
+    requestBody.client_id = self._clientId;
     requestBody.app_key = self._initOptions.appKey;
     requestBody.timestamp = (new Date()).toISOString();
 
@@ -12925,6 +12928,7 @@ Skylink.prototype._handleClientStats = function() {
   var statsObject = {
     username: (self._user && self._user.uid) || null,
     sdk_name: 'web',
+    room_id: self._room ? self._room.id : self._selectedRoom,
     sdk_version: self.VERSION,
     agent_name: AdapterJS.webrtcDetectedBrowser,
     agent_version: AdapterJS.webrtcDetectedVersion,
@@ -17208,8 +17212,7 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
   	}
   	self._streams[streamKey].tracks.video.width = videoElement.videoWidth;
   	self._streams[streamKey].tracks.video.height = videoElement.videoHeight;
-
-  	videoElement.src = '';
+  	
   	videoElement.srcObject = null;
   	callback();
   };
@@ -17981,6 +17984,20 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
     'Removing Firefox experimental H264 flag to ensure interopability reliability']);
 
   return sessionDescription.sdp.replace(/a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1\r\n/g, '');
+};
+
+/**
+ * Function that modifies the session description to remove the urn:3gpp:video-orientation
+ * @method _removeSDPVideoRotation
+ * @private
+ * @for Skylink
+ * @since 0.6.38
+ */
+Skylink.prototype._removeSDPVideoRotation = function(targetMid, sessionDescription) {
+  log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+    'Removing chrome urn:3gpp:video-orientation']);
+
+  return sessionDescription.sdp.replace(/a=extmap:\d+ urn:3gpp:video-orientation(:\d)?\r\n/g, '');
 };
 
 /**
