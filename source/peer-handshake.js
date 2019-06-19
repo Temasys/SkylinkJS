@@ -140,6 +140,7 @@ Skylink.prototype._doAnswer = function(targetMid) {
   pc.createAnswer(onSuccessCbFn, onErrorCbFn, answerConstraints);
 };
 
+
 /**
  * Function that sets the local session description and sends to Peer.
  * If trickle ICE is disabled, the local session description will be sent after
@@ -197,6 +198,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     sdp: _sessionDescription.sdp
   };
 
+  sessionDescription.sdp = self._removeSDPVideoRotation(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPFirefoxH264Pref(targetMid, sessionDescription);
   sessionDescription.sdp = self._setSDPCodecParams(targetMid, sessionDescription);
   sessionDescription.sdp = self._removeSDPUnknownAptRtx(targetMid, sessionDescription);
