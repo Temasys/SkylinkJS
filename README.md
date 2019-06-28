@@ -13,7 +13,7 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 | -------------- | ---------- | ----------- | --------- | ---------- | ------ | ---------- | ---- | ----- |
 | **Platforms:** | Win, Mac, Ubuntu, Android | Win, Mac, Ubuntu, Android | Win, Mac, Ubuntu, Android | Win | Mac | Mac | Win | iOS |
 | **Minimum Recommended Versions:** | `52` | `48` | `38` | `9` | `11` | `7` | `15` | `0.6.1` |
-| **Screensharing**  | Yes with [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc)  |  Yes with [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing)  | - | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing) | No | No |
+| **Screensharing**  | Yes** |  Yes**  |     -     | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing)  | - | Yes with [Commercial Temasys Plugin*](https://temasys.io/plugin/#commercial-licensing) | No | No |
 | **Video Call**     | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes | Yes [Temasys Plugin](http://temasys.io/plugin/)  | Yes (with H264 flag enabled) | Yes |
 | **Audio Call**     | Yes        | Yes         |  Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/) | Yes | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes | Yes |
 | **File Transfers** | Yes        | Yes         | Yes       | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | Yes | Yes with [Temasys Plugin](http://temasys.io/plugin/)  | No | No |
@@ -21,7 +21,7 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 
 - (+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.
 - (*) Custom Branded Temasys WebRTC Plugin incorporates additional features not available in the free plugin.
-- (**) Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.io). For Firefox extensions source code, [you may download from your Application Key in console.temasys.io](https://console.temasys.io).
+- (**) [Chrome Extension**](https://chrome.google.com/webstore/detail/skylink-webrtc-tools/ljckddiekopnnjoeaiofddfhgnbdoafc) is needed for Chrome versions < 72 and [Firefox Extension**](https://addons.mozilla.org/en-US/firefox/addon/skylink-webrtc-tools/) is needed for FF versions < 52. Our extensions works with Temasys demos and localhost demos. You will have to modify the extension to work on your hosted Web Applications. For Chrome extensions source code, [contact us](http://support.temasys.io). For Firefox extensions source code, [you may download from your Application Key in console.temasys.io](https://console.temasys.io).
 
 ##### Installation
 Install Temasys SkylinkJS Web SDK with [npm](https://www.npmjs.com/):
