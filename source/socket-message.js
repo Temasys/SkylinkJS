@@ -1739,7 +1739,7 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPCodecs(targetMid, answer);
   answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
   answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
-  answer.sdp = self._removetransportCCPackets(targetMid, answer, 'remote');
+  answer.sdp = self._removetransportCCPackets(targetMid, answer);
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
   answer.sdp = self._setSCTPport(targetMid, answer);
 
