@@ -1743,6 +1743,14 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
   answer.sdp = self._setSCTPport(targetMid, answer);
 
+  //TODO: @avi: Need to remove this line as temporary fix for Old MCU
+  if(answer.sdp.indexOf("DTLS/SCTP")>0
+    && self._hasMCU
+    && AdapterJS.webrtcDetectedBrowser === 'chrome'
+    && AdapterJS.webrtcDetectedVersion > 74){
+    answer.sdp = answer.sdp.replace("DTLS/SCTP", "DTLS/SCTP 5000");
+  }
+
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
   // This should be the state after offer is received. or even after negotiation is successful
