@@ -205,6 +205,7 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
+  sessionDescription.sdp = self._removetransportCCPackets(targetMid, sessionDescription);
   sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
 
   if (self._peerConnectionConfig.disableBundle) {

@@ -9364,7 +9364,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1584,
+            "line": 1585,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -9375,7 +9375,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1682,
+            "line": 1683,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -9386,7 +9386,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1811,
+            "line": 1813,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
@@ -9791,7 +9791,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1284,
+            "line": 1294,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -9804,7 +9804,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1343,
+            "line": 1353,
             "description": "Function that returns the camera and microphone sources.",
             "itemtype": "method",
             "name": "getStreamSources",
@@ -9888,7 +9888,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1435,
+            "line": 1445,
             "description": "Function that returns the screensharing sources.",
             "itemtype": "method",
             "name": "getScreenSources",
@@ -9956,7 +9956,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1556,
+            "line": 1566,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -9967,7 +9967,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1614,
+            "line": 1624,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -9978,7 +9978,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1687,
+            "line": 1697,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -9989,7 +9989,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1839,
+            "line": 1849,
             "description": "Function that parses the mediastream tracks for details.",
             "itemtype": "method",
             "name": "_parseStreamTracksInfo",
@@ -10000,7 +10000,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1911,
+            "line": 1921,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -10011,7 +10011,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2061,
+            "line": 2071,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -10022,7 +10022,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2102,
+            "line": 2112,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -10033,7 +10033,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2136,
+            "line": 2146,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -10044,7 +10044,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2231,
+            "line": 2241,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -10144,6 +10144,17 @@
         {
             "file": "source/stream-sdp.js",
             "line": 575,
+            "description": "Function that modifies the session description to remove transport-cc packets fb.",
+            "itemtype": "method",
+            "name": "_removetransportCCPackets",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.38",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 589,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -10154,7 +10165,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 643,
+            "line": 657,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -10165,7 +10176,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 685,
+            "line": 699,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -10176,7 +10187,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 768,
+            "line": 782,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -10187,7 +10198,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 985,
+            "line": 999,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
@@ -10198,7 +10209,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1022,
+            "line": 1036,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_renderSDPOutput",
@@ -10209,7 +10220,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1170,
+            "line": 1184,
             "description": "Function that parses the session description to get the MediaStream IDs.\nNOTE: It might not completely accurate if the setRemoteDescription() fails..",
             "itemtype": "method",
             "name": "_parseSDPMediaStreamIDs",
@@ -10220,7 +10231,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1217,
+            "line": 1231,
             "description": "Function that parses and retrieves the session description ICE candidates.",
             "itemtype": "method",
             "name": "_getSDPICECandidates",
@@ -10231,7 +10242,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1266,
+            "line": 1280,
             "description": "Function that gets each media line SSRCs.",
             "itemtype": "method",
             "name": "_getSDPMediaSSRC",
@@ -10242,7 +10253,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1309,
+            "line": 1323,
             "description": "Function that parses the current list of supported codecs from session description.",
             "itemtype": "method",
             "name": "_getSDPCodecsSupport",
@@ -10253,7 +10264,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1357,
+            "line": 1371,
             "description": "Function that checks if there are any common codecs supported for remote end.",
             "itemtype": "method",
             "name": "_getSDPCommonSupports",
@@ -10264,7 +10275,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1406,
+            "line": 1420,
             "description": "Function adds SCTP port number for Firefox 63.0.3 and above if its missing in the answer from MCU",
             "itemtype": "method",
             "name": "_setSCTPport",
@@ -10477,7 +10488,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1284"
+            "line": " source/stream-media.js:1294"
         },
         {
             "message": "Missing item type\nGlobal function that clones an object.",
