@@ -1741,7 +1741,7 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
   answer.sdp = self._setSCTPport(targetMid, answer);
 
-  //TODO: @avi: Need to remove this line as temporary fix for new MCU
+  //TODO: @avi: Need to remove this line as temporary fix for Old MCU
   if(answer.sdp.indexOf("DTLS/SCTP")>0
     && self._hasMCU
     && AdapterJS.webrtcDetectedBrowser === 'chrome'
