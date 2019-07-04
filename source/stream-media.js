@@ -1324,9 +1324,19 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         return onErrorCbFn(new Error('Failed to call getUserMedia() as AdapterJS is not yet loaded!'));
       }
 
-      AdapterJS.webRTCReady(function () {
-        navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
-      });
+      if (AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion > 71) {
+          navigator.mediaDevices.getDisplayMedia(settings.getUserMediaSettings)
+              .then(function(stream) {
+                onSuccessCbFn(stream);
+              })
+              .catch(function (error) {
+                onErrorCbFn(error);
+              })
+      } else {
+        AdapterJS.webRTCReady(function () {
+          navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+        });
+      }
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }

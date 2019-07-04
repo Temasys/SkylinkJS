@@ -1542,6 +1542,7 @@ Skylink.prototype._offerHandler = function(message) {
   offer.sdp = self._setSDPCodecParams(targetMid, offer);
   offer.sdp = self._removeSDPCodecs(targetMid, offer);
   offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
+  offer.sdp = self._removetransportCCPackets(targetMid, offer);
   offer.sdp = self._handleSDPConnectionSettings(targetMid, offer, 'remote');
   offer.sdp = self._removeSDPUnknownAptRtx(targetMid, offer);
 
@@ -1760,8 +1761,17 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPCodecs(targetMid, answer);
   answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
   answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
+  answer.sdp = self._removetransportCCPackets(targetMid, answer);
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
   answer.sdp = self._setSCTPport(targetMid, answer);
+
+  //TODO: @avi: Need to remove this line as temporary fix for Old MCU
+  if(answer.sdp.indexOf("DTLS/SCTP")>0
+    && self._hasMCU
+    && AdapterJS.webrtcDetectedBrowser === 'chrome'
+    && AdapterJS.webrtcDetectedVersion > 74){
+    answer.sdp = answer.sdp.replace("DTLS/SCTP", "DTLS/SCTP 5000");
+  }
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 

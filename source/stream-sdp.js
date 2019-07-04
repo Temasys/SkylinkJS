@@ -410,6 +410,20 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
 };
 
 /**
+ * Function that modifies the session description to remove the urn:3gpp:video-orientation
+ * @method _removeSDPVideoRotation
+ * @private
+ * @for Skylink
+ * @since 0.6.38
+ */
+Skylink.prototype._removeSDPVideoRotation = function(targetMid, sessionDescription) {
+  log.info([targetMid, 'RTCSessionDesription', sessionDescription.type,
+    'Removing chrome urn:3gpp:video-orientation']);
+
+  return sessionDescription.sdp.replace(/a=extmap:\d+ urn:3gpp:video-orientation(:\d)?\r\n/g, '');
+};
+
+/**
  * Function that modifies the session description to remove apt/rtx lines that does exists.
  * @method _removeSDPUnknownAptRtx
  * @private
@@ -558,6 +572,20 @@ Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescriptio
   return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ goog-remb\r\n/g, '');
 };
 
+/**
+ * Function that modifies the session description to remove transport-cc packets fb.
+ * @method _removetransportCCPackets
+ * @private
+ * @for Skylink
+ * @since 0.6.38
+ */
+
+Skylink.prototype._removetransportCCPackets = function (targetMid, sessionDescription) {
+
+  log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing transport-cc packets.']);
+  return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ transport-cc\r\n/g, '');
+
+};
 /**
  * Function that retrieves the session description selected codec.
  * @method _getSDPSelectedCodec

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.37 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.38 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.37</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.38</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -498,6 +498,20 @@ Skylink.prototype._removeSDPFirefoxH264Pref = function(targetMid, sessionDescrip
     &#x27;Removing Firefox experimental H264 flag to ensure interopability reliability&#x27;]);
 
   return sessionDescription.sdp.replace(/a=fmtp:0 profile-level-id=0x42e00c;packetization-mode=1\r\n/g, &#x27;&#x27;);
+};
+
+/**
+ * Function that modifies the session description to remove the urn:3gpp:video-orientation
+ * @method _removeSDPVideoRotation
+ * @private
+ * @for Skylink
+ * @since 0.6.38
+ */
+Skylink.prototype._removeSDPVideoRotation = function(targetMid, sessionDescription) {
+  log.info([targetMid, &#x27;RTCSessionDesription&#x27;, sessionDescription.type,
+    &#x27;Removing chrome urn:3gpp:video-orientation&#x27;]);
+
+  return sessionDescription.sdp.replace(/a=extmap:\d+ urn:3gpp:video-orientation(:\d)?\r\n/g, &#x27;&#x27;);
 };
 
 /**
