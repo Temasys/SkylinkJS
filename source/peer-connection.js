@@ -1862,7 +1862,60 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
   };
 
+  // Fix for FF-FF screen sharing onaddstream not firing when stopScreen called on remote peer. Instead, ontrack is fired.
+  pc.ontrack = function (evt) {
+    // Limiting condition to FF for the time being.
+    if (AdapterJS.webrtcDetectedBrowser !== 'firefox') {
+      return;
+    }
+
+    if (!self._peerConnections[targetMid]) {
+      return;
+    }
+
+    var stream = evt.streams[0];
+
+    if (!stream) {
+      return;
+    }
+
+    if (targetMid === 'MCU') {
+      log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received remote stream from MCU ->'], stream);
+      return;
+    } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
+      log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received empty remote stream ->'], stream);
+      return;
+    }
+
+    pc.remoteStream = stream;
+    pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
+
+    var peerSettings = clone(self.getPeerInfo(targetMid).settings);
+
+    self._streamsSession[targetMid][pc.remoteStreamId] = peerSettings;
+
+    if (stream.getAudioTracks().length === 0) {
+      self._streamsSession[targetMid][pc.remoteStreamId].audio = false;
+    }
+
+    if (stream.getVideoTracks().length === 0) {
+      self._streamsSession[targetMid][pc.remoteStreamId].video = false;
+    }
+
+    pc.hasStream = true;
+    pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
+
+    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+  }
+
+  // Ref: ontrack
+  // If onaddstream is triggered, ontrack will also be triggered. The reverse is not true, hence the addition of ontrack.
   pc.onaddstream = function (evt) {
+    // Adding the condition for FF to listen to ontrack instead of onaddstream.
+    if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
+      return;
+    }
+
     if (!self._peerConnections[targetMid]) {
       return;
     }
@@ -1897,6 +1950,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
   };
+
 
   pc.onicecandidate = function(event) {
     self._onIceCandidate(targetMid, event.candidate || event);

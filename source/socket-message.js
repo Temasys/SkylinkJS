@@ -1155,6 +1155,28 @@ Skylink.prototype._enterHandler = function(message) {
  */
 Skylink.prototype._restartHandler = function(message){
   var self = this;
+
+  // cxurrent browser is FF and peer browser is Chrome or vice versa
+  if (message.restartScreenshare) {
+    self.leaveRoom(false, function (error, success) {
+      if (error) {
+        console.error("Restart from screenshare failed on remote.")
+      } else {
+        self.joinRoom(self._selectedRoom, {
+          bandwidth: {},
+          googleXBandwidth: {},
+          sdpSettings: clone(self._sdpSettings),
+          voiceActivityDetection: self._voiceActivityDetection,
+          publishOnly: !!self._publishOnly,
+          parentId: self._parentId || null,
+          autoBandwidthAdjustment: self._bandwidthAdjuster
+        });
+      }
+    });
+
+    return;
+  }
+
   var targetMid = message.mid;
   var userInfo = message.userInfo || {};
   userInfo.settings = userInfo.settings || {};
@@ -1837,3 +1859,32 @@ Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
 
   return false;
 };
+
+/**
+ * Function that sends a modified restart message to trigger peer leave and rejoin on the remote peer
+ * @param {String} type - start or stop screen share
+ * @param {Object} peerId
+ * @private
+ * @for Skylink
+ * @since 0.6.37
+ */
+Skylink.prototype._sendRestartFromScreenshare = function (type, peerId) {
+  var self = this;
+  var restartMsg = {
+    type: self._SIG_MESSAGE_TYPE.RESTART,
+    mid: self._user.sid,
+    rid: self._room.id,
+    target: peerId,
+    agent: AdapterJS.webrtcDetectedBrowser,
+    version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
+    os: window.navigator.platform,
+    userInfo: self._getUserInfo(),
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+    SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+    DTProtocolVersion: self.DT_PROTOCOL_VERSION,
+    restartScreenshare: true,
+  };
+
+  log.debug([peerId, 'RTCPeerConnection', null, 'Sending restart to trigger remote peer to leave and re-join room for ' + type + ' screen share.']);
+  self._sendChannelMessage(restartMsg);
+}
