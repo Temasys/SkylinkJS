@@ -1290,7 +1290,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         };
 
         if (self._hasMCU) {
-          if (hasDefaultAudioTrack || !enableAudioSettings) {
+          if (hasDefaultAudioTrack && !(AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion > 71) || !enableAudioSettings) {
             self._onStreamAccessSuccess(stream, settings, true, false);
             return;
           }
@@ -2094,7 +2094,6 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
   self._streamsStoppedCbs[streamId] = function () {
     log.log([null, 'MediaStream', streamId, 'Stream has ended']);
-    streamHasEnded = true;
     self._trigger('mediaAccessStopped', !!isScreenSharing, !!isAudioFallback, streamId);
 
     if (self._inRoom) {
@@ -2126,18 +2125,18 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   // Handle event for Chrome / Opera
   if (['chrome', 'opera'].indexOf(AdapterJS.webrtcDetectedBrowser) > -1) {
     stream.oninactive = function () {
-      if (self._streamsStoppedCbs[streamId]) {
-        self._streamsStoppedCbs[streamId]();
-        delete self._streamsStoppedCbs[streamId];
+      if (!isScreenSharing) {
+        if (self._streamsStoppedCbs[streamId]) {
+          self._streamsStoppedCbs[streamId]();
+          delete self._streamsStoppedCbs[streamId];
+        }
       }
     };
 
     if (isScreenSharing && stream.getVideoTracks().length > 0) {
       stream.getVideoTracks()[0].onended = function () {
         setTimeout(function () {
-          if (!streamHasEnded && self._inRoom) {
             self.stopScreen();
-          }
         }, 350);
       };
     }
