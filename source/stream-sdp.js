@@ -564,9 +564,6 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
  * @since 0.6.16
  */
 Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescription) {
-  if (!this._initOptions.disableREMB) {
-    return sessionDescription.sdp;
-  }
 
   log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing REMB packets.']);
   return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ goog-remb\r\n/g, '');
