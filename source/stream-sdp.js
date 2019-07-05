@@ -564,6 +564,9 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
  * @since 0.6.16
  */
 Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescription) {
+  if (!this._initOptions.disableREMB) {
+    return sessionDescription.sdp;
+  }
 
   log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing REMB packets.']);
   return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ goog-remb\r\n/g, '');
@@ -571,17 +574,15 @@ Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescriptio
 
 /**
  * Function that modifies the session description to remove transport-cc packets fb.
- * @method _removetransportCCPackets
+ * @method _removeSDPTransportCCPackets
  * @private
  * @for Skylink
  * @since 0.6.38
  */
 
-Skylink.prototype._removetransportCCPackets = function (targetMid, sessionDescription) {
-
-  log.info([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing transport-cc packets.']);
+Skylink.prototype._removeSDPTransportCCPackets = function (targetMid, sessionDescription) {
+  log.info([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Removing transport-cc packets.']);
   return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ transport-cc\r\n/g, '');
-
 };
 /**
  * Function that retrieves the session description selected codec.
