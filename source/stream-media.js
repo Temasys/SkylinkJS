@@ -1256,7 +1256,6 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 
       if (enableAudioSettings) {
         if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
-          //hasDefaultAudioTrack = true;
           settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
         } else if (useMediaSource.indexOf('audio') > -1 && useMediaSource.indexOf('tab') > -1) {
           hasDefaultAudioTrack = true;
@@ -1290,25 +1289,37 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         };
 
         if (self._hasMCU) {
-          if (hasDefaultAudioTrack && !(AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion > 71) || !enableAudioSettings) {
-            self._onStreamAccessSuccess(stream, settings, true, false);
-            return;
+          if (enableAudioSettings) {
+            if ((AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion > 71) || AdapterJS.webrtcDetectedType === 'plugin') {
+              settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
+
+              navigator.getUserMedia({ audio: getUserMediaAudioSettings }, onAudioSuccessCbFn, onAudioErrorCbFn);
+
+              return;
+            }
           }
 
-          settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
-
-          navigator.getUserMedia({ audio: getUserMediaAudioSettings }, onAudioSuccessCbFn, onAudioErrorCbFn);
+          // all other scenarios will have the desired audio track and video track based on
+          self._onStreamAccessSuccess(stream, settings, true, false);
         } else {
           var audioTrack = null;
           var videoTrack = stream.getVideoTracks()[0];
           var newStream = null;
 
           if (hasDefaultAudioTrack) {
-            // use audio tracks from userMedia stream
-            audioTrack = self._streams.userMedia.stream.getAudioTracks()[0];
-            newStream = new MediaStream([videoTrack, audioTrack]).clone();
+            // mediaStream.clone() not a function in plugin
+            // getUserMedia with audio=true because plugin returns streams with only screen track
+            if (AdapterJS.webrtcDetectedType === 'plugin') {
+              settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
+              navigator.getUserMedia({audio: getUserMediaAudioSettings}, onAudioSuccessCbFn, onAudioErrorCbFn);
+            } else {
+              // use audio tracks from userMedia stream for Chrome and FF
+              audioTrack = self._streams.userMedia.stream.getAudioTracks()[0];
 
-            self._onStreamAccessSuccess(newStream, settings, true, false);
+              newStream = new MediaStream([videoTrack, audioTrack]).clone();
+
+              self._onStreamAccessSuccess(newStream, settings, true, false);
+            }
           } else {
             settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
             navigator.getUserMedia({audio: getUserMediaAudioSettings}, onAudioSuccessCbFn, onAudioErrorCbFn);
@@ -1325,6 +1336,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       }
 
       if (AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion > 71) {
+        // getDisplayMedia only retrieves video track
           navigator.mediaDevices.getDisplayMedia(settings.getUserMediaSettings)
               .then(function(stream) {
                 onSuccessCbFn(stream);
@@ -1334,7 +1346,17 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
               })
       } else {
         AdapterJS.webRTCReady(function () {
-          navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+          if (AdapterJS.webrtcDetectedType === 'plugin') {
+            // Plugin will return stream with only screen track even though constraints.audio = true
+            var constraints = settings.getUserMediaSettings;
+            if (Array.isArray(settings.getUserMediaSettings.video.mediaSource)) {
+              constraints.video.mediaSource = settings.getUserMediaSettings.video.mediaSource[0];
+            }
+            navigator.getUserMedia(constraints, onSuccessCbFn, onErrorCbFn);
+          } else {
+            // FF and Chrome < 71
+            navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+          }
         });
       }
     } catch (error) {
