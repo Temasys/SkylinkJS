@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.38 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.39 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.38</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.39</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -1953,7 +1953,60 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
   };
 
+  // Fix for FF-FF screen sharing onaddstream not firing when stopScreen called on remote peer. Instead, ontrack is fired.
+  pc.ontrack = function (evt) {
+    // Limiting condition to FF for the time being.
+    if (AdapterJS.webrtcDetectedBrowser !== &#x27;firefox&#x27;) {
+      return;
+    }
+
+    if (!self._peerConnections[targetMid]) {
+      return;
+    }
+
+    var stream = evt.streams[0];
+
+    if (!stream) {
+      return;
+    }
+
+    if (targetMid === &#x27;MCU&#x27;) {
+      log.warn([targetMid, &#x27;MediaStream&#x27;, pc.remoteStreamId, &#x27;Ignoring received remote stream from MCU -&gt;&#x27;], stream);
+      return;
+    } else if (!self._sdpSettings.direction.audio.receive &amp;&amp; !self._sdpSettings.direction.video.receive) {
+      log.warn([targetMid, &#x27;MediaStream&#x27;, pc.remoteStreamId, &#x27;Ignoring received empty remote stream -&gt;&#x27;], stream);
+      return;
+    }
+
+    pc.remoteStream = stream;
+    pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
+
+    var peerSettings = clone(self.getPeerInfo(targetMid).settings);
+
+    self._streamsSession[targetMid][pc.remoteStreamId] = peerSettings;
+
+    if (stream.getAudioTracks().length === 0) {
+      self._streamsSession[targetMid][pc.remoteStreamId].audio = false;
+    }
+
+    if (stream.getVideoTracks().length === 0) {
+      self._streamsSession[targetMid][pc.remoteStreamId].video = false;
+    }
+
+    pc.hasStream = true;
+    pc.hasScreen = peerSettings.video &amp;&amp; typeof peerSettings.video === &#x27;object&#x27; &amp;&amp; peerSettings.video.screenshare;
+
+    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+  }
+
+  // Ref: ontrack
+  // If onaddstream is triggered, ontrack will also be triggered. The reverse is not true, hence the addition of ontrack.
   pc.onaddstream = function (evt) {
+    // Adding the condition for FF to listen to ontrack instead of onaddstream.
+    if (AdapterJS.webrtcDetectedBrowser === &#x27;firefox&#x27;) {
+      return;
+    }
+
     if (!self._peerConnections[targetMid]) {
       return;
     }
@@ -1988,6 +2041,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
   };
+
 
   pc.onicecandidate = function(event) {
     self._onIceCandidate(targetMid, event.candidate || event);
