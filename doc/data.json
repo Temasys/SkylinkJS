@@ -2,7 +2,7 @@
     "project": {
         "name": "skylinkjs",
         "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-        "version": "0.6.38",
+        "version": "0.6.39",
         "url": "https://temasys.io/"
     },
     "files": {
@@ -3767,7 +3767,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2058,
+            "line": 2112,
             "description": "Function that handles the <code>_restartPeerConnection</code> scenario\n  for MCU enabled Peer connections.\nThis is implemented currently by making the user leave and join the Room again.\nThe Peer ID will not stay the same though.",
             "itemtype": "method",
             "name": "_restartMCUConnection",
@@ -3778,7 +3778,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2207,
+            "line": 2261,
             "description": "Function that handles the stats tabulation.",
             "itemtype": "method",
             "name": "_parseConnectionStats",
@@ -3789,7 +3789,7 @@
         },
         {
             "file": "source/peer-connection.js",
-            "line": 2227,
+            "line": 2281,
             "description": "Function that signals the end-of-candidates flag.",
             "itemtype": "method",
             "name": "_signalingEndOfCandidates",
@@ -9342,7 +9342,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1290,
+            "line": 1312,
             "description": "Function that handles the \"welcome\" socket message received.\nSee confluence docs for the \"welcome\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_welcomeHandler",
@@ -9353,7 +9353,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1470,
+            "line": 1492,
             "description": "Function that handles the \"offer\" socket message received.\nSee confluence docs for the \"offer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_offerHandler",
@@ -9364,7 +9364,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1584,
+            "line": 1608,
             "description": "Function that handles the \"candidate\" socket message received.\nSee confluence docs for the \"candidate\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_candidateHandler",
@@ -9375,7 +9375,7 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1682,
+            "line": 1706,
             "description": "Function that handles the \"answer\" socket message received.\nSee confluence docs for the \"answer\" expected properties to be received\n  based on the current <code>SM_PROTOCOL_VERSION</code>.",
             "itemtype": "method",
             "name": "_answerHandler",
@@ -9386,13 +9386,34 @@
         },
         {
             "file": "source/socket-message.js",
-            "line": 1811,
+            "line": 1845,
             "description": "Function that compares the SM / DT protocol versions to see if it in the version.",
             "itemtype": "method",
             "name": "_isLowerThanVersion",
             "access": "private",
             "tagname": "",
             "since": "0.6.16",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/socket-message.js",
+            "line": 1865,
+            "description": "Function that sends a modified restart message to trigger peer leave and rejoin on the remote peer",
+            "params": [
+                {
+                    "name": "type",
+                    "description": "- start or stop screen share",
+                    "type": "String"
+                },
+                {
+                    "name": "peerId",
+                    "description": "",
+                    "type": "Object"
+                }
+            ],
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.37",
             "class": "Skylink"
         },
         {
@@ -9791,7 +9812,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1284,
+            "line": 1368,
             "description": "<blockquote class=\"info\">\n  Note that broadcasted events from <a href=\"#method_muteStream\"><code>muteStream()</code> method</a>,\n  <a href=\"#method_stopStream\"><code>stopStream()</code> method</a>,\n  <a href=\"#method_stopScreen\"><code>stopScreen()</code> method</a>,\n  <a href=\"#method_sendMessage\"><code>sendMessage()</code> method</a>,\n  <a href=\"#method_unlockRoom\"><code>unlockRoom()</code> method</a> and\n  <a href=\"#method_lockRoom\"><code>lockRoom()</code> method</a> may be queued when\n  sent within less than an interval.\n</blockquote>\nFunction that stops <a href=\"#method_shareScreen\"><code>shareScreen()</code> Stream</a>.",
             "itemtype": "method",
             "name": "stopScreen",
@@ -9804,7 +9825,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1343,
+            "line": 1442,
             "description": "Function that returns the camera and microphone sources.",
             "itemtype": "method",
             "name": "getStreamSources",
@@ -9888,7 +9909,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1435,
+            "line": 1534,
             "description": "Function that returns the screensharing sources.",
             "itemtype": "method",
             "name": "getScreenSources",
@@ -9956,7 +9977,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1556,
+            "line": 1655,
             "description": "Function that handles the muting of Stream audio and video tracks.",
             "itemtype": "method",
             "name": "_muteStreams",
@@ -9967,7 +9988,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1614,
+            "line": 1713,
             "description": "Function that handles stopping the Stream streaming.",
             "itemtype": "method",
             "name": "_stopStreams",
@@ -9978,7 +9999,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1687,
+            "line": 1865,
             "description": "Function that parses the <code>getUserMedia()</code> settings provided.",
             "itemtype": "method",
             "name": "_parseStreamSettings",
@@ -9989,7 +10010,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1839,
+            "line": 2017,
             "description": "Function that parses the mediastream tracks for details.",
             "itemtype": "method",
             "name": "_parseStreamTracksInfo",
@@ -10000,7 +10021,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 1911,
+            "line": 2089,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API success callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessSuccess",
@@ -10011,7 +10032,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2061,
+            "line": 2238,
             "description": "Function that handles the native <code>navigator.getUserMedia()</code> API failure callback result.",
             "itemtype": "method",
             "name": "_onStreamAccessError",
@@ -10022,7 +10043,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2102,
+            "line": 2279,
             "description": "Function that handles the <code>RTCPeerConnection.onaddstream</code> remote MediaStream received.",
             "itemtype": "method",
             "name": "_onRemoteStreamAdded",
@@ -10033,7 +10054,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2136,
+            "line": 2313,
             "description": "Function that sets User's Stream to send to Peer connection.\nPriority for <code>shareScreen()</code> Stream over <code>getUserMedia()</code> Stream.",
             "itemtype": "method",
             "name": "_addLocalMediaStreams",
@@ -10044,7 +10065,7 @@
         },
         {
             "file": "source/stream-media.js",
-            "line": 2231,
+            "line": 2408,
             "description": "Function that handles ended streams.",
             "itemtype": "method",
             "name": "_handleEndedStreams",
@@ -10144,6 +10165,17 @@
         {
             "file": "source/stream-sdp.js",
             "line": 575,
+            "description": "Function that modifies the session description to remove transport-cc packets fb.",
+            "itemtype": "method",
+            "name": "_removeSDPTransportCCPackets",
+            "access": "private",
+            "tagname": "",
+            "since": "0.6.38",
+            "class": "Skylink"
+        },
+        {
+            "file": "source/stream-sdp.js",
+            "line": 587,
             "description": "Function that retrieves the session description selected codec.",
             "itemtype": "method",
             "name": "_getSDPSelectedCodec",
@@ -10154,7 +10186,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 643,
+            "line": 655,
             "description": "Function that modifies the session description to remove non-relay ICE candidates.",
             "itemtype": "method",
             "name": "_removeSDPFilteredCandidates",
@@ -10165,7 +10197,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 685,
+            "line": 697,
             "description": "Function that retrieves the current list of support codecs.",
             "itemtype": "method",
             "name": "_getCodecsSupport",
@@ -10176,7 +10208,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 768,
+            "line": 780,
             "description": "Function that modifies the session description to handle the connection settings.\nThis is experimental and never recommended to end-users.",
             "itemtype": "method",
             "name": "_handleSDPConnectionSettings",
@@ -10187,7 +10219,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 985,
+            "line": 997,
             "description": "Function that parses and retrieves the session description fingerprint.",
             "itemtype": "method",
             "name": "_getSDPFingerprint",
@@ -10198,7 +10230,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1022,
+            "line": 1034,
             "description": "Function that modifies the session description to append the MediaStream and MediaStreamTrack IDs that seems\nto be missing from Firefox answer session description to Chrome connection causing freezes in re-negotiation.",
             "itemtype": "method",
             "name": "_renderSDPOutput",
@@ -10209,7 +10241,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1170,
+            "line": 1182,
             "description": "Function that parses the session description to get the MediaStream IDs.\nNOTE: It might not completely accurate if the setRemoteDescription() fails..",
             "itemtype": "method",
             "name": "_parseSDPMediaStreamIDs",
@@ -10220,7 +10252,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1217,
+            "line": 1229,
             "description": "Function that parses and retrieves the session description ICE candidates.",
             "itemtype": "method",
             "name": "_getSDPICECandidates",
@@ -10231,7 +10263,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1266,
+            "line": 1278,
             "description": "Function that gets each media line SSRCs.",
             "itemtype": "method",
             "name": "_getSDPMediaSSRC",
@@ -10242,7 +10274,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1309,
+            "line": 1321,
             "description": "Function that parses the current list of supported codecs from session description.",
             "itemtype": "method",
             "name": "_getSDPCodecsSupport",
@@ -10253,7 +10285,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1357,
+            "line": 1369,
             "description": "Function that checks if there are any common codecs supported for remote end.",
             "itemtype": "method",
             "name": "_getSDPCommonSupports",
@@ -10264,7 +10296,7 @@
         },
         {
             "file": "source/stream-sdp.js",
-            "line": 1406,
+            "line": 1418,
             "description": "Function adds SCTP port number for Firefox 63.0.3 and above if its missing in the answer from MCU",
             "itemtype": "method",
             "name": "_setSCTPport",
@@ -10477,7 +10509,7 @@
         },
         {
             "message": "unknown tag: trigger",
-            "line": " source/stream-media.js:1284"
+            "line": " source/stream-media.js:1368"
         },
         {
             "message": "Missing item type\nGlobal function that clones an object.",
@@ -10526,6 +10558,10 @@
         {
             "message": "Missing item type\nVariable to will store the bounded function between Skylink instance and _reportToAPI function",
             "line": " source/skylink-debug.js:169"
+        },
+        {
+            "message": "Missing item type\nFunction that sends a modified restart message to trigger peer leave and rejoin on the remote peer",
+            "line": " source/socket-message.js:1865"
         }
     ]
 }

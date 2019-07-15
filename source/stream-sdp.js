@@ -573,6 +573,18 @@ Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescriptio
 };
 
 /**
+ * Function that modifies the session description to remove transport-cc packets fb.
+ * @method _removeSDPTransportCCPackets
+ * @private
+ * @for Skylink
+ * @since 0.6.38
+ */
+
+Skylink.prototype._removeSDPTransportCCPackets = function (targetMid, sessionDescription) {
+  log.info([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Removing transport-cc packets.']);
+  return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ transport-cc\r\n/g, '');
+};
+/**
  * Function that retrieves the session description selected codec.
  * @method _getSDPSelectedCodec
  * @private

@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.6.38 - Wed Jun 19 2019 12:06:58 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v0.6.39 - Thu Jul 11 2019 17:48:24 GMT+0800 (Singapore Standard Time) */
 
 (function(f){if(typeof exports==="object"&&typeof module!=="undefined"){module.exports=f()}else if(typeof define==="function"&&define.amd){define([],f)}else{var g;if(typeof window!=="undefined"){g=window}else if(typeof global!=="undefined"){g=global}else if(typeof self!=="undefined"){g=self}else{g=this}g.io = f()}})(function(){var define,module,exports;return (function e(t,n,r){function s(o,u){if(!n[o]){if(!t[o]){var a=typeof require=="function"&&require;if(!u&&a)return a(o,!0);if(i)return i(o,!0);var f=new Error("Cannot find module '"+o+"'");throw f.code="MODULE_NOT_FOUND",f}var l=n[o]={exports:{}};t[o][0].call(l.exports,function(e){var n=t[o][1][e];return s(n?n:e)},l,l.exports,e,t,n,r)}return n[o].exports}var i=typeof require=="function"&&require;for(var o=0;o<r.length;o++)s(r[o]);return s})({1:[function(_dereq_,module,exports){
 
@@ -14422,7 +14422,7 @@ if (typeof window.require !== 'function') {
   AdapterJS._defineMediaSourcePolyfill();
 }
 
-/*! skylinkjs - v0.6.38 - Wed Jun 19 2019 12:06:58 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v0.6.39 - Thu Jul 11 2019 17:48:24 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -16036,7 +16036,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.6.38';
+Skylink.prototype.VERSION = '0.6.39';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -20335,6 +20335,7 @@ Skylink.prototype._setIceServers = function(passedIceServers) {
     iceServers: iceServers
   };
 };
+
 Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, options, callback) {
   var self = this;
 
@@ -22049,7 +22050,60 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     }
   };
 
+  // Fix for FF-FF screen sharing onaddstream not firing when stopScreen called on remote peer. Instead, ontrack is fired.
+  pc.ontrack = function (evt) {
+    // Limiting condition to FF for the time being.
+    if (AdapterJS.webrtcDetectedBrowser !== 'firefox') {
+      return;
+    }
+
+    if (!self._peerConnections[targetMid]) {
+      return;
+    }
+
+    var stream = evt.streams[0];
+
+    if (!stream) {
+      return;
+    }
+
+    if (targetMid === 'MCU') {
+      log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received remote stream from MCU ->'], stream);
+      return;
+    } else if (!self._sdpSettings.direction.audio.receive && !self._sdpSettings.direction.video.receive) {
+      log.warn([targetMid, 'MediaStream', pc.remoteStreamId, 'Ignoring received empty remote stream ->'], stream);
+      return;
+    }
+
+    pc.remoteStream = stream;
+    pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
+
+    var peerSettings = clone(self.getPeerInfo(targetMid).settings);
+
+    self._streamsSession[targetMid][pc.remoteStreamId] = peerSettings;
+
+    if (stream.getAudioTracks().length === 0) {
+      self._streamsSession[targetMid][pc.remoteStreamId].audio = false;
+    }
+
+    if (stream.getVideoTracks().length === 0) {
+      self._streamsSession[targetMid][pc.remoteStreamId].video = false;
+    }
+
+    pc.hasStream = true;
+    pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
+
+    self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
+  }
+
+  // Ref: ontrack
+  // If onaddstream is triggered, ontrack will also be triggered. The reverse is not true, hence the addition of ontrack.
   pc.onaddstream = function (evt) {
+    // Adding the condition for FF to listen to ontrack instead of onaddstream.
+    if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
+      return;
+    }
+
     if (!self._peerConnections[targetMid]) {
       return;
     }
@@ -22084,6 +22138,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
 
     self._onRemoteStreamAdded(targetMid, stream, !!pc.hasScreen);
   };
+
 
   pc.onicecandidate = function(event) {
     self._onIceCandidate(targetMid, event.candidate || event);
@@ -23409,6 +23464,8 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   sessionDescription.sdp = self._removeSDPCodecs(targetMid, sessionDescription);
   sessionDescription.sdp = self._handleSDPConnectionSettings(targetMid, sessionDescription, 'local');
   sessionDescription.sdp = self._removeSDPREMBPackets(targetMid, sessionDescription);
+  // TODO: Fix has not been approved
+  // sessionDescription.sdp = self._removeSDPTransportCCPackets(targetMid, sessionDescription);
   sessionDescription.sdp = self._setSCTPport(targetMid, sessionDescription);
 
   if (self._peerConnectionConfig.disableBundle) {
@@ -29347,6 +29404,28 @@ Skylink.prototype._enterHandler = function(message) {
  */
 Skylink.prototype._restartHandler = function(message){
   var self = this;
+
+  // cxurrent browser is FF and peer browser is Chrome or vice versa
+  if (message.restartScreenshare) {
+    self.leaveRoom(false, function (error, success) {
+      if (error) {
+        console.error("Restart from screenshare failed on remote.")
+      } else {
+        self.joinRoom(self._selectedRoom, {
+          bandwidth: {},
+          googleXBandwidth: {},
+          sdpSettings: clone(self._sdpSettings),
+          voiceActivityDetection: self._voiceActivityDetection,
+          publishOnly: !!self._publishOnly,
+          parentId: self._parentId || null,
+          autoBandwidthAdjustment: self._bandwidthAdjuster
+        });
+      }
+    });
+
+    return;
+  }
+
   var targetMid = message.mid;
   var userInfo = message.userInfo || {};
   userInfo.settings = userInfo.settings || {};
@@ -29712,6 +29791,8 @@ Skylink.prototype._offerHandler = function(message) {
   offer.sdp = self._setSDPCodecParams(targetMid, offer);
   offer.sdp = self._removeSDPCodecs(targetMid, offer);
   offer.sdp = self._removeSDPREMBPackets(targetMid, offer);
+  // TODO: Fix has not been approved
+  // offer.sdp = self._removeSDPTransportCCPackets(targetMid, offer);
   offer.sdp = self._handleSDPConnectionSettings(targetMid, offer, 'remote');
   offer.sdp = self._removeSDPUnknownAptRtx(targetMid, offer);
 
@@ -29930,8 +30011,18 @@ Skylink.prototype._answerHandler = function(message) {
   answer.sdp = self._removeSDPCodecs(targetMid, answer);
   answer.sdp = self._removeSDPREMBPackets(targetMid, answer);
   answer.sdp = self._handleSDPConnectionSettings(targetMid, answer, 'remote');
+  // TODO: Fix has not been approved
+  // answer.sdp = self._removeSDPTransportCCPackets(targetMid, answer);
   answer.sdp = self._removeSDPUnknownAptRtx(targetMid, answer);
   answer.sdp = self._setSCTPport(targetMid, answer);
+
+  //TODO: @avi: Need to remove this line as temporary fix for Old MCU
+  if(answer.sdp.indexOf("DTLS/SCTP")>0
+    && self._hasMCU
+    && AdapterJS.webrtcDetectedBrowser === 'chrome'
+    && AdapterJS.webrtcDetectedVersion > 74){
+    answer.sdp = answer.sdp.replace("DTLS/SCTP", "DTLS/SCTP 5000");
+  }
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
 
@@ -30019,6 +30110,35 @@ Skylink.prototype._isLowerThanVersion = function (agentVer, requiredVer) {
 
   return false;
 };
+
+/**
+ * Function that sends a modified restart message to trigger peer leave and rejoin on the remote peer
+ * @param {String} type - start or stop screen share
+ * @param {Object} peerId
+ * @private
+ * @for Skylink
+ * @since 0.6.37
+ */
+Skylink.prototype._sendRestartFromScreenshare = function (type, peerId) {
+  var self = this;
+  var restartMsg = {
+    type: self._SIG_MESSAGE_TYPE.RESTART,
+    mid: self._user.sid,
+    rid: self._room.id,
+    target: peerId,
+    agent: AdapterJS.webrtcDetectedBrowser,
+    version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
+    os: window.navigator.platform,
+    userInfo: self._getUserInfo(),
+    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+    SMProtocolVersion: self.SM_PROTOCOL_VERSION,
+    DTProtocolVersion: self.DT_PROTOCOL_VERSION,
+    restartScreenshare: true,
+  };
+
+  log.debug([peerId, 'RTCPeerConnection', null, 'Sending restart to trigger remote peer to leave and re-join room for ' + type + ' screen share.']);
+  self._sendChannelMessage(restartMsg);
+}
 
 Skylink.prototype.getUserMedia = function(options,callback) {
   var self = this;
@@ -30921,7 +31041,7 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         self._trigger('incomingStream', self._user.sid, stream, true, self.getPeerInfo(), true, stream.id || stream.label);
         self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
 
-        if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
+        if (self._hasMCU) {
           self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
             if (err) {
               log.error('Failed refreshing connections for shareScreen() ->', err);
@@ -30933,9 +31053,38 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
             if (typeof callback === 'function') {
               callback(null, stream);
             }
+          })
+        } else {
+          var listOfPeers = Object.keys(self._peerConnections);
+
+          if (Object.keys(self._peerConnections).length === 0) {
+            log.error('Failed refreshing or restarting connections for shareScreen() ->', new Error('No peer connections to refresh.'));
+            return;
+          }
+
+          listOfPeers.forEach(function(peerId) {
+            if (AdapterJS.webrtcDetectedBrowser === self._peerInformations[peerId].agent.name) {
+              self._refreshPeerConnection([peerId], false, {}, function (err, success) {
+                if (err) {
+                  log.error('Failed refreshing connections for shareScreen() ->', err);
+                  if (typeof callback === 'function') {
+                    callback(new Error('Failed refreshing connections.'), null);
+                  }
+                  return;
+                }
+                if (typeof callback === 'function') {
+                  callback(null, stream);
+                }
+              })
+            } else {
+              // Fix for screen sharing interop - send restart msg to trigger peer leave and rejoin on the remote peer if different browsers detected
+              self._sendRestartFromScreenshare('start', peerId);
+
+              if (typeof callback === 'function') {
+                callback(null, stream);
+              }
+            }
           });
-        } else if (typeof callback === 'function') {
-          callback(null, stream);
         }
       } else if (typeof callback === 'function') {
         callback(null, stream);
@@ -30964,9 +31113,13 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 
     try {
       var hasDefaultAudioTrack = false;
+
+      if (self._streams.userMedia && self._streams.userMedia.stream && Array.isArray(self._streams.userMedia.stream.getAudioTracks()) && self._streams.userMedia.stream.getAudioTracks().length) {
+        hasDefaultAudioTrack = true;
+      }
+
       if (enableAudioSettings) {
         if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
-          hasDefaultAudioTrack = true;
           settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
         } else if (useMediaSource.indexOf('audio') > -1 && useMediaSource.indexOf('tab') > -1) {
           hasDefaultAudioTrack = true;
@@ -30975,12 +31128,6 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
       }
 
       var onSuccessCbFn = function (stream) {
-        if (hasDefaultAudioTrack || !enableAudioSettings) {
-          self._onStreamAccessSuccess(stream, settings, true, false);
-          return;
-        }
-
-        settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
 
         var onAudioSuccessCbFn = function (audioStream) {
           try {
@@ -31005,7 +31152,43 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
           self._onStreamAccessSuccess(stream, settings, true, false);
         };
 
-        navigator.getUserMedia({ audio: getUserMediaAudioSettings }, onAudioSuccessCbFn, onAudioErrorCbFn);
+        if (self._hasMCU) {
+          if (enableAudioSettings) {
+            if ((AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion > 71) || AdapterJS.webrtcDetectedType === 'plugin') {
+              settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
+
+              navigator.getUserMedia({ audio: getUserMediaAudioSettings }, onAudioSuccessCbFn, onAudioErrorCbFn);
+
+              return;
+            }
+          }
+
+          // all other scenarios will have the desired audio track and video track based on
+          self._onStreamAccessSuccess(stream, settings, true, false);
+        } else {
+          var audioTrack = null;
+          var videoTrack = stream.getVideoTracks()[0];
+          var newStream = null;
+
+          if (hasDefaultAudioTrack) {
+            // mediaStream.clone() not a function in plugin
+            // getUserMedia with audio=true because plugin returns streams with only screen track
+            if (AdapterJS.webrtcDetectedType === 'plugin') {
+              settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
+              navigator.getUserMedia({audio: getUserMediaAudioSettings}, onAudioSuccessCbFn, onAudioErrorCbFn);
+            } else {
+              // use audio tracks from userMedia stream for Chrome and FF
+              audioTrack = self._streams.userMedia.stream.getAudioTracks()[0];
+
+              newStream = new MediaStream([videoTrack, audioTrack]).clone();
+
+              self._onStreamAccessSuccess(newStream, settings, true, false);
+            }
+          } else {
+            settings.getUserMediaSettings.audio = getUserMediaAudioSettings;
+            navigator.getUserMedia({audio: getUserMediaAudioSettings}, onAudioSuccessCbFn, onAudioErrorCbFn);
+          }
+        }
       };
 
       var onErrorCbFn = function (error) {
@@ -31016,9 +31199,30 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         return onErrorCbFn(new Error('Failed to call getUserMedia() as AdapterJS is not yet loaded!'));
       }
 
-      AdapterJS.webRTCReady(function () {
-        navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
-      });
+      if (AdapterJS.webrtcDetectedBrowser === 'chrome' && AdapterJS.webrtcDetectedVersion > 71) {
+        // getDisplayMedia only retrieves video track
+          navigator.mediaDevices.getDisplayMedia(settings.getUserMediaSettings)
+              .then(function(stream) {
+                onSuccessCbFn(stream);
+              })
+              .catch(function (error) {
+                onErrorCbFn(error);
+              })
+      } else {
+        AdapterJS.webRTCReady(function () {
+          if (AdapterJS.webrtcDetectedType === 'plugin') {
+            // Plugin will return stream with only screen track even though constraints.audio = true
+            var constraints = settings.getUserMediaSettings;
+            if (Array.isArray(settings.getUserMediaSettings.video.mediaSource)) {
+              constraints.video.mediaSource = settings.getUserMediaSettings.video.mediaSource[0];
+            }
+            navigator.getUserMedia(constraints, onSuccessCbFn, onErrorCbFn);
+          } else {
+            // FF and Chrome < 71
+            navigator.getUserMedia(settings.getUserMediaSettings, onSuccessCbFn, onErrorCbFn);
+          }
+        });
+      }
     } catch (error) {
       self._onStreamAccessError(error, settings, true, false);
     }
@@ -31068,21 +31272,36 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
  * @since 0.6.0
  */
 Skylink.prototype.stopScreen = function () {
+  var self = this;
   if (this._streams.screenshare) {
     this._stopStreams({
       screenshare: true
     });
 
     if (this._inRoom) {
+      if (self._hasMCU) {
+        self._refreshPeerConnection(Object.keys(self._peerConnections), {}, false);
+      } else {
+        var listOfPeers = Object.keys(self._peerConnections);
+        listOfPeers.forEach(function (peerId) {
+          if (AdapterJS.webrtcDetectedBrowser === self._peerInformations[peerId].agent.name) {
+            self._refreshPeerConnection([peerId], {}, false);
+          } else {
+            self._sendRestartFromScreenshare('stop', peerId);
+          }
+        })
+      }
+
       if (this._streams.userMedia && this._streams.userMedia.stream) {
         this._trigger('incomingStream', this._user.sid, this._streams.userMedia.stream, true, this.getPeerInfo(),
-          false, this._streams.userMedia.stream.id || this._streams.userMedia.stream.label);
+            false, this._streams.userMedia.stream.id || this._streams.userMedia.stream.label);
         this._trigger('peerUpdated', this._user.sid, this.getPeerInfo(), true);
       }
-      this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
     }
   }
 };
+
+
 
 /**
  * Function that returns the camera and microphone sources.
@@ -31364,6 +31583,7 @@ Skylink.prototype._muteStreams = function () {
  */
 Skylink.prototype._stopStreams = function (options) {
   var self = this;
+  var peerIds = Object.keys(self._peerConnections);
   var stopFn = function (stream) {
     var streamId = stream.id || stream.label;
     log.debug([null, 'MediaStream', streamId, 'Stopping Stream ->'], stream);
@@ -31373,14 +31593,17 @@ Skylink.prototype._stopStreams = function (options) {
       var videoTracks = stream.getVideoTracks();
 
       for (var a = 0; a < audioTracks.length; a++) {
-        audioTracks[a].stop();
+        var track = audioTracks[a];
+        track.stop();
       }
 
       for (var v = 0; v < videoTracks.length; v++) {
-        videoTracks[v].stop();
+        var track = videoTracks[v];
+        track.stop();
       }
 
     } catch (error) {
+      console.log(error);
       stream.stop();
     }
 
@@ -31427,6 +31650,81 @@ Skylink.prototype._stopStreams = function (options) {
 
   log.log('Stopping Streams with settings ->', options);
 };
+
+Skylink.prototype._stopStreams = function (options) {
+  var self = this;
+  var removeTracksFromPC = function(track) {
+    var peerIds = Object.keys(self._peerConnections);
+    peerIds.forEach(function(peerId) {
+      var pc = self._peerConnections[peerId];
+      var senders = pc.getSenders();
+
+      senders.forEach(function(sender) {
+        if(sender.track && sender.track.id === track.id) {
+          pc.removeTrack(sender);
+        }
+      })
+    })
+  };
+
+    var stopFn = function (stream) {
+      var streamId = stream.id || stream.label;
+      log.debug([null, 'MediaStream', streamId, 'Stopping Stream ->'], stream);
+
+      try {
+        var audioTracks = stream.getAudioTracks();
+        var videoTracks = stream.getVideoTracks();
+
+        for (var a = 0; a < audioTracks.length; a++) {
+          audioTracks[a].stop();
+          removeTracksFromPC(audioTracks[a]);
+        }
+
+        for (var v = 0; v < videoTracks.length; v++) {
+          videoTracks[v].stop();
+          removeTracksFromPC(videoTracks[v]);
+        }
+      } catch (error) {
+        stream.stop();
+      }
+      if (self._streamsStoppedCbs[streamId]) {
+        self._streamsStoppedCbs[streamId]();
+        delete self._streamsStoppedCbs[streamId];
+      }
+    };
+    var stopUserMedia = false;
+    var stopScreenshare = false;
+    var hasStoppedMedia = false;
+
+    if (typeof options === 'object') {
+      stopUserMedia = options.userMedia === true;
+      stopScreenshare = options.screenshare === true;
+    }
+    if (stopUserMedia && self._streams.userMedia) {
+      if (self._streams.userMedia.stream) {
+        stopFn(self._streams.userMedia.stream);
+      }
+      self._streams.userMedia = null;
+      hasStoppedMedia = true;
+    }
+    if (stopScreenshare && self._streams.screenshare) {
+      if (self._streams.screenshare.streamClone) {
+        stopFn(self._streams.screenshare.streamClone);
+      }
+
+      if (self._streams.screenshare.stream) {
+        stopFn(self._streams.screenshare.stream);
+      }
+
+      self._streams.screenshare = null;
+      hasStoppedMedia = true;
+    }
+    if (self._inRoom && hasStoppedMedia) {
+      self._trigger('peerUpdated', self._user.sid, self.getPeerInfo(), true);
+    }
+    log.log('Stopping Streams with settings ->', options);
+};
+
 
 /**
  * Function that parses the <code>getUserMedia()</code> settings provided.
@@ -31636,7 +31934,7 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
   	}
   	self._streams[streamKey].tracks.video.width = videoElement.videoWidth;
   	self._streams[streamKey].tracks.video.height = videoElement.videoHeight;
-  	
+
   	videoElement.srcObject = null;
   	callback();
   };
@@ -31682,7 +31980,6 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
 
   self._streamsStoppedCbs[streamId] = function () {
     log.log([null, 'MediaStream', streamId, 'Stream has ended']);
-    streamHasEnded = true;
     self._trigger('mediaAccessStopped', !!isScreenSharing, !!isAudioFallback, streamId);
 
     if (self._inRoom) {
@@ -31714,18 +32011,18 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   // Handle event for Chrome / Opera
   if (['chrome', 'opera'].indexOf(AdapterJS.webrtcDetectedBrowser) > -1) {
     stream.oninactive = function () {
-      if (self._streamsStoppedCbs[streamId]) {
-        self._streamsStoppedCbs[streamId]();
-        delete self._streamsStoppedCbs[streamId];
+      if (!isScreenSharing) {
+        if (self._streamsStoppedCbs[streamId]) {
+          self._streamsStoppedCbs[streamId]();
+          delete self._streamsStoppedCbs[streamId];
+        }
       }
     };
 
     if (isScreenSharing && stream.getVideoTracks().length > 0) {
       stream.getVideoTracks()[0].onended = function () {
         setTimeout(function () {
-          if (!streamHasEnded && self._inRoom) {
             self.stopScreen();
-          }
         }, 350);
       };
     }
@@ -31905,8 +32202,8 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
       if (pc.signalingState !== self.PEER_CONNECTION_STATE.CLOSED) {
         // Updates the streams accordingly
         var updateStreamFn = function (updatedStream) {
-          if (updatedStream ? (pc.localStreamId ? updatedStream.id !== pc.localStreamId : true) : true) {
-            if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
+          if (updatedStream) {
+            if ((AdapterJS.webrtcDetectedBrowser === 'firefox') || (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection))) {
               pc.getSenders().forEach(function (sender) {
                 pc.removeTrack(sender);
               });
@@ -31921,7 +32218,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
             }
 
             if (updatedStream) {
-              if (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection)) {
+              if (AdapterJS.webrtcDetectedBrowser === 'firefox' || (AdapterJS.webrtcDetectedBrowser === 'edge' && !(self._initOptions.useEdgeWebRTC && window.msRTCPeerConnection))) {
                 updatedStream.getTracks().forEach(function (track) {
                   if ((track.kind === 'audio' && !offerToReceiveAudio) || (track.kind === 'video' && !offerToReceiveVideo)) {
                     return;
@@ -31929,7 +32226,7 @@ Skylink.prototype._addLocalMediaStreams = function(peerId) {
                   pc.addTrack(track, updatedStream);
                 });
               } else {
-                pc.addStream(updatedStream);
+                 pc.addStream(updatedStream);
               }
 
               pc.localStreamId = updatedStream.id || updatedStream.label;
@@ -32573,6 +32870,18 @@ Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescriptio
   return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ goog-remb\r\n/g, '');
 };
 
+/**
+ * Function that modifies the session description to remove transport-cc packets fb.
+ * @method _removeSDPTransportCCPackets
+ * @private
+ * @for Skylink
+ * @since 0.6.38
+ */
+
+Skylink.prototype._removeSDPTransportCCPackets = function (targetMid, sessionDescription) {
+  log.info([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Removing transport-cc packets.']);
+  return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ transport-cc\r\n/g, '');
+};
 /**
  * Function that retrieves the session description selected codec.
  * @method _getSDPSelectedCodec
@@ -33447,6 +33756,7 @@ Skylink.prototype._setSCTPport = function (targetMid, sessionDescription) {
 
   return sessionDescription.sdp;
 };
+
 
   if(typeof exports !== 'undefined') {
     // Prevent breaking code

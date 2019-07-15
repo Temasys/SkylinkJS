@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.6.38 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.6.39 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.6.38</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.6.39</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -663,6 +663,18 @@ Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescriptio
   return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ goog-remb\r\n/g, &#x27;&#x27;);
 };
 
+/**
+ * Function that modifies the session description to remove transport-cc packets fb.
+ * @method _removeSDPTransportCCPackets
+ * @private
+ * @for Skylink
+ * @since 0.6.38
+ */
+
+Skylink.prototype._removeSDPTransportCCPackets = function (targetMid, sessionDescription) {
+  log.info([targetMid, &#x27;RTCSessionDescription&#x27;, sessionDescription.type, &#x27;Removing transport-cc packets.&#x27;]);
+  return sessionDescription.sdp.replace(/a=rtcp-fb:\d+ transport-cc\r\n/g, &#x27;&#x27;);
+};
 /**
  * Function that retrieves the session description selected codec.
  * @method _getSDPSelectedCodec
@@ -1537,6 +1549,7 @@ Skylink.prototype._setSCTPport = function (targetMid, sessionDescription) {
 
   return sessionDescription.sdp;
 };
+
     </pre>
 </div>
 
