@@ -2357,4 +2357,88 @@ Skylink.prototype._signalingEndOfCandidates = function(targetMid) {
   }
 };
 
+/**
+ * Function that checks if the existing peer connections are connected via TURN.
+ * @param {String} [peerId]
+ * @param {Function} callback - The callback function fired when request has completed.
+ *   <small>Function parameters signature is <code>function (error, success)</code></small>
+ * @for Skylink
+ * @since 0.6.40
+ */
+Skylink.prototype.isTURNConnection = function(peerId, callback) {
+  var self = this;
+  var peerTURNConnections = {};
+  var peerIds = Object.keys(self._peerConnections);
+  var error = null;
+
+  if (!peerId && !callback) {
+    log.error([null, 'RTCPeerConnection', null, 'Callback function not provided for isTURNConnection method.']);
+    return;
+  } else if (peerId && !callback) {
+    if (typeof peerId !== 'function') {
+      log.error([null, 'RTCPeerConnection', null, 'Callback function not provided for isTURNConnection method.']);
+      return;
+    } else {
+      callback = peerId;
+      peerId = null;
+    }
+  } else if (peerId && callback) {
+    if (typeof peerId !== 'string' || typeof callback !== 'function') {
+      log.error([null, 'RTCPeerConnection', null, 'Invalid argument type.']);
+      return;
+    }
+  }
+
+  if (peerIds.length === 0) {
+    error = new Error('There is currently no peer connections to check.');
+  } else if (peerId && peerIds.indexOf(peerId) === -1) {
+    error = new Error('Peer Id does not exist.');
+  }
+
+  if (error) {
+      log.error([peerId, 'RTCPeerConnection', null, 'Failed checking peer TURN connections. ->'], error);
+      callback(error, null);
+      return;
+  }
+
+  var getTURNConnection = function(id) {
+    var TURNServers = self._peerConnStatus[id].constraints.iceServers.length > 0 ? self._peerConnStatus[id].constraints.iceServers[0].urls.filter(function(url) {
+      if (url.indexOf("turn:turn") !== -1 || url.indexOf("stun:turn") !== -1) {
+        return url;
+      }
+    }) : [];
+
+    var getSelectedCandidatePair = function(error, stats) {
+      if (stats) {
+        peerTURNConnections[id] = (stats.selectedCandidate.local.candidateType && stats.selectedCandidate.remote.candidateType) !== 'local' && TURNServers.length > 0;
+
+        if (peerId) {
+          callback(null, peerTURNConnections)
+        } else if (peerIds.indexOf(id) === peerIds.length - 1) {
+          callback(null, peerTURNConnections)
+        }
+      }
+
+      if (error) {
+        const er = new Error('No ICE Candidate selected.');
+        log.error([peerId, 'RTCPeerConnection', null, 'Failed checking peer TURN connections. ->'], er);
+        callback(er, null);
+      }
+    };
+
+    self._retrieveStats(id, getSelectedCandidatePair, true);
+  };
+
+
+  if (!self._hasMCU) {
+    if (!peerId) {
+      for (var i = 0; i < peerIds.length; i++) {
+        getTURNConnection(peerIds[i]);
+      }
+    } else {
+        getTURNConnection(peerId);
+    }
+  }
+};
+
 
