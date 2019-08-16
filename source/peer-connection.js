@@ -1880,7 +1880,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     var transceiverMid = rtcTrackEvent.transceiver.mid;
 
     // Safari RTCTrackEvent receiver object does not have mid info
-    if (AdapterJS.webrtcDetectedBrowser === 'safari') {
+    if (self._hasMCU && AdapterJS.webrtcDetectedBrowser === 'safari') {
       rtcTrackEvent.currentTarget.getTransceivers().forEach(function(transceiver) {
         if (transceiver.receiver.track.id === rtcTrackEvent.receiver.track.id) {
           transceiverMid = transceiver.mid;
