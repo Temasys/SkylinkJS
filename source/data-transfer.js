@@ -1,5 +1,5 @@
 /**
- * Function that starts an uploading data transfer from User to Peers.
+ * Function that starts an uploading data transfer from Peer to Peer(s).
  * @method sendBlobData
  * @param {Blob} data The Blob object.
  * @param {Number} [timeout=60] The timeout to wait for response from Peer.
