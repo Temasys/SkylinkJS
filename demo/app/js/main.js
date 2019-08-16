@@ -941,6 +941,13 @@ $(document).ready(function() {
   $('#start_recording_btn').click(function() {
     Demo.Skylink.startRecording();
   });
+  $('#check_TURN_Connection_btn').click(function() {
+    Demo.Skylink.isTURNConnection(function(error, result) {
+      if (result) {
+        Demo.Methods.displayChatMessage('TURN Connection result', JSON.stringify(result), false);
+      }
+    });
+  });
   $('#peer_video_list').on('click', '.toggle-connstats', function () {
     $(this).parent().find('.connstats').slideToggle();
     $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
