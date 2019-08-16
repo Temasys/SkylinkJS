@@ -1879,6 +1879,15 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     var stream = rtcTrackEvent.streams[0];
     var transceiverMid = rtcTrackEvent.transceiver.mid;
 
+    // Safari RTCTrackEvent receiver object does not have mid info
+    if (self._hasMCU && AdapterJS.webrtcDetectedBrowser === 'safari') {
+      rtcTrackEvent.currentTarget.getTransceivers().forEach(function(transceiver) {
+        if (transceiver.receiver.track.id === rtcTrackEvent.receiver.track.id) {
+          transceiverMid = transceiver.mid;
+        }
+      })
+    }
+
     pc.remoteStream = stream;
     pc.remoteStreamId = pc.remoteStreamId || stream.id || stream.label;
 
