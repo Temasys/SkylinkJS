@@ -10,42 +10,146 @@
   <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js" type="text/javascript"></script>
   <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
   <script src="http://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.js" type="text/javascript"></script>
-  <style>
-  .row-eq-height {
-    display: -webkit-box;
-    display: -webkit-flex;
-    display: -ms-flexbox;
-    display: flex;
-  }
-  .table {
-    font-size: 12px;
-  }
-  .table th {
-    font-size: 14px;
-  }
+  <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet">
+  <style type="text/css">
+    body {
+      font-family: 'Roboto', sans-serif;
+    }
+    .row-eq-height {
+      display: -webkit-box;
+      display: -webkit-flex;
+      display: -ms-flexbox;
+      display: flex;
+    }
+    .table {
+      font-size: 12px;
+    }
+    .table th {
+      font-size: 14px;
+    }
+    .row.display-flex {
+      display: flex;
+      flex-wrap: wrap
+    }
+    .row.display-flex > [class*='col-'] {
+      flex-grow: 1;
+      display: flex;
+    }
+    .row.display-flex .panel-default {
+      flex-grow: 1;
+    }
+    .navigation {
+      background: #eceff1;
+      margin-bottom: 20px;
+      padding-top: 7px;
+      padding-bottom: 7px;
+      box-shadow: 0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12);
+    }
+    .navigation small {
+      float: right;
+
+    }
+    .navigation .logo {
+      float: left;
+    }
+    .navigation .doc {
+      float: right;
+      margin-top: 11px;
+      background: #364352;
+      border: none;
+      font-size: 15px;
+    }
+    .demo-btn {
+      color: #364352;
+      background-color: transparent;
+      border-radius: 6px;
+      border-color: #364352;
+      transition: all .5s;
+    }
+    em {
+      font-style: normal;
+    }
+    .tile .panel-body {
+      color: #52504d;
+    }
+    .tile .panel-heading {
+      background: none;
+      border: none;
+    }
+    .tile h4 {
+      border-left: 2px solid #333333;
+      padding-left: 10px;
+    }
+    .level {
+      margin-bottom: 25px;
+      margin-top: 20px;
+    }
+    .level div{
+      border-radius: 5px;
+      font-size: 12px;
+      padding: 3px 10px;
+      pointer-events: none;
+    }
+    .level h5 {
+      font-size: 14px;
+      font-weight: 400;
+      color: #777777;
+    }
+    .banner .panel-default{
+      border: none;
+      box-shadow: none;
+    }
+    .banner h4{
+      color: #00aaa4;
+    }
+    .banner-inner .panel-info{
+      border: none;
+      margin-bottom: 0;
+    }
+    .banner-inner .panel-info + p{
+      background: #323e4c;
+      padding: 15px;
+      color: #fff;
+    }
+    .banner-inner .panel-heading{
+      background: #364352;
+      color: #fff;
+      font-weight: 500;
+    }
+    .banner-inner .panel-body{
+      color: #fff;
+      background: #323e4c;
+    }
+    .demo-btn:hover {
+      color: #fff;
+      background-color: #364352;
+      border-color: #364352;
+    }
+    div.panel-default:hover {
+      box-shadow: 0px 2px 4px -1px rgba(0,0,0,0.2), 0px 4px 5px 0px rgba(0,0,0,0.14), 0px 1px 10px 0px rgba(0,0,0,0.12)
+    }
   </style>
 </head>
 
 <body>
-  <div>
-    <div class="page">
-      <!-- header -->
-      <div class="container-fluid">
-        <div class="page-header">
-          <h2>
-            <a href="http://temasys.github.io/">
-              <img class="img-responsive" src="skylinkjs.svg" alt="Skylink JS" height="120px"; width="135px">
-            </a>
-            <small>Client API Documentation</small>
-          </h2>
-        </div>
-      </div>
-      <!-- banner -->
+<div class="container-fluid">
+  <!-- header -->
+  <div class="row">
+    <div class="col-xs-12 navigation">
+      <a href="http://temasys.github.io/" class="logo">
+        <img class="img-responsive" src="skylinkjs.svg" alt="Skylink JS" height="120px"; width="135px">
+      </a>
+      <a href="../doc/" class="btn btn-primary doc"><small>Client API Documentation</small></a>
+    </div>
+  </div>
+  <!-- banner -->
+  <div class="row">
+    <div class="col-md-12 tile banner">
       <div class="panel panel-default">
         <div class="panel-heading">
           <h4>Temasys Web SDK Documentation</h4>
         </div>
-        <div class="panel-body">
+        <div class="panel-body banner-inner">
           <div class="panel panel-info">
             <div class="panel-heading">Getting started</div>
             <div class="panel-body">
@@ -53,438 +157,394 @@
               To register for an API Key, simply signup for a developer account at
               our <a href="https://console.temasys.io">Developer Console</a>.<br>
               Once you received your API key, create a config.js file
-               (take example on config-example.js) and fill it with your information.
+              (take example on config-example.js) and fill it with your information.
             </div>
           </div>
           <p>
             <i>Only one module/namespace: <u>Skylink</u>.</i><br>
             The public API and events appear by default.
           </p>
-          <p>
-            <a href="../doc/" class="btn btn-primary">View Documentation</a>
-          </p>
-        </div>
-      </div>
-      <!-- row -->
-      <div class="row row-eq-height">
-        <!-- column -->
-        <div class="col-md-4 panel panel-default">
-          <div class="panel-heading">
-            <h4>Simple Audio Conference room <br><small>(/audio-only-call)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>This demo uses your API test account to create a audio conference room. New users are displayed
-                beside your personnal video element.</em>
-            </p>
-            <hr>
-            <ul>
-              <li>Automatically fetch for microphone</li>
-              <li>Automatically connects to default Room</li>
-              <li>Handle connection and disconnection of peers</li>
-              <li>Unlimited number of stream</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-success"
-                  role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="10" style="width:10%;">
-                  Easy
-                </div>
-              </div>
-            </div>
-            <p>
-              <a href="./audio-only-call/" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
-        </div>
-        <!-- column -->
-        <div class="col-md-4 panel panel-default">
-          <div class="panel-heading">
-            <h4>Simple Video Conference room <br><small>(/video-call)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>This demo uses your API test account to create a video conference room. New users are displayed
-                below your personnal video element.</em>
-            </p>
-            <hr>
-            <ul>
-              <li>Automatically fetch for video camera</li>
-              <li>Automatically connects to default Room</li>
-              <li>Handle connection and disconnection of peers</li>
-              <li>Unlimited number of stream</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-success"
-                  role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="10" style="width:15%;">
-                  Easy
-                </div>
-              </div>
-            </div>
-
-            <p>
-              <a href="./video-call/" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
-        </div>
-        <!-- column -->
-        <div class="col-md-4 panel panel-default">
-          <div class="panel-heading">
-            <h4>Messaging <br><small>(/messaging)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>This demo presents the different possibilities to send messages with Temasys Web SDK.</em>
-            </p>
-            <hr>
-            <ul>
-              <li>Automatically connects to default Room</li>
-              <li>Handle connection and disconnection of peers</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-success"
-                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
-                  Easy
-                </div>
-              </div>
-            </div>
-            <p>
-              <a href="./messaging" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
-        </div>
-      </div>
-      <!-- row -->
-      <div class="row row-eq-height">
-        <!-- column -->
-        <div class="col-md-4 panel panel-default">
-          <div class="panel-heading">
-            <h4>Streams <br><small>(/stream-settings)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>This demo presents the overview of all types of stream settings you can use to join a room.</em>
-            </p>
-            <hr>
-            <ul>
-              <li>Automatically connects to default Room</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-success"
-                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
-                  Easy
-                </div>
-              </div>
-            </div>
-            <p>
-              <a href="./connection-status" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
-        </div>
-        <!-- column -->
-        <div class="col-md-4 panel panel-default">
-          <div class="panel-heading">
-            <h4>Connection Status <br><small>(/connection-status)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>This demo presents the different states a web real time communication can have.</em>
-            </p>
-            <hr>
-            <ul>
-              <li>Automatically connects to default Room</li>
-              <li>Handle connection and disconnection of peers</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-success"
-                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
-                  Easy
-                </div>
-              </div>
-            </div>
-            <p>
-              <a href="./connection-status" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
-        </div>
-        <!-- column -->
-        <div class="col-md-4 panel panel-default">
-          <div class="panel-heading">
-            <h4>File Transfer <br><small>(/file-transfer)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>This demo presents the different possibilities to send files with Temasys Web SDK.</em>
-            </p>
-            <hr>
-            <ul>
-              <li>Automatically connects to default Room</li>
-              <li>Handle connection and disconnection of peers</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-success"
-                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
-                  Easy
-                </div>
-              </div>
-            </div>
-            <p>
-              <a href="./file-transfer" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
-        </div>
-      </div>
-      <!-- row -->
-      <div class="row row-eq-height">
-        <!-- column -->
-        <div class="col-md-4 panel panel-default">
-          <div class="panel-heading">
-            <h4>Chat room <br><small>(/chat-room)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>This demo presents an IRC like chat powered by Temasys Web SDK.</em>
-            </p>
-            <hr>
-            <ul>
-              <li>Automatically connects to default Room</li>
-              <li>Handle connection and disconnection of peers</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-success"
-                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:30%;">
-                  Easy
-                </div>
-              </div>
-            </div>
-            <p>
-              <a href="./chat-room" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
-        </div>
-        <!-- column -->
-        <div class="col-md-4 panel panel-default">
-          <div class="panel-heading">
-            <h4>Click-to-call Lobby <br><small>(/request-call)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>This demo presents the use-case to stimulate a call-like environment with Temasys Web SDK.</em>
-            </p>
-            <hr>
-            <ul>
-              <li>Automatically connects to default Room (lobby)</li>
-              <li>Handle connection and disconnection of peers</li>
-              <li>Connects user to the individual room when call is selected</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-success"
-                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:35%;">
-                  Easy
-                </div>
-              </div>
-            </div>
-            <p>
-              <a href="./file-transfer" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
-        </div>
-        <!-- column -->
-        <div class="col-md-4 panel panel-default">
-          <div class="panel-heading">
-            <h4>Agent-client Call-center - Privileged use case <br><small>(/privileged)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>This demo presents the use of privileged concept. This demo requires special demo <code>config.js</code> settings for various Privileged App Key and Auto-Introduce settings.</em>
-            </p>
-            <hr>
-            <ul>
-              <li>Retrieve list of unprivileged peers under the same realm</li>
-              <li>Retrieve list of all peers under the same realm</li>
-              <li>Introduce peers together</li>
-              <li>Customize whether peer is autoIntroduce / isPrivileged through dev console</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-warning"
-                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:80%;">
-                  Hard
-                </div>
-              </div>
-            </div>
-            <p>
-              <h5>Auto-Introduce: Enabled</h5>
-              <div class="btn-group btn-group-sm" role="group">
-                <a href="./privileged/auto-priv/" class="btn btn-primary">Privileged Key User Demo</a>
-                <a href="./privileged/auto-unpriv/" class="btn btn-primary">Non-Privileged Key User Demo</a>
-              </div>
-              <h5>Auto-Introduce: Disabled</h5>
-              <div class="btn-group btn-group-sm" role="group">
-                <a href="./privileged/unauto-priv/" class="btn btn-primary">Privileged Key User Demo</a>
-                <a href="./privileged/unauto-unpriv/" class="btn btn-primary">Non-Privileged Key User Demo</a>
-              </div>
-            </p>
-          </div>
-        </div>
-      </div>
-      <!-- row -->
-      <div class="row row-eq-height">
-        <!-- column -->
-        <div class="col-md-5 panel panel-default">
-          <div class="panel-heading">
-            <h4>Gridster UI Integration <br><small>(/gridster-integration)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>
-                This demo presents the possibilities using another third party library:
-                <a hrer="http://gridster.net/">Gridster</a>.
-                It is an advanced version of the Jumbotron Demo.
-              </em>
-            </p>
-            <hr>
-            <ul>
-              <li>Automatically fetch for audio and video</li>
-              <li>Automatically connects to default Room</li>
-              <li>Handle connection and disconnection of peers</li>
-              <li>Unlimited number of stream</li>
-              <li>Drag and Drop users</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-info"
-                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:50%;">
-                  Medium
-                </div>
-              </div>
-            </div>
-            <p>
-              <a href="./gridster-integration" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
-        </div>
-        <!-- column -->
-        <div class="col-md-7 panel panel-default">
-          <div class="panel-heading">
-            <h4>Demo <br><small>(/app)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>This demo shows you most of the functionality Temasys Web SDK can provide.</em>
-              All the states and information provided by the API are displayed.
-            </p>
-            <hr>
-            <ul>
-              <li>Automatically fetch for cam</li>
-              <li>Automatically connects to default Room</li>
-              <li>Handle connection and disconnection of peers</li>
-              <li>With list of users in room</li>
-              <li>Feedback on channel status</li>
-              <li>Feedback on handshake and Connection</li>
-              <li>File sharing features using DataChannel</li>
-              <li>Chat via Signaling or DataChannel</li>
-              <li>Users to update their own Display Name and add custom information</li>
-              <li>Muting of Audio/Video</li>
-              <li>Locking and Unlocking of Room</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-warning"
-                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:80%;">
-                  Hard
-                </div>
-              </div>
-            </div>
-            <p>
-              <a href="./app" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <!-- row -->
-      <div class="row row-eq-height">
-        <!-- column -->
-        <div class="col-md-5 panel panel-default">
-          <div class="panel-heading">
-            <h4>Data Streaming <br><small>(/data-streaming)</small></h4>
-          </div>
-          <div class="panel-body">
-            <div class="alert alert-warning" role="alert"><b>Warning!</b> This works only in Chrome browsers!</div>
-            <p>
-              <em>
-                This demo presents the ability to stream and share video mp4 files with friends.
-              </em>
-            </p>
-            <hr>
-            <ul>
-              <li>Streams data via Datachannel API</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-info"
-                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:30%;">
-                  Easy
-                </div>
-              </div>
-            </div>
-            <p>
-              <a href="./data-streaming" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
-        </div>
-        <!-- column -->
-        <div class="col-md-7 panel panel-default">
-          <div class="panel-heading">
-            <h4>Multi-stream Workaround <br><small>(/app)</small></h4>
-          </div>
-          <div class="panel-body">
-            <p>
-              <em>This demo presents a workaround to share both camera and screensharing stream at the same time.</em>
-            </p>
-            <hr>
-            <ul>
-              <li>Automatically fetch for cam</li>
-              <li>Automatically connects to default Room</li>
-              <li>Handle connection and disconnection of peers</li>
-              <li>With list of users in room</li>
-            </ul>
-            <div class="panel panel-info">
-              <div class="panel-heading">Difficulty</div>
-              <div class="progress" style="height:20px;margin:5px;">
-                <div class="progress-bar progress-bar-warning"
-                  role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:80%;">
-                  Hard
-                </div>
-              </div>
-            </div>
-            <p>
-              <a href="./screenshare-and-camera" class="btn btn-primary">View Demo</a>
-            </p>
-          </div>
         </div>
       </div>
     </div>
   </div>
+  <!-- row -->
+  <div class="row display-flex">
+    <!-- column -->
+    <div class="col-md-4 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Simple Audio Conference room <br><small>(/audio-only-call)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>This demo uses your API test account to create a audio conference room. New users are displayed
+              beside your personnal video element.</em>
+          </p>
+          <hr>
+          <ul>
+            <li>Automatically fetch for microphone</li>
+            <li>Automatically connects to default Room</li>
+            <li>Handle connection and disconnection of peers</li>
+            <li>Unlimited number of stream</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-success">Easy</div>
+          </div>
+          <p><a href="./audio-only-call/" class="btn btn-primary demo-btn">View Demo</a></p>
+        </div>
+      </div>
+    </div>
+    <!-- column -->
+    <div class="col-md-4 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Simple Video Conference room <br><small>(/video-call)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>This demo uses your API test account to create a video conference room. New users are displayed
+              below your personnal video element.</em>
+          </p>
+          <hr>
+          <ul>
+            <li>Automatically fetch for video camera</li>
+            <li>Automatically connects to default Room</li>
+            <li>Handle connection and disconnection of peers</li>
+            <li>Unlimited number of stream</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-success">Easy</div>
+          </div>
+
+          <p>
+            <a href="./video-call/" class="btn btn-primary demo-btn">View Demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- column -->
+    <div class="col-md-4 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Messaging <br><small>(/messaging)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>This demo presents the different possibilities to send messages with Temasys Web SDK.</em>
+          </p>
+          <hr>
+          <ul>
+            <li>Automatically connects to default Room</li>
+            <li>Handle connection and disconnection of peers</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-success">Easy</div>
+          </div>
+          <p>
+            <a href="./messaging" class="btn btn-primary demo-btn">View Demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- row -->
+  <div class="row display-flex">
+    <!-- column -->
+    <div class="col-md-4 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Streams <br><small>(/stream-settings)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>This demo presents the overview of all types of stream settings you can use to join a room.</em>
+          </p>
+          <hr>
+          <ul>
+            <li>Automatically connects to default Room</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-success">Easy</div>
+          </div>
+          <p>
+            <a href="./connection-status" class="btn btn-primary demo-btn">View Demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- column -->
+    <div class="col-md-4 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Connection Status <br><small>(/connection-status)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>This demo presents the different states a web real time communication can have.</em>
+          </p>
+          <hr>
+          <ul>
+            <li>Automatically connects to default Room</li>
+            <li>Handle connection and disconnection of peers</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-success">Easy</div>
+          </div>
+          <p>
+            <a href="./connection-status" class="btn btn-primary demo-btn">View Demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- column -->
+    <div class="col-md-4 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>File Transfer <br><small>(/file-transfer)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>This demo presents the different possibilities to send files with Temasys Web SDK.</em>
+          </p>
+          <hr>
+          <ul>
+            <li>Automatically connects to default Room</li>
+            <li>Handle connection and disconnection of peers</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-success">Easy</div>
+          </div>
+          <p>
+            <a href="./file-transfer" class="btn btn-primary demo-btn">View Demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- row -->
+  <div class="row display-flex">
+    <!-- column -->
+    <div class="col-md-4 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Chat room <br><small>(/chat-room)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>This demo presents an IRC like chat powered by Temasys Web SDK.</em>
+          </p>
+          <hr>
+          <ul>
+            <li>Automatically connects to default Room</li>
+            <li>Handle connection and disconnection of peers</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-success">Easy</div>
+          </div>
+          <p>
+            <a href="./chat-room" class="btn btn-primary demo-btn">View Demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- column -->
+    <div class="col-md-4 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Click-to-call Lobby <br><small>(/request-call)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>This demo presents the use-case to stimulate a call-like environment with Temasys Web SDK.</em>
+          </p>
+          <hr>
+          <ul>
+            <li>Automatically connects to default Room (lobby)</li>
+            <li>Handle connection and disconnection of peers</li>
+            <li>Connects user to the individual room when call is selected</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-success">Easy</div>
+          </div>
+          <p>
+            <a href="./file-transfer" class="btn btn-primary demo-btn">View Demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- column -->
+    <div class="col-md-4 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Agent-client Call-center - Privileged use case <br><small>(/privileged)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>This demo presents the use of privileged concept. This demo requires special demo <code>config.js</code> settings for various Privileged App Key and Auto-Introduce settings.</em>
+          </p>
+          <hr>
+          <ul>
+            <li>Retrieve list of unprivileged peers under the same realm</li>
+            <li>Retrieve list of all peers under the same realm</li>
+            <li>Introduce peers together</li>
+            <li>Customize whether peer is autoIntroduce / isPrivileged through dev console</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-warning">Hard</div>
+          </div>
+          <p>
+          <h5>Auto-Introduce: Enabled</h5>
+          <div class="btn-group btn-group-sm" role="group">
+            <a href="./privileged/auto-priv/" class="btn btn-primary demo-btn">Privileged Key User Demo</a>
+            <a href="./privileged/auto-unpriv/" class="btn btn-primary demo-btn">Non-Privileged Key User Demo</a>
+          </div>
+          <h5>Auto-Introduce: Disabled</h5>
+          <div class="btn-group btn-group-sm" role="group">
+            <a href="./privileged/unauto-priv/" class="btn btn-primary demo-btn">Privileged Key User Demo</a>
+            <a href="./privileged/unauto-unpriv/" class="btn btn-primary demo-btn">Non-Privileged Key User Demo</a>
+          </div>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- row -->
+  <div class="row display-flex">
+    <!-- column -->
+    <div class="col-md-6 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Gridster UI Integration <br><small>(/gridster-integration)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>
+              This demo presents the possibilities using another third party library:
+              <a hrer="http://gridster.net/">Gridster</a>.
+              It is an advanced version of the Jumbotron Demo.
+            </em>
+          </p>
+          <hr>
+          <ul>
+            <li>Automatically fetch for audio and video</li>
+            <li>Automatically connects to default Room</li>
+            <li>Handle connection and disconnection of peers</li>
+            <li>Unlimited number of stream</li>
+            <li>Drag and Drop users</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-info">Medium</div>
+          </div>
+          <p>
+            <a href="./gridster-integration" class="btn btn-primary demo-btn">View Demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- column -->
+    <div class="col-md-6 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Demo <br><small>(/app)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>This demo shows you most of the functionality Temasys Web SDK can provide.</em>
+            All the states and information provided by the API are displayed.
+          </p>
+          <hr>
+          <ul>
+            <li>Automatically fetch for cam</li>
+            <li>Automatically connects to default Room</li>
+            <li>Handle connection and disconnection of peers</li>
+            <li>With list of users in room</li>
+            <li>Feedback on channel status</li>
+            <li>Feedback on handshake and Connection</li>
+            <li>File sharing features using DataChannel</li>
+            <li>Chat via Signaling or DataChannel</li>
+            <li>Users to update their own Display Name and add custom information</li>
+            <li>Muting of Audio/Video</li>
+            <li>Locking and Unlocking of Room</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-warning">Hard</div>
+          </div>
+          <p>
+            <a href="./app" class="btn btn-primary demo-btn">View Demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- row -->
+  <div class="row display-flex">
+    <!-- column -->
+    <div class="col-md-6 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Data Streaming <br><small>(/data-streaming)</small></h4>
+        </div>
+        <div class="panel-body">
+          <div class="alert alert-warning" role="alert"><b>Warning!</b> This works only in Chrome browsers!</div>
+          <p>
+            <em>
+              This demo presents the ability to stream and share video mp4 files with friends.
+            </em>
+          </p>
+          <hr>
+          <ul>
+            <li>Streams data via Datachannel API</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-info">Medium</div>
+          </div>
+          <p>
+            <a href="./data-streaming" class="btn btn-primary demo-btn">View Demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+    <!-- column -->
+    <div class="col-md-6 tile">
+      <div class="panel panel-default">
+        <div class="panel-heading">
+          <h4>Multi-stream Workaround <br><small>(/app)</small></h4>
+        </div>
+        <div class="panel-body">
+          <p>
+            <em>This demo presents a workaround to share both camera and screensharing stream at the same time.</em>
+          </p>
+          <hr>
+          <ul>
+            <li>Automatically fetch for cam</li>
+            <li>Automatically connects to default Room</li>
+            <li>Handle connection and disconnection of peers</li>
+            <li>With list of users in room</li>
+          </ul>
+          <div class="level">
+            <h5>Difficulty</h5>
+            <div href="#" class="btn btn-warning">Hard</div>
+          </div>
+          <p>
+            <a href="./screenshare-and-camera" class="btn btn-primary demo-btn">View Demo</a>
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
 </body>
 </html>
