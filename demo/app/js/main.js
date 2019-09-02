@@ -363,6 +363,22 @@ Demo.Skylink.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
   }
 
   var peerVideo = $('#video' + peerId + ' .video-obj')[0];
+
+  // Added for testing
+  if(!isSelf && peerVideo.videoTracks && peerVideo.videoTracks.length > 0 && peerVideo.audioTracks && peerVideo.audioTracks.length > 0) { // already existing video element. Creating a new one..
+    var peerElm = document.createElement('div');
+    peerElm.id = 'video' + peerId + "-2";
+    peerElm.className = 'col-md-6 peervideo';
+
+    peerVideo2 = document.createElement('video');
+    peerVideo2.className = 'video-obj col-md-12';
+    peerVideo2.muted = isSelf;
+    peerVideo2.autoplay = true;
+    peerVideo2.controls = true;
+    peerVideo2.setAttribute('playsinline', true);
+    $('#video' + peerId).append(peerVideo2);
+    attachMediaStream(peerVideo2, stream);
+  } else
   attachMediaStream(peerVideo, stream);
   //$(peerVideo).show();
 
@@ -383,6 +399,7 @@ Demo.Skylink.on('incomingStream', function(peerId, stream, isSelf, peerInfo) {
   if (Demo.ShowStats[peerId]) {
     $('#video' + peerId + ' .connstats-wrapper').show();
   }
+
 });
 //---------------------------------------------------
 Demo.Skylink.on('mediaAccessSuccess', function(stream) {
@@ -762,10 +779,10 @@ Demo.Skylink.init(config, function (error, success) {
     Demo.Skylink.joinRoom(window.demoAppJoinRoomConfig || {
       userData: displayName,
       audio: { stereo: true },
-      video: true,
-      bandwidth: {
-        video: 1024
-      }
+      video: { resolution: Demo.Skylink.VIDEO_RESOLUTION.HD },
+      //bandwidth: {
+        //video: 1024
+      //}
     });
   }
 });
@@ -869,6 +886,38 @@ $(document).ready(function() {
   //---------------------------------------------------
   $('#update_user_info_btn').click(function() {
     Demo.Skylink.setUserData($('#display_user_info').val());
+  });
+  //---------------------------------------------------
+  $('#low_video_bw_btn').click(function() {
+    var localVideoSender = Demo.Skylink._currentRTCRTPSenders.MCU.find(sender => sender.track.kind == 'video');
+    var param = localVideoSender.getParameters();
+    param.encodings[0].maxBitrate = 100*1000; // setting to a low value (100 bits/s)
+    localVideoSender.setParameters(param);
+    console.log("Set local video send bandwidth to a LOW value. (label:'" + localVideoSender.track.label + "', trackId:'" + localVideoSender.track.id + "')");
+  });
+  //---------------------------------------------------
+  $('#high_video_bw_btn').click(function() {
+    var localVideoSender = Demo.Skylink._currentRTCRTPSenders.MCU.find(sender => sender.track.kind == 'video');
+    var param = localVideoSender.getParameters();
+    param.encodings[0].maxBitrate = 2000*1000; // setting to a high value (2000 bits/s)
+    localVideoSender.setParameters(param);
+    console.log("Set local video send bandwidth to a HIGH value. (label:'" + localVideoSender.track.label + "', trackId:'" + localVideoSender.track.id + "')");
+  });
+  //---------------------------------------------------
+  $('#add_extra_video_track_btn').click(function() {
+    const clonedUserMedia = Demo.Skylink._streams.userMedia.stream.clone();
+    Demo.Skylink._peerConnections["MCU"].addTrack(clonedUserMedia.getVideoTracks()[0], clonedUserMedia);
+    Demo.Skylink._refreshPeerConnection(
+      [Demo.Skylink._peerConnections["MCU"]],
+      false, {},
+      function (err, success) {
+        if (err) {
+          console.error('Failed refreshing connection after adding track ->', err);
+          return;
+        }
+        console.log('Successfully added additional video track to MCU PeerConnection');
+      });
+
   });
   //---------------------------------------------------
   $('#lock_btn').click(function() {
