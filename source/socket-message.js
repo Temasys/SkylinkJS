@@ -142,7 +142,6 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
  *   <li>If recording session has been started successfully: <ol>
  *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers
  *   parameter payload <code>state</code> as <code>START</code>.</li></ol></li></ol></li></ol>
- * @beta
  * @for Skylink
  * @since 0.6.16
  */
@@ -212,13 +211,6 @@ Skylink.prototype.startRecording = function (callback) {
  *   the recording session information.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {JSON} callback.success.recordingId The recording session ID.
- * @param {JSON} callback.success.link The recording session mixin videos link in
- *   <a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">MP4</a> format.
- *   <small>Object signature matches the <code>link</code> parameter payload received in the
- *   <a href="#event_recordingState"><code>recordingState</code> event</a>.</small>
- * @param {Boolean} [callbackSuccessWhenLink=false] The flag if <code>callback</code> function provided
- *   should result in success only when <a href="#event_recordingState"><code>recordingState</code> event</a>
- *   triggering <code>state</code> parameter payload as <code>LINK</code>.
  * @method stopRecording
  * @example
  *   // Example 1: Stop recording session
@@ -227,11 +219,6 @@ Skylink.prototype.startRecording = function (callback) {
  *     console.info("Recording session has stopped. ID ->", success);
  *   });
  *
- *   // Example 2: Stop recording session with mixin videos link
- *   skylinkDemo.stopRecording(function (error, success) {
- *     if (error) return;
- *     console.info("Recording session has compiled with links ->", success.link);
- *   }, true);
  * @trigger <ol class="desc-seq">
  *   <li>If MCU is not connected: <ol><li><b>ABORT</b> and return error.</li></ol></li>
  *   <li>If there is no existing recording session currently going on: <ol>
@@ -240,20 +227,7 @@ Skylink.prototype.startRecording = function (callback) {
  *   <small>4 seconds is mandatory for recording session to ensure better recording
  *   experience and stability.</small> <ol><li><b>ABORT</b> and return error.</li></ol></li>
  *   <li>Sends to MCU via Signaling server to stop recording session: <ol>
- *   <li>If recording session has been stopped successfully: <ol>
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a>
- *   triggers parameter payload <code>state</code> as <code>START</code>.
- *   <li>MCU starts mixin recorded session videos: <ol>
- *   <li>If recording session has been mixin successfully with links: <ol>
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers
- *   parameter payload <code>state</code> as <code>LINK</code>.<li>Else: <ol>
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a> triggers
- *   parameter payload <code>state</code> as <code>ERROR</code>.<li><b>ABORT</b> and return error.</ol></li>
- *   </ol></li></ol></li><li>Else: <ol>
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a>
- *   triggers parameter payload <code>state</code> as <code>ERROR</code>.</li><li><b>ABORT</b> and return error.</li>
- *   </ol></li></ol></li></ol>
- * @beta
+ *   <li>If recording session has been stopped successfully. <ol>
  * @for Skylink
  * @since 0.6.16
  */
@@ -335,20 +309,11 @@ Skylink.prototype.stopRecording = function (callback) {
  *   <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.<small>Note that this value may not be
  *   very accurate as this value is recorded when the stop event is received.</small>
  *   <small>Defined only after <code>state</code> has triggered <code>STOP</code>.</small></p></li>
- *   <li><code>mixingDateTime</code><var><b>{</b>String<b>}</b></var><p>The recording session mixing completed DateTime in
- *   <a href="https://en.wikipedia.org/wiki/ISO_8601">ISO 8601 format</a>.<small>Note that this value may not be
- *   very accurate as this value is recorded when the mixing completed event is received.</small>
- *   <small>Defined only when <code>state</code> is <code>LINK</code>.</small></p></li>
- *   <li><code>links</code><var><b>{</b>JSON<b>}</b></var><p>The recording session links.
- *   <small>Object signature matches the <code>link</code> parameter payload received in the
- *   <a href="#event_recordingState"><code>recordingState</code> event</a>.</small>
- *   <small>Defined only when <code>state</code> is <code>LINK</code>.</small></p></li>
  *   <li><code>error</code><var><b>{</b>Error<b>}</b></var><p>The recording session error.
  *   <small>Defined only when <code>state</code> is <code>ERROR</code>.</small></p></li></ul></li></ul>
  * @example
  *   // Example 1: Get recording sessions
  *   skylinkDemo.getRecordings();
- * @beta
  * @for Skylink
  * @since 0.6.16
  */
@@ -826,8 +791,6 @@ Skylink.prototype._recordingEventHandler = function (message) {
         state: self.RECORDING_STATE.START,
         startedDateTime: (new Date()).toISOString(),
         endedDateTime: null,
-        mixingDateTime: null,
-        links: null,
         error: null
       };
       self._recordingStartInterval = setTimeout(function () {
