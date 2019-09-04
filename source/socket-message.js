@@ -227,11 +227,7 @@ Skylink.prototype.startRecording = function (callback) {
  *   <small>4 seconds is mandatory for recording session to ensure better recording
  *   experience and stability.</small> <ol><li><b>ABORT</b> and return error.</li></ol></li>
  *   <li>Sends to MCU via Signaling server to stop recording session: <ol>
- *   <li>If recording session has been stopped successfully: <ol>
- *   <li><a href="#event_recordingState"><code>recordingState</code> event</a>
- *   triggers parameter payload <code>state</code> as <code>START</code>.
- *   <li>MCU starts mixin recorded session videos after all peer left. It will send error on recordingState event
- *   if there will be an issue in stopping recording session.
+ *   <li>If recording session has been stopped successfully. <ol>
  * @for Skylink
  * @since 0.6.16
  */
