@@ -211,13 +211,6 @@ Skylink.prototype.startRecording = function (callback) {
  *   the recording session information.
  *   <small>Defined as <code>null</code> when there are errors in request</small>
  * @param {JSON} callback.success.recordingId The recording session ID.
- * @param {JSON} callback.success.link The recording session mixin videos link in
- *   <a href="https://en.wikipedia.org/wiki/MPEG-4_Part_14">MP4</a> format.
- *   <small>Object signature matches the <code>link</code> parameter payload received in the
- *   <a href="#event_recordingState"><code>recordingState</code> event</a>.</small>
- * @param {Boolean} [callbackSuccessWhenLink=false] The flag if <code>callback</code> function provided
- *   should result in success only when <a href="#event_recordingState"><code>recordingState</code> event</a>
- *   triggering <code>state</code> parameter payload as <code>LINK</code>.
  * @method stopRecording
  * @example
  *   // Example 1: Stop recording session
