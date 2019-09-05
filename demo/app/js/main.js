@@ -11,9 +11,19 @@ Demo.Skylink = new Skylink();
 Demo.ShowStats = {};
 Demo.TransfersDone = {};
 Demo.Downloads = {};
+Demo.streams = [];
 
 var _peerId = null;
 var selectedPeers = [];
+
+var videoInputSources = null;
+
+navigator.mediaDevices.enumerateDevices()
+.then(function(mediaDevices) {
+  videoInputSources = mediaDevices.filter(function(mediaDevice) {
+    return mediaDevice.kind === 'videoinput';
+  });
+});
 
 Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);
 
@@ -763,7 +773,7 @@ Demo.Skylink.init(config, function (error, success) {
     Demo.Skylink.joinRoom(window.demoAppJoinRoomConfig || {
       userData: displayName,
       audio: { stereo: true },
-      video: false,
+      video: videoInputSources[0] && videoInputSources[0].deviceId ? { deviceId : videoInputSources[0].deviceId } : true,
       bandwidth: {
         video: 1024
       }
@@ -899,7 +909,12 @@ $(document).ready(function() {
   });
   //---------------------------------------------------
   $('#send_stream_btn').click(function() {
-    Demo.Skylink.sendStream({ audio: { stereo: true }, video: true });
+    Demo.Skylink.sendStream({
+      audio: { stereo: true },
+      video: videoInputSources[1] && videoInputSources[1].deviceId ? {
+        deviceId: videoInputSources[1].deviceId,
+      } : true,
+    });
   });
   //---------------------------------------------------
   $('#enable_video_btn').click(function () {

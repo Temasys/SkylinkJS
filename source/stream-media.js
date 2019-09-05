@@ -276,7 +276,12 @@
  * @for Skylink
  * @since 0.5.6
  */
-Skylink.prototype.getUserMedia = function(options,callback) {
+Skylink.prototype.getUserMedia = function (options, callback) {
+  var self = this;
+  self._getUserMedia(options, callback, false);
+};
+
+Skylink.prototype._getUserMedia = function (options, callback, fromSendStream) {
   var self = this;
 
   if (typeof options === 'function'){
@@ -365,7 +370,7 @@ Skylink.prototype.getUserMedia = function(options,callback) {
         self._streamsMutedSettings.videoMuted = true;
       }
 
-      self._onStreamAccessSuccess(stream, settings, false, false);
+      self._onStreamAccessSuccess(stream, settings, false, false, fromSendStream);
     };
 
     var onErrorCbFn = function (error) {
@@ -406,6 +411,13 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *   invoking <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.
  *   <small>Object signature matches the <code>options</code> parameter in the
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a>.</small>
+ * <blockquote class="info">
+ *   Note that when provided as a <code>MediaStream</code> object, the MediaStream object should be cloned if it is to be reused after
+ *   invoking <a href="#method_stopStream"><code>stopStream()</code> method</a>.
+ *   When the MediaStream object is no longer needed,
+ *   <a href="#method_stopStream"><code>stopStream()</code> method</a> with the MediaStream object as a param to stop the stream.
+ *   Failure to do so may cause the visual indicator (usually a green light) on the camera device to remain active.
+ * </blockquote>
  * @param {Function} [callback] The callback function fired when request has completed.
  *   <small>Function parameters signature is <code>function (error, success)</code></small>
  *   <small>Function request completion is determined by the <a href="#event_mediaAccessSuccess">
@@ -456,6 +468,43 @@ Skylink.prototype.getUserMedia = function(options,callback) {
  *       });
  *     });
  *   }
+ *
+ *   // Example 3: Sending manually managed MediaStreams
+ *   var mediaStream_1 = null;
+ *   var mediaStream_2 = null;
+ *
+ *   navigator.mediaDevices.getUserMedia({
+ *       audio: true,
+ *       video: {
+ *         sourceId: { exact: sourceId_1 }
+ *       }
+ *     }).then(function (stream) {
+ *       mediaStream_1 = stream;
+ *     });
+ *
+ *   navigator.mediaDevices.getUserMedia({
+ *       audio: true,
+ *       video: {
+ *         sourceId: { exact: sourceId_2 }
+ *       }
+ *     }).then(function (stream) {
+ *       mediaStream_2 = stream;
+ *     });
+ *
+ *   function showStream_1 () {
+ *      skylinkDemo.sendStream(mediaStream_1.clone());
+ *   };
+ *
+ *   function showStream_2 () {
+ *      skylinkDemo.sendStream(mediaStream_2.clone());
+ *   };
+ *
+ *   // Stopping the active stream in the video element
+ *   skylinkDemo.stopStream();
+ *
+ *   // Stopping the manually managed getUserMedia streams when it is no longer needed
+ *   skylinkDemo.stopStream(mediaStream_1);
+ *   skylinkDemo.stopStream(mediaStream_2);
  * @trigger <ol class="desc-seq">
  *   <li>Checks <code>options</code> provided. <ol><li>If provided parameter <code>options</code> is not valid: <ol>
  *   <li><b>ABORT</b> and return error.</li></ol></li>
@@ -495,7 +544,21 @@ Skylink.prototype.getUserMedia = function(options,callback) {
 Skylink.prototype.sendStream = function(options, callback) {
   var self = this;
 
-  var renegotiate = function(newStream, cb) {
+  var isOptionsMediaStream = function () {
+    return typeof options.getAudioTracks === 'function' || typeof options.getVideoTracks === 'function';
+  };
+
+  var checkActiveTracksFn = function (tracks) {
+    for (var t = 0; t < tracks.length; t++) {
+      if (!(tracks[t].ended || (typeof tracks[t].readyState === 'string' ?
+          tracks[t].readyState !== 'live' : false))) {
+        return true;
+      }
+    }
+    return false;
+  };
+
+  var renegotiate = function(originalStream, newStream, cb) {
     if (Object.keys(self._peerConnections).length > 0 || self._hasMCU) {
       self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
         if (err) {
@@ -525,7 +588,7 @@ Skylink.prototype.sendStream = function(options, callback) {
     var originalStreamHasAudioTrack = Array.isArray(originalStream.getAudioTracks()) && originalStream.getAudioTracks().length;
 
     if ((newStreamHasVideoTrack && !originalStreamHasVideoTrack) || (newStreamHasAudioTrack && !originalStreamHasAudioTrack)) {
-      self._stopStreams(originalStream);
+      self._stopStreams(originalStream, true);
       renegotiate(newStream, cb);
       return;
     }
@@ -537,6 +600,8 @@ Skylink.prototype.sendStream = function(options, callback) {
     if (newStreamHasAudioTrack && originalStreamHasAudioTrack) {
       self._replaceTrack(originalStream.getAudioTracks()[0].id, newStream.getAudioTracks()[0]);
     }
+
+    self._stopStreams(originalStream, true);
   };
 
   var restartFn = function (originalStream, stream) {
@@ -592,18 +657,11 @@ Skylink.prototype.sendStream = function(options, callback) {
     origStream = self._streams.screenshare.stream;
   }
 
-  if (typeof options.getAudioTracks === 'function' || typeof options.getVideoTracks === 'function') {
-    var checkActiveTracksFn = function (tracks) {
-      for (var t = 0; t < tracks.length; t++) {
-        if (!(tracks[t].ended || (typeof tracks[t].readyState === 'string' ?
-          tracks[t].readyState !== 'live' : false))) {
-          return true;
-        }
-      }
-      return false;
-    };
+  if (isOptionsMediaStream()) {
+    var hasActiveAudioTracks = checkActiveTracksFn(options.getAudioTracks());
+    var hasActiveVideoTracks = checkActiveTracksFn( options.getVideoTracks());
 
-    if (!checkActiveTracksFn( options.getAudioTracks() ) && !checkActiveTracksFn( options.getVideoTracks() )) {
+    if (!hasActiveAudioTracks && !hasActiveVideoTracks) {
       var invalidStreamError = 'Provided stream object does not have audio or video tracks.';
       log.error(invalidStreamError, options);
       if (typeof callback === 'function'){
@@ -614,19 +672,19 @@ Skylink.prototype.sendStream = function(options, callback) {
 
     self._onStreamAccessSuccess(options, {
       settings: {
-        audio: true,
-        video: true
+        audio: hasActiveAudioTracks,
+        video: hasActiveVideoTracks
       },
       getUserMediaSettings: {
-        audio: true,
-        video: true
+        audio: hasActiveAudioTracks,
+        video: hasActiveVideoTracks
       }
-    }, false, false);
+    }, false, false, true);
 
     restartFn(origStream, options);
 
   } else {
-    self.getUserMedia(options, function (err, stream) {
+    self._getUserMedia(options, function (err, stream) {
       if (err) {
         if (typeof callback === 'function') {
           callback(err, null);
@@ -634,7 +692,7 @@ Skylink.prototype.sendStream = function(options, callback) {
         return;
       }
       restartFn(origStream, stream);
-    });
+    }, true);
   }
 };
 
@@ -650,12 +708,21 @@ Skylink.prototype.sendStream = function(options, callback) {
  * </blockquote>
  * Function that stops <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>.
  * @method stopStream
+ * @param {JSON} [mediaStream] - The manually managed MediaStream to stop. Manually managed MediaStreams are obtained
+ * by invoking <code>navigator.mediaDevices.getUserMedia()</code> method.
  * @example
+ *   // Example 1
  *   function stopStream () {
  *     skylinkDemo.stopStream();
  *   }
  *
  *   skylinkDemo.getUserMedia();
+ *
+ *   // Example 2: Stopping a manually managed MediaStream
+ *   function stopStream () {
+ *     skylinkDemo.stopStream(stream);
+ *   }
+ *
  * @trigger <ol class="desc-seq">
  *   <li>Checks if there is <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>. <ol>
  *   <li>If there is <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a>: <ol>
@@ -669,8 +736,12 @@ Skylink.prototype.sendStream = function(options, callback) {
  * @for Skylink
  * @since 0.5.6
  */
-Skylink.prototype.stopStream = function () {
-  if (this._streams.userMedia) {
+Skylink.prototype.stopStream = function (mediaStream) {
+  if (mediaStream) {
+    mediaStream.getTracks().forEach(function(track) {
+      track.stop();
+    })
+  } else if (this._streams.userMedia) {
     this._stopStreams({
       userMedia: true
     });
@@ -1439,7 +1510,7 @@ Skylink.prototype.stopScreen = function () {
         this._refreshPeerConnection(Object.keys(this._peerConnections), {}, false);
       } else {
         var gDMVideoTrack = self._streams.screenshare.stream.getVideoTracks()[0];
-        var gUMVideoTrack = self._streams.userMedia.stream.getVideoTracks()[0];
+        var gUMVideoTrack = self._streams.userMedia && self._streams.userMedia.stream  ? self._streams.userMedia.stream.getVideoTracks()[0] : null;
 
         self._replaceTrack(gDMVideoTrack.id, gUMVideoTrack);
       }
@@ -1783,7 +1854,7 @@ Skylink.prototype._stopStreams = function (options, stopOnly) {
   var hasStoppedMedia = false;
 
   // from sendStream to stop original stream before sending new stream
-  if (!options.screenshare && !options.userMedia) {
+  if (!options.screenshare && !options.userMedia) { // options is a MediaStream object
     if (options.getTracks()) {
       stopFn(options);
     }
@@ -1810,7 +1881,7 @@ Skylink.prototype._stopStreams = function (options, stopOnly) {
     }
 
     if (self._streams.screenshare.stream) {
-      stopFn(self._streams.screenshare.stream, stopOnly);
+      stopFn(self._streams.screenshare.stream);
     }
 
     self._streams.screenshare = null;
@@ -2057,7 +2128,7 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
  * @for Skylink
  * @since 0.3.0
  */
-Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSharing, isAudioFallback) {
+Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSharing, isAudioFallback, fromSendStream) {
   var self = this;
   var streamId = stream.id || stream.label;
   var streamHasEnded = false;
@@ -2065,13 +2136,13 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   log.log([null, 'MediaStream', streamId, 'Has access to stream ->'], stream);
 
   // Stop previous stream
-  if (!isScreenSharing && self._streams.userMedia) {
+  if (!isScreenSharing && self._streams.userMedia && !fromSendStream) {
     self._stopStreams({
       userMedia: true,
       screenshare: false
     });
 
-  } else if (isScreenSharing && self._streams.screenshare) {
+  } else if (isScreenSharing && self._streams.screenshare && !fromSendStream) {
     self._stopStreams({
       userMedia: false,
       screenshare: true

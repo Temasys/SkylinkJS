@@ -712,7 +712,7 @@ Skylink.prototype._streamEventHandler = function(message) {
   var targetMid = message.mid;
   log.log([targetMid, null, message.type, 'Peer\'s stream status:'], message.status);
 
-  if (this._peerInformations[targetMid] && message.streamId) {
+  if (this._peerConnections[targetMid] && this._peerInformations[targetMid] && message.streamId) {
     this._streamsSession[targetMid] = this._streamsSession[targetMid] || {};
     if (message.status === 'ended') {
       if (message.settings && typeof message.settings === 'object' &&
