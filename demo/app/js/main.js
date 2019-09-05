@@ -11,9 +11,19 @@ Demo.Skylink = new Skylink();
 Demo.ShowStats = {};
 Demo.TransfersDone = {};
 Demo.Downloads = {};
+Demo.streams = [];
 
 var _peerId = null;
 var selectedPeers = [];
+
+var videoInputSources = null;
+
+navigator.mediaDevices.enumerateDevices()
+.then(function(mediaDevices) {
+  videoInputSources = mediaDevices.filter(function(mediaDevice) {
+    return mediaDevice.kind === 'videoinput';
+  });
+});
 
 Demo.Skylink.setLogLevel(Demo.Skylink.LOG_LEVEL.DEBUG);
 
@@ -332,6 +342,7 @@ Demo.Skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
     peerVideo.autoplay = true;
     peerVideo.controls = true;
     peerVideo.setAttribute('playsinline', true);
+    peerVideo.setAttribute('autoplay', true);
 
     if (!peerInfo.settings.audio && !peerInfo.settings.video) {
       peerVideo.poster = 'img/no_profile.jpg';
@@ -442,9 +453,9 @@ Demo.Skylink.on('handshakeProgress', function(state, peerId) {
       stage = 3;
       break;
   }
-  for (var i = 0; i <= stage; i++) {
-    $('#user' + peerId + ' .' + i).css('color', 'green');
-  }
+  // for (var i = 0; i <= stage; i++) {
+  //   $('#user' + peerId + ' .' + i).css('color', 'green');
+  // }
 });
 //---------------------------------------------------
 Demo.Skylink.on('candidateGenerationState', function(state, peerId) {
@@ -762,7 +773,7 @@ Demo.Skylink.init(config, function (error, success) {
     Demo.Skylink.joinRoom(window.demoAppJoinRoomConfig || {
       userData: displayName,
       audio: { stereo: true },
-      video: true,
+      video: videoInputSources[0] && videoInputSources[0].deviceId ? { deviceId : videoInputSources[0].deviceId } : true,
       bandwidth: {
         video: 1024
       }
@@ -895,6 +906,15 @@ $(document).ready(function() {
   //---------------------------------------------------
   $('#stop_stream_btn').click(function() {
     Demo.Skylink.stopStream();
+  });
+  //---------------------------------------------------
+  $('#send_stream_btn').click(function() {
+    Demo.Skylink.sendStream({
+      audio: { stereo: true },
+      video: videoInputSources[1] && videoInputSources[1].deviceId ? {
+        deviceId: videoInputSources[1].deviceId,
+      } : true,
+    });
   });
   //---------------------------------------------------
   $('#enable_video_btn').click(function () {
