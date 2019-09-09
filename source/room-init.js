@@ -449,7 +449,7 @@ Skylink.prototype.init = function(_options, _callback) {
   options.defaultRoom = options.defaultRoom && typeof options.defaultRoom === 'string' ? options.defaultRoom : options.appKey;
 
   // `init({ roomServer: "//server.temasys.io" })`
-  options.roomServer = options.roomServer && typeof options.roomServer === 'string' ? options.roomServer : '//api.temasys.io';
+  options.roomServer = options.roomServer && typeof options.roomServer === 'string' ? options.roomServer : '//beta-api.temasys.io';
 
   // `init({ statsServer: "//server.temasys.io" })`
   options.statsServer = options.statsServer && typeof options.statsServer === 'string' ? options.statsServer : '//api.temasys.io';
