@@ -1552,10 +1552,15 @@ Skylink.prototype.ROOM_SIZE = {
 /**
  * The status of media on the stream.
  * @attribute MEDIA_STATUS
- * @param {number} MUTED - The media is present in the stream and muted
- * @param {number} ACTIVE - The media is present in the stream and active
- * @param {number} UNAVAILABLE - The media is not present in the stream
- * @type {{ACTIVE: number, NO_MEDIA: number, MUTED: number}}
+ * @param {number} MUTED <small>Value <code>0</code></small>
+ * The media is present in the stream and muted
+ * @param {number} ACTIVE <small>Value <code>1</code></small>
+ * The media is present in the stream and active
+ * @param {number} UNAVAILABLE <small>Value <code>-1</code></small>
+ * The media is not present in the stream
+ * @type JSON
+ * @for Skylink
+ * @since 1.0
  */
 Skylink.prototype.MEDIA_STATUS = {
   MUTED: 0,

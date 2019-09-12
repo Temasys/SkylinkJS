@@ -255,7 +255,7 @@ function Skylink() {
    * @param {JSON} <#peerId> The Peer session information.
    * @param {JSON|String} <#peerId>.userData The Peer custom data.
    * @param {JSON} <#peerId>.settings The Peer streaming information.
-   * @param {JSON} <#peerId>.mediaStatus The Peer streaming muted status.
+   * @param {JSON} <#peerId>.mediaStatus The Peer streaming media status.
    * @param {JSON} <#peerId>.agent The Peer agent information.
    * @type JSON
    * @private

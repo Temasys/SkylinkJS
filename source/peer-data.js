@@ -510,7 +510,7 @@ Skylink.prototype.getCurrentDataStreamsSession = function() {
  *   <li><code>settings</code><var><b>{</b>JSON<b>}</b></var><p>The custom Peer settings.
  *   <small>Object signature matches the <code>peerInfo.settings</code> parameter payload received in the
  *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small></p></li>
- *   <li><code>mediaStatus</code><var><b>{</b>JSON<b>}</b></var><p>The custom Peer Stream muted settings.
+ *   <li><code>mediaStatus</code><var><b>{</b>JSON<b>}</b></var><p>The custom Peer Stream media status.
  *   <small>Object signature matches the <code>peerInfo.mediaStatus</code> parameter payload received in the
  *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small></p></li></ul></li></ul>
  * @example

@@ -64,9 +64,9 @@
  *   <small>This value must be between <code>8000</code> to <code>48000</code>.</small>
  *   <small>When not provided, the default browser configuration is used.</small>
  * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
- *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
+ *   <small>Providing the value as <code>false</code> sets <code>peerInfo.mediaStatus.audioMuted</code> to <code>1</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
- *   <code>true</code> and mutes any existing <a href="#method_shareScreen">
+ *   <code>0</code> and mutes any existing <a href="#method_shareScreen">
  *   <code>shareScreen()</code> Stream</a> audio tracks as well.</small>
  * @param {Array} [options.audio.optional] <blockquote class="info">
  *   This property has been deprecated. "optional" constraints has been moved from specs.<br>
@@ -90,9 +90,9 @@
  *    <code>options.video.frameRate</code>, <code>options.video.facingMode</code>.</blockquote>
  *   The video configuration options.
  * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
- *   <small>Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.videoMuted</code>,
- *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
- *   <code>true</code> and mutes any existing <a href="#method_shareScreen">
+ *   <small>Providing the value as <code>false</code> sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
+ *   <code>1</code>, but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
+ *   <code>0</code> and mutes any existing <a href="#method_shareScreen">
  *   <code>shareScreen()</code> Stream</a> video tracks as well.</small>
  * @param {JSON} [options.video.resolution] The video resolution.
  *   <small>By default, <a href="#attr_VIDEO_RESOLUTION"><code>VGA</code></a> resolution option
@@ -792,24 +792,27 @@ Skylink.prototype.stopStream = function (mediaStream) {
  *   <li>Checks if there is any available Streams: <ol><li>If there is no available Streams: <ol>
  *   <li><b>ABORT</b> and return error.</li></ol></li><li>If User is in Room: <ol>
  *   <li>Checks if there is audio tracks to mute / unmute: <ol><li>If there is audio tracks to mute / unmute: <ol>
- *   <li>If <code>options.audioMuted</code> value is not the same as the current
- *   <code>peerInfo.mediaStatus.audioMuted</code>: <small>This can be retrieved with
+ *   <li>If <code>options.audioMuted</code> is <code>false</code> and
+ *   <code>peerInfo.mediaStatus.audioMuted</code> is <code>1</code> or <code>options.audioMuted</code> is <code>true</code> and
+ *   <code>peerInfo.mediaStatus.audioMuted</code> is <code>0</code>: <small>This can be retrieved with
  *   <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a>.</small> <ol>
  *   <li><em>For Peer only</em> <a href="#event_peerUpdated"><code>peerUpdated</code> event</a>
  *   triggers with parameter payload <code>isSelf</code> value as <code>false</code>.</li>
  *   <li><em>For Peer only</em> <a href="#event_streamMuted"><code>streamMuted</code> event</a>
  *   triggers with parameter payload <code>isSelf</code> value as <code>false</code>.</li></ol></li></ol></li></ol></li>
  *   <li>Checks if there is video tracks to mute / unmute: <ol><li>If there is video tracks to mute / unmute: <ol>
- *   <li>If <code>options.videoMuted</code> value is not the same as the current
- *   <code>peerInfo.mediaStatus.videoMuted</code>: <small>This can be retrieved with
+ *   <li>If <code>options.videoMuted</code> is <code>false</code> and
+ *   <code>peerInfo.mediaStatus.videoMuted</code> is <code>1</code> or <code>options.videoMuted</code> is <code>true</code> and
+ *   <code>peerInfo.mediaStatus.videoMuted</code> is <code>0</code>: <small>This can be retrieved with
  *   <a href="#method_getPeerInfo"><code>getPeerInfo()</code> method</a>.</small> <ol>
  *   <li><em>For Peer only</em> <a href="#event_peerUpdated"><code>peerUpdated</code> event</a>
  *   triggers with parameter payload <code>isSelf</code> value as <code>false</code>.</li>
  *   <li><em>For Peer only</em> <a href="#event_streamMuted"><code>streamMuted</code> event</a> triggers with
  *   parameter payload <code>isSelf</code> value as <code>false</code>.</li></ol></li></ol></li></ol></li></ol></li>
- *   <li>If <code>options.audioMuted</code> value is not the same as the current
- *   <code>peerInfo.mediaStatus.audioMuted</code> or <code>options.videoMuted</code> value is not
- *   the same as the current <code>peerInfo.mediaStatus.videoMuted</code>: <ol>
+ *   <li>If <code>options.audioMuted</code> / <code>options.videoMuted</code> is <code>false</code> and
+ *   <code>peerInfo.mediaStatus.audioMuted</code> / <code>peerInfo.mediaStatus.videoMuted</code> is <code>1</code> or
+ *    <code>options.audioMuted</code> / <code>options.videoMuted</code> is <code>true</code> and
+ *   <code>peerInfo.mediaStatus.audioMuted</code> / <code>peerInfo.mediaStatus.videoMuted</code> is <code>0</code>: <ol>
  *   <li><a href="#event_localMediaMuted"><code>localMediaMuted</code> event</a> triggers.</li>
  *   <li>If User is in Room: <ol><li><a href="#event_streamMuted"><code>streamMuted</code> event</a>
  *   triggers with parameter payload <code>isSelf</code> value as <code>true</code>.</li>
@@ -889,10 +892,7 @@ Skylink.prototype.muteStream = function(options) {
     if ((streamTracksAvailability.hasVideo && hasToggledVideo) ||
       (streamTracksAvailability.hasAudio && hasToggledAudio)) {
 
-      self._trigger('localMediaMuted', {
-        audioMuted: streamTracksAvailability.hasAudio ? self._streamsMutedSettings.audioMuted : true,
-        videoMuted: streamTracksAvailability.hasVideo ? self._streamsMutedSettings.videoMuted : true
-      });
+      self._trigger('localMediaMuted', self._streamMediaStatus);
 
       if (self._inRoom) {
         self._trigger('streamMuted', self._user.sid, self.getPeerInfo(), true,
@@ -1777,8 +1777,8 @@ Skylink.prototype._muteStreams = function () {
       hasVideo = true;
     }
 
-    self._streamMediaStatus.audioMuted = hasAudio ? (self._streamsMutedSettings.audioMuted ? self.MEDIA_STATUS.UNAVAILABLE : self.MEDIA_STATUS.ACTIVE) : self.MEDIA_STATUS.UNAVAILABLE;
-    self._streamMediaStatus.videoMuted = hasVideo ? (self._streamsMutedSettings.videoMuted ? self.MEDIA_STATUS.UNAVAILABLE : self.MEDIA_STATUS.ACTIVE) : self.MEDIA_STATUS.UNAVAILABLE;
+    self._streamMediaStatus.audioMuted = hasAudio ? (self._streamsMutedSettings.audioMuted ? self.MEDIA_STATUS.MUTED : self.MEDIA_STATUS.ACTIVE) : self.MEDIA_STATUS.UNAVAILABLE;
+    self._streamMediaStatus.videoMuted = hasVideo ? (self._streamsMutedSettings.videoMuted ? self.MEDIA_STATUS.MUTED : self.MEDIA_STATUS.ACTIVE) : self.MEDIA_STATUS.UNAVAILABLE;
   };
 
   if (self._streams.userMedia && self._streams.userMedia.stream) {
