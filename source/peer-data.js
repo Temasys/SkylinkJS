@@ -160,22 +160,22 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     if (!this._sdpSettings.direction.audio.receive) {
       peerInfo.settings.audio = false;
-      peerInfo.mediaStatus.audioMuted = this.MEDIA_STATUS.UNAVAILABLE;
+      peerInfo.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
 
     if (!this._sdpSettings.direction.video.receive) {
       peerInfo.settings.video = false;
-      peerInfo.mediaStatus.videoMuted = this.MEDIA_STATUS.UNAVAILABLE;
+      peerInfo.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
 
     if (!this._sdpSettings.connection.audio) {
       peerInfo.settings.audio = false;
-      peerInfo.mediaStatus.audioMuted = this.MEDIA_STATUS.UNAVAILABLE;
+      peerInfo.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
 
     if (!this._sdpSettings.connection.video) {
       peerInfo.settings.video = false;
-      peerInfo.mediaStatus.videoMuted = this.MEDIA_STATUS.UNAVAILABLE;
+      peerInfo.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
 
     peerInfo.settings.data = !!(this._dataChannels[peerId] && this._dataChannels[peerId].main &&
@@ -190,12 +190,12 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       if (!(this._sdpSessions[peerId].remote.connection.audio &&
         this._sdpSessions[peerId].remote.connection.audio.indexOf('send') > -1)) {
         peerInfo.settings.audio = false;
-        peerInfo.mediaStatus.audioMuted = this.MEDIA_STATUS.UNAVAILABLE;
+        peerInfo.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
       }
       if (!(this._sdpSessions[peerId].remote.connection.video &&
         this._sdpSessions[peerId].remote.connection.video.indexOf('send') > -1)) {
         peerInfo.settings.video = false;
-        peerInfo.mediaStatus.videoMuted = this.MEDIA_STATUS.UNAVAILABLE;
+        peerInfo.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
       }
       if (!(this._sdpSessions[peerId].remote.connection.data &&
         this._sdpSessions[peerId].remote.connection.data.indexOf('send') > -1)) {
@@ -550,8 +550,8 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
       googleXBandwidth: clone(self._streamsBandwidthSettings.googleX)
     },
     mediaStatus: {
-      audioMuted: this.MEDIA_STATUS.UNAVAILABLE,
-      videoMuted: this.MEDIA_STATUS.UNAVAILABLE,
+      audioMuted: self.MEDIA_STATUS.UNAVAILABLE,
+      videoMuted: self.MEDIA_STATUS.UNAVAILABLE,
     }
   };
 
@@ -601,12 +601,12 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
 
         if (!hasSendAudio) {
           customSettings.settings.audio = false;
-          customSettings.mediaStatus.audioMuted = this.MEDIA_STATUS.UNAVAILABLE;
+          customSettings.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
         }
 
         if (!hasSendVideo) {
           customSettings.settings.video = false;
-          customSettings.mediaStatus.videoMuted = this.MEDIA_STATUS.UNAVAILABLE;
+          customSettings.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
         }
       }
     }
@@ -642,12 +642,12 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
     if (!(self._sdpSessions[usePeerId].local.connection.audio &&
       self._sdpSessions[usePeerId].local.connection.audio.indexOf('send') > -1)) {
       customSettings.settings.audio = false;
-      customSettings.mediaStatus.audioMuted = this.MEDIA_STATUS.UNAVAILABLE;
+      customSettings.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
     if (!(self._sdpSessions[usePeerId].local.connection.video &&
       self._sdpSessions[usePeerId].local.connection.video.indexOf('send') > -1)) {
       customSettings.settings.video = false;
-      customSettings.mediaStatus.videoMuted = this.MEDIA_STATUS.UNAVAILABLE;
+      customSettings.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
     if (!(self._sdpSessions[usePeerId].local.connection.data &&
       self._sdpSessions[usePeerId].local.connection.data.indexOf('send') > -1)) {
@@ -708,12 +708,12 @@ Skylink.prototype._getUserInfo = function(peerId) {
 
   if (!this._getSDPCommonSupports(peerId).video) {
     userInfo.settings.video = false;
-    userInfo.mediaStatus.videoMuted = this.MEDIA_STATUS.UNAVAILABLE;
+    userInfo.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
   }
 
   if (!this._getSDPCommonSupports(peerId).audio) {
     userInfo.settings.audio = false;
-    userInfo.mediaStatus.audioMuted = this.MEDIA_STATUS.UNAVAILABLE;
+    userInfo.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
   }
 
   delete userInfo.agent;

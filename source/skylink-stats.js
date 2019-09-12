@@ -271,7 +271,7 @@ Skylink.prototype._handleBandwidthStats = function (peerId) {
         stream_id: useStream.id,
         id: useStream.tracks.audio.id,
         label: useStream.tracks.audio.label,
-        muted: mediaStatus.audioMuted === this.MEDIA_STATUS.MUTED,
+        muted: mediaStatus.audioMuted === self.MEDIA_STATUS.MUTED,
       }];
     }
 
@@ -283,7 +283,7 @@ Skylink.prototype._handleBandwidthStats = function (peerId) {
         label: useStream.tracks.video.label,
         height: useStream.tracks.video.height,
         width: useStream.tracks.video.width,
-        muted: mediaStatus.videoMuted === this.MEDIA_STATUS.MUTED,
+        muted: mediaStatus.videoMuted === self.MEDIA_STATUS.MUTED,
       }];
     }
   }

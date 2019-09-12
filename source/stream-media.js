@@ -364,13 +364,13 @@ Skylink.prototype._getUserMedia = function (options, callback, fromSendStream) {
         self._streamsMutedSettings.audioMuted = settings.mutedSettings.shouldAudioMuted;
 
         if (options.audio) {
-          self._streamMediaStatus.audioMuted = settings.mutedSettings.shouldAudioMuted ? this.MEDIA_STATUS.MUTED : this.MEDIA_STATUS.ACTIVE;
+          self._streamMediaStatus.audioMuted = settings.mutedSettings.shouldAudioMuted ? self.MEDIA_STATUS.MUTED : self.MEDIA_STATUS.ACTIVE;
         }
 
       settings.mutedSettings.shouldVideoMuted = self._streamsMutedSettings.videoMuted;
 
         if (options.video) {
-          self._streamMediaStatus.videoMuted = settings.mutedSettings.shouldVideoMuted ? this.MEDIA_STATUS.MUTED : this.MEDIA_STATUS.ACTIVE;
+          self._streamMediaStatus.videoMuted = settings.mutedSettings.shouldVideoMuted ? self.MEDIA_STATUS.MUTED : self.MEDIA_STATUS.ACTIVE;
         }
 
       self._onStreamAccessSuccess(stream, settings, false, false, fromSendStream);
@@ -1777,8 +1777,8 @@ Skylink.prototype._muteStreams = function () {
       hasVideo = true;
     }
 
-    self._streamMediaStatus.audioMuted = hasAudio ? (self._streamsMutedSettings.audioMuted ? this.MEDIA_STATUS.UNAVAILABLE : this.MEDIA_STATUS.ACTIVE) : this.MEDIA_STATUS.UNAVAILABLE;
-    self._streamMediaStatus.videoMuted = hasVideo ? (self._streamsMutedSettings.videoMuted ? this.MEDIA_STATUS.UNAVAILABLE : this.MEDIA_STATUS.ACTIVE) : this.MEDIA_STATUS.UNAVAILABLE;
+    self._streamMediaStatus.audioMuted = hasAudio ? (self._streamsMutedSettings.audioMuted ? self.MEDIA_STATUS.UNAVAILABLE : self.MEDIA_STATUS.ACTIVE) : self.MEDIA_STATUS.UNAVAILABLE;
+    self._streamMediaStatus.videoMuted = hasVideo ? (self._streamsMutedSettings.videoMuted ? self.MEDIA_STATUS.UNAVAILABLE : self.MEDIA_STATUS.ACTIVE) : self.MEDIA_STATUS.UNAVAILABLE;
   };
 
   if (self._streams.userMedia && self._streams.userMedia.stream) {
