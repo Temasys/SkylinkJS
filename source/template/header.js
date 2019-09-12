@@ -656,6 +656,19 @@ function Skylink() {
   };
 
   /**
+   * Stores all the Stream media status.
+   * @attribute _streamsMediaStatus
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 1.0.0
+   */
+  this._streamMediaStatus = {
+    audioMuted: this.MEDIA_STATUS.UNAVAILABLE,
+    videoMuted: this.MEDIA_STATUS.UNAVAILABLE,
+  };
+
+  /**
    * Stores all the Stream sending maximum bandwidth settings.
    * @attribute _streamsBandwidthSettings
    * @type JSON

@@ -297,7 +297,6 @@ Skylink.prototype._getUserMedia = function (options, callback, fromSendStream) {
         audio: true,
         video: true
       };
-
     } else {
       var invalidOptionsError = 'Please provide a valid options';
       log.error(invalidOptionsError, options);
@@ -362,13 +361,17 @@ Skylink.prototype._getUserMedia = function (options, callback, fromSendStream) {
     var settings = self._parseStreamSettings(options);
 
     var onSuccessCbFn = function (stream) {
-      if (settings.mutedSettings.shouldAudioMuted) {
-        self._streamsMutedSettings.audioMuted = true;
-      }
+        self._streamsMutedSettings.audioMuted = settings.mutedSettings.shouldAudioMuted;
 
-      if (settings.mutedSettings.shouldVideoMuted) {
-        self._streamsMutedSettings.videoMuted = true;
-      }
+        if (options.audio) {
+          self._streamMediaStatus.audioMuted = settings.mutedSettings.shouldAudioMuted ? this.MEDIA_STATUS.MUTED : this.MEDIA_STATUS.ACTIVE;
+        }
+
+      settings.mutedSettings.shouldVideoMuted = self._streamsMutedSettings.videoMuted;
+
+        if (options.video) {
+          self._streamMediaStatus.videoMuted = settings.mutedSettings.shouldVideoMuted ? this.MEDIA_STATUS.MUTED : this.MEDIA_STATUS.ACTIVE;
+        }
 
       self._onStreamAccessSuccess(stream, settings, false, false, fromSendStream);
     };
@@ -764,7 +767,7 @@ Skylink.prototype.stopStream = function (mediaStream) {
  * @param {JSON} options The Streams muting options.
  * @param {Boolean} [options.audioMuted=true] The flag if all Streams audio
  *   tracks should be muted or not.
- * @param {Boolean} [options.videoMuted=true] The flag if all Strea.ms video
+ * @param {Boolean} [options.videoMuted=true] The flag if all Streams video
  *   tracks should be muted or not.
  * @example
  *   // Example 1: Mute both audio and video tracks in all Streams
@@ -823,14 +826,25 @@ Skylink.prototype.muteStream = function(options) {
     return;
   }
 
+  var getMutedSetting = function(mediaMutedOption) {
+    switch (mediaMutedOption) {
+      case 1:
+        return false;
+      case 0:
+        return true;
+      default:
+        return true;
+    }
+  };
+
   if (!(self._streams.userMedia && self._streams.userMedia.stream) &&
     !(self._streams.screenshare && self._streams.screenshare.stream)) {
     log.warn('No streams are available to mute / unmute!');
     return;
   }
 
-  var audioMuted = typeof options.audioMuted === 'boolean' ? options.audioMuted : true;
-  var videoMuted = typeof options.videoMuted === 'boolean' ? options.videoMuted : true;
+  var audioMuted = typeof options.audioMuted === 'boolean' ? options.audioMuted : typeof options.audioMuted === 'number' ? getMutedSetting(options.audioMuted) : true;
+  var videoMuted = typeof options.videoMuted === 'boolean' ? options.videoMuted : typeof options.videoMuted === 'number' ? getMutedSetting(options.videoMuted) : true;
   var hasToggledAudio = false;
   var hasToggledVideo = false;
 
@@ -847,7 +861,7 @@ Skylink.prototype.muteStream = function(options) {
   if (hasToggledVideo || hasToggledAudio) {
     var streamTracksAvailability = self._muteStreams();
 
-    if (hasToggledVideo && self._inRoom) {
+    if (hasToggledVideo && self._inRoom && streamTracksAvailability.hasVideo) {
       self._sendChannelMessage({
         type: self._SIG_MESSAGE_TYPE.MUTE_VIDEO,
         mid: self._user.sid,
@@ -855,9 +869,10 @@ Skylink.prototype.muteStream = function(options) {
         muted: self._streamsMutedSettings.videoMuted,
         stamp: (new Date()).getTime()
       });
+
     }
 
-    if (hasToggledAudio && self._inRoom) {
+    if (hasToggledAudio && self._inRoom && streamTracksAvailability.hasAudio) {
       setTimeout(function () {
         self._sendChannelMessage({
           type: self._SIG_MESSAGE_TYPE.MUTE_AUDIO,
@@ -868,6 +883,8 @@ Skylink.prototype.muteStream = function(options) {
         });
       }, hasToggledVideo ? 1050 : 0);
     }
+
+    log.debug('Updated Streams muted state ->', self._streamMediaStatus);
 
     if ((streamTracksAvailability.hasVideo && hasToggledVideo) ||
       (streamTracksAvailability.hasAudio && hasToggledAudio)) {
@@ -1759,6 +1776,9 @@ Skylink.prototype._muteStreams = function () {
       videoTracks[v].enabled = !self._streamsMutedSettings.videoMuted;
       hasVideo = true;
     }
+
+    self._streamMediaStatus.audioMuted = hasAudio ? (self._streamsMutedSettings.audioMuted ? this.MEDIA_STATUS.UNAVAILABLE : this.MEDIA_STATUS.ACTIVE) : this.MEDIA_STATUS.UNAVAILABLE;
+    self._streamMediaStatus.videoMuted = hasVideo ? (self._streamsMutedSettings.videoMuted ? this.MEDIA_STATUS.UNAVAILABLE : this.MEDIA_STATUS.ACTIVE) : this.MEDIA_STATUS.UNAVAILABLE;
   };
 
   if (self._streams.userMedia && self._streams.userMedia.stream) {
@@ -1785,7 +1805,7 @@ Skylink.prototype._muteStreams = function () {
     }
   }
 
-  log.debug('Updated Streams muted status ->', self._streamsMutedSettings);
+  log.debug('Updated Streams muted settings ->', self._streamsMutedSettings);
 
   return {
     hasVideo: hasVideo,

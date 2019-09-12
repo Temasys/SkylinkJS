@@ -1548,3 +1548,17 @@ Skylink.prototype.ROOM_SIZE = {
   LARGE: 'large',
   EXTRA_LARGE: 'extraLarge'
 };
+
+/**
+ * The status of media on the stream.
+ * @attribute MEDIA_STATUS
+ * @param {number} MUTED - The media is present in the stream and muted
+ * @param {number} ACTIVE - The media is present in the stream and active
+ * @param {number} UNAVAILABLE - The media is not present in the stream
+ * @type {{ACTIVE: number, NO_MEDIA: number, MUTED: number}}
+ */
+Skylink.prototype.MEDIA_STATUS = {
+  MUTED: 0,
+  ACTIVE: 1,
+  UNAVAILABLE: -1,
+};

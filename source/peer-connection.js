@@ -1652,7 +1652,7 @@ Skylink.prototype._removePeer = function(peerId) {
     peerInfo = clone(this.getPeerInfo(peerId)) || {
       userData: '',
       settings: { audio: false, video: false, data: false },
-      mediaStatus: { audioMuted: true, videoMuted: true },
+      mediaStatus: { audioMuted: this.MEDIA_STATUS.UNAVAILABLE, videoMuted: this.MEDIA_STATUS.UNAVAILABLE },
       agent: {
         name: 'unknown',
         version: 0,
