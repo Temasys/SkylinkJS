@@ -89,10 +89,11 @@ Skylink.prototype.generateUUID = function() {
  *   <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
  *   in sending session descriptions.
  *   <small>This can be useful for debugging purposes to test preferred audio quality and feedback.</small>
- * @param {Boolean} [options.disableREMB=false] <blockquote class="info">
+ * @param {Boolean} [options.disableREMB=true] <blockquote class="info">
  *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
  *   it may cause disruptions in connections or connectivity issues when toggled. </blockquote>
  *   The flag if video REMB feedback packets should be disabled in sending session descriptions.
+ *   By default, it is true for MCU and false for non MCU.
  * @param {JSON} [options.credentials] <blockquote class="info">
  *   Note that we strongly recommend developers to return the <code>options.credentials.duration</code>,
  *   <code>options.credentials.startDateTime</code> and <code>options.defaultRoom</code> and generate the

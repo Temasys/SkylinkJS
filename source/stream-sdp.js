@@ -550,7 +550,8 @@ Skylink.prototype._removeSDPCodecs = function (targetMid, sessionDescription) {
  * @since 0.6.16
  */
 Skylink.prototype._removeSDPREMBPackets = function (targetMid, sessionDescription) {
-  if (!this._initOptions.disableREMB) {
+  //Forcing disableREMB in case of Beta MCU.
+  if (!this._hasMCU) {
     return sessionDescription.sdp;
   }
 
