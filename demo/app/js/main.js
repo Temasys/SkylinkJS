@@ -477,20 +477,20 @@ Demo.Skylink.on("peerRestart", function(peerId, peerInfo, isSelf) {
   if (isSelf) {
     $("#isAudioMuted").css(
         "color",
-        peerInfo.mediaStatus.audioMuted ? "red" : "green"
+        peerInfo.settings.audio ? (peerInfo.mediaStatus.audioMuted === 0 ? "red" : "green") : "grey"
     );
     $("#isVideoMuted").css(
         "color",
-        peerInfo.mediaStatus.videoMuted ? "red" : "green"
+        peerInfo.settings.video ? (peerInfo.mediaStatus.videoMuted === 0 ? "red" : "green") : "grey"
     );
   } else {
     $("#user" + peerId + " .video").css(
         "color",
-        peerInfo.mediaStatus.videoMuted ? "red" : "green"
+        peerInfo.settings.video ? (peerInfo.mediaStatus.videoMuted === 0 ? "red" : "green") : "grey"
     );
     $("#user" + peerId + " .audio").css(
         "color",
-        peerInfo.mediaStatus.audioMuted ? "red" : "green"
+        peerInfo.settings.audio ? (peerInfo.mediaStatus.audioMuted === 0 ? "red" : "green") : "grey"
     );
     $("#user" + peerId + " .name").html(peerInfo.userData);
   }
@@ -544,11 +544,11 @@ Demo.Skylink.on("peerJoined", function(peerId, peerInfo, isSelf) {
     $("#display_user_id").html(peerId);
     $("#isAudioMuted").css(
         "color",
-        peerInfo.mediaStatus.audioMuted ? "red" : "green"
+        peerInfo.settings.audio ? (peerInfo.mediaStatus.audioMuted === 0 ? "red" : "green") : "grey"
     );
     $("#isVideoMuted").css(
         "color",
-        peerInfo.mediaStatus.videoMuted ? "red" : "green"
+        peerInfo.settings.video ? (peerInfo.mediaStatus.videoMuted === 0 ? "red" : "green") : "grey"
     );
     $("#leave_room_btn").show();
     $("#presence_panel").show();
@@ -612,11 +612,11 @@ Demo.Skylink.on("peerJoined", function(peerId, peerInfo, isSelf) {
     $("#user" + peerId + " .0").css("color", "green");
     $("#user" + peerId + " .video").css(
         "color",
-        peerInfo.mediaStatus.videoMuted ? "red" : "green"
+        peerInfo.settings.video ? (peerInfo.mediaStatus.videoMuted === 0 ? "red" : "green") : "grey"
     );
     $("#user" + peerId + " .audio").css(
         "color",
-        peerInfo.mediaStatus.audioMuted ? "red" : "green"
+        peerInfo.settings.audio ? (peerInfo.mediaStatus.audioMuted === 0 ? "red" : "green") : "grey"
     );
   }
 
@@ -673,20 +673,20 @@ Demo.Skylink.on("incomingStream", function(peerId, stream, isSelf, peerInfo) {
   if (isSelf) {
     $("#isAudioMuted").css(
         "color",
-        peerInfo.mediaStatus.audioMuted ? "red" : "green"
+        peerInfo.settings.audio ? (peerInfo.mediaStatus.audioMuted === 0 ? "red" : "green") : "grey"
     );
     $("#isVideoMuted").css(
         "color",
-        peerInfo.mediaStatus.videoMuted ? "red" : "green"
+        peerInfo.settings.video ? (peerInfo.mediaStatus.videoMuted === 0 ? "red" : "green") : "grey"
     );
   } else {
     $("#user" + peerId + " .video").css(
         "color",
-        peerInfo.mediaStatus.videoMuted ? "red" : "green"
+        peerInfo.settings.video ? (peerInfo.mediaStatus.videoMuted === 0 ? "red" : "green") : "grey"
     );
     $("#user" + peerId + " .audio").css(
         "color",
-        peerInfo.mediaStatus.audioMuted ? "red" : "green"
+        peerInfo.settings.audio ? (peerInfo.mediaStatus.audioMuted === 0 ? "red" : "green") : "grey"
     );
     $("#user" + peerId + " .name").html(peerInfo.userData);
   }
@@ -873,20 +873,20 @@ Demo.Skylink.on("peerUpdated", function(peerId, peerInfo, isSelf) {
   if (isSelf) {
     $("#isAudioMuted").css(
         "color",
-        peerInfo.mediaStatus.audioMuted ? "red" : "green"
+        peerInfo.settings.audio ? (peerInfo.mediaStatus.audioMuted === 0 ? "red" : "green") : "grey"
     );
     $("#isVideoMuted").css(
         "color",
-        peerInfo.mediaStatus.videoMuted ? "red" : "green"
+        peerInfo.settings.video ? (peerInfo.mediaStatus.videoMuted === 0 ? "red" : "green") : "grey"
     );
   } else {
     $("#user" + peerId + " .video").css(
         "color",
-        peerInfo.mediaStatus.videoMuted ? "red" : "green"
+        peerInfo.settings.video ? (peerInfo.mediaStatus.videoMuted === 0 ? "red" : "green") : "grey"
     );
     $("#user" + peerId + " .audio").css(
         "color",
-        peerInfo.mediaStatus.audioMuted ? "red" : "green"
+        peerInfo.settings.audio ? (peerInfo.mediaStatus.audioMuted === 0 ? "red" : "green") : "grey"
     );
     $("#user" + peerId + " .name").html(peerInfo.userData);
   }
