@@ -331,11 +331,15 @@ var _eventsDocs = {
    *   The experimental google video streaming bandwidth sent to Peers.
    * @param {Number} [peerInfo.settings.googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
    * @param {Number} [peerInfo.settings.googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
-   * @param {JSON} peerInfo.mediaStatus The Peer Stream muted settings.
-   * @param {Boolean} peerInfo.mediaStatus.audioMuted The flag if Peer Stream audio tracks is muted or not.
-   *   <small>If Peer <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>
-   * @param {Boolean} peerInfo.mediaStatus.videoMuted The flag if Peer Stream video tracks is muted or not.
-   *   <small>If Peer <code>peerInfo.settings.video</code> is false, this will be defined as <code>true</code>.</small>
+   * @param {JSON} peerInfo.mediaStatus The Peer Stream muted status.
+   * @param {Boolean} peerInfo.mediaStatus.audioMuted The value of the audio status.
+   *   <small>If Peer <code>mediaStatus</code> is <code>-1</code>, audio is not present in the stream. If Peer <code>mediaStatus</code> is <code>1</code>, audio is present
+   *   in the stream and active (not muted). If Peer <code>mediaStatus</code> is <code>0</code>, audio is present in the stream and muted.
+   *   </small>
+   * @param {Boolean} peerInfo.mediaStatus.videoMuted The value of the video status.
+   *   <small>If Peer <code>mediaStatus</code> is <code>-1</code>, video is not present in the stream. If Peer <code>mediaStatus</code> is <code>1</code>, video is present
+   *   in the stream and active (not muted). If Peer <code>mediaStatus</code> is <code>0</code>, video is present in the stream and muted.
+   *   </small>
    * @param {JSON} peerInfo.agent The Peer agent information.
    * @param {String} peerInfo.agent.name The Peer agent name.
    *   <small>Data may be accessing browser or non-Web SDK name.</small>
@@ -1251,14 +1255,16 @@ var _eventsDocs = {
    * Event triggered when <a href="#method_muteStream"><code>muteStream()</code> method</a> changes
    * User Streams audio and video tracks muted status.
    * @event localMediaMuted
-   * @param {JSON} mediaStatus The Streams muted settings.
+   * @param {JSON} mediaStatus The Streams media status.
    *   <small>This indicates the muted settings for both
    *   <a href="#method_getUserMedia"><code>getUserMedia()</code> Stream</a> and
    *   <a href="#method_shareScreen"><code>shareScreen()</code> Stream</a>.</small>
-   * @param {Boolean} mediaStatus.audioMuted The flag if all Streams audio tracks is muted or not.
-   *   <small>If User's <code>peerInfo.settings.audio</code> is false, this will be defined as <code>true</code>.</small>
-   * @param {Boolean} mediaStatus.videoMuted The flag if all Streams video tracks is muted or not.
-   *   <small>If User's <code>peerInfo.settings.video</code> is false, this will be defined as <code>true</code>.</small>
+   * @param {Boolean} mediaStatus.audioMuted The value of the audio status.
+   *   <small>If Peer <code>mediaStatus</code> is <code>1</code>, audio is present
+   *   in the stream and active (not muted). If Peer <code>mediaStatus</code> is <code>0</code>, audio is present in the stream and muted.</small>
+   * @param {Boolean} mediaStatus.videoMuted The value of the video status.
+   *   <small>If Peer <code>mediaStatus</code> is <code>1</code>, video is present
+   *   in the stream and active (not muted). If Peer <code>mediaStatus</code> is <code>0</code>, video is present in the stream and muted.</small>
    * @for Skylink
    * @since 0.6.15
    */

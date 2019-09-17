@@ -624,7 +624,7 @@ Skylink.prototype._muteAudioEventHandler = function(message) {
       }
       this._peerMessagesStamps[targetMid].audioMuted = message.stamp;
     }
-    this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted;
+    this._peerInformations[targetMid].mediaStatus.audioMuted = message.muted ? this.MEDIA_STATUS.MUTED : this.MEDIA_STATUS.ACTIVE;
     this._trigger('streamMuted', targetMid, this.getPeerInfo(targetMid), false,
       this._peerInformations[targetMid].settings.video &&
       this._peerInformations[targetMid].settings.video.screenshare);
@@ -654,7 +654,7 @@ Skylink.prototype._muteVideoEventHandler = function(message) {
       }
       this._peerMessagesStamps[targetMid].videoMuted = message.stamp;
     }
-    this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted;
+    this._peerInformations[targetMid].mediaStatus.videoMuted = message.muted ? this.MEDIA_STATUS.MUTED : this.MEDIA_STATUS.ACTIVE;
     this._trigger('streamMuted', targetMid, this.getPeerInfo(targetMid), false,
       this._peerInformations[targetMid].settings.video &&
       this._peerInformations[targetMid].settings.video.screenshare);

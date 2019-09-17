@@ -104,6 +104,7 @@ Skylink.prototype.getUserData = function(peerId) {
  * @since 0.4.0
  */
 Skylink.prototype.getPeerInfo = function(peerId) {
+  var self = this;
   var peerInfo = null;
 
   if (typeof peerId === 'string' && typeof this._peerInformations[peerId] === 'object') {
@@ -111,26 +112,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
     peerInfo.room = clone(this._selectedRoom);
     peerInfo.settings.bandwidth = peerInfo.settings.bandwidth || {};
     peerInfo.settings.googleXBandwidth = peerInfo.settings.googleXBandwidth || {};
-
-    if (!(typeof peerInfo.settings.video === 'boolean' || (peerInfo.settings.video &&
-      typeof peerInfo.settings.video === 'object'))) {
-      peerInfo.settings.video = false;
-      peerInfo.mediaStatus.audioMuted = true;
-    }
-
-    if (!(typeof peerInfo.settings.audio === 'boolean' || (peerInfo.settings.audio &&
-      typeof peerInfo.settings.audio === 'object'))) {
-      peerInfo.settings.audio = false;
-      peerInfo.mediaStatus.audioMuted = true;
-    }
-
-    if (typeof peerInfo.mediaStatus.audioMuted !== 'boolean') {
-      peerInfo.mediaStatus.audioMuted = true;
-    }
-
-    if (typeof peerInfo.mediaStatus.videoMuted !== 'boolean') {
-      peerInfo.mediaStatus.videoMuted = true;
-    }
+    peerInfo.mediaStatus = this._peerInformations[peerId].mediaStatus;
 
     if (peerInfo.settings.maxBandwidth) {
       peerInfo.settings.bandwidth = clone(peerInfo.settings.maxBandwidth);
@@ -178,22 +160,22 @@ Skylink.prototype.getPeerInfo = function(peerId) {
 
     if (!this._sdpSettings.direction.audio.receive) {
       peerInfo.settings.audio = false;
-      peerInfo.mediaStatus.audioMuted = true;
+      peerInfo.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
 
     if (!this._sdpSettings.direction.video.receive) {
       peerInfo.settings.video = false;
-      peerInfo.mediaStatus.videoMuted = true;
+      peerInfo.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
 
     if (!this._sdpSettings.connection.audio) {
       peerInfo.settings.audio = false;
-      peerInfo.mediaStatus.audioMuted = true;
+      peerInfo.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
 
     if (!this._sdpSettings.connection.video) {
       peerInfo.settings.video = false;
-      peerInfo.mediaStatus.videoMuted = true;
+      peerInfo.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
 
     peerInfo.settings.data = !!(this._dataChannels[peerId] && this._dataChannels[peerId].main &&
@@ -208,12 +190,12 @@ Skylink.prototype.getPeerInfo = function(peerId) {
       if (!(this._sdpSessions[peerId].remote.connection.audio &&
         this._sdpSessions[peerId].remote.connection.audio.indexOf('send') > -1)) {
         peerInfo.settings.audio = false;
-        peerInfo.mediaStatus.audioMuted = true;
+        peerInfo.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
       }
       if (!(this._sdpSessions[peerId].remote.connection.video &&
         this._sdpSessions[peerId].remote.connection.video.indexOf('send') > -1)) {
         peerInfo.settings.video = false;
-        peerInfo.mediaStatus.videoMuted = true;
+        peerInfo.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
       }
       if (!(this._sdpSessions[peerId].remote.connection.data &&
         this._sdpSessions[peerId].remote.connection.data.indexOf('send') > -1)) {
@@ -228,7 +210,7 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         audio: false,
         video: false
       },
-      mediaStatus: clone(this._streamsMutedSettings),
+      mediaStatus: self._streamMediaStatus,
       agent: {
         name: AdapterJS.webrtcDetectedBrowser,
         version: AdapterJS.webrtcDetectedVersion,
@@ -284,14 +266,6 @@ Skylink.prototype.getPeerInfo = function(peerId) {
         peerInfo.settings.audio.useinbandfec = this._initOptions.codecParams.audio.opus.useinbandfec;
       }
     }
-  }
-
-  if (!peerInfo.settings.audio) {
-    peerInfo.mediaStatus.audioMuted = true;
-  }
-
-  if (!peerInfo.settings.video) {
-    peerInfo.mediaStatus.videoMuted = true;
   }
 
   if (!peerInfo.settings.audio && !peerInfo.settings.video) {
@@ -536,7 +510,7 @@ Skylink.prototype.getCurrentDataStreamsSession = function() {
  *   <li><code>settings</code><var><b>{</b>JSON<b>}</b></var><p>The custom Peer settings.
  *   <small>Object signature matches the <code>peerInfo.settings</code> parameter payload received in the
  *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small></p></li>
- *   <li><code>mediaStatus</code><var><b>{</b>JSON<b>}</b></var><p>The custom Peer Stream muted settings.
+ *   <li><code>mediaStatus</code><var><b>{</b>JSON<b>}</b></var><p>The custom Peer Stream media status.
  *   <small>Object signature matches the <code>peerInfo.mediaStatus</code> parameter payload received in the
  *   <a href="#event_peerJoined"><code>peerJoined</code> event</a>.</small></p></li></ul></li></ul>
  * @example
@@ -576,8 +550,8 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
       googleXBandwidth: clone(self._streamsBandwidthSettings.googleX)
     },
     mediaStatus: {
-      audioMuted: true,
-      videoMuted: true
+      audioMuted: self.MEDIA_STATUS.UNAVAILABLE,
+      videoMuted: self.MEDIA_STATUS.UNAVAILABLE,
     }
   };
 
@@ -599,13 +573,13 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
         streamId === (self._streams.screenshare.stream.id || self._streams.screenshare.stream.label)) {
         customSettings.settings.audio = clone(self._streams.screenshare.settings.audio);
         customSettings.settings.video = clone(self._streams.screenshare.settings.video);
-        customSettings.mediaStatus = clone(self._streamsMutedSettings);
+        customSettings.mediaStatus = self._streamMediaStatus;
 
       } else if (self._streams.userMedia && self._streams.userMedia.stream &&
         streamId === (self._streams.userMedia.stream.id || self._streams.userMedia.stream.label)) {
         customSettings.settings.audio = clone(self._streams.userMedia.settings.audio);
         customSettings.settings.video = clone(self._streams.userMedia.settings.video);
-        customSettings.mediaStatus = clone(self._streamsMutedSettings);
+        customSettings.mediaStatus = self._streamMediaStatus;
       }
 
       if (typeof self._peerConnections[usePeerId].getSenders === 'function' &&
@@ -627,12 +601,12 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
 
         if (!hasSendAudio) {
           customSettings.settings.audio = false;
-          customSettings.mediaStatus.audioMuted = true;
+          customSettings.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
         }
 
         if (!hasSendVideo) {
           customSettings.settings.video = false;
-          customSettings.mediaStatus.videoMuted = true;
+          customSettings.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
         }
       }
     }
@@ -668,12 +642,12 @@ Skylink.prototype._getPeerCustomSettings = function (peerId) {
     if (!(self._sdpSessions[usePeerId].local.connection.audio &&
       self._sdpSessions[usePeerId].local.connection.audio.indexOf('send') > -1)) {
       customSettings.settings.audio = false;
-      customSettings.mediaStatus.audioMuted = true;
+      customSettings.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
     if (!(self._sdpSessions[usePeerId].local.connection.video &&
       self._sdpSessions[usePeerId].local.connection.video.indexOf('send') > -1)) {
       customSettings.settings.video = false;
-      customSettings.mediaStatus.videoMuted = true;
+      customSettings.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
     }
     if (!(self._sdpSessions[usePeerId].local.connection.data &&
       self._sdpSessions[usePeerId].local.connection.data.indexOf('send') > -1)) {
@@ -734,12 +708,12 @@ Skylink.prototype._getUserInfo = function(peerId) {
 
   if (!this._getSDPCommonSupports(peerId).video) {
     userInfo.settings.video = false;
-    userInfo.mediaStatus.videoMuted = true;
+    userInfo.mediaStatus.videoMuted = self.MEDIA_STATUS.UNAVAILABLE;
   }
 
   if (!this._getSDPCommonSupports(peerId).audio) {
     userInfo.settings.audio = false;
-    userInfo.mediaStatus.audioMuted = true;
+    userInfo.mediaStatus.audioMuted = self.MEDIA_STATUS.UNAVAILABLE;
   }
 
   delete userInfo.agent;

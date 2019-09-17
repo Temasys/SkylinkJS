@@ -260,7 +260,7 @@ Skylink.prototype._handleBandwidthStats = function (peerId) {
   };
 
   var useStream = self._streams.screenshare || self._streams.userMedia || null;
-  var mutedStatus = self.getPeerInfo().mediaStatus;
+  var mediaStatus = self.getPeerInfo().mediaStatus;
 
   // When stream is available, format the stream tracks information.
   // The SDK currently only allows sending of 1 stream at a time that has only 1 audio and video track each.
@@ -271,7 +271,7 @@ Skylink.prototype._handleBandwidthStats = function (peerId) {
         stream_id: useStream.id,
         id: useStream.tracks.audio.id,
         label: useStream.tracks.audio.label,
-        muted: mutedStatus.audioMuted
+        muted: mediaStatus.audioMuted === self.MEDIA_STATUS.MUTED,
       }];
     }
 
@@ -283,7 +283,7 @@ Skylink.prototype._handleBandwidthStats = function (peerId) {
         label: useStream.tracks.video.label,
         height: useStream.tracks.video.height,
         width: useStream.tracks.video.width,
-        muted: mutedStatus.videoMuted
+        muted: mediaStatus.videoMuted === self.MEDIA_STATUS.MUTED,
       }];
     }
   }
