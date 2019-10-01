@@ -1,8 +1,7 @@
 /**
  * <blockquote class="info">
  *   Note that Edge browser does not support renegotiation.
- *   For MCU enabled Peer connections with <code>options.mcuUseRenegoRestart</code> set to <code>false</code>
- *   in the <a href="#method_init"><code>init()</code> method</a>, the restart functionality may differ, you
+ *   For MCU enabled Peer connections, the restart functionality may differ, you
  *   may learn more about how to workaround it
  *   <a href="http://support.temasys.io/support/discussions/topics/12000002853">in this article here</a>.
  *   For restarts with Peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in
@@ -21,8 +20,7 @@
  * - When provided as an Array, it will refresh all connections with all the Peer IDs provided.
  * - When not provided, it will refresh all the currently connected Peers in the Room.
  * @param {Boolean} [iceRestart=false] <blockquote class="info">
- *   Note that this flag will not be honoured for MCU enabled Peer connections where
- *   <code>options.mcuUseRenegoRestart</code> flag is set to <code>false</code> as it is not necessary since for MCU
+ *   Note that this flag will not be honoured for MCU enabled Peer connections as it is not necessary since for MCU
  *   "restart" case is to invoke <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again, or that it is
  *   not supported by the MCU.</blockquote>
  *   The flag if ICE connections should restart when refreshing Peer connections.
@@ -72,25 +70,22 @@
  *   <small>Object signature follows <a href="#method_getPeersCustomSettings"><code>getPeersCustomSettings</code>
  *   method</a> returned per <code>#peerId</code> object.</small>
  * @trigger <ol class="desc-seq">
- *   <li>Checks if MCU is enabled for App Key provided in <a href="#method_init"><code>init()</code> method</a><ol>
- *   <li>If MCU is enabled: <ol><li>If there are connected Peers in the Room: <ol>
+ *   <li>Checks if MCU is enabled for App Key provided in <a href="#method_init"><code>init()</code> method</a>
+ *   <ol><li>If MCU is enabled:<ol><li>If there are connected Peers in the Room:<ol>
  *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
  *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all connected Peer connections.</li>
  *   <li><a href="#event_serverPeerRestart"><code>serverPeerRestart</code> event</a> triggers for
- *   connected MCU server Peer connection.</li></ol></li>
- *   <li>If <code>options.mcuUseRenegoRestart</code> value is <code>false</code> set in the
- *   <a href="#method_init"><code>init()</code> method</a>: <ol><li>
- *   Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>
+ *   connected MCU server Peer connection.</li>
+ *   <li>Invokes <a href="#method_joinRoom"><code>joinRoom()</code> method</a> <small><code>refreshConnection()</code>
  *   will retain the User session information except the Peer ID will be a different assigned ID due to restarting the
- *   Room session.</small> <ol><li>If request has errors <ol><li><b>ABORT</b> and return error.
- *   </li></ol></li></ol></li></ol></li></ol></li>
- *   <li>Else: <ol><li>If there are connected Peers in the Room: <ol>
- *   <li>Refresh connections for all targeted Peers. <ol>
- *   <li>If Peer connection exists: <ol>
- *   <li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
+ *   Room session.</small></li>
+ *   </ol></li><li>If request has errors<ol><li><b>ABORT</b> and return error.</li></ol></li></ol>
+ *   <li>Else: If there are connected Peers in the Room:
+ *   <ol><li>Refresh connections for all targeted Peers.
+ *   <ol><li>If Peer connection exists:
+ *   <ol><li><a href="#event_peerRestart"><code>peerRestart</code> event</a> triggers parameter payload
  *   <code>isSelfInitiateRestart</code> value as <code>true</code> for all targeted Peer connections.</li></ol></li>
- *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li>
- *   </ol></li></ol></li></ol></ol></li></ol></li></ol>
+ *   <li>Else: <ol><li><b>ABORT</b> and return error.</li></ol></li></ol></li></ol></li></li></ol></li></ol>
  * @example
  *   // Example 1: Refreshing a Peer connection
  *   function refreshFrozenVideoStream (peerId) {
@@ -202,7 +197,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, options
     }
   };
 
-  if (listOfPeers.length === 0 && !(self._hasMCU && !self._initOptions.mcuUseRenegoRestart)) {
+  if (listOfPeers.length === 0 && !self._hasMCU) {
     emitErrorForPeersFn('There is currently no peer connections to restart');
     return;
   }
@@ -213,7 +208,7 @@ Skylink.prototype.refreshConnection = function(targetPeerId, iceRestart, options
   }
 
   self._throttle(function (runFn) {
-    if (!runFn && self._hasMCU && !self._initOptions.mcuUseRenegoRestart) {
+    if (!runFn && self._hasMCU) {
       if (self._initOptions.throttlingShouldThrowError) {
         emitErrorForPeersFn('Unable to run as throttle interval has not reached (' + self._initOptions.throttleIntervals.refreshConnection + 'ms).');
       }
@@ -2123,45 +2118,6 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
   var self = this;
   var listOfPeers = Object.keys(self._peerConnections);
   var listOfPeerRestartErrors = {};
-  var sendRestartMsgFn = function (peerId) {
-    var restartMsg = {
-      type: self._SIG_MESSAGE_TYPE.RESTART,
-      mid: self._user.sid,
-      rid: self._room.id,
-      agent: AdapterJS.webrtcDetectedBrowser,
-      version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
-      os: window.navigator.platform,
-      userInfo: self._getUserInfo(peerId),
-      target: peerId,
-      weight: self._peerPriorityWeight,
-      receiveOnly: self.getPeerInfo().config.receiveOnly,
-      enableIceTrickle: self._initOptions.enableIceTrickle,
-      enableDataChannel: self._initOptions.enableDataChannel,
-      enableIceRestart: self._enableIceRestart,
-      doIceRestart: self._initOptions.mcuUseRenegoRestart && doIceRestart === true &&
-        self._enableIceRestart && self._peerInformations[peerId] &&
-        self._peerInformations[peerId].config.enableIceRestart,
-      isRestartResend: false,
-      temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-      SMProtocolVersion: self.SM_PROTOCOL_VERSION,
-      DTProtocolVersion: self.DT_PROTOCOL_VERSION
-    };
-
-    if (self._publishOnly) {
-      restartMsg.publishOnly = {
-        type: self._streams.screenshare && self._streams.screenshare.stream ? 'screenshare' : 'video'
-      };
-    }
-
-    if (self._parentId) {
-      restartMsg.parentId = self._parentId;
-    }
-
-    log.log([peerId, 'RTCPeerConnection', null, 'Sending restart message to signaling server ->'], restartMsg);
-
-    self._sendChannelMessage(restartMsg);
-    self._handleNegotiationStats('restart', peerId, restartMsg, false);
-  };
 
   // Toggle the main bandwidth options.
   if (bwOptions.bandwidth && typeof bwOptions.bandwidth === 'object') {
@@ -2195,67 +2151,56 @@ Skylink.prototype._restartMCUConnection = function(callback, doIceRestart, bwOpt
 
     if (listOfPeers[i] !== 'MCU') {
       self._trigger('peerRestart', listOfPeers[i], self.getPeerInfo(listOfPeers[i]), true, false);
-
-      if (!self._initOptions.mcuUseRenegoRestart) {
-        sendRestartMsgFn(listOfPeers[i]);
-      }
     }
   }
 
   self._trigger('serverPeerRestart', 'MCU', self.SERVER_PEER_TYPE.MCU);
 
-  if (self._initOptions.mcuUseRenegoRestart) {
-    self._peerEndOfCandidatesCounter.MCU = self._peerEndOfCandidatesCounter.MCU || {};
-    self._peerEndOfCandidatesCounter.MCU.len = 0;
-    sendRestartMsgFn('MCU');
-  } else {
-    // Restart with MCU = peer leaves then rejoins room
-    var peerJoinedFn = function (peerId, peerInfo, isSelf) {
-      log.log([null, 'PeerConnection', null, 'Invoked all peers to restart with MCU. Firing callback']);
+  // Restart with MCU = peer leaves then rejoins room
+  var peerJoinedFn = function (peerId, peerInfo, isSelf) {
+    log.log([null, 'PeerConnection', null, 'Invoked all peers to restart with MCU. Firing callback']);
 
-      if (typeof callback === 'function') {
-        if (Object.keys(listOfPeerRestartErrors).length > 0) {
-          callback({
-            refreshErrors: listOfPeerRestartErrors,
-            listOfPeers: listOfPeers
-          }, null);
-        } else {
-          callback(null, {
-            listOfPeers: listOfPeers
-          });
-        }
-      }
-    };
-
-    self.once('peerJoined', peerJoinedFn, function (peerId, peerInfo, isSelf) {
-      return isSelf;
-    });
-
-    self.leaveRoom(false, function (error, success) {
-      if (error) {
-        if (typeof callback === 'function') {
-          for (var i = 0; i < listOfPeers.length; i++) {
-            listOfPeerRestartErrors[listOfPeers[i]] = error;
-          }
-          callback({
-            refreshErrors: listOfPeerRestartErrors,
-            listOfPeers: listOfPeers
-          }, null);
-        }
+    if (typeof callback === 'function') {
+      if (Object.keys(listOfPeerRestartErrors).length > 0) {
+        callback({
+          refreshErrors: listOfPeerRestartErrors,
+          listOfPeers: listOfPeers
+        }, null);
       } else {
-        //self._trigger('serverPeerLeft', 'MCU', self.SERVER_PEER_TYPE.MCU);
-        self.joinRoom(self._selectedRoom, {
-          bandwidth: bwOptions.bandwidth || {},
-          googleXBandwidth: bwOptions.googleXBandwidth || {},
-          sdpSettings: clone(self._sdpSettings),
-          voiceActivityDetection: self._voiceActivityDetection,
-          publishOnly: !!self._publishOnly,
-          parentId: self._parentId || null,
-          autoBandwidthAdjustment: self._bandwidthAdjuster
+        callback(null, {
+          listOfPeers: listOfPeers
         });
       }
-    });
-  }
+    }
+  };
+
+  self.once('peerJoined', peerJoinedFn, function (peerId, peerInfo, isSelf) {
+    return isSelf;
+  });
+
+  self.leaveRoom(false, function (error, success) {
+    if (error) {
+      if (typeof callback === 'function') {
+        for (var i = 0; i < listOfPeers.length; i++) {
+          listOfPeerRestartErrors[listOfPeers[i]] = error;
+        }
+        callback({
+          refreshErrors: listOfPeerRestartErrors,
+          listOfPeers: listOfPeers
+        }, null);
+      }
+    } else {
+      self.joinRoom(self._selectedRoom, {
+        bandwidth: bwOptions.bandwidth || {},
+        googleXBandwidth: bwOptions.googleXBandwidth || {},
+        sdpSettings: clone(self._sdpSettings),
+        voiceActivityDetection: self._voiceActivityDetection,
+        publishOnly: !!self._publishOnly,
+        parentId: self._parentId || null,
+        autoBandwidthAdjustment: self._bandwidthAdjuster
+      });
+    }
+  });
 };
 
 /**

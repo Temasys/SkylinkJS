@@ -1156,7 +1156,7 @@ Skylink.prototype._enterHandler = function(message) {
 Skylink.prototype._restartHandler = function(message){
   var self = this;
 
-  // cxurrent browser is FF and peer browser is Chrome or vice versa
+  // current browser is FF and peer browser is Chrome or vice versa
   if (message.restartScreenshare) {
     self.leaveRoom(false, function (error, success) {
       if (error) {
@@ -1233,13 +1233,6 @@ Skylink.prototype._restartHandler = function(message){
     (self._hasMCU && self._publishOnly) || (message.parentId && self._user && self._user.sid &&
     message.parentId === self._user.sid))) {
     log.warn([targetMid, 'RTCPeerConnection', null, 'Discarding "restart" for parentId or publishOnly case ->'], message);
-    return;
-  }
-
-  if (self._hasMCU && !self._initOptions.mcuUseRenegoRestart) {
-    log.warn([targetMid, 'RTCPeerConnection', null, 'Dropping restart request as MCU does not support re-negotiation. ' +
-      'Restart workaround is to re-join Room for Peer.']);
-    self._trigger('peerRestart', targetMid, self.getPeerInfo(targetMid), false, false);
     return;
   }
 

@@ -178,20 +178,13 @@ Skylink.prototype.generateUUID = function() {
  * @param {Number} [options.throttleIntervals.getUserMedia=0] The interval timeout for
  *   <a href="#method_getUserMedia"><code>getUserMedia()</code> method</a> throttling in milliseconds.
  * @param {Number} [options.throttleIntervals.refreshConnection=5000] <blockquote class="info">
- *   Note that this throttling is only done for MCU enabled Peer connections with the
- *   <code>options.mcuUseRenegoRestart</code> being set to <code>false</code>.
+ *   Note that this throttling is only done for MCU enabled Peer connections.
  *   </blockquote> The interval timeout for <a href="#method_refreshConnection">
  *   <code>refreshConnection()</code> method</a> throttling in milliseconds.
  *   <small>Note that there will be no throttling when <a href="#method_refreshConnection">
  *   <code>refreshConnection()</code> method</a> is called internally.</small>
  * @param {Boolean} [options.throttleShouldThrowError=false] The flag if throttled methods should throw errors when
  *   method is invoked less than the interval timeout value configured in <code>options.throttleIntervals</code>.
- * @param {Boolean} [options.mcuUseRenegoRestart=false] <blockquote class="info">
- *   Note that this feature is currently is beta and for any enquiries on enabling and its support, please
- *   contact <a href="http://support.temasys.io">our support portal</a>.</blockquote>
- *   The flag if <a href="#method_refreshConnection"><code>
- *   refreshConnection()</code> method</a> should renegotiate like non-MCU enabled Peer connection for MCU
- *   enabled Peer connections instead of invoking <a href="#method_joinRoom"><code>joinRoom()</code> method</a> again.
  * @param {String|Array} [options.iceServer] The ICE servers for debugging purposes to use.
  *   - When defined as string, the value is considered as <code>[options.iceServer]</code>.
  *   <small>Note that this is a debugging feature and is only used when instructed for debugging purposes.</small>
@@ -345,7 +338,6 @@ Skylink.prototype.generateUUID = function() {
  * @param {JSON} callback.success.filterCandidatesType The configured value of the <code>options.filterCandidatesType</code>.
  * @param {JSON} callback.success.throttleIntervals The configured value of the <code>options.throttleIntervals</code>.
  * @param {Boolean} callback.success.throttleShouldThrowError The configured value of the <code>options.throttleShouldThrowError</code>.
- * @param {JSON} callback.success.mcuUseRenegoRestart The configured value of the <code>options.mcuUseRenegoRestart</code>.
  * @param {JSON} callback.success.iceServer The configured value of the <code>options.iceServer</code>.
  *   <small>See the <code>.urls</code> property in this object for configured value if defined.</small>
  * @param {JSON|String} callback.success.socketServer The configured value of the <code>options.socketServer</code>.
@@ -495,9 +487,6 @@ Skylink.prototype.init = function(_options, _callback) {
 
   // `init({ throttleShouldThrowError: false })`
   options.throttleShouldThrowError = options.throttleShouldThrowError === true;
-
-  // `init({ mcuUseRenegoRestart: false })`
-  options.mcuUseRenegoRestart = options.mcuUseRenegoRestart === true;
 
   // `init({ useEdgeWebRTC: false })`
   options.useEdgeWebRTC = options.useEdgeWebRTC === true;
