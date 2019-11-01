@@ -859,6 +859,7 @@ Skylink.prototype._requestServerInfo = function(method, url, callback, params) {
       if(!self._socketUseXDR) {
         xhr.setRequestHeader('Skylink_SDK_version', self.VERSION);
         xhr.setRequestHeader('Skylink_SDK_type', 'WEB_SDK');
+        xhr.setRequestHeader('Skylink_API_version', self.API_VERSION);
       }
 
       if (params) {
