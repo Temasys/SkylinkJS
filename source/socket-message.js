@@ -522,6 +522,7 @@ Skylink.prototype._approachEventHandler = function(message){
 
   if (self._hasMCU) {
     enterMsg.target = 'MCU';
+    enterMsg.publisherId = self._user.sid;
   }
 
   self._sendChannelMessage(enterMsg);
@@ -915,6 +916,7 @@ Skylink.prototype._inRoomHandler = function(message) {
 
   if (self._hasMCU) {
     enterMsg.target = 'MCU';
+    enterMsg.publisherId = self._user.sid;
   }
 
   self._sendChannelMessage(enterMsg);
