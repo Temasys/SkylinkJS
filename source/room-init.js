@@ -472,6 +472,7 @@ Skylink.prototype.init = function(_options, _callback) {
   // `init({ forceSSL: true })`
   options.forceSSL = options.forceSSL !== false;
 
+  // `init({ socketServerPath: '' })`
   options._signalingServerPath = options.socketServerPath || '';
 
   // `init({ enableStatsGathering: true })`
