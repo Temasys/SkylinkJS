@@ -216,6 +216,7 @@ Skylink.prototype._createSocket = function (type, joinRoomTimestamp) {
     timeout: self._initOptions.socketTimeout,
     reconnectionAttempts: 2,
     reconnectionDelayMax: 5000,
+    path: self._initOptions._signalingServerPath,
     reconnectionDelay: 1000,
     transports: ['websocket'],
     query: { // ESS-1038: Adding custom headers to signaling

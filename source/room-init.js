@@ -472,6 +472,8 @@ Skylink.prototype.init = function(_options, _callback) {
   // `init({ forceSSL: true })`
   options.forceSSL = options.forceSSL !== false;
 
+  options._signalingServerPath = options.socketServerPath || '';
+
   // `init({ enableStatsGathering: true })`
   options.enableStatsGathering = options.enableStatsGathering !== false;
 
@@ -934,7 +936,8 @@ Skylink.prototype._parseInfo = function(info) {
   this._isPrivileged = info.isPrivileged;
   this._autoIntroduce = info.autoIntroduce;
   this._hasMCU = info.hasMCU;
-
+  this._signalingServerPath = info.ipSigserverPath || '';
+  this._initOptions._signalingServerPath = (this._initOptions._signalingServerPath === '') ? this._signalingServerPath : this._initOptions._signalingServerPath;
   if(!info.enable_stats_config){
     this._initOptions.enableStatsGathering = false;
   }
