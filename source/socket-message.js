@@ -867,6 +867,18 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._peerPriorityWeight = message.tieBreaker + (self._initOptions.priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.AUTO ?
     0 : (self._initOptions.priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.ENFORCE_OFFERER ? 2e+15 : -(2e+15)));
 
+  var updateUserSid = function () {
+    var peerId = message.sid;
+    self._peerMedias[peerId] = Object.assign({}, self._peerMedias['self']);
+    delete self._peerMedias['self'];
+    var mediaIds = Object.keys(self._peerMedias[peerId]);
+    for (var i = 0; i < mediaIds.length; i++) {
+      self._peerMedias[peerId][mediaIds[i]].publisherId = peerId;
+    }
+  };
+
+  updateUserSid();
+
   self._handleSessionStats(message);
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
