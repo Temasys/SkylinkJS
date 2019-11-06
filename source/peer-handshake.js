@@ -351,14 +351,55 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
-      userInfo: self._getUserInfo(targetMid)
+      userInfo: self._getUserInfo(targetMid),
     };
 
     pc.processingLocalSDP = messageToSend.type === self.HANDSHAKE_PROGRESS.OFFER;
 
+    var updateTransceiverMidFromLocalSDP = function () {
+      var mediaMids = self._getTransceiverMid(sessionDescription);
+      var mediaIds = Object.keys(self._peerMedias[self._user.sid]);
+      var audioMids = mediaMids.audio;
+      var videoMids = mediaMids.video;
+
+      for (var i = 0; i < mediaIds.length; i++) {
+        var mediaInfo = self._peerMedias[self._user.sid][mediaIds[i]];
+
+        for (var a = 0; a < audioMids.length; a++) {
+          if (audioMids[a].streamId === mediaInfo.streamId && (audioMids[a].direction === 'sendonly' || audioMids[a].direction === 'sendrecv')) {
+            mediaInfo.transceiverMid = audioMids[a].transceiverMid;
+            break;
+          }
+        }
+
+        for (var v = 0; v < videoMids.length; v++) {
+          if (videoMids[v].streamId === mediaInfo.streamId && (videoMids[v].direction === 'sendonly' || videoMids[v].direction === 'sendrecv')) {
+            mediaInfo.transceiverMid = videoMids[v].transceiverMid;
+            break;
+          }
+        }
+      }
+    };
+
+    var getMediaInfoList = function () {
+      var mediaInfoList = [];
+      var peerMedia = clone(self._peerMedias[self._user.sid]);
+      var mediaIds = Object.keys(peerMedia);
+      for (var i = 0; i < mediaIds.length; i++) {
+        delete peerMedia[mediaIds[i]].streamId;
+        delete peerMedia[mediaIds[i]].trackId;
+        mediaInfoList.push(peerMedia[mediaIds[i]]);
+      }
+
+      return mediaInfoList;
+    };
+
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER) {
       messageToSend.weight = self._peerPriorityWeight;
     }
+
+    updateTransceiverMidFromLocalSDP();
+    messageToSend.mediaInfoList = getMediaInfoList();
 
     // Merging Restart and Offer messages. The already present keys in offer message will not be overwritten.
     // Only news keys from mergeMessage are added.
@@ -392,8 +433,6 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   } else {
     pc.setLocalDescription(new RTCSessionDescription(sessionDescription), onSuccessCbFn, onErrorCbFn);
   }
-
-
 };
 
 Skylink.prototype.renegotiateIfNeeded = function (peerId) {
