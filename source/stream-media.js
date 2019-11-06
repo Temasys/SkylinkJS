@@ -2290,6 +2290,32 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   self._parseStreamTracksInfo(isScreenSharing ? 'screenshare' : 'userMedia', function () {
   	self._trigger('mediaAccessSuccess', stream, !!isScreenSharing, !!isAudioFallback, streamId);
   });
+
+  // build peerMedia
+  var processPeerMedia = function () {
+    var tracks = stream.getTracks();
+    var peerMedia = self._peerMedias['self'] || {};
+
+    for (var i = 0; i < tracks.length; i++) {
+      var mediaId = (tracks[i].kind === self.TRACK_KIND.AUDIO ? 'AUDIO' : 'VIDEO') + '_' + stream.id;
+      var mediaState = tracks[i].readyState === self.TRACK_READY_STATE.ENDED ? self.MEDIA_STATE.UNAVAILABLE : (tracks[i].muted ? self.MEDIA_STATE.MUTED : self.MEDIA_STATE.ACTIVE);
+      peerMedia[mediaId] = {
+        publisherId: null,
+        mediaId: mediaId,
+        mediaType: tracks[i].kind === self.TRACK_KIND.AUDIO ? self.MEDIA_TYPE.AUDIO_MIC : (isScreenSharing ? self.MEDIA_TYPE.VIDEO_SCREEN : self.MEDIA_TYPE.VIDEO_CAMERA),
+        mediaState: mediaState,
+        transceiverMid: null,
+        streamId: stream.id,
+        trackId: tracks[i].id,
+        mediaMetaData: '',
+        simulcast: '',
+      };
+
+      self._peerMedias['self'] = peerMedia;
+    }
+
+  };
+  processPeerMedia();
 };
 
 /**
