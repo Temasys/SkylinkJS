@@ -774,6 +774,16 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
 Skylink.prototype.VERSION = '@@version';
 
 /**
+ * Contains the current API_VERSION of Skylink platform.
+ * @attribute API_VERSION
+ * @type String
+ * @readOnly
+ * @for Skylink
+ * @since 1.0.1
+ */
+Skylink.prototype.API_VERSION = '9.0.0';
+
+/**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
  * @attribute READY_STATE_CHANGE
  * @param {Number} INIT      <small>Value <code>0</code></small>
