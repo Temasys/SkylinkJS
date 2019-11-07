@@ -1502,6 +1502,33 @@ Skylink.prototype._offerHandler = function(message) {
     self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
+  // build remote peer media
+  var setPeerMedia = function () {
+    var clonedPeerMedia = clone(self._peerMedias[targetMid]) || {};
+    var mediaInfoList = message.mediaInfoList;
+
+    // reset peer medias to empty obj
+    self._peerMedias[targetMid] = {};
+
+    for (var i = 0; i < mediaInfoList.length; i++) {
+      var mediaInfo = mediaInfoList[i];
+
+      if (targetMid !== mediaInfo.publisherId) {
+        console.error(targetMid, mediaInfo.publisherId);
+      }
+
+      self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId] = mediaInfo;
+
+      // if peerMedia has previous state - offer is due to renegotiation
+      if (clonedPeerMedia[mediaInfo.mediaId]) {
+        self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId].streamId = (mediaInfo.transceiverMid === clonedPeerMedia[mediaInfo.mediaId].transceiverMid) ? clonedPeerMedia[mediaInfo.mediaId].streamId : '';
+        self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId].trackId = (mediaInfo.transceiverMid === clonedPeerMedia[mediaInfo.mediaId].transceiverMid) ? clonedPeerMedia[mediaInfo.mediaId].trackId : '';
+      }
+    }
+  };
+
+  setPeerMedia();
+
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Session description object created'], offer);
 
   // offer.sdp = self._removeSDPFilteredCandidates(targetMid, offer);
@@ -1748,6 +1775,33 @@ Skylink.prototype._answerHandler = function(message) {
     self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus || {};
     self._peerInformations[targetMid].userData = userInfo.userData;
   }
+
+  // build remote peer media
+  var setPeerMedia = function () {
+    var clonedPeerMedia = clone(self._peerMedias[targetMid]) || {};
+    var mediaInfoList = message.mediaInfoList;
+
+    // reset peer medias to empty obj
+    self._peerMedias[targetMid] = {};
+
+    for (var i = 0; i < mediaInfoList.length; i++) {
+      var mediaInfo = mediaInfoList[i];
+
+      if (targetMid !== mediaInfo.publisherId) {
+        console.error(targetMid, mediaInfo.publisherId);
+      }
+
+      self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId] = mediaInfo;
+
+      // if peerMedia has previous state - offer is due to renegotiation
+      if (clonedPeerMedia[mediaInfo.mediaId]) {
+        self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId].streamId = (mediaInfo.transceiverMid === clonedPeerMedia[mediaInfo.mediaId].transceiverMid) ? clonedPeerMedia[mediaInfo.mediaId].streamId : '';
+        self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId].trackId = (mediaInfo.transceiverMid === clonedPeerMedia[mediaInfo.mediaId].transceiverMid) ? clonedPeerMedia[mediaInfo.mediaId].trackId : '';
+      }
+    }
+  };
+
+  setPeerMedia();
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Session description object created'], answer);
 

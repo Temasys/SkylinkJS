@@ -1912,13 +1912,35 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasStream = true;
     pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
 
+    var processStreamForMediaInfo = function (transceiverMid, stream) {
+      var isScreensharing = false;
+      var isMatch = false;
+      var mediaIds = Object.keys(self._peerMedias[targetMid]);
+      var peerMedia = self._peerMedias[targetMid];
+      for (var i = 0; i < mediaIds.length; i++) {
+        if (peerMedia[mediaIds[i]].transceiverMid === transceiverMid) {
+          isMatch = true;
+          isScreensharing = peerMedia[mediaIds[i]].mediaType === self.MEDIA_TYPE.VIDEO_SCREEN;
+          peerMedia[mediaIds[i]].streamId = stream.id;
+        }
+      }
+
+      if (!isMatch) {
+        log.error([targetMid, 'RTCPeerConnection', null, 'TransceiverMid of track on ontrack event does not match any transceiverMid in peerMedias mediaInfo.']);
+      }
+
+      return isScreensharing;
+    };
+
+    var isScreensharing = processStreamForMediaInfo(transceiverMid, stream);
+
     rtcTrackEvent.track.onunmute = function() {
-      self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, !!pc.hasScreen);
+      self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, isScreensharing);
     };
 
     // Safari tracks come in as muted=false
     if (!rtcTrackEvent.track.muted){
-      self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, !!pc.hasScreen);
+      self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, isScreensharing);
     }
   };
 

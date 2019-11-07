@@ -366,14 +366,15 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
         var mediaInfo = self._peerMedias[self._user.sid][mediaIds[i]];
 
         for (var a = 0; a < audioMids.length; a++) {
-          if (audioMids[a].streamId === mediaInfo.streamId && (audioMids[a].direction === 'sendonly' || audioMids[a].direction === 'sendrecv')) {
+          // TODO: change to match just streamId once splitting of gUM (multi track) is implemented
+          if (audioMids[a].streamId === mediaInfo.streamId && (mediaInfo.mediaType === self.MEDIA_TYPE.AUDIO_MIC || mediaInfo.mediaType === self.MEDIA_TYPE.AUDIO) && (audioMids[a].direction === 'sendonly' || audioMids[a].direction === 'sendrecv')) {
             mediaInfo.transceiverMid = audioMids[a].transceiverMid;
             break;
           }
         }
 
         for (var v = 0; v < videoMids.length; v++) {
-          if (videoMids[v].streamId === mediaInfo.streamId && (videoMids[v].direction === 'sendonly' || videoMids[v].direction === 'sendrecv')) {
+          if (videoMids[v].streamId === mediaInfo.streamId && !(mediaInfo.mediaType === self.MEDIA_TYPE.AUDIO_MIC || mediaInfo.mediaType === self.MEDIA_TYPE.AUDIO) && (videoMids[v].direction === 'sendonly' || videoMids[v].direction === 'sendrecv')) {
             mediaInfo.transceiverMid = videoMids[v].transceiverMid;
             break;
           }

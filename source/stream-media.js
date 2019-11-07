@@ -2396,20 +2396,20 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
       if (track.enabled && !track.muted) {
         audioTrack = track;
       }
-    })
+    });
 
     stream.getVideoTracks().forEach(function(track) {
       if (track.enabled && !track.muted) {
         videoTrack = track;
       }
-    })
+    });
 
     if (audioTrack && videoTrack) {
       return new MediaStream([audioTrack, videoTrack]);
     }
 
     return null;
-  }
+  };
 
   var newStream = stream;
   if (stream.getTracks().length > 2) {
