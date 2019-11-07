@@ -1487,12 +1487,6 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
-    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
-      pc.localDescription);
-    return;
-  }*/
-
   // Add-on by Web SDK fixes
   if (message.userInfo && typeof message.userInfo === 'object') {
     var userInfo = message.userInfo || {};
@@ -1805,18 +1799,6 @@ Skylink.prototype._answerHandler = function(message) {
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Session description object created'], answer);
 
-  /*if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
-    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
-      pc.remoteDescription);
-    return;
-  }
-
-  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-    log.error([targetMid, null, message.type, 'Unable to set peer connection ' +
-      'at signalingState "stable". Ignoring remote answer'], pc.signalingState);
-    return;
-  }*/
-
   answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
   answer.sdp = self._setSDPCodec(targetMid, answer);
   answer.sdp = self._setSDPBitrate(targetMid, answer);
@@ -1832,20 +1814,6 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
-
-  /*
-    Removeing this below if condition in favor of this ticket: https://jira.temasys.com.sg/browse/ESS-1632
-  */
-  // This should be the state after offer is received. or even after negotiation is successful
-  // if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
-  //   log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
-  //     '"have-local-offer" state for re-negotiation. Dropping message.'], {
-  //       signalingState: pc.signalingState,
-  //       isRestart: !!message.restart
-  //     });
-  //   self._handleNegotiationStats('dropped_answer', targetMid, answer, true, 'Peer connection state is "' + pc.signalingState + '"');
-  //   return;
-  // }
 
   // Added checks if there is a current remote sessionDescription being processing before processing this one
   if (pc.processingRemoteSDP) {
