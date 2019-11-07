@@ -412,6 +412,10 @@ Skylink.prototype._processSigMessage = function(message, session) {
   case this._SIG_MESSAGE_TYPE.ANSWER_ACK:
     this._answerAckHandler(message);
     break;
+  // --- SIG 2.0 ---
+  case this._SIG_MESSAGE_TYPE.MEDIA_INFO_EVENT:
+    this._mediaInfoEventHandler(message);
+    break;
   default:
     log.error([message.mid, 'Socket', message.type, 'Unsupported message ->'], clone(message));
     break;
@@ -2248,5 +2252,56 @@ Skylink.prototype._acknowledgeAnswer = function (targetMid, isSuccess, error) {
   self._handleNegotiationStats(statsStateKey, targetMid, answerAckMessage, true, error);
 
   return false;
+};
+
+Skylink.prototype._mediaInfoEventHandler = function (message) {
+  console.log("received mediaInfo message from sig");
+  var targetMid = message.publisherId;
+
+  var valueChanged = function (mediaId, key, newValue) {
+    var mediaInfo = self._peerMedias[targetMid][mediaId];
+    return mediaInfo[key] && mediaInfo[key] !== newValue;
+  };
+
+  var keys = [ 'MEDIA_STATE', 'TRANSCEIVER_MID' ];
+  var mediaIds = Object.keys(self._peerMedias[targetMid]);
+  for (var k = 0; k < keys.length; k++) {
+    for (var i = 0; i < mediaIds.length; i++) {
+      if (valueChanged(mediaIds[i], keys[k], message[keys[k]])) {
+        //update value of mediaInfo in peer media
+
+        if (keys[k] === 'MEDIA_STATE') {
+          self._peerMedias[targetMid][message.mediaId][keys[k]] = message[keys[k]];
+          log.log([targetMid, 'mediaInfoEvent', null, 'MediaState updated successfully'], message);
+          if (message.mediaState === self.MEDIA_STATE.UNAVAILABLE) {
+            // process unavailable stream
+          } else {
+            switch (message.mediaType) {
+              case self.MEDIA_TYPE.VIDEO_SCREEN:
+              case self.MEDIA_TYPE.VIDEO_CAMERA:
+              case self.MEDIA_TYPE.VIDEO_OTHER:
+              case self.MEDIA_TYPE.VIDEO: {
+                if (message.mediaState === self.MEDIA_STATE.MUTED) {
+                  // this._muteVideoEventHandler(message); message signature from mediaInfoEvent is different from muteAudioEvent/muteVideoEvent
+                }
+                break;
+              }
+              case self.MEDIA_TYPE.AUDIO_MIC:
+              case self.MEDIA_TYPE.AUDIO: {
+                // this._muteAudioEventHandler(message);
+                break;
+              }
+              default: log.debug([targetMid, 'MediaInfoEvent', null, 'Invalid mediaType'], message);
+            }
+          }
+        } else if (keys[k] === 'TRANSCEIVER_MID') {
+          self._peerMedias[targetMid][message.mediaId][keys[k]] = message[keys[k]];
+          log.log([targetMid, 'mediaInfoEvent', null, 'TransceiverMid updated successfully'], message);
+        } else {
+          log.error([targetMid, 'mediaInfoEvent', null, 'Media info value is read-only'], message);
+        }
+      }
+    }
+  }
 };
 
