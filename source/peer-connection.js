@@ -1913,15 +1913,35 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
 
     var processStreamForMediaInfo = function (transceiverMid, stream) {
-      var isScreensharing = false;
+      var parsedInfo = {};
+      parsedInfo.isScreensharing = false;
+      parsedInfo.peerId = targetMid;
       var isMatch = false;
-      var mediaIds = Object.keys(self._peerMedias[targetMid]);
-      var peerMedia = self._peerMedias[targetMid];
-      for (var i = 0; i < mediaIds.length; i++) {
-        if (peerMedia[mediaIds[i]].transceiverMid === transceiverMid) {
-          isMatch = true;
-          isScreensharing = peerMedia[mediaIds[i]].mediaType === self.MEDIA_TYPE.VIDEO_SCREEN;
-          peerMedia[mediaIds[i]].streamId = stream.id;
+
+      if (targetMid === 'MCU') {
+        var peerIds = Object.keys(self._peerMedias);
+        for (var p = 0; p < peerIds.length; p++) {
+          var mediaInfos = Object.values(self._peerMedias[peerIds[p]]);
+          for (var m = 0; m < mediaInfos.length; m++) {
+            if (mediaInfos[m].transceiverMid === transceiverMid) {
+              isMatch = true;
+              parsedInfo.peerId = peerIds[p];
+              parsedInfo.isScreensharing = mediaInfos[m].mediaType === self.MEDIA_TYPE.VIDEO_SCREEN;
+              self._peerMedias[peerIds[p]][mediaInfos[m].mediaId].streamId = stream.id;
+              break;
+            }
+          }
+        }
+      } else {
+        var mediaIds = Object.keys(self._peerMedias[targetMid]);
+        var peerMedia = self._peerMedias[targetMid];
+        for (var i = 0; i < mediaIds.length; i++) {
+          if (peerMedia[mediaIds[i]].transceiverMid === transceiverMid) {
+            isMatch = true;
+            parsedInfo.isScreensharing = peerMedia[mediaIds[i]].mediaType === self.MEDIA_TYPE.VIDEO_SCREEN;
+            peerMedia[mediaIds[i]].streamId = stream.id;
+            break;
+          }
         }
       }
 
@@ -1929,18 +1949,18 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
         log.error([targetMid, 'RTCPeerConnection', null, 'TransceiverMid of track on ontrack event does not match any transceiverMid in peerMedias mediaInfo.']);
       }
 
-      return isScreensharing;
+      return parsedInfo;
     };
 
-    var isScreensharing = processStreamForMediaInfo(transceiverMid, stream);
+    var parsedInfo = processStreamForMediaInfo(transceiverMid, stream);
 
     rtcTrackEvent.track.onunmute = function() {
-      self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, isScreensharing);
+      self._onRemoteStreamAdded(parsedInfo.peerId, stream, parsedInfo.isScreensharing);
     };
 
     // Safari tracks come in as muted=false
     if (!rtcTrackEvent.track.muted){
-      self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, isScreensharing);
+      self._onRemoteStreamAdded(parsedInfo.peerId, stream, parsedInfo.isScreensharing);
     }
   };
 
