@@ -1869,9 +1869,31 @@ Skylink.prototype._stopStreams = function (options, stopOnly) {
     }
   };
 
+  var updateMediaStateToUnavailable = function (streamId) {
+    var mediaInfos = Object.values(self._peerMedias[self._user.sid]);
+    for (var m = 0; m < mediaInfos.length; m++) {
+      if (mediaInfos[m].streamId === streamId) {
+        self._peerMedias[self._user.sid][mediaInfos[m].mediaId].mediaState = self.MEDIA_STATE.UNAVAILABLE;
+      }
+    }
+  };
+
+  var deleteUnavailableMedia = function () {
+    var mediaInfos = Object.values(self._peerMedias[self._user.sid]);
+    for (var m = 0; m < mediaInfos.length; m++) {
+      if (mediaInfos[m].mediaState === self.MEDIA_STATE.UNAVAILABLE) {
+        log.log([self._user.sid, 'PeerMedia', null, 'Media in \'unavailable\' state deleted'], self._peerMedias[self._user.sid][mediaInfos[m].mediaId]);
+        delete self._peerMedias[self._user.sid][mediaInfos[m].mediaId];
+      }
+    }
+  };
+
   var stopUserMedia = false;
   var stopScreenshare = false;
   var hasStoppedMedia = false;
+  // userMedia and screen stream is removed in _streamsStoppedCbs
+  var userMediaStreamId = self._streams.userMedia.stream ? self._streams.userMedia.stream.id : null;
+  var scrennStreamId = self._streams.screenshare ? self._streams.screenshare.stream.id : null;
 
   // from sendStream to stop original stream before sending new stream
   if (!options.screenshare && !options.userMedia) { // options is a MediaStream object
@@ -1891,6 +1913,7 @@ Skylink.prototype._stopStreams = function (options, stopOnly) {
       stopFn(self._streams.userMedia.stream);
     }
 
+    updateMediaStateToUnavailable(userMediaStreamId);
     self._streams.userMedia = null;
     hasStoppedMedia = true;
   }
@@ -1904,8 +1927,26 @@ Skylink.prototype._stopStreams = function (options, stopOnly) {
       stopFn(self._streams.screenshare.stream);
     }
 
+    updateMediaStateToUnavailable(scrennStreamId);
     self._streams.screenshare = null;
     hasStoppedMedia = true;
+  }
+
+  self.once('handshakeProgress', function () {
+    deleteUnavailableMedia();
+  }, function (state) {
+    return state === self.HANDSHAKE_PROGRESS.OFFER;
+  });
+
+  if (Object.keys(self._peerConnections).length > 0) {
+    self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
+      if (err) {
+        log.error('Failed refreshing connections for stopStream() ->', err);
+        return;
+      }
+    });
+  } else {
+    deleteUnavailableMedia();
   }
 
   if (self._inRoom && hasStoppedMedia) {
@@ -2147,17 +2188,18 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     self._trigger('mediaAccessStopped', !!isScreenSharing, !!isAudioFallback, streamId);
 
     if (self._inRoom) {
-      log.debug([null, 'MediaStream', streamId, 'Sending Stream ended status to Peers']);
+      // FIXME: remove - not needed as now renegotiation is triggered with mediaInfoList in offer
+      // log.debug([null, 'MediaStream', streamId, 'Sending Stream ended status to Peers']);
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.STREAM,
-        mid: self._user.sid,
-        rid: self._room.id,
-        cid: self._key,
-        streamId: streamId,
-        settings: settings.settings,
-        status: 'ended'
-      });
+      // self._sendChannelMessage({
+      //   type: self._SIG_MESSAGE_TYPE.STREAM,
+      //   mid: self._user.sid,
+      //   rid: self._room.id,
+      //   cid: self._key,
+      //   streamId: streamId,
+      //   settings: settings.settings,
+      //   status: 'ended'
+      // });
 
       self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true, !!isScreenSharing, streamId);
 

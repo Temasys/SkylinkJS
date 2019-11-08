@@ -1923,7 +1923,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
         for (var p = 0; p < peerIds.length; p++) {
           var mediaInfos = Object.values(self._peerMedias[peerIds[p]]);
           for (var m = 0; m < mediaInfos.length; m++) {
-            if (mediaInfos[m].transceiverMid === transceiverMid) {
+            if (mediaInfos[m].transceiverMid === transceiverMid && (peerIds[m] !== self._user.sid)) {
               isMatch = true;
               parsedInfo.peerId = peerIds[p];
               parsedInfo.isScreensharing = mediaInfos[m].mediaType === self.MEDIA_TYPE.VIDEO_SCREEN;
