@@ -173,14 +173,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   if (!pc) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
       'Local session description will not be set as connection does not exists ->'], _sessionDescription);
-    self._handleNegotiationStats('dropped_' + sessionDescription.type, targetMid, sessionDescription, false, 'Peer connection does not exists');
+    self._handleNegotiationStats('dropped_' + _sessionDescription.type, targetMid, _sessionDescription, false, 'Peer connection does not exists');
     return;
 
   } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
     pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
       'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
-    self._handleNegotiationStats('dropped_offer', targetMid, sessionDescription, false, 'Peer connection state is "' + pc.signalingState + '"');
+    self._handleNegotiationStats('dropped_offer', targetMid, _sessionDescription, false, 'Peer connection state is "' + pc.signalingState + '"');
     return;
 
   // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
@@ -188,14 +188,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
       'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
-    self._handleNegotiationStats('dropped_answer', targetMid, sessionDescription, false, 'Peer connection state is "' + pc.signalingState + '"');
+    self._handleNegotiationStats('dropped_answer', targetMid, _sessionDescription, false, 'Peer connection state is "' + pc.signalingState + '"');
     return;
 
   // Added checks if there is a current local sessionDescription being processing before processing this one
   } else if (pc.processingLocalSDP) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
       'Local session description will not be set as another is being processed ->'], _sessionDescription);
-    self._handleNegotiationStats('dropped_' + sessionDescription.type, targetMid, sessionDescription, false, 'Peer connection is currently processing an existing sdp');
+    self._handleNegotiationStats('dropped_' + _sessionDescription.type, targetMid, _sessionDescription, false, 'Peer connection is currently processing an existing sdp');
     return;
   }
 

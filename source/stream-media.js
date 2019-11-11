@@ -1323,7 +1323,8 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         var shouldRenegotiate = true;
 
         if (self._streams.userMedia && self._streams.userMedia.stream && Array.isArray(self._streams.userMedia.stream.getVideoTracks()) && self._streams.userMedia.stream.getVideoTracks().length) {
-          shouldRenegotiate = false;
+          // TODO: Replace track
+          // shouldRenegotiate = false;
         }
 
         if (AdapterJS.webrtcDetectedBrowser === 'edge') {
@@ -1380,7 +1381,6 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 
     try {
       var hasDefaultAudioTrack = false;
-
 
       if (self._streams.userMedia && self._streams.userMedia.stream && Array.isArray(self._streams.userMedia.stream.getAudioTracks()) && self._streams.userMedia.stream.getAudioTracks().length) {
         hasDefaultAudioTrack = true;
