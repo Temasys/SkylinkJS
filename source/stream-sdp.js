@@ -1512,7 +1512,7 @@ Skylink.prototype._getTransceiverMid = function (sessionDescription) {
         parsedMline.transceiverMid = msidLines[i].split(/:/)[1].trim();
       }
 
-      if (msidLines[i].match(/a=msid:([\w|-]+)/)) {
+      if (msidLines[i].match(/a=msid:([\w|-|{]+)/)) {
         var array = msidLines[i].split(' ');
         var firstItem = array[0].split(/:/)[1].trim();
         parsedMline.streamId = firstItem === '-' ? '' : firstItem;

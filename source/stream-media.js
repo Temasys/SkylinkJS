@@ -1527,6 +1527,10 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 Skylink.prototype.stopScreen = function () {
   var self = this;
   if (self._streams.screenshare) {
+    self._stopStreams({
+      screenshare: true,
+    }, true);
+
     if (self._inRoom) {
       if (self._streams.userMedia && self._streams.userMedia.stream) {
         self._trigger('incomingStream', self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo(),
@@ -1543,9 +1547,6 @@ Skylink.prototype.stopScreen = function () {
         self._replaceTrack(gDMVideoTrack.id, gUMVideoTrack);
       }
     }
-    self._stopStreams({
-      screenshare: true,
-    }, true);
   }
 };
 
