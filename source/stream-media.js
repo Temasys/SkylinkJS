@@ -583,18 +583,28 @@ Skylink.prototype.sendStream = function(options, callback) {
   var performReplaceTracks = function (originalStream, newStream, cb) {
     if (!originalStream) {
       renegotiate(newStream, cb);
-      return;
-    }
-    var newStreamHasVideoTrack = Array.isArray(newStream.getVideoTracks()) && newStream.getVideoTracks().length;
-    var newStreamHasAudioTrack = Array.isArray(newStream.getAudioTracks()) && newStream.getAudioTracks().length;
-    var originalStreamHasVideoTrack = Array.isArray(originalStream.getVideoTracks()) && originalStream.getVideoTracks().length;
-    var originalStreamHasAudioTrack = Array.isArray(originalStream.getAudioTracks()) && originalStream.getAudioTracks().length;
-
-    if ((newStreamHasVideoTrack && !originalStreamHasVideoTrack) || (newStreamHasAudioTrack && !originalStreamHasAudioTrack)) {
+    } else {
       self._stopStreams(originalStream, true);
+      renegotiate(newStream, cb);
+    }
+
+    /** TODO: Replace track
+
+     if (!originalStream) {
       renegotiate(newStream, cb);
       return;
     }
+
+     var newStreamHasVideoTrack = Array.isArray(newStream.getVideoTracks()) && newStream.getVideoTracks().length;
+     var newStreamHasAudioTrack = Array.isArray(newStream.getAudioTracks()) && newStream.getAudioTracks().length;
+     var originalStreamHasVideoTrack = Array.isArray(originalStream.getVideoTracks()) && originalStream.getVideoTracks().length;
+     var originalStreamHasAudioTrack = Array.isArray(originalStream.getAudioTracks()) && originalStream.getAudioTracks().length;
+
+     if ((newStreamHasVideoTrack && !originalStreamHasVideoTrack) || (newStreamHasAudioTrack && !originalStreamHasAudioTrack)) {
+     self._stopStreams(originalStream, true);
+     renegotiate(newStream, cb);
+     return;
+     }
 
     if (newStreamHasVideoTrack && originalStreamHasVideoTrack) {
       self._replaceTrack(originalStream.getVideoTracks()[0].id, newStream.getVideoTracks()[0]);
@@ -605,6 +615,7 @@ Skylink.prototype.sendStream = function(options, callback) {
     }
 
     self._stopStreams(originalStream, true);
+     **/
   };
 
   var restartFn = function (originalStream, stream) {
@@ -2308,13 +2319,13 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   // build peerMedia
   var processPeerMedia = function () {
     var tracks = stream.getTracks();
-    var peerMedia = self._peerMedias['self'] || {};
+    var peerMedia = self._user.sid ? self._peerMedias[self._user.sid] : self._peerMedias['self'] || {};
 
     for (var i = 0; i < tracks.length; i++) {
       var mediaId = (tracks[i].kind === self.TRACK_KIND.AUDIO ? 'AUDIO' : 'VIDEO') + '_' + stream.id;
       var mediaState = tracks[i].readyState === self.TRACK_READY_STATE.ENDED ? self.MEDIA_STATE.UNAVAILABLE : (tracks[i].muted ? self.MEDIA_STATE.MUTED : self.MEDIA_STATE.ACTIVE);
       peerMedia[mediaId] = {
-        publisherId: null,
+        publisherId: self._user.sid || null,
         mediaId: mediaId,
         mediaType: tracks[i].kind === self.TRACK_KIND.AUDIO ? self.MEDIA_TYPE.AUDIO_MIC : (isScreenSharing ? self.MEDIA_TYPE.VIDEO_SCREEN : self.MEDIA_TYPE.VIDEO_CAMERA),
         mediaState: mediaState,
@@ -2325,7 +2336,11 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
         simulcast: '',
       };
 
-      self._peerMedias['self'] = peerMedia;
+      if (self._user.sid) {
+        self._peerMedias[self._user.sid] = peerMedia;
+      } else {
+        self._peerMedias['self'] = peerMedia;
+      }
     }
 
   };
