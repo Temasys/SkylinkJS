@@ -1747,6 +1747,15 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._peerConnStatus[peerId]) {
     delete this._peerConnStatus[peerId];
   }
+  // remove peer medias
+  if (this._peerMedias[peerId]) {
+    delete this._peerMedias[peerId];
+  }
+
+  // remove buffered local offer
+  if (this._bufferedLocalOffer[peerId]) {
+    delete this._bufferedLocalOffer[peerId];
+  }
   // close datachannel connection
   if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
