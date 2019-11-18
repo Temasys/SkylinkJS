@@ -940,4 +940,15 @@ function Skylink() {
    * @since 1.0.0
    */
   this._currentRTCRTPSenders = {};
+
+  /**
+   * Stores the list of the Peer medias.
+   * @attribute peerMedias
+   * @param {Object} <#peerId> The Peer media.
+   * @type JSON
+   * @private
+   * @for Skylink
+   * @since 0.1.0
+   */
+  this._peerMedias = {};
 }

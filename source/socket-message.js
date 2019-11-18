@@ -412,6 +412,10 @@ Skylink.prototype._processSigMessage = function(message, session) {
   case this._SIG_MESSAGE_TYPE.ANSWER_ACK:
     this._answerAckHandler(message);
     break;
+  // --- SIG 2.0 ---
+  case this._SIG_MESSAGE_TYPE.MEDIA_INFO_EVENT:
+    this._mediaInfoEventHandler(message);
+    break;
   default:
     log.error([message.mid, 'Socket', message.type, 'Unsupported message ->'], clone(message));
     break;
@@ -868,6 +872,18 @@ Skylink.prototype._inRoomHandler = function(message) {
   self._peerPriorityWeight = message.tieBreaker + (self._initOptions.priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.AUTO ?
     0 : (self._initOptions.priorityWeightScheme === self.PRIORITY_WEIGHT_SCHEME.ENFORCE_OFFERER ? 2e+15 : -(2e+15)));
 
+  var updateUserSid = function () {
+    var peerId = message.sid;
+    self._peerMedias[peerId] = Object.assign({}, self._peerMedias['self']);
+    delete self._peerMedias['self'];
+    var mediaIds = Object.keys(self._peerMedias[peerId]);
+    for (var i = 0; i < mediaIds.length; i++) {
+      self._peerMedias[peerId][mediaIds[i]].publisherId = peerId;
+    }
+  };
+
+  updateUserSid();
+
   self._handleSessionStats(message);
   self._trigger('peerJoined', self._user.sid, self.getPeerInfo(), true);
   self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, self._user.sid);
@@ -990,13 +1006,11 @@ Skylink.prototype._enterHandler = function(message) {
   }
 
   var processPeerFn = function (cert) {
-    if ((!self._peerInformations[targetMid] && !self._hasMCU) || (self._hasMCU && !self._peerInformations['MCU'])) {
-      isNewPeer = true;
-
-      self._peerInformations[targetMid] = userInfo;
-
+    if ((!self._peerInformations[targetMid] && !self._hasMCU) || (self._hasMCU && targetMid === 'MCU' && !self._peerInformations['MCU'])) {
       var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
         !!userInfo.settings.video.screenshare;
+      isNewPeer = true;
+      self._peerInformations[targetMid] = userInfo;
 
       self._addPeer(targetMid, cert || null, {
         agent: userInfo.agent.name,
@@ -1008,9 +1022,7 @@ Skylink.prototype._enterHandler = function(message) {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
 
         self._hasMCU = true;
-        self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
         self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
-
       } else {
         self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
       }
@@ -1018,15 +1030,16 @@ Skylink.prototype._enterHandler = function(message) {
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
     }
 
-    if (self._hasMCU && targetMid !== self._user.sid) {
-      self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
-    }
-
     self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
       userData: 0,
       audioMuted: 0,
       videoMuted: 0
     };
+
+    if (self._hasMCU && message.publisherId !== self._user.sid) {
+      self._peerInformations[message.publisherId] = userInfo;
+      self._trigger('peerJoined', message.publisherId, self.getPeerInfo(message.publisherId), false);
+    }
 
     if (self._hasMCU !== true) {
       var welcomeMsg = {
@@ -1313,13 +1326,11 @@ Skylink.prototype._welcomeHandler = function(message) {
   }
 
   var processPeerFn = function (cert) {
-    if ((!self._peerInformations[targetMid] && !self._hasMCU) || (self._hasMCU && !self._peerInformations['MCU'])) {
-      isNewPeer = true;
-
-      self._peerInformations[targetMid] = userInfo;
-
+    if ((!self._peerInformations[targetMid] && !self._hasMCU) || (self._hasMCU && targetMid === 'MCU' && !self._peerInformations['MCU'])) {
       var hasScreenshare = userInfo.settings.video && typeof userInfo.settings.video === 'object' &&
         !!userInfo.settings.video.screenshare;
+      isNewPeer = true;
+      self._peerInformations[targetMid] = userInfo;
 
       self._addPeer(targetMid, cert || null, {
         agent: userInfo.agent.name,
@@ -1331,23 +1342,11 @@ Skylink.prototype._welcomeHandler = function(message) {
         log.info([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
         self._hasMCU = true;
         self._trigger('serverPeerJoined', targetMid, self.SERVER_PEER_TYPE.MCU);
-
       } else {
         self._trigger('peerJoined', targetMid, self.getPeerInfo(targetMid), false);
       }
 
-      self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
       self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.WELCOME, targetMid);
-    }
-
-    if (self._hasMCU && Array.isArray(message.peersInRoom) && message.peersInRoom.length) {
-      var userId = self._user.sid;
-      for (var peersInRoomIndex = 0; peersInRoomIndex < message.peersInRoom.length; peersInRoomIndex++) {
-        var _PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
-        if (_PEER_ID !== userId) {
-          self._trigger('peerJoined', _PEER_ID, self.getPeerInfo(_PEER_ID), false);
-        }
-      }
     }
 
     self._peerMessagesStamps[targetMid] = self._peerMessagesStamps[targetMid] || {
@@ -1356,6 +1355,18 @@ Skylink.prototype._welcomeHandler = function(message) {
       videoMuted: 0,
       hasWelcome: false
     };
+
+    // self._trigger('handshakeProgress', self.HANDSHAKE_PROGRESS.ENTER, targetMid);
+    if (self._hasMCU && Array.isArray(message.peersInRoom) && message.peersInRoom.length) {
+      var userId = self._user.sid;
+      for (var peersInRoomIndex = 0; peersInRoomIndex < message.peersInRoom.length; peersInRoomIndex++) {
+        var _PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
+        if (_PEER_ID !== userId) {
+          self._peerInformations[_PEER_ID] = userInfo;
+          self._trigger('peerJoined', _PEER_ID, self.getPeerInfo(_PEER_ID), false);
+        }
+      }
+    }
 
     if (self._hasMCU || self._peerPriorityWeight > message.weight) {
       if (self._peerMessagesStamps[targetMid].hasWelcome) {
@@ -1371,8 +1382,9 @@ Skylink.prototype._welcomeHandler = function(message) {
         version: userInfo.agent.version,
         os: userInfo.agent.os
       }, true);
-
-    } else {
+    }
+     /** TODO: remove after testing - commented out when implementing targeted enter with publisherId for MCU
+      else {
       log.debug([targetMid, 'RTCPeerConnection', null, 'Waiting for peer to start negotiation.']);
 
       var welcomeMsg = {
@@ -1407,6 +1419,7 @@ Skylink.prototype._welcomeHandler = function(message) {
       self._sendChannelMessage(welcomeMsg);
       self._handleNegotiationStats('welcome', targetMid, welcomeMsg, false);
     }
+     **/
   };
 
   if (self._peerConnectionConfig.certificate !== self.PEER_CERTIFICATE.AUTO &&
@@ -1475,12 +1488,6 @@ Skylink.prototype._offerHandler = function(message) {
     return;
   }
 
-  /*if (pc.localDescription ? !!pc.localDescription.sdp : false) {
-    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
-      pc.localDescription);
-    return;
-  }*/
-
   // Add-on by Web SDK fixes
   if (message.userInfo && typeof message.userInfo === 'object') {
     var userInfo = message.userInfo || {};
@@ -1489,6 +1496,37 @@ Skylink.prototype._offerHandler = function(message) {
     self._peerInformations[targetMid].mediaStatus = userInfo.mediaStatus || {};
     self._peerInformations[targetMid].userData = userInfo.userData;
   }
+
+  // build remote peer media
+  var setPeerMedia = function () {
+    var clonedPeerMedia = clone(self._peerMedias[targetMid]) || {};
+    var mediaInfoList = message.mediaInfoList;
+
+    // reset peer medias to empty obj
+    if (self._peerMedias[targetMid]) {
+      self._peerMedias[targetMid] = {};
+    }
+
+    for (var i = 0; i < mediaInfoList.length; i++) {
+      var mediaInfo = mediaInfoList[i];
+
+      if (targetMid !== 'MCU' && targetMid !== mediaInfo.publisherId) {
+        console.error(targetMid, mediaInfo.publisherId);
+      }
+
+      delete mediaInfo.type; // MCU adds 'type' key
+      self._peerMedias[mediaInfo.publisherId] = self._peerMedias[mediaInfo.publisherId] || {};
+      self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId] = mediaInfo;
+
+      // if peerMedia has previous state - offer is due to renegotiation
+      if (clonedPeerMedia[mediaInfo.mediaId]) {
+        self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId].streamId = (mediaInfo.transceiverMid === clonedPeerMedia[mediaInfo.mediaId].transceiverMid) ? clonedPeerMedia[mediaInfo.mediaId].streamId : '';
+        self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId].trackId = (mediaInfo.transceiverMid === clonedPeerMedia[mediaInfo.mediaId].transceiverMid) ? clonedPeerMedia[mediaInfo.mediaId].trackId : '';
+      }
+    }
+  };
+
+  setPeerMedia();
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Session description object created'], offer);
 
@@ -1737,19 +1775,38 @@ Skylink.prototype._answerHandler = function(message) {
     self._peerInformations[targetMid].userData = userInfo.userData;
   }
 
+// build remote peer media
+  var setPeerMedia = function () {
+    var clonedPeerMedia = clone(self._peerMedias[targetMid]) || {};
+    var mediaInfoList = message.mediaInfoList;
+
+    // reset peer medias to empty obj
+    if (self._peerMedias[targetMid]) {
+      self._peerMedias[targetMid] = {};
+    }
+
+    for (var i = 0; i < mediaInfoList.length; i++) {
+      var mediaInfo = mediaInfoList[i];
+
+      if (targetMid !== 'MCU' && targetMid !== mediaInfo.publisherId) {
+        console.error(targetMid, mediaInfo.publisherId);
+      }
+
+      delete mediaInfo.type; // MCU adds 'type' key
+      self._peerMedias[mediaInfo.publisherId] = self._peerMedias[mediaInfo.publisherId] || {};
+      self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId] = mediaInfo;
+
+      // if peerMedia has previous state - offer is due to renegotiation
+      if (clonedPeerMedia[mediaInfo.mediaId]) {
+        self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId].streamId = (mediaInfo.transceiverMid === clonedPeerMedia[mediaInfo.mediaId].transceiverMid) ? clonedPeerMedia[mediaInfo.mediaId].streamId : '';
+        self._peerMedias[mediaInfo.publisherId][mediaInfo.mediaId].trackId = (mediaInfo.transceiverMid === clonedPeerMedia[mediaInfo.mediaId].transceiverMid) ? clonedPeerMedia[mediaInfo.mediaId].trackId : '';
+      }
+    }
+  };
+
+  setPeerMedia();
+
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Session description object created'], answer);
-
-  /*if (pc.remoteDescription ? !!pc.remoteDescription.sdp : false) {
-    log.warn([targetMid, null, message.type, 'Peer has an existing connection'],
-      pc.remoteDescription);
-    return;
-  }
-
-  if (pc.signalingState === self.PEER_CONNECTION_STATE.STABLE) {
-    log.error([targetMid, null, message.type, 'Unable to set peer connection ' +
-      'at signalingState "stable". Ignoring remote answer'], pc.signalingState);
-    return;
-  }*/
 
   answer.sdp = self._removeSDPFilteredCandidates(targetMid, answer);
   answer.sdp = self._setSDPCodec(targetMid, answer);
@@ -1766,20 +1823,6 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   log.log([targetMid, 'RTCSessionDescription', message.type, 'Updated remote answer ->'], answer.sdp);
-
-  /*
-    Removeing this below if condition in favor of this ticket: https://jira.temasys.com.sg/browse/ESS-1632
-  */
-  // This should be the state after offer is received. or even after negotiation is successful
-  // if (pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER) {
-  //   log.warn([targetMid, null, message.type, 'Peer connection state is not in ' +
-  //     '"have-local-offer" state for re-negotiation. Dropping message.'], {
-  //       signalingState: pc.signalingState,
-  //       isRestart: !!message.restart
-  //     });
-  //   self._handleNegotiationStats('dropped_answer', targetMid, answer, true, 'Peer connection state is "' + pc.signalingState + '"');
-  //   return;
-  // }
 
   // Added checks if there is a current remote sessionDescription being processing before processing this one
   if (pc.processingRemoteSDP) {
@@ -1798,7 +1841,6 @@ Skylink.prototype._answerHandler = function(message) {
   }
 
   self._parseSDPMediaStreamIDs(targetMid, answer);
-
 
   var onSuccessCbFn = function() {
     log.debug([targetMid, null, message.type, 'Remote description set']);
@@ -2215,5 +2257,56 @@ Skylink.prototype._acknowledgeAnswer = function (targetMid, isSuccess, error) {
   self._handleNegotiationStats(statsStateKey, targetMid, answerAckMessage, true, error);
 
   return false;
+};
+
+Skylink.prototype._mediaInfoEventHandler = function (message) {
+  console.log("received mediaInfo message from sig");
+  var targetMid = message.publisherId;
+
+  var valueChanged = function (mediaId, key, newValue) {
+    var mediaInfo = self._peerMedias[targetMid][mediaId];
+    return mediaInfo[key] && mediaInfo[key] !== newValue;
+  };
+
+  var keys = [ 'MEDIA_STATE', 'TRANSCEIVER_MID' ];
+  var mediaIds = Object.keys(self._peerMedias[targetMid]);
+  for (var k = 0; k < keys.length; k++) {
+    for (var i = 0; i < mediaIds.length; i++) {
+      if (valueChanged(mediaIds[i], keys[k], message[keys[k]])) {
+        //update value of mediaInfo in peer media
+
+        if (keys[k] === 'MEDIA_STATE') {
+          self._peerMedias[targetMid][message.mediaId][keys[k]] = message[keys[k]];
+          log.log([targetMid, 'mediaInfoEvent', null, 'MediaState updated successfully'], message);
+          if (message.mediaState === self.MEDIA_STATE.UNAVAILABLE) {
+            // process unavailable stream
+          } else {
+            switch (message.mediaType) {
+              case self.MEDIA_TYPE.VIDEO_SCREEN:
+              case self.MEDIA_TYPE.VIDEO_CAMERA:
+              case self.MEDIA_TYPE.VIDEO_OTHER:
+              case self.MEDIA_TYPE.VIDEO: {
+                if (message.mediaState === self.MEDIA_STATE.MUTED) {
+                  // this._muteVideoEventHandler(message); message signature from mediaInfoEvent is different from muteAudioEvent/muteVideoEvent
+                }
+                break;
+              }
+              case self.MEDIA_TYPE.AUDIO_MIC:
+              case self.MEDIA_TYPE.AUDIO: {
+                // this._muteAudioEventHandler(message);
+                break;
+              }
+              default: log.debug([targetMid, 'MediaInfoEvent', null, 'Invalid mediaType'], message);
+            }
+          }
+        } else if (keys[k] === 'TRANSCEIVER_MID') {
+          self._peerMedias[targetMid][message.mediaId][keys[k]] = message[keys[k]];
+          log.log([targetMid, 'mediaInfoEvent', null, 'TransceiverMid updated successfully'], message);
+        } else {
+          log.error([targetMid, 'mediaInfoEvent', null, 'Media info value is read-only'], message);
+        }
+      }
+    }
+  }
 };
 

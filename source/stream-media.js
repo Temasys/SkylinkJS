@@ -583,18 +583,28 @@ Skylink.prototype.sendStream = function(options, callback) {
   var performReplaceTracks = function (originalStream, newStream, cb) {
     if (!originalStream) {
       renegotiate(newStream, cb);
-      return;
-    }
-    var newStreamHasVideoTrack = Array.isArray(newStream.getVideoTracks()) && newStream.getVideoTracks().length;
-    var newStreamHasAudioTrack = Array.isArray(newStream.getAudioTracks()) && newStream.getAudioTracks().length;
-    var originalStreamHasVideoTrack = Array.isArray(originalStream.getVideoTracks()) && originalStream.getVideoTracks().length;
-    var originalStreamHasAudioTrack = Array.isArray(originalStream.getAudioTracks()) && originalStream.getAudioTracks().length;
-
-    if ((newStreamHasVideoTrack && !originalStreamHasVideoTrack) || (newStreamHasAudioTrack && !originalStreamHasAudioTrack)) {
+    } else {
       self._stopStreams(originalStream, true);
+      renegotiate(newStream, cb);
+    }
+
+    /** TODO: Replace track
+
+     if (!originalStream) {
       renegotiate(newStream, cb);
       return;
     }
+
+     var newStreamHasVideoTrack = Array.isArray(newStream.getVideoTracks()) && newStream.getVideoTracks().length;
+     var newStreamHasAudioTrack = Array.isArray(newStream.getAudioTracks()) && newStream.getAudioTracks().length;
+     var originalStreamHasVideoTrack = Array.isArray(originalStream.getVideoTracks()) && originalStream.getVideoTracks().length;
+     var originalStreamHasAudioTrack = Array.isArray(originalStream.getAudioTracks()) && originalStream.getAudioTracks().length;
+
+     if ((newStreamHasVideoTrack && !originalStreamHasVideoTrack) || (newStreamHasAudioTrack && !originalStreamHasAudioTrack)) {
+     self._stopStreams(originalStream, true);
+     renegotiate(newStream, cb);
+     return;
+     }
 
     if (newStreamHasVideoTrack && originalStreamHasVideoTrack) {
       self._replaceTrack(originalStream.getVideoTracks()[0].id, newStream.getVideoTracks()[0]);
@@ -605,6 +615,7 @@ Skylink.prototype.sendStream = function(options, callback) {
     }
 
     self._stopStreams(originalStream, true);
+     **/
   };
 
   var restartFn = function (originalStream, stream) {
@@ -1312,7 +1323,8 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
         var shouldRenegotiate = true;
 
         if (self._streams.userMedia && self._streams.userMedia.stream && Array.isArray(self._streams.userMedia.stream.getVideoTracks()) && self._streams.userMedia.stream.getVideoTracks().length) {
-          shouldRenegotiate = false;
+          // TODO: Replace track
+          // shouldRenegotiate = false;
         }
 
         if (AdapterJS.webrtcDetectedBrowser === 'edge') {
@@ -1369,7 +1381,6 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 
     try {
       var hasDefaultAudioTrack = false;
-
 
       if (self._streams.userMedia && self._streams.userMedia.stream && Array.isArray(self._streams.userMedia.stream.getAudioTracks()) && self._streams.userMedia.stream.getAudioTracks().length) {
         hasDefaultAudioTrack = true;
@@ -1516,6 +1527,10 @@ Skylink.prototype.shareScreen = function (enableAudio, mediaSource, callback) {
 Skylink.prototype.stopScreen = function () {
   var self = this;
   if (self._streams.screenshare) {
+    self._stopStreams({
+      screenshare: true,
+    }, true);
+
     if (self._inRoom) {
       if (self._streams.userMedia && self._streams.userMedia.stream) {
         self._trigger('incomingStream', self._user.sid, self._streams.userMedia.stream, true, self.getPeerInfo(),
@@ -1532,9 +1547,6 @@ Skylink.prototype.stopScreen = function () {
         self._replaceTrack(gDMVideoTrack.id, gUMVideoTrack);
       }
     }
-    self._stopStreams({
-      screenshare: true,
-    }, true);
   }
 };
 
@@ -1869,9 +1881,31 @@ Skylink.prototype._stopStreams = function (options, stopOnly) {
     }
   };
 
+  var updateMediaStateToUnavailable = function (streamId) {
+    var mediaInfos = Object.values(self._peerMedias[self._user.sid]);
+    for (var m = 0; m < mediaInfos.length; m++) {
+      if (mediaInfos[m].streamId === streamId) {
+        self._peerMedias[self._user.sid][mediaInfos[m].mediaId].mediaState = self.MEDIA_STATE.UNAVAILABLE;
+      }
+    }
+  };
+
+  var deleteUnavailableMedia = function () {
+    var mediaInfos = Object.values(self._peerMedias[self._user.sid]);
+    for (var m = 0; m < mediaInfos.length; m++) {
+      if (mediaInfos[m].mediaState === self.MEDIA_STATE.UNAVAILABLE) {
+        log.log([self._user.sid, 'PeerMedia', null, 'Media in \'unavailable\' state deleted'], self._peerMedias[self._user.sid][mediaInfos[m].mediaId]);
+        delete self._peerMedias[self._user.sid][mediaInfos[m].mediaId];
+      }
+    }
+  };
+
   var stopUserMedia = false;
   var stopScreenshare = false;
   var hasStoppedMedia = false;
+  // userMedia and screen stream is removed in _streamsStoppedCbs
+  var userMediaStreamId = self._streams.userMedia.stream ? self._streams.userMedia.stream.id : null;
+  var scrennStreamId = self._streams.screenshare ? self._streams.screenshare.stream.id : null;
 
   // from sendStream to stop original stream before sending new stream
   if (!options.screenshare && !options.userMedia) { // options is a MediaStream object
@@ -1891,6 +1925,7 @@ Skylink.prototype._stopStreams = function (options, stopOnly) {
       stopFn(self._streams.userMedia.stream);
     }
 
+    updateMediaStateToUnavailable(userMediaStreamId);
     self._streams.userMedia = null;
     hasStoppedMedia = true;
   }
@@ -1904,8 +1939,26 @@ Skylink.prototype._stopStreams = function (options, stopOnly) {
       stopFn(self._streams.screenshare.stream);
     }
 
+    updateMediaStateToUnavailable(scrennStreamId);
     self._streams.screenshare = null;
     hasStoppedMedia = true;
+  }
+
+  self.once('handshakeProgress', function () {
+    deleteUnavailableMedia();
+  }, function (state) {
+    return state === self.HANDSHAKE_PROGRESS.OFFER;
+  });
+
+  if (Object.keys(self._peerConnections).length > 0) {
+    self._refreshPeerConnection(Object.keys(self._peerConnections), false, {}, function (err, success) {
+      if (err) {
+        log.error('Failed refreshing connections for stopStream() ->', err);
+        return;
+      }
+    });
+  } else {
+    deleteUnavailableMedia();
   }
 
   if (self._inRoom && hasStoppedMedia) {
@@ -2111,34 +2164,6 @@ Skylink.prototype._parseStreamTracksInfo = function (streamKey, callback) {
 	};
 
   callback();
-
-  // // Append the stream to a dummy <video> element to retrieve the resolution width and height.
-  // var videoElement = document.createElement('video');
-  // videoElement.autoplay = true;
-  // // Mute the audio of the <video> element to prevent feedback.
-  // //videoElement.muted = true;
-  // videoElement.volume = 0;
-  //
-  // var onVideoLoaded = function () {
-  // 	if (!self._streams[streamKey]) {
-  // 		return;
-  // 	}
-  // 	self._streams[streamKey].tracks.video.width = videoElement.videoWidth;
-  // 	self._streams[streamKey].tracks.video.height = videoElement.videoHeight;
-  //
-  // 	videoElement.srcObject = null;
-  // 	callback();
-  // };
-  //
-  // // Because the plugin does not support the "loadeddata" event.
-  // if (AdapterJS.webrtcDetectedType === 'plugin') {
-  //   setTimeout(onVideoLoaded, 1500);
-  //
-  // } else {
-  //   videoElement.addEventListener('loadeddata', onVideoLoaded);
-  // }
-  //
-  // AdapterJS.attachMediaStream(videoElement, stream);
 }
 
 /**
@@ -2175,17 +2200,18 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
     self._trigger('mediaAccessStopped', !!isScreenSharing, !!isAudioFallback, streamId);
 
     if (self._inRoom) {
-      log.debug([null, 'MediaStream', streamId, 'Sending Stream ended status to Peers']);
+      // FIXME: remove - not needed as now renegotiation is triggered with mediaInfoList in offer
+      // log.debug([null, 'MediaStream', streamId, 'Sending Stream ended status to Peers']);
 
-      self._sendChannelMessage({
-        type: self._SIG_MESSAGE_TYPE.STREAM,
-        mid: self._user.sid,
-        rid: self._room.id,
-        cid: self._key,
-        streamId: streamId,
-        settings: settings.settings,
-        status: 'ended'
-      });
+      // self._sendChannelMessage({
+      //   type: self._SIG_MESSAGE_TYPE.STREAM,
+      //   mid: self._user.sid,
+      //   rid: self._room.id,
+      //   cid: self._key,
+      //   streamId: streamId,
+      //   settings: settings.settings,
+      //   status: 'ended'
+      // });
 
       self._trigger('streamEnded', self._user.sid, self.getPeerInfo(), true, !!isScreenSharing, streamId);
 
@@ -2290,6 +2316,36 @@ Skylink.prototype._onStreamAccessSuccess = function(stream, settings, isScreenSh
   self._parseStreamTracksInfo(isScreenSharing ? 'screenshare' : 'userMedia', function () {
   	self._trigger('mediaAccessSuccess', stream, !!isScreenSharing, !!isAudioFallback, streamId);
   });
+
+  // build peerMedia
+  var processPeerMedia = function () {
+    var tracks = stream.getTracks();
+    var peerMedia = self._user.sid ? self._peerMedias[self._user.sid] : self._peerMedias['self'] || {};
+
+    for (var i = 0; i < tracks.length; i++) {
+      var mediaId = (tracks[i].kind === self.TRACK_KIND.AUDIO ? 'AUDIO' : 'VIDEO') + '_' + stream.id;
+      var mediaState = tracks[i].readyState === self.TRACK_READY_STATE.ENDED ? self.MEDIA_STATE.UNAVAILABLE : (tracks[i].muted ? self.MEDIA_STATE.MUTED : self.MEDIA_STATE.ACTIVE);
+      peerMedia[mediaId] = {
+        publisherId: self._user.sid || null,
+        mediaId: mediaId,
+        mediaType: tracks[i].kind === self.TRACK_KIND.AUDIO ? self.MEDIA_TYPE.AUDIO_MIC : (isScreenSharing ? self.MEDIA_TYPE.VIDEO_SCREEN : self.MEDIA_TYPE.VIDEO_CAMERA),
+        mediaState: mediaState,
+        transceiverMid: null,
+        streamId: stream.id,
+        trackId: tracks[i].id,
+        mediaMetaData: '',
+        simulcast: '',
+      };
+
+      if (self._user.sid) {
+        self._peerMedias[self._user.sid] = peerMedia;
+      } else {
+        self._peerMedias['self'] = peerMedia;
+      }
+    }
+
+  };
+  processPeerMedia();
 };
 
 /**
@@ -2348,20 +2404,6 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
   var self = this;
   var streamId = (self._peerConnections[targetMid] && self._peerConnections[targetMid].remoteStreamId) || stream.id || stream.label;
 
-  // if (!self._peerInformations[targetMid]) {
-  //   log.warn([targetMid, 'MediaStream', streamId, 'Received remote stream when peer is not connected. Ignoring stream ->'], stream);
-  //   return;
-  // }
-
-  /*if (!self._peerInformations[targetMid].settings.audio &&
-    !self._peerInformations[targetMid].settings.video && !isScreenSharing) {
-    log.log([targetMid, 'MediaStream', stream.id,
-      'Receive remote stream but ignoring stream as it is empty ->'
-      ], stream);
-    return;
-  }*/
-
-
   var buildNewStream = function() {
     var audioTrack = null;
     var videoTrack = null;
@@ -2370,20 +2412,20 @@ Skylink.prototype._onRemoteStreamAdded = function(targetMid, stream, isScreenSha
       if (track.enabled && !track.muted) {
         audioTrack = track;
       }
-    })
+    });
 
     stream.getVideoTracks().forEach(function(track) {
       if (track.enabled && !track.muted) {
         videoTrack = track;
       }
-    })
+    });
 
     if (audioTrack && videoTrack) {
       return new MediaStream([audioTrack, videoTrack]);
     }
 
     return null;
-  }
+  };
 
   var newStream = stream;
   if (stream.getTracks().length > 2) {

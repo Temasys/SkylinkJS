@@ -173,14 +173,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   if (!pc) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
       'Local session description will not be set as connection does not exists ->'], _sessionDescription);
-    self._handleNegotiationStats('dropped_' + sessionDescription.type, targetMid, sessionDescription, false, 'Peer connection does not exists');
+    self._handleNegotiationStats('dropped_' + _sessionDescription.type, targetMid, _sessionDescription, false, 'Peer connection does not exists');
     return;
 
   } else if (_sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER &&
     pc.signalingState !== self.PEER_CONNECTION_STATE.STABLE) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
       'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
-    self._handleNegotiationStats('dropped_offer', targetMid, sessionDescription, false, 'Peer connection state is "' + pc.signalingState + '"');
+    self._handleNegotiationStats('dropped_offer', targetMid, _sessionDescription, false, 'Peer connection state is "' + pc.signalingState + '"');
     return;
 
   // Added checks to ensure that state is "have-remote-offer" if setting local "answer"
@@ -188,14 +188,14 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
     pc.signalingState !== self.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type, 'Local session description ' +
       'will not be set as signaling state is "' + pc.signalingState + '" ->'], _sessionDescription);
-    self._handleNegotiationStats('dropped_answer', targetMid, sessionDescription, false, 'Peer connection state is "' + pc.signalingState + '"');
+    self._handleNegotiationStats('dropped_answer', targetMid, _sessionDescription, false, 'Peer connection state is "' + pc.signalingState + '"');
     return;
 
   // Added checks if there is a current local sessionDescription being processing before processing this one
   } else if (pc.processingLocalSDP) {
     log.warn([targetMid, 'RTCSessionDescription', _sessionDescription.type,
       'Local session description will not be set as another is being processed ->'], _sessionDescription);
-    self._handleNegotiationStats('dropped_' + sessionDescription.type, targetMid, sessionDescription, false, 'Peer connection is currently processing an existing sdp');
+    self._handleNegotiationStats('dropped_' + _sessionDescription.type, targetMid, _sessionDescription, false, 'Peer connection is currently processing an existing sdp');
     return;
   }
 
@@ -351,14 +351,56 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
       mid: self._user.sid,
       target: targetMid,
       rid: self._room.id,
-      userInfo: self._getUserInfo(targetMid)
+      userInfo: self._getUserInfo(targetMid),
     };
 
     pc.processingLocalSDP = messageToSend.type === self.HANDSHAKE_PROGRESS.OFFER;
 
+    var updateTransceiverMidFromLocalSDP = function () {
+      var mediaMids = self._getTransceiverMid(sessionDescription);
+      var mediaIds = Object.keys(self._peerMedias[self._user.sid]);
+      var audioMids = mediaMids.audio;
+      var videoMids = mediaMids.video;
+
+      for (var i = 0; i < mediaIds.length; i++) {
+        var mediaInfo = self._peerMedias[self._user.sid][mediaIds[i]];
+
+        for (var a = 0; a < audioMids.length; a++) {
+          // TODO: change to match just streamId once splitting of gUM (multi track) is implemented
+          if (audioMids[a].streamId === mediaInfo.streamId && (mediaInfo.mediaType === self.MEDIA_TYPE.AUDIO_MIC || mediaInfo.mediaType === self.MEDIA_TYPE.AUDIO) && (audioMids[a].direction === 'sendonly' || audioMids[a].direction === 'sendrecv')) {
+            mediaInfo.transceiverMid = audioMids[a].transceiverMid;
+            break;
+          }
+        }
+
+        for (var v = 0; v < videoMids.length; v++) {
+          if (videoMids[v].streamId === mediaInfo.streamId && !(mediaInfo.mediaType === self.MEDIA_TYPE.AUDIO_MIC || mediaInfo.mediaType === self.MEDIA_TYPE.AUDIO) && (videoMids[v].direction === 'sendonly' || videoMids[v].direction === 'sendrecv')) {
+            mediaInfo.transceiverMid = videoMids[v].transceiverMid;
+            break;
+          }
+        }
+      }
+    };
+
+    var getMediaInfoList = function () {
+      var mediaInfoList = [];
+      var peerMedia = clone(self._peerMedias[self._user.sid]);
+      var mediaIds = Object.keys(peerMedia);
+      for (var i = 0; i < mediaIds.length; i++) {
+        delete peerMedia[mediaIds[i]].streamId;
+        delete peerMedia[mediaIds[i]].trackId;
+        mediaInfoList.push(peerMedia[mediaIds[i]]);
+      }
+
+      return mediaInfoList;
+    };
+
     if (sessionDescription.type === self.HANDSHAKE_PROGRESS.OFFER) {
       messageToSend.weight = self._peerPriorityWeight;
     }
+
+    updateTransceiverMidFromLocalSDP();
+    messageToSend.mediaInfoList = getMediaInfoList();
 
     // Merging Restart and Offer messages. The already present keys in offer message will not be overwritten.
     // Only news keys from mergeMessage are added.
@@ -392,8 +434,6 @@ Skylink.prototype._setLocalAndSendMessage = function(targetMid, _sessionDescript
   } else {
     pc.setLocalDescription(new RTCSessionDescription(sessionDescription), onSuccessCbFn, onErrorCbFn);
   }
-
-
 };
 
 Skylink.prototype.renegotiateIfNeeded = function (peerId) {

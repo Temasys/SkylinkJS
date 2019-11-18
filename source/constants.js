@@ -1458,7 +1458,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   STOP_RTMP: 'stopRTMP',
   RTMP: 'rtmpEvent',
   RECORDING: 'recordingEvent',
-  END_OF_CANDIDATES: 'endOfCandidates'
+  END_OF_CANDIDATES: 'endOfCandidates',
+  MEDIA_INFO_EVENT: 'mediaInfoEvent',
 };
 
 /**
@@ -1576,4 +1577,53 @@ Skylink.prototype.MEDIA_STATUS = {
   MUTED: 0,
   ACTIVE: 1,
   UNAVAILABLE: -1,
+};
+
+/**
+ * @attribute MEDIA_STATE
+ * @param {string} MUTED - The state when the MediaTrack enabled flag is set to false. The MediaTrack is sending black frames.
+ * @param {string} ACTIVE - The state when the MediaTrack enabled flag and active flag is set to true. The MediaTrack is sending frames with content.
+ * @param {string} STOPPED - The state when the MediaTrack active flag is false. The MediaTrack is not sending any frames.
+ * @param {string} UNAVAILABLE - The state when the MediaTrack is no longer available or has been disposed.
+ * @type JSON
+ * @for Skylink
+ * @since 1.0
+ */
+Skylink.prototype.MEDIA_STATE = {
+  MUTED: 'muted',
+  ACTIVE: 'active',
+  STOPPED: 'stopped',
+  UNAVAILABLE: 'unavailable',
+};
+
+/**
+ * The list of media types.
+ * @attribute MEDIA_TYPE
+ * @param {string} AUDIO_MIC - Audio from a microphone.
+ * @param {string} VIDEO_CAMERA - Video from a Camera of any type.
+ * @param {string} VIDEO_SCREEN - Video of the Screen captured for screen sharing.
+ * @param {string} VIDEO_OTHER - Video from source other than Camera.
+ * @param {string} AUDIO - Audio from an unspecified MediaType.
+ * @param {string} VIDEO - Video from an unspecified MediaType.
+ * @type JSON
+ * @for Skylink
+ * @since 1.0
+ */
+Skylink.prototype.MEDIA_TYPE = {
+  AUDIO_MIC: 'audioMic',
+  VIDEO_CAMERA: 'videoCamera',
+  VIDEO_SCREEN: 'videoScreen',
+  VIDEO_OTHER: 'videoOther',
+  AUDIO: 'audio',
+  VIDEO: 'video',
+};
+
+Skylink.prototype.TRACK_READY_STATE = {
+  LIVE: 'live',
+  ENDED: 'ended',
+};
+
+Skylink.prototype.TRACK_KIND = {
+  AUDIO: 'audio',
+  VIDEO: 'video',
 };

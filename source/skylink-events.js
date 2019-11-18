@@ -1315,7 +1315,8 @@ var _eventsDocs = {
    * @for Skylink
    * @since 0.6.18
    */
-  candidatesGathered: []
+  candidatesGathered: [],
+  mediaInfoDeleted: []
 };
 
 /**

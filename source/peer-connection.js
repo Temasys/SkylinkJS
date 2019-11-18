@@ -1747,6 +1747,15 @@ Skylink.prototype._removePeer = function(peerId) {
   if (this._peerConnStatus[peerId]) {
     delete this._peerConnStatus[peerId];
   }
+  // remove peer medias
+  if (this._peerMedias[peerId]) {
+    delete this._peerMedias[peerId];
+  }
+
+  // remove buffered local offer
+  if (this._bufferedLocalOffer[peerId]) {
+    delete this._bufferedLocalOffer[peerId];
+  }
   // close datachannel connection
   if (this._dataChannels[peerId]) {
     this._closeDataChannel(peerId);
@@ -1886,7 +1895,7 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     var transceiverMid = rtcTrackEvent.transceiver.mid;
 
     // Safari RTCTrackEvent receiver object does not have mid info
-    if (self._hasMCU && AdapterJS.webrtcDetectedBrowser === 'safari') {
+    if (AdapterJS.webrtcDetectedBrowser === 'safari') {
       rtcTrackEvent.currentTarget.getTransceivers().forEach(function(transceiver) {
         if (transceiver.receiver.track.id === rtcTrackEvent.receiver.track.id) {
           transceiverMid = transceiver.mid;
@@ -1912,13 +1921,55 @@ Skylink.prototype._createPeerConnection = function(targetMid, isScreenSharing, c
     pc.hasStream = true;
     pc.hasScreen = peerSettings.video && typeof peerSettings.video === 'object' && peerSettings.video.screenshare;
 
+    var processStreamForMediaInfo = function (transceiverMid, stream) {
+      var parsedInfo = {};
+      parsedInfo.isScreensharing = false;
+      parsedInfo.peerId = targetMid;
+      var isMatch = false;
+
+      if (targetMid === 'MCU') {
+        var peerIds = Object.keys(self._peerMedias);
+        for (var p = 0; p < peerIds.length; p++) {
+          var mediaInfos = Object.values(self._peerMedias[peerIds[p]]);
+          for (var m = 0; m < mediaInfos.length; m++) {
+            if (mediaInfos[m].transceiverMid === transceiverMid && (peerIds[p] !== self._user.sid)) {
+              isMatch = true;
+              parsedInfo.peerId = peerIds[p];
+              parsedInfo.isScreensharing = mediaInfos[m].mediaType === self.MEDIA_TYPE.VIDEO_SCREEN;
+              self._peerMedias[peerIds[p]][mediaInfos[m].mediaId].streamId = stream.id;
+              break;
+            }
+          }
+        }
+      } else {
+        var mediaIds = Object.keys(self._peerMedias[targetMid]);
+        var peerMedia = self._peerMedias[targetMid];
+        for (var i = 0; i < mediaIds.length; i++) {
+          if (peerMedia[mediaIds[i]].transceiverMid === transceiverMid) {
+            isMatch = true;
+            parsedInfo.isScreensharing = peerMedia[mediaIds[i]].mediaType === self.MEDIA_TYPE.VIDEO_SCREEN;
+            peerMedia[mediaIds[i]].streamId = stream.id;
+            break;
+          }
+        }
+      }
+
+      if (!isMatch) {
+        log.error([targetMid, 'RTCPeerConnection', null, 'TransceiverMid of track on ontrack event does not match any transceiverMid in peerMedias mediaInfo.']);
+      }
+
+      return parsedInfo;
+    };
+
+    var parsedInfo = processStreamForMediaInfo(transceiverMid, stream);
+
     rtcTrackEvent.track.onunmute = function() {
-      self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, !!pc.hasScreen);
+      self._onRemoteStreamAdded(parsedInfo.peerId, stream, parsedInfo.isScreensharing);
     };
 
     // Safari tracks come in as muted=false
     if (!rtcTrackEvent.track.muted){
-      self._onRemoteStreamAdded(self._hasMCU ? self._transceiverIdPeerIdMap[transceiverMid] : targetMid, stream, !!pc.hasScreen);
+      self._onRemoteStreamAdded(parsedInfo.peerId, stream, parsedInfo.isScreensharing);
     }
   };
 

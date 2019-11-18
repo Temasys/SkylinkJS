@@ -1486,3 +1486,45 @@ Skylink.prototype._modifyDTLSRole = function (sessionDescription) {
   sessionDescription.sdp = sessionDescription.sdp.replace(/a=setup:[a-z]+/g, 'a=setup:' + self._originalDTLSRole);
   return sessionDescription.sdp;
 };
+
+Skylink.prototype._getTransceiverMid = function (sessionDescription) {
+  var results = {
+    audio: [],
+    video: [],
+  };
+
+  var mediaSections = sessionDescription.sdp.split('m=');
+  for (var m = 0; m < mediaSections.length; m++) {
+    var mediaItem = mediaSections[m];
+    var msidLines = mediaItem.split(/\n/);
+    var mediaType = msidLines[0].split(' ')[0];
+    if (mediaType === 'application' || m === 0) {
+      continue;
+    }
+    var parsedMline = {};
+    for (var i = 0; i < msidLines.length; i += 1) {
+      if (msidLines[i].match(/a=recvonly|a=sendonly|a=sendrecv|a=inactive/)) {
+        var array = msidLines[i].split('=');
+        parsedMline.direction = array[1].trim();
+      }
+
+      if (msidLines[i].match(/a=mid:*/)) {
+        parsedMline.transceiverMid = msidLines[i].split(/:/)[1].trim();
+      }
+
+      if (msidLines[i].match(/a=msid:([\w|-|{]+)/)) {
+        var array = msidLines[i].split(' ');
+        var firstItem = array[0].split(/:/)[1].trim();
+        parsedMline.streamId = firstItem === '-' ? '' : firstItem;
+        parsedMline.trackId = array[1].trim();
+      }
+
+      if (parsedMline.transceiverMid && parsedMline.streamId && parsedMline.trackId) {
+        results[mediaType].push(parsedMline);
+        parsedMline = {};
+      }
+    }
+  }
+
+  return results;
+};
