@@ -88,7 +88,16 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
 
   if (!isPrivate) {
     log.debug([null, 'Socket', null, 'Broadcasting message to Peers']);
-
+    //encrypt message if secureMessageSecret is given
+    if(this._initOptions.secureMessageSecret && this._initOptions.secureMessageSecret!=''){
+      if(!CryptoJS){
+        log.error([null, 'CryptoJS', null, 'Include CryptoJS for encryption feature']);
+      }
+      var key  = CryptoJS.enc.Hex.parse(this._initOptions.secureMessageSecret);
+      var iv   = CryptoJS.enc.Hex.parse('00000000000000000000000000000000');
+      var encryptedObject = CryptoJS.AES.encrypt(JSON.stringify(message), key, {iv: iv});
+      message = encryptedObject.toString();
+    }
     this._sendChannelMessage({
       cid: this._key,
       data: message,
