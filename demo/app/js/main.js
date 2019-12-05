@@ -268,6 +268,9 @@ Demo.Skylink.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
     ((message.isDataChannel) ? 'P2P' : 'Socket') + ' -> ' + message.targetPeerId + ': ' +
     message.content, message.isPrivate);
 });
+Demo.Skylink.on('messageHistory', function(message, peerId, peerInfo, isSelf) {
+  console.log("this is message history", message);
+});
 //---------------------------------------------------
 Demo.Skylink.on('peerRestart', function(peerId, peerInfo, isSelf) {
   if (isSelf) {
@@ -766,6 +769,9 @@ Demo.Skylink.init(config, function (error, success) {
       bandwidth: {
         video: 1024
       }
+    }, function(){
+      console.log("peer Joined ");
+      Demo.Skylink.getMessageHistory();
     });
   }
 });
