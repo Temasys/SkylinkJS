@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.9.2 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.9.3 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.9.2</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.9.3</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -90,7 +90,7 @@
 <div class="file">
     <pre class="code prettyprint linenums">
 /**
- * Function that starts an uploading data transfer from User to Peers.
+ * Function that starts an uploading data transfer from Peer to Peer(s).
  * @method sendBlobData
  * @param {Blob} data The Blob object.
  * @param {Number} [timeout=60] The timeout to wait for response from Peer.
@@ -2998,6 +2998,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
   self._trigger(&#x27;dataTransferState&#x27;, self.DATA_TRANSFER_STATE.DOWNLOADING, transferId, senderPeerId,
     self._getTransferInfo(transferId, peerId, true, false, false), null);
 };
+
     </pre>
 </div>
 

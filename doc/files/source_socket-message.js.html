@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Temasys Documentation - SkylinkJS 0.9.2 - Web SDK</title>
+    <title>Temasys Documentation - SkylinkJS 0.9.3 - Web SDK</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- font and icon -->
     <link rel="shortcut icon" type="image/ico" href="../assets/favicon.ico">
@@ -33,7 +33,7 @@
           <span class="icon-bar"></span>
         </button>
         <a href="" class="navbar-brand">
-          <img src="../assets/img/logo.svg" /><small>Version: 0.9.2</small>
+          <img src="../assets/img/logo.svg" /><small>Version: 0.9.3</small>
         </a>
       </div>
       <div id="navbar" class="navbar-collapse collapse">
@@ -177,16 +177,30 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
       &#x27;there are Peer connected by then).&#x27;);
   }
 
+  //encode message if secureMessageSecret is given
+
+
   if (!isPrivate) {
     log.debug([null, &#x27;Socket&#x27;, null, &#x27;Broadcasting message to Peers&#x27;]);
 
-    this._sendChannelMessage({
+    var publicMessageBody = {
       cid: this._key,
       data: message,
       mid: this._user.sid,
       rid: this._room.id,
       type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-    });
+    };
+
+    if(this._initOptions.secureMessageSecret &amp;&amp; this._initOptions.secureMessageSecret!==&#x27;&#x27;){
+      if(!CryptoJS){
+        log.error([null, &#x27;Socket&#x27;, null, &quot;CryptoJS is not available&quot;]);
+      } else{
+        publicMessageBody.data = this._encryptMessage(JSON.stringify(message));
+        publicMessageBody.isSecure = true;
+      }
+    }
+
+    this._sendChannelMessage(publicMessageBody);
   } else {
     this._trigger(&#x27;incomingMessage&#x27;, {
       content: message,
@@ -197,6 +211,31 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
       senderPeerId: this._user.sid
     }, this._user.sid, this.getPeerInfo(), true);
   }
+};
+Skylink.prototype._encryptMessage = function(message) {
+  var cipher = CryptoJS.AES.encrypt(message, this._initOptions.secureMessageSecret);
+  return cipher.toString();
+};
+
+Skylink.prototype._decryptMessage = function(message) {
+  var decipher = CryptoJS.AES.decrypt(message, this._initOptions.secureMessageSecret);
+  return decipher.toString(CryptoJS.enc.Utf8);
+}
+/**
+ * Function that gets the message history from server if secureMessageSecret and hasPersistentMessage is set to true.
+ * @method getMessageHistory
+ * @for Skylink
+ * @since 0.9.2
+ */
+Skylink.prototype.getMessageHistory = function() {
+
+  this._sendChannelMessage({
+    cid: this._key,
+    mid: this._user.sid,
+    rid: this._room.id,
+    target: this._user.sid,
+    type: this._SIG_MESSAGE_TYPE.MESSAGE_HISTORY
+  });
 };
 
 /**
@@ -462,6 +501,7 @@ Skylink.prototype._processSigMessage = function(message, session) {
   log.debug([origin, &#x27;Socket&#x27;, message.type, &#x27;Received from peer -&gt;&#x27;], clone(message));
   if (message.mid === this._user.sid &amp;&amp;
     message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &amp;&amp;
+    message.type !== this._SIG_MESSAGE_TYPE.MESSAGE_HISTORY &amp;&amp;
     message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
     log.debug([origin, &#x27;Socket&#x27;, message.type, &#x27;Ignoring message -&gt;&#x27;], clone(message));
     return;
@@ -470,6 +510,9 @@ Skylink.prototype._processSigMessage = function(message, session) {
   //--- BASIC API Messages ----
   case this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE:
     this._publicMessageHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.MESSAGE_HISTORY:
+    this._messageHistoryHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE:
     this._privateMessageHandler(message);
@@ -872,11 +915,42 @@ Skylink.prototype._privateMessageHandler = function(message) {
  * @since 0.4.0
  */
 Skylink.prototype._publicMessageHandler = function(message) {
+
+  if(message.isSecure){
+    message.data = JSON.parse(this._decryptMessage(message.data));
+  }
+
   var targetMid = message.mid;
   log.log([targetMid, null, message.type,
     &#x27;Received public message from peer:&#x27;], message.data);
   this._trigger(&#x27;incomingMessage&#x27;, {
     content: message.data,
+    isPrivate: false,
+    targetPeerId: null, // is not null if there&#x27;s user
+    isDataChannel: false,
+    senderPeerId: targetMid
+  }, targetMid, this.getPeerInfo(targetMid), false);
+};
+
+/**
+ * Function that handles message history received from server.
+ * @method _messageHistoryHandler
+ * @private
+ * @for Skylink
+ * @since 0.9.3
+ */
+
+Skylink.prototype._messageHistoryHandler = function(message) {
+
+  var messageData = JSON.parse(message.data);
+  for(var i=0; i&lt;messageData.length; i++){
+    messageData[i][&quot;data&quot;] = this._decryptMessage((messageData[i][&quot;data&quot;]));
+  }
+  var targetMid = message.mid;
+  log.log([targetMid, null, message.type,
+    &#x27;Received MessageHistory for this room:&#x27;], messageData);
+  this._trigger(&#x27;messageHistory&#x27;, {
+    content: messageData,
     isPrivate: false,
     targetPeerId: null, // is not null if there&#x27;s user
     isDataChannel: false,

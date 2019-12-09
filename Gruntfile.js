@@ -71,6 +71,7 @@ module.exports = function(grunt) {
                     ],
                     '<%= production %>/skylink.complete.js': [
                         'node_modules/socket.io-client/socket.io.js',
+                        'node_modules/crypto-js/crypto-js.js',
                         'node_modules/adapterjs/publish/adapter.screenshare.js',
                         '<%= production %>/skylink.debug.js'
                     ]

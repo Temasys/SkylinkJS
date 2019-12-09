@@ -1448,7 +1448,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   STOP_RTMP: 'stopRTMP',
   RTMP: 'rtmpEvent',
   RECORDING: 'recordingEvent',
-  END_OF_CANDIDATES: 'endOfCandidates'
+  END_OF_CANDIDATES: 'endOfCandidates',
+  MESSAGE_HISTORY: 'messageHistory',
 };
 
 /**
