@@ -1,4 +1,4 @@
-/*! skylinkjs - v0.9.2 - Tue May 07 2019 11:00:47 GMT+0800 (Singapore Standard Time) */
+/*! skylinkjs - v0.9.3 - Mon Dec 09 2019 10:39:19 GMT+0800 (Singapore Standard Time) */
 
 (function(globals) {
 
@@ -1652,7 +1652,7 @@ Skylink.prototype.SYSTEM_ACTION_REASON = {
  * @for Skylink
  * @since 0.1.0
  */
-Skylink.prototype.VERSION = '0.9.2';
+Skylink.prototype.VERSION = '0.9.3';
 
 /**
  * The list of <a href="#method_init"><code>init()</code> method</a> ready states.
@@ -2329,7 +2329,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   STOP_RTMP: 'stopRTMP',
   RTMP: 'rtmpEvent',
   RECORDING: 'recordingEvent',
-  END_OF_CANDIDATES: 'endOfCandidates'
+  END_OF_CANDIDATES: 'endOfCandidates',
+  MESSAGE_HISTORY: 'messageHistory',
 };
 
 /**
@@ -5591,6 +5592,7 @@ Skylink.prototype._DATAProtocolHandler = function(peerId, chunk, chunkType, chun
   self._trigger('dataTransferState', self.DATA_TRANSFER_STATE.DOWNLOADING, transferId, senderPeerId,
     self._getTransferInfo(transferId, peerId, true, false, false), null);
 };
+
 Skylink.prototype._onIceCandidate = function(targetMid, candidate) {
   var self = this;
   var pc = self._peerConnections[targetMid];
@@ -10345,6 +10347,8 @@ Skylink.prototype.init = function(_options, _callback) {
   // `init({ enableStatsGathering: true })`
   options.enableStatsGathering = options.enableStatsGathering !== false;
 
+  options.secureMessageSecret = options.secureMessageSecret || '';
+
   // `init({ socketTimeout: 20000 })`
   options.socketTimeout = typeof options.socketTimeout === 'number' && options.socketTimeout >= 5000 ? options.socketTimeout : 7000;
 
@@ -14021,16 +14025,30 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
       'there are Peer connected by then).');
   }
 
+  //encode message if secureMessageSecret is given
+
+
   if (!isPrivate) {
     log.debug([null, 'Socket', null, 'Broadcasting message to Peers']);
 
-    this._sendChannelMessage({
+    var publicMessageBody = {
       cid: this._key,
       data: message,
       mid: this._user.sid,
       rid: this._room.id,
       type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-    });
+    };
+
+    if(this._initOptions.secureMessageSecret && this._initOptions.secureMessageSecret!==''){
+      if(!CryptoJS){
+        log.error([null, 'Socket', null, "CryptoJS is not available"]);
+      } else{
+        publicMessageBody.data = this._encryptMessage(JSON.stringify(message));
+        publicMessageBody.isSecure = true;
+      }
+    }
+
+    this._sendChannelMessage(publicMessageBody);
   } else {
     this._trigger('incomingMessage', {
       content: message,
@@ -14041,6 +14059,31 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
       senderPeerId: this._user.sid
     }, this._user.sid, this.getPeerInfo(), true);
   }
+};
+Skylink.prototype._encryptMessage = function(message) {
+  var cipher = CryptoJS.AES.encrypt(message, this._initOptions.secureMessageSecret);
+  return cipher.toString();
+};
+
+Skylink.prototype._decryptMessage = function(message) {
+  var decipher = CryptoJS.AES.decrypt(message, this._initOptions.secureMessageSecret);
+  return decipher.toString(CryptoJS.enc.Utf8);
+}
+/**
+ * Function that gets the message history from server if secureMessageSecret and hasPersistentMessage is set to true.
+ * @method getMessageHistory
+ * @for Skylink
+ * @since 0.9.2
+ */
+Skylink.prototype.getMessageHistory = function() {
+
+  this._sendChannelMessage({
+    cid: this._key,
+    mid: this._user.sid,
+    rid: this._room.id,
+    target: this._user.sid,
+    type: this._SIG_MESSAGE_TYPE.MESSAGE_HISTORY
+  });
 };
 
 /**
@@ -14306,6 +14349,7 @@ Skylink.prototype._processSigMessage = function(message, session) {
   log.debug([origin, 'Socket', message.type, 'Received from peer ->'], clone(message));
   if (message.mid === this._user.sid &&
     message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &&
+    message.type !== this._SIG_MESSAGE_TYPE.MESSAGE_HISTORY &&
     message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
     log.debug([origin, 'Socket', message.type, 'Ignoring message ->'], clone(message));
     return;
@@ -14314,6 +14358,9 @@ Skylink.prototype._processSigMessage = function(message, session) {
   //--- BASIC API Messages ----
   case this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE:
     this._publicMessageHandler(message);
+    break;
+  case this._SIG_MESSAGE_TYPE.MESSAGE_HISTORY:
+    this._messageHistoryHandler(message);
     break;
   case this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE:
     this._privateMessageHandler(message);
@@ -14716,11 +14763,42 @@ Skylink.prototype._privateMessageHandler = function(message) {
  * @since 0.4.0
  */
 Skylink.prototype._publicMessageHandler = function(message) {
+
+  if(message.isSecure){
+    message.data = JSON.parse(this._decryptMessage(message.data));
+  }
+
   var targetMid = message.mid;
   log.log([targetMid, null, message.type,
     'Received public message from peer:'], message.data);
   this._trigger('incomingMessage', {
     content: message.data,
+    isPrivate: false,
+    targetPeerId: null, // is not null if there's user
+    isDataChannel: false,
+    senderPeerId: targetMid
+  }, targetMid, this.getPeerInfo(targetMid), false);
+};
+
+/**
+ * Function that handles message history received from server.
+ * @method _messageHistoryHandler
+ * @private
+ * @for Skylink
+ * @since 0.9.3
+ */
+
+Skylink.prototype._messageHistoryHandler = function(message) {
+
+  var messageData = JSON.parse(message.data);
+  for(var i=0; i<messageData.length; i++){
+    messageData[i]["data"] = this._decryptMessage((messageData[i]["data"]));
+  }
+  var targetMid = message.mid;
+  log.log([targetMid, null, message.type,
+    'Received MessageHistory for this room:'], messageData);
+  this._trigger('messageHistory', {
+    content: messageData,
     isPrivate: false,
     targetPeerId: null, // is not null if there's user
     isDataChannel: false,
