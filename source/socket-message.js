@@ -49,11 +49,12 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
     listOfPeers = [targetPeerId];
     isPrivate = true;
   }
+  //disabling check so user can save message history even when no peer joined
 
-  if (!this._inRoom || !this._socket || !this._user) {
-    log.error('Unable to send message as User is not in Room. ->', message);
-    return;
-  }
+  // if (!this._inRoom || !this._socket || !this._user) {
+  //   log.error('Unable to send message as User is not in Room. ->', message);
+  //   return;
+  // }
 
   // Loop out unwanted Peers
   for (var i = 0; i < listOfPeers.length; i++) {
