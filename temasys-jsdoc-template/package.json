@@ -1,0 +1,59 @@
+{
+  "_from": "braintree-jsdoc-template",
+  "_id": "braintree-jsdoc-template@3.3.0",
+  "_inBundle": false,
+  "_integrity": "sha512-sjkq3w1Dt1HO/yKa2WzFpsi+cuO5qv0kD2kHl6T0amdrnQX9T7sQBBde56iYR1dzXFYMXyh7ti/662v9/00bGw==",
+  "_location": "/braintree-jsdoc-template",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "tag",
+    "registry": true,
+    "raw": "braintree-jsdoc-template",
+    "name": "braintree-jsdoc-template",
+    "escapedName": "braintree-jsdoc-template",
+    "rawSpec": "",
+    "saveSpec": null,
+    "fetchSpec": "latest"
+  },
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "https://registry.npmjs.org/braintree-jsdoc-template/-/braintree-jsdoc-template-3.3.0.tgz",
+  "_shasum": "6a98a8c209673caab752e19dfa4408850a9439fe",
+  "_spec": "braintree-jsdoc-template",
+  "_where": "/Users/gsharma/temasys/web-sdk-2.x",
+  "author": {
+    "name": "Braintreeps",
+    "email": "code@getbraintree.com"
+  },
+  "bugs": {
+    "url": "https://github.com/braintree/jsdoc-template"
+  },
+  "bundleDependencies": false,
+  "deprecated": false,
+  "description": "Braintree JSDoc 3 Template",
+  "devDependencies": {
+    "eslint": "^2.13.1",
+    "eslint-config-braintree": "^1.0.2",
+    "taffydb": "^2.7.3"
+  },
+  "homepage": "https://github.com/braintree/jsdoc-template",
+  "licenses": [
+    {
+      "type": "Apache-2.0",
+      "url": "http://www.apache.org/licenses/LICENSE-2.0"
+    }
+  ],
+  "main": "publish.js",
+  "name": "braintree-jsdoc-template",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/braintree/jsdoc-template.git"
+  },
+  "scripts": {
+    "lint": "eslint .",
+    "test": "npm run lint"
+  },
+  "version": "3.3.0"
+}

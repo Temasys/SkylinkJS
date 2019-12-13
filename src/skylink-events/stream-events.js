@@ -1,0 +1,69 @@
+import {
+  INCOMING_STREAM,
+  INCOMING_SCREEN_STREAM,
+  STREAM_ENDED,
+  STREAM_MUTED,
+} from './constants';
+
+import SkylinkEvent from '../utils/skylinkEvent';
+
+/**
+ * @event SkylinkEvents.onIncomingStream
+ * @description Event triggered when receiving Peer Stream.
+ * @param {Object} detail - Event's payload.
+ * @param {SkylinkRoom} detail.room - The current room
+ * @param {string} detail.peerId - The peer's id
+ * @param {MediaStream} detail.stream - The Stream object. To attach it to an element: <code>attachMediaStream(videoElement, stream);</code>.
+ * @param {string} detail.streamId - The stream id.
+ * @param {boolean} detail.isSelf -The flag if Peer is User.
+ * @param {peerInfo} detail.peerInfo - The Peer session information.
+ * @param {string} detail.isReplace - The The flag if the incoming stream has replaced an existing stream.
+ * @param {string} detail.replacedStreamId - The streamId of the replaced stream.
+ * @param {boolean} detail.isVideo - The flag if the incoming stream has a video track.
+ * @param {boolean} detail.isAudio - The flag if the incoming stream has an audio track.
+ * @alias SkylinkEvents.onIncomingStream
+ * */
+export const onIncomingStream = (detail = {}) => new SkylinkEvent(INCOMING_STREAM, { detail });
+
+/**
+ * @event SkylinkEvents.onIncomingScreenStream
+ * @description Event triggered when receving Peer Screenshare Stream.
+ * @param {Object} detail - Event's payload.
+ * @param {SkylinkRoom} detail.room - The current room.
+ * @param {string} detail.peerId - The peer's id.
+ * @param {MediaStream} detail.stream - The Stream object.
+ * @param {string} detail.streamId - The Stream id.
+ * @param {Boolean} detail.isSelf - The flag if Peer is User.
+ * @param {peerInfo} detail.peerInfo - The Peer session information.
+ * @param {Boolean} detail.isReplace - The flag if the incoming screenshare stream results from shareScreen() called with replaceUserMediaStream = true.
+ * @param {boolean} detail.isVideo - The flag if the incoming screen stream has a video track.
+ * @param {boolean} detail.isAudio - The flag if the incoming screen stream has an audio track.
+ * */
+export const onIncomingScreenStream = (detail = {}) => new SkylinkEvent(INCOMING_SCREEN_STREAM, { detail });
+
+/**
+ * @event SkylinkEvents.streamEnded
+ * @description Event triggered when a Peer Stream streaming has stopped. Note that it may not be the currently sent Stream to User, and it also triggers when User leaves the Room for any currently sent Stream to User from Peer.
+ * @param {Object} detail - Event's payload.
+ * @param {string} detail.peerId - The Peer ID.
+ * @param {SkylinkRoom} detail.room - The room.
+ * @param {peerInfo} detail.peerInfo - The Peer session information. Object signature matches the <code>peerInfo</code> parameter payload received in the <code>peerJoined</code> event.
+ * @param {Boolean} detail.isSelf The flag if Peer is User.
+ * @param {Boolean} detail.isScreensharing The flag if Peer Stream is a screensharing Stream.
+ * @param {string} detail.streamId The Stream ID.
+ * @param {boolean} detail.isVideo - The flag if the ended stream has a video track.
+ * @param {boolean} detail.isAudio - The flag if the ended stream has an audio track.
+ * */
+export const streamEnded = (detail = {}) => new SkylinkEvent(STREAM_ENDED, { detail });
+
+/**
+ * @event SkylinkEvents.streamMuted
+ * @description Event triggered when Peer Stream audio or video tracks has been muted / unmuted.
+ * @param {Object} detail - Event's payload.
+ * @param {string} detail.peerId -  The Peer ID.
+ * @param {peerInfo} detail.peerInfo The Peer session information. Object signature matches the <code>peerInfo</code> parameter payload received in the <code>peerJoined</code> event.
+ * @param {Boolean} detail.isSelf The flag if Peer is User.
+ * @param {boolean} detail.isVideo - The flag if the ended stream has a video track.
+ * @param {boolean} detail.isAudio - The flag if the ended stream has an audio track.
+ * */
+export const streamMuted = (detail = {}) => new SkylinkEvent(STREAM_MUTED, { detail });

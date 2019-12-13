@@ -1,0 +1,34 @@
+{
+  "plugins": ["plugins/markdown"],
+  "recurseDepth": 10,
+  "source": {
+    "include": ["./src"],
+    "exclude": [
+      "./coverage",
+      "./demos",
+      "./dist",
+      "./test",
+      "./node_modules",
+      "./configs"
+    ],
+    "includePattern": ".+\\.js(doc|x)?$",
+    "excludePattern": "(^|\\/|\\\\)_"
+  },
+  "sourceType": "module",
+  "tags": {
+    "allowUnknownTags": ["category"],
+    "dictionaries": ["jsdoc", "closure"]
+  },
+  "templates": {
+    "cleverLinks": true,
+    "monospaceLinks": false
+  },
+  "opts": {
+    "template": "../../temasys-jsdoc-template",
+    "destination": "./docs",
+    "encoding": "utf8",
+    "readme": "readme.md",
+    "recurse": true,
+    "verbose": true
+  }
+}

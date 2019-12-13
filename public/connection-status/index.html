@@ -1,0 +1,55 @@
+<html>
+<head>
+  <title>Temasys Web SDK Demo : Connection Status</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel='shortcut icon' href='../favicon.ico'>
+  <link href="../assets/css/base.css" rel="stylesheet" type="text/css" media="screen">
+  <link href="../assets/css/messaging.css" rel="stylesheet" type="text/css" media="screen">
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js" type="text/javascript"></script>
+</head>
+<body>
+  <section>
+    <div>
+        <h1 class='title'>Temasys Web SDK Demo: Signaling events</h1>
+    </div>
+  </section>
+  <br/>
+  <br/>
+  <section>
+    <p>Ready state: <span id="readystate" style="text-transform: uppercase;"></span></p>
+    <p>Channel status: <span id="channel"></span></p>
+  </section>
+  <br/>
+  <br/>
+  <section>
+    <h3>Peer events</h3>
+    <table id="peers" class="table">
+      <tr>
+        <th>PeerId</th>
+        <th>HandshakeProgress</th>
+        <th>PeerConnectionState</th>
+        <th>CandidateGenerateState</th>
+        <th>DataChannelState</th>
+      </tr>
+    </table>
+  </section>
+
+  <br/>
+  <br/>
+  <br/>
+  <br/>
+
+  <footer class='footer navbar-fixed-bottom container-footer'>
+      <div class='text-center'>
+        <p class='muted credit'>
+          &copy; Temasys Communications Pte Ltd 2019. All Rights Reserved.
+        </p>
+      </div>
+  </footer>
+
+  <script src="../edge-attachmediastream.js"   type="text/javascript"></script>
+  <script src="../../node_modules/socket.io-client/dist/socket.io.js" type="text/javascript"></script>
+  <script src="script.js" type="module"></script>
+</body>
+</html>

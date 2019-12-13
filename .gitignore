@@ -24,6 +24,7 @@ nbproject
 *.sublime-workspace
 npm-debug.log
 node_modules
+dist
 codekit-config.json
 lib-cov
 *.seed
@@ -33,7 +34,6 @@ lib-cov
 *.out
 *.pid
 *.gz
-package-lock.json
 
 # Dreamweaver added files
 _notes
@@ -57,8 +57,9 @@ dwsync.xml
 .idea
 bamboo
 demo/**/config.js
-tests/config.js
-tests/test.conf.js
-
-#Visual Studio Code
+coverage
+.nyc_output
+docs
 .history/
+.vscode/launch.json
+package-lock.json
