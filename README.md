@@ -7,15 +7,14 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 > ##### Browsers in Beta (Edge):
 > _Note that for beta supported browsers, some of the audio / video functionalities may not work well. Some older versions of Edge may require you to enable experimental support for H.264 video codec to interop with Chrome and Firefox browsers._
 
-| Features       | Chrome | Firefox | Opera | Safari | Edge (beta) | 
-| -------------- | ---------- | ----------- | --------- | ---------- | ------ | ---------- | ---- | ----- |
-| **Platforms:** | Win, Mac, Linux, Android | Win, Mac, Linux, Android | Win, Mac, Linux, Android | Mac | Win |
-| **Minimum Recommended Versions:** | `52` | `48` | `38` | `11` | `14.14352` |
-| **Screensharing**  | Yes        |  Yes        |     -     | - | No |
-| **Video Call**     | Yes        | Yes         | Yes       | Yes | Yes (with H264 flag enabled) |
-| **Audio Call**     | Yes        | Yes         |  Yes      | Yes  | Yes |
-| **File Transfers** | Yes        | Yes         | Yes       | Yes | No |
-| **Chat Messaging** | Yes        | Yes         | Yes       | Yes | Yes (Signaling only) |
+| Features                      | Chrome                   | Firefox                  | Opera                    | Safari | Edge (beta)                  |
+|-------------------------------|--------------------------|--------------------------|--------------------------|--------|------------------------------|
+| Platforms:                    | Win, Mac, Linux, Android | Win, Mac, Linux, Android | Win, Mac, Linux, Android | Mac    | Win                          |
+| Minimum Recommended Versions: | 52                       | 48                       | 38                       | 11     | 14.14352                     |
+| Screensharing                 | Yes                      | Yes                      | -                        | -      | No                           |
+| Video Call                    | Yes                      | Yes                      | Yes                      | Yes    | Yes (with H264 flag enabled) |
+| Audio Call                    | Yes                      | Yes                      | Yes                      | Yes    | Yes                          |
+| File Transfers                | Yes                      | Yes                      | Yes                      | Yes    | No                           |
 
 - (+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.
 
