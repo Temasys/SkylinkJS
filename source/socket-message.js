@@ -108,7 +108,6 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
         publicMessageBody.isSecure = true;
       }
     }
-
     this._sendChannelMessage(publicMessageBody);
   } else {
     this._trigger('incomingMessage', {
@@ -825,7 +824,7 @@ Skylink.prototype._privateMessageHandler = function(message) {
  */
 Skylink.prototype._publicMessageHandler = function(message) {
 
-  if(message.isSecure){
+  if(this._initOptions.secureMessageSecret && this._initOptions.secureMessageSecret!==''){
     message.data = JSON.parse(this._decryptMessage(message.data));
   }
 
@@ -852,8 +851,10 @@ Skylink.prototype._publicMessageHandler = function(message) {
 Skylink.prototype._messageHistoryHandler = function(message) {
 
   var messageData = JSON.parse(message.data);
-  for(var i=0; i<messageData.length; i++){
-    messageData[i]["data"] = this._decryptMessage((messageData[i]["data"]));
+  if(this._initOptions.secureMessageSecret && this._initOptions.secureMessageSecret!=='') {
+    for (var i = 0; i < messageData.length; i++) {
+      messageData[i]["data"] = this._decryptMessage((messageData[i]["data"]));
+    }
   }
   var targetMid = message.mid;
   log.log([targetMid, null, message.type,
