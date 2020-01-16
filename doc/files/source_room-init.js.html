@@ -560,6 +560,8 @@ Skylink.prototype.init = function(_options, _callback) {
   // &#x60;init({ enableStatsGathering: true })&#x60;
   options.enableStatsGathering = options.enableStatsGathering !== false;
 
+  options.secureMessageSecret = options.secureMessageSecret || &#x27;&#x27;;
+
   // &#x60;init({ socketTimeout: 20000 })&#x60;
   options.socketTimeout = typeof options.socketTimeout === &#x27;number&#x27; &amp;&amp; options.socketTimeout &gt;= 5000 ? options.socketTimeout : 7000;
 

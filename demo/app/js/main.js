@@ -268,6 +268,16 @@ Demo.Skylink.on('incomingMessage', function(message, peerId, peerInfo, isSelf) {
     ((message.isDataChannel) ? 'P2P' : 'Socket') + ' -> ' + message.targetPeerId + ': ' +
     message.content, message.isPrivate);
 });
+
+//---------------------------------------------------
+Demo.Skylink.on('messageHistory', function(message, peerId, peerInfo, isSelf) {
+  console.log("this is message history", message);
+  for(var key in message["content"]){
+    var messageBody = message["content"][key];
+    $("#chat_log").append(messageBody["data"]+"  <small>"+messageBody["timeStamp"].replace("T", ' ').replace('Z','')+"</small>"+"<br>");
+  }
+});
+
 //---------------------------------------------------
 Demo.Skylink.on('peerRestart', function(peerId, peerInfo, isSelf) {
   if (isSelf) {
@@ -776,6 +786,9 @@ Demo.Skylink.init(config, function (error, success) {
       bandwidth: {
         video: 1024
       }
+    }, function(){
+      console.log("peer Joined ");
+      Demo.Skylink.getMessageHistory();
     });
   }
 });
@@ -800,7 +813,7 @@ $(document).ready(function() {
         if (selectedPeers.length > 0) {
           Demo.Skylink.sendMessage($('#chat_input').val(), selectedPeers);
         } else {
-          Demo.Skylink.sendMessage($('#chat_input').val());
+          Demo.Skylink.sendMessage($('#chat_input').val().replace(/[^a-zA-Z .,]/g, ''));
         }
       }
       $('#chat_input').val('');

@@ -89,13 +89,24 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
   if (!isPrivate) {
     log.debug([null, 'Socket', null, 'Broadcasting message to Peers']);
 
-    this._sendChannelMessage({
+    var publicMessageBody ={
       cid: this._key,
       data: message,
       mid: this._user.sid,
       rid: this._room.id,
       type: this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE
-    });
+    };
+
+    if(this._initOptions.secureMessageSecret && this._initOptions.secureMessageSecret!==''){
+      if(!CryptoJS){
+        log.error([null, 'Socket', null, "CryptoJS is not available"]);
+      } else{
+        publicMessageBody.data = this._encryptMessage(JSON.stringify(message));
+        publicMessageBody.isSecure = true;
+      }
+    }
+
+    this._sendChannelMessage(publicMessageBody);
   } else {
     this._trigger('incomingMessage', {
       content: message,
@@ -106,6 +117,32 @@ Skylink.prototype.sendMessage = function(message, targetPeerId) {
       senderPeerId: this._user.sid
     }, this._user.sid, this.getPeerInfo(), true);
   }
+};
+
+Skylink.prototype._encryptMessage = function(message) {
+  var cipher = CryptoJS.AES.encrypt(message, this._initOptions.secureMessageSecret);
+  return cipher.toString();
+};
+
+Skylink.prototype._decryptMessage = function(message) {
+  var decipher = CryptoJS.AES.decrypt(message, this._initOptions.secureMessageSecret);
+  return decipher.toString(CryptoJS.enc.Utf8);
+}
+/**
+ * Function that gets the message history from server if secureMessageSecret and hasPersistentMessage is set to true.
+ * @method getMessageHistory
+ * @for Skylink
+ * @since 0.6.0
+ */
+Skylink.prototype.getMessageHistory = function() {
+
+  this._sendChannelMessage({
+    cid: this._key,
+    mid: this._user.sid,
+    rid: this._room.id,
+    target: this._user.sid,
+    type: this._SIG_MESSAGE_TYPE.MESSAGE_HISTORY
+  });
 };
 
 /**
@@ -385,6 +422,7 @@ Skylink.prototype._processSigMessage = function(message, session) {
   log.debug([origin, 'Socket', message.type, 'Received from peer ->'], clone(message));
   if (message.mid === this._user.sid &&
     message.type !== this._SIG_MESSAGE_TYPE.REDIRECT &&
+    message.type !== this._SIG_MESSAGE_TYPE.MESSAGE_HISTORY &&
     message.type !== this._SIG_MESSAGE_TYPE.IN_ROOM) {
     log.debug([origin, 'Socket', message.type, 'Ignoring message ->'], clone(message));
     return;
@@ -394,6 +432,9 @@ Skylink.prototype._processSigMessage = function(message, session) {
   case this._SIG_MESSAGE_TYPE.PUBLIC_MESSAGE:
     this._publicMessageHandler(message);
     break;
+    case this._SIG_MESSAGE_TYPE.MESSAGE_HISTORY:
+      this._messageHistoryHandler(message);
+      break;
   case this._SIG_MESSAGE_TYPE.PRIVATE_MESSAGE:
     this._privateMessageHandler(message);
     break;
@@ -788,11 +829,44 @@ Skylink.prototype._privateMessageHandler = function(message) {
  * @since 0.4.0
  */
 Skylink.prototype._publicMessageHandler = function(message) {
+
+  if(this._initOptions.secureMessageSecret && this._initOptions.secureMessageSecret!==''){
+    message.data = JSON.parse(this._decryptMessage(message.data));
+  }
+
   var targetMid = message.mid;
   log.log([targetMid, null, message.type,
     'Received public message from peer:'], message.data);
   this._trigger('incomingMessage', {
     content: message.data,
+    isPrivate: false,
+    targetPeerId: null, // is not null if there's user
+    isDataChannel: false,
+    senderPeerId: targetMid
+  }, targetMid, this.getPeerInfo(targetMid), false);
+};
+
+/**
+ * Function that handles message history received from server.
+ * @method _messageHistoryHandler
+ * @private
+ * @for Skylink
+ * @since 0.6.0
+ */
+
+Skylink.prototype._messageHistoryHandler = function(message) {
+
+  var messageData = JSON.parse(message.data);
+  if(this._initOptions.secureMessageSecret && this._initOptions.secureMessageSecret!=='') {
+    for (var i = 0; i < messageData.length; i++) {
+      messageData[i]["data"] = this._decryptMessage((messageData[i]["data"]));
+    }
+  }
+  var targetMid = message.mid;
+  log.log([targetMid, null, message.type,
+    'Received MessageHistory for this room:'], messageData);
+  this._trigger('messageHistory', {
+    content: messageData,
     isPrivate: false,
     targetPeerId: null, // is not null if there's user
     isDataChannel: false,
