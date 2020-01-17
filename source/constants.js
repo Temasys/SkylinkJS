@@ -1444,7 +1444,8 @@ Skylink.prototype._SIG_MESSAGE_TYPE = {
   START_RECORDING: 'startRecordingRoom',
   STOP_RECORDING: 'stopRecordingRoom',
   RECORDING: 'recordingEvent',
-  END_OF_CANDIDATES: 'endOfCandidates'
+  END_OF_CANDIDATES: 'endOfCandidates',
+  MESSAGE_HISTORY: 'messageHistory'
 };
 
 /**
