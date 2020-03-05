@@ -1,0 +1,112 @@
+body {
+    background: white;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+}
+
+/* TITLES */
+
+h3 {
+    font-size: 1rem;
+}
+
+/* TABLES */
+.table {
+    border: 1px solid;
+    width: 100%;
+}
+
+.table th {
+    border: 1px solid;
+    background: #00b6b1;
+    color: white;
+    height: 4rem;
+}
+
+table tr, td {
+    border: 1px solid black;
+    height: 3rem;
+}
+
+/* STANDARD ELEMENTS */
+input:focus,
+select:focus,
+textarea:focus,
+button:focus {
+    outline: none;
+}
+
+.btn {
+    background: #7b5a9c;
+    color: white;
+    border-radius: 8px;
+}
+
+.full-width {
+    width: 100%;
+}
+
+.component {
+    height: 2rem;
+    border: 2px solid black;
+    font-size: 1rem;
+    font-weight: 300;
+    margin-top: 1rem;
+}
+
+.file-component {
+    border: 0;
+}
+
+.container {
+    width: 100%;
+    display: flex;
+    margin-top: 1rem;
+    margin-bottom: 1rem;
+}
+
+.container-footer {
+    width: 100%;
+    margin-top: 2rem;
+    margin-bottom: 2rem;
+}
+
+.container-header  {
+    background: #00b6b1;
+    padding: 20px;
+    border-top-left-radius: 20px;
+    border-top-right-radius: 20px;
+    border: 1px solid #0a0a0a;
+  }
+
+.component-width {
+    width: 25rem;
+}
+
+.select-size {
+    width: 4rem;
+}
+
+.text-area {
+    height: 5rem;
+}
+
+/* HELPERS */
+.text-center {
+    text-align: center;
+}
+
+.bordered-container {
+    border: 1px solid #7b807f;
+    outline: 2px dashed #c4c5c4;
+    outline-offset: -20px;
+    box-shadow: 5px 2px 4px 3px #e8e8e8;
+    min-height: 88vh;
+}
+
+.stripes-background {
+    background-image: url('../img/stripes.png');
+}
+
+.margin-right {
+    margin-right: 10px !important;
+}

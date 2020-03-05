@@ -7,7 +7,13 @@ pipelines:
        script:
          - echo "Default"
   branches:
-    staging:
+    development-1:
+    - step:
+          name: Build
+          script:
+          - npm install
+          - npm run publish
+    staging-1:
     - step:
           name: Build and Test
           script:
@@ -15,7 +21,7 @@ pipelines:
             - git rm -r publish/*
             - npm run publish
             - echo "Generated new publish files"
-            - git add publish/*
-            - git add docs/*
+            - git add --force publish/*
+            - git add --force docs/*
             - git commit -m "[skip ci] Add publish files"
             - git push
