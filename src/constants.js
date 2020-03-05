@@ -1870,6 +1870,7 @@ export const BROWSER_AGENT = {
   CHROME: 'chrome',
   FIREFOX: 'firefox',
   SAFARI: 'safari',
+  REACT_NATIVE: 'react-native',
 };
 
 /**

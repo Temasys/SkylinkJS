@@ -99,6 +99,8 @@ class PeerMedia {
 
     Skylink.setSkylinkState(updatedState, room.id);
 
+    helpers.processOnRemoveTrack(updatedState, peerId, clonedMediaInfo);
+
     dispatchEvent(mediaInfoDeleted({
       mediaInfo: clonedMediaInfo,
     }));
@@ -119,6 +121,7 @@ class PeerMedia {
 
   /**
    * Method that updates the transceiver mid value of local media info after set local description.
+   * // TODO: remove as it is no longer called
    * @param room
    * @param peerId
    * @private

@@ -1,4 +1,6 @@
-import { BUNDLE_POLICY, HANDSHAKE_PROGRESS, PEER_TYPE } from '../../../constants';
+import {
+  BUNDLE_POLICY, HANDSHAKE_PROGRESS, PEER_TYPE, BROWSER_AGENT,
+} from '../../../constants';
 import Skylink from '../../../index';
 import logger from '../../../logger';
 import callbacks from './callbacks/index';
@@ -69,6 +71,10 @@ const createNativePeerConnection = (targetMid, constraints, optional, hasScreenS
   rtcPeerConnection.oniceconnectionstatechange = callbacks.oniceconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.onsignalingstatechange = callbacks.onsignalingstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.onicegatheringstatechange = callbacks.onicegatheringstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+
+  if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE) {
+    rtcPeerConnection.onsenderadded = callbacks.onsenderadded.bind(rtcPeerConnection, ...callbackExtraParams);
+  }
 
   return rtcPeerConnection;
 };

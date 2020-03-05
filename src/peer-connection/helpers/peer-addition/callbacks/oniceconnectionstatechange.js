@@ -95,7 +95,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
     PeerConnection.getConnectionStatus(state, targetMid).then(() => {
       handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
       statsInterval = setInterval(() => {
-        if (peerConnection.signalingState === PEER_CONNECTION_STATE.CLOSED) {
+        if (peerConnection.signalingState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === PEER_CONNECTION_STATE.CLOSED) {
           clearInterval(statsInterval);
         } else {
           new HandleBandwidthStats().send(state.room.id, peerConnection, targetMid);

@@ -23,14 +23,14 @@ const updateMediaStatus = (state, peerId, streamId) => {
   Skylink.setSkylinkState(updatedState, updatedState.room.id);
 };
 
-const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent) => {
+const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent, stream) => {
   dispatchEvent(streamEnded({
     room: state.room,
     peerId,
     peerInfo: PeerData.getPeerInfo(peerId, state.room),
     isSelf: false,
     isScreensharing,
-    streamId: rtcTrackEvent.track.id,
+    streamId: stream.id,
     isVideo: rtcTrackEvent.track.kind === TRACK_KIND.VIDEO,
     isAudio: rtcTrackEvent.track.kind === TRACK_KIND.AUDIO,
   }));
@@ -86,7 +86,7 @@ const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
   }
 
   updateMediaStatus(state, peerId, stream.id);
-  dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent);
+  dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent, stream);
 
   if (isScreensharing) {
     // Dispatch to ensure that the client has a way of retrieving the camera stream. Camera stream was not added to pc and therefore ontrack will not trigger on remote.

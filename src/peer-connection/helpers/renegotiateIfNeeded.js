@@ -3,7 +3,7 @@ const renegotiateIfNeeded = (state, peerId) => {
 
   return new Promise((resolve) => {
     const peerConnection = peerConnections[peerId];
-    const pcSenders = peerConnection.getSenders();
+    const pcSenders = peerConnection.getSenders() ? peerConnection.getSenders() : [];
     const senderGetStatsPromises = [];
     const savedSenders = currentRTCRTPSenders[peerId] || [];
     let isRenegoNeeded = false;
