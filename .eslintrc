@@ -1,0 +1,11 @@
+{
+  "parser": "babel-eslint",
+  "globals": {
+    "window": true
+  },
+  "rules": {
+    "max-len": "off",
+    "import/no-cycle": "off"
+  },
+  "extends": ["airbnb-base"]
+}

@@ -1,0 +1,45 @@
+.action, .default {
+    font-style: italic;
+    color: gray;
+}
+
+.message, .you, .action, .default {
+    margin-bottom: 0.4rem;
+    margin-top: 0.4rem;
+    padding-left: 1rem;
+}
+
+.you {
+    font-weight: bold;
+    margin-bottom: 0.2rem;
+    font-weight: bold;
+    margin-bottom: 0.4rem;
+}
+
+.answer, .closed, .offer, .completed, .stable, .open, .enter, .error, .failed, .canceled {
+    font-weight: bold;
+}
+
+.answer, .closed, .offer {
+    color: gray;
+}
+
+.completed {
+    color: green;
+}
+
+.stable {
+    color: blue;
+}
+
+.open {
+    color: #8ecc30;
+}
+
+.enter {
+    color: orange;
+}
+
+.error, .failed, .canceled {
+    color: red;
+}

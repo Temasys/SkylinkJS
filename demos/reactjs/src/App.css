@@ -1,0 +1,21 @@
+.skylink-header {
+  height: 50px;
+  background: #000;
+  padding: 15px;
+}
+
+.skylink-demo-body {
+  padding-top: 25px;
+}
+
+.text-white {
+  color: white;
+}
+
+.text-muted {
+  color: #777;
+}
+
+.public-method-btn {
+    margin-top: 10px !important;
+}

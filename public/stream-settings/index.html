@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Temasys Web SDK Demo : Stream Settings Selection</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel='shortcut icon' href='../favicon.ico'>
+  <style>
+    video {
+      background: #000;
+    }
+  </style>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js" type="text/javascript"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js" type="text/javascript"></script>
+</head>
+<body>
+  <div>
+    <p>Join Room with</p>
+    <select id="settings">
+      <option value="av">Audio and Video</option>
+      <option value="a">Audio only</option>
+      <option value="v">Video only</option>
+      <option value="o">No stream</option>
+    </select>
+    <button id="joinRoomBtn">Join room</button>
+    <button id="toggleAudioBtn" style="display:none;">-</button>
+    <button id="toggleVideoBtn" style="display:none;">-</button>
+  </div>
+  <hr>
+
+  <script src="../../dist/skylink.esm.js"  type="module"></script>
+  <script src="../../node_modules/socket.io-client/dist/socket.io.js" type="text/javascript"></script>
+  <script src="../edge-attachmediastream.js"   type="text/javascript"></script>
+  <script src="script.js"   type="module"></script>
+</body>
+</html>

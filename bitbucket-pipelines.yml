@@ -1,0 +1,21 @@
+image: node:10.7.0
+
+pipelines:
+  default:
+  - step:
+       name: Build and Test
+       script:
+         - echo "Default"
+  branches:
+    staging:
+    - step:
+          name: Build and Test
+          script:
+            - npm install
+            - git rm -r publish/*
+            - npm run publish
+            - echo "Generated new publish files"
+            - git add publish/*
+            - git add docs/*
+            - git commit -m "[skip ci] Add publish files"
+            - git push
