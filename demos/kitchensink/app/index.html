@@ -176,18 +176,6 @@
                   <span class="glyphicon glyphicon-facetime-video"></span>
                   <span class="glyphicon glyphicon-remove"></span>
                 </button>
-                <button id="stop_stream_btn" type="button" title="Stop stream" class="btn btn-primary">
-                  <span class="glyphicon glyphicon glyphicon-minus-sign"></span>
-                  Stop Stream
-                </button>
-                <button id="send_stream_btn" type="button" title="Send stream" class="btn btn-primary">
-                  <span class="glyphicon glyphicon glyphicon-minus-sign"></span>
-                  Send Stream
-                </button>
-                <button id="send_video_btn" type="button" title="Send video" class="btn btn-primary">
-                  <span class="glyphicon glyphicon glyphicon-minus-sign"></span>
-                  Send Video
-                </button>
               </div>
             </div>
 
@@ -198,6 +186,25 @@
               <div>
                 <h2>Call Actions:</h2>
               </div>
+              <div class="btns">
+                <button id="stop_stream_btn" type="button" title="Stop stream" class="btn btn-primary">
+                  <span class="glyphicon glyphicon-stop"></span>
+                  Stop Stream
+                </button>
+                <button id="send_stream_btn" type="button" title="Send stream" class="btn btn-primary">
+                  <span class="glyphicon glyphicon-play"></span>
+                  Start Audio & Video
+                </button>
+                <button id="start_video_btn" type="button" title="Start Video" class="btn btn-primary">
+                  <span class="glyphicon glyphicon-play"></span>
+                  Start Video Only
+                </button>
+                <button id="start_audio_btn" type="button" title="Start Audio" class="btn btn-primary">
+                  <span class="glyphicon glyphicon-play"></span>
+                  Start Audio Only
+                </button>
+              </div>
+              <br/>
               <div class="btns">
                 <button id="share_screen_btn" type="button" title="Share screen" class="btn btn-primary">
                   <span class="glyphicon glyphicon glyphicon-eye-open"></span>
@@ -215,14 +222,21 @@
                   <span class="glyphicon glyphicon glyphicon-stop"></span>
                   Stop Recording
                 </button>
-                <button id="leave_room_btn" type="button" title="Leave room" class="btn btn-primary">
-                  <span class="glyphicon glyphicon-log-out"></span>
-                  <b>Exit call</b>
-                </button>
+              </div>
+              <br/>
                 <button id="get_logs_btn" type="button" title="Get logs" class="btn btn-primary">
                   <span class="glyphicon glyphicon glyphicon-download"></span>
                   Get Logs
                 </button>
+              <div class="btns">
+                <button id="leave_room_btn" type="button" title="Leave room" class="btn btn-danger">
+                  <span class="glyphicon glyphicon-log-out"></span>
+                  <b>Exit call</b>
+                </button>
+                <!--<button id="send_video_btn" type="button" title="Send video" class="btn btn-primary">
+                  <span class="glyphicon glyphicon-play"></span>
+                  Send Video
+                </button>-->
               </div>
             </div>
 

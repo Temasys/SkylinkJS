@@ -1167,11 +1167,53 @@ $(document).ready(function() {
     .catch((err) => console.error("stopStreams rejected", err));
   });
   //---------------------------------------------------
+  const startSendStream = function(mediaOptions) {
+    Demo.Skylink.sendStream(config.defaultRoom,mediaOptions);
+  };
+
   $("#send_stream_btn").click(function() {
-    Demo.Skylink.sendStream(config.defaultRoom,{
+    const mediaOptions = {
       audio: { stereo: true },
       video: true,
-    });
+    };
+
+    if (Demo.Streams && Demo.Streams.userMedia) {
+      Demo.Skylink.stopStreams(config.defaultRoom)
+      .then(() => startSendStream(mediaOptions))
+      .catch((err) => console.error("stopStreams rejected", err));
+    } else {
+      startSendStream(mediaOptions);
+    }
+  });
+  //---------------------------------------------------
+  $("#start_video_btn").click(function() {
+    const mediaOptions = {
+      audio: false,
+      video: true,
+    };
+
+    if (Demo.Streams && Demo.Streams.userMedia) {
+      Demo.Skylink.stopStreams(config.defaultRoom)
+      .then(() => startSendStream(mediaOptions))
+      .catch((err) => console.error("stopStreams rejected", err));
+    } else {
+      startSendStream(mediaOptions);
+    }
+  });
+  //---------------------------------------------------
+  $("#start_audio_btn").click(function() {
+    const mediaOptions = {
+      audio: { stereo: true },
+      video: false,
+    };
+
+    if (Demo.Streams && Demo.Streams.userMedia) {
+      Demo.Skylink.stopStreams(config.defaultRoom)
+      .then(() => startSendStream(mediaOptions))
+      .catch((err) => console.error("stopStreams rejected", err));
+    } else {
+      startSendStream(mediaOptions);
+    }
   });
   //---------------------------------------------------
   $("#send_video_btn").click(function() {
