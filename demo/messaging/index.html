@@ -1,52 +1,107 @@
 <html>
-<head>
-  <title>Temasys Web SDK Demo : Message Type</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel='shortcut icon' href='../favicon.ico'>
-  <link href="../assets/css/base.css" rel="stylesheet" type="text/css" media="screen">
-  <link href="../assets/css/messaging.css" rel="stylesheet" type="text/css" media="screen">
-  <link href="style.css" rel="stylesheet" type="text/css" media="screen">
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js" type="text/javascript"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js" type="text/javascript"></script>
-</head>
-<body>
-  <section>
-    <div>
-      <h1 class='title'>Temasys Web SDK Demo: Chat Room</h1>
-    </div>
-  </section>
-  <section class="container-header">
-    <select id="target" class="component component-width">
-      <option value="group" selected>Group message</option>
-    </select>
-    <br/>
-    <select id="type" class="component component-width">
-      <option value="p2p">Secure Message</option>
-      <option value="socket" selected>Socket Message</option>
-    </select>
-    <br/>
-    <textarea type="text" id="message" placeholder="My message" class="component component-width text-area"></textarea>
-    <br/>
-    <button onclick="sendMessage()" class="btn component">Send message</button>
-  </section>
+  <head>
+    <title>Temasys Web SDK Demo : Message Type</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="shortcut icon" href="../favicon.ico" />
+    <link
+      href="../assets/css/base.css"
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+    />
+    <link
+      href="../assets/css/messaging.css"
+      rel="stylesheet"
+      type="text/css"
+      media="screen"
+    />
+    <link href="style.css" rel="stylesheet" type="text/css" media="screen" />
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js"
+      type="text/javascript"
+    ></script>
+    <script
+      src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js"
+      type="text/javascript"
+    ></script>
+    <link
+      href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      href="https://fonts.googleapis.com/icon?family=Material+Icons"
+      rel="stylesheet"
+    />
+  </head>
+  <body>
+    <div class="main">
+      <div class="template">
+        <div class="left-panel">
+          <a href="http://temasys.io/" class="logo">
+            <img
+              class="img-responsive"
+              src="../temasys.svg"
+              alt="Skylink JS"
+              width="200px"
+            />
+          </a>
 
-  <div id="container" class="container-body">
-    <div id="chatbox"></div>
-  </div>
+          <div class="notes">
+            <p style="margin-bottom: 0;">
+              <span>Secure</span
+              ><i class="material-icons bounce-1">
+                chat
+              </i>
+            </p>
+            <p>Chat room</p>
+            <button class="add-peer" id="add-peer">Join another peer</button>
+          </div>
 
-  <footer class='footer navbar-fixed-bottom container-footer'>
-      <div class='text-center'>
-        <p class='muted credit'>
-          &copy; Temasys Communications Pte Ltd 2014. All Rights Reserved.
-        </p>
+          <div class="footer">
+            <p>© 2020 Temasys Communications. All Rights Reserved.</p>
+          </div>
+        </div>
+
+        <div class="boxes">
+          <section class="container-header con">
+            <div>
+              <select id="target" class="component component-width">
+                <option value="group" selected>Group message</option>
+              </select>
+              <br />
+              <select id="type" class="component component-width">
+                <option value="p2p">Secure Message</option>
+                <option value="socket" selected>Socket Message</option>
+              </select>
+            </div>
+            <br />
+            <div>
+              <textarea
+                type="text"
+                id="message"
+                placeholder="My message"
+                class="component component-width text-area"
+              ></textarea>
+              <br />
+              <button onclick="sendMessage()" class="btn component">
+                Send message
+              </button>
+            </div>
+          </section>
+
+          <div id="container" class="container-body">
+            <div id="chatbox"></div>
+          </div>
+        </div>
       </div>
-  </footer>
+    </div>
 
-  <script src="../../publish/skylink.complete.js"  type="text/javascript"></script>
-  <script src="../edge-attachmediastream.js"   type="text/javascript"></script>
-  <script src="../config.js"   type="text/javascript"></script>
-  <script src="script.js"   type="text/javascript"></script>
-
-
-</body>
+    <script
+      src="../../publish/skylink.complete.js"
+      type="text/javascript"
+    ></script>
+    <script src="../edge-attachmediastream.js" type="text/javascript"></script>
+    <script src="../config.js" type="text/javascript"></script>
+    <script src="script.js" type="text/javascript"></script>
+  </body>
 </html>

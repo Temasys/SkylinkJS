@@ -14,6 +14,201 @@ header a:first-child {
 
 #chatbox {
   position: absolute;
-  bottom: 0px;
+  bottom: 20px;
 }
 
+html {
+  font-size: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f7f7f7;
+  font-family: "Roboto", sans-serif;
+}
+
+.main {
+  position: absolute;
+  top: 50px;
+  bottom: 50px;
+  right: 100px;
+  left: 100px;
+  background-color: #fff;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  overflow: hidden;
+}
+
+.template {
+  height: 100%;
+  display: flex;
+}
+
+.left-panel {
+  width: 40%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: 15px;
+  padding-left: 30px;
+}
+
+.boxes {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-start;
+  height: 100%;
+  width: 60%;
+}
+
+.box {
+  width: 300px;
+  background-color: #f9f9f9;
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  align-items: center;
+}
+
+.template .box h2 {
+  font-size: 2rem;
+}
+
+.content {
+  transition: all 0.2s linear;
+}
+
+.template .box .content p {
+  text-align: center;
+}
+
+.template .box .content p i {
+  font-size: 5rem;
+  animation-duration: 2s;
+  animation-iteration-count: infinite;
+}
+
+.box a {
+  color: #fff;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.2s linear;
+}
+
+.logo {
+  margin-top: 15px;
+}
+
+.footer p {
+  text-align: center;
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.notes p {
+  font-size: 4rem;
+  font-weight: 300;
+  color: #434343;
+  line-height: 57.1429px;
+  margin-top: 0;
+}
+
+.notes p span {
+  font-size: 5rem;
+  font-weight: bold;
+}
+
+.notes i {
+  font-size: 5rem;
+  color: #a1d6d4;
+  margin-left: 15px;
+}
+
+.add-peer {
+  color: #000;
+  padding: 15px 25px;
+  border-radius: 10px;
+  border: 0;
+  font-size: 1.7rem;
+  background: rgb(2, 0, 36);
+  background: linear-gradient(
+    90deg,
+    rgba(2, 0, 36, 1) 0%,
+    rgb(255, 220, 49) 0%,
+    rgb(228, 202, 58) 100%
+  );
+  font-weight: 400;
+  cursor: pointer;
+  transition: all 0.3s linear;
+}
+
+.con {
+  background: #596275;
+  border-radius: 0;
+  border: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+.con select {
+  height: 5rem;
+  font-size: 1.5rem;
+  border: 1px solid #474e5f;
+  color: #ffffff;
+  width: 40rem;
+  margin-bottom: 20px;
+  background: #474e5f;
+  font-weight: 400;
+}
+
+.con textarea {
+  height: 10rem;
+  font-size: 1.5rem;
+  border: 1px solid #c3c3c3;
+  color: #696969;
+  width: 40rem;
+  padding: 10px;
+  resize: none;
+}
+
+.con button {
+  border: none;
+  padding: 10px 15px;
+  height: auto;
+  font-size: 1.5rem;
+  background: #01aaa2;
+  border-radius: 6px;
+  width: 100%;
+}
+
+.con + .container-body {
+  position: static;
+  height: auto;
+  width: 100%;
+  border: 0;
+  background: #474e5f;
+}
+
+#chatbox .action {
+  font-style: italic;
+  color: white;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+#chatbox .you {
+  font-style: normal;
+  color: #01aaa2;
+  font-size: 1.5rem;
+  font-weight: 400;
+}
+
+#chatbox .message {
+  font-style: normal;
+  color: #e7cb39;
+  font-size: 1.5rem;
+  font-weight: 400;
+}

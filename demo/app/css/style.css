@@ -1,5 +1,18 @@
+html {
+  font-size: 10px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: #f7f7f7;
+  font-family: "Roboto", sans-serif;
+}
+
 .navbar-white {
-  background:#fff;
+  background: #fff;
 }
 #get_user_media_btn,
 #join_room_btn,
@@ -7,107 +20,108 @@
 #presence_panel,
 #file_panel,
 #file_list_panel {
-  display:none;
+  display: none;
 }
 .circle {
-  color:red;
-  border:solid 1px;
-  border-radius:50%;
-  padding:5px;
-  margin-bottom:7px;
-  font-size:10px;
+  color: red;
+  border: solid 1px;
+  border-radius: 50%;
+  padding: 5px;
+  margin-bottom: 7px;
+  font-size: 10px;
 }
 .table {
-  font-size:12px;
-  word-break:break-word;
+  font-size: 12px;
+  word-break: break-word;
 }
 .table td:first-child {
-  font-weight:bold;
-  width:38%;
+  font-weight: bold;
+  width: 38%;
 }
 .table.upload-table td:first-child {
-  font-weight:normal;
-  width:85%;
+  font-weight: normal;
+  width: 85%;
 }
 #credential_panel {
-  margin-bottom:0;
-  border-left:0;
-  border-right:0;
-  box-shadow:none;
-  border-radius:0;
+  margin-bottom: 0;
+  border-left: 0;
+  border-right: 0;
+  box-shadow: none;
+  border-radius: 0;
 }
 #credential_panel .panel-body {
-  padding-bottom:0;
+  padding-bottom: 0;
 }
 #credential_panel .panel-body .form-group {
-  text-align:left;
+  text-align: left;
 }
 #credential_panel .panel-body .form-group .title,
 #credential_panel .panel-body .form-group .control-group {
-  display:inline-block;
-  vertical-align:top;
+  display: inline-block;
+  vertical-align: top;
 }
 #credential_panel .panel-body .form-group .title {
-  margin-top:0;
-  float:left;
+  margin-top: 0;
+  float: left;
 }
 #credential_panel .panel-body .form-group .title span {
-  display:block;
-  margin-bottom:5px;
+  display: block;
+  margin-bottom: 5px;
 }
 #credential_panel .panel-body .form-group .control-group {
 }
-video, object {
-  background:#444;
-  border:solid 2px #fff;
-  padding:0!important;
+video,
+object {
+  background: #444;
+  border: solid 2px #fff;
+  padding: 0 !important;
 }
 video#local_video,
 object#local_video {
-  right:15px;
-  position:absolute;
-  z-index:9999;
+  right: 15px;
+  position: absolute;
+  z-index: 9999;
 }
 #file_body {
-  max-height:200px;
-  overflow-y:auto;
+  max-height: 200px;
+  overflow-y: auto;
 }
 #chat_panel {
-  margin:15px 0 45px;
+  margin: 15px 0 45px;
 }
 #chat_body {
-  max-height:200px;
-  overflow-y:auto;
+  max-height: 200px;
+  overflow-y: auto;
 }
 .list-group-item-heading em {
-  float:right;
-  font-style:normal;
-  color:#888;
+  float: right;
+  font-style: normal;
+  color: #888;
 }
 .chat-item {
-  border:0;
-  padding:0 0 15px 0;
+  border: 0;
+  padding: 0 0 15px 0;
 }
 .chat-item img {
   width: 250px;
 }
 #chat_input {
-  display:block;
-  width:100%;
+  display: block;
+  width: 100%;
 }
 .control_settings .col {
   margin: 7px 0;
 }
 #leave_room_btn {
-  margin-left:12px;
+  margin-left: 12px;
 }
 .control_settings .btn-group {
   width: 100%;
 }
 footer {
-  background:#f5f5f5;
-  padding:12px 0 0;
-  border-top:solid 1px #e0e0e0;
+  background: #f5f5f5;
+  padding: 12px 0 0;
+  border-top: solid 1px #e0e0e0;
 }
 .selected-users em {
   font-style: normal;
@@ -138,10 +152,10 @@ footer {
 }
 
 .peervideo .connstats-wrapper button {
-  background: rgba(44, 44, 44, .75);
+  background: rgba(44, 44, 44, 0.75);
   border: solid 1px #fff;
   color: #fff;
-  outline: 0!important;
+  outline: 0 !important;
   padding: 5px 15px;
   cursor: pointer;
   font-size: 12px;
@@ -152,7 +166,7 @@ footer {
 }
 
 .peervideo .connstats {
-  background: rgba(88, 88, 88, .75);
+  background: rgba(88, 88, 88, 0.75);
   color: #fff;
   padding: 12px 17px 20px;
   font-size: 11px;
@@ -161,7 +175,7 @@ footer {
   text-align: left;
 }
 
-.peervideo .connstats div:nth-child(2){
+.peervideo .connstats div:nth-child(2) {
   margin-bottom: 15px;
 }
 
@@ -190,23 +204,132 @@ footer {
   font-size: 10px;
 }
 
-@media screen and (max-width:1999px){
+@media screen and (max-width: 1999px) {
   #credential_panel .panel-body {
-    margin-bottom:15px;
+    margin-bottom: 15px;
   }
   #credential_panel .panel-body button {
-    margin-left:14px;
+    margin-left: 14px;
   }
 }
-@media screen and (max-width:991px){
-  video, object {
-   display:block;
-   width:100%;
+@media screen and (max-width: 991px) {
+  video,
+  object {
+    display: block;
+    width: 100%;
   }
   video#local_video,
   object#local_video {
-    right:0;
-    position:static;
-    display:block
+    right: 0;
+    position: static;
+    display: block;
   }
+}
+
+/* NEW STYLESHEET */
+.main {
+  position: absolute;
+  top: 50px;
+  bottom: 50px;
+  right: 100px;
+  left: 100px;
+  background-color: #fff;
+  box-shadow: 0 10px 20px rgba(0, 0, 0, 0.19), 0 6px 6px rgba(0, 0, 0, 0.23);
+  overflow-y: scroll;
+  padding: 15px;
+}
+
+.logo {
+  margin: 10px 0px 20px;
+}
+
+.logo img {
+  width: 200px;
+}
+
+.settings-btn button {
+  margin-right: 7px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: none;
+  background: #37b3d0;
+  transition: all 0.2s linear;
+}
+
+.settings-btn button:hover,
+.call-btn button:hover {
+  background: #156071;
+}
+
+.call-btn button {
+  margin-right: 7px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: none;
+  background: #37b3d0;
+  transition: all 0.2s linear;
+  margin-left: 0 !important;
+}
+
+.settings-btn button i,
+.call-btn button i,
+.user-btn button i {
+  vertical-align: bottom;
+}
+
+.user-btn {
+  margin-top: 20px;
+}
+
+.user-input input[type="text"] {
+  background: #fff;
+  border-radius: 4px !important;
+  border: 1px solid #ddd;
+  width: 100%;
+  color: #3a4046;
+}
+
+.user-btn button {
+  margin-right: 7px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: none;
+  background: #37b3d0;
+  transition: all 0.2s linear;
+  margin-left: 0 !important;
+}
+
+.file-transfer #clear-selected-users {
+  margin-right: 7px;
+  margin-bottom: 20px;
+  padding: 10px;
+  border: none;
+  background: #37b3d0;
+  transition: all 0.2s linear;
+  margin-left: 0 !important;
+  border-radius: 4px;
+}
+
+.file-transfer #send_file_btn {
+  background: #efde68;
+  color: #000;
+  font-weight: normal;
+}
+
+.file-transfer button i {
+  vertical-align: bottom;
+  font-size: 20px;
+}
+
+.panel-chat {
+  border: 1px solid #e2e2e2;
+}
+
+#chat_input.well {
+  background-color: #fbfbfb;
+}
+
+h2 {
+  font-size: 24px;
+  margin-bottom: 20px;
 }
