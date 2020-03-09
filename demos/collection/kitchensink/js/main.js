@@ -393,7 +393,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
       'glyphicon-volume-up audio'
     ];
     for (var i = 0; i < 10; i++) {
-      newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
+      newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' icon-circle ' +
         i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
     }
     newListEntry += '</td></tr>';
@@ -434,7 +434,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
     peerAudio.setAttribute('playsinline', true);
 
     if (!peerInfo.settings.audio && !peerInfo.settings.video) {
-      peerVideo.poster = 'img/no_profile.jpg';
+      peerVideo.poster = '../../assets/imgs/no_profile.jpg';
     }
 
     $('#peer_video_list').append(peerElm);
@@ -1167,11 +1167,53 @@ $(document).ready(function() {
     .catch((err) => console.error("stopStreams rejected", err));
   });
   //---------------------------------------------------
+  const startSendStream = function(mediaOptions) {
+    Demo.Skylink.sendStream(config.defaultRoom,mediaOptions);
+  };
+
   $("#send_stream_btn").click(function() {
-    Demo.Skylink.sendStream(config.defaultRoom,{
+    const mediaOptions = {
       audio: { stereo: true },
       video: true,
-    });
+    };
+
+    if (Demo.Streams && Demo.Streams.userMedia) {
+      Demo.Skylink.stopStreams(config.defaultRoom)
+      .then(() => startSendStream(mediaOptions))
+      .catch((err) => console.error("stopStreams rejected", err));
+    } else {
+      startSendStream(mediaOptions);
+    }
+  });
+  //---------------------------------------------------
+  $("#start_video_btn").click(function() {
+    const mediaOptions = {
+      audio: false,
+      video: true,
+    };
+
+    if (Demo.Streams && Demo.Streams.userMedia) {
+      Demo.Skylink.stopStreams(config.defaultRoom)
+      .then(() => startSendStream(mediaOptions))
+      .catch((err) => console.error("stopStreams rejected", err));
+    } else {
+      startSendStream(mediaOptions);
+    }
+  });
+  //---------------------------------------------------
+  $("#start_audio_btn").click(function() {
+    const mediaOptions = {
+      audio: { stereo: true },
+      video: false,
+    };
+
+    if (Demo.Streams && Demo.Streams.userMedia) {
+      Demo.Skylink.stopStreams(config.defaultRoom)
+      .then(() => startSendStream(mediaOptions))
+      .catch((err) => console.error("stopStreams rejected", err));
+    } else {
+      startSendStream(mediaOptions);
+    }
   });
   //---------------------------------------------------
   $("#send_video_btn").click(function() {
@@ -1284,11 +1326,6 @@ $(document).ready(function() {
       $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
       $(this).html($(this).attr('toggled') ? 'Hide Stats' : 'Show Stats');
     });
-  });
-
-  $('#get_logs_btn').click(function() {
-    console.log(SkylinkLogger.getLogs());
-    SkylinkLogger.clearLogs();
   });
 
   window.setSelectedSecret = dom => {

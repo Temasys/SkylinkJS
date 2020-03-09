@@ -36,16 +36,16 @@ const dispatchEvents = (roomState, stream) => {
 
 const dispatchEventsToLocalEnd = (roomState, streams) => {
   for (let i = 0; i < streams.length; i += 1) {
-    if (!streams[i]) break;
-
-    if (Array.isArray(streams[i])) {
-      for (let x = 0; x < streams[i].length; x += 1) {
-        if (streams[i][x]) {
-          dispatchEvents(roomState, streams[i][x]);
+    if (streams[i]) {
+      if (Array.isArray(streams[i])) {
+        for (let x = 0; x < streams[i].length; x += 1) {
+          if (streams[i][x]) {
+            dispatchEvents(roomState, streams[i][x]);
+          }
         }
+      } else {
+        dispatchEvents(roomState, streams[i]);
       }
-    } else {
-      dispatchEvents(roomState, streams[i]);
     }
   }
 };
