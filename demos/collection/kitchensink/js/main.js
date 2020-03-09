@@ -393,7 +393,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
       'glyphicon-volume-up audio'
     ];
     for (var i = 0; i < 10; i++) {
-      newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' circle ' +
+      newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' icon-circle ' +
         i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
     }
     newListEntry += '</td></tr>';
@@ -434,7 +434,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
     peerAudio.setAttribute('playsinline', true);
 
     if (!peerInfo.settings.audio && !peerInfo.settings.video) {
-      peerVideo.poster = 'img/no_profile.jpg';
+      peerVideo.poster = '../../assets/imgs/no_profile.jpg';
     }
 
     $('#peer_video_list').append(peerElm);
@@ -1326,11 +1326,6 @@ $(document).ready(function() {
       $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
       $(this).html($(this).attr('toggled') ? 'Hide Stats' : 'Show Stats');
     });
-  });
-
-  $('#get_logs_btn').click(function() {
-    console.log(SkylinkLogger.getLogs());
-    SkylinkLogger.clearLogs();
   });
 
   window.setSelectedSecret = dom => {
