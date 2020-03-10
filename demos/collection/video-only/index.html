@@ -22,7 +22,7 @@
                     <span class="icon-bar"></span>
                     <span class="icon-bar"></span>
                 </button>
-                <b class="navbar-brand">Temasys Web SDK 2.0 Demo : Audio Only Call (1 - 1)</b>
+                <b class="navbar-brand">Temasys Web SDK 2.0 Demo : Video Only Call (1 - 1)</b>
             </div>
 
             <div id="navigation_panel" class="collapse navbar-collapse">
@@ -58,6 +58,7 @@
                             <tr>
                                 <td>Media stream status</td>
                                 <td>
+                                    <span id="isVideoMuted" class="icon-circle glyphicon glyphicon-facetime-video"></span>
                                     <span id="isAudioMuted" class="icon-circle glyphicon glyphicon-volume-up"></span>
                                 </td>
                             </tr>
@@ -96,56 +97,72 @@
                     <div class="panel-body">
                         <table class="table">
                             <tbody>
-                                <tr>
-                                    <td><h3>Update Peer:</h3></td>
-                                    <td>
-                                        <div class="btn-panel">
-                                            <table>
-                                                <tr>
-                                                    <td>
-                                                        <div class="margin-right-5">
-                                                            <input id="display_user_info" type="text" class="form-control">
-                                                        </div>
-                                                    </td>
-                                                    <td>
-                                                        <div>
-                                                            <button id="update_user_info_btn" class="btn btn-primary" title="Set name" type="button">
-                                                                <span class="glyphicon glyphicon-user"></span> <b>Set name</b>
-                                                            </button>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><h3>Call Settings:</h3></td>
-                                    <td>
-                                        <div class="btn-panel">
-                                            <button id="enable_audio_btn" type="button" title="Enable microphone" class="btn btn-primary">
-                                                <span class="glyphicon glyphicon-volume-up"></span>
-                                                <span class="glyphicon glyphicon-ok"></span>
-                                            </button>
-                                            <button id="disable_audio_btn" type="button" title="Disable microphone" class="btn btn-primary">
-                                                <span class="glyphicon glyphicon-volume-up"></span>
-                                                <span class="glyphicon glyphicon-remove"></span>
-                                            </button>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td><h3>Call actions:</h3></td>
-                                    <td>
-                                        <div class="btn-panel">
-                                            <button id="leave_room_btn" type="button" title="Leave room" class="btn btn-danger">
-                                                <span class="glyphicon glyphicon-log-out"></span>
-                                                <b>Exit call</b>
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
+                            <tr>
+                                <td><h3>Update Peer:</h3></td>
+                                <td>
+                                    <div class="btn-panel">
+                                        <table>
+                                            <tr>
+                                                <td>
+                                                    <div class="margin-right-5">
+                                                        <input id="display_user_info" type="text" class="form-control">
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div>
+                                                        <button id="update_user_info_btn" class="btn btn-primary" title="Set name" type="button">
+                                                            <span class="glyphicon glyphicon-user"></span> <b>Set name</b>
+                                                        </button>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><h3>Call Settings:</h3></td>
+                                <td>
+                                    <div class="btn-panel">
+                                        <button id="enable_audio_btn" type="button" title="Enable microphone" class="btn btn-primary">
+                                            <span class="glyphicon glyphicon-volume-up"></span>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </button>
+                                        <button id="disable_audio_btn" type="button" title="Disable microphone" class="btn btn-primary">
+                                            <span class="glyphicon glyphicon-volume-up"></span>
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </button>
+                                        <button id="enable_video_btn" type="button" title="Enable webcam" class="btn btn-primary">
+                                            <span class="glyphicon glyphicon-facetime-video"></span>
+                                            <span class="glyphicon glyphicon-ok"></span>
+                                        </button>
+                                        <button id="disable_video_btn" type="button" title="Disable webcam" class="btn btn-primary">
+                                            <span class="glyphicon glyphicon-facetime-video"></span>
+                                            <span class="glyphicon glyphicon-remove"></span>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td><h3>Call actions:</h3></td>
+                                <td>
+                                    <div class="btn-panel">
+                                        <button id="share_screen_btn" type="button" title="Share screen" class="btn btn-primary">
+                                            <span class="glyphicon glyphicon glyphicon-eye-open"></span>
+                                            Share Screen
+                                        </button>
+                                        <button id="stop_screen_btn" type="button" title="Stop screen" class="btn btn-primary">
+                                            <span class="glyphicon glyphicon glyphicon-eye-close"></span>
+                                            Stop Screen
+                                        </button>
+                                        <hr/>
+                                        <button id="leave_room_btn" type="button" title="Leave room" class="btn btn-danger">
+                                            <span class="glyphicon glyphicon-log-out"></span>
+                                            <b>Exit call</b>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -172,7 +189,7 @@
 </section>
 <div class="container">
     <p class="text-center">
-        &copy; Temasys Communications Pte Ltd 2020. All Rights Reserved.
+        &copy; Temasys Communications Pte Ltd 2019. All Rights Reserved.
     </p>
 </div>
 <script src="../socket.io.js"></script>

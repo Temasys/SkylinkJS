@@ -191,7 +191,31 @@ video {
     margin-right: 5px;
 }
 
+/** Commons **/
+#room_locked_row {
+    display: none;
+    margin: auto;
+}
 
+.start_call_panel {
+    max-width: 500px;
+    min-width: 300px;
+    padding: 10px;
+}
+
+.btn-panel {
+    padding: inherit;
+}
+
+.select-user {
+    margin-right: 5px !important;
+}
+
+.green {
+    color: green;
+}
+
+/** Media Queries **/
 @media screen and (max-width:1999px){
     #credential_panel .panel-body {
       margin-bottom: 15px;
