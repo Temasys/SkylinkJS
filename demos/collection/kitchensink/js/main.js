@@ -33,16 +33,6 @@ const joinRoomOptions = {
 //----- set logging -----
 SkylinkLogger.setLevel(SkylinkLogger.logLevels.DEBUG, true);
 
-const logToConsoleDOM = (message, level) => {
-  const $loggerListParentDOM = $('ul#console_log');
-  const $logListItem = $('<li />').addClass('list-group-item');
-  const $logText = $('<span />').addClass('log-message-text').text(message);
-  const $levelBadge = $('<span />').addClass('log-level-badge badge badge-primary').text(level.toUpperCase());
-  $logListItem.append($levelBadge);
-  $logListItem.append($logText);
-  $logListItem.appendTo($loggerListParentDOM);
-};
-
 Demo.Methods.displayChatItemHTML = function(peerId, timestamp, content, isPrivate) {
   var Hours, Minutes, Seconds;
   if (timestamp.getHours() < 10)

@@ -68,10 +68,6 @@ video {
     margin-right: 12px;
 }
 
-#messaging_panel {
-    margin: 15px 0 45px;
-}
-
 #chat_body {
     max-height: 200px;
     overflow-y: auto;

@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Temasys Web SDK 2.0 Demo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="../../assets/imgs/favicon.ico">
+    <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" media="screen">
+    <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js" type="text/javascript"></script>
+    <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/rollups/hmac-sha1.js" type="text/javascript"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.2/components/enc-base64.js" type="text/javascript"></script>
+    <link href="../../css/main.css" rel="stylesheet" type="text/css" />
+    <link href="./chat.css" rel="stylesheet" type="text/css" />
+</head>
+<body>
+<header>
+    <nav class="navbar navbar-default" role="navigation">
+        <div class="container-fluid">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target="#navigation_panel">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <b class="navbar-brand">Temasys Web SDK Demo: Chat</b>
+            </div>
+            <div id="navigation_panel" class="collapse navbar-collapse">
+                <form class="navbar-form navbar-right" onsubmit="return false">
+                    <div class="btn-group">
+                        <a class="btn btn-primary" href="https://console.temasys.io">
+                            Get your App key
+                        </a>
+                        <a id="doc_btn" href="https://cdn.temasys.io/skylink/skylinkjs/2.x/docs/index.html" class="btn btn-primary">View Documentation</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </nav>
+</header>
+<section>
+    <div>
+        <div class="container-fluid">
+            <div class="col-md-3">
+                <div id="status_panel" class="panel panel-default">
+                    <div class="panel-heading">Connection Information</div>
+                    <div class="panel-body">
+                        <table class="table">
+                            <tbody>
+                            <tr>
+                                <td>App ID</td>
+                                <td id="display_app_id"></td>
+                            </tr>
+                            <tr>
+                                <td>User ID</td>
+                                <td id="display_user_id">Not in Room</td>
+                            </tr>
+                            <tr>
+                                <td>Display Name</td>
+                                <td id="display_user_name">-</td>
+                            </tr>
+                            <tr>
+                                <td>Room Name</td>
+                                <td id="display_room_name">-</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="presence_panel" class="panel panel-default">
+                    <div class="panel-heading">Connected Peers</div>
+                    <div class="panel-body">
+                        <table id="presence_list" class="table">
+                            <tbody id="presence_list_body"></tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="chat_settings_panel" class="panel panel-default">
+                    <div class="panel-heading">Chat Settings</div>
+                    <div class="panel-body">
+                        <form role="form">
+                            <div class="checkbox">
+                                <label>
+                                    <input id="send_data_channel" type="checkbox">
+                                    <b>Send via P2P channel</b> <span class="glyphicon glyphicon-transfer"></span>
+                                </label>
+                            </div>
+                            <div class="checkbox">
+                                <label>
+                                    <input id="set_persistent_message" type="checkbox">
+                                    <b>Persist Messages</b> <span class="glyphicon glyphicon-transfer"></span>
+                                </label>
+                            </div>
+                        </form>
+                        <div>
+                            <button id="leave_room_btn" type="button" title="Leave room" class="btn btn-danger">
+                                <span class="glyphicon glyphicon-log-out"></span>
+                                <b>Leave Chat</b>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div id="encrypt-secrets-panel">
+                    <div id="secret_id_panel" class="panel panel-default">
+                        <div class="panel-heading">Encryption</div>
+                        <div class="panel-body">
+                            <table id="secret_id_list" class="table">
+                                <thead>
+                                <tr><td>Secret Id</td>
+                                    <td>Encrypt Secret</td></tr>
+                                </thead>
+                                <tbody id="secret_id_list_body"></tbody>
+                            </table>
+                            <div>
+                                <button id="clear_secret_ids_button" class="btn btn-primary">Clear Secret Ids</button>
+                                <button id="clear_selected_secret_id_button" class="btn btn-primary">Clear Selected Secret</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-9" id="join_room_panel">
+                <div class="btn-group col-md-12">
+                    <div class="btns">
+                        <div>
+                            <label for="join_room_name"><b>Room Name</b>
+                                <input id="join_room_name" type="text" class="form-control">
+                            </label>
+                        </div>
+                        <div>
+                            <label for="join_room_display_name"><b>Display Name</b>
+                                <input id="join_room_display_name" type="text" class="form-control">
+                            </label>
+                        </div>
+                        <button id="join_room_btn" type="button" title="Join room" class="btn btn-primary">
+                            <span class="glyphicon glyphicon-log-in"></span>&nbsp;
+                            Join Room
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div id="in_room_panel" class="col-md-9">
+                <div id="peer_video_list" class="col-md-12"></div>
+                <div id="messaging_panel" class="col-md-12">
+                    <div class="encryption_panel">
+                        <div>
+                            <h4>Encryption:</h4>
+                        </div>
+                        <div class="input-group">
+                            <div>
+                                <label for="encrypt_secret"><b>Secret</b>
+                                    <input id="encrypt_secret" type="text" class="form-control">
+                                </label>
+                                <label for="encrypt_secret_id"><b>Secret Id</b>
+                                    <input id="encrypt_secret_id" type="text" class="form-control">
+                                </label>
+                                <label class="no-label">
+                                    <button id="set_encrypt_secret_btn" class="btn btn-primary" title="Set encryption secret" type="button">
+                                        <span class="glyphicon glyphicon-user"></span> <b>Set encryption secret</b>
+                                    </button>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chat-log-panel">
+                        <div>
+                            <h3>Chat Log</h3>
+                        </div>
+                        <div class="panel panel-default panel-chat">
+                            <div id="chat_body" class="panel-body chat">
+                                <ul id="chat_log" class="list-group"></ul>
+                            </div>
+                        </div>
+                        <button id="get_stored_messages_button" class="btn btn-primary">Get Stored Messages</button>
+                    </div>
+                    <div class="chat-send-panel">
+                        <textarea id="chat_input" placeholder="Enter your chat message here" class="well panel-chat"></textarea>
+                        <button id="send_message_button" class="btn btn-primary">Send Message</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<div class="container">
+    <p class="text-center">
+        &copy; Temasys Communications Pte Ltd 2020. All Rights Reserved.
+    </p>
+</div>
+<script src="../socket.io.js"></script>
+<script src="./main.js" type="module"></script>
+<!-- Caching and test purposes -->
+<img src="../../assets/imgs/black.png" style="display:none;"/>
+</body>
+</html>
