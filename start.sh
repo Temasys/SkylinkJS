@@ -5,20 +5,20 @@ OS="`uname`"
 case $OS in
   'Linux')
     OS='Linux'
-    google-chrome https://localhost:8082/demos/collection/kitchensink/index.html
+    google-chrome https://localhost:8082/demos/collection/index.html
     ;;
   'FreeBSD')
     OS='FreeBSD'
     alias ls='ls -G'
-	google-chrome https://localhost:8082/demos/collection/kitchensink/index.html
+	google-chrome https://localhost:8082/demos/collection/index.html
     ;;
   'MINGW32_NT-6.1')
     OS='Windows'
-	start chrome "https://localhost:8082/demos/collection/kitchensink/index.html"
+	start chrome "https://localhost:8082/demos/collection/index.html"
     ;;
   'Darwin')
     OS='Mac'
-    open -a /Applications/Google\ Chrome.app https://localhost:8082/demos/collection/kitchensink/index.html
+    open -a /Applications/Google\ Chrome.app https://localhost:8082/demos/collection/index.html
     ;;
   'AIX') ;;
   *) echo "OS $OS not recognized";;

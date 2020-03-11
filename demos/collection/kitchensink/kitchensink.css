@@ -1,3 +1,15 @@
+#logs_panel {
+    display: none;
+}
+
+#console_log_body .log-message-text {
+    word-break: break-word;
+}
+
+#console_log_body .log-level-badge.badge.error {
+    background-color: red;
+}
+
 .encrypt-secrets-panel {
     padding-top: 10px;
 }

@@ -1,5 +1,5 @@
 /* eslint-disable import/extensions */
-import Skylink, { SkylinkLogger, SkylinkEventManager, SkylinkConstants } from '../../../../build/skylink.complete.js';
+import Skylink, { SkylinkLogger, SkylinkEventManager, SkylinkConstants } from '../../../build/skylink.complete.js';
 import config from '../config.js';
 
 /********************************************************
@@ -354,29 +354,7 @@ $(document).ready(function() {
       config.defaultRoom = joinRoomName;
     }
     Demo.Skylink.joinRoom(joinRoomOptions);
-  });
-  // //---------------------------------------------------
-  $('#peer_video_list').on('click', '.toggle-connstats', function () {
-    $(this).parent().find('.connstats').slideToggle();
-    $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
-
-    var peerId = $(this).attr('data');
-
-    $(this).html($(this).attr('toggled') ? 'Hide ' + (peerId === 'MCU' ? ' MCU ' : '') + 'Stats' :
-      'Show ' + (peerId === 'MCU' ? ' MCU ' : '') + 'Stats');
-
-    if ($(this).attr('toggled')) {
-      Demo.Stats[peerId] = true;
-      var test = setInterval(function () {
-        if (Demo.Stats[peerId]) {
-          Demo.Skylink.getConnectionStatus(config.defaultRoom, peerId);
-        } else {
-          clearInterval(test);
-        }
-      }, 1000);
-    } else {
-      Demo.Stats[peerId] = false;
-    }
+    $('#join_room_btn').addClass('disabled');
   });
   // //---------------------------------------------------
   $('#clear-selected-users').click(() => {
