@@ -7,6 +7,10 @@
     color: white !important;
 }
 
+button.btn {
+    margin-bottom: 1rem;
+}
+
 /*
 #join_room_panel
 */
@@ -27,7 +31,6 @@ input[type="text"] {
     border: 1px solid;
     border-radius: 5px !important;
     background: #f0f7ff;
-    margin-top: 1rem;
     margin-bottom: 1rem;
 }
 
@@ -191,6 +194,10 @@ video {
     margin-right: 5px;
 }
 
+.green {
+    color: green;
+}
+
 /** Commons **/
 #room_locked_row {
     display: none;
@@ -203,17 +210,10 @@ video {
     padding: 10px;
 }
 
-.btn-panel {
-    padding: inherit;
-}
-
 .select-user {
     margin-right: 5px !important;
 }
 
-.green {
-    color: green;
-}
 
 /** Media Queries **/
 @media screen and (max-width:1999px){
