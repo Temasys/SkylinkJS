@@ -16,8 +16,8 @@ const BUILD_JS = {
   },
   umd: {
     format: 'umd',
-    fileName: 'skylink.umd.js',
-    minFileName: 'skylink.min.umd.js',
+    fileName: 'skylink.complete.umd.js',
+    minFileName: 'skylink.complete.min.umd.js',
   },
 };
 
