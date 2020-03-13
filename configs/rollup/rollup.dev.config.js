@@ -34,6 +34,22 @@ const config = {
       globals,
       banner,
     },
+    {
+      file: `${BUILD_PATH}/${BUILD_JS.umd.fileName}`,
+      format: BUILD_JS.umd.format,
+      exports: 'named',
+      name: 'Skylink',
+      globals,
+      banner,
+    },
+    {
+      file: `${BUILD_PATH}/${BUILD_JS.umd.minFileName}`,
+      format: BUILD_JS.umd.format,
+      exports: 'named',
+      name: 'Skylink',
+      globals,
+      banner,
+    },
   ],
   onwarn: (warning, warn) => {
     // skip certain warnings
@@ -51,7 +67,7 @@ const config = {
       },
     }),
     terser({
-      include: ['*min*'],
+      include: [/^.+\.min\.umd\.js$/, /^.+\.min\.js$/],
       exclude: ['some*'],
       compress: {
         arguments: true,

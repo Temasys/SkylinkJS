@@ -17,7 +17,7 @@ const replaceImportSrc = contents => contents.toString().replace('../../../build
 const CONFIGS = [];
 const getOptions = (folderName, file) => ({
   minify: {
-    include: ['*min*'],
+    include: [/^.+\.min\.js$/],
     exclude: ['some*'],
     compress: {
       arguments: true,
@@ -41,23 +41,22 @@ const getOptions = (folderName, file) => ({
   },
 });
 
-const generateConfig = (files) => {
+const generateConfig = (options) => {
   CONSTANTS.FOLDERS.push(pkg.version);
   CONSTANTS.FOLDERS.forEach((folderName) => {
-    for (let i = 0; i < files.length; i += 1) {
-      const file = files[i];
+    for (let i = 0; i < options.length; i += 1) {
+      const file = options[i].fileName;
       const OPTIONS = getOptions(folderName, file);
       const config = {
         input: `${BUILD_PATH}/${file}`,
         output: [
           {
             file: `${PUBLISH_PATH}/${folderName}/${file}`,
-            format: CONSTANTS.BUILD_JS.esm.format,
+            format: options[i].format,
           },
         ],
         plugins: [
-          replace({}),
-          terser(OPTIONS.minify),
+          //terser(OPTIONS.minify),
           gzipPlugin(OPTIONS.gzip),
           copy(OPTIONS.copy),
         ],
@@ -72,6 +71,11 @@ const generateConfig = (files) => {
   }));
 };
 
-generateConfig([CONSTANTS.BUILD_JS.esm.fileName, CONSTANTS.BUILD_JS.esm.minFileName]);
+generateConfig([
+  { fileName: CONSTANTS.BUILD_JS.esm.fileName, format: CONSTANTS.BUILD_JS.esm.format },
+  { fileName: CONSTANTS.BUILD_JS.esm.minFileName, format: CONSTANTS.BUILD_JS.esm.format },
+  { fileName: CONSTANTS.BUILD_JS.umd.fileName, format: CONSTANTS.BUILD_JS.umd.format },
+  { fileName: CONSTANTS.BUILD_JS.umd.minFileName, format: CONSTANTS.BUILD_JS.umd.format },
+]);
 
 export default CONFIGS;
