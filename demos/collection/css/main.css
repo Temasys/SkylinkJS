@@ -7,6 +7,10 @@
     color: white !important;
 }
 
+button.btn {
+    margin-bottom: 1rem;
+}
+
 /*
 #join_room_panel
 */
@@ -27,7 +31,6 @@ input[type="text"] {
     border: 1px solid;
     border-radius: 5px !important;
     background: #f0f7ff;
-    margin-top: 1rem;
     margin-bottom: 1rem;
 }
 
@@ -63,10 +66,6 @@ video {
     font-style: normal;
     font-size: 12px;
     margin-right: 12px;
-}
-
-#messaging_panel {
-    margin: 15px 0 45px;
 }
 
 #chat_body {
@@ -191,7 +190,28 @@ video {
     margin-right: 5px;
 }
 
+.green {
+    color: green;
+}
 
+/** Commons **/
+#room_locked_row {
+    display: none;
+    margin: auto;
+}
+
+.start_call_panel {
+    max-width: 500px;
+    min-width: 300px;
+    padding: 10px;
+}
+
+.select-user {
+    margin-right: 5px !important;
+}
+
+
+/** Media Queries **/
 @media screen and (max-width:1999px){
     #credential_panel .panel-body {
       margin-bottom: 15px;

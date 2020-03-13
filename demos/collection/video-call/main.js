@@ -1,5 +1,5 @@
 /* eslint-disable import/extensions */
-import Skylink, { SkylinkLogger, SkylinkEventManager, SkylinkConstants } from '../../../../build/skylink.complete.js';
+import Skylink, { SkylinkLogger, SkylinkEventManager, SkylinkConstants } from '../../../build/skylink.complete.js';
 import config from '../config.js';
 
 /********************************************************
@@ -26,12 +26,32 @@ $('#display_user_info').val(displayName);
 
 const joinRoomOptions = {
   audio: { stereo: true },
-  video: false,
+  video: true,
   userData: displayName,
 };
 
 //----- set logging -----
 SkylinkLogger.setLevel(SkylinkLogger.logLevels.DEBUG, true);
+
+Demo.Methods.toggleInRoomSettings = function(peerId, inRoom) {
+  if (inRoom) {
+    $('#join_room_panel').css("display", "none");
+    $('#in_room_panel').css("display", "block");
+    $('#display_user_id').html(peerId);
+    $('#room_locked_row').hide();
+  } else {
+    $('#join_room_btn').removeClass('disabled');
+    $('#presence_list_body').empty();
+    $('#join_room_panel').css("display", "block");
+    $('#in_room_panel').css("display", "none");
+    $('#isAudioMuted').css('color', 'red');
+    $('#isVideoMuted').css('color', 'red');
+    $('#display_room_status').html('-');
+    $('#display_user_id').html('Not in Room');
+    $('#presence_panel').hide();
+    $('#console_log').empty();
+  }
+};
 
 Demo.Methods.updateStreams = function() {
   Demo.Streams = Demo.Skylink.getStreams(config.defaultRoom) || [];
@@ -42,8 +62,15 @@ Demo.Methods.getMediaStatus = function(type) {
     return { audioMuted: -1, videoMuted: -1 };
   }
 
-  const audioSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams.userMedia).filter((sId) => { return Demo.Streams.userMedia[sId].getAudioTracks().length > 0 })];
-  return audioSId ? audioSId: { audioMuted: -1, videoMuted: -1 };
+  if (type === 'audio') {
+    const audioSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams.userMedia).filter((sId) => { return Demo.Streams.userMedia[sId].getAudioTracks().length > 0 })]
+    return audioSId ? audioSId: { audioMuted: -1, videoMuted: -1 };
+  }
+
+  if (type === 'video') {
+    const videoSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams.userMedia).filter((sId) => { return Demo.Streams.userMedia[sId].getVideoTracks().length > 0 })]
+    return videoSId ? videoSId: { audioMuted: -1, videoMuted: -1 };
+  }
 };
 
 Demo.Methods.logToConsoleDOM = (message, level) => {
@@ -61,56 +88,53 @@ Demo.Methods.logToConsoleDOM = (message, level) => {
 };
 
 /********************************************************
- Skylink Events
+ SKYLINK EVENTS
  *********************************************************/
 
-SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_REOPEN, (evt) => {
-  Demo.Skylink.leaveRoom(config.defaultRoom)
-  .then(() => {
-    Demo.Peers = 0;
-    Demo.PeerIds = [];
-    Demo.Skylink.joinRoom(joinRoomOptions)
-  })
-});
-
-//---------------------------------------------------
-
+// //---------------------------------------------------
+// // PEER EVENTS
+// //---------------------------------------------------
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) => {
   const eventDetail = evt.detail;
   const { isSelf, peerId, peerInfo } = eventDetail;
+  const streamIds = Object.keys(peerInfo.mediaStatus);
+  let audioStreamId = null;
+  let videoStreamId = null;
+
+  if (streamIds[0] && peerInfo.mediaStatus[streamIds[0]].videoMuted === -1) {
+    audioStreamId = streamIds[0];
+    videoStreamId = streamIds[1];
+  }
 
   if (isSelf) {
-    $('#join_room_panel').css("display", "none");
-    $('#in_room_panel').css("display", "block");
-
+    _peerId = peerId;
     // allow only 2 peers in the room
     if (Demo.Peers > 0) {
       Demo.Skylink.lockRoom(config.defaultRoom);
     }
-    $('#room_locked_row').hide();
-  }
 
-  const streamIds = Object.keys(peerInfo.mediaStatus);
-  const audioStreamId = streamIds[0];
+    Demo.Methods.toggleInRoomSettings(peerId, true);
 
-  if (isSelf) {
-    _peerId = peerId;
-    $('#display_user_id').html(peerId);
     $('#isAudioMuted').css('color',
       (audioStreamId && peerInfo.mediaStatus[audioStreamId].audioMuted === 1) ? 'green' : 'red');
-    $('#leave_room_btn').show();
-    $('#presence_panel').show();
+    $('#isVideoMuted').css('color',
+      (videoStreamId && peerInfo.mediaStatus[videoStreamId].videoMuted === 1) ? 'green' : 'red');
   } else {
+    $('#presence_panel').show();
     Demo.Methods.logToConsoleDOM(`Peer ${peerId} has joined the room`, 'System');
 
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
-      '<td><input class="select-user" target="' + peerId + '" type="checkbox" onclick="selectTargetPeer(this);">' +
-      '<span class="name">' + peerInfo.userData + '</span></td><td><span class="glyphicon glyphicon-volume-up audio icon-circle" title="MediaStream: Audio"></span></td></tr>';
+      '<td><span class="name">' + peerInfo.userData + '</span></td><td>';
 
+    var titleList = ['MediaStream: Video', 'MediaStream: Audio'];
+    var glyphiconList = ['glyphicon-facetime-video video', 'glyphicon-volume-up audio'];
+    for (var i = 0; i < titleList.length; i++) {
+      newListEntry += '<span class="glyphicon ' + glyphiconList[i] + ' icon-circle ' +
+        i + '" title="' + titleList[i] + '"></span>&nbsp;&nbsp;&nbsp;';
+    }
+    newListEntry += '</td></tr>';
     $('#presence_list').append(newListEntry);
 
-    $('#user' + peerId + ' .audio').css('color',
-      (audioStreamId && peerInfo.mediaStatus[audioStreamId].audioMuted === 1) ? 'green' : 'red');
     Demo.Skylink.lockRoom(config.defaultRoom);
   }
 
@@ -130,7 +154,10 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
 
     let peerVideo = window.document.createElement('video');
     peerVideo.className = isSelf ? 'video-obj col-md-12 self-video-elem' : 'video-obj col-md-12';
-    peerVideo.poster = '../../assets/imgs/no_profile.jpg';
+    peerVideo.muted = isSelf;
+    peerVideo.autoplay = true;
+    peerVideo.controls = true;
+    peerVideo.setAttribute('playsinline', true);
 
     let peerAudio = window.document.createElement('audio');
     peerAudio.className = isSelf ? 'audio-obj col-md-12 self-audio-elem' : 'audio-obj col-md-12';
@@ -138,6 +165,10 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
     peerAudio.autoplay = true;
     peerAudio.controls = true;
     peerAudio.setAttribute('playsinline', true);
+
+    if (!peerInfo.settings.audio && !peerInfo.settings.video) {
+      peerVideo.poster = '../assets/imgs/no_profile.jpg';
+    }
 
     $('#peer_video_list').append(peerElm);
     $(peerElm).append(peerVideo);
@@ -155,54 +186,11 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
 
 
     setTimeout(function () {
+      peerVideo.removeAttribute('controls');
       peerAudio.removeAttribute('controls');
     });
   }
 });
-
-//---------------------------------------------------
-
-SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM, (evt) => {
-  const eventDetail = evt.detail;
-  const { peerId, stream, isSelf, peerInfo, isReplace, isVideo, isAudio } = eventDetail;
-  let peerVideo = $('#video' + peerId + ' .video-obj')[0];
-  let peerAudio = $('#video' + peerId + ' .audio-obj')[0];
-
-  if (!isSelf) {
-    if (Demo.PeerIds.indexOf(peerId) < 0) {
-      Demo.PeerIds.push(peerId);
-      Demo.Peers += 1;
-    }
-  }
-
-  peerVideo.poster = '../../assets/imgs/no_profile.jpg';
-  window.attachMediaStream(peerAudio, stream);
-
-  const isAudioStream = stream.getAudioTracks().length > 0 || false;
-
-  if (isSelf) {
-      $('#isAudioMuted').css('color',
-        (peerInfo.mediaStatus[stream.id].audioMuted === 1) ? 'green' : 'red');
-  } else {
-      $('#user' + peerId + ' .audio').css('color',
-        (isAudioStream && peerInfo.mediaStatus[stream.id].audioMuted === 1) ? 'green' : 'red');
-    $('#user' + peerId + ' .name').html(peerInfo.userData);
-  }
-
-  if (Demo.ShowStats[peerId]) {
-    $('#video' + peerId + ' .connstats-wrapper').show();
-  }
-
-  Demo.Methods.updateStreams();
-});
-
-//---------------------------------------------------
-
-SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.MEDIA_ACCESS_SUCCESS, (evt) => {
-  Demo.Methods.logToConsoleDOM('Audio access is allowed.', 'System');
-});
-
-//---------------------------------------------------
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_LEFT, (evt) => {
   const eventDetail = evt.detail;
@@ -229,57 +217,190 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_LEFT, (evt) =>
   Demo.Skylink.unlockRoom(config.defaultRoom);
 });
 
-//---------------------------------------------------
-
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_UPDATED, (evt) => {
   const { peerId, peerInfo, isSelf } = evt.detail;
   const streamIds = Object.keys(peerInfo.mediaStatus);
-  const audioStreamId = streamIds[0];
+  let audioStreamId = null;
+  let videoStreamId = null;
+
+  if (streamIds[0] && peerInfo.mediaStatus[streamIds[0]].videoMuted === -1) {
+    audioStreamId = streamIds[0];
+    videoStreamId = streamIds[1];
+  }
 
   if (isSelf) {
     $('#isAudioMuted').css('color',
       (audioStreamId && peerInfo.mediaStatus[audioStreamId].audioMuted === 1) ? 'green' : 'red');
+    $('#isVideoMuted').css('color',
+      (videoStreamId && peerInfo.mediaStatus[videoStreamId].videoMuted === 1) ? 'green' : 'red');
   } else {
-    const muted = !(audioStreamId && peerInfo.mediaStatus[audioStreamId].audioMuted === 1);
-    $('#user' + peerId + ' .audio').css('color', !muted ? 'green' : 'red');
-    Demo.Methods.logToConsoleDOM(`Peer ${peerId} ${muted ? 'muted' : 'unmuted' } audio`, 'Media');
+    const audioMuted = !(audioStreamId && peerInfo.mediaStatus[audioStreamId].audioMuted === 1);
+    const videoMuted = !(videoStreamId && peerInfo.mediaStatus[videoStreamId].videoMuted === 1);
+
+    if (videoMuted && $('#user' + peerId + ' .video').hasClass('green') || (!videoMuted && !$('#user' + peerId + ' .video').hasClass('green'))) {
+      $('#user' + peerId + ' .video').toggleClass('green');
+      Demo.Methods.logToConsoleDOM(`Peer ${peerId} ${videoMuted ? 'muted' : 'unmuted' } video`, 'Media')    ;
+    }
+
+    if (audioMuted && $('#user' + peerId + ' .audio').hasClass('green') || (!audioMuted && !$('#user' + peerId + ' .audio').hasClass('green'))) {
+      $('#user' + peerId + ' .audio').toggleClass('green');
+      Demo.Methods.logToConsoleDOM(`Peer ${peerId} ${audioMuted ? 'muted' : 'unmuted' } audio`, 'Media');
+    }
+
     $('#user' + peerId + ' .name').html(peerInfo.userData);
   }
 });
 
-//---------------------------------------------------
 
+// //---------------------------------------------------
+// // MEDIA STREAM EVENTS
+// //---------------------------------------------------
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM, (evt) => {
+  const eventDetail = evt.detail;
+  const { peerId, stream, isSelf, peerInfo, isVideo, isAudio } = eventDetail;
+  let peerVideo = $('#video' + peerId + ' .video-obj')[0];
+  let peerAudio = $('#video' + peerId + ' .audio-obj')[0];
+
+  if (!isSelf) {
+    if (Demo.PeerIds.indexOf(peerId) < 0) {
+      Demo.PeerIds.push(peerId);
+      Demo.Peers += 1;
+    }
+  }
+
+  if ((isVideo && isAudio) || (isVideo && !isAudio)) {
+    if (peerVideo.poster) {
+      peerVideo.removeAttribute('poster');
+    }
+    window.attachMediaStream(peerVideo, stream);
+  } else {
+    window.attachMediaStream(peerAudio, stream);
+  }
+
+  const isAudioStream = stream.getAudioTracks().length > 0 || false;
+  const isVideoStream = stream.getVideoTracks().length > 0 || false;
+
+  if (isSelf) {
+    if (isAudioStream) {
+      $('#isAudioMuted').css('color',
+        (peerInfo.mediaStatus[stream.id].audioMuted === 1) ? 'green' : 'red');
+    } else {
+      $('#isVideoMuted').css('color',
+        (isVideoStream && peerInfo.mediaStatus[stream.id].videoMuted === 1) ? 'green' : 'red');
+    }
+  } else {
+    $('#user' + peerId + ' .name').html(peerInfo.userData);
+  }
+
+  if (Demo.ShowStats[peerId]) {
+    $('#video' + peerId + ' .connstats-wrapper').show();
+  }
+
+  Demo.Methods.updateStreams();
+});
+
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_SCREEN_STREAM, (evt) => {
+  const eventDetail = evt.detail;
+  const { peerId, stream, isSelf } = eventDetail;
+
+  let peerScreen = window.document.createElement('video');
+  peerScreen.className = isSelf ? `video-obj col-md-12 ${peerId}screen self-video-elem` : `video-obj col-md-12 ${peerId}screen`;
+  peerScreen.muted = isSelf;
+  peerScreen.autoplay = true;
+  peerScreen.controls = true;
+  peerScreen.setAttribute('playsinline', true);
+
+  $('#video' + peerId + '.peervideo').append(peerScreen);
+
+  window.attachMediaStream(peerScreen, stream);
+  setTimeout(function () {
+    peerScreen.removeAttribute('controls');
+  });
+});
+
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.MEDIA_ACCESS_SUCCESS, (evt) => {
+  const { stream } = evt.detail;
+  const audioTracks = stream.getAudioTracks();
+  const videoTracks = stream.getVideoTracks();
+  if (audioTracks.length > 0) {
+    Demo.Methods.logToConsoleDOM('Audio access is allowed.', 'System');
+  }
+
+  if (videoTracks.length > 0) {
+    Demo.Methods.logToConsoleDOM('Video access is allowed.', 'System');
+  }
+});
+
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STREAM_ENDED, (evt) => {
+  const eventDetail = evt.detail;
+  const { isScreensharing, isSelf, peerId } = eventDetail;
+
+  if (!isSelf && !isScreensharing) {
+    document.getElementById(`video${eventDetail.peerId}`).firstChild.setAttribute('poster', '../app/img/black.png');
+  }
+
+  if (isScreensharing) {
+    const screenElm = $(`.${peerId}screen`)[0];
+    screenElm.parentNode.removeChild(screenElm);
+  }
+
+  Demo.Methods.updateStreams();
+});
+
+// //---------------------------------------------------
+// // ROOM EVENTS
+// //---------------------------------------------------
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ROOM_LOCK, (evt) => {
   const eventDetail = evt.detail;
   const { isLocked } = eventDetail;
   Demo.Methods.logToConsoleDOM(`Room is ${(isLocked ? 'locked' : 'unlocked')}`);
 });
 
-//---------------------------------------------------
-
-SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STREAM_ENDED, (evt) => {
-  Demo.Methods.updateStreams();
+// //---------------------------------------------------
+// // RECONNECT
+// //---------------------------------------------------
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_REOPEN, (evt) => {
+  Demo.Skylink.leaveRoom(config.defaultRoom)
+  .then(() => {
+    Demo.Peers = 0;
+    Demo.PeerIds = [];
+    Demo.Skylink.joinRoom(joinRoomOptions)
+  })
 });
 
-//---------------------------------------------------
 
+// //---------------------------------------------------
+// // STATE EVENTS
+// //---------------------------------------------------
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_MESSAGE, (evt) => {
   const detail = evt.detail;
   const { message } = detail;
   const reason = JSON.parse(message).reason;
+  // room locked state will only be known after attempt to join room
   if (reason === 'locked') {
     $('#room_locked_row').show();
+    $('#join_room_btn').removeClass('disabled');
   }
 });
-
-//---------------------------------------------------
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_ERROR, (evt) => {
   const { error } = evt.detail;
   Demo.Methods.logToConsoleDOM(`Channel Error: ${error.message || error}`, 'System');
 });
 
-//---------------------------------------------------
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ICE_CONNECTION_STATE, (evt) => {
+  const eventDetail = evt.detail;
+  const { state, peerId } = eventDetail;
+  switch (state) {
+    case SkylinkConstants.ICE_CONNECTION_STATE.CONNECTED:
+    case SkylinkConstants.ICE_CONNECTION_STATE.COMPLETED:
+      $(`#video${peerId === 'MCU' ? _peerId : peerId} .connstats-wrapper`).show();
+      Demo.ShowStats[peerId] = true;
+      break;
+    default:
+    // do nothing
+  }
+});
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STATUS_STATE_CHANGE, (evt) => {
   const { peerId, state, stats } = evt.detail;
@@ -429,9 +550,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
       (stats.certificate.remote.fingerprintAlgorithm || '-') + ')');
     $(statsElm)
     .find('.certificate .certright')
-    .html('Ciphers - (srtp: ' +
-      (stats.certificate.srtpCipher ? '<small>' + stats.certificate.srtpCipher + '</small>' : 'N/A') + ', dtls: ' +
-      (stats.certificate.dtlsCipher ? '<small>' + stats.certificate.dtlsCipher + '</small>' : 'N/A') + ')');
+    .html('');
   }
 });
 
@@ -461,17 +580,34 @@ $(document).ready(function() {
     });
   });
   // //---------------------------------------------------
+  $('#enable_video_btn').click(function () {
+    Demo.Skylink.muteStreams(config.defaultRoom, {
+      videoMuted: false,
+      audioMuted: Demo.Methods.getMediaStatus('audio').audioMuted
+    });
+  });
+  //---------------------------------------------------
+  $('#disable_video_btn').click(function () {
+    Demo.Skylink.muteStreams(config.defaultRoom, {
+      videoMuted: true,
+      audioMuted: Demo.Methods.getMediaStatus('audio').audioMuted
+    });
+  });
+  // //---------------------------------------------------
+  $('#share_screen_btn').click(function () {
+    Demo.Skylink.shareScreen(config.defaultRoom, true).then((stream) => {
+      console.log('Screen share started: ', stream);
+    });
+  });
+  // //---------------------------------------------------
+  $('#stop_screen_btn').click(function() {
+    Demo.Skylink.stopScreen(config.defaultRoom);
+  });
+  // //---------------------------------------------------
   $('#leave_room_btn').click(function() {
     Demo.Skylink.leaveRoom(config.defaultRoom)
     .then(() => {
-      $('#join_room_btn').removeClass('disabled');
-      $('#console_log').find('li').remove();
-      $('#display_user_id').html('Not in Room');
-      $('#isAudioMuted').css('color', 'red');
-      $('#join_room_panel').css("display", "block");
-      $('#in_room_panel').css("display", "none");
-      $('#presence_list_body').empty();
-      $('#presence_panel').hide();
+      Demo.Methods.toggleInRoomSettings('', false);
       Demo.Peers = 0;
       Demo.PeerIds = [];
     })
@@ -507,40 +643,5 @@ $(document).ready(function() {
     } else {
       Demo.Stats[peerId] = false;
     }
-  });
-
-  window.selectTargetPeer = dom => {
-    var peerId = $(dom).attr('target');
-    var panelDom = $('#selected_users_panel');
-
-    if (!dom.checked) {
-      $(`#${peerId}-selected-user`).remove();
-
-      var index = selectedPeers.indexOf(peerId);
-
-      if (index > -1) {
-        selectedPeers.splice(index, 1);
-      }
-
-      if ($(panelDom).find('.selected-users em').length === 0) {
-        $(panelDom).find('.all').show();
-      } else {
-        $(panelDom).find('.all').hide();
-      }
-    } else {
-      $(panelDom).find('.selected-users').append('<em id="' +
-        peerId + '-selected-user">Peer ' + peerId + '</em>');
-      $(panelDom).find('.all').hide();
-      selectedPeers.push(peerId);
-    }
-  };
-  $('#clear-selected-users').click(() => {
-    $('#selected_users_panel .selected-users').html('');
-    $('.select-user').each(function () {
-      $(this)[0].checked = false;
-    });
-    $('#selected_users_panel .all').show();
-    $('#selected_users_panel .all').show();
-    selectedPeers = [];
   });
 });
