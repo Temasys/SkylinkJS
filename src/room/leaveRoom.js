@@ -5,7 +5,7 @@ import {
 import PeerData from '../peer-data';
 import { SkylinkSignalingServer } from '../server-communication/index';
 import { peerLeft, serverPeerLeft } from '../skylink-events';
-import { dispatchEvent, addEventListener } from '../utils/skylinkEventManager';
+import { dispatchEvent, addEventListener, removeEventListener } from '../utils/skylinkEventManager';
 import logger from '../logger/index';
 import PeerConnection from '../peer-connection/index';
 import stopStreamHelpers from '../media-stream/helpers/stopStream/index';
@@ -82,10 +82,13 @@ const sendByeOrDisconnectSocket = state => new Promise((resolve) => {
     // disconnect socket if it is the last room
     skylinkSignalingServer.config = skylinkSignalingServer.resetSocketConfig(window.location.protocol);
 
-    addEventListener(SkylinkConstants.EVENTS.CHANNEL_CLOSE, () => {
+    const handleChannelClose = () => {
       logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.DISCONNECT_SOCKET.SUCCESS]);
+      removeEventListener(SkylinkConstants.EVENTS.CHANNEL_CLOSE, handleChannelClose);
       resolve(updatedState);
-    });
+    };
+
+    addEventListener(SkylinkConstants.EVENTS.CHANNEL_CLOSE, handleChannelClose);
 
     if (skylinkSignalingServer.socket.connected) {
       skylinkSignalingServer.socket.disconnect();
@@ -101,10 +104,20 @@ const sendByeOrDisconnectSocket = state => new Promise((resolve) => {
  * @param {SkylinkState} state
  */
 const stopStreams = (state) => {
-  const { room } = state;
+  const { room, streams } = state;
 
-  stopStreamHelpers.prepStopStreams(room.id, null, true);
-  new ScreenSharing(state).stop();
+  if (streams.userMedia) {
+    stopStreamHelpers.prepStopStreams(room.id, null, true);
+  }
+
+  if (streams.screenshare) {
+    new ScreenSharing(state).stop(true);
+  }
+};
+
+const clearRoomState = (roomKey) => {
+  Skylink.clearRoomStateFromSingletons(roomKey);
+  Skylink.removeSkylinkState(roomKey);
 };
 
 /**
@@ -133,7 +146,7 @@ export const leaveRoom = roomState => new Promise((resolve, reject) => {
             isSelf: true,
             room,
           }));
-          Skylink.removeSkylinkState(removedState.room.id);
+          clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);
         });
     } else {
@@ -156,7 +169,7 @@ export const leaveRoom = roomState => new Promise((resolve, reject) => {
             isSelf: true,
             room,
           }));
-          Skylink.removeSkylinkState(removedState.room.id);
+          clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);
         });
     }

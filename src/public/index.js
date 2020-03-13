@@ -1009,6 +1009,21 @@ class SkylinkPublicInterface {
    * @description Method that stops the room session.
    * @param {String} roomName  - The room name to leave.
    * @return {Promise.<String>}
+   * @example
+   * Example 1:
+   *
+   * // add event listener to catch peerLeft events when remote peer leaves room
+   * SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_LEFT, (evt) => {
+   *    const { detail } = evt;
+   *   // handle remote peer left
+   * });
+   *
+   * skylink.leaveRoom(roomName)
+   * .then((roomName) => {
+   *   // handle local peer left
+   * })
+   * .catch((error) => // handle error);
+   * @fires {@link SkylinkEvents.event:peerLeft|peerLeft} on the remote end of the connection.
    * @alias Skylink#leaveRoom
    * @since 0.5.5
    */

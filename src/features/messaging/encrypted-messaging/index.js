@@ -132,6 +132,10 @@ class EncryptedMessaging {
       }
     }
   }
+
+  static deleteEncryptedInstance(room) {
+    delete instance[room.id];
+  }
 }
 
 export default EncryptedMessaging;

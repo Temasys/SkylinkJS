@@ -128,6 +128,10 @@ class AsyncMessaging {
       peerInfo: PeerData.getPeerInfo(targetMid, room),
     }));
   }
+
+  static deleteAsyncInstance(room) {
+    delete instance[room.id];
+  }
 }
 
 export default AsyncMessaging;
