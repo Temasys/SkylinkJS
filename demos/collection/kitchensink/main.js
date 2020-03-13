@@ -686,13 +686,10 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
       // format packet stats
       itemStr += '<br>Packets - (' + stats[type][dir].packets + ' sent, ' +
         stats[type][dir].packetsLost + ' lost, ' + stats[type][dir].jitter + ' jitter' +
-        (typeof stats[type][dir].jitterBufferMs === 'number' ? ', ' + stats[type][dir].jitterBufferMs +
-          ' jitter buffer <i>ms</i>' : '') + (dir === 'sending' ? ', ' + stats[type][dir].rtt + ' rtt' : '') +
+        (dir === 'sending' ? ', ' + stats[type][dir].roundTripTime + ' rtt' : '') +
         (typeof stats[type][dir].nacks === 'number' ? ', ' + stats[type][dir].nacks + ' nacks' : '') +
         (typeof stats[type][dir].plis === 'number' ? ', ' + stats[type][dir].plis + ' plis' : '') +
-        (typeof stats[type][dir].firs === 'number' ? ', ' + stats[type][dir].firs + ' firs' : '') +
-        (typeof stats[type][dir].slis === 'number' ? ', ' + stats[type][dir].slis + ' slis' : '') +
-        (typeof stats[type][dir].e2eDelay === 'number' ? ', ' + stats[type][dir].e2eDelay + ' e2eDelay' : '') + ')';
+        (typeof stats[type][dir].firs === 'number' ? ', ' + stats[type][dir].firs + ' firs' : '') + ')';
 
       // format codec stats
       if (stats[type][dir].codec) {
@@ -708,10 +705,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
       if (type === 'audio') {
         itemStr += '<br>Settings - (';
 
-        if (typeof stats.audio[dir].inputLevel === 'number') {
-          itemAddStr += 'input level: ' + stats.audio[dir].inputLevel;
-        } else if (typeof stats.audio[dir].outputLevel === 'number') {
-          itemAddStr += 'output level: ' + stats.audio[dir].outputLevel;
+        if (typeof stats.audio[dir].audioLevel === 'number') {
+          itemAddStr += 'audio level: ' + stats.audio[dir].audioLevel;
         }
 
         if (typeof stats.audio[dir].echoReturnLoss === 'number') {
@@ -719,7 +714,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
         }
 
         if (typeof stats.audio[dir].echoReturnLossEnhancement === 'number') {
-          itemAddStr += (itemAddStr ? ', ' : '') + 'echo return loss: ' + stats.audio[dir].echoReturnLossEnhancement;
+          itemAddStr += (itemAddStr ? ', ' : '') + 'echo return loss enhancement: ' + stats.audio[dir].echoReturnLossEnhancement;
         }
 
       } else {
@@ -737,14 +732,6 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
           itemAddStr += (itemAddStr ? ', ' : '') + dir + ': ' + stats.video[dir].frames;
         }
 
-        if (typeof stats.video[dir].framesInput === 'number') {
-          itemAddStr += (itemAddStr ? ', ' : '') + 'input: ' + stats.video[dir].framesInput;
-        }
-
-        if (typeof stats.video[dir].framesOutput === 'number') {
-          itemAddStr += (itemAddStr ? ', ' : '') + 'output: ' + stats.video[dir].framesOutput;
-        }
-
         if (typeof stats.video[dir].framesDropped === 'number') {
           itemAddStr += (itemAddStr ? ', ' : '') + 'dropped: ' + stats.video[dir].framesDropped;
         }
@@ -753,20 +740,12 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
           itemAddStr += (itemAddStr ? ', ' : '') + 'decoded: ' + stats.video[dir].framesDecoded;
         }
 
-        if (typeof stats.video[dir].frameRateMean === 'number') {
-          itemAddStr += (itemAddStr ? ', ' : '') + 'fps mean: ' + stats.video[dir].frameRateMean.toFixed(2);
+        if (typeof stats.video[dir].framesEncoded === 'number') {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'encoded: ' + stats.video[dir].framesEncoded;
         }
 
-        if (typeof stats.video[dir].frameRateStdDev === 'number') {
-          itemAddStr += (itemAddStr ? ', ' : '') + 'fps std dev: ' + stats.video[dir].frameRateStdDev.toFixed(2);
-        }
-
-        if (typeof stats.video[dir].framesDecoded === 'number') {
-          itemAddStr += (itemAddStr ? ', ' : '') + 'decoded: ' + stats.video[dir].framesDecoded.toFixed(2);
-        }
-
-        if (typeof stats.video[dir].framesCorrupted === 'number') {
-          itemAddStr += (itemAddStr ? ', ' : '') + 'corrupted: ' + stats.video[dir].framesCorrupted.toFixed(2);
+        if (stats.video[dir].decoderImplementation) {
+          itemAddStr += (itemAddStr ? ', ' : '') + 'decoder implementation: ' + stats.video[dir].decoderImplementation;
         }
 
         if (typeof stats.video[dir].framesPerSecond === 'number') {
@@ -804,8 +783,11 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
         (stats.certificate.local.fingerprintAlgorithm || '-') + ', remote: ' +
         (stats.certificate.remote.fingerprintAlgorithm || '-') + ')');
     $(statsElm)
-    .find('.certificate .certright')
-    .html('');
+      .find('.certificate .certright')
+      .html('Ciphers - (srtp: ' +
+        (stats.certificate.srtpCipher ? '<small>' + stats.certificate.srtpCipher + '</small>' : 'N/A') + ', dtls: ' +
+        (stats.certificate.dtlsCipher ? '<small>' + stats.certificate.dtlsCipher + '</small>' : 'N/A') + ', tlsVersion: ' +
+        (stats.certificate.tlsVersion ? '<small>' + stats.certificate.tlsVersion + '</small>' : 'N/A') + ')');
   }
 });
 

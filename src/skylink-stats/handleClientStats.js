@@ -1,5 +1,6 @@
 import SkylinkStats from './index';
 import Skylink from '../index';
+import { SDK_NAME } from '../constants';
 
 class HandleClientStats extends SkylinkStats {
   constructor() {
@@ -7,13 +8,20 @@ class HandleClientStats extends SkylinkStats {
     const { AdapterJS, navigator } = window;
     this.model = {
       client_id: null,
+      appKey: null,
+      timestamp: null,
       username: null,
-      sdk_name: 'web',
+      sdk_name: SDK_NAME.WEB,
       sdk_version: null,
       agent_name: AdapterJS.webrtcDetectedBrowser,
       agent_version: AdapterJS.webrtcDetectedVersion,
       agent_platform: navigator.platform,
       agent_plugin_version: (AdapterJS.WebRTCPlugin.plugin && AdapterJS.WebRTCPlugin.plugin.VERSION) || null,
+      device_version: null,
+      enumerated_devices: null,
+      device_muted: null,
+      network_type: navigator.connection ? navigator.connection.type : '-',
+      language: navigator.language,
     };
   }
 

@@ -20,6 +20,8 @@ const onConnection = (resolve, roomKey) => {
     dispatchEvent(channelReopen({
       socketSession: clone(socketSession),
     }));
+
+    new HandleSignalingStats().send(roomKey, STATES.SIGNALING.RECONNECT_SUCCESS);
   } else {
     dispatchEvent(channelOpen({
       socketSession: clone(socketSession),

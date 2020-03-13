@@ -61,14 +61,6 @@ class SessionDescription {
     return helpers.getSDPSelectedCodec(...args);
   }
 
-  static getSDPFingerprint(...args) {
-    return helpers.getSDPFingerprint(...args);
-  }
-
-  static getSDPMediaSSRC(...args) {
-    return helpers.getSDPMediaSSRC(...args);
-  }
-
   static setOriginalDTLSRole(...args) {
     return helpers.setOriginalDTLSRole(...args);
   }
