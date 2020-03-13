@@ -11,13 +11,20 @@ Demo.Peers = 0;
 Demo.PeerIds = [];
 Demo.Stats = {};
 Demo.Methods = {};
-Demo.Skylink = new Skylink(config);
+Demo.Skylink = null;
 Demo.ShowStats = {};
 Demo.Streams = null;
 Demo._Skylink = Skylink;
+
+
 window.Demo = Demo;
+const APPKEYS = {
+  p2p: 'c7ae7e8a-2e24-43a5-85c6-d4dafbdfecb6',
+  mcu: '6198a7fa-b8b0-4b0a-8079-4642198c8601',
+};
 let selectedPeers = [];
 let _peerId = null;
+let selectedAppKey = null;
 
 const { $, document } = window;
 
@@ -968,6 +975,8 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#join_room_btn').click(function () {
+    config.appKey = selectedAppKey || config.appKey;
+    Demo.Skylink = new Skylink(config);
     if (!$('#join_room_video').prop('checked')) {
       joinRoomOptions.video = false;
     }
@@ -1043,10 +1052,23 @@ $(document).ready(function() {
     $('#selected_users_panel .all').show();
     selectedPeers = [];
   });
+  // //---------------------------------------------------
+  $('#get_logs_btn').click(function() {
+    console.log(SkylinkLogger.getLogs());
+    SkylinkLogger.clearLogs();
+    Demo.Methods.logToConsoleDOM('Check console log for output', 'System');
+  });
 
   window.setSelectedSecret = dom => {
     var secretId = $(dom).attr('value');
     Demo.Skylink.setSelectedSecret(config.defaultRoom, secretId);
+  };
+
+  window.setAppKey = dom => {
+    var appKey = $(dom).attr('value');
+    console.log(appKey);
+    selectedAppKey = APPKEYS[appKey];
+    $('#display_app_id').html(selectedAppKey);
   };
 
   window.selectTargetPeer = dom => {

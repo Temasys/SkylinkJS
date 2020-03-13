@@ -18,7 +18,6 @@ if (!getParameterByName('room')) {
 }
 
 const config = {
-  // appKey: getParameterByName('appKey') || '6198a7fa-b8b0-4b0a-8079-4642198c8601',
   appKey: getParameterByName('appKey') || 'c7ae7e8a-2e24-43a5-85c6-d4dafbdfecb6',
   defaultRoom: getParameterByName('room'),
   enableIceTrickle: !getParameterByName('enableIceTrickle'),

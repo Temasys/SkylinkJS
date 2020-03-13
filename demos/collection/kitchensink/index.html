@@ -113,6 +113,20 @@
           <div class="btn-group col-md-12">
             <div class="btns">
               <form role="form">
+                <div>
+                  <label for="join_room_p2p_key">
+                    <input id="join_room_p2p_key" type="radio" name="appKey" value="p2p" checked="true" onclick="setAppKey(this);">
+                    <b>P2P</b>
+                  </label>
+                </div>
+                <div>
+                  <label for="join_room_mcu_key">
+                    <input id="join_room_mcu_key" type="radio" name="appKey" value="mcu" onclick="setAppKey(this);">
+                    <b>MCU</b>
+                  </label>
+                </div>
+              </form>
+              <form role="form">
                 <div class="checkbox">
                   <label for="join_room_audio">
                     <input id="join_room_audio" type="checkbox" checked="true">
@@ -358,22 +372,6 @@
               <button id="send_message_button" class="btn btn-primary">Send Message</button>
             </div>
           </div>
-<!--          <div id="console_log_panel" class="col-md-12">-->
-<!--            <br>-->
-<!--            <hr/>-->
-<!--            <br>-->
-<!--            <div>-->
-<!--              <h3>Logs</h3>-->
-<!--            </div>-->
-<!--            <div class="panel panel-default panel-chat">-->
-<!--              <div id="console_log_body" class="panel-body" style="height: 300px; overflow: scroll">-->
-<!--                <ul id="console_log" class="list-group">-->
-
-<!--                </ul>-->
-<!--              </div>-->
-<!--              <button id="clear-console-log" class="btn btn-danger pull-right" style="margin-top: 10px">Clear Log</button>-->
-<!--            </div>-->
-<!--          </div>-->
         </div>
       </div>
     </div>
