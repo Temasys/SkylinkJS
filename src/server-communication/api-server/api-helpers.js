@@ -8,7 +8,7 @@ import {
   API_VERSION,
   READY_STATE_CHANGE,
   READY_STATE_CHANGE_ERROR,
-  SDK_TYPE,
+  SDK_NAME,
   SDK_VERSION,
   SIGNALING_VERSION,
 } from '../../constants';
@@ -116,7 +116,7 @@ export const authenticateApp = async (options) => {
   const endpoint = getEndPoint(options);
   const apiResponse = await fetch(endpoint, {
     headers: {
-      Skylink_SDK_type: SDK_TYPE.WEB,
+      Skylink_SDK_type: SDK_NAME.WEB,
       Skylink_SDK_version: SDK_VERSION,
       Skylink_API_version: API_VERSION,
       'X-Server-Select': SIGNALING_VERSION,

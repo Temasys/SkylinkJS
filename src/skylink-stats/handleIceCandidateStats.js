@@ -5,10 +5,12 @@ class HandleIceCandidateStats extends SkylinkStats {
   constructor() {
     super();
     this.model = {
+      client_id: null,
+      appKey: null,
+      timestamp: null,
       room_id: null,
       user_id: null,
       peer_id: null,
-      client_id: null,
       state: null,
       is_remote: false,
       candidate_id: null,

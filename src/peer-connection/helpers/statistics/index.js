@@ -47,7 +47,6 @@ class PeerConnectionStatistics {
         id: null,
         local: {},
         remote: {},
-        // consentResponses: {}, TODO: remove
         consentRequests: {},
         responses: {},
         requests: {},
@@ -68,8 +67,7 @@ class PeerConnectionStatistics {
   }
 
   getStatsSuccess(promiseResolve, promiseReject, stats) {
-    const { AdapterJS } = window;
-    const { peerBandwidth, peerStats } = this.roomState;
+    const { peerBandwidth, peerStats, room } = this.roomState;
     // TODO: Need to do full implementation of success function
     if (typeof stats.forEach === 'function') {
       stats.forEach((item, prop) => {
@@ -79,48 +77,49 @@ class PeerConnectionStatistics {
       this.output.raw = stats;
     }
 
-    const edgeTracksKind = {
-      remote: {},
-      local: {},
-    };
-
     try {
       if (isEmptyObj(peerStats)) {
         logger.log.DEBUG([this.peerId, TAGS.STATS_MODULE, null, messages.STATS_MODULE.STATS_DISCARDED]);
         return;
       }
-      // Polyfill for Plugin missing "mediaType" stats item
-      const rawOutput = Object.keys(this.output.raw);
-      for (let i = 0; i < rawOutput.length; i += 1) {
-        try {
-          if (rawOutput[i].indexOf('ssrc_') === 0 && !this.output.raw[rawOutput[i]].mediaType) {
-            this.output.raw[rawOutput[i]].mediaType = this.output.raw[rawOutput[i]].audioInputLevel || this.output.raw[rawOutput[i]].audioOutputLevel ? 'audio' : 'video';
 
-            // Polyfill for Edge 15.x missing "mediaType" stats item
-          } else if (AdapterJS.webrtcDetectedBrowser === 'edge' && !this.output.raw[rawOutput[i]].mediaType
-            && ['inboundrtp', 'outboundrtp'].indexOf(this.output.raw[rawOutput[i]].type) > -1) {
-            const trackItem = this.output.raw[this.output.raw[rawOutput[i]].mediaTrackId] || {};
-            this.output.raw[rawOutput[i]].mediaType = edgeTracksKind[this.output.raw[rawOutput[i]].isRemote ? 'remote' : 'local'][trackItem.trackIdentifier] || '';
-          }
-
-          // Parse DTLS certificates and ciphers used
-          parsers.parseCertificates(this.output, rawOutput[i]);
-          parsers.parseSelectedCandidatePair(this.roomState, this.output, rawOutput[i], this.peerConnection, this.peerId, this.isAutoBwStats);
-          parsers.parseCodecs(this.output, rawOutput[i]);
-          parsers.parseAudio(this.roomState, this.output, rawOutput[i], this.peerConnection, this.peerId, this.isAutoBwStats);
-          parsers.parseVideo(this.roomState, this.output, rawOutput[i], this.peerConnection, this.peerId, this.isAutoBwStats);
-          parsers.parseVideoE2EDelay(this.roomState, this.output, rawOutput[i], this.peerConnection, this.peerId, this.beSilentOnLogs);
-
-          if (this.isAutoBwStats && !peerBandwidth[this.peerId][rawOutput[i]]) {
-            peerBandwidth[this.peerId][rawOutput[i]] = this.output.raw[rawOutput[i]];
-          } else if (!this.isAutoBwStats && !peerStats[this.peerId][rawOutput[i]]) {
-            peerStats[this.peerId][rawOutput[i]] = this.output.raw[rawOutput[i]];
-          }
-        } catch (err) {
-          logger.log.DEBUG([this.peerId, TAGS.STATS_MODULE, null, messages.STATS_MODULE.ERRORS.PARSE_FAILED], err);
-          break;
+      const rawEntries = Object.entries(this.output.raw);
+      rawEntries.forEach((entry) => {
+        const key = entry[0];
+        const value = entry[1];
+        const { type } = value;
+        switch (type) {
+          case 'remote-inbound-rtp': // sender stats
+          case 'outbound-rtp':
+          case 'inbound-rtp':
+            if (type === 'inbound-rtp') {
+              parsers.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, this.isAutoBwStats, 'receiving');
+            } else {
+              parsers.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, this.isAutoBwStats, 'sending');
+            }
+            break;
+          case 'certificate':
+            parsers.parseCertificates(this.output, value);
+            break;
+          case 'local-candidate':
+          case 'remote-candidate':
+            parsers.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId, this.isAutoBwStats);
+            break;
+          case 'media-source':
+            parsers.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId, this.isAutoBwStats);
+            break;
+          default:
+            // do nothing
         }
-      }
+
+        if (this.isAutoBwStats && !peerBandwidth[this.peerId][key]) {
+          peerBandwidth[this.peerId][key] = this.output.raw[key];
+        } else if (!this.isAutoBwStats && !peerStats[this.peerId][key]) {
+          peerStats[this.peerId][key] = this.output.raw[key];
+        }
+
+        Skylink.setSkylinkState(this.roomState, room.id);
+      });
     } catch (err) {
       this.getStatsFailure(promiseReject, messages.STATS_MODULE.ERRORS.PARSE_FAILED, err);
     }
@@ -167,11 +166,10 @@ class PeerConnectionStatistics {
         this.isAutoBwStats = isAutoBwStats;
 
         try {
+          // obtain stats from SDP that are not available in stats report or not complete
           this.gatherRTCPeerConnectionDetails();
           this.gatherSDPIceCandidates();
           this.gatherSDPCodecs();
-          this.gatherCertificateDetails();
-          this.gatherSSRCDetails();
           this.gatherRTCDataChannelDetails();
         } catch (err) {
           logger.log.WARN([this.peerId, TAGS.STATS_MODULE, null, messages.STATS_MODULE.ERRORS.PARSE_FAILED], err);
@@ -246,30 +244,6 @@ class PeerConnectionStatistics {
     this.output.video.sending.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.remoteDescription, 'video', beSilentOnLogs);
     this.output.audio.receiving.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.localDescription, 'audio', beSilentOnLogs);
     this.output.video.receiving.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.localDescription, 'video', beSilentOnLogs);
-  }
-
-  /**
-   * Formats output object with SDP certificate details
-   * @private
-   */
-  gatherCertificateDetails() {
-    const { peerConnection, beSilentOnLogs } = this;
-    this.output.certificate.local = SessionDescription.getSDPFingerprint(this.peerId, peerConnection.localDescription, beSilentOnLogs);
-    this.output.certificate.remote = SessionDescription.getSDPFingerprint(this.peerId, peerConnection.remoteDescription, beSilentOnLogs);
-  }
-
-  /**
-   * Formats output object with audio and video ssrc details
-   * @private
-   */
-  gatherSSRCDetails() {
-    const { peerConnection, beSilentOnLogs } = this;
-    const inboundSSRCs = SessionDescription.getSDPMediaSSRC(this.peerId, peerConnection.remoteDescription, beSilentOnLogs);
-    const outboundSSRCs = SessionDescription.getSDPMediaSSRC(this.peerId, peerConnection.localDescription, beSilentOnLogs);
-    this.output.audio.receiving.ssrc = inboundSSRCs.audio;
-    this.output.video.receiving.ssrc = inboundSSRCs.video;
-    this.output.audio.sending.ssrc = outboundSSRCs.audio;
-    this.output.video.sending.ssrc = outboundSSRCs.video;
   }
 
   /**

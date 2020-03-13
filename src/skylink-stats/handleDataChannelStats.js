@@ -6,10 +6,12 @@ class HandleDataChannelStats extends SkylinkStats {
     super();
     const { AdapterJS } = window;
     this.model = {
+      client_id: null,
+      appKey: null,
+      timestamp: null,
       room_id: null,
       user_id: null,
       peer_id: null,
-      client_id: null,
       state: null,
       channel_id: null,
       channel_label: null,
