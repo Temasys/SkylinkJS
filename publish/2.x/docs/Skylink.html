@@ -473,7 +473,7 @@ const skylink = new Skylink(initOptions);</code></pre>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1480">line 1480</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1495">line 1495</a>
         </li>
       </ul>
     </dd>
@@ -573,7 +573,7 @@ const skylink = new Skylink(initOptions);</code></pre>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1442">line 1442</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1457">line 1457</a>
         </li>
       </ul>
     </dd>
@@ -967,7 +967,7 @@ skylink.getConnectionStatus("Room_1", selectedPeers)
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1467">line 1467</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1482">line 1482</a>
         </li>
       </ul>
     </dd>
@@ -2293,7 +2293,7 @@ const peers = skylink.getPeersInRoom();</code></pre>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1200">line 1200</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1215">line 1215</a>
         </li>
       </ul>
     </dd>
@@ -2409,7 +2409,7 @@ skylink.getRecordings(roomName);</code></pre>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1411">line 1411</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1426">line 1426</a>
         </li>
       </ul>
     </dd>
@@ -2593,7 +2593,7 @@ skylink.getRecordings(roomName);</code></pre>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1507">line 1507</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1522">line 1522</a>
         </li>
       </ul>
     </dd>
@@ -2938,7 +2938,7 @@ let getStoredMessages = (roomName) => {
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1427">line 1427</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1442">line 1442</a>
         </li>
       </ul>
     </dd>
@@ -3029,7 +3029,7 @@ let getStoredMessages = (roomName) => {
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1338">line 1338</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1353">line 1353</a>
         </li>
       </ul>
     </dd>
@@ -5013,7 +5013,7 @@ skylink.joinRoom(prefetchedStream)
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1030">line 1030</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1045">line 1045</a>
         </li>
       </ul>
     </dd>
@@ -5168,7 +5168,7 @@ skylink.joinRoom(prefetchedStream)
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1015">line 1015</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1030">line 1030</a>
         </li>
       </ul>
     </dd>
@@ -5185,6 +5185,14 @@ skylink.joinRoom(prefetchedStream)
 
 
 
+  <h5>Fires:</h5>
+  <ul>
+    
+      <li>
+        <a href="SkylinkEvents.html#.event:peerLeft"><code>peerLeft</code></a> on the remote end of the connection.
+      </li>
+    
+  </ul>
 
 
 
@@ -5192,6 +5200,33 @@ skylink.joinRoom(prefetchedStream)
 
 
 
+
+
+  <div class="example-container">
+    <a class="link-icon" href="#leaveRoom-examples">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h5 id="leaveRoom-examples">Example</h5>
+    
+
+  <pre class="prettyprint"><code>Example 1:
+
+// add event listener to catch peerLeft events when remote peer leaves room
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_LEFT, (evt) => {
+   const { detail } = evt;
+  // handle remote peer left
+});
+
+skylink.leaveRoom(roomName)
+.then((roomName) => {
+  // handle local peer left
+})
+.catch((error) => // handle error);</code></pre>
+
+
+  </div>
 
 
       
@@ -5323,7 +5358,7 @@ skylink.joinRoom(prefetchedStream)
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1135">line 1135</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1150">line 1150</a>
         </li>
       </ul>
     </dd>
@@ -5728,7 +5763,7 @@ skylink.lockRoom(roomName);</code></pre>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1246">line 1246</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1261">line 1261</a>
         </li>
       </ul>
     </dd>
@@ -7286,7 +7321,7 @@ Object signature matches the <code>options</code> parameter in the
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1391">line 1391</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1406">line 1406</a>
         </li>
       </ul>
     </dd>
@@ -7561,7 +7596,7 @@ skylink.sendStream(roomName, prefetchedStreams)
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1454">line 1454</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1469">line 1469</a>
         </li>
       </ul>
     </dd>
@@ -7745,7 +7780,7 @@ skylink.sendStream(roomName, prefetchedStreams)
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1493">line 1493</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1508">line 1508</a>
         </li>
       </ul>
     </dd>
@@ -8382,7 +8417,7 @@ let shareScreenReplace = () => {
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1058">line 1058</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1073">line 1073</a>
         </li>
       </ul>
     </dd>
@@ -8634,7 +8669,7 @@ skylink.startRecording(roomName)
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1279">line 1279</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1294">line 1294</a>
         </li>
       </ul>
     </dd>
@@ -8832,7 +8867,7 @@ skylink.startRTMPSession(roomName, streamId, endpoint)
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1098">line 1098</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1113">line 1113</a>
         </li>
       </ul>
     </dd>
@@ -9054,7 +9089,7 @@ skylink.stopRecording(roomName)
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1310">line 1310</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1325">line 1325</a>
         </li>
       </ul>
     </dd>
@@ -9648,7 +9683,7 @@ skylink.stopScreen(roomName);</code></pre>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1152">line 1152</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1167">line 1167</a>
         </li>
       </ul>
     </dd>

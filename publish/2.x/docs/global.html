@@ -332,6 +332,1721 @@
   
 
   <span class='name-container'>
+    <a class="link-icon" href="#audioStats">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="audioStats">
+      <span class="type-signature"></span>audioStats<span class="type-signature"> :Object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>The Peer connection audio streaming statistics.</p>
+  </div>
+
+
+
+
+
+
+
+
+
+
+  <h5 class="subsection-title">Properties:</h5>
+
+  
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>audioStats.sending</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming statistics.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>bytes</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current sending audio streaming bytes.
+  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalBytes</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total sending audio streaming bytes.
+  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>packets</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current sending audio streaming packets.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalPackets</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total sending audio streaming packets.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>ssrc</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming RTP packets SSRC.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>roundTripTime</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming round-trip delay time.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>jitter</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming RTP packets jitter in seconds.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>retransmittedBytesSent</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The total number of bytes that were retransmitted for this SSRC, only including
+  payload bytes. This is a subset of bytesSent.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>retransmittedPacketsSent</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The total number of packets that were retransmitted for this SSRC. This is a subset of packetsSent.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>codec</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming selected codec information.
+  Defined as <code>null</code> if local session description is not available before parsing.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>name</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming selected codec name.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>payloadType</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming selected codec payload type.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>implementation</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming selected codec implementation.
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>channels</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming selected codec channels (2 for stereo).
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing,
+  and this is usually present in <code>statistics.audio</code> property.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>clockRate</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming selected codec media sampling rate.
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>params</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming selected codec parameters.
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>audioLevel</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection audio level of the media source.
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalSamplesDuration</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio total duration in seconds.
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>echoReturnLoss</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming echo return loss in db (decibels).
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>echoReturnLossEnhancement</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending audio streaming
+  echo return loss enhancement db (decibels).
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>audioStats.receiving</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio streaming statistics.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>bytes</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current sending audio streaming bytes.
+  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalBytes</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total sending audio streaming bytes.
+  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>packets</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current receiving audio streaming packets.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalPackets</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total receiving audio streaming packets.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>packetsLost</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current receiving audio streaming packets lost.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>fractionLost</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current receiving audio streaming fraction packets lost.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalPacketsLost</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total receiving audio streaming packets lost.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>ssrc</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio streaming RTP packets SSRC.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>jitter</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio streaming RTP packets jitter in seconds.
+  Defined as <code>0</code> if it's not present in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalSamplesReceived</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total number of audio samples that
+have been received.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalSamplesDuration</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio total duration in seconds.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>codec</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio streaming selected codec information.
+  Defined as <code>null</code> if remote session description is not available before parsing.
+  Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
+  The value is derived from the remote session description.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>name</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio streaming selected codec name.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>payloadType</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio streaming selected codec payload type.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>implementation</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio streaming selected codec implementation.
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>channels</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio streaming selected codec channels (2 for stereo).
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing,
+  and this is usually present in <code>statistics.audio</code> property.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>clockRate</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio streaming selected codec media sampling rate.
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>params</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio streaming selected codec parameters.
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>audioLevel</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving audio streaming audio level.
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="peer-connection_helpers_statistics_parsers_parseAudio.js.html">peer-connection/helpers/statistics/parsers/parseAudio.js</a>, <a href="peer-connection_helpers_statistics_parsers_parseAudio.js.html#line7">line 7</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
     <a class="link-icon" href="#codecParams">
       <svg height="20" width="20" style="fill: black;">
         <use xlink:href="#linkIcon"></use>
@@ -9149,7 +10864,7 @@ Note that this is a debugging feature and is only used when instructed for debug
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line1084">line 1084</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line838">line 838</a>
         </li>
       </ul>
     </dd>
@@ -9507,7 +11222,7 @@ Note that this is a debugging feature and is only used when instructed for debug
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line1072">line 1072</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line826">line 826</a>
         </li>
       </ul>
     </dd>
@@ -11241,7 +12956,7 @@ const streams = skylink.getPeersStreams("Room_1");</code></pre>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1161">line 1161</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1176">line 1176</a>
         </li>
       </ul>
     </dd>
@@ -11415,7 +13130,7 @@ const streams = skylink.getPeersStreams("Room_1");</code></pre>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line1066">line 1066</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line820">line 820</a>
         </li>
       </ul>
     </dd>
@@ -11706,7 +13421,7 @@ const streams = skylink.getPeersStreams("Room_1");</code></pre>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1397">line 1397</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1412">line 1412</a>
         </li>
       </ul>
     </dd>
@@ -11972,7 +13687,7 @@ const streams = skylink.getPeersStreams("Room_1");</code></pre>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line1056">line 1056</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line810">line 810</a>
         </li>
       </ul>
     </dd>
@@ -12124,7 +13839,7 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</
         
           
     <span class="param-type">
-      JSON
+      <a href="global.html#audioStats">audioStats</a>
     </span>
 
     
@@ -12139,1676 +13854,6 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</
 
         <td class="description last">
           <p>The Peer connection audio streaming statistics.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>sending</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      JSON
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming statistics.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-        <th>Attributes</th>
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>bytes</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current sending audio streaming bytes.
-  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalBytes</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total sending audio streaming bytes.
-  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>packets</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current sending audio streaming packets.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPackets</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total sending audio streaming packets.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>packetsLost</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p><blockquote class="info">
-  This property has been deprecated and would be removed in future releases
-  as it should not be in <code>sending</code> property.
-  </blockquote> The Peer connection current sending audio streaming packets lost.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPacketsLost</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p><blockquote class="info">
-  This property has been deprecated and would be removed in future releases
-  as it should not be in <code>sending</code> property.
-  </blockquote> The Peer connection total sending audio streaming packets lost.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>ssrc</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming RTP packets SSRC.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>rtt</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming RTT (Round-trip delay time).
-  Defined as <code>0</code> if it's not present in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>jitter</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p><blockquote class="info">
-  This property has been deprecated and would be removed in future releases
-  as it should not be in <code>sending</code> property.
-  </blockquote> The Peer connection sending audio streaming RTP packets jitter in seconds.
-  Defined as <code>0</code> if it's not present in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>jitterBufferMs</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p><blockquote class="info">
-  This property has been deprecated and would be removed in future releases
-  as it should not be in <code>sending</code> property.
-  </blockquote> The Peer connection sending audio streaming
-  RTP packets jitter buffer in miliseconds.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>codec</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      JSON
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming selected codec information.
-  Defined as <code>null</code> if local session description is not available before parsing.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-        <th>Attributes</th>
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>name</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming selected codec name.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>payloadType</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming selected codec payload type.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>implementation</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming selected codec implementation.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>channels</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming selected codec channels (2 for stereo).
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing,
-  and this is usually present in <code>statistics.audio</code> property.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>clockRate</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming selected codec media sampling rate.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>params</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming selected codec parameters.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>inputLevel</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming input level.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>echoReturnLoss</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming echo return loss in db (decibels).
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>echoReturnLossEnhancement</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending audio streaming
-  echo return loss enhancement db (decibels).
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>receiving</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      JSON
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming statistics.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-        <th>Attributes</th>
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>bytes</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current sending audio streaming bytes.
-  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalBytes</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total sending audio streaming bytes.
-  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>packets</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving audio streaming packets.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPackets</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving audio streaming packets.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>packetsLost</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving audio streaming packets lost.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>fractionLost</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving audio streaming fraction packets lost.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>packetsDiscarded</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving audio streaming packets discarded.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPacketsLost</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving audio streaming packets lost.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPacketsDiscarded</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving audio streaming packets discarded.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>ssrc</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming RTP packets SSRC.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>jitter</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming RTP packets jitter in seconds.
-  Defined as <code>0</code> if it's not present in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>jitterBufferMs</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming
-  RTP packets jitter buffer in miliseconds.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>codec</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      JSON
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming selected codec information.
-  Defined as <code>null</code> if remote session description is not available before parsing.
-  Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
-  The value is derived from the remote session description.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-        <th>Attributes</th>
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>name</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming selected codec name.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>payloadType</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming selected codec payload type.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>implementation</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming selected codec implementation.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>channels</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming selected codec channels (2 for stereo).
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing,
-  and this is usually present in <code>statistics.audio</code> property.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>clockRate</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming selected codec media sampling rate.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>params</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming selected codec parameters.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>outputLevel</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving audio streaming output level.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
           </td>
     </tr>
 
@@ -13823,7 +13868,7 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</
         
           
     <span class="param-type">
-      JSON
+      <a href="global.html#videoStats">videoStats</a>
     </span>
 
     
@@ -13838,2931 +13883,6 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</
 
         <td class="description last">
           <p>The Peer connection video streaming statistics.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>sending</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      JSON
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming statistics.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-        <th>Attributes</th>
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>bytes</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current sending video streaming bytes.
-  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalBytes</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total sending video streaming bytes.
-  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>packets</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current sending video streaming packets.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPackets</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total sending video streaming packets.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>packetsLost</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p><blockquote class="info">
-  This property has been deprecated and would be removed in future releases
-  as it should not be in <code>sending</code> property.
-  </blockquote> The Peer connection current sending video streaming packets lost.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPacketsLost</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p><blockquote class="info">
-  This property has been deprecated and would be removed in future releases
-  as it should not be in <code>sending</code> property.
-  </blockquote> The Peer connection total sending video streaming packets lost.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>ssrc</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming RTP packets SSRC.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>rtt</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming RTT (Round-trip delay time).
-  Defined as <code>0</code> if it's not present in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>jitter</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p><blockquote class="info">
-  This property has been deprecated and would be removed in future releases
-  as it should not be in <code>sending</code> property.
-  </blockquote> The Peer connection sending video streaming RTP packets jitter in seconds.
-  Defined as <code>0</code> if it's not present in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>jitterBufferMs</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p><blockquote class="info">
-  This property has been deprecated and would be removed in future releases
-  as it should not be in <code>sending</code> property.
-  </blockquote> The Peer connection sending video streaming RTP packets jitter buffer in miliseconds.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>qpSum</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming sum of the QP values of frames passed.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>codec</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      JSON
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming selected codec information.
-  Defined as <code>null</code> if local session description is not available before parsing.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-        <th>Attributes</th>
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>name</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming selected codec name.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>payloadType</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming selected codec payload type.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>implementation</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming selected codec implementation.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>channels</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming selected codec channels (2 for stereo).
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing,
-  and this is usually present in <code>statistics.audio</code> property.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>clockRate</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming selected codec media sampling rate.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>params</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming selected codec parameters.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>frames</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming frames.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>frameRateInput</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming fps input.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>frameRateInput</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming fps input.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>framesDropped</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming frames dropped.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>frameRateMean</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming fps mean.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>frameRateStdDev</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming fps standard deviation.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>framesPerSecond</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming fps.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>framesDecoded</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming frames decoded.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>framesCorrupted</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection sending video streaming frames corrupted.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalFrames</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total sending video streaming frames.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>nacks</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current sending video streaming nacks.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalNacks</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total sending video streaming nacks.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>plis</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current sending video streaming plis.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPlis</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total sending video streaming plis.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>firs</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current sending video streaming firs.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalFirs</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total sending video streaming firs.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>slis</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current sending video streaming slis.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalSlis</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total sending video streaming slis.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>receiving</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      JSON
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming statistics.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-        <th>Attributes</th>
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>bytes</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving video streaming bytes.
-  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalBytes</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving video streaming bytes.
-  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>packets</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving video streaming packets.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPackets</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving video streaming packets.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>packetsLost</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving video streaming packets lost.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>fractionLost</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving video streaming fraction packets lost.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>packetsDiscarded</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving video streaming packets discarded.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPacketsLost</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving video streaming packets lost.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPacketsDiscarded</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving video streaming packets discarded.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>ssrc</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming RTP packets SSRC.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>e2eDelay</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming e2e delay.
-  Defined as <code>null</code> if it's not present in original raw statistics.before parsing, and that
-  it finds any existing audio, video or object (plugin) DOM elements that has set with the
-  Peer remote stream object to parse current time. Note that <code>document.getElementsByTagName</code> function
-  and DOM <code>.currentTime</code> has to be supported inorder for data to be parsed correctly.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>jitter</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming RTP packets jitter in seconds.
-  Defined as <code>0</code> if it's not present in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>jitterBufferMs</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming
-  RTP packets jitter buffer in miliseconds.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>codec</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      JSON
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming selected codec information.
-  Defined as <code>null</code> if remote session description is not available before parsing.
-  Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
-  The value is derived from the remote session description.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-        <th>Attributes</th>
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>name</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming selected codec name.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>payloadType</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming selected codec payload type.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>implementation</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming selected codec implementation.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>channels</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming selected codec channels (2 for stereo).
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing,
-  and this is usually present in <code>statistics.audio</code> property.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>clockRate</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming selected codec media sampling rate.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>params</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming selected codec parameters.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>frames</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming frames.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>framesOutput</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming fps output.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>framesDecoded</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming frames decoded.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>frameRateMean</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming fps mean.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>frameRateStdDev</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming fps standard deviation.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>framesPerSecond</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming fps.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>framesDecoded</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming frames decoded.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>framesCorrupted</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection receiving video streaming frames corrupted.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalFrames</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving video streaming frames.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>nacks</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving video streaming nacks.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalNacks</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving video streaming nacks.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>plis</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving video streaming plis.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPlis</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving video streaming plis.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>firs</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving video streaming firs.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalFirs</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving video streaming firs.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>slis</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection current receiving video streaming slis.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalPlis</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Number
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The Peer connection total receiving video streaming slis.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
           </td>
     </tr>
 
@@ -17286,45 +14406,7 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</
 
     <tr>
       
-        <td class="name"><code>readable</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      boolean
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The flag if Peer has gotten a valid incoming ICE request.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>rtt</code></td>
+        <td class="name"><code>roundTripTime</code></td>
       
 
       <td class="type">
@@ -17362,7 +14444,7 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</
 
     <tr>
       
-        <td class="name"><code>totalRtt</code></td>
+        <td class="name"><code>totalRoundTripTime</code></td>
       
 
       <td class="type">
@@ -17886,44 +14968,6 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</
 
     <tr>
       
-        <td class="name"><code>received</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The current ICE consent requests received.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
         <td class="name"><code>sent</code></td>
       
 
@@ -17962,44 +15006,6 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</
 
     <tr>
       
-        <td class="name"><code>totalReceived</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The total ICE consent requests received.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
         <td class="name"><code>totalSent</code></td>
       
 
@@ -18030,221 +15036,6 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</
 
         <td class="description last">
           <p>The total ICE consent requests sent.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>consentResponses</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      JSON
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The current ICE consent responses.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-        <th>Attributes</th>
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>received</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The current ICE consent responses received.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>sent</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The current ICE consent responses sent.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalReceived</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The total ICE consent responses received.
-  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>totalSent</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-
-        <td class="description last">
-          <p>The total ICE consent responses sent.
   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
           </td>
     </tr>
@@ -18743,6 +15534,44 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</
 
         <td class="description last">
           <p>The certificates DTLS cipher.
+  Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>tlsVersion</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The certificates DTLS TLS Version agreed.
   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.</p>
           </td>
     </tr>
@@ -21175,7 +18004,7 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.</
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1415">line 1415</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1430">line 1430</a>
         </li>
       </ul>
     </dd>
@@ -21627,7 +18456,7 @@ Object signature matches <code>audio.input</code> format.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1318">line 1318</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1333">line 1333</a>
         </li>
       </ul>
     </dd>
@@ -21889,6 +18718,2228 @@ Object signature matches <code>audio.input</code> format.</p>
       <ul class="dummy">
         <li>
           <a href="server-communication_signaling-server_message-builder_builders_setUserDataMessage.js.html">server-communication/signaling-server/message-builder/builders/setUserDataMessage.js</a>, <a href="server-communication_signaling-server_message-builder_builders_setUserDataMessage.js.html#line4">line 4</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#videoStats">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="videoStats">
+      <span class="type-signature"></span>videoStats<span class="type-signature"></span>
+    </h4>
+  </span>
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+  <h5 class="subsection-title">Properties:</h5>
+
+  
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>videoStats.sending</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming statistics.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>ssrc</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming RTP packets SSRC.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>bytes</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current sending video streaming bytes.
+  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalBytes</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total sending video streaming bytes.
+  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>packets</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current sending video streaming packets.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalPackets</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total sending video streaming packets.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>roundTripTime</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming Round-trip delay time.
+  Defined as <code>0</code> if it's not present in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>jitter</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p><blockquote class="info">
+  This property has been deprecated and would be removed in future releases
+  as it should not be in <code>sending</code> property.
+  </blockquote> The Peer connection sending video streaming RTP packets jitter in seconds.
+  Defined as <code>0</code> if it's not present in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>qpSum</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming sum of the QP values of frames passed.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>frames</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming frames.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>frameWidth</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming frame width.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>frameHeight</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming frame height.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>hugeFramesSent</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming number
+of huge frames sent by this RTP stream. Huge frames, by definition, are frames that have an encoded size at least 2.5 times the average size of the frames.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>framesPerSecond</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming fps.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>framesEncoded</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming frames encoded.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>nacks</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current sending video streaming nacks.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalNacks</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total sending video streaming nacks.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>plis</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current sending video streaming plis.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalPlis</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total sending video streaming plis.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>firs</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current sending video streaming firs.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalFirs</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total sending video streaming firs.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>codec</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming selected codec information.
+  Defined as <code>null</code> if local session description is not available before parsing.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>name</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming selected codec name.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>payloadType</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming selected codec payload type.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>implementation</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming selected codec implementation.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>channels</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming selected codec channels (2 for stereo).
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing,
+  and this is usually present in <code>statistics.audio</code> property.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>clockRate</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming selected codec media sampling rate.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>params</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming selected codec parameters.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>videoStats.receiving</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming statistics.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>ssrc</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming RTP packets SSRC.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>bytes</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current receiving video streaming bytes.
+  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalBytes</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total receiving video streaming bytes.
+  Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>packets</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current receiving video streaming packets.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalPackets</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total receiving video streaming packets.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>packetsLost</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current receiving video streaming packets lost.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalPacketsLost</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total receiving video streaming packets lost.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>frames</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming frames.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>frameWidth</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming frame width.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>frameHeight</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection sending video streaming frame height.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>framesDecoded</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming frames decoded.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>framesDroped</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming frames dropped.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>nacks</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current receiving video streaming nacks.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalNacks</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total receiving video streaming nacks.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>plis</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current receiving video streaming plis.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalPlis</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total receiving video streaming plis.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>firs</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection current receiving video streaming firs.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>totalFirs</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection total receiving video streaming firs.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>codec</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming selected codec information.
+  Defined as <code>null</code> if remote session description is not available before parsing.
+  Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
+  The value is derived from the remote session description.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>name</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming selected codec name.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>payloadType</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming selected codec payload type.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>implementation</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming selected codec implementation.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>channels</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming selected codec channels (2 for stereo).
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing,
+  and this is usually present in <code>statistics.audio</code> property.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>clockRate</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      Number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming selected codec media sampling rate.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>params</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer connection receiving video streaming selected codec parameters.
+  Defined as <code>null</code> if it's not available in original raw statistics before parsing.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="peer-connection_helpers_statistics_parsers_parseVideo.js.html">peer-connection/helpers/statistics/parsers/parseVideo.js</a>, <a href="peer-connection_helpers_statistics_parsers_parseVideo.js.html#line6">line 6</a>
         </li>
       </ul>
     </dd>
