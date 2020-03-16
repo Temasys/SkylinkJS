@@ -1,5 +1,5 @@
 import {
-  getParamValidity, getRoomStateByName, isABoolean, isEmptyArray,
+  getParamValidity, getRoomStateByName, isABoolean,
 } from '../../utils/helpers';
 import PeerConnection from '../../peer-connection';
 import MESSAGES from '../../messages';
@@ -19,9 +19,8 @@ class Messaging {
     const roomState = getRoomStateByName(roomName);
     if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
       const encryptedMessaging = new EncryptedMessaging(roomState);
-      const isPublicMessage = !targetPeerId || (Array.isArray(targetPeerId) && isEmptyArray(targetPeerId));
       const asyncMessaging = new AsyncMessaging(roomState);
-      if (asyncMessaging.canPersist() && isPublicMessage) {
+      if (asyncMessaging.canPersist()) {
         asyncMessaging.sendMessage(roomName, message, targetPeerId);
       } else if (encryptedMessaging.canEncrypt()) {
         encryptedMessaging.sendMessage(roomName, message, targetPeerId);

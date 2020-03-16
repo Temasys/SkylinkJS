@@ -166,6 +166,7 @@ const MESSAGES = {
       ERRORS: {
         FAILED_SETTING_PERSISTENCE: 'Failed setting persistent message flag',
         INVALID_TYPE: 'Persistent message flag must be of type boolean',
+        PRIVATE_MESSAGE: 'Cannot persist private messages',
         PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED: 'Persistent Message feature is not enabled. Enable'
           + ' this feature on the key under \'Advanced Settings\' in the Temasys Console',
       },
