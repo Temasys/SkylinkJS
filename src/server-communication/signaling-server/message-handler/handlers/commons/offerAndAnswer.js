@@ -133,7 +133,7 @@ const setRemoteDescription = (room, targetMid, remoteDescription) => {
 
   peerConnection.processingRemoteSDP = true;
   handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, remoteDescription, true);
-
+  logger.log.INFO([targetMid, 'RTCSessionDescription', type, 'Session description object created:'], remoteDescription);
   return peerConnection.setRemoteDescription(remoteDescription)
     .then(() => peerConnection);
 };

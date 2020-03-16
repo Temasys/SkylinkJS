@@ -1,4 +1,4 @@
-# SKYLINK WEB SDK 2.1.0
+# SKYLINK WEB SDK 2.1.1
 > Temasys SkylinkJS Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
 
 You'll need a Temasys Account and an App key to use this. [Register here to get your App key](https://console.temasys.io).
@@ -22,10 +22,11 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 
 #### Read more
 - [Getting started](https://temasys.io/getting-started-with-webrtc-and-skylinkjs/)
-- [API Docs](http://cdn.temasys.io/skylink/skylinkjs/latest/doc/classes/Skylink.html)
+- [API Docs](http://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
 - [Temasys Console  - Get your App key](https://console.temasys.io)
-- [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/master/demo)
+- [Demos](https://cdn.temasys.io/skylink/skylinkjs/latest/demos/collection/index.html)
+- [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/master/demos)
 
 
 ##### Need help or want something changed?
@@ -34,7 +35,7 @@ You can raise tickets on [our support portal](http://support.temasys.io) or on [
 ##### Current versions and stability
 We recommend that you always use the latest versions of the Temasys SkylinkJS Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: 2.1.0](https://github.com/Temasys/SkylinkJS/releases/tag/2.1.0).
+[Latest version: 2.1.1](https://github.com/Temasys/SkylinkJS/releases/tag/2.1.1).
 
 
 ## How to build your own Temasys SkylinkJS Web SDK

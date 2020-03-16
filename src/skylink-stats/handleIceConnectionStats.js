@@ -8,10 +8,12 @@ class HandleIceConnectionStats extends SkylinkStats {
   constructor() {
     super();
     this.model = {
+      client_id: null,
+      appKey: null,
+      timestamp: null,
       room_id: null,
       user_id: null,
       peer_id: null,
-      client_id: null,
       state: null,
       local_candidate: {},
       remote_candidate: {},
@@ -36,7 +38,7 @@ class HandleIceConnectionStats extends SkylinkStats {
         if (stats) {
           // Parse the selected ICE candidate pair for both local and remote candidate.
           ['local', 'remote'].forEach((dirType) => {
-            const candidate = stats.selectedCandidate[dirType];
+            const candidate = stats.selectedCandidatePair[dirType];
             if (candidate) {
               const modelCandidate = this.model[`${dirType}_candidate`];
               modelCandidate.ip_address = candidate.ipAddress || null;
