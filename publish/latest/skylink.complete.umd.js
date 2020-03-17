@@ -3,7 +3,7 @@
 	factory();
 }(function () { 'use strict';
 
-	/* SkylinkJS v2.1.1 Mon Mar 16 2020 02:59:02 GMT+0000 (Coordinated Universal Time) */
+	/* SkylinkJS v2.1.1 Tue Mar 17 2020 02:52:09 GMT+0000 (Coordinated Universal Time) */
 	(function (global, factory) {
 		typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 		typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -3021,6 +3021,7 @@
 		      ERRORS: {
 		        FAILED_SETTING_PERSISTENCE: 'Failed setting persistent message flag',
 		        INVALID_TYPE: 'Persistent message flag must be of type boolean',
+		        PRIVATE_MESSAGE: 'Cannot persist private messages',
 		        PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED: 'Persistent Message feature is not enabled. Enable'
 		          + ' this feature on the key under \'Advanced Settings\' in the Temasys Console',
 		      },
@@ -12141,7 +12142,8 @@
 		    if (!isABoolean(isPersistent)) {
 		      throw SkylinkError.throwError(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.FAILED_SETTING_PERSISTENCE, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.INVALID_TYPE);
 		    } else if (!this.hasPersistentMessage) {
-		      throw SkylinkError.throwError(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.FAILED_SETTING_PERSISTENCE, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED);
+		      this.isPersistent = isPersistent;
+		      throw SkylinkError.throwError(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED);
 		    }
 
 		    this.isPersistent = isPersistent;
@@ -12160,10 +12162,15 @@
 
 		  sendMessage(roomName, message, targetPeerId) {
 		    const roomState = getRoomStateByName(roomName);
+		    const isPublicMessage = !targetPeerId || (Array.isArray(targetPeerId) && isEmptyArray(targetPeerId));
 		    if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
 		      try {
 		        logger.log.DEBUG([null, TAGS.ASYNC_MESSAGING, null, MESSAGES.MESSAGING.PERSISTENCE.SEND_MESSAGE]);
 		        const encryptedMessaging = new EncryptedMessaging(roomState);
+		        if (!isPublicMessage) {
+		          throw new Error(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PRIVATE_MESSAGE);
+		        }
+
 		        if (encryptedMessaging.canEncrypt(true)) {
 		          encryptedMessaging.sendMessage(roomName, message, targetPeerId, this.isPersistent);
 		        }
@@ -12244,9 +12251,8 @@
 		    const roomState = getRoomStateByName(roomName);
 		    if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
 		      const encryptedMessaging = new EncryptedMessaging(roomState);
-		      const isPublicMessage = !targetPeerId || (Array.isArray(targetPeerId) && isEmptyArray(targetPeerId));
 		      const asyncMessaging = new AsyncMessaging(roomState);
-		      if (asyncMessaging.canPersist() && isPublicMessage) {
+		      if (asyncMessaging.canPersist()) {
 		        asyncMessaging.sendMessage(roomName, message, targetPeerId);
 		      } else if (encryptedMessaging.canEncrypt()) {
 		        encryptedMessaging.sendMessage(roomName, message, targetPeerId);
@@ -18633,8 +18639,9 @@
 		  if (isPrivate) {
 		    for (let i = 0; i < listOfPeers.length; i += 1) {
 		      const peerId = listOfPeers[i];
-		      messageBody.target = peerId;
-		      signalingReadyMessages.push(messageBody);
+		      const mBody = Object.assign({}, messageBody);
+		      mBody.target = peerId;
+		      signalingReadyMessages.push(mBody);
 		      logger.log.DEBUG([peerId, TAGS.MESSAGING, null, MESSAGES.MESSAGING.PRIVATE_MESSAGE], { message });
 		    }
 		  } else {
