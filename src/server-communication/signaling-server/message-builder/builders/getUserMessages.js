@@ -25,8 +25,9 @@ const getUserMessages = (roomState, config, message) => {
   if (isPrivate) {
     for (let i = 0; i < listOfPeers.length; i += 1) {
       const peerId = listOfPeers[i];
-      messageBody.target = peerId;
-      signalingReadyMessages.push(messageBody);
+      const mBody = Object.assign({}, messageBody);
+      mBody.target = peerId;
+      signalingReadyMessages.push(mBody);
       logger.log.DEBUG([peerId, TAGS.MESSAGING, null, MESSAGES.MESSAGING.PRIVATE_MESSAGE], { message });
     }
   } else {
