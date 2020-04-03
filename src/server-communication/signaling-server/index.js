@@ -153,7 +153,9 @@ class SkylinkSignalingServer {
    */
   answer(...args) {
     return this.messageBuilder.getAnswerMessage(...args).then((answer) => {
+      const state = args[0];
       this.sendMessage(answer);
+      this.dispatchHandshakeProgress(state, 'ANSWER');
       return answer;
     });
   }
@@ -191,6 +193,7 @@ class SkylinkSignalingServer {
 
     this.messageBuilder.getOfferMessage(...args).then((offer) => {
       this.sendMessage(offer);
+      this.dispatchHandshakeProgress(state, 'OFFER');
     });
   }
 

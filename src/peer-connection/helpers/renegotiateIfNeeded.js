@@ -19,6 +19,13 @@ const renegotiateIfNeeded = (state, peerId) => {
         reports.forEach((report) => {
           if (report && report.ssrc) {
             transmittingSenders[report.ssrc] = pcSenders[senderIndex];
+          } else if (report && report.type === 'ssrc' && report.id.indexOf('send') > 1) { // required for retrieving sender information for react
+            // native ios
+            report.values.forEach((value) => {
+              if (value.ssrc) {
+                transmittingSenders[value.ssrc] = pcSenders[senderIndex];
+              }
+            });
           }
         });
       });

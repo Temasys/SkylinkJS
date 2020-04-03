@@ -74,6 +74,7 @@ const createNativePeerConnection = (targetMid, constraints, optional, hasScreenS
 
   if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE) {
     rtcPeerConnection.onsenderadded = callbacks.onsenderadded.bind(rtcPeerConnection, ...callbackExtraParams);
+    rtcPeerConnection.onremovetrack = callbacks.onremovetrack.bind(rtcPeerConnection, targetMid, state.room, false);
   }
 
   return rtcPeerConnection;

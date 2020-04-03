@@ -82,6 +82,7 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
       PeerConnection.createDataChannel({
         peerId: targetMid,
         roomState: state,
+        createAsMessagingChannel: true,
       });
       state.peerConnections[targetMid].hasMainChannel = true;
     }
