@@ -364,6 +364,13 @@ const MESSAGES = {
     LOGS_NOT_STORED: 'Store logs feature is not enabled. Enable it via SkylinkLogger.setLevel(logLevel, storeLogs)',
     LOGS_CLEARED: 'Stored logs cleared',
   },
+  BROWSER_AGENT: {
+    REACT_NATIVE: {
+      ERRORS: {
+        DROPPING_ONREMOVETRACK: 'Dropping onremovetrack as trackInfo is malformed',
+      },
+    },
+  },
 };
 
 export default MESSAGES;
