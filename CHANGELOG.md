@@ -12,7 +12,6 @@
 #### New features
 * Our new SDK is module based with full compatibility with ES6
 * All callbacks have been promisified
-* Multiple `getUserMedia` streams support
 * Multiple rooms support
 _______________________
 
@@ -30,20 +29,21 @@ Method 1: Import as type `module` in script tag of `index.html`
 ```
  <script type="module">
     import Skylink, { SkylinkEventManager, SkylinkLogger, SkylinkConstants } from 'https://cdn.temasys.io/skylink/skylinkjs/latest/skylink.complete.js'; 
+    window.Skylink = Skylink; // assign to the window object if Skylink needs to be accessed in other scripts
  </script>
  <script defer src="index.js"></script>
 ```
-- access `Skylink` class in `index.js`
+- access `Skylink` class in `index.js` or directly in the script tag
 ```
  const skylink = new Skylink(config);
 ```
-Method 2: Import directly in `index.js`
-- from npm module
+Method 2: Import in `index.js`
+- from cdn
 ```
  import Skylink, { SkylinkEventManager, SkylinkLogger, SkylinkConstants } from 'https://cdn.temasys.io/skylink/skylinkjs/latest/skylink.complete.js';
  const skylink = new Skylink(config);
 ```
-- from cdn
+- from NPM module
 ```
  import Skylink, { SkylinkEventManager, SkylinkLogger, SkylinkConstants } from 'skylinkjs';
  const skylink = new Skylink(config);
@@ -81,7 +81,6 @@ Step 2: Init Skylink with config and call joinRoom in success callback function
 const config = {
     appKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX',
     defaultRoom: 'skylinkRoom',
-    enableIceTrickle: true,
     enableDataChannel: true,
     forceSSL: true,
 };
@@ -119,7 +118,6 @@ Step 1: Instantiate Skylink and init with config
 const config = {
     appKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX',
     defaultRoom: 'skylinkRoom',
-    enableIceTrickle: true,
     enableDataChannel: true,
     forceSSL: true,
 };
@@ -147,7 +145,7 @@ skylink.joinRoom(joinRoomOptions)
 })
 .catch();
 ```
- Step 3: Listen on 'peerJoined' event with isSelf=true for self join room success outcome
+ Step 3: Listen on 'peerJoined' event with `isSelf=true` for self join room success outcome
 ```
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) => {
     const { isSelf, peerId, peerInfo } = evt.detail;
