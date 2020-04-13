@@ -787,8 +787,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
     $(statsElm)
       .find('.certificate .certleft')
       .html('Certificate algorithm - (local: ' +
-        (stats.certificate.local.fingerprintAlgorithm || '-') + ', remote: ' +
-        (stats.certificate.remote.fingerprintAlgorithm || '-') + ')');
+        (stats.certificate.local && stats.certificate.local.fingerprintAlgorithm || '-') + ', remote: ' +
+        (stats.certificate.remote && stats.certificate.remote.fingerprintAlgorithm || '-') + ')');
     $(statsElm)
       .find('.certificate .certright')
       .html('Ciphers - (srtp: ' +
@@ -886,6 +886,17 @@ $(document).ready(function() {
   const startSendStream = function(mediaOptions) {
     Demo.Skylink.sendStream(config.defaultRoom,mediaOptions);
   };
+
+  $("#add_stream_btn").click(function() {
+    const mediaOptions = {
+      audio: { stereo: true },
+      video: true,
+    };
+    Demo.Skylink.sendStream(config.defaultRoom, mediaOptions)
+    .then((streams) => {
+      console.log("added streams", streams);
+    })
+  })
 
   $("#send_stream_btn").click(function() {
     const mediaOptions = {
