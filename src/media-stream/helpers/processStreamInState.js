@@ -6,6 +6,7 @@ import { mediaAccessSuccess } from '../../skylink-events';
 import { dispatchEvent } from '../../utils/skylinkEventManager';
 import PeerMedia from '../../peer-media/index';
 import { TAGS } from '../../constants';
+import { hasAudioTrack, hasVideoTrack } from '../../utils/helpers';
 
 const isStreamInState = (state, stream) => {
   const { streams } = state;
@@ -57,6 +58,8 @@ const processStreamInState = (stream = null, settings = {}, roomkey, isScreensha
     isScreensharing,
     isAudioFallback,
     streamId: stream.id,
+    isAudio: hasAudioTrack(stream),
+    isVideo: hasVideoTrack(stream),
   }));
 };
 
