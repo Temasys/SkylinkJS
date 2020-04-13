@@ -292,9 +292,13 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_LEFT, (evt) =>
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_UPDATED, (evt) => {
   const { peerId, peerInfo, isSelf } = evt.detail;
-  const streamIds = Object.keys(peerInfo.mediaStatus);
+  let streamIds = Object.keys(peerInfo.mediaStatus);
   let audioStreamId = null;
   let videoStreamId = null;
+
+  if (Demo.Streams && Demo.Streams.screenshare) {
+    streamIds = streamIds.filter((id) => id !== Demo.Streams.screenshare.id)
+  }
 
   if (streamIds[0] && streamIds[1]) {
     audioStreamId = streamIds[0];
@@ -393,6 +397,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_SCREEN_
   setTimeout(function () {
     peerScreen.removeAttribute('controls');
   });
+
+  Demo.Methods.updateStreams();
 });
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.MEDIA_ACCESS_SUCCESS, (evt) => {
@@ -413,7 +419,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STREAM_ENDED, (evt)
   const { isScreensharing, isSelf, peerId } = eventDetail;
 
   if (!isSelf && !isScreensharing) {
-    document.getElementById(`video${eventDetail.peerId}`).firstChild.setAttribute('poster', '../app/img/black.png');
+    document.getElementById(`video${eventDetail.peerId}`).firstChild.setAttribute('poster', '../assets/imgs/black.png');
   }
 
   if (isScreensharing) {
