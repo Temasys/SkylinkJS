@@ -14,7 +14,7 @@ const isStreamInState = (state, stream) => {
     return false;
   }
 
-  const streamObjs = Object.values(streams.userMedia);
+  const streamObjs = streams.userMedia ? Object.values(streams.userMedia) : [];
   if (streamObjs.some(streamObj => streamObj.id === stream.id)) {
     return true;
   }
