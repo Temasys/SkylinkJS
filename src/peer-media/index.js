@@ -101,9 +101,11 @@ class PeerMedia {
 
     helpers.processOnRemoveTrack(updatedState, peerId, clonedMediaInfo);
 
-    dispatchEvent(mediaInfoDeleted({
-      mediaInfo: clonedMediaInfo,
-    }));
+    if (clonedMediaInfo) {
+      dispatchEvent(mediaInfoDeleted({
+        mediaInfo: clonedMediaInfo,
+      }));
+    }
   }
 
   /**

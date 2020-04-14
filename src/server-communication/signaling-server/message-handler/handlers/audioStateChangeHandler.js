@@ -1,7 +1,9 @@
 import Skylink from '../../../../index';
 import logger from '../../../../logger';
 import MESSAGES from '../../../../messages';
-import { MEDIA_STATE, MEDIA_STATUS, TAGS, TRACK_KIND } from '../../../../constants';
+import {
+  MEDIA_STATE, MEDIA_STATUS, TAGS, TRACK_KIND,
+} from '../../../../constants';
 import PeerMedia from '../../../../peer-media';
 import mediaInfoEventHelpers from './helpers/mediaInfoEventHelpers';
 

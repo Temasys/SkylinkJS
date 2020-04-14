@@ -149,6 +149,7 @@ const MESSAGES = {
     MESSAGE_ADDED_TO_BUFFER: 'Message buffered as enter message has not been sent',
     ENTER_LISTENER: 'Enter listener initialized',
     BUFFERED_MESSAGES_SENT: 'Buffered messages sent',
+    BUFFERED_MESSAGES_DROPPED: 'Buffered messages dropped - no mid',
     OUTDATED_MSG: 'Dropping outdated status ->',
     DROPPING_MUTE_EVENT: 'Dropping mute audio / video event message as it is processed by mediaInfoEvent',
     BUFFER_NOT_NEEDED: 'Enter message sent. Messages do not need to be buffered',
@@ -249,6 +250,7 @@ const MESSAGES = {
       INVALID_GUM_OPTIONS: 'Invalid user media options',
       GET_USER_MEDIA: 'Error retrieving stream from \'getUserMedia\' method',
       INVALID_MUTE_OPTIONS: 'Invalid muteStreams options provided',
+      NO_STREAMS_MUTED: 'No streams to mute',
       SEND_STREAM: 'Error sending stream',
       INVALID_MEDIA_STREAM_ARRAY: 'Array is not of type MediaStream',
       ACTIVE_STREAMS: 'There are currently active streams being sent to remote peers. Please stop streams.',
@@ -363,6 +365,7 @@ const MESSAGES = {
     EVENT_UNREGISTER_ERROR: 'Error unregistering event',
     LOGS_NOT_STORED: 'Store logs feature is not enabled. Enable it via SkylinkLogger.setLevel(logLevel, storeLogs)',
     LOGS_CLEARED: 'Stored logs cleared',
+    INVALID_CB: 'Dropping listener as it is not a function',
   },
   BROWSER_AGENT: {
     REACT_NATIVE: {

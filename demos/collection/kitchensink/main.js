@@ -32,7 +32,7 @@ const { $, document } = window;
 const displayName = `name_user_${  Math.floor((Math.random() * 1000) + 1)}`;
 $('#display_user_info').val(displayName);
 const joinRoomOptions = {
-  audio: { stereo: true },
+  audio: true,
   video: true,
   userData: displayName,
 };
@@ -155,7 +155,7 @@ Demo.Methods.logToConsoleDOM = (message, level) => {
   }
 
   $logListItem.append($logText);
-  $logListItem.appendTo($loggerListParentDOM);
+  $logListItem.prependTo($loggerListParentDOM);
 };
 
 /********************************************************
@@ -813,6 +813,12 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
   DOM Events
 *********************************************************/
 $(document).ready(function() {
+  // reset joinRoomOptions
+  $('#join_room_p2p_key').prop('checked', true);
+  $('#join_room_audio').prop('checked', true);
+  $('#join_room_audio_muted').prop('checked', false);
+  $('#join_room_video').prop('checked', true);
+  $('#join_room_video_muted').prop('checked', false);
   //---------------------------------------------------
   $('#display_app_id').html(config.appKey || config.apiKey || 'Not Provided');
   // //---------------------------------------------------
@@ -895,15 +901,13 @@ $(document).ready(function() {
   });
   //---------------------------------------------------
   const startSendStream = function(mediaOptions) {
-    Demo.Skylink.sendStream(config.defaultRoom,mediaOptions);
+    Demo.Skylink.sendStream(config.defaultRoom, mediaOptions);
   };
 
   $("#add_stream_btn").click(function() {
-    const mediaOptions = {
-      audio: { stereo: true },
-      video: true,
-    };
-    Demo.Skylink.sendStream(config.defaultRoom, mediaOptions)
+    const options = Object.assign({}, joinRoomOptions);
+    delete options.userData;
+    Demo.Skylink.sendStream(config.defaultRoom, options)
     .then((streams) => {
       console.log("added streams", streams);
     })
@@ -999,12 +1003,6 @@ $(document).ready(function() {
   $('#join_room_btn').click(function () {
     config.appKey = selectedAppKey || config.appKey;
     Demo.Skylink = new Skylink(config);
-    if (!$('#join_room_video').prop('checked')) {
-      joinRoomOptions.video = false;
-    }
-    if (!$('#join_room_audio').prop('checked')) {
-      joinRoomOptions.audio = false;
-    }
     Demo.Skylink.joinRoom(joinRoomOptions);
     $('#join_room_btn').addClass('disabled');
   });
@@ -1093,6 +1091,34 @@ $(document).ready(function() {
     $('#display_app_id').html(selectedAppKey);
   };
 
+  window.setMediaOptions = dom => {
+    var type = $(dom).attr('value');
+    var checked = $(dom).prop('checked');
+    joinRoomOptions[type] = checked;
+    if (type === 'audio') {
+      if (!checked) {
+        $('#join_room_audio_muted').prop('checked', checked);
+      }
+      $('#join_room_audio_muted').prop('disabled', !checked);
+    } else if (type === 'video') {
+      if (!checked) {
+        $('#join_room_video_muted').prop('checked', checked);
+      }
+      $('#join_room_video_muted').prop('disabled', !checked);
+    }
+  }
+
+  window.setMuteOption = dom => {
+    var type = $(dom).attr('value');
+    if ($(dom).prop('checked')) {
+      joinRoomOptions[type] = {};
+      joinRoomOptions[type].mute = true;
+    } else {
+      delete joinRoomOptions[type].mute;
+      joinRoomOptions[type] = true;
+    }
+  }
+
   window.selectTargetPeer = dom => {
     var peerId = $(dom).attr('target');
     var panelDom = $('#selected_users_panel');
@@ -1120,7 +1146,7 @@ $(document).ready(function() {
   };
 
   window.onerror = function (error) {
-    let message = '';
+    let message = 'Check console for error';
     if (error.indexOf('Failed decrypting message') > -1) {
       message = `Failed decrypting message: ${error.split('-')[1].trim()}` ;
     }
@@ -1131,6 +1157,11 @@ $(document).ready(function() {
 
     Demo.Methods.logToConsoleDOM(message, 'error');
   };
+
+  window.addEventListener("unhandledrejection", (promiseRejectionEvent) => {
+    let message = promiseRejectionEvent.reason;
+    Demo.Methods.logToConsoleDOM(message, 'error');
+  });
 });
 
 var DemoSkylinkEventManager = SkylinkEventManager;
