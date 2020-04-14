@@ -430,6 +430,11 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STREAM_ENDED, (evt)
   Demo.Methods.updateStreams();
 });
 
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STREAM_MUTED, (evt) => {
+  console.log("STREAM_MUTED", evt.detail);
+})
+
+
 // //---------------------------------------------------
 // // ROOM EVENTS
 // //---------------------------------------------------

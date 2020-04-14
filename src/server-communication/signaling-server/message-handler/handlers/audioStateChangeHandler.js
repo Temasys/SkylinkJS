@@ -1,7 +1,7 @@
 import Skylink from '../../../../index';
 import logger from '../../../../logger';
 import MESSAGES from '../../../../messages';
-import { MEDIA_STATE, MEDIA_STATUS, TAGS } from '../../../../constants';
+import { MEDIA_STATE, MEDIA_STATUS, TAGS, TRACK_KIND } from '../../../../constants';
 import PeerMedia from '../../../../peer-media';
 import mediaInfoEventHelpers from './helpers/mediaInfoEventHelpers';
 
@@ -36,7 +36,7 @@ const audioStateChangeHandler = (targetMid, message) => {
   updatedState.peerInformations[targetMid].mediaStatus[streamId].audioMuted = (mediaState === MEDIA_STATE.MUTED || mediaState === MEDIA_STATE.STOPPED) ? MEDIA_STATUS.MUTED : MEDIA_STATUS.ACTIVE;
   Skylink.setSkylinkState(updatedState, room.id);
 
-  mediaInfoEventHelpers.dispatchMediaStateChangeEvents(updatedState, streamId, targetMid);
+  mediaInfoEventHelpers.dispatchMediaStateChangeEvents(updatedState, streamId, targetMid, TRACK_KIND.AUDIO, false);
 };
 
 export default audioStateChangeHandler;

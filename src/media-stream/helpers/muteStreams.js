@@ -14,14 +14,16 @@ import {
 } from '../../constants';
 import PeerMedia from '../../peer-media/index';
 
-const dispatchStreamMutedEvent = (room, streamId, isScreensharing) => {
+const dispatchStreamMutedEvent = (room, stream, isScreensharing) => {
   const roomState = Skylink.getSkylinkState(room.id);
   dispatchEvent(streamMuted({
     isSelf: true,
     peerId: roomState.user.sid,
     peerInfo: PeerData.getUserInfo(room),
-    streamId,
+    streamId: stream.id,
     isScreensharing,
+    isAudio: hasAudioTrack(stream),
+    isVideo: hasVideoTrack(stream),
   }));
 };
 
@@ -112,31 +114,6 @@ const sendSigMsgs = (hasToggledVideo, hasToggledAudio, room, streamId) => {
   }
 };
 
-// TODO: check if this is needed since Edge is not built on Chrome
-// const muteForEdge = (roomState, streamId, hasToggledVideo, hasToggledAudio) => {
-//   const { peerConnections } = roomState;
-//   const peerIds = Object.keys(peerConnections);
-//   peerIds.forEach((peerId) => {
-//     const localStreams = peerConnections[peerId].getLocalStreams();
-//     if (streamId) {
-//       for (let i = 0; i < localStreams.length; i += 1) {
-//         if (streamId === localStreams[i].id) {
-//           muteFn(localStreams[i], roomState);
-//           dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, localStreams[i], roomState);
-//           sendMuteAudioAndMuteVideoSigMsg(hasToggledVideo, hasToggledAudio, roomState, streamId);
-//           break;
-//         }
-//       }
-//     } else {
-//       localStreams.forEach((stream, i) => {
-//         muteFn(stream, roomState);
-//         dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, stream, roomState);
-//         setTimeout(sendMuteAudioAndMuteVideoSigMsg, i === 0 ? 0 : 1000);
-//       });
-//     }
-//   });
-// };
-
 const muteFn = (stream, state) => {
   const updatedState = state;
   const { room } = updatedState;
@@ -166,6 +143,14 @@ const retrieveToggleState = (state, options, streamId) => {
   const { streams, streamsMutedSettings } = state;
   let hasToggledAudio = false;
   let hasToggledVideo = false;
+
+  if (streams.screenshare.id === streamId) {
+    hasToggledVideo = true;
+    return {
+      hasToggledAudio,
+      hasToggledVideo,
+    };
+  }
 
   if (hasAudioTrack(streams.userMedia[streamId].stream) && streamsMutedSettings[streamId].audioMuted !== options.audioMuted) {
     hasToggledAudio = true;
@@ -203,26 +188,24 @@ const startMuteEvents = (roomKey, streamId, options) => {
   const toggleState = retrieveToggleState(state, options, streamId);
   const { hasToggledAudio, hasToggledVideo } = toggleState;
 
-  if (streams.userMedia) {
+  if (streams.userMedia && streams.userMedia[streamId]) {
     updateStreamsMutedSettings(state, toggleState, streamId);
     muteFn(streams.userMedia[streamId].stream, state);
     dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, streams.userMedia[streamId].stream, room.id);
     dispatchPeerUpdatedEvent(room); // TODO: Currently peerUpdatedEvent will fire after each stream is updated. Suggest to refactor to have last stream trigger peerUpdatedEvent after a timeout since only one peerUpdatedEvent is needed
-    dispatchStreamMutedEvent(room, streamId);
+    dispatchStreamMutedEvent(room, streams.userMedia[streamId].stream);
     sendSigMsgs(hasToggledVideo, hasToggledAudio, room, streamId);
     updateMediaInfo(hasToggledVideo, hasToggledAudio, room, streamId);
   }
 
-  if (streams.screenshare) {
-    if ((streamId && streams.screenshare.stream.id === streamId) || !streamId) {
-      updateStreamsMutedSettings(state, toggleState, streamId);
-      muteFn(streams.screenshare.stream, state);
-      dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, streams.screenshare.stream, room.id, true);
-      dispatchPeerUpdatedEvent(room);
-      dispatchStreamMutedEvent(room, streamId, true);
-      sendSigMsgs(hasToggledVideo, hasToggledAudio, room, streamId);
-      updateMediaInfo(hasToggledVideo, hasToggledAudio, room, streamId);
-    }
+  if (streams.screenshare && streams.screenshare.id === streamId) {
+    updateStreamsMutedSettings(state, toggleState, streamId);
+    muteFn(streams.screenshare.stream, state);
+    dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, streams.screenshare.stream, room.id, true);
+    dispatchPeerUpdatedEvent(room);
+    dispatchStreamMutedEvent(room, streams.screenshare.stream, true);
+    sendSigMsgs(hasToggledVideo, hasToggledAudio, room, streamId);
+    updateMediaInfo(hasToggledVideo, hasToggledAudio, room, streamId);
   }
 };
 
@@ -285,6 +268,9 @@ const muteStreams = (roomState, options, streamId = null) => {
   };
 
   const streamIdsThatCanBeMuted = streamId ? [streamId] : Object.keys(streams.userMedia).filter(id => !streams.userMedia[id].isReplaced);
+  if (streams.screenshare && !streams.screenshare.isReplaced) {
+    streamIdsThatCanBeMuted.push(streams.screenshare.id);
+  }
   const streamIdsToMute = Object.values(streamIdsThatCanBeMuted).filter(sId => (retrieveToggleState(roomState, fOptions, sId).hasToggledAudio || retrieveToggleState(roomState, fOptions, sId).hasToggledVideo));
 
   streamIdsToMute.forEach((streamIdToMute, i) => {

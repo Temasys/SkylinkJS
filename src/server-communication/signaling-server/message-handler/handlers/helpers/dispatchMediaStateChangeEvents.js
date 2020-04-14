@@ -1,8 +1,9 @@
 import PeerData from '../../../../../peer-data';
 import { dispatchEvent } from '../../../../../utils/skylinkEventManager';
 import { peerUpdated, streamMuted } from '../../../../../skylink-events';
+import { TRACK_KIND } from '../../../../../constants';
 
-const dispatchMediaStateChangeEvents = (state, streamId, peerId) => {
+const dispatchMediaStateChangeEvents = (state, streamId, peerId, kind, isScreensharing) => {
   const peerInfo = PeerData.getPeerInfo(peerId, state.room);
 
   dispatchEvent(streamMuted({
@@ -10,6 +11,9 @@ const dispatchMediaStateChangeEvents = (state, streamId, peerId) => {
     peerId,
     peerInfo,
     streamId,
+    isAudio: kind === TRACK_KIND.AUDIO,
+    isVideo: kind === TRACK_KIND.VIDEO,
+    isScreensharing,
   }));
 
   dispatchEvent(peerUpdated({
