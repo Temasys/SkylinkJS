@@ -11,6 +11,9 @@ const deleteStreamFromState = (room, stream, isScreensharing = null) => {
 
   if (isScreensharing) {
     delete updatedState.streams.screenshare;
+    delete updatedState.streamsMediaStatus[stream.id];
+    delete updatedState.streamsMutedSettings[stream.id];
+    updatedState.streams.screenshare = null;
 
     logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SUCCESS} - stream id: ${stream.id} (screenshare)`]);
   } else {

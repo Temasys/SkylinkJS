@@ -63,7 +63,8 @@ export const streamEnded = (detail = {}) => new SkylinkEvent(STREAM_ENDED, { det
  * @param {String} detail.peerId -  The Peer ID.
  * @param {peerInfo} detail.peerInfo The Peer session information. Object signature matches the <code>peerInfo</code> parameter payload received in the <code>peerJoined</code> event.
  * @param {Boolean} detail.isSelf The flag if Peer is User.
- * @param {boolean} detail.isVideo - The flag if the ended stream has a video track.
- * @param {boolean} detail.isAudio - The flag if the ended stream has an audio track.
+ * @param {boolean} detail.isVideo - The flag if the muted stream has a video track.
+ * @param {boolean} detail.isAudio - The flag if the muted stream has an audio track.
+ * @param {boolean} detail.isScreensharing - The flag if the muted stream is a screensharing stream.
  * */
 export const streamMuted = (detail = {}) => new SkylinkEvent(STREAM_MUTED, { detail });
