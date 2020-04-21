@@ -15,13 +15,14 @@ import buildPeerInformations from './buildPeerInformations';
 import getConnectionStatus from './getConnectionStatus';
 import closePeerConnection from './closePeerConnection';
 import updatePeerInformationsMediaStatus from './updatePeerInformationsMediaStatus';
+import processNewSender from './processNewSender';
 
 /**
  * @namespace PeerConnectionHelpers
  * @description All helper and utility functions for <code>{@link PeerConnection}</code> class are listed here.
  * @private
  * @memberOf PeerConnection
- * @type {{createOffer, createAnswer, addPeer, createDataChannel, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, getDataChannelBuffer, refreshDataChannel, closeDataChannel, refreshConnection, refreshPeerConnection, restartPeerConnection, buildPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus }}
+ * @type {{createOffer, createAnswer, addPeer, createDataChannel, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, getDataChannelBuffer, refreshDataChannel, closeDataChannel, refreshConnection, refreshPeerConnection, restartPeerConnection, buildPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus, processNewSender  }}
  */
 const helpers = {
   createOffer,
@@ -41,6 +42,7 @@ const helpers = {
   getConnectionStatus,
   closePeerConnection,
   updatePeerInformationsMediaStatus,
+  processNewSender,
 };
 
 export default helpers;

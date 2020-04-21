@@ -382,7 +382,7 @@ export const CANDIDATE_PROCESSING_STATE = {
  * @property {String} CLOSED         Value <code>"closed"</code>
  *   The value of the state when Peer connection ICE connection has closed.
  *   This happens when Peer connection is closed and no streaming can occur at this stage.
- * @property {String} TRICKLE_FAILED Value <code>"trickeFailed"</code>
+ * @property {String} TRICKLE_FAILED Value <code>"trickleFailed"</code>
  *   The value of the state when Peer connection ICE connection has failed during trickle ICE.
  * @constant
  * @type Object
@@ -1813,11 +1813,11 @@ export const MEDIA_INFO = {
  * @memberOf SkylinkConstants
  * @since 2.0
  */
-export const SDK_VERSION = '2.0';
+export const SDK_VERSION = '2.0.0';
 
 /**
  * The SDK type.
- * @typedef SDK_TYPE
+ * @typedef SDK_NAME
  * @type {Object}
  * @private
  * @constant
@@ -1825,11 +1825,11 @@ export const SDK_VERSION = '2.0';
  * @memberOf SkylinkConstants
  * @since 2.0
  */
-export const SDK_TYPE = {
-  WEB: 'WEB_SDK',
-  ANDROID: 'Android',
-  IOS: 'iOS',
-  CPP: 'cpp',
+export const SDK_NAME = {
+  WEB: 'Web SDK',
+  ANDROID: 'Android SDK',
+  IOS: 'iOS SDK',
+  CPP: 'C++ SDK',
 };
 
 /**
@@ -1870,6 +1870,7 @@ export const BROWSER_AGENT = {
   CHROME: 'chrome',
   FIREFOX: 'firefox',
   SAFARI: 'safari',
+  REACT_NATIVE: 'react-native',
 };
 
 /**
@@ -1900,10 +1901,11 @@ export const SOCKET_EVENTS = {
   CONNECT: 'connect',
   DISCONNECT: 'disconnect',
   RECONNECT_ATTEMPT: 'reconnect_attempt',
-  ERROR: 'error',
+  RECONNECT_SUCCESS: 'reconnect_success',
   RECONNECT_FAILED: 'reconnect_failed',
   RECONNECT_ERROR: 'reconnect_error',
   MESSAGE: 'message',
+  ERROR: 'error',
 };
 
 /**

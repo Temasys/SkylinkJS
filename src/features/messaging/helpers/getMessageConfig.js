@@ -1,4 +1,4 @@
-import { isAString } from '../../../utils/helpers';
+import { isAString, isEmptyArray } from '../../../utils/helpers';
 import logger from '../../../logger';
 import { PEER_TYPE, TAGS } from '../../../constants';
 import MESSAGES from '../../../messages';
@@ -16,7 +16,7 @@ const getMessageConfig = (roomState, targetPeerId) => {
     throw Error(MESSAGES.ROOM.ERRORS.NOT_IN_ROOM);
   }
 
-  if (Array.isArray(targetPeerId)) {
+  if (Array.isArray(targetPeerId) && !isEmptyArray(targetPeerId)) {
     listOfPeers = targetPeerId;
     isPrivate = true;
   } else if (targetPeerId && isAString(targetPeerId)) {

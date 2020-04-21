@@ -3,7 +3,7 @@ import logger from '../../../logger';
 import MESSAGES from '../../../messages';
 import SkylinkSignalingServer from '../../../server-communication/signaling-server';
 import {
-  getParamValidity, getRoomStateByName, isABoolean,
+  getParamValidity, getRoomStateByName, isABoolean, isEmptyArray,
 } from '../../../utils/helpers';
 import SkylinkError from '../../../utils/skylinkError';
 import Skylink from '../../../index';
@@ -41,7 +41,8 @@ class AsyncMessaging {
     if (!isABoolean(isPersistent)) {
       throw SkylinkError.throwError(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.FAILED_SETTING_PERSISTENCE, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.INVALID_TYPE);
     } else if (!this.hasPersistentMessage) {
-      throw SkylinkError.throwError(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.FAILED_SETTING_PERSISTENCE, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED);
+      this.isPersistent = isPersistent;
+      throw SkylinkError.throwError(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED);
     }
 
     this.isPersistent = isPersistent;
@@ -60,10 +61,15 @@ class AsyncMessaging {
 
   sendMessage(roomName, message, targetPeerId) {
     const roomState = getRoomStateByName(roomName);
+    const isPublicMessage = !targetPeerId || (Array.isArray(targetPeerId) && isEmptyArray(targetPeerId));
     if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
       try {
         logger.log.DEBUG([null, TAGS.ASYNC_MESSAGING, null, MESSAGES.MESSAGING.PERSISTENCE.SEND_MESSAGE]);
         const encryptedMessaging = new EncryptedMessaging(roomState);
+        if (!isPublicMessage) {
+          throw new Error(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PRIVATE_MESSAGE);
+        }
+
         if (encryptedMessaging.canEncrypt(true)) {
           encryptedMessaging.sendMessage(roomName, message, targetPeerId, this.isPersistent);
         }
@@ -127,6 +133,10 @@ class AsyncMessaging {
       peerId: targetMid,
       peerInfo: PeerData.getPeerInfo(targetMid, room),
     }));
+  }
+
+  static deleteAsyncInstance(room) {
+    delete instance[room.id];
   }
 }
 

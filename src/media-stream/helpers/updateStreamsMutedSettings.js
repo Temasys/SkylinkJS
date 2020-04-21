@@ -3,11 +3,11 @@ import Skylink from '../../index';
 const updateStreamsMutedSettings = (roomKey, settings, stream) => {
   const updatedState = Skylink.getSkylinkState(roomKey);
   const { room, streamsMutedSettings } = updatedState;
-  const { mutedSettings: { shouldAudioMuted, shouldVideoMuted }, settings: { audio, video } } = settings;
+  const { audio, video } = settings.settings;
 
   streamsMutedSettings[stream.id] = {};
-  streamsMutedSettings[stream.id].audioMuted = audio ? shouldAudioMuted : true;
-  streamsMutedSettings[stream.id].videoMuted = video ? shouldVideoMuted : true;
+  streamsMutedSettings[stream.id].audioMuted = !audio;
+  streamsMutedSettings[stream.id].videoMuted = !video;
 
   Skylink.setSkylinkState(updatedState, room.id);
 };

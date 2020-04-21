@@ -65,7 +65,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
     return;
   }
 
-  if (state) {
+  if (state && peerConnection.iceConnectionState !== ICE_CONNECTION_STATE.CONNECTED) {
     handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
   }
 
@@ -93,8 +93,9 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
 
     // Do an initial getConnectionStatus() to backfill the first retrieval in order to do (currentTotalStats - lastTotalStats).
     PeerConnection.getConnectionStatus(state, targetMid).then(() => {
+      handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
       statsInterval = setInterval(() => {
-        if (peerConnection.signalingState === PEER_CONNECTION_STATE.CLOSED) {
+        if (peerConnection.signalingState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === PEER_CONNECTION_STATE.CLOSED) {
           clearInterval(statsInterval);
         } else {
           new HandleBandwidthStats().send(state.room.id, peerConnection, targetMid);

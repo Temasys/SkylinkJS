@@ -24,10 +24,12 @@ import Messaging from '../features/messaging';
 class SkylinkPublicInterface {
   /**
    * @description Method that starts a room session.
+   * <p>Resolves with an array of <code>MediaStreams</code> or null if pre-fetched
+   * stream was passed into <code>joinRoom</code> method. First item in array is <code>MediaStream</code> of kind audio and second item is
+   * <code>MediaStream</code> of kind video.</p>
    * @param {joinRoomOptions} [options] - The options available to join the room and configure the session.
    * @param {MediaStream} [prefetchedStream] - The pre-fetched media stream object obtained when the user calls {@link Skylink#getUserMedia|getUserMedia} method before {@link Skylink#joinRoom|joinRoom} method.
-   * @return {Promise.<Array<MediaStream|null>>} Promise object with an array of <code>MediaStreams</code> or null if pre-fetched stream was
-   * passed into <code>joinRoom</code> method. First item in array is MediaStream of kind audio and second item is MediaStream of kind video.
+   * @return {Promise.<MediaStreams>}
    * @example
    * Example 1: Calling joinRoom with options
    *
@@ -707,6 +709,8 @@ class SkylinkPublicInterface {
    *   than the milliseconds interval configured in the {@link initOptions}.
    * </blockquote>
    * @description Method that retrieves camera stream.
+   * <p>Resolves with an array of <code>MediaStreams</code>. First item in array is <code>MediaStream</code> of kind audio and second item is
+   * <code>MediaStream</code> of kind video.</p>
    * @param {String|null} roomName - The room name.
    * - If no roomName is passed or <code>getUserMedia()</code> is called before {@link Skylink#joinRoom|joinRoom}, the returned stream will not be associated with a room. The stream must be maintained independently.
    * To stop the stream, call {@link Skylink#stopPrefetchedStream|stopPrefetchedStream} method.
@@ -834,14 +838,14 @@ class SkylinkPublicInterface {
    * @param {String|JSON} [options.video.facingMode] The video camera facing mode.
    *   The list of available video source id can be retrieved by the {@link https://developer.mozilla.org
    *   /en-US/docs/Web/API/MediaTrackConstraints/facingMode}.
-   * @return {Promise<MediaStream>} MediaStream
+   * @return {Promise.<MediaStreams>}
    * @example
    * Example 1: Get both audio and video after joinRoom
    *
    * skylink.getUserMedia(roomName, {
    *     audio: true,
    *     video: true,
-   * }).then((stream) => // do something)
+   * }).then((streams) => // do something)
    * .catch((error) => // handle error);
    * @example
    * Example 2: Get only audio
@@ -849,7 +853,7 @@ class SkylinkPublicInterface {
    * skylink.getUserMedia(roomName, {
    *     audio: true,
    *     video: false,
-   * }).then((stream) => // do something)
+   * }).then((streams) => // do something)
    * .catch((error) => // handle error);
    * @example
    * Example 3: Configure resolution for video
@@ -857,7 +861,7 @@ class SkylinkPublicInterface {
    * skylink.getUserMedia(roomName, {
    *     audio: true,
    *     video: { resolution: skylinkConstants.VIDEO_RESOLUTION.HD },
-   * }).then((stream) => // do something)
+   * }).then((streams) => // do something)
    * .catch((error) => // handle error);
    * @example
    * Example 4: Configure stereo flag for OPUS codec audio (OPUS is always used by default)
@@ -867,7 +871,7 @@ class SkylinkPublicInterface {
    *         stereo: true,
    *     },
    *     video: true,
-   * }).then((stream) => // do something)
+   * }).then((streams) => // do something)
    * .catch((error) => // handle error);
    * @example
    * Example 5: Get both audio and video before joinRoom
@@ -876,7 +880,7 @@ class SkylinkPublicInterface {
    * skylink.getUserMedia({
    *     audio: true,
    *     video: true,
-   * }).then((stream) => // do something)
+   * }).then((streams) => // do something)
    * .catch((error) => // handle error);
    * @example
    * Example 6: Get media sources before joinRoom - only available on Chrome browsers
@@ -903,7 +907,7 @@ class SkylinkPublicInterface {
    *   video: {
    *     deviceId: videoInputDevices[0].deviceId,
    *   }
-   * }).then((stream) => // do something)
+   * }).then((streams) => // do something)
    * .catch((error) => // handle error);
    * @fires <b>If retrieval of fallback audio stream is successful:</b> <br/> - {@link SkylinkEvents.event:mediaAccessSuccess|mediaAccessSuccessEvent} with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallback=false</code> if initial retrieval is successful.
    * @fires <b>If initial retrieval is unsuccessful:</b> <br/> Fallback to retrieve audio only stream is triggered (configured in {@link initOptions} <code>audioFallback</code>) <br/>&emsp; - {@link SkylinkEvents.event:mediaAccessFallback|mediaAccessFallbackEvent} with parameter payload <code>state=FALLBACKING</code>, <code>isScreensharing=false</code> and <code>isAudioFallback=true</code> and <code>options.video=true</code> and <code>options.audio=true</code>. <br/> No fallback to retrieve audio only stream <br/> - {@link SkylinkEvents.event:mediaAccessError|mediaAccessErrorEvent} with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallbackError=false</code>.
@@ -1009,6 +1013,21 @@ class SkylinkPublicInterface {
    * @description Method that stops the room session.
    * @param {String} roomName  - The room name to leave.
    * @return {Promise.<String>}
+   * @example
+   * Example 1:
+   *
+   * // add event listener to catch peerLeft events when remote peer leaves room
+   * SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_LEFT, (evt) => {
+   *    const { detail } = evt;
+   *   // handle remote peer left
+   * });
+   *
+   * skylink.leaveRoom(roomName)
+   * .then((roomName) => {
+   *   // handle local peer left
+   * })
+   * .catch((error) => // handle error);
+   * @fires {@link SkylinkEvents.event:peerLeft|peerLeft} on the remote end of the connection.
    * @alias Skylink#leaveRoom
    * @since 0.5.5
    */
@@ -1341,13 +1360,15 @@ class SkylinkPublicInterface {
 
   /**
    * @description Method that sends a new <code>userMedia</code> stream to all connected peers in a room.
+   * <p>Resolves with an array of <code>MediaStreams</code>. First item in array is <code>MediaStream</code> of kind audio and second item is
+   * <code>MediaStream</code> of kind video.</p>
    * @param {String} roomName - The room name.
    * @param {JSON|MediaStream} options - The {@link Skylink#getUserMedia|getUserMedia} <code>options</code> parameter settings. The MediaStream to send to the remote peer.
    * - When provided as a <code>MediaStream</code> object, this configures the <code>options.audio</code> and
    *   <code>options.video</code> based on the tracks available in the <code>MediaStream</code> object.
    *   Object signature matches the <code>options</code> parameter in the
    *   <code>getUserMedia</code> method</a>.
-   * @return {Promise.<MediaStream|Array<MediaStream>>}
+   * @return {Promise.<MediaStreams>}
    * @example
    * Example 1: Send new MediaStream with audio and video
    *
@@ -1361,6 +1382,15 @@ class SkylinkPublicInterface {
    * })
    *
    * skylink.sendStream(roomName, options)
+   *  // streams can also be obtained from resolved promise
+   *  .then((streams) => {
+   *        if (streams[0]) {
+   *          window.attachMediaStream(audioEl, streams[0]); // first item in array is an audio stream
+   *        }
+   *        if (streams[1]) {
+   *          window.attachMediaStream(videoEl, streams[1]); // second item in array is a video stream
+   *        }
+   *    })
    *   .catch((error) => { console.error(error) });
    * }
    *

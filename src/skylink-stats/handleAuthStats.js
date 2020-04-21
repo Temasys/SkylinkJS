@@ -5,13 +5,15 @@ class HandleAuthStats extends SkylinkStats {
   constructor() {
     super();
     this.model = {
-      room_id: null,
       client_id: null,
+      appKey: null,
+      timestamp: null,
+      room_id: null,
+      state: null,
       http_status: null,
       http_error: null,
       api_url: null,
       api_result: null,
-      state: null,
     };
   }
 

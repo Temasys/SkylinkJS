@@ -11,6 +11,7 @@ import retrieveValueGivenTransceiverMid from './retrieveValueGivenTransceiverMid
 import retrieveFormattedMediaInfo from './retrieveFormattedMediaInfo';
 import resetPeerMedia from './resetPeerMedia';
 import populatePeerMediaInfo from './populatePeerMediaInfo';
+import processOnRemoveTrack from './processOnRemoveTrack';
 
 const helpers = {
   retrieveTransceiverMid,
@@ -26,6 +27,7 @@ const helpers = {
   retrieveFormattedMediaInfo,
   resetPeerMedia,
   populatePeerMediaInfo,
+  processOnRemoveTrack,
 };
 
 export default helpers;

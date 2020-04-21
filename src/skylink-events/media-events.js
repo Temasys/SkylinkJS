@@ -55,6 +55,8 @@ export const mediaAccessStopped = (detail = {}) => new SkylinkEvent(MEDIA_ACCESS
  * @param {Boolean} detail.isScreensharing - The flag if event occurred during <code>shareScreen()</code> method and not <code>getUserMedia()</code> method.
  * @param {Boolean} detail.isAudioFallback - The flag if event occurred during retrieval of audio tracks only when <code>getUserMedia()</code> method had failed to retrieve both audio and video tracks.
  * @param {String} detail.streamId - The Stream ID.
+ * @param {boolean} detail.isVideo - The flag if the incoming stream has a video track.
+ * @param {boolean} detail.isAudio - The flag if the incoming stream has an audio track.
  * @alias SkylinkEvents.mediaAccessSuccess
  */
 export const mediaAccessSuccess = (detail = {}) => new SkylinkEvent(MEDIA_ACCESS_SUCCESS, { detail });

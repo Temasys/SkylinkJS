@@ -70,11 +70,9 @@ const createAnswer = (roomState, targetMid) => {
 
   // No ICE restart constraints for createAnswer as it fails in chrome 48
   // { iceRestart: true }
-  return new Promise((resolve, reject) => {
-    peerConnection.createAnswer(answerConstraints)
-      .then(answer => onAnswerCreated(resolve, targetMid, roomState, answer))
-      .catch(err => onAnswerFailed(reject, targetMid, roomState, err));
-  });
+  return new Promise((resolve, reject) => peerConnection.createAnswer(answerConstraints)
+    .then(answer => onAnswerCreated(resolve, targetMid, roomState, answer))
+    .catch(error => onAnswerFailed(reject, targetMid, roomState, error)));
 };
 
 export default createAnswer;

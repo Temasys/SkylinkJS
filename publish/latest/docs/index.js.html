@@ -200,6 +200,13 @@ class Skylink extends SkylinkPublicInterface {
     }
   }
 
+  // eslint-disable-next-line consistent-return
+  static clearRoomStateFromSingletons(roomKey) {
+    if (roomKey) {
+      return skylinkStates.clearRoomStateFromSingletons(roomKey);
+    }
+  }
+
   /**
    * @description Method that retrieves the complete initOptions values (default + user specified).
    * @return {initOptions}

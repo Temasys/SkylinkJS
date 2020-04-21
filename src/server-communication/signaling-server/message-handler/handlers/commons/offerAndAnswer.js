@@ -12,6 +12,7 @@ import { dispatchEvent } from '../../../../../utils/skylinkEventManager';
 import handleNegotiationStats from '../../../../../skylink-stats/handleNegotiationStats';
 import MESSAGES from '../../../../../messages';
 import PeerMedia from '../../../../../peer-media/index';
+import SessionDescription from '../../../../../session-description';
 
 const handleSetOfferAndAnswerSuccess = (state, targetMid, description, isRemote) => {
   const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
@@ -21,11 +22,13 @@ const handleSetOfferAndAnswerSuccess = (state, targetMid, description, isRemote)
 
   handleNegotiationStats.send(room.id, HANDLE_NEGOTIATION_STATS[msgType].set, targetMid, description, isRemote);
 
-  dispatchEvent(handshakeProgress({
-    state: HANDSHAKE_PROGRESS[msgType],
-    peerId: isRemote ? targetMid : state.user.sid,
-    room,
-  }));
+  if (isRemote) { // handshake progress is triggered on the local end after sdp it is created
+    dispatchEvent(handshakeProgress({
+      state: HANDSHAKE_PROGRESS[msgType],
+      peerId: targetMid,
+      room,
+    }));
+  }
 
   if (isRemote) {
     if (description.type === 'offer') {
@@ -36,7 +39,6 @@ const handleSetOfferAndAnswerSuccess = (state, targetMid, description, isRemote)
     IceConnection.addIceCandidateFromQueue(targetMid, room);
   } else {
     bufferedLocalOffer[targetMid] = null;
-
     if (description.type === 'offer') {
       peerConnection.setOffer = 'local';
     } else {
@@ -62,12 +64,13 @@ const handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote,
   }));
 };
 
-const mungeSDP = () => {
+const mungeSDP = (targetMid, sessionDescription, roomKey) => {
+  const mungedSessionDescription = sessionDescription;
   // modifying the remote description received
   // TODO: Below SDP methods needs to be implemented in the SessionDescription Class.
   // sessionDescriptionToSet.sdp = SessionDescription.removeSDPFilteredCandidates(targetMid, sessionDescriptionToSet, message.rid);
   // sessionDescriptionToSet.sdp = SessionDescription.setSDPCodec(targetMid, sessionDescriptionToSet, message.rid);
-  // sessionDescriptionToSet.sdp = SessionDescription.setSDPBitrate(targetMid, sessionDescriptionToSet, message.rid);
+  mungedSessionDescription.sdp = SessionDescription.setSDPBitrate(targetMid, mungedSessionDescription, roomKey);
   // sessionDescriptionToSet.sdp = SessionDescription.setSDPCodecParams(targetMid, sessionDescriptionToSet, message.rid);
   // sessionDescriptionToSet.sdp = SessionDescription.removeSDPCodecs(targetMid, sessionDescriptionToSet, message.rid);
   // sessionDescriptionToSet.sdp = SessionDescription.removeSDPREMBPackets(targetMid, sessionDescriptionToSet, message.rid);
@@ -79,6 +82,7 @@ const mungeSDP = () => {
   // }
 
   // logger.log.INFO([targetMid, 'RTCSessionDescription', type, `Updated remote ${type} ->`], sessionDescriptionToSet.sdp);
+  return mungedSessionDescription;
 };
 
 const setLocalDescription = (room, targetMid, localDescription) => {
@@ -133,8 +137,8 @@ const setRemoteDescription = (room, targetMid, remoteDescription) => {
 
   peerConnection.processingRemoteSDP = true;
   handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, remoteDescription, true);
-
-  return peerConnection.setRemoteDescription(remoteDescription)
+  const mungedSessionDescription = mungeSDP(targetMid, remoteDescription, room.id);
+  return peerConnection.setRemoteDescription(mungedSessionDescription)
     .then(() => peerConnection);
 };
 
