@@ -3969,6 +3969,183 @@ retrieval state changes.</p>
   
 
   <span class='name-container'>
+    <a class="link-icon" href="#.event:iceConnectionState">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id=".event:iceConnectionState">
+      <span class="type-signature"></span>iceConnectionState<span class="type-signature"></span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>Learn more about how ICE works in this
+  <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+Event triggered when a Peer connection ICE connection state has changed.</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>state</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      SkylinkEvents.ICE_CONNECTION_STATE
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The current Peer connection ICE connection state.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>peerId</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The Peer ID.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="skylink-events_candidate-events.js.html">skylink-events/candidate-events.js</a>, <a href="skylink-events_candidate-events.js.html#line50">line 50</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
     <a class="link-icon" href="#.event:localMediaMuted">
       <svg height="20" width="20" style="fill: black;">
         <use xlink:href="#linkIcon"></use>
@@ -4281,7 +4458,7 @@ retrieval state changes.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="skylink-events_media-events.js.html">skylink-events/media-events.js</a>, <a href="skylink-events_media-events.js.html#line82">line 82</a>
+          <a href="skylink-events_media-events.js.html">skylink-events/media-events.js</a>, <a href="skylink-events_media-events.js.html#line84">line 84</a>
         </li>
       </ul>
     </dd>
@@ -4805,7 +4982,7 @@ retrieval state changes.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="skylink-events_media-events.js.html">skylink-events/media-events.js</a>, <a href="skylink-events_media-events.js.html#line96">line 96</a>
+          <a href="skylink-events_media-events.js.html">skylink-events/media-events.js</a>, <a href="skylink-events_media-events.js.html#line98">line 98</a>
         </li>
       </ul>
     </dd>
@@ -6019,6 +6196,64 @@ retrieval state changes.</p>
 
         <td class="description last">
           <p>The Stream ID.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>isVideo</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The flag if the incoming stream has a video track.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>isAudio</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The flag if the incoming stream has an audio track.</p>
           
         </td>
       </tr>
@@ -10081,7 +10316,7 @@ retrieval state changes.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="skylink-events_media-events.js.html">skylink-events/media-events.js</a>, <a href="skylink-events_media-events.js.html#line62">line 62</a>
+          <a href="skylink-events_media-events.js.html">skylink-events/media-events.js</a>, <a href="skylink-events_media-events.js.html#line64">line 64</a>
         </li>
       </ul>
     </dd>
@@ -10634,7 +10869,7 @@ retrieval state changes.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="skylink-events_media-events.js.html">skylink-events/media-events.js</a>, <a href="skylink-events_media-events.js.html#line72">line 72</a>
+          <a href="skylink-events_media-events.js.html">skylink-events/media-events.js</a>, <a href="skylink-events_media-events.js.html#line74">line 74</a>
         </li>
       </ul>
     </dd>
@@ -12866,7 +13101,7 @@ true for stored messages.</p>
         
 
         <td class="description last">
-          <p>The flag if the ended stream has a video track.</p>
+          <p>The flag if the muted stream has a video track.</p>
           
         </td>
       </tr>
@@ -12895,7 +13130,36 @@ true for stored messages.</p>
         
 
         <td class="description last">
-          <p>The flag if the ended stream has an audio track.</p>
+          <p>The flag if the muted stream has an audio track.</p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>isScreensharing</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The flag if the muted stream is a screensharing stream.</p>
           
         </td>
       </tr>

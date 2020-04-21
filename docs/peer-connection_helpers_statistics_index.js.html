@@ -98,7 +98,7 @@ import SessionDescription from '../../../session-description';
 import logger from '../../../logger';
 import messages from '../../../messages';
 import {
-  GET_CONNECTION_STATUS_STATE, DATA_CHANNEL_TYPE, TAGS,
+  GET_CONNECTION_STATUS_STATE, DATA_CHANNEL_TYPE, TAGS, BROWSER_AGENT,
 } from '../../../constants';
 import { dispatchEvent } from '../../../utils/skylinkEventManager';
 import { getConnectionStatusStateChange } from '../../../skylink-events/peer-events';
@@ -162,6 +162,12 @@ class PeerConnectionStatistics {
   }
 
   getStatsSuccess(promiseResolve, promiseReject, stats) {
+    const { AdapterJS } = window;
+    if (!stats &amp;&amp; AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE) {
+      // get stats in react native will resolve with 'null'
+      promiseResolve(this.output);
+      return;
+    }
     const { peerBandwidth, peerStats, room } = this.roomState;
     // TODO: Need to do full implementation of success function
     if (typeof stats.forEach === 'function') {

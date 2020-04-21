@@ -3,7 +3,7 @@
 	factory();
 }(function () { 'use strict';
 
-	/* SkylinkJS v2.1.1 Tue Mar 17 2020 02:52:09 GMT+0000 (Coordinated Universal Time) */
+	/* SkylinkJS v2.1.1 Tue Apr 21 2020 08:18:10 GMT+0000 (Coordinated Universal Time) */
 	(function (global, factory) {
 		typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
 		typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -243,8 +243,9 @@
 		 * @param {String} detail.peerId -  The Peer ID.
 		 * @param {peerInfo} detail.peerInfo The Peer session information. Object signature matches the <code>peerInfo</code> parameter payload received in the <code>peerJoined</code> event.
 		 * @param {Boolean} detail.isSelf The flag if Peer is User.
-		 * @param {boolean} detail.isVideo - The flag if the ended stream has a video track.
-		 * @param {boolean} detail.isAudio - The flag if the ended stream has an audio track.
+		 * @param {boolean} detail.isVideo - The flag if the muted stream has a video track.
+		 * @param {boolean} detail.isAudio - The flag if the muted stream has an audio track.
+		 * @param {boolean} detail.isScreensharing - The flag if the muted stream is a screensharing stream.
 		 * */
 		const streamMuted = (detail = {}) => new SkylinkEvent(STREAM_MUTED, { detail });
 
@@ -434,10 +435,10 @@
 		const candidatesGathered = detail => new SkylinkEvent(CANDIDATES_GATHERED, { detail });
 
 		/**
+		 * @event SkylinkEvents.iceConnectionState
 		 * @description Learn more about how ICE works in this
 		 *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
 		 * Event triggered when a Peer connection ICE connection state has changed.
-		 * @event SkylinkEvent.iceConnectionState
 		 * @param {SkylinkEvents.ICE_CONNECTION_STATE} state The current Peer connection ICE connection state.
 		 * @param {String} peerId The Peer ID.
 		 */
@@ -725,6 +726,8 @@
 		 * @param {Boolean} detail.isScreensharing - The flag if event occurred during <code>shareScreen()</code> method and not <code>getUserMedia()</code> method.
 		 * @param {Boolean} detail.isAudioFallback - The flag if event occurred during retrieval of audio tracks only when <code>getUserMedia()</code> method had failed to retrieve both audio and video tracks.
 		 * @param {String} detail.streamId - The Stream ID.
+		 * @param {boolean} detail.isVideo - The flag if the incoming stream has a video track.
+		 * @param {boolean} detail.isAudio - The flag if the incoming stream has an audio track.
 		 * @alias SkylinkEvents.mediaAccessSuccess
 		 */
 		const mediaAccessSuccess = (detail = {}) => new SkylinkEvent(MEDIA_ACCESS_SUCCESS, { detail });
@@ -1176,7 +1179,7 @@
 		 * @property {String} CLOSED         Value <code>"closed"</code>
 		 *   The value of the state when Peer connection ICE connection has closed.
 		 *   This happens when Peer connection is closed and no streaming can occur at this stage.
-		 * @property {String} TRICKLE_FAILED Value <code>"trickeFailed"</code>
+		 * @property {String} TRICKLE_FAILED Value <code>"trickleFailed"</code>
 		 *   The value of the state when Peer connection ICE connection has failed during trickle ICE.
 		 * @constant
 		 * @type Object
@@ -2664,6 +2667,7 @@
 		  CHROME: 'chrome',
 		  FIREFOX: 'firefox',
 		  SAFARI: 'safari',
+		  REACT_NATIVE: 'react-native',
 		};
 
 		/**
@@ -3004,6 +3008,7 @@
 		    MESSAGE_ADDED_TO_BUFFER: 'Message buffered as enter message has not been sent',
 		    ENTER_LISTENER: 'Enter listener initialized',
 		    BUFFERED_MESSAGES_SENT: 'Buffered messages sent',
+		    BUFFERED_MESSAGES_DROPPED: 'Buffered messages dropped - no mid',
 		    OUTDATED_MSG: 'Dropping outdated status ->',
 		    DROPPING_MUTE_EVENT: 'Dropping mute audio / video event message as it is processed by mediaInfoEvent',
 		    BUFFER_NOT_NEEDED: 'Enter message sent. Messages do not need to be buffered',
@@ -3104,6 +3109,7 @@
 		      INVALID_GUM_OPTIONS: 'Invalid user media options',
 		      GET_USER_MEDIA: 'Error retrieving stream from \'getUserMedia\' method',
 		      INVALID_MUTE_OPTIONS: 'Invalid muteStreams options provided',
+		      NO_STREAMS_MUTED: 'No streams to mute',
 		      SEND_STREAM: 'Error sending stream',
 		      INVALID_MEDIA_STREAM_ARRAY: 'Array is not of type MediaStream',
 		      ACTIVE_STREAMS: 'There are currently active streams being sent to remote peers. Please stop streams.',
@@ -3117,6 +3123,7 @@
 		      POST_FAILED: 'Failed posting to stats api',
 		      PARSE_FAILED: 'Failed parsing stats report',
 		      STATS_IS_NULL: 'Stats object is null',
+		      INVALID_TRACK_KIND: 'Media kind is not audio or video',
 		    },
 		    HANDLE_ICE_GATHERING_STATS: {
 		      PROCESS_FAILED: 'process_failed',
@@ -3218,844 +3225,156 @@
 		    EVENT_UNREGISTER_ERROR: 'Error unregistering event',
 		    LOGS_NOT_STORED: 'Store logs feature is not enabled. Enable it via SkylinkLogger.setLevel(logLevel, storeLogs)',
 		    LOGS_CLEARED: 'Stored logs cleared',
+		    INVALID_CB: 'Dropping listener as it is not a function',
+		  },
+		  BROWSER_AGENT: {
+		    REACT_NATIVE: {
+		      ERRORS: {
+		        DROPPING_ONREMOVETRACK: 'Dropping onremovetrack as trackInfo is malformed',
+		      },
+		    },
 		  },
 		};
 
-		class SkylinkEventManager {
-		  constructor() {
-		    this.events = {};
-		    this.privateEvents = {};
-		  }
-
-		  addPrivateEventListener(eventName, callback) {
-		    this.addListener(eventName, callback, true);
-		  }
-
-		  addEventListener(eventName, callback) {
-		    this.addListener(eventName, callback, false);
-		  }
-
-		  addListener(eventName, callback, isPrivate) {
-		    try {
-		      const key = isPrivate ? 'privateEvents' : 'events';
-
-		      if (!this[key][eventName]) {
-		        this[key][eventName] = {};
-		      }
-
-		      if (!this[key][eventName].callbacks) {
-		        this[key][eventName].callbacks = [];
-		      }
-
-		      this[key][eventName].callbacks.push(callback);
-
-		      if (!isPrivate) {
-		        logger.log.DEBUG([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.EVENT_REGISTERED]);
-		      }
-		    } catch (err) {
-		      logger.log.ERROR([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.EVENT_REGISTER_ERROR], err);
-		    }
-		  }
-
-		  dispatchEvent(evt) {
-		    if (evt.name === EVENTS.LOGGED_ON_CONSOLE) {
-		      return;
-		    }
-
-		    let allEventCallbacks = [];
-		    if (!this.events[evt.name]) {
-		      logger.log.DEBUG([null, TAGS.SKYLINK_EVENT, evt.name, MESSAGES.LOGGER.EVENT_DISPATCHED]);
-		    } else {
-		      const userCallbacks = this.events[evt.name].callbacks;
-		      allEventCallbacks = allEventCallbacks.concat(userCallbacks);
-		    }
-
-		    if (this.privateEvents[evt.name]) {
-		      const privateCallbacks = this.privateEvents[evt.name] ? this.privateEvents[evt.name].callbacks : [];
-		      allEventCallbacks = allEventCallbacks.concat(privateCallbacks);
-		    }
-
-		    allEventCallbacks.forEach((callback) => {
-		      try {
-		        callback(evt.detail);
-		      } catch (err) {
-		        logger.log.ERROR([null, TAGS.SKYLINK_EVENT, evt.name, MESSAGES.LOGGER.EVENT_DISPATCH_ERROR], err);
-		      }
-		    });
-		  }
-
-		  removeEventListener(eventName, callback) {
-		    this.removeListener(eventName, callback, false);
-		  }
-
-		  removePrivateEventListener(eventName, callback) {
-		    this.removeListener(eventName, callback, true);
-		  }
-
-		  removeListener(eventName, callback, isPrivate) {
-		    const key = isPrivate ? 'privateEvents' : 'events';
-
-		    if (!isPrivate && !(this.events[eventName] && this.events[eventName].callbacks)) {
-		      logger.log.WARN([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.EVENT_UNREGISTERED]);
-		      return;
-		    }
-
-		    try {
-		      this[key][eventName].callbacks.forEach((cb, i) => {
-		        if (cb === callback) {
-		          delete this[key][eventName].callbacks[i];
-
-		          if (!isPrivate) {
-		            logger.log.DEBUG([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.EVENT_UNREGISTERED]);
-		          }
-		        }
-		      });
-		    } catch (err) {
-		      logger.log.ERROR([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.EVENT_DISPATCH_ERROR], err);
-		    }
-		  }
-		}
-
-		const skylinkEventManager = new SkylinkEventManager();
-		const addEventListener = skylinkEventManager.addPrivateEventListener.bind(skylinkEventManager);
-		const removeEventListener = skylinkEventManager.removePrivateEventListener.bind(skylinkEventManager);
-		const dispatchEvent = skylinkEventManager.dispatchEvent.bind(skylinkEventManager);
-
-		const logMethods = [
-		  'trace',
-		  'debug',
-		  'info',
-		  'warn',
-		  'error',
-		];
-
-		const LEVEL_STORAGE_KEY = 'loglevel:skylinkjs';
-
-		const checkSupport = (methodName) => {
-		  let hasSupport = true;
-		  if (typeof console === 'undefined') {
-		    hasSupport = false;
-		  } else if (typeof console[methodName] === 'undefined') { // eslint-disable-line no-console
-		    hasSupport = false;
-		  }
-		  return hasSupport;
-		};
-
-		const getFormattedMessage = (message) => {
-		  let log = 'SkylinkJS -';
-		  if (Array.isArray(message)) {
-		    // fragment1 - peerId
-		    // fragment2 - tag
-		    // fragment3 - additional info / state
-		    const [fragment1, fragment2, fragment3, messageString] = message;
-		    log += fragment1 ? ` [${fragment1}]` : ' -';
-		    // eslint-disable-next-line no-nested-ternary
-		    log += fragment2 ? ` <<${fragment2}>>` : (fragment1 ? '' : ' <<Method>>');
-		    if (fragment3) {
-		      if (Array.isArray(fragment3)) {
-		        for (let i = 0; i < fragment3.length; i += 1) {
-		          log += ` (${fragment3[i]})`;
-		        }
-		      } else {
-		        log += ` (${fragment3})`;
-		      }
-		    }
-		    log += ` ${messageString}`;
-		  } else {
-		    log += ` ${message}`;
-		  }
-		  return log;
-		};
-
-		const logFn = (logger$1, level, message, debugObject = null) => {
-		  const datetime = `[${(new Date()).toISOString()}]`;
-		  const currentLevel = logger$1.level;
-		  const { logLevels } = logger$1;
-		  if (currentLevel <= level && currentLevel !== logLevels.SILENT) {
-		    const methodName = logMethods[level];
-		    const hasSupport = checkSupport(methodName);
-
-		    if (!hasSupport) {
-		      return;
-		    }
-
-		    const formattedMessage = getFormattedMessage(message);
-		    if (checkSupport(methodName)) {
-		      console[methodName](datetime, formattedMessage, debugObject || ''); // eslint-disable-line no-console
-		      dispatchEvent(loggedOnConsole({ level: methodName, message: formattedMessage, debugObject }));
-		    }
-
-		    if (logger.storeLogs) {
-		      const logItems = [datetime, methodName.toUpperCase(), formattedMessage];
-		      if (debugObject) {
-		        logItems.push(debugObject);
-		      }
-		      logger.storedLogs.push(logItems);
-		    }
-		  }
-		};
-
-		const persistLogLevel = (level) => {
-		  window.localStorage.setItem(LEVEL_STORAGE_KEY, level);
-		};
-
-		const getPersistedLevel = (logLevels) => {
-		  const level = window.localStorage.getItem(LEVEL_STORAGE_KEY);
-		  return level !== null && !Number.isNaN(+level) ? +level : logLevels.ERROR;
-		};
-
 		/**
-		 * @classdesc Class used for logging messages on the console. Exports a singleton logger object.
-		 * @class SkylinkLogger
-		 * @public
-		 * @example
-		 * import { SkylinkLogger } from 'skylinkjs';
-		 *
-		 * const skylinkLogger = new SkylinkLogger();
-		 */
-		class SkylinkLogger {
-		  constructor() {
-		    /**
-		     * @description List of log levels.
-		     * @type {Object} logLevels
-		     * @property {number} TRACE - All logs.
-		     * @property {number} DEBUG
-		     * @property {number} INFO
-		     * @property {number} WARN
-		     * @property {number} ERROR
-		     * @property {number} SILENT - No logs.
-		     */
-		    this.logLevels = {
-		      TRACE: 0, // All Logs
-		      DEBUG: 1,
-		      INFO: 2,
-		      WARN: 3,
-		      ERROR: 4, // Ideal level for Production Env.
-		      SILENT: 5, // No logging
-		    };
-
-		    this.level = getPersistedLevel(this.logLevels);
-
-		    /**
-		     * @description The flag that enables the store logs function.
-		     * @type {boolean}
-		     */
-		    this.storeLogs = false;
-
-		    /**
-		     * @description The stored logs when storeLogs flag is set to true.
-		     * @type {Array.<logItems>} The array of stored logs
-		     */
-		    this.storedLogs = [];
-		  }
-
-		  /**
-		   * @description Method that sets the log level.
-		   * @param {number} level - The log level to be set. REF: {@link SkylinkLogger#logLevels|logLevels}
-		   * @param {Boolean} storeLogs - The flag if logs should be stored.
-		   * @public
-		   * @example
-		   * skylinkLogger.setLogLevels(skylinkLogger.logLevels.TRACE);
-		   * @alias SkylinkLogger#setLevel
-		   */
-		  setLevel(level = this.levels.ERROR, storeLogs) {
-		    if (typeof level === 'number') {
-		      this.level = level;
-		      persistLogLevel(this.level);
-		    } else {
-		      this.level = this.levels.ERROR;
-		    }
-
-		    if (storeLogs) {
-		      this.storeLogs = storeLogs;
-		    }
-		  }
-
-		  /**
-		   * @description Enables logging with highest level (TRACE).
-		   * @public
-		   * @alias SkylinkLogger#enableAll
-		   */
-		  enableAll() {
-		    this.setLevel(this.logLevels.TRACE);
-		  }
-
-		  /**
-		   * @description Disables all logging with lowest level (SILENT).
-		   * @public
-		   * @alias SkylinkLogger#disableAll
-		   */
-		  disableAll() {
-		    this.setLevel(this.logLevels.SILENT);
-		  }
-
-		  getLogs() {
-		    if (this.storeLogs) {
-		      return this.storedLogs;
-		    }
-
-		    this.log.WARN(MESSAGES.LOGGER.LOGS_NOT_STORED);
-		    return null;
-		  }
-
-		  clearLogs() {
-		    this.log.INFO(MESSAGES.LOGGER.LOGS_CLEARED);
-		    this.storedLogs = [];
-		  }
-		}
-
-		/**
-		 * @type {SkylinkLogger}
+		 * @param {GetUserMediaOptions} options
+		 * @param {SkylinkState} roomState
+		 * @return {SkylinkState}
+		 * @memberOf MediaStreamHelpers
 		 * @private
 		 */
-		const logger = new SkylinkLogger();
+		const parseMediaOptions = (options, roomState) => {
+		  const state = Skylink.getSkylinkState(roomState.room.id);
+		  const mediaOptions = options || {};
 
-		/**
-		 * @description Method to trigger a log
-		 * @type {{TRACE: SkylinkLogger.log.TRACE, DEBUG: SkylinkLogger.log.DEBUG, INFO: SkylinkLogger.log.INFO, WARN: SkylinkLogger.log.WARN, ERROR: SkylinkLogger.log.ERROR}}
-		 * @private
-		 */
-		SkylinkLogger.prototype.log = {
-		  TRACE: (...params) => {
-		    logFn(logger, logger.logLevels.TRACE, ...params);
-		  },
-		  DEBUG: (...params) => {
-		    logFn(logger, logger.logLevels.DEBUG, ...params);
-		  },
-		  INFO: (...params) => {
-		    logFn(logger, logger.logLevels.INFO, ...params);
-		  },
-		  WARN: (...params) => {
-		    logFn(logger, logger.logLevels.WARN, ...params);
-		  },
-		  ERROR: (...params) => {
-		    logFn(logger, logger.logLevels.ERROR, ...params);
-		  },
-		};
-
-		const getSDPCodecsSupport = (targetMid, sessionDescription) => {
-		  const codecs = { audio: {}, video: {} };
-
-		  if (!(sessionDescription && sessionDescription.sdp)) {
-		    return codecs;
-		  }
-
-		  const sdpLines = sessionDescription.sdp.split('\r\n');
-		  let mediaType = '';
-
-		  for (let i = 0; i < sdpLines.length; i += 1) {
-		    /* eslint-disable prefer-destructuring */
-		    /* eslint-disable no-continue */
-		    if (sdpLines[i].indexOf('m=') === 0) {
-		      mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0];
-		      continue;
-		    }
-
-		    if (sdpLines[i].indexOf('a=rtpmap:') === 0) {
-		      const parts = (sdpLines[i].split(' ')[1] || '').split('/');
-		      const codec = (parts[0] || '').toLowerCase();
-		      const info = parts[1] + (parts[2] ? `/${parts[2]}` : '');
-
-		      if (['ulpfec', 'red', 'telephone-event', 'cn', 'rtx'].indexOf(codec) > -1) {
-		        continue;
-		      }
-
-		      codecs[mediaType][codec] = codecs[mediaType][codec] || [];
-
-		      if (codecs[mediaType][codec].indexOf(info) === -1) {
-		        codecs[mediaType][codec].push(info);
-		      }
-		    }
-		  }
-
-		  logger.log.INFO([targetMid || null, 'RTCSessionDescription', sessionDescription.type, 'Parsed codecs support ->'], codecs);
-		  return codecs;
-		};
-
-		const getCodecsSupport = roomKey => new Promise((resolve, reject) => {
-		  const state = Skylink.getSkylinkState(roomKey);
-		  const updatedState = state;
-		  const { AdapterJS, RTCRtpSender, RTCPeerConnection } = window;
-
-		  if (state.currentCodecSupport) {
-		    resolve(state.currentCodecSupport);
-		  }
-
-		  updatedState.currentCodecSupport = { audio: {}, video: {} };
-
-		  // Safari 11 REQUIRES a stream first before connection works, hence let's spoof it for now
-		  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
-		    updatedState.currentCodecSupport.audio = {
-		      opus: ['48000/2'],
-		    };
-		    updatedState.currentCodecSupport.video = {
-		      h264: ['48000'],
-		    };
-		    resolve(updatedState.currentCodecSupport);
-		  }
-
-		  try {
-		    if (window.webrtcDetectedBrowser === 'edge') {
-		      const { codecs } = RTCRtpSender.getCapabilities();
-
-		      for (let i = 0; i < codecs.length; i += 1) {
-		        if (['audio', 'video'].indexOf(codecs[i].kind) > -1 && codecs[i].name) {
-		          const codec = codecs[i].name.toLowerCase();
-		          updatedState.currentCodecSupport[codecs[i].kind][codec] = codecs[i].clockRate + (codecs[i].numChannels > 1 ? `/${codecs[i].numChannels}` : '');
-		        }
-		      }
-		      // Ignore .fecMechanisms for now
-		      resolve(updatedState.currentCodecSupport);
-		    } else {
-		      const pc = new RTCPeerConnection(null);
-		      const offerConstraints = AdapterJS.webrtcDetectedType !== 'plugin' ? {
-		        offerToReceiveAudio: true,
-		        offerToReceiveVideo: true,
-		      } : {
-		        mandatory: {
-		          OfferToReceiveVideo: true,
-		          OfferToReceiveAudio: true,
-		        },
-		      };
-
-		      // Prevent errors and proceed with create offer still...
-		      try {
-		        const channel = pc.createDataChannel('test');
-		        updatedState.binaryChunkType = channel.binaryType || state.binaryChunkType;
-		        updatedState.binaryChunkType = state.binaryChunkType.toLowerCase().indexOf('array') > -1 ? DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER : state.binaryChunkType;
-		        // Set the value according to the property
-		        const prop = Object.keys(DATA_TRANSFER_DATA_TYPE);
-		        for (let i = 0; i < prop.length; i += 1) {
-		          // eslint-disable-next-line no-prototype-builtins
-		          if (DATA_TRANSFER_DATA_TYPE.hasOwnProperty(prop)
-		              && state.binaryChunkType.toLowerCase() === DATA_TRANSFER_DATA_TYPE[prop].toLowerCase()) {
-		            updatedState.binaryChunkType = DATA_TRANSFER_DATA_TYPE[prop];
-		            break;
-		          }
-		        }
-		        // eslint-disable-next-line no-empty
-		      } catch (e) {}
-
-		      pc.createOffer(offerConstraints)
-		        .then((offer) => {
-		          updatedState.currentCodecSupport = SessionDescription.getSDPCodecsSupport(null, offer, roomKey);
-		          resolve(updatedState.currentCodecSupport);
-		        })
-		        .catch((error) => {
-		          reject(error);
-		        });
-		    }
-		  } catch (error) {
-		    reject(error);
-		  }
-		});
-
-		/* eslint-disable prefer-template */
-
-		const parseFn = (sessionDescription, type, codecName, samplingRate, settings) => {
-		  const mLine = sessionDescription.sdp.match(new RegExp('m=' + type + '\ .*\r\n', 'gi'));
-		  // Find the m= line
-		  if (Array.isArray(mLine) && mLine.length > 0) {
-		    const codecsList = sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codecName + '\/'
-		      + (samplingRate ? samplingRate + (type === 'audio' ? '[\/]*.*' : '.*') : '.*') + '\r\n', 'gi'));
-		    // Get the list of codecs related to it
-		    if (Array.isArray(codecsList) && codecsList.length > 0) {
-		      for (let i = 0; i < codecsList.length; i += 1) {
-		        const payload = (codecsList[i].split('a=rtpmap:')[1] || '').split(' ')[0];
-		        if (!payload) {
-		          continue;
-		        }
-		        const fmtpLine = sessionDescription.sdp.match(new RegExp('a=fmtp:' + payload + '\ .*\r\n', 'gi'));
-		        let updatedFmtpLine = 'a=fmtp:' + payload + ' ';
-		        const addedKeys = [];
-		        // Check if a=fmtp: line exists
-		        if (Array.isArray(fmtpLine) && fmtpLine.length > 0) {
-		          const fmtpParts = (fmtpLine[0].split('a=fmtp:' + payload + ' ')[1] || '').replace(/ /g, '').replace(/\r\n/g, '').split(';');
-		          for (let j = 0; j < fmtpParts.length; j += 1) {
-		            if (!fmtpParts[j]) {
-		              continue;
-		            }
-		            const keyAndValue = fmtpParts[j].split('=');
-		            if (settings.hasOwnProperty(keyAndValue[0])) {
-		              // Dont append parameter key+value if boolean and false
-		              updatedFmtpLine += typeof settings[keyAndValue[0]] === 'boolean' ? (settings[keyAndValue[0]]
-		                ? keyAndValue[0] + '=1;' : '') : keyAndValue[0] + '=' + settings[keyAndValue[0]] + ';';
-		            } else {
-		              updatedFmtpLine += fmtpParts[j] + ';';
-		            }
-		            addedKeys.push(keyAndValue[0]);
-		          }
-		          sessionDescription.sdp = sessionDescription.sdp.replace(fmtpLine[0], '');
-		        }
-		        for (const key in settings) {
-		          if (settings.hasOwnProperty(key) && addedKeys.indexOf(key) === -1) {
-		            // Dont append parameter key+value if boolean and false
-		            updatedFmtpLine += typeof settings[key] === 'boolean' ? (settings[key] ? key + '=1;' : '') : key + '=' + settings[key] + ';';
-		            addedKeys.push(key);
-		          }
-		        }
-		        if (updatedFmtpLine !== 'a=fmtp:' + payload + ' ') {
-		          sessionDescription.sdp = sessionDescription.sdp.replace(codecsList[i], codecsList[i] + updatedFmtpLine + '\r\n');
-		        }
-		      }
-		    }
-		  }
-		};
-
-		const setSDPCodecParams = (targetMid, sessionDescription, roomKey) => {
-		  const state = Skylink.getSkylinkState(roomKey);
-		  const initOptions = Skylink.getInitOptions();
-
-		  // Set audio codecs -> OPUS
-		  // RFC: https://tools.ietf.org/html/draft-ietf-payload-rtp-opus-11
-		  parseFn(sessionDescription, 'audio', AUDIO_CODEC.OPUS, 48000, (() => {
-		    const opusOptions = {};
-		    // let audioSettings = state.streams.screenshare ? state.streams.screenshare.settings.audio : (state.streams.userMedia ? state.streams.userMedia.settings.audio : {});
-		    // TODO: check if settings across different streams are the same
-		    // FIXME: Quickfix to pass in first stream
-		    const streamIds = Object.keys(state.streams.userMedia);
-		    let audioSettings = state.streams.userMedia ? state.streams.userMedia[streamIds[0]].settings.audio : {};
-		    audioSettings = audioSettings && typeof audioSettings === 'object' ? audioSettings : {};
-		    if (typeof initOptions.codecParams.audio.opus.stereo === 'boolean') {
-		      opusOptions.stereo = initOptions.codecParams.audio.opus.stereo;
-		    } else if (typeof audioSettings.stereo === 'boolean') {
-		      opusOptions.stereo = audioSettings.stereo;
-		    }
-		    if (typeof initOptions.codecParams.audio.opus['sprop-stereo'] === 'boolean') {
-		      opusOptions['sprop-stereo'] = initOptions.codecParams.audio.opus['sprop-stereo'];
-		    } else if (typeof audioSettings.stereo === 'boolean') {
-		      opusOptions['sprop-stereo'] = audioSettings.stereo;
-		    }
-		    if (typeof initOptions.codecParams.audio.opus.usedtx === 'boolean') {
-		      opusOptions.usedtx = initOptions.codecParams.audio.opus.usedtx;
-		    } else if (typeof audioSettings.usedtx === 'boolean') {
-		      opusOptions.usedtx = audioSettings.usedtx;
-		    }
-		    if (typeof initOptions.codecParams.audio.opus.useinbandfec === 'boolean') {
-		      opusOptions.useinbandfec = initOptions.codecParams.audio.opus.useinbandfec;
-		    } else if (typeof audioSettings.useinbandfec === 'boolean') {
-		      opusOptions.useinbandfec = audioSettings.useinbandfec;
-		    }
-		    if (typeof initOptions.codecParams.audio.opus.maxplaybackrate === 'number') {
-		      opusOptions.maxplaybackrate = initOptions.codecParams.audio.opus.maxplaybackrate;
-		    } else if (typeof audioSettings.maxplaybackrate === 'number') {
-		      opusOptions.maxplaybackrate = audioSettings.maxplaybackrate;
-		    }
-		    if (typeof initOptions.codecParams.audio.opus.minptime === 'number') {
-		      opusOptions.minptime = initOptions.codecParams.audio.opus.minptime;
-		    } else if (typeof audioSettings.minptime === 'number') {
-		      opusOptions.minptime = audioSettings.minptime;
-		    }
-		    // Possible future params: sprop-maxcapturerate, maxaveragebitrate, sprop-stereo, cbr
-		    // NOT recommended: maxptime, ptime, rate, minptime
-		    return opusOptions;
-		  })());
-
-		  // RFC: https://tools.ietf.org/html/rfc4733
-		  // Future: Set telephone-event: 100 0-15,66,70
-
-		  // RFC: https://tools.ietf.org/html/draft-ietf-payload-vp8-17
-		  // Set video codecs -> VP8
-		  parseFn(sessionDescription, 'video', VIDEO_CODEC.VP8, null, (() => {
-		    const vp8Options = {};
-		    // NOT recommended: max-fr, max-fs (all are codec decoder capabilities)
-		    if (typeof initOptions.codecParams.video.vp8.maxFr === 'number') {
-		      vp8Options['max-fr'] = initOptions.codecParams.video.vp8.maxFr;
-		    }
-		    if (typeof initOptions.codecParams.video.vp8.maxFs === 'number') {
-		      vp8Options['max-fs'] = initOptions.codecParams.video.vp8.maxFs;
-		    }
-		    return vp8Options;
-		  })());
-
-		  // RFC: https://tools.ietf.org/html/draft-ietf-payload-vp9-02
-		  // Set video codecs -> VP9
-		  parseFn(sessionDescription, 'video', VIDEO_CODEC.VP9, null, (() => {
-		    const vp9Options = {};
-		    // NOT recommended: max-fr, max-fs (all are codec decoder capabilities)
-		    if (typeof initOptions.codecParams.video.vp9.maxFr === 'number') {
-		      vp9Options['max-fr'] = initOptions.codecParams.video.vp9.maxFr;
-		    }
-		    if (typeof initOptions.codecParams.video.vp9.maxFs === 'number') {
-		      vp9Options['max-fs'] = initOptions.codecParams.video.vp9.maxFs;
-		    }
-		    return vp9Options;
-		  })());
-
-		  // RFC: https://tools.ietf.org/html/rfc6184
-		  // Set the video codecs -> H264
-		  parseFn(sessionDescription, 'video', VIDEO_CODEC.H264, null, (() => {
-		    const h264Options = {};
-		    if (typeof initOptions.codecParams.video.h264.levelAsymmetryAllowed === 'string') {
-		      h264Options['profile-level-id'] = initOptions.codecParams.video.h264.profileLevelId;
-		    }
-		    if (typeof initOptions.codecParams.video.h264.levelAsymmetryAllowed === 'boolean') {
-		      h264Options['level-asymmetry-allowed'] = initOptions.codecParams.video.h264.levelAsymmetryAllowed;
-		    }
-		    if (typeof initOptions.codecParams.video.h264.packetizationMode === 'boolean') {
-		      h264Options['packetization-mode'] = initOptions.codecParams.video.h264.packetizationMode;
-		    }
-		    // Possible future params (remove if they are decoder/encoder capabilities or info):
-		    //   max-recv-level, max-mbps, max-smbps, max-fs, max-cpb, max-dpb, max-br,
-		    //   max-mbps, max-smbps, max-fs, max-cpb, max-dpb, max-br, redundant-pic-cap, sprop-parameter-sets,
-		    //   sprop-level-parameter-sets, use-level-src-parameter-sets, in-band-parameter-sets,
-		    //   sprop-interleaving-depth, sprop-deint-buf-req, deint-buf-cap, sprop-init-buf-time,
-		    //   sprop-max-don-diff, max-rcmd-nalu-size, sar-understood, sar-supported
-		    //   NOT recommended: profile-level-id (WebRTC uses "42e00a" for the moment)
-		    //   https://bugs.chromium.org/p/chromium/issues/detail?id=645599
-		    return h264Options;
-		  })());
-
-		  return sessionDescription.sdp;
-		};
-
-		/* eslint-disable no-param-reassign */
-		const removeSDPFilteredCandidates = (targetMid, sessionDescription, roomKey) => {
-		  const initOptions = Skylink.getInitOptions();
-		  const state = Skylink.getSkylinkState(roomKey);
-		  // Handle Firefox MCU Peer ICE candidates
-		  if (targetMid === PEER_TYPE.MCU && sessionDescription.type === HANDSHAKE_PROGRESS$1.ANSWER
-		    && window.webrtcDetectedBrowser === 'firefox') {
-		    sessionDescription.sdp = sessionDescription.sdp.replace(/ generation 0/g, '');
-		    sessionDescription.sdp = sessionDescription.sdp.replace(/ udp /g, ' UDP ');
-		  }
-
-		  if (initOptions.forceTURN && state.hasMCU) {
-		    logger.log.WARN([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not filtering ICE candidates as '
-		    + 'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate '
-		    + 'flags are not honoured']);
-		    return sessionDescription.sdp;
-		  }
-
-		  if (initOptions.filterCandidatesType.host) {
-		    logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "host" ICE candidates.']);
-		    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*host.*\r\n/g, '');
-		  }
-
-		  if (initOptions.filterCandidatesType.srflx) {
-		    logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "srflx" ICE candidates.']);
-		    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*srflx.*\r\n/g, '');
-		  }
-
-		  if (initOptions.filterCandidatesType.relay) {
-		    logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "relay" ICE candidates.']);
-		    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*relay.*\r\n/g, '');
-		  }
-		  // sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
-		  return sessionDescription.sdp;
-		};
-
-		/* eslint-disable prefer-template */
-
-		const setSDPCodec = (targetMid, sessionDescription, roomKey, overrideSettings) => {
-		  const initOptions = Skylink.getInitOptions(roomKey);
-		  const parseFn = (type, codecSettings) => {
-		    const codec = typeof codecSettings === 'object' ? codecSettings.codec : codecSettings;
-		    let samplingRate = typeof codecSettings === 'object' ? codecSettings.samplingRate : null;
-		    let channels = typeof codecSettings === 'object' ? codecSettings.channels : null;
-
-		    if (codec === constants[type === 'audio' ? 'AUDIO_CODEC' : 'VIDEO_CODEC'].AUTO) {
-		      logger.log.WARN([targetMid, 'RTCSessionDesription', sessionDescription.type, `Not preferring any codec for ${type} streaming. Using browser selection.`]);
-		      return;
-		    }
-
-		    const mLine = sessionDescription.sdp.match(new RegExp('m=' + type + ' .*\r\n', 'gi'));
-
-		    if (!(Array.isArray(mLine) && mLine.length > 0)) {
-		      logger.log.ERROR([targetMid, 'RTCSessionDesription', sessionDescription.type, `Not preferring any codec for ${type} streaming as m= line is not found.`]);
-		      return;
-		    }
-
-		    const setLineFn = (codecsList, isSROk, isChnlsOk) => {
-		      if (Array.isArray(codecsList) && codecsList.length > 0) {
-		        if (!isSROk) {
-		          samplingRate = null;
-		        }
-		        if (!isChnlsOk) {
-		          channels = null;
-		        }
-		        logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Preferring "' + codec + '" (samplingRate: ' + (samplingRate || 'n/a') + ', channels: ' + (channels || 'n/a') + ') for "' + type + '" streaming.']);
-
-		        let line = mLine[0];
-		        const lineParts = line.replace('\r\n', '').split(' ');
-		        // Set the m=x x UDP/xxx
-		        line = lineParts[0] + ' ' + lineParts[1] + ' ' + lineParts[2] + ' ';
-		        // Remove them to leave the codecs only
-		        lineParts.splice(0, 3);
-		        // Loop for the codecs list to append first
-		        for (let i = 0; i < codecsList.length; i += 1) {
-		          const parts = (codecsList[i].split('a=rtpmap:')[1] || '').split(' ');
-		          if (parts.length < 2) {
-		            continue;
-		          }
-		          line += parts[0] + ' ';
-		        }
-		        // Loop for later fallback codecs to append
-		        for (let j = 0; j < lineParts.length; j += 1) {
-		          if (line.indexOf(' ' + lineParts[j]) > 0) {
-		            lineParts.splice(j, 1);
-		            j -= 1;
-		          } else if (sessionDescription.sdp.match(new RegExp('a=rtpmap:' + lineParts[j] + '\ ' + codec + '/.*\r\n', 'gi'))) {
-		            line += lineParts[j] + ' ';
-		            lineParts.splice(j, 1);
-		            j -= 1;
-		          }
-		        }
-		        // Append the rest of the codecs
-		        line += lineParts.join(' ') + '\r\n';
-		        sessionDescription.sdp = sessionDescription.sdp.replace(mLine[0], line);
-		        return true;
-		      }
-		    };
-
-		    // If samplingRate & channels
-		    if (samplingRate) {
-		      if (type === 'audio' && channels && setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ '
-		        + codec + '\/' + samplingRate + (channels === 1 ? '[\/1]*' : '\/' + channels) + '\r\n', 'gi')), true, true)) {
-		        return;
-		      } else if (setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/' + samplingRate + '[\/]*.*\r\n', 'gi')), true)) {
-		        return;
-		      }
-		    }
-		    if (type === 'audio' && channels && setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/.*\/' + channels + '\r\n', 'gi')), false, true)) {
-		      return;
-		    }
-
-		    setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/.*\r\n', 'gi')));
+		  state.userData = mediaOptions.userData || state.userData || '';
+		  state.streamsBandwidthSettings = {
+		    googleX: {},
+		    bAS: {},
 		  };
-
-		  parseFn('audio', overrideSettings ? overrideSettings.audio : initOptions.audioCodec);
-		  parseFn('video', overrideSettings ? overrideSettings.video : initOptions.videoCodec);
-
-		  return sessionDescription.sdp;
-		};
-
-		/* eslint-disable prefer-template */
-
-		const setSDPBitrate = (targetMid, sessionDescription, roomKey) => {
-		  const state = Skylink.getSkylinkState(roomKey);
-		  const sdpLines = sessionDescription.sdp.split('\r\n');
-		  const parseFn = function (type, bw) {
-		    let mLineType = type;
-		    let mLineIndex = -1;
-		    let cLineIndex = -1;
-
-		    if (type === 'data') {
-		      mLineType = 'application';
-		    }
-
-		    for (let i = 0; i < sdpLines.length; i += 1) {
-		      if (sdpLines[i].indexOf('m=' + mLineType) === 0) {
-		        mLineIndex = i;
-		      } else if (mLineIndex > 0) {
-		        if (sdpLines[i].indexOf('m=') === 0) {
-		          break;
-		        }
-
-		        if (sdpLines[i].indexOf('c=') === 0) {
-		          cLineIndex = i;
-		          // Remove previous b:AS settings
-		        } else if (sdpLines[i].indexOf('b=AS:') === 0 || sdpLines[i].indexOf('b:TIAS:') === 0) {
-		          sdpLines.splice(i, 1);
-		          i -= 1;
-		        }
-		      }
-		    }
-
-		    if (!(typeof bw === 'number' && bw > 0)) {
-		      logger.log.WARN([targetMid, 'RTCSessionDesription', sessionDescription.type, `Not limiting ${type} bandwidth`]);
-		      return;
-		    }
-
-		    if (cLineIndex === -1) {
-		      logger.log.ERROR([targetMid, 'RTCSessionDesription', sessionDescription.type, `Failed setting ${type} bandwidth as c-line is missing.`]);
-		      return;
-		    }
-
-		    // Follow RFC 4566, that the b-line should follow after c-line.
-		    logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, `Limiting maximum sending ${type} bandwidth ->`], bw);
-		    sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1000 * (window.webrtcDetectedVersion > 52 && window.webrtcDetectedVersion < 55 ? 1000 : 1)).toFixed(0) : 'b=AS:' + bw);
+		  state.publishOnly = false;
+		  state.sdpSettings = {
+		    connection: {
+		      audio: true,
+		      video: true,
+		      data: true,
+		    },
+		    direction: {
+		      audio: { send: true, receive: true },
+		      video: { send: true, receive: true },
+		    },
 		  };
+		  state.voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === 'boolean' ? mediaOptions.voiceActivityDetection : true;
+		  state.peerConnectionConfig = {
+		    bundlePolicy: BUNDLE_POLICY.BALANCED,
+		    rtcpMuxPolicy: RTCP_MUX_POLICY.REQUIRE,
+		    iceCandidatePoolSize: 0,
+		    certificate: PEER_CERTIFICATE.AUTO,
+		    disableBundle: false,
+		  };
+		  state.bandwidthAdjuster = null;
 
-		  let bASAudioBw = state.streamsBandwidthSettings.bAS.audio;
-		  let bASVideoBw = state.streamsBandwidthSettings.bAS.video;
-		  let bASDataBw = state.streamsBandwidthSettings.bAS.data;
-		  let googleXMinBw = state.streamsBandwidthSettings.googleX.min;
-		  let googleXMaxBw = state.streamsBandwidthSettings.googleX.max;
-
-		  if (state.peerCustomConfigs[targetMid]) {
-		    if (state.peerCustomConfigs[targetMid].bandwidth
-		      && typeof state.peerCustomConfigs[targetMid].bandwidth === 'object') {
-		      if (typeof state.peerCustomConfigs[targetMid].bandwidth.audio === 'number') {
-		        bASAudioBw = state.peerCustomConfigs[targetMid].bandwidth.audio;
-		      }
-		      if (typeof state.peerCustomConfigs[targetMid].bandwidth.video === 'number') {
-		        bASVideoBw = state.peerCustomConfigs[targetMid].bandwidth.video;
-		      }
-		      if (typeof state.peerCustomConfigs[targetMid].bandwidth.data === 'number') {
-		        bASDataBw = state.peerCustomConfigs[targetMid].bandwidth.data;
-		      }
+		  if (mediaOptions.bandwidth) {
+		    if (typeof mediaOptions.bandwidth.audio === 'number') {
+		      state.streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
 		    }
-		    if (state.peerCustomConfigs[targetMid].googleXBandwidth && typeof state.peerCustomConfigs[targetMid].googleXBandwidth === 'object') {
-		      if (typeof state.peerCustomConfigs[targetMid].googleXBandwidth.min === 'number') {
-		        googleXMinBw = state.peerCustomConfigs[targetMid].googleXBandwidth.min;
-		      }
-		      if (typeof state.peerCustomConfigs[targetMid].googleXBandwidth.max === 'number') {
-		        googleXMaxBw = state.peerCustomConfigs[targetMid].googleXBandwidth.max;
-		      }
+
+		    if (typeof mediaOptions.bandwidth.video === 'number') {
+		      state.streamsBandwidthSettings.bAS.video = mediaOptions.bandwidth.video;
+		    }
+
+		    if (typeof mediaOptions.bandwidth.data === 'number') {
+		      state.streamsBandwidthSettings.bAS.data = mediaOptions.bandwidth.data;
 		    }
 		  }
 
-		  parseFn('audio', bASAudioBw);
-		  parseFn('video', bASVideoBw);
-		  parseFn('data', bASDataBw);
-
-		  // Sets the experimental google bandwidth
-		  if ((typeof googleXMinBw === 'number') || (typeof googleXMaxBw === 'number')) {
-		    let codec = null;
-		    let codecRtpMapLineIndex = -1;
-		    let codecFmtpLineIndex = -1;
-
-		    for (let j = 0; j < sdpLines.length; j += 1) {
-		      if (sdpLines[j].indexOf('m=video') === 0) {
-		        codec = sdpLines[j].split(' ')[3];
-		      } else if (codec) {
-		        if (sdpLines[j].indexOf('m=') === 0) {
-		          break;
-		        }
-
-		        if (sdpLines[j].indexOf('a=rtpmap:' + codec + ' ') === 0) {
-		          codecRtpMapLineIndex = j;
-		        } else if (sdpLines[j].indexOf('a=fmtp:' + codec + ' ') === 0) {
-		          sdpLines[j] = sdpLines[j].replace(/x-google-(min|max)-bitrate=[0-9]*[;]*/gi, '');
-		          codecFmtpLineIndex = j;
-		          break;
-		        }
-		      }
+		  if (mediaOptions.googleXBandwidth) {
+		    if (typeof mediaOptions.googleXBandwidth.min === 'number') {
+		      state.streamsBandwidthSettings.googleX.min = mediaOptions.googleXBandwidth.min;
 		    }
 
-		    if (codecRtpMapLineIndex > -1) {
-		      let xGoogleParams = '';
-
-		      if (typeof googleXMinBw === 'number') {
-		        xGoogleParams += 'x-google-min-bitrate=' + googleXMinBw + ';';
-		      }
-
-		      if (typeof googleXMaxBw === 'number') {
-		        xGoogleParams += 'x-google-max-bitrate=' + googleXMaxBw + ';';
-		      }
-
-		      logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Limiting x-google-bitrate ->'], xGoogleParams);
-
-		      if (codecFmtpLineIndex > -1) {
-		        sdpLines[codecFmtpLineIndex] += (sdpLines[codecFmtpLineIndex].split(' ')[1] ? ';' : '') + xGoogleParams;
-		      } else {
-		        sdpLines.splice(codecRtpMapLineIndex + 1, 0, 'a=fmtp:' + codec + ' ' + xGoogleParams);
-		      }
+		    if (typeof mediaOptions.googleXBandwidth.max === 'number') {
+		      state.streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
 		    }
 		  }
 
-		  return sdpLines.join('\r\n');
+		  if (mediaOptions.sdpSettings) {
+		    if (mediaOptions.sdpSettings.direction) {
+		      if (mediaOptions.sdpSettings.direction.audio) {
+		        state.sdpSettings.direction.audio.receive = typeof mediaOptions.sdpSettings.direction.audio.receive === 'boolean' ? mediaOptions.sdpSettings.direction.audio.receive : true;
+		        state.sdpSettings.direction.audio.send = typeof mediaOptions.sdpSettings.direction.audio.send === 'boolean' ? mediaOptions.sdpSettings.direction.audio.send : true;
+		      }
+
+		      if (mediaOptions.sdpSettings.direction.video) {
+		        state.sdpSettings.direction.video.receive = typeof mediaOptions.sdpSettings.direction.video.receive === 'boolean' ? mediaOptions.sdpSettings.direction.video.receive : true;
+		        state.sdpSettings.direction.video.send = typeof mediaOptions.sdpSettings.direction.video.send === 'boolean' ? mediaOptions.sdpSettings.direction.video.send : true;
+		      }
+		    }
+		    if (mediaOptions.sdpSettings.connection) {
+		      state.sdpSettings.connection.audio = typeof mediaOptions.sdpSettings.connection.audio === 'boolean' ? mediaOptions.sdpSettings.connection.audio : true;
+		      state.sdpSettings.connection.video = typeof mediaOptions.sdpSettings.connection.video === 'boolean' ? mediaOptions.sdpSettings.connection.video : true;
+		      state.sdpSettings.connection.data = typeof mediaOptions.sdpSettings.connection.data === 'boolean' ? mediaOptions.sdpSettings.connection.data : true;
+		    }
+		  }
+
+		  if (mediaOptions.publishOnly) {
+		    state.sdpSettings.direction.audio.send = true;
+		    state.sdpSettings.direction.audio.receive = false;
+		    state.sdpSettings.direction.video.send = true;
+		    state.sdpSettings.direction.video.receive = false;
+		    state.publishOnly = true;
+		  }
+
+		  /* eslint-disable no-restricted-syntax */
+		  /* eslint-disable no-prototype-builtins */
+		  if (mediaOptions.peerConnection && typeof mediaOptions.peerConnection === 'object') {
+		    if (typeof mediaOptions.peerConnection.bundlePolicy === 'string') {
+		      for (const bpProp in BUNDLE_POLICY) {
+		        if (BUNDLE_POLICY.hasOwnProperty(bpProp) && BUNDLE_POLICY[bpProp] === mediaOptions.peerConnection.bundlePolicy) {
+		          state.peerConnectionConfig.bundlePolicy = mediaOptions.peerConnection.bundlePolicy;
+		        }
+		      }
+		    }
+		    if (typeof mediaOptions.peerConnection.rtcpMuxPolicy === 'string') {
+		      for (const rmpProp in RTCP_MUX_POLICY) {
+		        if (RTCP_MUX_POLICY.hasOwnProperty(rmpProp) && RTCP_MUX_POLICY[rmpProp] === mediaOptions.peerConnection.rtcpMuxPolicy) {
+		          state.peerConnectionConfig.rtcpMuxPolicy = mediaOptions.peerConnection.rtcpMuxPolicy;
+		        }
+		      }
+		    }
+		    if (typeof mediaOptions.peerConnection.iceCandidatePoolSize === 'number' && mediaOptions.peerConnection.iceCandidatePoolSize > 0) {
+		      state.peerConnectionConfig.iceCandidatePoolSize = mediaOptions.peerConnection.iceCandidatePoolSize;
+		    }
+		    if (typeof mediaOptions.peerConnection.certificate === 'string') {
+		      for (const pcProp in PEER_CERTIFICATE) {
+		        if (PEER_CERTIFICATE.hasOwnProperty(pcProp) && PEER_CERTIFICATE[pcProp] === mediaOptions.peerConnection.certificate) {
+		          state.peerConnectionConfig.certificate = mediaOptions.peerConnection.certificate;
+		        }
+		      }
+		    }
+		    state.peerConnectionConfig.disableBundle = mediaOptions.peerConnection.disableBundle === true;
+		  }
+
+		  if (mediaOptions.autoBandwidthAdjustment) {
+		    state.bandwidthAdjuster = {
+		      interval: 10,
+		      limitAtPercentage: 100,
+		      useUploadBwOnly: false,
+		    };
+
+		    if (typeof mediaOptions.autoBandwidthAdjustment === 'object') {
+		      if (typeof mediaOptions.autoBandwidthAdjustment.interval === 'number' && mediaOptions.autoBandwidthAdjustment.interval >= 10) {
+		        state.bandwidthAdjuster.interval = mediaOptions.autoBandwidthAdjustment.interval;
+		      }
+		      if (typeof mediaOptions.autoBandwidthAdjustment.limitAtPercentage === 'number' && (mediaOptions.autoBandwidthAdjustment.limitAtPercentage >= 0 && mediaOptions.autoBandwidthAdjustment.limitAtPercentage <= 100)) {
+		        state.bandwidthAdjuster.limitAtPercentage = mediaOptions.autoBandwidthAdjustment.limitAtPercentage;
+		      }
+		      if (typeof mediaOptions.autoBandwidthAdjustment.useUploadBwOnly === 'boolean') {
+		        state.bandwidthAdjuster.useUploadBwOnly = mediaOptions.autoBandwidthAdjustment.useUploadBwOnly;
+		      }
+		    }
+		  }
+		  return state;
 		};
 
 		var clone_1 = createCommonjsModule(function (module) {
@@ -4317,312 +3636,6 @@
 		}
 		});
 
-		const isUser = (peerId, roomState) => {
-		  const { user } = roomState;
-		  return peerId === user.sid;
-		};
-
-		/**
-		 * @description Function that returns the User / Peer current session information.
-		 * @private
-		 * @param {String} peerId
-		 * @param {SkylinkRoom} room
-		 * @return {peerInfo}
-		 * @memberOf PeerDataHelpers
-		 */
-		const getPeerInfo = (peerId, room) => {
-		  let peerInfo = null;
-		  if (!peerId) {
-		    return null;
-		  }
-		  const state = Skylink.getSkylinkState(room.id);
-
-		  if (!state) {
-		    Skylink.logNoRoomState(room.id);
-		    return peerInfo;
-		  }
-
-		  if (isUser(peerId, state)) {
-		    return PeerData.getCurrentSessionInfo(room);
-		  }
-
-		  peerInfo = clone_1(state.peerInformations[peerId]);
-
-		  if (!peerInfo) {
-		    logger.log.ERROR(`${MESSAGES.PEER_INFORMATIONS.NO_PEER_INFO} ${peerId}`);
-		    return peerInfo;
-		  }
-
-		  // FIXME: would there ever be a case of !peerInfo.settings?
-		  // if (!peerInfo.settings) {
-		  //   peerInfo.settings = {};
-		  // }
-
-		  // if (!peerInfo.mediaStatus) {
-		  //   peerInfo.mediaStatus = {};
-		  // }
-
-		  peerInfo.room = clone_1(room.roomName);
-
-		  peerInfo.settings.data = !!(state.dataChannels[peerId] && state.dataChannels[peerId].main && state.dataChannels[peerId].main.channel && state.dataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
-		  peerInfo.connected = state.peerConnStatus[peerId] && !!state.peerConnStatus[peerId].connected;
-		  peerInfo.init = state.peerConnStatus[peerId] && !!state.peerConnStatus[peerId].init;
-
-		  // peerInfo.settings.bandwidth = peerInfo.settings.bandwidth || {};
-		  // peerInfo.settings.googleXBandwidth = peerInfo.settings.googleXBandwidth || {};
-
-		  // if (!(typeof peerInfo.settings.video === 'boolean' || typeof peerInfo.settings.video === 'object')) {
-		  //   // peerInfo.settings.video = false;
-		  //   peerInfo.mediaStatus.audioMuted = true;
-		  // }
-
-		  // if (!(typeof peerInfo.settings.audio === 'boolean' || typeof peerInfo.settings.audio === 'object')) {
-		  //   // peerInfo.settings.audio = false;
-		  //   peerInfo.mediaStatus.audioMuted = true;
-		  // }
-
-		  // if (typeof peerInfo.mediaStatus.audioMuted !== 'boolean') {
-		  //   peerInfo.mediaStatus.audioMuted = true;
-		  // }
-
-		  // if (typeof peerInfo.mediaStatus.videoMuted !== 'boolean') {
-		  //   peerInfo.mediaStatus.videoMuted = true;
-		  // }
-
-		  // if (peerInfo.settings.maxBandwidth) {
-		  //   peerInfo.settings.bandwidth = clone(peerInfo.settings.maxBandwidth);
-		  //   delete peerInfo.settings.maxBandwidth;
-		  // }
-
-		  // if (peerInfo.settings.video && typeof peerInfo.settings.video === 'object' && peerInfo.settings.video.customSettings && typeof peerInfo.settings.video.customSettings === 'object') {
-		  // // if (peerInfo.settings.video.customSettings && typeof peerInfo.settings.video.customSettings === 'object') {
-		  //   if (peerInfo.settings.video.customSettings.frameRate) {
-		  //     peerInfo.settings.video.frameRate = clone(peerInfo.settings.video.customSettings.frameRate);
-		  //   }
-		  //   if (peerInfo.settings.video.customSettings.facingMode) {
-		  //     peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
-		  //   }
-		  //   if (peerInfo.settings.video.customSettings.width) {
-		  //     peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
-		  //     peerInfo.settings.video.resolution.width = clone(peerInfo.settings.video.customSettings.width);
-		  //   }
-		  //   if (peerInfo.settings.video.customSettings.height) {
-		  //     peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
-		  //     peerInfo.settings.video.resolution.height = clone(peerInfo.settings.video.customSettings.height);
-		  //   }
-		  // }
-
-		  // if (peerInfo.settings.audio && typeof peerInfo.settings.audio === 'object') {
-		  //   peerInfo.settings.audio.stereo = peerInfo.settings.audio.stereo === true;
-		  // }
-
-		  // TODO: check if receiveOnly and publishOnly is required
-		  if (peerId === PEER_TYPE.MCU) {
-		    peerInfo.config.receiveOnly = true;
-		    peerInfo.config.publishOnly = false;
-		  } else if (state.hasMCU) {
-		    peerInfo.config.receiveOnly = false;
-		    peerInfo.config.publishOnly = true;
-		  }
-
-		  // TODO: check if the sdp parsing is required
-		  // parse sdp to update media settings and status
-		  // if (!state.sdpSettings.direction.audio.receive) {
-		  //   peerInfo.settings.audio = false;
-		  //   peerInfo.mediaStatus.audioMuted = true;
-		  // }
-		  //
-		  // if (!state.sdpSettings.direction.video.receive) {
-		  //   peerInfo.settings.video = false;
-		  //   peerInfo.mediaStatus.videoMuted = true;
-		  // }
-		  //
-		  // if (!state.sdpSettings.connection.audio) {
-		  //   peerInfo.settings.audio = false;
-		  //   peerInfo.mediaStatus.audioMuted = true;
-		  // }
-		  //
-		  // if (!state.sdpSettings.connection.video) {
-		  //   peerInfo.settings.video = false;
-		  //   peerInfo.mediaStatus.videoMuted = true;
-		  // }
-
-		  // Makes sense to be send direction since we are retrieving information if Peer is sending anything to us
-		  // if (state.sdpSessions[peerId] && state.sdpSessions[peerId].remote && state.sdpSessions[peerId].remote.connection && typeof state.sdpSessions[peerId].remote.connection === 'object') {
-		  //   if (!(state.sdpSessions[peerId].remote.connection.audio && state.sdpSessions[peerId].remote.connection.audio.indexOf('send') > -1)) {
-		  //     peerInfo.settings.audio = false;
-		  //     peerInfo.mediaStatus.audioMuted = true;
-		  //   }
-		  //   if (!(state.sdpSessions[peerId].remote.connection.video && state.sdpSessions[peerId].remote.connection.video.indexOf('send') > -1)) {
-		  //     peerInfo.settings.video = false;
-		  //     peerInfo.mediaStatus.videoMuted = true;
-		  //   }
-		  //   if (!(state.sdpSessions[peerId].remote.connection.data && state.sdpSessions[peerId].remote.connection.data.indexOf('send') > -1)) {
-		  //     peerInfo.settings.data = false;
-		  //   }
-		  // }
-
-		  // if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
-		  //   peerInfo.userData = '';
-		  // }
-
-		  // if (!peerInfo.settings.audio) {
-		  //   peerInfo.mediaStatus.audioMuted = true;
-		  // }
-		  //
-		  // if (!peerInfo.settings.video) {
-		  //   peerInfo.mediaStatus.videoMuted = true;
-		  // }
-
-		  if (!peerInfo.settings.audio && !peerInfo.settings.video) {
-		    peerInfo.config.receiveOnly = true;
-		    peerInfo.config.publishOnly = false;
-		  }
-
-		  return peerInfo;
-		};
-
-		/**
-		 * @param {GetUserMediaOptions} options
-		 * @param {SkylinkState} roomState
-		 * @return {SkylinkState}
-		 * @memberOf MediaStreamHelpers
-		 * @private
-		 */
-		const parseMediaOptions = (options, roomState) => {
-		  const state = Skylink.getSkylinkState(roomState.room.id);
-		  const mediaOptions = options || {};
-
-		  state.userData = mediaOptions.userData || state.userData || '';
-		  state.streamsBandwidthSettings = {
-		    googleX: {},
-		    bAS: {},
-		  };
-		  state.publishOnly = false;
-		  state.sdpSettings = {
-		    connection: {
-		      audio: true,
-		      video: true,
-		      data: true,
-		    },
-		    direction: {
-		      audio: { send: true, receive: true },
-		      video: { send: true, receive: true },
-		    },
-		  };
-		  state.voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === 'boolean' ? mediaOptions.voiceActivityDetection : true;
-		  state.peerConnectionConfig = {
-		    bundlePolicy: BUNDLE_POLICY.BALANCED,
-		    rtcpMuxPolicy: RTCP_MUX_POLICY.REQUIRE,
-		    iceCandidatePoolSize: 0,
-		    certificate: PEER_CERTIFICATE.AUTO,
-		    disableBundle: false,
-		  };
-		  state.bandwidthAdjuster = null;
-
-		  if (mediaOptions.bandwidth) {
-		    if (typeof mediaOptions.bandwidth.audio === 'number') {
-		      state.streamsBandwidthSettings.bAS.audio = mediaOptions.bandwidth.audio;
-		    }
-
-		    if (typeof mediaOptions.bandwidth.video === 'number') {
-		      state.streamsBandwidthSettings.bAS.video = mediaOptions.bandwidth.video;
-		    }
-
-		    if (typeof mediaOptions.bandwidth.data === 'number') {
-		      state.streamsBandwidthSettings.bAS.data = mediaOptions.bandwidth.data;
-		    }
-		  }
-
-		  if (mediaOptions.googleXBandwidth) {
-		    if (typeof mediaOptions.googleXBandwidth.min === 'number') {
-		      state.streamsBandwidthSettings.googleX.min = mediaOptions.googleXBandwidth.min;
-		    }
-
-		    if (typeof mediaOptions.googleXBandwidth.max === 'number') {
-		      state.streamsBandwidthSettings.googleX.max = mediaOptions.googleXBandwidth.max;
-		    }
-		  }
-
-		  if (mediaOptions.sdpSettings) {
-		    if (mediaOptions.sdpSettings.direction) {
-		      if (mediaOptions.sdpSettings.direction.audio) {
-		        state.sdpSettings.direction.audio.receive = typeof mediaOptions.sdpSettings.direction.audio.receive === 'boolean' ? mediaOptions.sdpSettings.direction.audio.receive : true;
-		        state.sdpSettings.direction.audio.send = typeof mediaOptions.sdpSettings.direction.audio.send === 'boolean' ? mediaOptions.sdpSettings.direction.audio.send : true;
-		      }
-
-		      if (mediaOptions.sdpSettings.direction.video) {
-		        state.sdpSettings.direction.video.receive = typeof mediaOptions.sdpSettings.direction.video.receive === 'boolean' ? mediaOptions.sdpSettings.direction.video.receive : true;
-		        state.sdpSettings.direction.video.send = typeof mediaOptions.sdpSettings.direction.video.send === 'boolean' ? mediaOptions.sdpSettings.direction.video.send : true;
-		      }
-		    }
-		    if (mediaOptions.sdpSettings.connection) {
-		      state.sdpSettings.connection.audio = typeof mediaOptions.sdpSettings.connection.audio === 'boolean' ? mediaOptions.sdpSettings.connection.audio : true;
-		      state.sdpSettings.connection.video = typeof mediaOptions.sdpSettings.connection.video === 'boolean' ? mediaOptions.sdpSettings.connection.video : true;
-		      state.sdpSettings.connection.data = typeof mediaOptions.sdpSettings.connection.data === 'boolean' ? mediaOptions.sdpSettings.connection.data : true;
-		    }
-		  }
-
-		  if (mediaOptions.publishOnly) {
-		    state.sdpSettings.direction.audio.send = true;
-		    state.sdpSettings.direction.audio.receive = false;
-		    state.sdpSettings.direction.video.send = true;
-		    state.sdpSettings.direction.video.receive = false;
-		    state.publishOnly = true;
-		  }
-
-		  /* eslint-disable no-restricted-syntax */
-		  /* eslint-disable no-prototype-builtins */
-		  if (mediaOptions.peerConnection && typeof mediaOptions.peerConnection === 'object') {
-		    if (typeof mediaOptions.peerConnection.bundlePolicy === 'string') {
-		      for (const bpProp in BUNDLE_POLICY) {
-		        if (BUNDLE_POLICY.hasOwnProperty(bpProp) && BUNDLE_POLICY[bpProp] === mediaOptions.peerConnection.bundlePolicy) {
-		          state.peerConnectionConfig.bundlePolicy = mediaOptions.peerConnection.bundlePolicy;
-		        }
-		      }
-		    }
-		    if (typeof mediaOptions.peerConnection.rtcpMuxPolicy === 'string') {
-		      for (const rmpProp in RTCP_MUX_POLICY) {
-		        if (RTCP_MUX_POLICY.hasOwnProperty(rmpProp) && RTCP_MUX_POLICY[rmpProp] === mediaOptions.peerConnection.rtcpMuxPolicy) {
-		          state.peerConnectionConfig.rtcpMuxPolicy = mediaOptions.peerConnection.rtcpMuxPolicy;
-		        }
-		      }
-		    }
-		    if (typeof mediaOptions.peerConnection.iceCandidatePoolSize === 'number' && mediaOptions.peerConnection.iceCandidatePoolSize > 0) {
-		      state.peerConnectionConfig.iceCandidatePoolSize = mediaOptions.peerConnection.iceCandidatePoolSize;
-		    }
-		    if (typeof mediaOptions.peerConnection.certificate === 'string') {
-		      for (const pcProp in PEER_CERTIFICATE) {
-		        if (PEER_CERTIFICATE.hasOwnProperty(pcProp) && PEER_CERTIFICATE[pcProp] === mediaOptions.peerConnection.certificate) {
-		          state.peerConnectionConfig.certificate = mediaOptions.peerConnection.certificate;
-		        }
-		      }
-		    }
-		    state.peerConnectionConfig.disableBundle = mediaOptions.peerConnection.disableBundle === true;
-		  }
-
-		  if (mediaOptions.autoBandwidthAdjustment) {
-		    state.bandwidthAdjuster = {
-		      interval: 10,
-		      limitAtPercentage: 100,
-		      useUploadBwOnly: false,
-		    };
-
-		    if (typeof mediaOptions.autoBandwidthAdjustment === 'object') {
-		      if (typeof mediaOptions.autoBandwidthAdjustment.interval === 'number' && mediaOptions.autoBandwidthAdjustment.interval >= 10) {
-		        state.bandwidthAdjuster.interval = mediaOptions.autoBandwidthAdjustment.interval;
-		      }
-		      if (typeof mediaOptions.autoBandwidthAdjustment.limitAtPercentage === 'number' && (mediaOptions.autoBandwidthAdjustment.limitAtPercentage >= 0 && mediaOptions.autoBandwidthAdjustment.limitAtPercentage <= 100)) {
-		        state.bandwidthAdjuster.limitAtPercentage = mediaOptions.autoBandwidthAdjustment.limitAtPercentage;
-		      }
-		      if (typeof mediaOptions.autoBandwidthAdjustment.useUploadBwOnly === 'boolean') {
-		        state.bandwidthAdjuster.useUploadBwOnly = mediaOptions.autoBandwidthAdjustment.useUploadBwOnly;
-		      }
-		    }
-		  }
-		  return state;
-		};
-
 		// requires the mid to be set after setOffer both local or remote
 		const retrieveTransceiverMid = (room, track) => {
 		  const roomState = Skylink.getSkylinkState(room.id);
@@ -4658,10 +3671,10 @@
 
 		const buildPeerMediaInfo = (room, mid, track, streamId, mediaType) => ({
 		  publisherId: mid,
-		  mediaId: helpers$5.retrieveMediaId(track.kind, streamId),
+		  mediaId: helpers$6.retrieveMediaId(track.kind, streamId),
 		  mediaType,
-		  mediaState: helpers$5.retrieveMediaState(track),
-		  transceiverMid: helpers$5.retrieveTransceiverMid(room, track),
+		  mediaState: helpers$6.retrieveMediaState(track),
+		  transceiverMid: helpers$6.retrieveTransceiverMid(room, track),
 		  streamId,
 		  trackId: track.id,
 		  mediaMetaData: '',
@@ -4722,7 +3735,7 @@
 		const dispatchMediaInfoMsg = (room, peerId, dispatchEvent, mediaId) => {
 		  const updatedState = Skylink.getSkylinkState(room.id);
 		  if (updatedState.user.sid === peerId && dispatchEvent) {
-		    helpers$5.sendMediaInfoMsg(room, updatedState.peerMedias[peerId][mediaId]);
+		    helpers$6.sendMediaInfoMsg(room, updatedState.peerMedias[peerId][mediaId]);
 		  }
 		};
 
@@ -4897,6 +3910,1317 @@
 		  }
 		};
 
+		const isUser = (peerId, roomState) => {
+		  const { user } = roomState;
+		  return peerId === user.sid;
+		};
+
+		/**
+		 * @description Function that returns the User / Peer current session information.
+		 * @private
+		 * @param {String} peerId
+		 * @param {SkylinkRoom} room
+		 * @return {peerInfo}
+		 * @memberOf PeerDataHelpers
+		 */
+		const getPeerInfo = (peerId, room) => {
+		  let peerInfo = null;
+		  if (!peerId) {
+		    return null;
+		  }
+		  const state = Skylink.getSkylinkState(room.id);
+
+		  if (!state) {
+		    Skylink.logNoRoomState(room.id);
+		    return peerInfo;
+		  }
+
+		  if (isUser(peerId, state)) {
+		    return PeerData.getCurrentSessionInfo(room);
+		  }
+
+		  peerInfo = clone_1(state.peerInformations[peerId]);
+
+		  if (!peerInfo) {
+		    logger.log.ERROR(`${MESSAGES.PEER_INFORMATIONS.NO_PEER_INFO} ${peerId}`);
+		    return peerInfo;
+		  }
+
+		  // FIXME: would there ever be a case of !peerInfo.settings?
+		  // if (!peerInfo.settings) {
+		  //   peerInfo.settings = {};
+		  // }
+
+		  // if (!peerInfo.mediaStatus) {
+		  //   peerInfo.mediaStatus = {};
+		  // }
+
+		  peerInfo.room = clone_1(room.roomName);
+
+		  peerInfo.settings.data = !!(state.dataChannels[peerId] && state.dataChannels[peerId].main && state.dataChannels[peerId].main.channel && state.dataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
+		  peerInfo.connected = state.peerConnStatus[peerId] && !!state.peerConnStatus[peerId].connected;
+		  peerInfo.init = state.peerConnStatus[peerId] && !!state.peerConnStatus[peerId].init;
+
+		  // peerInfo.settings.bandwidth = peerInfo.settings.bandwidth || {};
+		  // peerInfo.settings.googleXBandwidth = peerInfo.settings.googleXBandwidth || {};
+
+		  // if (!(typeof peerInfo.settings.video === 'boolean' || typeof peerInfo.settings.video === 'object')) {
+		  //   // peerInfo.settings.video = false;
+		  //   peerInfo.mediaStatus.audioMuted = true;
+		  // }
+
+		  // if (!(typeof peerInfo.settings.audio === 'boolean' || typeof peerInfo.settings.audio === 'object')) {
+		  //   // peerInfo.settings.audio = false;
+		  //   peerInfo.mediaStatus.audioMuted = true;
+		  // }
+
+		  // if (typeof peerInfo.mediaStatus.audioMuted !== 'boolean') {
+		  //   peerInfo.mediaStatus.audioMuted = true;
+		  // }
+
+		  // if (typeof peerInfo.mediaStatus.videoMuted !== 'boolean') {
+		  //   peerInfo.mediaStatus.videoMuted = true;
+		  // }
+
+		  // if (peerInfo.settings.maxBandwidth) {
+		  //   peerInfo.settings.bandwidth = clone(peerInfo.settings.maxBandwidth);
+		  //   delete peerInfo.settings.maxBandwidth;
+		  // }
+
+		  // if (peerInfo.settings.video && typeof peerInfo.settings.video === 'object' && peerInfo.settings.video.customSettings && typeof peerInfo.settings.video.customSettings === 'object') {
+		  // // if (peerInfo.settings.video.customSettings && typeof peerInfo.settings.video.customSettings === 'object') {
+		  //   if (peerInfo.settings.video.customSettings.frameRate) {
+		  //     peerInfo.settings.video.frameRate = clone(peerInfo.settings.video.customSettings.frameRate);
+		  //   }
+		  //   if (peerInfo.settings.video.customSettings.facingMode) {
+		  //     peerInfo.settings.video.facingMode = clone(peerInfo.settings.video.customSettings.facingMode);
+		  //   }
+		  //   if (peerInfo.settings.video.customSettings.width) {
+		  //     peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+		  //     peerInfo.settings.video.resolution.width = clone(peerInfo.settings.video.customSettings.width);
+		  //   }
+		  //   if (peerInfo.settings.video.customSettings.height) {
+		  //     peerInfo.settings.video.resolution = peerInfo.settings.video.resolution || {};
+		  //     peerInfo.settings.video.resolution.height = clone(peerInfo.settings.video.customSettings.height);
+		  //   }
+		  // }
+
+		  // if (peerInfo.settings.audio && typeof peerInfo.settings.audio === 'object') {
+		  //   peerInfo.settings.audio.stereo = peerInfo.settings.audio.stereo === true;
+		  // }
+
+		  // TODO: check if receiveOnly and publishOnly is required
+		  if (peerId === PEER_TYPE.MCU) {
+		    peerInfo.config.receiveOnly = true;
+		    peerInfo.config.publishOnly = false;
+		  } else if (state.hasMCU) {
+		    peerInfo.config.receiveOnly = false;
+		    peerInfo.config.publishOnly = true;
+		  }
+
+		  // TODO: check if the sdp parsing is required
+		  // parse sdp to update media settings and status
+		  // if (!state.sdpSettings.direction.audio.receive) {
+		  //   peerInfo.settings.audio = false;
+		  //   peerInfo.mediaStatus.audioMuted = true;
+		  // }
+		  //
+		  // if (!state.sdpSettings.direction.video.receive) {
+		  //   peerInfo.settings.video = false;
+		  //   peerInfo.mediaStatus.videoMuted = true;
+		  // }
+		  //
+		  // if (!state.sdpSettings.connection.audio) {
+		  //   peerInfo.settings.audio = false;
+		  //   peerInfo.mediaStatus.audioMuted = true;
+		  // }
+		  //
+		  // if (!state.sdpSettings.connection.video) {
+		  //   peerInfo.settings.video = false;
+		  //   peerInfo.mediaStatus.videoMuted = true;
+		  // }
+
+		  // Makes sense to be send direction since we are retrieving information if Peer is sending anything to us
+		  // if (state.sdpSessions[peerId] && state.sdpSessions[peerId].remote && state.sdpSessions[peerId].remote.connection && typeof state.sdpSessions[peerId].remote.connection === 'object') {
+		  //   if (!(state.sdpSessions[peerId].remote.connection.audio && state.sdpSessions[peerId].remote.connection.audio.indexOf('send') > -1)) {
+		  //     peerInfo.settings.audio = false;
+		  //     peerInfo.mediaStatus.audioMuted = true;
+		  //   }
+		  //   if (!(state.sdpSessions[peerId].remote.connection.video && state.sdpSessions[peerId].remote.connection.video.indexOf('send') > -1)) {
+		  //     peerInfo.settings.video = false;
+		  //     peerInfo.mediaStatus.videoMuted = true;
+		  //   }
+		  //   if (!(state.sdpSessions[peerId].remote.connection.data && state.sdpSessions[peerId].remote.connection.data.indexOf('send') > -1)) {
+		  //     peerInfo.settings.data = false;
+		  //   }
+		  // }
+
+		  // if (!(peerInfo.userData !== null && typeof peerInfo.userData !== 'undefined')) {
+		  //   peerInfo.userData = '';
+		  // }
+
+		  // if (!peerInfo.settings.audio) {
+		  //   peerInfo.mediaStatus.audioMuted = true;
+		  // }
+		  //
+		  // if (!peerInfo.settings.video) {
+		  //   peerInfo.mediaStatus.videoMuted = true;
+		  // }
+
+		  if (!peerInfo.settings.audio && !peerInfo.settings.video) {
+		    peerInfo.config.receiveOnly = true;
+		    peerInfo.config.publishOnly = false;
+		  }
+
+		  return peerInfo;
+		};
+
+		/**
+		 * @description Function that returns the current session peerInfo is peer isSelf.
+		 * @private
+		 * @param {SkylinkRoom} room
+		 * @return {peerInfo}
+		 * @memberOf PeerDataHelpers
+		 */
+		const getCurrentSessionInfo = (room) => {
+		  const state = Skylink.getSkylinkState(room.id);
+		  const initOptions = Skylink.getInitOptions();
+		  const { AdapterJS } = window;
+		  const { enableDataChannel, codecParams } = initOptions;
+		  const { roomName } = room;
+		  const {
+		    streamsMediaStatus,
+		    userData,
+		    peerPriorityWeight,
+		    enableIceRestart,
+		    publishOnly,
+		    SMProtocolVersion,
+		    DTProtocolVersion,
+		    streams,
+		    streamsBandwidthSettings,
+		    sdpSettings,
+		    user,
+		  } = state;
+
+		  const peerInfo = {
+		    userData,
+		    settings: {
+		      audio: false,
+		      video: false,
+		    },
+		    mediaStatus: {},
+		    agent: {
+		      name: AdapterJS.webrtcDetectedBrowser,
+		      version: AdapterJS.webrtcDetectedVersion,
+		      os: window.navigator.platform,
+		      pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+		      SMProtocolVersion,
+		      DTProtocolVersion,
+		      SDKVersion: SDK_VERSION,
+		    },
+		    room: roomName,
+		    config: {
+		      enableDataChannel,
+		      enableIceRestart,
+		      priorityWeight: peerPriorityWeight,
+		      receiveOnly: false,
+		      publishOnly,
+		    },
+		    sid: user.sid,
+		    screenshare: false,
+		  };
+
+		  if (streams && streams.userMedia) {
+		    const streamIds = Object.keys(streams.userMedia);
+		    if (streams.userMedia[streamIds[0]]) { // assume that all the streams have the same settings
+		      peerInfo.settings = clone_1(streams.userMedia[streamIds[0]].settings);
+		    }
+		  }
+
+		  peerInfo.mediaStatus = streamsMediaStatus;
+
+		  peerInfo.userData = userData || null;
+
+		  peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
+
+		  if (streams.screenshare) {
+		    peerInfo.screenshare = true;
+		  }
+
+		  peerInfo.settings.maxBandwidth = clone_1(streamsBandwidthSettings.bAS);
+		  peerInfo.settings.googleXBandwidth = clone_1(streamsBandwidthSettings.googleX);
+
+		  if (peerInfo.settings.bandwidth) {
+		    peerInfo.settings.maxBandwidth = clone_1(peerInfo.settings.bandwidth);
+		    delete peerInfo.settings.bandwidth;
+		  }
+
+		  peerInfo.settings.data = enableDataChannel && sdpSettings.connection.data;
+
+		  if (peerInfo.settings.audio && isAObj(peerInfo.settings.audio)) {
+		    // Override the settings.audio.usedtx
+		    if (isABoolean(typeof codecParams.audio.opus.stereo)) {
+		      peerInfo.settings.audio.stereo = codecParams.audio.opus.stereo;
+		    }
+		    // Override the settings.audio.usedtx
+		    if (isABoolean(codecParams.audio.opus.usedtx)) {
+		      peerInfo.settings.audio.usedtx = codecParams.audio.opus.usedtx;
+		    }
+		    // Override the settings.audio.maxplaybackrate
+		    if (isANumber(codecParams.audio.opus.maxplaybackrate)) {
+		      peerInfo.settings.audio.maxplaybackrate = codecParams.audio.opus.maxplaybackrate;
+		    }
+		    // Override the settings.audio.useinbandfec
+		    if (isABoolean(codecParams.audio.opus.useinbandfec)) {
+		      peerInfo.settings.audio.useinbandfec = codecParams.audio.opus.useinbandfec;
+		    }
+		  }
+
+		  if (peerInfo.settings.video && isAObj(peerInfo.settings.video)) {
+		    peerInfo.settings.video.customSettings = {};
+
+		    if (peerInfo.settings.video.frameRate && isAObj(peerInfo.settings.video.frameRate)) {
+		      peerInfo.settings.video.customSettings.frameRate = clone_1(peerInfo.settings.video.frameRate);
+		      peerInfo.settings.video.frameRate = -1;
+		    }
+
+		    if (peerInfo.settings.video.facingMode && isAObj(peerInfo.settings.video.facingMode)) {
+		      peerInfo.settings.video.customSettings.facingMode = clone_1(peerInfo.settings.video.facingMode);
+		      peerInfo.settings.video.facingMode = '-1';
+		    }
+
+		    if (peerInfo.settings.video.resolution && isAObj(peerInfo.settings.video.resolution)) {
+		      if (peerInfo.settings.video.resolution.width && isAObj(peerInfo.settings.video.resolution.width)) {
+		        peerInfo.settings.video.customSettings.width = clone_1(peerInfo.settings.video.width);
+		        peerInfo.settings.video.resolution.width = -1;
+		      }
+
+		      if (peerInfo.settings.video.resolution.height && isAObj(peerInfo.settings.video.resolution.height)) {
+		        peerInfo.settings.video.customSettings.height = clone_1(peerInfo.settings.video.height);
+		        peerInfo.settings.video.resolution.height = -1;
+		      }
+		    }
+		  }
+
+		  if (!peerInfo.settings.audio && !peerInfo.settings.video) {
+		    peerInfo.config.receiveOnly = true;
+		    peerInfo.config.publishOnly = false;
+		  }
+
+		  return clone_1(peerInfo);
+		};
+
+		/**
+		 * @description Function that returns the userInfo to be sent to Signaling.
+		 * @private
+		 * @param {SkylinkRoom} room
+		 * @return {Object}
+		 * @memberOf PeerDataHelpers
+		 */
+		const getUserInfo = (room) => {
+		  const userInfo = helpers.getCurrentSessionInfo(room);
+		  delete userInfo.room;
+		  // delete userInfo.config;
+		  // delete userInfo.settings.data;
+		  return userInfo;
+		};
+
+		/**
+		 * @description Function that returns the User / Peer current custom data.
+		 * @private
+		 * @param {Skylink} roomState
+		 * @param {String} peerId
+		 * @return {roomState.userData}
+		 * @memberOf PeerDataHelpers
+		 */
+		const getUserData = (roomState, peerId) => {
+		  if (peerId && roomState.peerInformations[peerId]) {
+		    let peerUserData = roomState.peerInformations[peerId].userData;
+
+		    if (!peerUserData) {
+		      peerUserData = '';
+		    }
+		    return peerUserData;
+		  }
+		  return roomState.userData;
+		};
+
+		/**
+		 * @description Function that overwrites the User current custom data.
+		 * @private
+		 * @param {SkylinkRoom} room
+		 * @param {String | Object} userData
+		 * @memberOf PeerDataHelpers
+		 * @fires peerUpdated
+		 */
+		const setUserData = (room, userData) => {
+		  const roomState = Skylink.getSkylinkState(room.id);
+		  const { PEER_INFORMATIONS: { UPDATE_USER_DATA } } = MESSAGES;
+		  const updatedUserData = userData || '';
+
+		  roomState.userData = updatedUserData;
+		  Skylink.setSkylinkState(roomState, roomState.room.id);
+
+		  new SkylinkSignalingServer().setUserData(roomState);
+
+		  dispatchEvent(peerUpdated({
+		    peerId: roomState.user.sid,
+		    peerInfo: helpers.getCurrentSessionInfo(room),
+		    isSelf: true,
+		  }));
+
+		  logger.log.INFO(UPDATE_USER_DATA, updatedUserData);
+		};
+
+		// eslint-disable-next-line consistent-return
+		const prepStopStreams = (roomId, streamId, fromLeaveRoom = false, isScreensharing = false) => new Promise((resolve, reject) => {
+		  const state = Skylink.getSkylinkState(roomId);
+		  const { streams } = state;
+
+		  if (!state || !streams) {
+		    reject(new Error(`${MESSAGES.ROOM_STATE.NOT_FOUND} - ${roomId}`));
+		  }
+
+		  if (!streams || (!isScreensharing && !streams.userMedia) || (isScreensharing && !streams.screenshare) || (isScreensharing && streams.screenshare && (streams.screenshare.id !== streamId))) {
+		    reject(new Error(`${MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM} - ${streamId}`));
+		  }
+
+		  if (isScreensharing) {
+		    stopStreamHelpers.prepStopScreenStream(state.room, streamId, fromLeaveRoom)
+		      .then(() => resolve())
+		      .catch(rej => reject(rej));
+		  } else {
+		    stopStreamHelpers.prepStopUserMediaStreams(state, streamId, fromLeaveRoom)
+		      .then(() => resolve())
+		      .catch(rej => reject(rej));
+		  }
+		});
+
+		const hasStreamBeenReplaced = (state, stoppedStream) => {
+		  const { streams } = state;
+
+		  if (!streams.userMedia) {
+		    return false;
+		  }
+
+		  const streamObjs = Object.values(streams.userMedia);
+
+		  return streamObjs.some(streamObj => streamObj.isReplaced && (streamObj.id === stoppedStream.id));
+		};
+
+		const filterUserMediaStreams = (state) => {
+		  const { streams } = state;
+		  const filteredStreams = {
+		    replacedStreams: [],
+		    addedStreams: [],
+		  };
+		  const streamIds = Object.keys(streams.userMedia);
+		  streamIds.forEach((userMediaStreamId) => {
+		    if (hasStreamBeenReplaced(state, streams.userMedia[userMediaStreamId].stream)) {
+		      filteredStreams.replacedStreams.push(streams.userMedia[userMediaStreamId].stream);
+		    } else {
+		      filteredStreams.addedStreams.push(streams.userMedia[userMediaStreamId].stream);
+		    }
+		  });
+
+		  return filteredStreams;
+		};
+
+		// eslint-disable-next-line consistent-return
+		const prepStopUserMediaStreams = (state, streamId, fromLeaveRoom) => new Promise((resolve, reject) => {
+		  const { user } = state;
+		  const filteredStreams = filterUserMediaStreams(state);
+		  const isScreensharing = false;
+
+		  try {
+		    if (!streamId) {
+		      stopStreamHelpers.stopAddedStreams(state, filteredStreams.addedStreams, isScreensharing, fromLeaveRoom);
+
+		      // TODO:
+		      // added streams must be stopped first and renegotiation started before replaced streams are stopped
+		      // add event listener to listen for handshake offer to trigger stopReplacedStreams
+
+		      stopStreamHelpers.stopReplacedStreams(state, filteredStreams.replacedStreams, isScreensharing, fromLeaveRoom);
+		    } else {
+		      const { stream } = state.streams.userMedia[streamId];
+		      if (hasStreamBeenReplaced(state, stream)) {
+		        // TODO
+		        stopStreamHelpers.stopReplacedStream(state, stream, fromLeaveRoom);
+		      } else {
+		        stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
+		      }
+		    }
+
+		    return stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
+		  } catch (error) {
+		    logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA], error);
+		    reject(MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA);
+		  }
+		});
+
+		const stopAddedStream = (state, stream, isScreensharing = false, fromLeaveRoom = false) => {
+		  const { room, user } = state;
+
+		  try {
+		    stopStreamHelpers.tryStopStream(stream, user.sid);
+
+		    if (!fromLeaveRoom) {
+		      stopStreamHelpers.removeTracks(room, stream);
+		      stopStreamHelpers.updateMediaInfoMediaState(room, stream);
+		      stopStreamHelpers.deleteStreamFromState(room, stream, isScreensharing);
+		      stopStreamHelpers.listenForEventAndDeleteMediaInfo(room, stream);
+		      stopStreamHelpers.dispatchOnLocalStreamEnded(room, stream, isScreensharing);
+
+		      if (isScreensharing) {
+		        new ScreenSharing(state).deleteScreensharingInstance(room);
+		      }
+		    }
+		  } catch (err) {
+		    logger.log.ERROR([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_ADDED_STREAM], err);
+		  }
+		};
+
+		const stopMediaTracks = (tracks, peerId) => {
+		  if (!tracks || !tracks[0]) {
+		    return false;
+		  }
+
+		  tracks.forEach((track) => {
+		    try {
+		      track.stop();
+		    } catch (error) {
+		      logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_MEDIA_TRACK} - track id: ${track.id}`], error);
+		    }
+		  });
+
+		  return true;
+		};
+
+		const tryStopStream = (stream, peerId) => {
+		  if (!stream) return;
+
+		  try {
+		    stopMediaTracks(stream.getAudioTracks());
+		  } catch (error) {
+		    logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_AUDIO_TRACK} - stream id: ${stream.id}`], error);
+		  }
+
+		  try {
+		    stopMediaTracks(stream.getVideoTracks());
+		  } catch (error) {
+		    logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_VIDEO_TRACK} - stream id: ${stream.id}`], error);
+		  }
+		};
+
+		const removeSenderFromList = (state, peerId, sender) => {
+		  const { room } = state;
+		  const updatedState = state;
+		  let indexToRemove = -1;
+
+		  if (!updatedState.currentRTCRTPSenders[peerId]) {
+		    return;
+		  }
+
+		  const listOfSenders = updatedState.currentRTCRTPSenders[peerId];
+
+		  for (let i = 0; i < listOfSenders.length; i += 1) {
+		    if (sender === listOfSenders[i]) {
+		      indexToRemove = i;
+		      break;
+		    }
+		  }
+
+		  if (indexToRemove !== -1) {
+		    listOfSenders.splice(indexToRemove, 1);
+		    updatedState.currentRTCRTPSenders[peerId] = listOfSenders;
+		    Skylink.setSkylinkState(updatedState, room.id);
+		  } else {
+		    logger.log.WARN([peerId, null, null, 'No matching sender was found for the peer.'], sender);
+		  }
+		};
+
+		const removeTrack = (state, peerConnections, track) => {
+		  const trackId = track.id;
+		  const peerIds = Object.keys(peerConnections);
+
+		  for (let i = 0; i < peerIds.length; i += 1) {
+		    try {
+		      const targetMid = peerIds[i];
+		      const peerConnection = peerConnections[targetMid];
+
+		      if (peerConnection.connectionState === PEER_CONNECTION_STATE$1.CLOSED) {
+		        break;
+		      }
+
+		      const senders = peerConnection.getSenders();
+		      let sender = null;
+		      for (let y = 0; y < senders.length; y += 1) {
+		        if (senders[y].track && senders[y].track.id === trackId) {
+		          sender = senders[y];
+		          peerConnection.removeTrack(sender);
+		          removeSenderFromList(state, targetMid, sender);
+		        }
+		      }
+		    } catch (error) {
+		      logger.log.ERROR([peerIds[i], TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.ERRORS.REMOVE_TRACK], error);
+		    }
+		  }
+		};
+
+		/**
+		 * Function that removes the tracks from the peer connection.
+		 * @param {SkylinkRoom} room
+		 * @param {MediaStream} stream
+		 * @memberOf MediaStreamHelpers
+		 */
+		const removeTracks = (room, stream) => {
+		  const state = Skylink.getSkylinkState(room.id);
+		  const { peerConnections, user } = state;
+		  const tracks = stream.getTracks();
+
+		  try {
+		    tracks.forEach((track) => {
+		      removeTrack(state, peerConnections, track);
+		    });
+		  } catch (error) {
+		    logger.log.ERROR([user.sid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.ERRORS.REMOVE_TRACK], error);
+		  }
+		};
+
+		const listenForEventAndDeleteMediaInfo = (room, stream) => {
+		  const state = Skylink.getSkylinkState(room.id);
+
+		  const executeOfferCallback = (evt) => {
+		    const s = stream;
+		    const { user } = state;
+		    const { detail } = evt;
+		    if (detail.state === HANDSHAKE_PROGRESS$1.OFFER) {
+		      const mediaId = PeerMedia.retrieveMediaId(hasAudioTrack(s) ? TRACK_KIND.AUDIO : TRACK_KIND.VIDEO, s.id);
+		      PeerMedia.deleteUnavailableMedia(room, user.sid, mediaId);
+		    }
+		  };
+
+		  const executeMediaDeletedCallback = () => {
+		    removeEventListener(EVENTS.HANDSHAKE_PROGRESS, executeOfferCallback);
+		    removeEventListener(EVENTS.MEDIA_INFO_DELETED, executeMediaDeletedCallback);
+		  };
+
+		  addEventListener(EVENTS.HANDSHAKE_PROGRESS, executeOfferCallback);
+		  addEventListener(EVENTS.MEDIA_INFO_DELETED, executeMediaDeletedCallback);
+		};
+
+		const stopAddedStreams = (state, streams, isScreensharing, fromLeaveRoom) => {
+		  streams.forEach((stream) => {
+		    stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
+		  });
+		};
+
+		const updateMediaInfoMediaState = (room, stream) => {
+		  const state = Skylink.getSkylinkState(room.id);
+		  const { user } = state;
+		  const streamId = stream.id;
+		  const mediaId = PeerMedia.retrieveMediaId(stream.getTracks()[0].kind, streamId);
+		  PeerMedia.setMediaStateToUnavailable(room, user.sid, mediaId);
+		};
+
+		const deleteStreamFromState = (room, stream, isScreensharing = null) => {
+		  const updatedState = Skylink.getSkylinkState(room.id);
+		  const { user } = updatedState;
+		  const streamIdToRemove = stream.id;
+
+		  if (isScreensharing) {
+		    delete updatedState.streams.screenshare;
+		    delete updatedState.streamsMediaStatus[stream.id];
+		    delete updatedState.streamsMutedSettings[stream.id];
+		    updatedState.streams.screenshare = null;
+
+		    logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SUCCESS} - stream id: ${stream.id} (screenshare)`]);
+		  } else {
+		    delete updatedState.streams.userMedia[streamIdToRemove];
+		    delete updatedState.streamsMediaStatus[stream.id];
+		    delete updatedState.streamsMutedSettings[stream.id];
+
+		    if (isEmptyObj(updatedState.streams.userMedia)) {
+		      updatedState.streams.userMedia = null;
+		    }
+
+		    logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SUCCESS} - stream id: ${stream.id}`]);
+		  }
+
+		  Skylink.setSkylinkState(updatedState, updatedState.room.id);
+		};
+
+		/**
+		 * Function that handles the <code>RTCPeerConnection.removeTracks(sender)</code> on the local MediaStream.
+		 * @param {SkylinkRoom} room
+		 * @param {MediaStream} stream - The stream.
+		 * @param {boolean} isScreensharing
+		 * @memberOf MediaStreamHelpers
+		 * @fires streamEnded
+		 */
+		const dispatchOnLocalStreamEnded = (room, stream, isScreensharing = false) => {
+		  const state = Skylink.getSkylinkState(room.id);
+		  const { MEDIA_STREAM } = MESSAGES;
+		  const { user } = state;
+		  const isSelf = true;
+
+		  logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, MEDIA_STREAM.STOP_SETTINGS], {
+		    peerId: user.sid, isSelf, isScreensharing, stream,
+		  });
+
+		  dispatchEvent(streamEnded({
+		    room,
+		    peerId: user.sid,
+		    peerInfo: PeerData.getCurrentSessionInfo(room),
+		    isSelf,
+		    isScreensharing,
+		    streamId: stream.id,
+		    isVideo: hasVideoTrack(stream),
+		    isAudio: hasAudioTrack(stream),
+		  }));
+
+		  dispatchEvent(mediaAccessStopped({
+		    isScreensharing,
+		    streamId: stream.id,
+		  }));
+
+		  dispatchEvent(peerUpdated({
+		    peerId: user.sid,
+		    peerInfo: helpers.getCurrentSessionInfo(room),
+		    isSelf: true,
+		  }));
+		};
+
+		const hasStreamBeenReplaced$1 = (state, stoppedStream) => {
+		  const { streams } = state;
+
+		  if (!streams.userMedia) {
+		    return false;
+		  }
+
+		  const streamObjs = Object.values(streams.userMedia);
+
+		  return streamObjs.some(streamObj => streamObj.isReplaced && (streamObj.id === stoppedStream.id));
+		};
+
+		const prepStopScreenStream = (room, streamId, fromLeaveRoom = false) => new Promise((resolve, reject) => {
+		  const state = Skylink.getSkylinkState(room.id);
+		  const { user, streams } = state;
+		  const screenStream = streams.screenshare.stream;
+		  const isScreensharing = true;
+
+		  try {
+		    if (hasStreamBeenReplaced$1(state, screenStream)) {
+		      stopStreamHelpers.stopReplacedStream(state, screenStream, isScreensharing, fromLeaveRoom);
+		    } else {
+		      stopStreamHelpers.stopAddedStream(state, screenStream, isScreensharing, fromLeaveRoom);
+		    }
+
+		    stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
+		  } catch (error) {
+		    logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN], error);
+		    reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN));
+		  }
+		});
+
+		const dispatchPeerUpdatedEvent = (roomState) => {
+		  const { room, user } = roomState;
+
+		  dispatchEvent(peerUpdated({
+		    peerId: user.sid,
+		    isSelf: true,
+		    peerInfo: PeerData.getCurrentSessionInfo(room),
+		  }));
+		};
+
+		// eslint-disable-next-line consistent-return
+		const initRefreshConnectionAndResolve = (room, fromLeaveRoom, resolve, reject) => {
+		  const state = Skylink.getSkylinkState(room.id);
+		  const { peerConnections } = state;
+
+		  try {
+		    if (!fromLeaveRoom) {
+		      if (!isEmptyArray(Object.keys(peerConnections))) {
+		        // eslint-disable-next-line consistent-return
+		        const executeAnswerAckCallback = (evt) => {
+		          const { detail } = evt;
+		          if (detail.state === HANDSHAKE_PROGRESS$1.ANSWER_ACK) {
+		            return (resolve());
+		          }
+		        };
+
+		        addEventListener(EVENTS.HANDSHAKE_PROGRESS, executeAnswerAckCallback);
+
+		        PeerConnection.refreshConnection(state);
+		      } else {
+		        dispatchPeerUpdatedEvent(state);
+		        PeerMedia.deleteUnavailableMedia(state.room, state.user.sid);
+		        return resolve();
+		      }
+		    }
+		  } catch (err) {
+		    reject(err);
+		  }
+		};
+
+		const sendStreamReplaceEndedMsg = (state, stoppedStream) => {
+		  const { room, user } = state;
+		  const signaling = new SkylinkSignalingServer();
+		  signaling.stream(room.id, user, stoppedStream, STREAM_STATUS.REPLACED_STREAM_ENDED, null);
+		};
+
+		// TODO:
+		//  implement stop user media stream
+		//  stop screen stream will be implemented diff - need to replace the screen stream with the original user media stream
+		//  ref: onScreenStreamEnded for previous implementation
+		const stopReplacedStream = (state, stream, isScreensharing, fromLeaveRoom) => {
+		  const { user, room } = state;
+
+		  try {
+		    stopStreamHelpers.tryStopStream(stream);
+
+		    if (!fromLeaveRoom) {
+		      sendStreamReplaceEndedMsg(state, stream);
+		      stopStreamHelpers.deleteStreamFromState(room, stream, isScreensharing);
+		      stopStreamHelpers.dispatchOnLocalStreamEnded(room, stream);
+		    }
+		  } catch (err) {
+		    logger.log.ERROR([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_REPLACED_STREAM], err);
+		  }
+		};
+
+		const stopReplacedStreams = (state, streams, isScreensharing, fromLeaveRoom) => {
+		  streams.forEach((stream) => {
+		    stopStreamHelpers.stopReplacedStream(state, stream, isScreensharing, fromLeaveRoom);
+		  });
+		};
+
+		const stopStreamHelpers = {
+		  prepStopStreams,
+		  prepStopUserMediaStreams,
+		  stopAddedStream,
+		  tryStopStream,
+		  removeTracks,
+		  listenForEventAndDeleteMediaInfo,
+		  stopAddedStreams,
+		  updateMediaInfoMediaState,
+		  deleteStreamFromState,
+		  dispatchOnLocalStreamEnded,
+		  prepStopScreenStream,
+		  initRefreshConnectionAndResolve,
+		  stopReplacedStream,
+		  stopReplacedStreams,
+		};
+
+		/**
+		 * @private
+		 * @classdesc Class used for handling RTCMediaStream. Helper methods are listed inside <code>{@link MediaStreamHelpers}</code>.
+		 * @class
+		 */
+		class MediaStream$1 {
+		  /**
+		   * @description Function that retrieves camera Stream.
+		   * @param {SkylinkState} state
+		   * @param {GetUserMediaOptions} mediaOptions - The camera Stream configuration options.
+		   * @return {Promise}
+		   */
+		  static getUserMedia(state, mediaOptions = {}) {
+		    const { room } = state;
+		    const updatedRoomState = helpers$7.parseMediaOptions(mediaOptions, state);
+		    const { audio, video } = mediaOptions;
+		    const useExactConstraints = !!mediaOptions.useExactConstraints;
+		    Skylink.setSkylinkState(updatedRoomState, room.id);
+
+		    return helpers$7.prepMediaAccessRequest({
+		      useExactConstraints,
+		      audio,
+		      video,
+		      roomKey: room.id,
+		    });
+		  }
+
+		  /**
+		   * @description Function that filters user input from getUserMedia public method
+		   * @param {SkylinkState} roomState
+		   * @param {GetUserMediaOptions} options
+		   */
+		  static getUserMediaLayer(roomState, options = null) {
+		    return new Promise((resolve, reject) => {
+		      let mediaOptions = {
+		        audio: true,
+		        video: true,
+		      };
+
+		      if (!options) {
+		        logger.log.WARN([roomState.user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.NO_OPTIONS} - ${MESSAGES.MEDIA_STREAM.DEFAULT_OPTIONS}`], mediaOptions);
+		      }
+
+		      if (!isAObj(options)) {
+		        logger.log.ERROR([roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS], options);
+		        reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS), null);
+		      }
+
+		      mediaOptions = options;
+
+		      const getUserMediaPromise = MediaStream$1.getUserMedia(roomState, mediaOptions);
+		      getUserMediaPromise.then((stream) => {
+		        resolve(stream);
+		      }).catch((error) => {
+		        reject(error);
+		      });
+		    });
+		  }
+
+		  /**
+		   * Function that stops the getUserMedia() streams.
+		   * @param {SkylinkState} roomState
+		   * @param {String} streamId - The id of the stream to stop if there is more than one getUserMedia stream.
+		   */
+		  static stopStreams(roomState, streamId) {
+		    return stopStreamHelpers.prepStopStreams(roomState.room.id, streamId);
+		  }
+
+		  /**
+		   * Function that sets User's Stream to send to Peer connection.
+		   * @param {String} targetMid - The mid of the target peer
+		   * @param {SkylinkState} roomState - Skylink State of current room
+		   */
+		  static addLocalMediaStreams(targetMid, roomState) {
+		    helpers$7.addLocalMediaStreams(targetMid, roomState);
+		  }
+
+		  /**
+		   * Function that handles the <code>RTCPeerConnection.ontrack</code> event on remote stream added.
+		   * @param {MediaStream} stream - {@link https://developer.mozilla.org/en-US/docs/Web/API/MediaStream}
+		   * @param {SkylinkState} currentRoomState - Current room state
+		   * @param {String} targetMid - The mid of the target peer
+		   * @param {boolean} [isScreensharing=false] - The flag if stream is a screenshare stream.
+		   */
+		  static onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio) {
+		    helpers$7.onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio);
+		  }
+
+		  /**
+		   * Function that mutes the stream.
+		   * @param {SkylinkState} roomState
+		   * @param {Object} options
+		   * @param {boolean} options.audioMuted
+		   * @param {boolean} options.videoMuted
+		   * @param {String} streamId
+		   */
+		  static muteStreams(roomState, options, streamId) {
+		    return helpers$7.muteStreams(roomState, options, streamId);
+		  }
+
+		  /**
+		   * Function that sends the MediaStream object if present or mediaStream settings.
+		   * @param {SkylinkState} roomState
+		   * @param {MediaStream|Object} options
+		   */
+		  static sendStream(roomState, options) {
+		    return helpers$7.sendStream(roomState, options);
+		  }
+
+		  static getStreamSources() {
+		    return helpers$7.getStreamSources();
+		  }
+
+		  static getScreenSources() {
+		    return helpers$7.getScreenSources();
+		  }
+
+		  static updateRemoteStreams(room, peerId, stream) {
+		    return helpers$7.updateRemoteStreams(room, peerId, stream);
+		  }
+
+		  /**
+		   * Function that returns all active streams including screenshare stream if present.
+		   * @param {SkylinkState} roomState
+		   * @return {streamList} streamList
+		   */
+		  static getStreams(roomState) {
+		    return helpers$7.getStreams(roomState);
+		  }
+
+		  static usePrefetchedStream(roomKey, stream, options = null) {
+		    return new Promise((resolve) => {
+		      if (!stream && (options.id && options.active)) {
+		        // eslint-disable-next-line no-param-reassign
+		        stream = options;
+		      }
+
+		      const streamOptions = { audio: stream.getAudioTracks().length !== 0, video: stream.getVideoTracks().length !== 0 };
+		      const audioSettings = helpers$7.parseStreamSettings(streamOptions, TRACK_KIND.AUDIO);
+		      const videoSettings = helpers$7.parseStreamSettings(streamOptions, TRACK_KIND.VIDEO);
+		      const isAudioFallback = false;
+		      return helpers$7.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve);
+		    });
+		  }
+		}
+
+		const hasPeerConnections = (peerConnections, hasMCU) => (hasMCU ? !!peerConnections.MCU.maps : !isEmptyObj(peerConnections));
+
+		const getSelfStreams = (streams) => {
+		  if (streams.userMedia) {
+		    return streams.userMedia;
+		  }
+		  return null;
+		};
+
+		const getSelfScreen = (streams) => {
+		  if (streams.screenshare) {
+		    return streams.screenshare;
+		  }
+		  return null;
+		};
+
+		/**
+		 * @description Function that gets the list of connected Peers Streams in the Room.
+		 * @param {SkylinkState} roomState
+		 * @param {boolean} [includeSelf=true] - The flag if self streams are included.
+		 * @return {Object}
+		 * @memberOf PeerDataHelpers
+		 */
+		const getPeersStreams = (roomState, includeSelf = true) => {
+		  const listOfPeersStreams = {};
+		  const {
+		    peerConnections,
+		    user,
+		    streams,
+		    hasMCU,
+		  } = roomState;
+
+		  if (user && user.sid && includeSelf) {
+		    const selfStreams = getSelfStreams(streams);
+		    const selfScreen = getSelfScreen(streams);
+		    listOfPeersStreams[user.sid] = selfStreams || selfScreen ? {} : null;
+
+		    if (selfStreams) {
+		      Object.keys(selfStreams).forEach((streamId) => {
+		        listOfPeersStreams[user.sid].isSelf = true;
+		        listOfPeersStreams[user.sid][streamId] = selfStreams[streamId].stream;
+		      });
+		    }
+
+		    if (selfScreen) {
+		      listOfPeersStreams[user.sid].isSelf = true;
+		      listOfPeersStreams[user.sid][selfScreen.id] = selfScreen;
+		    }
+		  }
+
+		  if (hasPeerConnections(peerConnections, hasMCU)) {
+		    const listOfPeers = hasMCU ? Object.keys(peerConnections.MCU.maps) : Object.keys(peerConnections);
+		    for (let i = 0; i < listOfPeers.length; i += 1) {
+		      listOfPeersStreams[listOfPeers[i]] = {};
+		      const remoteStreams = MediaStream$1.retrieveRemoteStreams(roomState, listOfPeers[i]);
+		      remoteStreams.forEach((stream) => {
+		        listOfPeersStreams[listOfPeers[i]][stream.id] = stream;
+		      });
+		    }
+		  }
+
+		  return isEmptyObj(listOfPeersStreams) ? null : listOfPeersStreams;
+		};
+
+		const hasPeerDataChannels = dataChannels => !isEmptyObj(dataChannels);
+
+		/**
+		 * @description Function that gets the current list of connected Peers Datachannel connections in the Room.
+		 * @private
+		 * @param {SkylinkState} roomState
+		 * @return {Object} listOfPeersDataChannels
+		 * @memberOf PeerDataHelpers
+		 */
+		const getPeersDataChannels = (roomState) => {
+		  const { dataChannels } = roomState;
+		  const listOfPeersDataChannels = {};
+		  const listOfPeers = Object.keys(dataChannels);
+
+		  for (let i = 0; i < listOfPeers.length; i += 1) {
+		    const peerId = listOfPeers[i];
+		    listOfPeersDataChannels[peerId] = {};
+
+		    if (hasPeerDataChannels(dataChannels)) {
+		      const channelProp = Object.keys(dataChannels[peerId]);
+		      for (let y = 0; y < channelProp.length; y += 1) {
+		        const channel = dataChannels[peerId][channelProp[y]];
+		        const {
+		          channelName,
+		          channelType,
+		          transferId,
+		          streamId,
+		        } = channel;
+		        let peerChannel = null;
+		        peerChannel = PeerConnection.getDataChannelBuffer(channel);
+		        peerChannel.channelProp = channelProp[y];
+		        peerChannel.channelName = channelName;
+		        peerChannel.channelType = channelType;
+		        peerChannel.currentTransferId = transferId;
+		        peerChannel.currentStreamId = streamId;
+		        peerChannel.readyState = channel.channel
+		          ? channel.channel.readyState : DATA_CHANNEL_STATE$1.CREATE_ERROR;
+
+		        listOfPeersDataChannels[peerId][channelName] = peerChannel;
+		      }
+		    }
+		  }
+
+		  return listOfPeersDataChannels;
+		};
+
+		const hasPeers = peerInformations => !isEmptyObj(peerInformations);
+
+		/**
+		 * Function that gets a current custom Peer settings.
+		 * @param {SkylinkState} state
+		 * @param {String} peerId
+		 * @private
+		 * @return {Object}
+		 * @memberOf PeerDataHelpers
+		 */
+		const getPeerCustomSettings = (state, peerId) => {
+		  const { streams } = state;
+		  const customSettings = {};
+		  customSettings.settings = {
+		    audio: false,
+		    video: false,
+		    data: false,
+		    bandwidth: clone_1(state.streamsBandwidthSettings.bAS),
+		    googleXBandwidth: clone_1(state.streamsBandwidthSettings.googleX),
+		  };
+
+		  const usePeerId = state.hasMCU ? PEER_TYPE.MCU : peerId;
+
+		  if (state.peerConnections[usePeerId].signalingState !== PEER_CONNECTION_STATE$1.CLOSED) {
+		    const initOptions = Skylink.getInitOptions();
+		    const peerInfo = PeerData.getPeerInfo(usePeerId, state.room);
+
+		    customSettings.settings = clone_1(peerInfo.settings);
+		    customSettings.settings.data = initOptions.enableDataChannel && state.peerInformations[usePeerId].config.enableDataChannel;
+
+		    // TODO: check logic - why the need to build again and not take from getPeerInfo since the signature is the same
+		    if (streams.userMedia || streams.screenshare) ;
+		  }
+
+		  //  update default conifg with peer custom config TODO: check if parsing of state.peerCustomConfigs is required or if it can be assigned directly
+		  if (state.peerCustomConfigs[usePeerId]) {
+		    if (Object.hasOwnProperty.call(state.peerCustomConfigs[usePeerId], 'bandwidth')) {
+		      const peerCustomConfigBandwidth = state.peerCustomConfigs[usePeerId].bandwidth;
+
+		      if (isAObj(peerCustomConfigBandwidth)) {
+		        if (isANumber(peerCustomConfigBandwidth.audio)) {
+		          customSettings.settings.bandwidth.audio = peerCustomConfigBandwidth.audio;
+		        }
+		        if (isANumber(peerCustomConfigBandwidth.video)) {
+		          customSettings.settings.bandwidth.video = peerCustomConfigBandwidth.video;
+		        }
+		        if (isANumber(peerCustomConfigBandwidth.data)) {
+		          customSettings.settings.bandwidth.data = peerCustomConfigBandwidth.data;
+		        }
+		      }
+		    }
+
+		    if (Object.hasOwnProperty.call(state.peerCustomConfigs[usePeerId], 'googleXBandwidth')) {
+		      const peerCustomConfigGoogleXBandwidth = state.peerCustomConfigs[usePeerId].googleXBandwidth;
+
+		      if (isAObj(peerCustomConfigGoogleXBandwidth)) {
+		        if (isANumber(peerCustomConfigGoogleXBandwidth.min)) {
+		          customSettings.settings.googleXBandwidth.min = peerCustomConfigGoogleXBandwidth.min;
+		        }
+		        if (isANumber(peerCustomConfigGoogleXBandwidth.max)) {
+		          customSettings.settings.googleXBandwidth.max = peerCustomConfigGoogleXBandwidth.max;
+		        }
+		      }
+		    }
+		  }
+
+		  // Check we are going to send data to peer // TODO: is the above check enough or do we need to parse it from sdp
+		  // if (state.sdpSessions[usePeerId]) {
+		  //   const peerLocalConnection = state.sdpSessions[usePeerId].local.connection;
+		  //   if (isAObj(peerLocalConnection)) {
+		  //     if (state.sdpSessions[usePeerId].local.connection.audio
+		  //       && state.sdpSessions[usePeerId].local.connection.audio.indexOf('send') > -1) {
+		  //       customSettings.settings.audio = true;
+		  //       customSettings.mediaStatus.audioMuted = false;
+		  //     }
+		  //     if (state.sdpSessions[usePeerId].local.connection.video
+		  //       && state.sdpSessions[usePeerId].local.connection.video.indexOf('send') > -1) {
+		  //       customSettings.settings.video = true;
+		  //       customSettings.mediaStatus.videoMuted = false;
+		  //     }
+		  //     if (state.sdpSessions[usePeerId].local.connection.data
+		  //       && state.sdpSessions[usePeerId].local.connection.data.indexOf('send') > -1) {
+		  //       customSettings.settings.data = true;
+		  //     }
+		  //   }
+		  // }
+
+		  return customSettings;
+		};
+
+		/**
+		 * @description Function that gets the list of current custom Peer settings sent and set.
+		 * @param {SkylinkState} roomState
+		 * @return {Object} customSettingsList
+		 * @memberOf PeerDataHelpers
+		 */
+		const getPeersCustomSettings = (roomState) => {
+		  const { peerInformations } = roomState;
+		  const customSettingsList = {};
+
+		  if (hasPeers(peerInformations)) {
+		    const peerIds = Object.keys(peerInformations);
+
+		    for (let peerId = 0; peerId < peerIds.length; peerId += 1) {
+		      customSettingsList[peerIds[peerId]] = getPeerCustomSettings(roomState, peerIds[peerId]);
+		    }
+
+		    return customSettingsList;
+		  }
+
+		  return customSettingsList;
+		};
+
+		/**
+		 * Iterates through all connected peers to find the greatest peerPriorityWeight and sets the current users peerPriorityWeight to max.
+		 * @param {SkylinkState} roomState
+		 * @private
+		 */
+		const setGreatestPeerPriorityWeight = (roomState) => {
+		  const state = Skylink.getSkylinkState(roomState.room.id);
+		  const { peerInformations } = state;
+		  const informationList = Object.entries(peerInformations);
+		  const selfPriorityWeight = state.peerPriorityWeight;
+
+		  let maxPeerPriority = selfPriorityWeight;
+		  for (let i = 0; i < informationList.length; i += 1) {
+		    const peerInformation = informationList[i][1];
+		    const { config: { priorityWeight } } = peerInformation;
+
+		    if (priorityWeight > maxPeerPriority) {
+		      maxPeerPriority = priorityWeight;
+		      state.peerPriorityWeight = maxPeerPriority + 1;
+		    }
+		  }
+		  Skylink.setSkylinkState(state, state.room.id);
+		  logger.log.DEBUG(`User's priorityWeight is set to ${maxPeerPriority}`);
+		};
+
+		/**
+		 * @namespace PeerDataHelpers
+		 * @description All helper and utility functions for <code>{@link PeerData}</code> class are listed here.
+		 * @private
+		 * @type {{getCurrentSessionInfo, getPeerInfo, getUserData, getUserInfo, setUserData, getPeersStreams, getPeersDataChannels, getPeersCustomSettings, setGreatestPeerPriorityWeight}}
+		 */
+		const helpers = {
+		  getPeerInfo,
+		  getCurrentSessionInfo,
+		  getUserInfo,
+		  getUserData,
+		  setUserData,
+		  getPeersStreams,
+		  getPeersDataChannels,
+		  getPeersCustomSettings,
+		  setGreatestPeerPriorityWeight,
+		};
+
+		/**
+		 * @classdesc Class that represents PeerData methods
+		 * @class
+		 * @private
+		 */
+		class PeerData {
+		  /**
+		   * @description Function that returns the User / Peer current session information.
+		   * @private
+		   * @param {String} peerId
+		   * @param {SkylinkRoom} room
+		   * @return {peerInfo}
+		   */
+		  static getPeerInfo(peerId, room) {
+		    return helpers.getPeerInfo(peerId, room);
+		  }
+
+		  /**
+		   * @private
+		   * @param {SkylinkRoom} room
+		   * @return {peerInfo}
+		   */
+		  static getCurrentSessionInfo(room) {
+		    return helpers.getCurrentSessionInfo(room);
+		  }
+
+		  /**
+		   * @description Function that returns the User session information to be sent to Peers.
+		   * @private
+		   * @param {SkylinkRoom} room
+		   * @return {Object}
+		   */
+		  static getUserInfo(room) {
+		    return helpers.getUserInfo(room);
+		  }
+
+		  /**
+		   * @description Function that returns the User / Peer current custom data.
+		   * @private
+		   * @param {Skylink} roomState
+		   * @param {String} peerId
+		   * @return {roomState.userData}
+		   */
+		  static getUserData(roomState, peerId) {
+		    return helpers.getUserData(roomState, peerId);
+		  }
+
+		  /**
+		   * @description Function that overwrites the User current custom data.
+		   * @private
+		   * @param {SkylinkRoom} room
+		   * @param {String | Object} userData
+		   */
+		  static setUserData(room, userData) {
+		    helpers.setUserData(room, userData);
+		  }
+
+		  /**
+		   * @description  Function that gets the list of connected Peers Streams in the Room.
+		   * @private
+		   * @param {SkylinkState} roomState
+		   * @param {boolean} [includeSelf=true] - The flag if self streams are included.
+		   * @return {Object}
+		   */
+		  static getPeersStreams(roomState, includeSelf) {
+		    return helpers.getPeersStreams(roomState, includeSelf);
+		  }
+
+		  /**
+		   * @description Function that gets the current list of connected Peers Datachannel connections in the Room.
+		   * @private
+		   * @param {SkylinkState} roomState
+		   * @return {Object} listOfPeersDataChannels
+		   */
+		  static getPeersDataChannels(roomState) {
+		    return helpers.getPeersDataChannels(roomState);
+		  }
+
+		  /**
+		   * @description Function that gets the list of current custom Peer settings sent and set.
+		   * @param {SkylinkState} roomState
+		   * @return {Object}
+		   */
+		  static getPeersCustomSettings(roomState) {
+		    return helpers.getPeersCustomSettings(roomState);
+		  }
+
+		  /**
+		   * Iterates through all connected peers to find the greatest peerPriorityWeight and sets the current users peerPriorityWeight to max.
+		   * @param {SkylinkState} roomState
+		   * @return {*|void}
+		   */
+		  static setGreatestPeerPriorityWeight(roomState) {
+		    return helpers.setGreatestPeerPriorityWeight(roomState);
+		  }
+		}
+
 		const handleSocketClose = (roomKey, reason) => {
 		  const state = Skylink.getSkylinkState(roomKey) || Object.values(Skylink.getSkylinkState())[0]; // to handle leaveAllRooms method
 
@@ -4960,6 +5284,9 @@
 		    const { fetch } = window;
 
 		    try {
+		      if (!data.client_id) {
+		        return;
+		      }
 		      const initOptions = Skylink.getInitOptions();
 		      const { enableStatsGathering } = initOptions;
 
@@ -5182,10 +5509,17 @@
 		  return negTypeMessages.indexOf(message.type) > -1;
 		};
 
-		const sendBufferedMsg = (currentBufferedMsgs) => {
+		const sendBufferedMsg = (state, currentBufferedMsgs) => {
 		  const signaling = new SkylinkSignalingServer();
 		  for (let i = currentBufferedMsgs.length - 1; i >= 0; i -= 1) {
 		    const message = currentBufferedMsgs[i];
+		    if (!message.mid) {
+		      if (!state.user.sid) {
+		        logger.log.DEBUG([state.user.sid, TAGS.SIG_SERVER, null, `${MESSAGES.SIGNALING.BUFFERED_MESSAGES_DROPPED}`]);
+		        return;
+		      }
+		      message.mid = state.user.sid;
+		    }
 		    signaling.sendMessage(message);
 		    currentBufferedMsgs.splice(i, 1);
 		  }
@@ -5204,7 +5538,7 @@
 		    Skylink.setSkylinkState(state, state.room.id);
 
 		    logger.log.DEBUG([state.user.sid, TAGS.SIG_SERVER, null, `${MESSAGES.SIGNALING.BUFFERED_MESSAGES_SENT}: ${currentBufferedMsgs.length}`]);
-		    sendBufferedMsg(currentBufferedMsgs);
+		    sendBufferedMsg(state, currentBufferedMsgs);
 		    skylinkEventManager.removeEventListener(EVENTS.HANDSHAKE_PROGRESS, executeCallbackAndRemoveListener);
 		  }
 		};
@@ -5280,13 +5614,13 @@
 
 		    // selectedSecretId should be set to default if there are no encryptSecrets stored
 		    if (updatedData.selectedSecretId === secretId) {
-		      updatedData.selectedSecretId = helpers$1.setSelectedSecretId();
+		      updatedData.selectedSecretId = helpers$2.setSelectedSecretId();
 		    }
 
 		    delete updatedData.encryptSecrets[secretId];
 		  } else {
 		    logger.log.DEBUG([null, TAGS.ENCRYPTED_MESSAGING, null, `${MESSAGES.MESSAGING.ENCRYPTION.DELETE_ALL}`]);
-		    updatedData.selectedSecretId = helpers$1.setSelectedSecretId();
+		    updatedData.selectedSecretId = helpers$2.setSelectedSecretId();
 		    updatedData.encryptSecrets = {};
 		  }
 
@@ -5298,7 +5632,7 @@
 		    throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.NO_SECRET_OR_SECRET_ID);
 		  }
 
-		  if (!helpers$1.utils.isValidString(secret)) {
+		  if (!helpers$2.utils.isValidString(secret)) {
 		    throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_TYPE);
 		  }
 
@@ -5310,11 +5644,11 @@
 		    throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.NO_SECRET_OR_SECRET_ID);
 		  }
 
-		  if (!helpers$1.utils.isValidString(secretId)) {
+		  if (!helpers$2.utils.isValidString(secretId)) {
 		    throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_TYPE);
 		  }
 
-		  if (helpers$1.utils.isExisting(secretId, updatedEncryptSecrets)) {
+		  if (helpers$2.utils.isExisting(secretId, updatedEncryptSecrets)) {
 		    throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SECRET_ID_NOT_UNIQUE);
 		  }
 
@@ -11795,7 +12129,7 @@
 		    return '';
 		  }
 
-		  if (!helpers$1.utils.isValidString(secretId)) ;
+		  if (!helpers$2.utils.isValidString(secretId)) ;
 
 		  if (!encryptSecrets[secretId]) {
 		    throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SECRET_ID_NOT_FOUND);
@@ -11817,7 +12151,7 @@
 		    throw Error(MESSAGES.ROOM.ERRORS.NOT_IN_ROOM);
 		  }
 
-		  if (Array.isArray(targetPeerId)) {
+		  if (Array.isArray(targetPeerId) && !isEmptyArray(targetPeerId)) {
 		    listOfPeers = targetPeerId;
 		    isPrivate = true;
 		  } else if (targetPeerId && isAString(targetPeerId)) {
@@ -11846,7 +12180,7 @@
 		const sendMessageToSig = (roomState, config, message, encryptedMessage = '', targetPeerId) => {
 		  const signaling = new SkylinkSignalingServer();
 		  signaling.sendUserMessage(roomState, config, encryptedMessage || message);
-		  helpers.dispatchOnIncomingMessage(roomState, config, message, true, targetPeerId);
+		  helpers$1.dispatchOnIncomingMessage(roomState, config, message, true, targetPeerId);
 		};
 
 		// if isSelf = true, targetPeerId is the peer id targeted in sendMessage
@@ -11887,14 +12221,14 @@
 
 		const trySendMessage = (roomState, message, targetPeerId) => {
 		  try {
-		    const config = helpers.getMessageConfig(roomState, targetPeerId);
-		    helpers.sendMessageToSig(roomState, config, message, null, targetPeerId);
+		    const config = helpers$1.getMessageConfig(roomState, targetPeerId);
+		    helpers$1.sendMessageToSig(roomState, config, message, null, targetPeerId);
 		  } catch (error) {
 		    SkylinkError.throwError(MESSAGES.MESSAGING.ERRORS.FAILED_SENDING_MESSAGE);
 		  }
 		};
 
-		const helpers = {
+		const helpers$1 = {
 		  getMessageConfig,
 		  sendMessageToSig,
 		  dispatchOnIncomingMessage,
@@ -11902,9 +12236,9 @@
 		};
 
 		const getMessageConfig$1 = (roomState, targetPeerId, encryptSecrets, selectedSecretId, isPersistent) => {
-		  const config = helpers.getMessageConfig(roomState, targetPeerId);
+		  const config = helpers$1.getMessageConfig(roomState, targetPeerId);
 
-		  if (helpers$1.utils.hasCrypto() && helpers$1.utils.canEncrypt(selectedSecretId, encryptSecrets)) {
+		  if (helpers$2.utils.hasCrypto() && helpers$2.utils.canEncrypt(selectedSecretId, encryptSecrets)) {
 		    config.secretId = selectedSecretId;
 		  }
 
@@ -11932,7 +12266,7 @@
 		};
 
 		const tryDecryptMessage = (message, secretId, encryptSecrets) => {
-		  const decryptedMessage = helpers$1.encryptMessage(message, encryptSecrets[secretId], true);
+		  const decryptedMessage = helpers$2.encryptMessage(message, encryptSecrets[secretId], true);
 		  if (isEmptyString(decryptedMessage)) {
 		    throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.ENCRYPT_SECRET);
 		  } else {
@@ -11940,7 +12274,7 @@
 		  }
 		};
 
-		const helpers$1 = {
+		const helpers$2 = {
 		  deleteEncryptSecrets,
 		  setEncryptSecret,
 		  setSelectedSecretId,
@@ -11948,21 +12282,6 @@
 		  getMessageConfig: getMessageConfig$1,
 		  encryptMessage,
 		  tryDecryptMessage,
-		};
-
-		/**
-		 * @description Function that returns the userInfo to be sent to Signaling.
-		 * @private
-		 * @param {SkylinkRoom} room
-		 * @return {Object}
-		 * @memberOf PeerDataHelpers
-		 */
-		const getUserInfo = (room) => {
-		  const userInfo = helpers$7.getCurrentSessionInfo(room);
-		  delete userInfo.room;
-		  // delete userInfo.config;
-		  // delete userInfo.settings.data;
-		  return userInfo;
 		};
 
 		const instance = {};
@@ -11999,7 +12318,7 @@
 
 		  setEncryptSecret(secret, secretId) {
 		    try {
-		      this.encryptSecrets = helpers$1.setEncryptSecret(this.encryptSecrets, secret, secretId);
+		      this.encryptSecrets = helpers$2.setEncryptSecret(this.encryptSecrets, secret, secretId);
 		      this.dispatchEncryptSecretEvent();
 		    } catch (error) {
 		      SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_ENCRYPT_SECRET, error.message);
@@ -12012,7 +12331,7 @@
 
 		  deleteEncryptSecrets(secretId) {
 		    try {
-		      const updatedData = helpers$1.deleteEncryptSecrets(this.encryptSecrets, this.selectedSecretId, secretId);
+		      const updatedData = helpers$2.deleteEncryptSecrets(this.encryptSecrets, this.selectedSecretId, secretId);
 		      this.encryptSecrets = updatedData.encryptSecrets;
 		      this.selectedSecretId = updatedData.selectedSecretId;
 		      this.dispatchEncryptSecretEvent();
@@ -12023,7 +12342,7 @@
 
 		  setSelectedSecretId(secretId) {
 		    try {
-		      this.selectedSecretId = helpers$1.setSelectedSecretId(this.encryptSecrets, secretId);
+		      this.selectedSecretId = helpers$2.setSelectedSecretId(this.encryptSecrets, secretId);
 		      this.dispatchEncryptSecretEvent();
 		    } catch (error) {
 		      SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_SELECTED_SECRET, error.message);
@@ -12046,8 +12365,8 @@
 
 		  canEncrypt(throwError) {
 		    try {
-		      if (helpers$1.utils.canEncrypt(this.selectedSecretId, this.encryptSecrets)) {
-		        return helpers$1.utils.isValidString(this.selectedSecretId) && helpers$1.utils.isValidString(this.encryptSecrets[this.selectedSecretId]);
+		      if (helpers$2.utils.canEncrypt(this.selectedSecretId, this.encryptSecrets)) {
+		        return helpers$2.utils.isValidString(this.selectedSecretId) && helpers$2.utils.isValidString(this.encryptSecrets[this.selectedSecretId]);
 		      }
 
 		      return false;
@@ -12060,7 +12379,7 @@
 		  }
 
 		  decryptStoredMessages(message, secretId) {
-		    if (helpers$1.utils.canEncrypt(secretId, this.encryptSecrets) && !Object.keys(this.encryptSecrets).filter(key => key === secretId).length) {
+		    if (helpers$2.utils.canEncrypt(secretId, this.encryptSecrets) && !Object.keys(this.encryptSecrets).filter(key => key === secretId).length) {
 		      throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SECRET_ID_NOT_FOUND);
 		    }
 
@@ -12068,8 +12387,8 @@
 		  }
 
 		  decryptMessage(message, secretId = '') {
-		    if (secretId && helpers$1.utils.canDecrypt(this.encryptSecrets)) {
-		      return helpers$1.tryDecryptMessage(message, secretId, this.encryptSecrets);
+		    if (secretId && helpers$2.utils.canDecrypt(this.encryptSecrets)) {
+		      return helpers$2.tryDecryptMessage(message, secretId, this.encryptSecrets);
 		    }
 
 		    throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_SECRETS);
@@ -12080,9 +12399,9 @@
 		    if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
 		      try {
 		        logger.log.DEBUG([null, TAGS.ASYNC_MESSAGING, null, MESSAGES.MESSAGING.ENCRYPTION.SEND_MESSAGE]);
-		        const config = helpers$1.getMessageConfig(roomState, targetPeerId, this.encryptSecrets, this.selectedSecretId, isPersistent);
-		        const encryptedMessage = helpers$1.encryptMessage(message, this.encryptSecrets[this.selectedSecretId]);
-		        helpers.sendMessageToSig(roomState, config, message, encryptedMessage, targetPeerId);
+		        const config = helpers$2.getMessageConfig(roomState, targetPeerId, this.encryptSecrets, this.selectedSecretId, isPersistent);
+		        const encryptedMessage = helpers$2.encryptMessage(message, this.encryptSecrets[this.selectedSecretId]);
+		        helpers$1.sendMessageToSig(roomState, config, message, encryptedMessage, targetPeerId);
 		      } catch (error) {
 		        SkylinkError.throwError(MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
 		      }
@@ -12095,7 +12414,7 @@
 		}
 
 		const getMessageConfig$2 = (roomState, targetPeerId) => {
-		  const config = helpers$1.getMessageConfig(roomState, targetPeerId);
+		  const config = helpers$2.getMessageConfig(roomState, targetPeerId);
 		  config.isPersistent = true;
 
 		  return config;
@@ -12110,7 +12429,7 @@
 		  isDataChannel: false,
 		});
 
-		const helpers$2 = {
+		const helpers$3 = {
 		  getMessageConfig: getMessageConfig$2,
 		  parseDecryptedMessageData,
 		};
@@ -12221,7 +12540,7 @@
 		    try {
 		      for (let i = 0; i < messageData.length; i += 1) {
 		        messageData[i].data = encryptedMessaging.decryptStoredMessages(messageData[i].data, messageData[i].secretId);
-		        messages.push(helpers$2.parseDecryptedMessageData(messageData[i], targetMid));
+		        messages.push(helpers$3.parseDecryptedMessageData(messageData[i], targetMid));
 		      }
 		    } catch (error) {
 		      throw SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.FAILED_DECRYPTING_MESSAGE, error.message);
@@ -12257,7 +12576,7 @@
 		      } else if (encryptedMessaging.canEncrypt()) {
 		        encryptedMessaging.sendMessage(roomName, message, targetPeerId);
 		      } else {
-		        helpers.trySendMessage(roomState, message, targetPeerId);
+		        helpers$1.trySendMessage(roomState, message, targetPeerId);
 		      }
 		    }
 		  }
@@ -12290,7 +12609,7 @@
 		      }
 		    }
 
-		    helpers.dispatchOnIncomingMessage(roomState, { isPrivate: isABoolean(isPublic) ? !isPublic : !!target }, messageData, false, targetMid);
+		    helpers$1.dispatchOnIncomingMessage(roomState, { isPrivate: isABoolean(isPublic) ? !isPublic : !!target }, messageData, false, targetMid);
 		  }
 		}
 
@@ -12948,7 +13267,7 @@
 		 * @private
 		 * @type {{setIceServers, addIceCandidateFromQueue, addIceCandidate, onIceCandidate, addIceCandidateToQueue}}
 		 */
-		const helpers$3 = {
+		const helpers$4 = {
 		  setIceServers,
 		  addIceCandidateFromQueue,
 		  addIceCandidate,
@@ -12969,7 +13288,7 @@
 		   * @return {filteredIceServers}
 		   */
 		  static setIceServers(iceServers) {
-		    return helpers$3.setIceServers(iceServers);
+		    return helpers$4.setIceServers(iceServers);
 		  }
 
 		  /**
@@ -12979,11 +13298,11 @@
 		   * @param {SkylinkRoom} room - Current Room
 		   */
 		  static addIceCandidateFromQueue(targetMid, room) {
-		    return helpers$3.addIceCandidateFromQueue(targetMid, room);
+		    return helpers$4.addIceCandidateFromQueue(targetMid, room);
 		  }
 
 		  static addIceCandidateToQueue(targetMid, candidateId, candidateType, nativeCandidate, state) {
-		    return helpers$3.addIceCandidateToQueue(targetMid, candidateId, candidateType, nativeCandidate, state);
+		    return helpers$4.addIceCandidateToQueue(targetMid, candidateId, candidateType, nativeCandidate, state);
 		  }
 
 		  /**
@@ -12996,7 +13315,7 @@
 		   * @fires candidateProcessingState
 		   */
 		  static addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState) {
-		    return helpers$3.addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState);
+		    return helpers$4.addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState);
 		  }
 
 		  /**
@@ -13008,7 +13327,7 @@
 		   * @return {null}
 		   */
 		  static onIceCandidate(targetMid, rtcIceConnectionEvent, room) {
-		    return helpers$3.onIceCandidate(targetMid, rtcIceConnectionEvent, room);
+		    return helpers$4.onIceCandidate(targetMid, rtcIceConnectionEvent, room);
 		  }
 		}
 
@@ -13484,11 +13803,13 @@
 
 		  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS[msgType].set, targetMid, description, isRemote);
 
-		  dispatchEvent(handshakeProgress({
-		    state: HANDSHAKE_PROGRESS$1[msgType],
-		    peerId: isRemote ? targetMid : state.user.sid,
-		    room,
-		  }));
+		  if (isRemote) { // handshake progress is triggered on the local end after sdp it is created
+		    dispatchEvent(handshakeProgress({
+		      state: HANDSHAKE_PROGRESS$1[msgType],
+		      peerId: targetMid,
+		      room,
+		    }));
+		  }
 
 		  if (isRemote) {
 		    if (description.type === 'offer') {
@@ -13499,7 +13820,6 @@
 		    IceConnection.addIceCandidateFromQueue(targetMid, room);
 		  } else {
 		    bufferedLocalOffer[targetMid] = null;
-
 		    if (description.type === 'offer') {
 		      peerConnection.setOffer = 'local';
 		    } else {
@@ -13523,6 +13843,27 @@
 		    error,
 		    room,
 		  }));
+		};
+
+		const mungeSDP = (targetMid, sessionDescription, roomKey) => {
+		  const mungedSessionDescription = sessionDescription;
+		  // modifying the remote description received
+		  // TODO: Below SDP methods needs to be implemented in the SessionDescription Class.
+		  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPFilteredCandidates(targetMid, sessionDescriptionToSet, message.rid);
+		  // sessionDescriptionToSet.sdp = SessionDescription.setSDPCodec(targetMid, sessionDescriptionToSet, message.rid);
+		  mungedSessionDescription.sdp = SessionDescription.setSDPBitrate(targetMid, mungedSessionDescription, roomKey);
+		  // sessionDescriptionToSet.sdp = SessionDescription.setSDPCodecParams(targetMid, sessionDescriptionToSet, message.rid);
+		  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPCodecs(targetMid, sessionDescriptionToSet, message.rid);
+		  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPREMBPackets(targetMid, sessionDescriptionToSet, message.rid);
+		  // sessionDescriptionToSet.sdp = SessionDescription.handleSDPConnectionSettings(targetMid, sessionDescriptionToSet, message.rid, 'remote');
+		  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPUnknownAptRtx(targetMid, sessionDescriptionToSet, message.rid);
+
+		  // if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
+		  //   SessionDescription.setOriginalDTLSRole(state, sessionDescriptionToSet, true);
+		  // }
+
+		  // logger.log.INFO([targetMid, 'RTCSessionDescription', type, `Updated remote ${type} ->`], sessionDescriptionToSet.sdp);
+		  return mungedSessionDescription;
 		};
 
 		const setLocalDescription = (room, targetMid, localDescription) => {
@@ -13577,8 +13918,8 @@
 
 		  peerConnection.processingRemoteSDP = true;
 		  handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, remoteDescription, true);
-		  logger.log.INFO([targetMid, 'RTCSessionDescription', type, 'Session description object created:'], remoteDescription);
-		  return peerConnection.setRemoteDescription(remoteDescription)
+		  const mungedSessionDescription = mungeSDP(targetMid, remoteDescription, room.id);
+		  return peerConnection.setRemoteDescription(mungedSessionDescription)
 		    .then(() => peerConnection);
 		};
 
@@ -13814,7 +14155,7 @@
 
 		  return new Promise((resolve) => {
 		    const peerConnection = peerConnections[peerId];
-		    const pcSenders = peerConnection.getSenders();
+		    const pcSenders = peerConnection.getSenders() ? peerConnection.getSenders() : [];
 		    const senderGetStatsPromises = [];
 		    const savedSenders = currentRTCRTPSenders[peerId] || [];
 		    let isRenegoNeeded = false;
@@ -13830,6 +14171,13 @@
 		        reports.forEach((report) => {
 		          if (report && report.ssrc) {
 		            transmittingSenders[report.ssrc] = pcSenders[senderIndex];
+		          } else if (report && report.type === 'ssrc' && report.id.indexOf('send') > 1) { // required for retrieving sender information for react
+		            // native ios
+		            report.values.forEach((value) => {
+		              if (value.ssrc) {
+		                transmittingSenders[value.ssrc] = pcSenders[senderIndex];
+		              }
+		            });
 		          }
 		        });
 		      });
@@ -14513,589 +14861,6 @@
 		  }
 		};
 
-		// eslint-disable-next-line consistent-return
-		const prepStopStreams = (roomId, streamId, fromLeaveRoom = false, isScreensharing = false) => new Promise((resolve, reject) => {
-		  const state = Skylink.getSkylinkState(roomId);
-		  const { streams } = state;
-
-		  if (!state || !streams) {
-		    reject(new Error(`${MESSAGES.ROOM_STATE.NOT_FOUND} - ${roomId}`));
-		  }
-
-		  if (!streams || (!isScreensharing && !streams.userMedia) || (isScreensharing && !streams.screenshare) || (isScreensharing && streams.screenshare && (streams.screenshare.id !== streamId))) {
-		    reject(new Error(`${MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM} - ${streamId}`));
-		  }
-
-		  if (isScreensharing) {
-		    stopStreamHelpers.prepStopScreenStream(state.room, streamId, fromLeaveRoom)
-		      .then(() => resolve())
-		      .catch(rej => reject(rej));
-		  } else {
-		    stopStreamHelpers.prepStopUserMediaStreams(state, streamId, fromLeaveRoom)
-		      .then(() => resolve())
-		      .catch(rej => reject(rej));
-		  }
-		});
-
-		const hasStreamBeenReplaced = (state, stoppedStream) => {
-		  const { streams } = state;
-
-		  if (!streams.userMedia) {
-		    return false;
-		  }
-
-		  const streamObjs = Object.values(streams.userMedia);
-
-		  return streamObjs.some(streamObj => streamObj.isReplaced && (streamObj.id === stoppedStream.id));
-		};
-
-		const filterUserMediaStreams = (state) => {
-		  const { streams } = state;
-		  const filteredStreams = {
-		    replacedStreams: [],
-		    addedStreams: [],
-		  };
-		  const streamIds = Object.keys(streams.userMedia);
-		  streamIds.forEach((userMediaStreamId) => {
-		    if (hasStreamBeenReplaced(state, streams.userMedia[userMediaStreamId].stream)) {
-		      filteredStreams.replacedStreams.push(streams.userMedia[userMediaStreamId].stream);
-		    } else {
-		      filteredStreams.addedStreams.push(streams.userMedia[userMediaStreamId].stream);
-		    }
-		  });
-
-		  return filteredStreams;
-		};
-
-		// eslint-disable-next-line consistent-return
-		const prepStopUserMediaStreams = (state, streamId, fromLeaveRoom) => new Promise((resolve, reject) => {
-		  const { user } = state;
-		  const filteredStreams = filterUserMediaStreams(state);
-		  const isScreensharing = false;
-
-		  try {
-		    if (!streamId) {
-		      stopStreamHelpers.stopAddedStreams(state, filteredStreams.addedStreams, isScreensharing, fromLeaveRoom);
-
-		      // TODO:
-		      // added streams must be stopped first and renegotiation started before replaced streams are stopped
-		      // add event listener to listen for handshake offer to trigger stopReplacedStreams
-
-		      stopStreamHelpers.stopReplacedStreams(state, filteredStreams.replacedStreams, isScreensharing, fromLeaveRoom);
-		    } else {
-		      const { stream } = state.streams.userMedia[streamId];
-		      if (hasStreamBeenReplaced(state, stream)) {
-		        // TODO
-		        stopStreamHelpers.stopReplacedStream(state, stream, fromLeaveRoom);
-		      } else {
-		        stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
-		      }
-		    }
-
-		    return stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
-		  } catch (error) {
-		    logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA], error);
-		    reject(MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA);
-		  }
-		});
-
-		const stopAddedStream = (state, stream, isScreensharing = false, fromLeaveRoom = false) => {
-		  const { room, user } = state;
-
-		  try {
-		    stopStreamHelpers.tryStopStream(stream, user.sid);
-
-		    if (!fromLeaveRoom) {
-		      stopStreamHelpers.removeTracks(room, stream);
-		      stopStreamHelpers.updateMediaInfoMediaState(room, stream);
-		      stopStreamHelpers.deleteStreamFromState(room, stream, isScreensharing);
-		      stopStreamHelpers.listenForEventAndDeleteMediaInfo(room, stream);
-		      stopStreamHelpers.dispatchOnLocalStreamEnded(room, stream, isScreensharing);
-
-		      if (isScreensharing) {
-		        new ScreenSharing(state).deleteScreensharingInstance(room);
-		      }
-		    }
-		  } catch (err) {
-		    logger.log.ERROR([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_ADDED_STREAM], err);
-		  }
-		};
-
-		const stopMediaTracks = (tracks, peerId) => {
-		  if (!tracks || !tracks[0]) {
-		    return false;
-		  }
-
-		  tracks.forEach((track) => {
-		    try {
-		      track.stop();
-		    } catch (error) {
-		      logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_MEDIA_TRACK} - track id: ${track.id}`], error);
-		    }
-		  });
-
-		  return true;
-		};
-
-		const tryStopStream = (stream, peerId) => {
-		  if (!stream) return;
-
-		  try {
-		    stopMediaTracks(stream.getAudioTracks());
-		  } catch (error) {
-		    logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_AUDIO_TRACK} - stream id: ${stream.id}`], error);
-		  }
-
-		  try {
-		    stopMediaTracks(stream.getVideoTracks());
-		  } catch (error) {
-		    logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_VIDEO_TRACK} - stream id: ${stream.id}`], error);
-		  }
-		};
-
-		const removeSenderFromList = (state, peerId, sender) => {
-		  const { room } = state;
-		  const updatedState = state;
-		  let indexToRemove = -1;
-
-		  if (!updatedState.currentRTCRTPSenders[peerId]) {
-		    return;
-		  }
-
-		  const listOfSenders = updatedState.currentRTCRTPSenders[peerId];
-
-		  for (let i = 0; i < listOfSenders.length; i += 1) {
-		    if (sender === listOfSenders[i]) {
-		      indexToRemove = i;
-		      break;
-		    }
-		  }
-
-		  if (indexToRemove !== -1) {
-		    listOfSenders.splice(indexToRemove, 1);
-		    updatedState.currentRTCRTPSenders[peerId] = listOfSenders;
-		    Skylink.setSkylinkState(updatedState, room.id);
-		  } else {
-		    logger.log.WARN([peerId, null, null, 'No matching sender was found for the peer.'], sender);
-		  }
-		};
-
-		const removeTrack = (state, peerConnections, track) => {
-		  const trackId = track.id;
-		  const peerIds = Object.keys(peerConnections);
-
-		  for (let i = 0; i < peerIds.length; i += 1) {
-		    try {
-		      const targetMid = peerIds[i];
-		      const peerConnection = peerConnections[targetMid];
-
-		      if (peerConnection.connectionState === PEER_CONNECTION_STATE$1.CLOSED) {
-		        break;
-		      }
-
-		      const senders = peerConnection.getSenders();
-		      let sender = null;
-		      for (let y = 0; y < senders.length; y += 1) {
-		        if (senders[y].track && senders[y].track.id === trackId) {
-		          sender = senders[y];
-		          peerConnection.removeTrack(sender);
-		          removeSenderFromList(state, targetMid, sender);
-		        }
-		      }
-		    } catch (error) {
-		      logger.log.ERROR([peerIds[i], TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.ERRORS.REMOVE_TRACK], error);
-		    }
-		  }
-		};
-
-		/**
-		 * Function that removes the tracks from the peer connection.
-		 * @param {SkylinkRoom} room
-		 * @param {MediaStream} stream
-		 * @memberOf MediaStreamHelpers
-		 */
-		const removeTracks = (room, stream) => {
-		  const state = Skylink.getSkylinkState(room.id);
-		  const { peerConnections, user } = state;
-		  const tracks = stream.getTracks();
-
-		  try {
-		    tracks.forEach((track) => {
-		      removeTrack(state, peerConnections, track);
-		    });
-		  } catch (error) {
-		    logger.log.ERROR([user.sid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.ERRORS.REMOVE_TRACK], error);
-		  }
-		};
-
-		const listenForEventAndDeleteMediaInfo = (room, stream) => {
-		  const state = Skylink.getSkylinkState(room.id);
-
-		  const executeOfferCallback = (evt) => {
-		    const s = stream;
-		    const { user } = state;
-		    const { detail } = evt;
-		    if (detail.state === HANDSHAKE_PROGRESS$1.OFFER) {
-		      const mediaId = PeerMedia.retrieveMediaId(hasAudioTrack(s) ? TRACK_KIND.AUDIO : TRACK_KIND.VIDEO, s.id);
-		      PeerMedia.deleteUnavailableMedia(room, user.sid, mediaId);
-		    }
-		  };
-
-		  const executeMediaDeletedCallback = () => {
-		    removeEventListener(EVENTS.HANDSHAKE_PROGRESS, executeOfferCallback);
-		    removeEventListener(EVENTS.MEDIA_INFO_DELETED, executeMediaDeletedCallback);
-		  };
-
-		  addEventListener(EVENTS.HANDSHAKE_PROGRESS, executeOfferCallback);
-		  addEventListener(EVENTS.MEDIA_INFO_DELETED, executeMediaDeletedCallback);
-		};
-
-		const stopAddedStreams = (state, streams, isScreensharing, fromLeaveRoom) => {
-		  streams.forEach((stream) => {
-		    stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
-		  });
-		};
-
-		const updateMediaInfoMediaState = (room, stream) => {
-		  const state = Skylink.getSkylinkState(room.id);
-		  const { user } = state;
-		  const streamId = stream.id;
-		  const mediaId = PeerMedia.retrieveMediaId(stream.getTracks()[0].kind, streamId);
-		  PeerMedia.setMediaStateToUnavailable(room, user.sid, mediaId);
-		};
-
-		const deleteStreamFromState = (room, stream, isScreensharing = null) => {
-		  const updatedState = Skylink.getSkylinkState(room.id);
-		  const { user } = updatedState;
-		  const streamIdToRemove = stream.id;
-
-		  if (isScreensharing) {
-		    delete updatedState.streams.screenshare;
-
-		    logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SUCCESS} - stream id: ${stream.id} (screenshare)`]);
-		  } else {
-		    delete updatedState.streams.userMedia[streamIdToRemove];
-		    delete updatedState.streamsMediaStatus[stream.id];
-		    delete updatedState.streamsMutedSettings[stream.id];
-
-		    if (isEmptyObj(updatedState.streams.userMedia)) {
-		      updatedState.streams.userMedia = null;
-		    }
-
-		    logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SUCCESS} - stream id: ${stream.id}`]);
-		  }
-
-		  Skylink.setSkylinkState(updatedState, updatedState.room.id);
-		};
-
-		/**
-		 * Function that handles the <code>RTCPeerConnection.removeTracks(sender)</code> on the local MediaStream.
-		 * @param {SkylinkRoom} room
-		 * @param {MediaStream} stream - The stream.
-		 * @param {boolean} isScreensharing
-		 * @memberOf MediaStreamHelpers
-		 * @fires streamEnded
-		 */
-		const dispatchOnLocalStreamEnded = (room, stream, isScreensharing = false) => {
-		  const state = Skylink.getSkylinkState(room.id);
-		  const { MEDIA_STREAM } = MESSAGES;
-		  const { user } = state;
-		  const isSelf = true;
-
-		  logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, MEDIA_STREAM.STOP_SETTINGS], {
-		    peerId: user.sid, isSelf, isScreensharing, stream,
-		  });
-
-		  dispatchEvent(streamEnded({
-		    room,
-		    peerId: user.sid,
-		    peerInfo: PeerData.getCurrentSessionInfo(room),
-		    isSelf,
-		    isScreensharing,
-		    streamId: stream.id,
-		    isVideo: hasVideoTrack(stream),
-		    isAudio: hasAudioTrack(stream),
-		  }));
-
-		  dispatchEvent(mediaAccessStopped({
-		    isScreensharing,
-		    streamId: stream.id,
-		  }));
-
-		  dispatchEvent(peerUpdated({
-		    peerId: user.sid,
-		    peerInfo: helpers$7.getCurrentSessionInfo(room),
-		    isSelf: true,
-		  }));
-		};
-
-		const hasStreamBeenReplaced$1 = (state, stoppedStream) => {
-		  const { streams } = state;
-
-		  if (!streams.userMedia) {
-		    return false;
-		  }
-
-		  const streamObjs = Object.values(streams.userMedia);
-
-		  return streamObjs.some(streamObj => streamObj.isReplaced && (streamObj.id === stoppedStream.id));
-		};
-
-		const prepStopScreenStream = (room, streamId, fromLeaveRoom = false) => new Promise((resolve, reject) => {
-		  const state = Skylink.getSkylinkState(room.id);
-		  const { user, streams } = state;
-		  const screenStream = streams.screenshare.stream;
-		  const isScreensharing = true;
-
-		  try {
-		    if (hasStreamBeenReplaced$1(state, screenStream)) {
-		      stopStreamHelpers.stopReplacedStream(state, screenStream, isScreensharing, fromLeaveRoom);
-		    } else {
-		      stopStreamHelpers.stopAddedStream(state, screenStream, isScreensharing, fromLeaveRoom);
-		    }
-
-		    stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
-		  } catch (error) {
-		    logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN], error);
-		    reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN));
-		  }
-		});
-
-		const dispatchPeerUpdatedEvent = (roomState) => {
-		  const { room, user } = roomState;
-
-		  dispatchEvent(peerUpdated({
-		    peerId: user.sid,
-		    isSelf: true,
-		    peerInfo: PeerData.getCurrentSessionInfo(room),
-		  }));
-		};
-
-		// eslint-disable-next-line consistent-return
-		const initRefreshConnectionAndResolve = (room, fromLeaveRoom, resolve, reject) => {
-		  const state = Skylink.getSkylinkState(room.id);
-		  const { peerConnections } = state;
-
-		  try {
-		    if (!fromLeaveRoom) {
-		      if (!isEmptyArray(Object.keys(peerConnections))) {
-		        // eslint-disable-next-line consistent-return
-		        const executeAnswerAckCallback = (evt) => {
-		          const { detail } = evt;
-		          if (detail.state === HANDSHAKE_PROGRESS$1.ANSWER_ACK) {
-		            return (resolve());
-		          }
-		        };
-
-		        addEventListener(EVENTS.HANDSHAKE_PROGRESS, executeAnswerAckCallback);
-
-		        PeerConnection.refreshConnection(state);
-		      } else {
-		        dispatchPeerUpdatedEvent(state);
-		        PeerMedia.deleteUnavailableMedia(state.room, state.user.sid);
-		        return resolve();
-		      }
-		    }
-		  } catch (err) {
-		    reject(err);
-		  }
-		};
-
-		const sendStreamReplaceEndedMsg = (state, stoppedStream) => {
-		  const { room, user } = state;
-		  const signaling = new SkylinkSignalingServer();
-		  signaling.stream(room.id, user, stoppedStream, STREAM_STATUS.REPLACED_STREAM_ENDED, null);
-		};
-
-		// TODO:
-		//  implement stop user media stream
-		//  stop screen stream will be implemented diff - need to replace the screen stream with the original user media stream
-		//  ref: onScreenStreamEnded for previous implementation
-		const stopReplacedStream = (state, stream, isScreensharing, fromLeaveRoom) => {
-		  const { user, room } = state;
-
-		  try {
-		    stopStreamHelpers.tryStopStream(stream);
-
-		    if (!fromLeaveRoom) {
-		      sendStreamReplaceEndedMsg(state, stream);
-		      stopStreamHelpers.deleteStreamFromState(room, stream, isScreensharing);
-		      stopStreamHelpers.dispatchOnLocalStreamEnded(room, stream);
-		    }
-		  } catch (err) {
-		    logger.log.ERROR([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_REPLACED_STREAM], err);
-		  }
-		};
-
-		const stopReplacedStreams = (state, streams, isScreensharing, fromLeaveRoom) => {
-		  streams.forEach((stream) => {
-		    stopStreamHelpers.stopReplacedStream(state, stream, isScreensharing, fromLeaveRoom);
-		  });
-		};
-
-		const stopStreamHelpers = {
-		  prepStopStreams,
-		  prepStopUserMediaStreams,
-		  stopAddedStream,
-		  tryStopStream,
-		  removeTracks,
-		  listenForEventAndDeleteMediaInfo,
-		  stopAddedStreams,
-		  updateMediaInfoMediaState,
-		  deleteStreamFromState,
-		  dispatchOnLocalStreamEnded,
-		  prepStopScreenStream,
-		  initRefreshConnectionAndResolve,
-		  stopReplacedStream,
-		  stopReplacedStreams,
-		};
-
-		/**
-		 * @private
-		 * @classdesc Class used for handling RTCMediaStream. Helper methods are listed inside <code>{@link MediaStreamHelpers}</code>.
-		 * @class
-		 */
-		class MediaStream$1 {
-		  /**
-		   * @description Function that retrieves camera Stream.
-		   * @param {SkylinkState} state
-		   * @param {GetUserMediaOptions} mediaOptions - The camera Stream configuration options.
-		   * @return {Promise}
-		   */
-		  static getUserMedia(state, mediaOptions = {}) {
-		    const { room } = state;
-		    const updatedRoomState = helpers$6.parseMediaOptions(mediaOptions, state);
-		    const { audio, video } = mediaOptions;
-		    const useExactConstraints = !!mediaOptions.useExactConstraints;
-		    Skylink.setSkylinkState(updatedRoomState, room.id);
-
-		    return helpers$6.prepMediaAccessRequest({
-		      useExactConstraints,
-		      audio,
-		      video,
-		      roomKey: room.id,
-		    });
-		  }
-
-		  /**
-		   * @description Function that filters user input from getUserMedia public method
-		   * @param {SkylinkState} roomState
-		   * @param {GetUserMediaOptions} options
-		   */
-		  static getUserMediaLayer(roomState, options = null) {
-		    return new Promise((resolve, reject) => {
-		      let mediaOptions = {
-		        audio: true,
-		        video: true,
-		      };
-
-		      if (!options) {
-		        logger.log.WARN([roomState.user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.NO_OPTIONS} - ${MESSAGES.MEDIA_STREAM.DEFAULT_OPTIONS}`], mediaOptions);
-		      }
-
-		      if (!isAObj(options)) {
-		        logger.log.ERROR([roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS], options);
-		        reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS), null);
-		      }
-
-		      mediaOptions = options;
-
-		      const getUserMediaPromise = MediaStream$1.getUserMedia(roomState, mediaOptions);
-		      getUserMediaPromise.then((stream) => {
-		        resolve(stream);
-		      }).catch((error) => {
-		        reject(error);
-		      });
-		    });
-		  }
-
-		  /**
-		   * Function that stops the getUserMedia() streams.
-		   * @param {SkylinkState} roomState
-		   * @param {String} streamId - The id of the stream to stop if there is more than one getUserMedia stream.
-		   */
-		  static stopStreams(roomState, streamId) {
-		    return stopStreamHelpers.prepStopStreams(roomState.room.id, streamId);
-		  }
-
-		  /**
-		   * Function that sets User's Stream to send to Peer connection.
-		   * @param {String} targetMid - The mid of the target peer
-		   * @param {SkylinkState} roomState - Skylink State of current room
-		   */
-		  static addLocalMediaStreams(targetMid, roomState) {
-		    helpers$6.addLocalMediaStreams(targetMid, roomState);
-		  }
-
-		  /**
-		   * Function that handles the <code>RTCPeerConnection.ontrack</code> event on remote stream added.
-		   * @param {MediaStream} stream - {@link https://developer.mozilla.org/en-US/docs/Web/API/MediaStream}
-		   * @param {SkylinkState} currentRoomState - Current room state
-		   * @param {String} targetMid - The mid of the target peer
-		   * @param {boolean} [isScreensharing=false] - The flag if stream is a screenshare stream.
-		   */
-		  static onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio) {
-		    helpers$6.onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio);
-		  }
-
-		  /**
-		   * Function that mutes the stream.
-		   * @param {SkylinkState} roomState
-		   * @param {Object} options
-		   * @param {boolean} options.audioMuted
-		   * @param {boolean} options.videoMuted
-		   * @param {String} streamId
-		   */
-		  static muteStreams(roomState, options, streamId) {
-		    return helpers$6.muteStreams(roomState, options, streamId);
-		  }
-
-		  /**
-		   * Function that sends the MediaStream object if present or mediaStream settings.
-		   * @param {SkylinkState} roomState
-		   * @param {MediaStream|Object} options
-		   */
-		  static sendStream(roomState, options) {
-		    return helpers$6.sendStream(roomState, options);
-		  }
-
-		  static getStreamSources() {
-		    return helpers$6.getStreamSources();
-		  }
-
-		  static getScreenSources() {
-		    return helpers$6.getScreenSources();
-		  }
-
-		  static updateRemoteStreams(room, peerId, stream) {
-		    return helpers$6.updateRemoteStreams(room, peerId, stream);
-		  }
-
-		  /**
-		   * Function that returns all active streams including screenshare stream if present.
-		   * @param {SkylinkState} roomState
-		   * @return {streamList} streamList
-		   */
-		  static getStreams(roomState) {
-		    return helpers$6.getStreams(roomState);
-		  }
-
-		  static usePrefetchedStream(roomKey, stream, options = null) {
-		    return new Promise((resolve) => {
-		      if (!stream && (options.id && options.active)) {
-		        // eslint-disable-next-line no-param-reassign
-		        stream = options;
-		      }
-
-		      const streamOptions = { audio: stream.getAudioTracks().length !== 0, video: stream.getVideoTracks().length !== 0 };
-		      const audioSettings = helpers$6.parseStreamSettings(streamOptions, TRACK_KIND.AUDIO);
-		      const videoSettings = helpers$6.parseStreamSettings(streamOptions, TRACK_KIND.VIDEO);
-		      const isAudioFallback = false;
-		      return helpers$6.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve);
-		    });
-		  }
-		}
-
 		/* eslint-disable no-unused-vars */
 
 		const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, restartOfferMsg) => {
@@ -15253,6 +15018,7 @@
 		      PeerConnection.createDataChannel({
 		        peerId: targetMid,
 		        roomState: state,
+		        createAsMessagingChannel: true,
 		      });
 		      state.peerConnections[targetMid].hasMainChannel = true;
 		    }
@@ -15346,6 +15112,11 @@
 		  rtcPeerConnection.oniceconnectionstatechange = callbacks$2.oniceconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
 		  rtcPeerConnection.onsignalingstatechange = callbacks$2.onsignalingstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
 		  rtcPeerConnection.onicegatheringstatechange = callbacks$2.onicegatheringstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+
+		  if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE) {
+		    rtcPeerConnection.onsenderadded = callbacks$2.onsenderadded.bind(rtcPeerConnection, ...callbackExtraParams);
+		    rtcPeerConnection.onremovetrack = callbacks$2.onremovetrack.bind(rtcPeerConnection, targetMid, state.room, false);
+		  }
 
 		  return rtcPeerConnection;
 		};
@@ -15878,21 +15649,26 @@
 		    channelType,
 		    roomState,
 		  } = params;
-		  const state = PeerConnection.getSkylinkState(roomState.room.id);
-		  const { room } = state;
-		  const handleDataChannelStats = new HandleDataChannelStats();
+		  if (error.error.errorDetail !== 'NONE') {
+		    const state = Skylink.getSkylinkState(roomState.room.id);
+		    const { room } = state;
+		    const handleDataChannelStats = new HandleDataChannelStats();
 
-		  logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Datachannel has an exception ->'], error);
-		  handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE$1.ERROR, peerId, dataChannel, channelProp, error);
-		  dispatchEvent(onDataChannelStateChanged({
-		    state: DATA_CHANNEL_STATE$1.ERROR,
-		    room,
-		    peerId,
-		    channelName,
-		    channelType,
-		    bufferAmount: Skylink.getDataChannelBuffer(dataChannel),
-		    error,
-		  }));
+		    logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Datachannel has an exception ->'], error);
+		    handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE$1.ERROR, peerId, dataChannel, channelProp, error);
+		    dispatchEvent(onDataChannelStateChanged({
+		      state: DATA_CHANNEL_STATE$1.ERROR,
+		      room,
+		      peerId,
+		      channelName,
+		      channelType,
+		      bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
+		      error,
+		    }));
+		  } else {
+		    // "Transport channel close" error triggered on calling dataChannel.close()
+		    logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, 'Datachannel state ->'], error.error.message);
+		  }
 		};
 
 		/**
@@ -15947,7 +15723,7 @@
 		  logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, 'Datachannel buffering data transfer low']);
 
 		  dispatchEvent(onDataChannelStateChanged({
-		    state: DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW,
+		    state: DATA_CHANNEL_STATE$1.BUFFERED_AMOUNT_LOW,
 		    room,
 		    peerId,
 		    channelName,
@@ -16040,7 +15816,7 @@
 		            createAsMessagingChannel: true,
 		            roomState: state,
 		          });
-		          handleDataChannelStats.send(STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.reconnecting, peerId, { label: channelName }, 'main');
+		          handleDataChannelStats.send(room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.reconnecting, peerId, { label: channelName }, 'main');
 		        }
 		      }, 100);
 		    }
@@ -16409,7 +16185,7 @@
 		  bufferedAmountLowThreshold: parseInt(channel.bufferedAmountLowThreshold, 10) || 0,
 		});
 
-		const hasPeerDataChannels = dataChannels => !isEmptyObj(dataChannels);
+		const hasPeerDataChannels$1 = dataChannels => !isEmptyObj(dataChannels);
 
 		/**
 		 * Function that refreshes the main messaging Datachannel.
@@ -16420,7 +16196,7 @@
 		const refreshDataChannel = (state, peerId) => {
 		  const { dataChannels, peerConnections } = state;
 
-		  if (hasPeerDataChannels(dataChannels) && Object.hasOwnProperty.call(dataChannels, peerId)) {
+		  if (hasPeerDataChannels$1(dataChannels) && Object.hasOwnProperty.call(dataChannels, peerId)) {
 		    if (Object.hasOwnProperty.call(dataChannels[peerId], 'main')) {
 		      const mainDataChannel = dataChannels[peerId].main;
 		      const { channelName, channelType } = mainDataChannel;
@@ -16853,14 +16629,23 @@
 		  Skylink.setSkylinkState(updatedState, room.id);
 		};
 
+		const processNewSender = (state, targetMid, sender) => {
+		  const updatedState = state;
+		  if (!updatedState.currentRTCRTPSenders[targetMid]) {
+		    updatedState.currentRTCRTPSenders[targetMid] = [];
+		  }
+		  updatedState.currentRTCRTPSenders[targetMid].push(sender);
+		  Skylink.setSkylinkState(updatedState, updatedState.room.id);
+		};
+
 		/**
 		 * @namespace PeerConnectionHelpers
 		 * @description All helper and utility functions for <code>{@link PeerConnection}</code> class are listed here.
 		 * @private
 		 * @memberOf PeerConnection
-		 * @type {{createOffer, createAnswer, addPeer, createDataChannel, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, getDataChannelBuffer, refreshDataChannel, closeDataChannel, refreshConnection, refreshPeerConnection, restartPeerConnection, buildPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus }}
+		 * @type {{createOffer, createAnswer, addPeer, createDataChannel, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, getDataChannelBuffer, refreshDataChannel, closeDataChannel, refreshConnection, refreshPeerConnection, restartPeerConnection, buildPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus, processNewSender  }}
 		 */
-		const helpers$4 = {
+		const helpers$5 = {
 		  createOffer,
 		  createAnswer,
 		  addPeer,
@@ -16878,6 +16663,7 @@
 		  getConnectionStatus,
 		  closePeerConnection: closePeerConnection$1,
 		  updatePeerInformationsMediaStatus,
+		  processNewSender,
 		};
 
 		/* eslint-disable no-param-reassign */
@@ -16901,7 +16687,7 @@
 		    if (!peerConnection.hasMainChannel) {
 		      peerConnection.hasMainChannel = true;
 		    }
-		    helpers$4.createDataChannel({ peerId: targetMid, dataChannel, roomState: currentRoomState });
+		    helpers$5.createDataChannel({ peerId: targetMid, dataChannel, roomState: currentRoomState });
 		  } else {
 		    logger.log.WARN([targetMid, 'RTCDataChannel', dataChannel.label, 'Not adding datachannel as enable datachannel is set to false']);
 		  }
@@ -17014,7 +16800,15 @@
 		  buildTrackInfo(roomKey) {
 		    const state = Skylink.getSkylinkState(roomKey);
 		    const { streams } = state;
-		    const streamObjs = Object.values(Object.values(streams.userMedia));
+		    let streamObjs = [];
+		    if (streams.userMedia) {
+		      streamObjs = Object.values(Object.values(streams.userMedia));
+		    }
+
+		    if (streams.screenshare) {
+		      streamObjs.push(streams.screenshare);
+		    }
+
 		    streamObjs.forEach((streamObj) => {
 		      if (streamObj) {
 		        const stream = streamObj.stream ? streamObj.stream : streamObj[Object.keys(streamObj)[0]].stream;
@@ -17041,6 +16835,10 @@
 
 		    if (!roomState) {
 		      logger.log.DEBUG([peerId, 'Statistics', 'Bandwidth_Stats', STATS_MODULE.HANDLE_BANDWIDTH_STATS.NO_STATE]);
+		      return;
+		    }
+
+		    if (!roomState.streams.userMedia && !roomState.streams.screenshare) {
 		      return;
 		    }
 
@@ -17247,7 +17045,7 @@
 		    PeerConnection.getConnectionStatus(state, targetMid).then(() => {
 		      handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
 		      statsInterval = setInterval(() => {
-		        if (peerConnection.signalingState === PEER_CONNECTION_STATE.CLOSED) {
+		        if (peerConnection.signalingState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === PEER_CONNECTION_STATE.CLOSED) {
 		          clearInterval(statsInterval);
 		        } else {
 		          new HandleBandwidthStats().send(state.room.id, peerConnection, targetMid);
@@ -17406,14 +17204,14 @@
 		  Skylink.setSkylinkState(updatedState, updatedState.room.id);
 		};
 
-		const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent) => {
+		const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent, stream) => {
 		  dispatchEvent(streamEnded({
 		    room: state.room,
 		    peerId,
 		    peerInfo: PeerData.getPeerInfo(peerId, state.room),
 		    isSelf: false,
 		    isScreensharing,
-		    streamId: rtcTrackEvent.track.id,
+		    streamId: stream.id,
 		    isVideo: rtcTrackEvent.track.kind === TRACK_KIND.VIDEO,
 		    isAudio: rtcTrackEvent.track.kind === TRACK_KIND.AUDIO,
 		  }));
@@ -17447,10 +17245,11 @@
 		 * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
 		 */
 		const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
+		  const { AdapterJS } = window;
 		  const state = getStateByKey(room.id);
 		  const { peerInformations } = state;
 		  const { MEDIA_STREAM, PEER_INFORMATIONS } = MESSAGES;
-		  const stream = rtcTrackEvent.target;
+		  const stream = AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE ? rtcTrackEvent.stream : rtcTrackEvent.target;
 
 
 		  logger.log.INFO([peerId, TAGS.MEDIA_STREAM, null, MEDIA_STREAM.REMOTE_TRACK_REMOVED], {
@@ -17469,7 +17268,7 @@
 		  }
 
 		  updateMediaStatus(state, peerId, stream.id);
-		  dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent);
+		  dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent, stream);
 
 		  if (isScreensharing) {
 		    // Dispatch to ensure that the client has a way of retrieving the camera stream. Camera stream was not added to pc and therefore ontrack will not trigger on remote.
@@ -17480,8 +17279,22 @@
 		};
 
 		/**
+		 * React Native only callback to retrieve senders from the peer connection as the sender object is not returned from peerConnection.addTrack.
+		 * @param peerConnection
+		 * @param targetMid
+		 * @param currentRoomState
+		 * @param event
+		 * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
+		 */
+		const onsenderadded = (peerConnection, targetMid, currentRoomState, event) => {
+		  const updatedState = Skylink.getSkylinkState(currentRoomState.room.id);
+		  const { sender } = event;
+		  helpers$5.processNewSender(updatedState, targetMid, sender);
+		};
+
+		/**
 		 * @description Callbacks for createPeerConnection method
-		 * @type {{ondatachannel, onicecandidate, oniceconnectionstatechange, onicegatheringstatechange, onsignalingstatechange, ontrack, onremovetrack}}
+		 * @type {{ondatachannel, onicecandidate, oniceconnectionstatechange, onicegatheringstatechange, onsignalingstatechange, ontrack, onremovetrack, onsenderadded}}
 		 * @memberOf PeerConnection.PeerConnectionHelpers
 		 * @namespace CreatePeerConnectionCallbacks
 		 * @private
@@ -17494,6 +17307,7 @@
 		  onicegatheringstatechange,
 		  onsignalingstatechange,
 		  onremovetrack,
+		  onsenderadded,
 		};
 
 		/**
@@ -17919,7 +17733,7 @@
 		  }));
 		};
 
-		const dispatchMediaStateChangeEvents = (state, streamId, peerId) => {
+		const dispatchMediaStateChangeEvents = (state, streamId, peerId, kind, isScreensharing) => {
 		  const peerInfo = PeerData.getPeerInfo(peerId, state.room);
 
 		  dispatchEvent(streamMuted({
@@ -17927,6 +17741,9 @@
 		    peerId,
 		    peerInfo,
 		    streamId,
+		    isAudio: kind === TRACK_KIND.AUDIO,
+		    isVideo: kind === TRACK_KIND.VIDEO,
+		    isScreensharing,
 		  }));
 
 		  dispatchEvent(peerUpdated({
@@ -17971,12 +17788,12 @@
 		  updatedState.peerInformations[targetMid].mediaStatus[streamId].audioMuted = (mediaState === MEDIA_STATE.MUTED || mediaState === MEDIA_STATE.STOPPED) ? MEDIA_STATUS.MUTED : MEDIA_STATUS.ACTIVE;
 		  Skylink.setSkylinkState(updatedState, room.id);
 
-		  mediaInfoEventHelpers.dispatchMediaStateChangeEvents(updatedState, streamId, targetMid);
+		  mediaInfoEventHelpers.dispatchMediaStateChangeEvents(updatedState, streamId, targetMid, TRACK_KIND.AUDIO, false);
 		};
 
 		const videoStateChangeHandler = (targetMid, message) => {
 		  const {
-		    type, rid, mediaId, mediaState, transceiverMid,
+		    type, rid, mediaId, mediaState, transceiverMid, mediaType,
 		  } = message;
 		  const updatedState = Skylink.getSkylinkState(rid);
 		  const { room } = updatedState;
@@ -18004,7 +17821,7 @@
 
 		  Skylink.setSkylinkState(updatedState, room.id);
 
-		  mediaInfoEventHelpers.dispatchMediaStateChangeEvents(updatedState, streamId, targetMid);
+		  mediaInfoEventHelpers.dispatchMediaStateChangeEvents(updatedState, streamId, targetMid, TRACK_KIND.VIDEO, mediaType === MEDIA_TYPE.VIDEO_SCREEN);
 		};
 
 		const addNewPeerMediaInfo = (state, message) => {
@@ -18911,7 +18728,9 @@
 		   */
 		  answer(...args) {
 		    return this.messageBuilder.getAnswerMessage(...args).then((answer) => {
+		      const state = args[0];
 		      this.sendMessage(answer);
+		      this.dispatchHandshakeProgress(state, 'ANSWER');
 		      return answer;
 		    });
 		  }
@@ -18949,6 +18768,7 @@
 
 		    this.messageBuilder.getOfferMessage(...args).then((offer) => {
 		      this.sendMessage(offer);
+		      this.dispatchHandshakeProgress(state, 'OFFER');
 		    });
 		  }
 
@@ -19094,8 +18914,8 @@
 		const sendMediaInfoMsg = (room, updatedMediaInfo) => {
 		  const signaling = new SkylinkSignalingServer();
 		  const state = Skylink.getSkylinkState(room.id);
-		  const { peerMedias, user, hasMCU } = state;
-		  const peerIds = hasMCU ? [PEER_TYPE.MCU] : Object.keys(peerMedias).filter(peerId => peerId !== user.sid);
+		  const { user, hasMCU, peerConnections } = state;
+		  const peerIds = hasMCU ? [PEER_TYPE.MCU] : Object.keys(peerConnections).filter(peerId => (peerId !== user.sid) && (peerId !== PEER_TYPE.MCU));
 
 		  peerIds.forEach((target) => {
 		    signaling.mediaInfoEvent(state, target, updatedMediaInfo);
@@ -19116,14 +18936,14 @@
 		    mediaInfo.transceiverMid = mediaInfo.mediaState === MEDIA_STATE.UNAVAILABLE ? mediaInfo.transceiverMid : null;
 		    for (let a = 0; a < audioMids.length; a += 1) {
 		      if (audioMids[a].streamId === mediaInfo.streamId && (audioMids[a].direction === 'sendonly' || audioMids[a].direction === 'sendrecv')) {
-		        helpers$5.updatePeerMediaInfo(room, peerId, false, mediaInfo.mediaId, MEDIA_INFO.TRANSCEIVER_MID, audioMids[a].transceiverMid);
+		        helpers$6.updatePeerMediaInfo(room, peerId, false, mediaInfo.mediaId, MEDIA_INFO.TRANSCEIVER_MID, audioMids[a].transceiverMid);
 		        break;
 		      }
 		    }
 
 		    for (let v = 0; v < videoMids.length; v += 1) {
 		      if (videoMids[v].streamId === mediaInfo.streamId && (videoMids[v].direction === 'sendonly' || videoMids[v].direction === 'sendrecv')) {
-		        helpers$5.updatePeerMediaInfo(room, peerId, false, mediaInfo.mediaId, MEDIA_INFO.TRANSCEIVER_MID, videoMids[v].transceiverMid);
+		        helpers$6.updatePeerMediaInfo(room, peerId, false, mediaInfo.mediaId, MEDIA_INFO.TRANSCEIVER_MID, videoMids[v].transceiverMid);
 		        break;
 		      }
 		    }
@@ -19184,7 +19004,38 @@
 		  return peerMedia;
 		};
 
-		const helpers$5 = {
+		const processOnRemoveTrack = (state, peerId, clonedMediaInfo) => {
+		  // This method is required because react native android does not have a way for the remote to register onremovetrack event
+		  // onremovetrack needs to be caught in the renegotiation when the remote calls stopStreams and sends an offer
+		  // the removed track/stream will be set to unavailable
+		  // Although react native ios has didRemoveReceiver callback, and onremovetrack can be artificially attached to the peerConnection to process
+		  // a stopped stream, the type of stream is not identifiable i.e is screenshare or not.
+		  // Therefore react native ios and android will implement the same workaround for now.
+		  const { AdapterJS } = window;
+		  if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE && clonedMediaInfo) {
+		    const { room } = state;
+		    const trackInfo = {
+		      track: {
+		        id: null,
+		        kind: null,
+		      },
+		    };
+		    const stream = {
+		      id: null,
+		    };
+		    trackInfo.track.id = clonedMediaInfo.trackId;
+		    trackInfo.track.kind = (clonedMediaInfo.mediaType === MEDIA_TYPE.AUDIO || clonedMediaInfo.mediaType === MEDIA_TYPE.AUDIO_MIC) ? TRACK_KIND.AUDIO : TRACK_KIND.VIDEO;
+		    stream.id = clonedMediaInfo.streamId;
+		    trackInfo.stream = stream;
+		    if (!(trackInfo.track.id || trackInfo.track.kind || stream.id)) {
+		      logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.BROWSER_AGENT.REACT_NATIVE.ERRORS.DROPPING_ONREMOVETRACK}`], trackInfo);
+		      return;
+		    }
+		    callbacks$2.onremovetrack(peerId, room, clonedMediaInfo.mediaType === MEDIA_TYPE.VIDEO_SCREEN, trackInfo);
+		  }
+		};
+
+		const helpers$6 = {
 		  retrieveTransceiverMid,
 		  retrieveMediaState,
 		  retrieveMediaId,
@@ -19198,6 +19049,7 @@
 		  retrieveFormattedMediaInfo,
 		  resetPeerMedia,
 		  populatePeerMediaInfo,
+		  processOnRemoveTrack,
 		};
 
 		class PeerMedia {
@@ -19214,7 +19066,7 @@
 		    delete updatedState.peerMedias.null;
 		    Skylink.setSkylinkState(updatedState, room.id);
 		    Object.keys(updatedState.peerMedias[sid]).forEach((mediaId) => {
-		      helpers$5.updatePeerMediaInfo(room, sid, false, mediaId, MEDIA_INFO.PUBLISHER_ID, sid);
+		      helpers$6.updatePeerMediaInfo(room, sid, false, mediaId, MEDIA_INFO.PUBLISHER_ID, sid);
 		    });
 		  }
 
@@ -19227,8 +19079,8 @@
 		   */
 		  static updateStreamIdFromOntrack(room, peerId, transceiverMid, streamId) {
 		    const state = Skylink.getSkylinkState(room.id);
-		    const mediaId = helpers$5.retrieveValueGivenTransceiverMid(state, peerId, transceiverMid, MEDIA_INFO.MEDIA_ID);
-		    helpers$5.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.STREAM_ID, streamId);
+		    const mediaId = helpers$6.retrieveValueGivenTransceiverMid(state, peerId, transceiverMid, MEDIA_INFO.MEDIA_ID);
+		    helpers$6.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.STREAM_ID, streamId);
 		  }
 
 		  /**
@@ -19258,7 +19110,7 @@
 		   * @param mediaId
 		   */
 		  static setMediaStateToUnavailable(room, peerId, mediaId) {
-		    helpers$5.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.MEDIA_STATE, MEDIA_STATE.UNAVAILABLE);
+		    helpers$6.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.MEDIA_STATE, MEDIA_STATE.UNAVAILABLE);
 		  }
 
 		  /**
@@ -19290,9 +19142,13 @@
 
 		    Skylink.setSkylinkState(updatedState, room.id);
 
-		    dispatchEvent(mediaInfoDeleted({
-		      mediaInfo: clonedMediaInfo,
-		    }));
+		    helpers$6.processOnRemoveTrack(updatedState, peerId, clonedMediaInfo);
+
+		    if (clonedMediaInfo) {
+		      dispatchEvent(mediaInfoDeleted({
+		        mediaInfo: clonedMediaInfo,
+		      }));
+		    }
 		  }
 
 		  /**
@@ -19305,23 +19161,24 @@
 		   * @private
 		   */
 		  static updatePeerMediaInfo(room, peerId, mediaId, key, value) {
-		    helpers$5.updatePeerMediaInfo(room, peerId, true, mediaId, key, value);
+		    helpers$6.updatePeerMediaInfo(room, peerId, true, mediaId, key, value);
 		  }
 
 		  /**
 		   * Method that updates the transceiver mid value of local media info after set local description.
+		   * // TODO: remove as it is no longer called
 		   * @param room
 		   * @param peerId
 		   * @private
 		   */
 		  static updateTransceiverMid(room, peerId) {
 		    try {
-		      const tracks = helpers$5.retrieveTracks(room);
+		      const tracks = helpers$6.retrieveTracks(room);
 		      tracks.forEach((track) => {
-		        const transceiverMid = helpers$5.retrieveTransceiverMid(room, track);
-		        const streamId = helpers$5.retrieveStreamIdOfTrack(room, track);
-		        const mediaId = helpers$5.retrieveMediaId(track.kind, streamId);
-		        helpers$5.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.TRANSCEIVER_MID, transceiverMid);
+		        const transceiverMid = helpers$6.retrieveTransceiverMid(room, track);
+		        const streamId = helpers$6.retrieveStreamIdOfTrack(room, track);
+		        const mediaId = helpers$6.retrieveMediaId(track.kind, streamId);
+		        helpers$6.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.TRANSCEIVER_MID, transceiverMid);
 		      });
 		    } catch (err) {
 		      logger.log.ERROR([peerId, TAGS.PEER_MEDIA, null, MESSAGES.MEDIA_INFO.ERRORS.FAILED_UPDATING_TRANSCEIVER_MID], err);
@@ -19338,9 +19195,9 @@
 		    try {
 		      const state = Skylink.getSkylinkState(room.id);
 		      const clonedPeerMedia = clone_1(state.peerMedias[targetMid]) || {};
-		      const updatedState = helpers$5.resetPeerMedia(room, targetMid);
+		      const updatedState = helpers$6.resetPeerMedia(room, targetMid);
 		      mediaInfoList.forEach((mediaInfo) => {
-		        updatedState.peerMedias[mediaInfo.publisherId] = helpers$5.populatePeerMediaInfo(updatedState, clonedPeerMedia, mediaInfo);
+		        updatedState.peerMedias[mediaInfo.publisherId] = helpers$6.populatePeerMediaInfo(updatedState, clonedPeerMedia, mediaInfo);
 		      });
 		      Skylink.setSkylinkState(updatedState, room.id);
 		    } catch (err) {
@@ -19376,7 +19233,7 @@
 		   * @returns {String} mediaId
 		   */
 		  static retrieveMediaId(trackKind, streamId) {
-		    return helpers$5.retrieveMediaId(trackKind, streamId);
+		    return helpers$6.retrieveMediaId(trackKind, streamId);
 		  }
 
 		  /**
@@ -19391,8 +19248,8 @@
 		    const state = Skylink.getSkylinkState(room.id);
 		    const peerId = state.user.sid;
 
-		    helpers$5.parseSDPForTransceiverMid(room, peerId, sessionDescription);
-		    return helpers$5.retrieveFormattedMediaInfo(room, peerId);
+		    helpers$6.parseSDPForTransceiverMid(room, peerId, sessionDescription);
+		    return helpers$6.retrieveFormattedMediaInfo(room, peerId);
 		  }
 
 		  /**
@@ -19412,10 +19269,10 @@
 
 		    try {
 		      tracks.forEach((track) => {
-		        mediaId = helpers$5.retrieveMediaId(track.kind, stream.id);
+		        mediaId = helpers$6.retrieveMediaId(track.kind, stream.id);
 		        // eslint-disable-next-line no-nested-ternary
-		        peerMedia[mediaId] = helpers$5.buildPeerMediaInfo(room, peerId, track, stream.id, track.kind === TRACK_KIND.AUDIO ? MEDIA_TYPE.AUDIO_MIC : (isScreensharing ? MEDIA_TYPE.VIDEO_SCREEN : MEDIA_TYPE.VIDEO_CAMERA));
-		        helpers$5.updatePeerMediaInfo(room, peerId, dispatchEvt, mediaId, null, null, peerMedia[mediaId]);
+		        peerMedia[mediaId] = helpers$6.buildPeerMediaInfo(room, peerId, track, stream.id, track.kind === TRACK_KIND.AUDIO ? MEDIA_TYPE.AUDIO_MIC : (isScreensharing ? MEDIA_TYPE.VIDEO_SCREEN : MEDIA_TYPE.VIDEO_CAMERA));
+		        helpers$6.updatePeerMediaInfo(room, peerId, dispatchEvt, mediaId, null, null, peerMedia[mediaId]);
 		      });
 		    } catch (err) {
 		      logger.log.ERROR([peerId, TAGS.MEDIA_INFO, MESSAGES.MEDIA_INFO.ERRORS.FAILED_PROCESSING_PEER_MEDIA], err);
@@ -19430,7 +19287,7 @@
 		    return false;
 		  }
 
-		  const streamObjs = Object.values(streams.userMedia);
+		  const streamObjs = streams.userMedia ? Object.values(streams.userMedia) : [];
 		  if (streamObjs.some(streamObj => streamObj.id === stream.id)) {
 		    return true;
 		  }
@@ -19457,7 +19314,7 @@
 		    return;
 		  }
 
-		  helpers$6.processNewStream(updatedState.room, stream, settings, isScreensharing);
+		  helpers$7.processNewStream(updatedState.room, stream, settings, isScreensharing);
 		  PeerMedia.processPeerMedia(updatedState.room, updatedState.user.sid, stream, isScreensharing);
 
 		  if (isAudioFallback) {
@@ -19473,6 +19330,8 @@
 		    isScreensharing,
 		    isAudioFallback,
 		    streamId: stream.id,
+		    isAudio: hasAudioTrack(stream),
+		    isVideo: hasVideoTrack(stream),
 		  }));
 		};
 
@@ -19632,6 +19491,292 @@
 		  return settings;
 		};
 
+		/* eslint-disable no-nested-ternary */
+
+		const dispatchStreamMutedEvent = (room, stream, isScreensharing) => {
+		  const roomState = Skylink.getSkylinkState(room.id);
+		  dispatchEvent(streamMuted({
+		    isSelf: true,
+		    peerId: roomState.user.sid,
+		    peerInfo: PeerData.getUserInfo(room),
+		    streamId: stream.id,
+		    isScreensharing,
+		    isAudio: hasAudioTrack(stream),
+		    isVideo: hasVideoTrack(stream),
+		  }));
+		};
+
+		const dispatchPeerUpdatedEvent$1 = (room) => {
+		  const roomState = Skylink.getSkylinkState(room.id);
+		  const isSelf = true;
+		  const peerId = roomState.user.sid;
+		  const peerInfo = PeerData.getCurrentSessionInfo(room);
+
+		  dispatchEvent(peerUpdated({
+		    isSelf,
+		    peerId,
+		    peerInfo,
+		  }));
+		};
+
+		const getAudioTracks = stream => stream.getAudioTracks();
+
+		const getVideoTracks = stream => stream.getVideoTracks();
+
+		const dispatchLocalMediaMutedEvent = (hasToggledVideo, hasToggledAudio, stream, roomKey, isScreensharing = false) => {
+		  const state = Skylink.getSkylinkState(roomKey);
+
+		  if ((hasVideoTrack(stream) && hasToggledVideo) || (hasAudioTrack(stream) && hasToggledAudio)) {
+		    dispatchEvent(localMediaMuted({
+		      streamId: stream.id,
+		      isScreensharing,
+		      mediaStatus: state.streamsMediaStatus[stream.id],
+		    }));
+		  }
+
+		  return true;
+		};
+
+		const retrieveOriginalActiveStreamId = (roomState, currentActiveStreamId, replacedStreamIds) => {
+		  let originalActiveStreamId = currentActiveStreamId;
+		  const { streams: { userMedia } } = roomState;
+		  const pReplacedStreamIds = replacedStreamIds || Object.keys(userMedia).filter(streamId => userMedia[streamId].isReplaced);
+
+		  if (pReplacedStreamIds.length === 0) {
+		    return originalActiveStreamId;
+		  }
+
+		  if (pReplacedStreamIds.indexOf(originalActiveStreamId) > -1) {
+		    pReplacedStreamIds.splice(pReplacedStreamIds.indexOf(originalActiveStreamId), 1);
+		  }
+
+		  if (pReplacedStreamIds.length > 1) {
+		    for (let i = 0; i < pReplacedStreamIds.length; i += 1) {
+		      if (userMedia[pReplacedStreamIds[i]].newStream && userMedia[pReplacedStreamIds[i]].newStream.id === originalActiveStreamId) {
+		        originalActiveStreamId = pReplacedStreamIds[i];
+		        retrieveOriginalActiveStreamId(roomState, originalActiveStreamId, pReplacedStreamIds);
+		        break;
+		      }
+		    }
+		  }
+
+		  return pReplacedStreamIds[0];
+		};
+
+		const updateMediaInfo = (hasToggledVideo, hasToggledAudio, room, streamId) => {
+		  const roomState = Skylink.getSkylinkState(room.id);
+		  const originalStreamId = retrieveOriginalActiveStreamId(roomState, streamId);
+		  const { streamsMutedSettings } = roomState;
+
+		  if (hasToggledVideo) {
+		    const mediaId = PeerMedia.retrieveMediaId(TRACK_KIND.VIDEO, originalStreamId);
+		    PeerMedia.updatePeerMediaInfo(room, roomState.user.sid, mediaId, MEDIA_INFO.MEDIA_STATE, streamsMutedSettings[originalStreamId].videoMuted ? MEDIA_STATE.MUTED : MEDIA_STATE.ACTIVE);
+		  }
+
+		  if (hasToggledAudio) {
+		    const mediaId = PeerMedia.retrieveMediaId(TRACK_KIND.AUDIO, originalStreamId);
+		    setTimeout(() => PeerMedia.updatePeerMediaInfo(room, roomState.user.sid, mediaId, MEDIA_INFO.MEDIA_STATE, streamsMutedSettings[originalStreamId].audioMuted ? MEDIA_STATE.MUTED : MEDIA_STATE.ACTIVE), hasToggledVideo ? 1050 : 0);
+		  }
+		};
+
+		const muteFn = (stream, state) => {
+		  const updatedState = state;
+		  const { room } = updatedState;
+		  const audioTracks = getAudioTracks(stream);
+		  const videoTracks = getVideoTracks(stream);
+		  updatedState.streamsMediaStatus[stream.id].audioMuted = MEDIA_STATUS.UNAVAILABLE;
+		  updatedState.streamsMediaStatus[stream.id].videoMuted = MEDIA_STATUS.UNAVAILABLE;
+
+		  audioTracks.forEach((audioTrack) => {
+		    // eslint-disable-next-line no-param-reassign
+		    audioTrack.enabled = !updatedState.streamsMutedSettings[stream.id].audioMuted;
+		    updatedState.streamsMediaStatus[stream.id].audioMuted = updatedState.streamsMutedSettings[stream.id].audioMuted ? MEDIA_STATUS.MUTED : MEDIA_STATUS.ACTIVE;
+		  });
+
+		  videoTracks.forEach((videoTrack) => {
+		    // eslint-disable-next-line no-param-reassign
+		    videoTrack.enabled = !updatedState.streamsMutedSettings[stream.id].videoMuted;
+		    updatedState.streamsMediaStatus[stream.id].videoMuted = updatedState.streamsMutedSettings[stream.id].videoMuted ? MEDIA_STATUS.MUTED : MEDIA_STATUS.ACTIVE;
+		  });
+
+		  Skylink.setSkylinkState(updatedState, room.id);
+
+		  logger.log.DEBUG(MESSAGES.MEDIA_STREAM.UPDATE_MEDIA_STATUS, updatedState.streamsMediaStatus, stream.id);
+		};
+
+		const retrieveToggleState = (state, options, streamId) => {
+		  const { streams, streamsMutedSettings } = state;
+		  let hasToggledAudio = false;
+		  let hasToggledVideo = false;
+
+		  if (streams.screenshare && streams.screenshare.id === streamId && streamsMutedSettings[streamId].videoMuted !== options.videoMuted) {
+		    hasToggledVideo = true;
+		  } else if (streams.userMedia && streams.userMedia[streamId]) {
+		    if (hasAudioTrack(streams.userMedia[streamId].stream) && streamsMutedSettings[streamId].audioMuted !== options.audioMuted) {
+		      hasToggledAudio = true;
+		    }
+
+		    if (hasVideoTrack(streams.userMedia[streamId].stream) && streamsMutedSettings[streamId].videoMuted !== options.videoMuted) {
+		      hasToggledVideo = true;
+		    }
+		  }
+
+		  return {
+		    hasToggledAudio,
+		    hasToggledVideo,
+		  };
+		};
+
+		const updateStreamsMutedSettings = (state, toggleState, streamId) => {
+		  const updatedState = state;
+		  const { room } = updatedState;
+
+		  if (toggleState.hasToggledAudio) {
+		    updatedState.streamsMutedSettings[streamId].audioMuted = !updatedState.streamsMutedSettings[streamId].audioMuted;
+		  }
+
+		  if (toggleState.hasToggledVideo) {
+		    updatedState.streamsMutedSettings[streamId].videoMuted = !updatedState.streamsMutedSettings[streamId].videoMuted;
+		  }
+
+		  logger.log.DEBUG(MESSAGES.MEDIA_STREAM.UPDATE_MUTED_SETTINGS, updatedState.streamsMutedSettings, streamId);
+		  Skylink.setSkylinkState(updatedState, room.id);
+		};
+
+		const startMuteEvents = (roomKey, streamId, options) => {
+		  const roomState = Skylink.getSkylinkState(roomKey);
+		  const { streams, room, peerConnections } = roomState;
+		  const toggleState = retrieveToggleState(roomState, options, streamId);
+		  const { hasToggledAudio, hasToggledVideo } = toggleState;
+		  let mutedStream = null;
+		  let isScreensharing = false;
+
+		  if (streams.userMedia && streams.userMedia[streamId]) {
+		    mutedStream = streams.userMedia[streamId].stream;
+		  } else if (streams.screenshare && streams.screenshare.id === streamId) {
+		    mutedStream = streams.screenshare.stream;
+		    isScreensharing = true;
+		  }
+
+		  if (!mutedStream) {
+		    return;
+		  }
+
+		  updateStreamsMutedSettings(roomState, toggleState, streamId);
+		  muteFn(mutedStream, roomState);
+		  dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, mutedStream, room.id, isScreensharing);
+		  dispatchPeerUpdatedEvent$1(room);
+		  dispatchStreamMutedEvent(room, mutedStream, isScreensharing);
+		  // TODO: remove audioMuteEvent and videoMuteEvent
+		  // sendSigMsgs(hasToggledVideo, hasToggledAudio, room, streamId);
+
+		  // wait for at least 1 connection before sending mediaInfoEvent otherwise sig message will be dropped at sendMediaInfoMsg if there are no
+		  // connections
+		  if (isEmptyArray(Object.keys(peerConnections).filter(peerId => peerId !== PEER_TYPE.MCU))) {
+		    const updateMediaInfoAndRemoveListener = (evt) => {
+		      const { state } = evt.detail;
+		      if (state === HANDSHAKE_PROGRESS$1.ANSWER_ACK) {
+		        updateMediaInfo(hasToggledVideo, hasToggledAudio, room, streamId);
+		        removeEventListener(EVENTS.HANDSHAKE_PROGRESS, updateMediaInfoAndRemoveListener);
+		      }
+		    };
+
+		    addEventListener(EVENTS.HANDSHAKE_PROGRESS, updateMediaInfoAndRemoveListener);
+		  } else {
+		    // Workaround for sendStream with mute option and existing peerConnections throwing "no streamId" error message:
+		    // delay sending the mediaInfoEvent sig message to ensure that ontrack on the remote is fired and the streamId is populated in mediaInfo
+		    // before mediaInfoEvent is received
+		    setTimeout(() => {
+		      updateMediaInfo(hasToggledVideo, hasToggledAudio, room, streamId);
+		    }, 500);
+		  }
+		};
+
+		const retrieveMutedSetting = (mediaMutedOption) => {
+		  switch (mediaMutedOption) {
+		    case 1:
+		      return false;
+		    case 0:
+		      return true;
+		    default:
+		      return true;
+		  }
+		};
+
+		const isValidStreamId = (streamId, state) => {
+		  const { streams } = state;
+		  let isValid = false;
+
+		  Object.keys(streams.userMedia).forEach((gumStreamId) => {
+		    if (gumStreamId === streamId) {
+		      isValid = true;
+		    }
+		  });
+
+		  if (streams.screenshare && streams.screenshare.id === streamId) {
+		    isValid = true;
+		  }
+
+		  return isValid;
+		};
+
+		/**
+		 * @param {SkylinkState} roomState
+		 * @param {boolean} options
+		 * @param {boolean} options.audioMuted
+		 * @param {boolean} options.videoMuted
+		 * @param {String} streamId
+		 * @memberOf MediaStreamHelpers
+		 * @fires streamMuted, peerUpdated, localMediaMuted
+		 */
+		const muteStreams = (roomState, options, streamId = null) => {
+		  const {
+		    streams, room,
+		  } = roomState;
+
+		  if (!isAObj(options)) {
+		    logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_MUTE_OPTIONS, options);
+		    return;
+		  }
+
+		  if (!streams.userMedia && !streams.screenshare) {
+		    logger.log.WARN(MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM);
+		    return;
+		  }
+
+		  if (streamId && !isValidStreamId(streamId, roomState)) {
+		    logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_MUTE_OPTIONS, options);
+		    return;
+		  }
+
+		  const fOptions = {
+		    audioMuted: isABoolean(options.audioMuted) ? options.audioMuted : (isANumber(options.audioMuted) ? retrieveMutedSetting(options.audioMuted) : true),
+		    videoMuted: isABoolean(options.videoMuted) ? options.videoMuted : (isANumber(options.videoMuted) ? retrieveMutedSetting(options.videoMuted) : true),
+		  };
+
+		  let streamIdsThatCanBeMuted = [];
+		  if (streamId && ((streams.userMedia[streamId] && !streams.userMedia[streamId].isReplaced) || (streams.screenshare.id === streamId && !streams.screenshare.isReplaced))) {
+		    streamIdsThatCanBeMuted.push(streamId);
+		  } else {
+		    streamIdsThatCanBeMuted = Object.keys(streams.userMedia).filter(id => !streams.userMedia[id].isReplaced);
+		    if (streams.screenshare && !streams.screenshare.isReplaced) {
+		      streamIdsThatCanBeMuted.push(streams.screenshare.id);
+		    }
+		  }
+
+		  if (isEmptyArray(streamIdsThatCanBeMuted)) {
+		    logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAMS_MUTED, options);
+		    return;
+		  }
+
+		  const streamIdsToMute = Object.values(streamIdsThatCanBeMuted).filter(sId => (retrieveToggleState(roomState, fOptions, sId).hasToggledAudio || retrieveToggleState(roomState, fOptions, sId).hasToggledVideo));
+
+		  streamIdsToMute.forEach((streamIdToMute, i) => {
+		    setTimeout(() => startMuteEvents(room.id, streamIdToMute, fOptions), i === 0 ? 0 : 1050);
+		    // TODO: Implement peerUpdatedEvent timeout here?
+		  });
+		};
+
 		/**
 		 * @description Helper function for {@link MediaStream.getUserMedia}
 		 * @param {GetUserMediaOptions} params - The camera Stream configuration options.
@@ -19640,8 +19785,8 @@
 		 */
 		const prepMediaAccessRequest = params => new Promise((resolve, reject) => {
 		  const { roomKey, ...rest } = params;
-		  const audioSettings = helpers$6.parseStreamSettings(rest, TRACK_KIND.AUDIO);
-		  const videoSettings = helpers$6.parseStreamSettings(rest, TRACK_KIND.VIDEO);
+		  const audioSettings = helpers$7.parseStreamSettings(rest, TRACK_KIND.AUDIO);
+		  const videoSettings = helpers$7.parseStreamSettings(rest, TRACK_KIND.VIDEO);
 		  const { AdapterJS } = window;
 
 		  if (!audioSettings.getUserMediaSettings.audio && !videoSettings.getUserMediaSettings.video) {
@@ -19651,14 +19796,25 @@
 		  AdapterJS.webRTCReady(() => {
 		    window.navigator.mediaDevices.getUserMedia({ audio: audioSettings.getUserMediaSettings.audio, video: videoSettings.getUserMediaSettings.video }).then((stream) => {
 		      const isAudioFallback = false;
-		      return helpers$6.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve);
-		    }).catch(error => helpers$6.onStreamAccessError(error, reject, resolve, roomKey, audioSettings, videoSettings));
+
+		      const streams = helpers$7.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback);
+		      const state = Skylink.getSkylinkState(roomKey);
+		      if (streams[0] && audioSettings.mutedSettings.shouldAudioMuted) {
+		        muteStreams(state, { audioMuted: audioSettings.mutedSettings.shouldAudioMuted, videoMuted: videoSettings.mutedSettings.shouldVideoMuted }, streams[0].id);
+		      }
+
+		      if (streams[1] && videoSettings.mutedSettings.shouldVideoMuted) {
+		        muteStreams(state, { audioMuted: audioSettings.mutedSettings.shouldAudioMuted, videoMuted: videoSettings.mutedSettings.shouldVideoMuted }, streams[1].id);
+		      }
+
+		      resolve(streams);
+		    }).catch(error => helpers$7.onStreamAccessError(error, reject, resolve, roomKey, audioSettings, videoSettings));
 		  });
 		});
 
 		const isSenderTrackAndTrackMatched = (senderTrack, tracks) => {
 		  for (let x = 0; x < tracks.length; x += 1) {
-		    if (senderTrack === tracks[x]) {
+		    if (senderTrack.id === tracks[x].id) {
 		      return true;
 		    }
 		  }
@@ -19667,7 +19823,7 @@
 		};
 
 		const isStreamOnPC = (peerConnection, stream) => {
-		  const transceivers = peerConnection.getTransceivers();
+		  const transceivers = peerConnection.getTransceivers ? peerConnection.getTransceivers() : [];
 		  const tracks = stream.getTracks();
 
 		  if (isEmptyArray(transceivers)) {
@@ -19688,11 +19844,9 @@
 		  const tracks = stream.getTracks();
 		  for (let track = 0; track < tracks.length; track += 1) {
 		    const sender = peerConnection.addTrack(tracks[track], stream);
-		    if (!updatedState.currentRTCRTPSenders[peerId]) {
-		      updatedState.currentRTCRTPSenders[peerId] = [];
+		    if (sender) {
+		      helpers$5.processNewSender(updatedState, peerId, sender);
 		    }
-
-		    updatedState.currentRTCRTPSenders[peerId].push(sender);
 		  }
 
 		  Skylink.setSkylinkState(updatedState, updatedState.room.id);
@@ -19811,7 +19965,7 @@
 		      isAudioFallback,
 		    }));
 
-		    return window.navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => helpers$6.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve)).catch((fallbackError) => {
+		    return window.navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => helpers$7.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve)).catch((fallbackError) => {
 		      logger.log.ERROR([state.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.FALLBACK, fallbackError]);
 		      dispatchEvent(mediaAccessError({
 		        error: fallbackError,
@@ -19880,287 +20034,6 @@
 		  } catch (error) {
 		    logger.log.ERROR([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.ERRORS.REPLACE_TRACK], error);
 		  }
-		};
-
-		/* eslint-disable no-nested-ternary */
-
-		const dispatchStreamMutedEvent = (room, streamId, isScreensharing) => {
-		  const roomState = Skylink.getSkylinkState(room.id);
-		  dispatchEvent(streamMuted({
-		    isSelf: true,
-		    peerId: roomState.user.sid,
-		    peerInfo: PeerData.getUserInfo(room),
-		    streamId,
-		    isScreensharing,
-		  }));
-		};
-
-		const dispatchPeerUpdatedEvent$1 = (room) => {
-		  const roomState = Skylink.getSkylinkState(room.id);
-		  const isSelf = true;
-		  const peerId = roomState.user.sid;
-		  const peerInfo = PeerData.getCurrentSessionInfo(room);
-
-		  dispatchEvent(peerUpdated({
-		    isSelf,
-		    peerId,
-		    peerInfo,
-		  }));
-		};
-
-		const getAudioTracks = stream => stream.getAudioTracks();
-
-		const getVideoTracks = stream => stream.getVideoTracks();
-
-		const dispatchLocalMediaMutedEvent = (hasToggledVideo, hasToggledAudio, stream, roomKey, isScreensharing = false) => {
-		  const state = Skylink.getSkylinkState(roomKey);
-
-		  if ((hasVideoTrack(stream) && hasToggledVideo) || (hasAudioTrack(stream) && hasToggledAudio)) {
-		    dispatchEvent(localMediaMuted({
-		      streamId: stream.id,
-		      isScreensharing,
-		      mediaStatus: state.streamsMediaStatus[stream.id],
-		    }));
-		  }
-
-		  return true;
-		};
-
-		const retrieveOriginalActiveStreamId = (roomState, currentActiveStreamId, replacedStreamIds) => {
-		  let originalActiveStreamId = currentActiveStreamId;
-		  const { streams: { userMedia } } = roomState;
-		  const pReplacedStreamIds = replacedStreamIds || Object.keys(userMedia).filter(streamId => userMedia[streamId].isReplaced);
-
-		  if (pReplacedStreamIds.length === 0) {
-		    return originalActiveStreamId;
-		  }
-
-		  if (pReplacedStreamIds.indexOf(originalActiveStreamId) > -1) {
-		    pReplacedStreamIds.splice(pReplacedStreamIds.indexOf(originalActiveStreamId), 1);
-		  }
-
-		  if (pReplacedStreamIds.length > 1) {
-		    for (let i = 0; i < pReplacedStreamIds.length; i += 1) {
-		      if (userMedia[pReplacedStreamIds[i]].newStream && userMedia[pReplacedStreamIds[i]].newStream.id === originalActiveStreamId) {
-		        originalActiveStreamId = pReplacedStreamIds[i];
-		        retrieveOriginalActiveStreamId(roomState, originalActiveStreamId, pReplacedStreamIds);
-		        break;
-		      }
-		    }
-		  }
-
-		  return pReplacedStreamIds[0];
-		};
-
-		const updateMediaInfo = (hasToggledVideo, hasToggledAudio, room, streamId) => {
-		  const roomState = Skylink.getSkylinkState(room.id);
-		  const originalStreamId = retrieveOriginalActiveStreamId(roomState, streamId);
-		  const { streamsMutedSettings } = roomState;
-
-		  if (hasToggledVideo) {
-		    const mediaId = PeerMedia.retrieveMediaId(TRACK_KIND.VIDEO, originalStreamId);
-		    PeerMedia.updatePeerMediaInfo(room, roomState.user.sid, mediaId, MEDIA_INFO.MEDIA_STATE, streamsMutedSettings[originalStreamId].videoMuted ? MEDIA_STATE.MUTED : MEDIA_STATE.ACTIVE);
-		  }
-
-		  if (hasToggledAudio) {
-		    const mediaId = PeerMedia.retrieveMediaId(TRACK_KIND.AUDIO, originalStreamId);
-		    setTimeout(() => PeerMedia.updatePeerMediaInfo(room, roomState.user.sid, mediaId, MEDIA_INFO.MEDIA_STATE, streamsMutedSettings[originalStreamId].audioMuted ? MEDIA_STATE.MUTED : MEDIA_STATE.ACTIVE), hasToggledVideo ? 1050 : 0);
-		  }
-		};
-
-		const sendSigMsgs = (hasToggledVideo, hasToggledAudio, room, streamId) => {
-		  const roomState = Skylink.getSkylinkState(room.id);
-		  const signaling = new SkylinkSignalingServer();
-		  const originalStreamId = retrieveOriginalActiveStreamId(roomState, streamId);
-
-		  if (hasToggledVideo) {
-		    signaling.muteVideoEvent(room, originalStreamId);
-		  }
-
-		  if (hasToggledAudio) {
-		    setTimeout(() => signaling.muteAudioEvent(room, originalStreamId), hasToggledVideo ? 1050 : 0);
-		  }
-		};
-
-		// TODO: check if this is needed since Edge is not built on Chrome
-		// const muteForEdge = (roomState, streamId, hasToggledVideo, hasToggledAudio) => {
-		//   const { peerConnections } = roomState;
-		//   const peerIds = Object.keys(peerConnections);
-		//   peerIds.forEach((peerId) => {
-		//     const localStreams = peerConnections[peerId].getLocalStreams();
-		//     if (streamId) {
-		//       for (let i = 0; i < localStreams.length; i += 1) {
-		//         if (streamId === localStreams[i].id) {
-		//           muteFn(localStreams[i], roomState);
-		//           dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, localStreams[i], roomState);
-		//           sendMuteAudioAndMuteVideoSigMsg(hasToggledVideo, hasToggledAudio, roomState, streamId);
-		//           break;
-		//         }
-		//       }
-		//     } else {
-		//       localStreams.forEach((stream, i) => {
-		//         muteFn(stream, roomState);
-		//         dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, stream, roomState);
-		//         setTimeout(sendMuteAudioAndMuteVideoSigMsg, i === 0 ? 0 : 1000);
-		//       });
-		//     }
-		//   });
-		// };
-
-		const muteFn = (stream, state) => {
-		  const updatedState = state;
-		  const { room } = updatedState;
-		  const audioTracks = getAudioTracks(stream);
-		  const videoTracks = getVideoTracks(stream);
-		  updatedState.streamsMediaStatus[stream.id].audioMuted = MEDIA_STATUS.UNAVAILABLE;
-		  updatedState.streamsMediaStatus[stream.id].videoMuted = MEDIA_STATUS.UNAVAILABLE;
-
-		  audioTracks.forEach((audioTrack) => {
-		    // eslint-disable-next-line no-param-reassign
-		    audioTrack.enabled = !updatedState.streamsMutedSettings[stream.id].audioMuted;
-		    updatedState.streamsMediaStatus[stream.id].audioMuted = updatedState.streamsMutedSettings[stream.id].audioMuted ? MEDIA_STATUS.MUTED : MEDIA_STATUS.ACTIVE;
-		  });
-
-		  videoTracks.forEach((videoTrack) => {
-		    // eslint-disable-next-line no-param-reassign
-		    videoTrack.enabled = !updatedState.streamsMutedSettings[stream.id].videoMuted;
-		    updatedState.streamsMediaStatus[stream.id].videoMuted = updatedState.streamsMutedSettings[stream.id].videoMuted ? MEDIA_STATUS.MUTED : MEDIA_STATUS.ACTIVE;
-		  });
-
-		  Skylink.setSkylinkState(updatedState, room.id);
-
-		  logger.log.DEBUG(MESSAGES.MEDIA_STREAM.UPDATE_MEDIA_STATUS, updatedState.streamsMediaStatus, stream.id);
-		};
-
-		const retrieveToggleState = (state, options, streamId) => {
-		  const { streams, streamsMutedSettings } = state;
-		  let hasToggledAudio = false;
-		  let hasToggledVideo = false;
-
-		  if (hasAudioTrack(streams.userMedia[streamId].stream) && streamsMutedSettings[streamId].audioMuted !== options.audioMuted) {
-		    hasToggledAudio = true;
-		  }
-
-		  if (hasVideoTrack(streams.userMedia[streamId].stream) && streamsMutedSettings[streamId].videoMuted !== options.videoMuted) {
-		    hasToggledVideo = true;
-		  }
-
-		  return {
-		    hasToggledAudio,
-		    hasToggledVideo,
-		  };
-		};
-
-		const updateStreamsMutedSettings = (state, toggleState, streamId) => {
-		  const updatedState = state;
-		  const { room } = updatedState;
-
-		  if (toggleState.hasToggledAudio) {
-		    updatedState.streamsMutedSettings[streamId].audioMuted = !updatedState.streamsMutedSettings[streamId].audioMuted;
-		  }
-
-		  if (toggleState.hasToggledVideo) {
-		    updatedState.streamsMutedSettings[streamId].videoMuted = !updatedState.streamsMutedSettings[streamId].videoMuted;
-		  }
-
-		  logger.log.DEBUG(MESSAGES.MEDIA_STREAM.UPDATE_MUTED_SETTINGS, updatedState.streamsMutedSettings, streamId);
-		  Skylink.setSkylinkState(updatedState, room.id);
-		};
-
-		const startMuteEvents = (roomKey, streamId, options) => {
-		  const state = Skylink.getSkylinkState(roomKey);
-		  const { streams, room } = state;
-		  const toggleState = retrieveToggleState(state, options, streamId);
-		  const { hasToggledAudio, hasToggledVideo } = toggleState;
-
-		  if (streams.userMedia) {
-		    updateStreamsMutedSettings(state, toggleState, streamId);
-		    muteFn(streams.userMedia[streamId].stream, state);
-		    dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, streams.userMedia[streamId].stream, room.id);
-		    dispatchPeerUpdatedEvent$1(room); // TODO: Currently peerUpdatedEvent will fire after each stream is updated. Suggest to refactor to have last stream trigger peerUpdatedEvent after a timeout since only one peerUpdatedEvent is needed
-		    dispatchStreamMutedEvent(room, streamId);
-		    sendSigMsgs(hasToggledVideo, hasToggledAudio, room, streamId);
-		    updateMediaInfo(hasToggledVideo, hasToggledAudio, room, streamId);
-		  }
-
-		  if (streams.screenshare) {
-		    if ((streamId && streams.screenshare.stream.id === streamId) || !streamId) {
-		      updateStreamsMutedSettings(state, toggleState, streamId);
-		      muteFn(streams.screenshare.stream, state);
-		      dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, streams.screenshare.stream, room.id, true);
-		      dispatchPeerUpdatedEvent$1(room);
-		      dispatchStreamMutedEvent(room, streamId, true);
-		      sendSigMsgs(hasToggledVideo, hasToggledAudio, room, streamId);
-		      updateMediaInfo(hasToggledVideo, hasToggledAudio, room, streamId);
-		    }
-		  }
-		};
-
-		const retrieveMutedSetting = (mediaMutedOption) => {
-		  switch (mediaMutedOption) {
-		    case 1:
-		      return false;
-		    case 0:
-		      return true;
-		    default:
-		      return true;
-		  }
-		};
-
-		const isValidStreamId = (streamId, state) => {
-		  const { streams } = state;
-		  let isValid = false;
-
-		  Object.keys(streams.userMedia).forEach((gumStreamId) => {
-		    if (gumStreamId === streamId) {
-		      isValid = true;
-		    }
-		  });
-
-		  return isValid;
-		};
-
-		/**
-		 * @param {SkylinkState} roomState
-		 * @param {boolean} options
-		 * @param {boolean} options.audioMuted
-		 * @param {boolean} options.videoMuted
-		 * @param {String} streamId
-		 * @memberOf MediaStreamHelpers
-		 * @fires streamMuted, peerUpdated, localMediaMuted
-		 */
-		const muteStreams = (roomState, options, streamId = null) => {
-		  const {
-		    streams, room,
-		  } = roomState;
-
-		  if (!isAObj(options)) {
-		    logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_MUTE_OPTIONS, options);
-		    return;
-		  }
-
-		  if (!streams.userMedia && !streams.screenshare) {
-		    logger.log.WARN(MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM);
-		    return;
-		  }
-
-		  if (streamId && !isValidStreamId(streamId, roomState)) {
-		    logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_MUTE_OPTIONS, options);
-		    return;
-		  }
-
-		  const fOptions = {
-		    audioMuted: isABoolean(options.audioMuted) ? options.audioMuted : (isANumber(options.audioMuted) ? retrieveMutedSetting(options.audioMuted) : true),
-		    videoMuted: isABoolean(options.videoMuted) ? options.videoMuted : (isANumber(options.videoMuted) ? retrieveMutedSetting(options.videoMuted) : true),
-		  };
-
-		  const streamIdsThatCanBeMuted = streamId ? [streamId] : Object.keys(streams.userMedia).filter(id => !streams.userMedia[id].isReplaced);
-		  const streamIdsToMute = Object.values(streamIdsThatCanBeMuted).filter(sId => (retrieveToggleState(roomState, fOptions, sId).hasToggledAudio || retrieveToggleState(roomState, fOptions, sId).hasToggledVideo));
-
-		  streamIdsToMute.forEach((streamIdToMute, i) => {
-		    setTimeout(() => startMuteEvents(room.id, streamIdToMute, fOptions), i === 0 ? 0 : 1050);
-		    // TODO: Implement peerUpdatedEvent timeout here?
-		  });
 		};
 
 		const dispatchEvents = (roomState, stream) => {
@@ -20282,17 +20155,13 @@
 		    return reject(new Error(MESSAGES.ROOM_STATE.NO_ROOM_NAME));
 		  }
 
-		  const { inRoom, streams } = roomState;
+		  const { inRoom } = roomState;
 		  const { AdapterJS } = window;
 		  const isNotObjOrNullOrPlugin = (!isAObj(options) || options === null) && !(AdapterJS && AdapterJS.WebRTCPlugin && AdapterJS.WebRTCPlugin.plugin);
 
 		  if (!inRoom) {
 		    logger.log.WARN(MESSAGES.ROOM.ERRORS.NOT_IN_ROOM);
 		    return reject(new Error(`${MESSAGES.ROOM.ERRORS.NOT_IN_ROOM}`));
-		  }
-
-		  if (streams.userMedia) {
-		    return reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.ACTIVE_STREAMS));
 		  }
 
 		  if (isNotObjOrNullOrPlugin) {
@@ -20413,9 +20282,8 @@
 		    return streamList;
 		  }
 
-		  const streamIds = Object.keys(userMedia);
-
 		  if (userMedia) {
+		    const streamIds = Object.keys(userMedia);
 		    streamList.userMedia = {};
 		    streamIds.forEach((streamId) => {
 		      streamList.userMedia[streamId] = userMedia[streamId].stream;
@@ -20559,32 +20427,32 @@
 
 		const processNewStream = (room, stream, settings, isScreensharing) => {
 		  addStreamToState(room, stream, settings, isScreensharing);
-		  helpers$6.updateStreamsMutedSettings(room.id, settings, stream);
-		  helpers$6.updateStreamsMediaStatus(room.id, settings, stream);
+		  helpers$7.updateStreamsMutedSettings(room.id, settings, stream);
+		  helpers$7.updateStreamsMediaStatus(room.id, settings, stream);
 		};
 
 		const updateStreamsMutedSettings$1 = (roomKey, settings, stream) => {
 		  const updatedState = Skylink.getSkylinkState(roomKey);
 		  const { room, streamsMutedSettings } = updatedState;
-		  const { mutedSettings: { shouldAudioMuted, shouldVideoMuted }, settings: { audio, video } } = settings;
+		  const { audio, video } = settings.settings;
 
 		  streamsMutedSettings[stream.id] = {};
-		  streamsMutedSettings[stream.id].audioMuted = audio ? shouldAudioMuted : true;
-		  streamsMutedSettings[stream.id].videoMuted = video ? shouldVideoMuted : true;
+		  streamsMutedSettings[stream.id].audioMuted = !audio;
+		  streamsMutedSettings[stream.id].videoMuted = !video;
 
 		  Skylink.setSkylinkState(updatedState, room.id);
 		};
 
-		const onStreamAccessSuccess = (roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve) => {
+		const onStreamAccessSuccess = (roomKey, stream, audioSettings, videoSettings, isAudioFallback) => {
 		  const isScreensharing = false;
-		  const streams = helpers$6.splitAudioAndVideoStream(stream);
+		  const streams = helpers$7.splitAudioAndVideoStream(stream);
 
 		  streams.forEach((st) => {
 		    if (!st) return;
-		    helpers$6.processStreamInState(st, hasAudioTrack(st) ? audioSettings : videoSettings, roomKey, isScreensharing, isAudioFallback);
+		    helpers$7.processStreamInState(st, hasAudioTrack(st) ? audioSettings : videoSettings, roomKey, isScreensharing, isAudioFallback);
 		  });
 
-		  resolve(streams);
+		  return streams;
 		};
 
 		/**
@@ -20593,7 +20461,7 @@
 		 * @private
 		 * @type {{parseMediaOptions, processStreamInState, parseStreamSettings, prepMediaAccessRequest, addLocalMediaStreams, onRemoteTrackAdded, onStreamAccessError, buildPeerStreamsInfo, replaceTrack, muteStreams, getStreamSources, sendStream, getStreams, getScreenSources, updateStreamsMediaStatus, updateRemoteStreams, retrieveVideoStreams, splitAudioAndVideoStream, processNewStream, updateStreamsMutedSettings, onStreamAccessSuccess}}
 		 */
-		const helpers$6 = {
+		const helpers$7 = {
 		  parseMediaOptions,
 		  processStreamInState,
 		  parseStreamSettings,
@@ -20833,7 +20701,7 @@
 		  }
 
 		  navigator.mediaDevices.getUserMedia(options).then((stream) => {
-		    const streams = helpers$6.splitAudioAndVideoStream(stream);
+		    const streams = helpers$7.splitAudioAndVideoStream(stream);
 		    resolve(streams);
 		  }).catch((error) => {
 		    reject(error);
@@ -20957,550 +20825,848 @@
 		 */
 		const generateISOStringTimesStamp = () => new Date().toISOString();
 
-		/**
-		 * @description Function that returns the current session peerInfo is peer isSelf.
-		 * @private
-		 * @param {SkylinkRoom} room
-		 * @return {peerInfo}
-		 * @memberOf PeerDataHelpers
-		 */
-		const getCurrentSessionInfo = (room) => {
-		  const state = Skylink.getSkylinkState(room.id);
-		  const initOptions = Skylink.getInitOptions();
-		  const { AdapterJS } = window;
-		  const { enableDataChannel, codecParams } = initOptions;
-		  const { roomName } = room;
-		  const {
-		    streamsMediaStatus,
-		    userData,
-		    peerPriorityWeight,
-		    enableIceRestart,
-		    publishOnly,
-		    SMProtocolVersion,
-		    DTProtocolVersion,
-		    streams,
-		    streamsBandwidthSettings,
-		    sdpSettings,
-		    user,
-		  } = state;
-
-		  const peerInfo = {
-		    userData,
-		    settings: {
-		      audio: false,
-		      video: false,
-		    },
-		    mediaStatus: {},
-		    agent: {
-		      name: AdapterJS.webrtcDetectedBrowser,
-		      version: AdapterJS.webrtcDetectedVersion,
-		      os: window.navigator.platform,
-		      pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
-		      SMProtocolVersion,
-		      DTProtocolVersion,
-		      SDKVersion: SDK_VERSION,
-		    },
-		    room: roomName,
-		    config: {
-		      enableDataChannel,
-		      enableIceRestart,
-		      priorityWeight: peerPriorityWeight,
-		      receiveOnly: false,
-		      publishOnly,
-		    },
-		    sid: user.sid,
-		    screenshare: false,
-		  };
-
-		  if (streams && streams.userMedia) {
-		    const streamIds = Object.keys(streams.userMedia);
-		    if (streams.userMedia[streamIds[0]]) { // assume that all the streams have the same settings
-		      peerInfo.settings = clone_1(streams.userMedia[streamIds[0]].settings);
-		    }
+		class SkylinkEventManager {
+		  constructor() {
+		    this.events = {};
+		    this.privateEvents = {};
 		  }
 
-		  peerInfo.mediaStatus = streamsMediaStatus;
-
-		  peerInfo.userData = userData || null;
-
-		  peerInfo.config.receiveOnly = !peerInfo.settings.video && !peerInfo.settings.audio;
-
-		  if (streams.screenshare) {
-		    peerInfo.screenshare = true;
+		  addPrivateEventListener(eventName, callback) {
+		    this.addListener(eventName, callback, true);
 		  }
 
-		  peerInfo.settings.maxBandwidth = clone_1(streamsBandwidthSettings.bAS);
-		  peerInfo.settings.googleXBandwidth = clone_1(streamsBandwidthSettings.googleX);
-
-		  if (peerInfo.settings.bandwidth) {
-		    peerInfo.settings.maxBandwidth = clone_1(peerInfo.settings.bandwidth);
-		    delete peerInfo.settings.bandwidth;
+		  addEventListener(eventName, callback) {
+		    this.addListener(eventName, callback, false);
 		  }
 
-		  peerInfo.settings.data = enableDataChannel && sdpSettings.connection.data;
+		  addListener(eventName, callback, isPrivate) {
+		    try {
+		      const key = isPrivate ? 'privateEvents' : 'events';
 
-		  if (peerInfo.settings.audio && isAObj(peerInfo.settings.audio)) {
-		    // Override the settings.audio.usedtx
-		    if (isABoolean(typeof codecParams.audio.opus.stereo)) {
-		      peerInfo.settings.audio.stereo = codecParams.audio.opus.stereo;
-		    }
-		    // Override the settings.audio.usedtx
-		    if (isABoolean(codecParams.audio.opus.usedtx)) {
-		      peerInfo.settings.audio.usedtx = codecParams.audio.opus.usedtx;
-		    }
-		    // Override the settings.audio.maxplaybackrate
-		    if (isANumber(codecParams.audio.opus.maxplaybackrate)) {
-		      peerInfo.settings.audio.maxplaybackrate = codecParams.audio.opus.maxplaybackrate;
-		    }
-		    // Override the settings.audio.useinbandfec
-		    if (isABoolean(codecParams.audio.opus.useinbandfec)) {
-		      peerInfo.settings.audio.useinbandfec = codecParams.audio.opus.useinbandfec;
-		    }
-		  }
-
-		  if (peerInfo.settings.video && isAObj(peerInfo.settings.video)) {
-		    peerInfo.settings.video.customSettings = {};
-
-		    if (peerInfo.settings.video.frameRate && isAObj(peerInfo.settings.video.frameRate)) {
-		      peerInfo.settings.video.customSettings.frameRate = clone_1(peerInfo.settings.video.frameRate);
-		      peerInfo.settings.video.frameRate = -1;
-		    }
-
-		    if (peerInfo.settings.video.facingMode && isAObj(peerInfo.settings.video.facingMode)) {
-		      peerInfo.settings.video.customSettings.facingMode = clone_1(peerInfo.settings.video.facingMode);
-		      peerInfo.settings.video.facingMode = '-1';
-		    }
-
-		    if (peerInfo.settings.video.resolution && isAObj(peerInfo.settings.video.resolution)) {
-		      if (peerInfo.settings.video.resolution.width && isAObj(peerInfo.settings.video.resolution.width)) {
-		        peerInfo.settings.video.customSettings.width = clone_1(peerInfo.settings.video.width);
-		        peerInfo.settings.video.resolution.width = -1;
+		      if (!isAFunction(callback)) {
+		        logger.log.DEBUG([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.INVALID_CB]);
+		        return;
 		      }
 
-		      if (peerInfo.settings.video.resolution.height && isAObj(peerInfo.settings.video.resolution.height)) {
-		        peerInfo.settings.video.customSettings.height = clone_1(peerInfo.settings.video.height);
-		        peerInfo.settings.video.resolution.height = -1;
+		      if (!this[key][eventName]) {
+		        this[key][eventName] = {};
 		      }
+
+		      if (!this[key][eventName].callbacks) {
+		        this[key][eventName].callbacks = [];
+		      }
+
+		      this[key][eventName].callbacks.push(callback);
+
+		      if (!isPrivate) {
+		        logger.log.DEBUG([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.EVENT_REGISTERED]);
+		      }
+		    } catch (err) {
+		      logger.log.ERROR([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.EVENT_REGISTER_ERROR], err);
 		    }
 		  }
 
-		  if (!peerInfo.settings.audio && !peerInfo.settings.video) {
-		    peerInfo.config.receiveOnly = true;
-		    peerInfo.config.publishOnly = false;
-		  }
-
-		  return clone_1(peerInfo);
-		};
-
-		/**
-		 * @description Function that returns the User / Peer current custom data.
-		 * @private
-		 * @param {Skylink} roomState
-		 * @param {String} peerId
-		 * @return {roomState.userData}
-		 * @memberOf PeerDataHelpers
-		 */
-		const getUserData = (roomState, peerId) => {
-		  if (peerId && roomState.peerInformations[peerId]) {
-		    let peerUserData = roomState.peerInformations[peerId].userData;
-
-		    if (!peerUserData) {
-		      peerUserData = '';
+		  dispatchEvent(evt) {
+		    if (evt.name === EVENTS.LOGGED_ON_CONSOLE) {
+		      return;
 		    }
-		    return peerUserData;
+
+		    let allEventCallbacks = [];
+		    if (!this.events[evt.name]) {
+		      logger.log.DEBUG([null, TAGS.SKYLINK_EVENT, evt.name, MESSAGES.LOGGER.EVENT_DISPATCHED]);
+		    } else {
+		      const userCallbacks = this.events[evt.name].callbacks;
+		      allEventCallbacks = allEventCallbacks.concat(userCallbacks);
+		    }
+
+		    if (this.privateEvents[evt.name]) {
+		      const privateCallbacks = this.privateEvents[evt.name] ? this.privateEvents[evt.name].callbacks : [];
+		      allEventCallbacks = allEventCallbacks.concat(privateCallbacks);
+		    }
+
+		    allEventCallbacks.forEach((callback) => {
+		      try {
+		        callback(evt.detail);
+		      } catch (err) {
+		        logger.log.ERROR([null, TAGS.SKYLINK_EVENT, evt.name, MESSAGES.LOGGER.EVENT_DISPATCH_ERROR], err);
+		      }
+		    });
 		  }
-		  return roomState.userData;
-		};
 
-		/**
-		 * @description Function that overwrites the User current custom data.
-		 * @private
-		 * @param {SkylinkRoom} room
-		 * @param {String | Object} userData
-		 * @memberOf PeerDataHelpers
-		 * @fires peerUpdated
-		 */
-		const setUserData = (room, userData) => {
-		  const roomState = Skylink.getSkylinkState(room.id);
-		  const { PEER_INFORMATIONS: { UPDATE_USER_DATA } } = MESSAGES;
-		  const updatedUserData = userData || '';
-
-		  roomState.userData = updatedUserData;
-		  Skylink.setSkylinkState(roomState, roomState.room.id);
-
-		  new SkylinkSignalingServer().setUserData(roomState);
-
-		  dispatchEvent(peerUpdated({
-		    peerId: roomState.user.sid,
-		    peerInfo: helpers$7.getCurrentSessionInfo(room),
-		    isSelf: true,
-		  }));
-
-		  logger.log.INFO(UPDATE_USER_DATA, updatedUserData);
-		};
-
-		const hasPeerConnections = (peerConnections, hasMCU) => (hasMCU ? !!peerConnections.MCU.maps : !isEmptyObj(peerConnections));
-
-		const getSelfStreams = (streams) => {
-		  if (streams.userMedia) {
-		    return streams.userMedia;
+		  removeEventListener(eventName, callback) {
+		    this.removeListener(eventName, callback, false);
 		  }
-		  return null;
-		};
 
-		const getSelfScreen = (streams) => {
-		  if (streams.screenshare) {
-		    return streams.screenshare;
+		  removePrivateEventListener(eventName, callback) {
+		    this.removeListener(eventName, callback, true);
 		  }
-		  return null;
-		};
 
-		/**
-		 * @description Function that gets the list of connected Peers Streams in the Room.
-		 * @param {SkylinkState} roomState
-		 * @param {boolean} [includeSelf=true] - The flag if self streams are included.
-		 * @return {Object}
-		 * @memberOf PeerDataHelpers
-		 */
-		const getPeersStreams = (roomState, includeSelf = true) => {
-		  const listOfPeersStreams = {};
-		  const {
-		    peerConnections,
-		    user,
-		    streams,
-		    hasMCU,
-		  } = roomState;
+		  removeListener(eventName, callback, isPrivate) {
+		    const key = isPrivate ? 'privateEvents' : 'events';
 
-		  if (user && user.sid && includeSelf) {
-		    const selfStreams = getSelfStreams(streams);
-		    const selfScreen = getSelfScreen(streams);
-		    listOfPeersStreams[user.sid] = selfStreams || selfScreen ? {} : null;
+		    if (!isPrivate && !(this.events[eventName] && this.events[eventName].callbacks)) {
+		      logger.log.WARN([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.EVENT_UNREGISTERED]);
+		      return;
+		    }
 
-		    if (selfStreams) {
-		      Object.keys(selfStreams).forEach((streamId) => {
-		        listOfPeersStreams[user.sid].isSelf = true;
-		        listOfPeersStreams[user.sid][streamId] = selfStreams[streamId].stream;
+		    try {
+		      this[key][eventName].callbacks.forEach((cb, i) => {
+		        if (cb === callback) {
+		          delete this[key][eventName].callbacks[i];
+
+		          if (!isPrivate) {
+		            logger.log.DEBUG([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.EVENT_UNREGISTERED]);
+		          }
+		        }
 		      });
+		    } catch (err) {
+		      logger.log.ERROR([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.EVENT_DISPATCH_ERROR], err);
 		    }
-
-		    if (selfScreen) {
-		      listOfPeersStreams[user.sid].isSelf = true;
-		      listOfPeersStreams[user.sid][selfScreen.id] = selfScreen;
-		    }
-		  }
-
-		  if (hasPeerConnections(peerConnections, hasMCU)) {
-		    const listOfPeers = hasMCU ? Object.keys(peerConnections.MCU.maps) : Object.keys(peerConnections);
-		    for (let i = 0; i < listOfPeers.length; i += 1) {
-		      listOfPeersStreams[listOfPeers[i]] = {};
-		      const remoteStreams = MediaStream$1.retrieveRemoteStreams(roomState, listOfPeers[i]);
-		      remoteStreams.forEach((stream) => {
-		        listOfPeersStreams[listOfPeers[i]][stream.id] = stream;
-		      });
-		    }
-		  }
-
-		  return isEmptyObj(listOfPeersStreams) ? null : listOfPeersStreams;
-		};
-
-		const hasPeerDataChannels$1 = dataChannels => !isEmptyObj(dataChannels);
-
-		/**
-		 * @description Function that gets the current list of connected Peers Datachannel connections in the Room.
-		 * @private
-		 * @param {SkylinkState} roomState
-		 * @return {Object} listOfPeersDataChannels
-		 * @memberOf PeerDataHelpers
-		 */
-		const getPeersDataChannels = (roomState) => {
-		  const { dataChannels } = roomState;
-		  const listOfPeersDataChannels = {};
-		  const listOfPeers = Object.keys(dataChannels);
-
-		  for (let i = 0; i < listOfPeers.length; i += 1) {
-		    const peerId = listOfPeers[i];
-		    listOfPeersDataChannels[peerId] = {};
-
-		    if (hasPeerDataChannels$1(dataChannels)) {
-		      const channelProp = Object.keys(dataChannels[peerId]);
-		      for (let y = 0; y < channelProp.length; y += 1) {
-		        const channel = dataChannels[peerId][channelProp[y]];
-		        const {
-		          channelName,
-		          channelType,
-		          transferId,
-		          streamId,
-		        } = channel;
-		        let peerChannel = null;
-		        peerChannel = PeerConnection.getDataChannelBuffer(channel);
-		        peerChannel.channelProp = channelProp[y];
-		        peerChannel.channelName = channelName;
-		        peerChannel.channelType = channelType;
-		        peerChannel.currentTransferId = transferId;
-		        peerChannel.currentStreamId = streamId;
-		        peerChannel.readyState = channel.channel
-		          ? channel.channel.readyState : DATA_CHANNEL_STATE$1.CREATE_ERROR;
-
-		        listOfPeersDataChannels[peerId][channelName] = peerChannel;
-		      }
-		    }
-		  }
-
-		  return listOfPeersDataChannels;
-		};
-
-		const hasPeers = peerInformations => !isEmptyObj(peerInformations);
-
-		/**
-		 * Function that gets a current custom Peer settings.
-		 * @param {SkylinkState} state
-		 * @param {String} peerId
-		 * @private
-		 * @return {Object}
-		 * @memberOf PeerDataHelpers
-		 */
-		const getPeerCustomSettings = (state, peerId) => {
-		  const { streams } = state;
-		  const customSettings = {};
-		  customSettings.settings = {
-		    audio: false,
-		    video: false,
-		    data: false,
-		    bandwidth: clone_1(state.streamsBandwidthSettings.bAS),
-		    googleXBandwidth: clone_1(state.streamsBandwidthSettings.googleX),
-		  };
-
-		  const usePeerId = state.hasMCU ? PEER_TYPE.MCU : peerId;
-
-		  if (state.peerConnections[usePeerId].signalingState !== PEER_CONNECTION_STATE$1.CLOSED) {
-		    const initOptions = Skylink.getInitOptions();
-		    const peerInfo = PeerData.getPeerInfo(usePeerId, state.room);
-
-		    customSettings.settings = clone_1(peerInfo.settings);
-		    customSettings.settings.data = initOptions.enableDataChannel && state.peerInformations[usePeerId].config.enableDataChannel;
-
-		    // TODO: check logic - why the need to build again and not take from getPeerInfo since the signature is the same
-		    if (streams.userMedia || streams.screenshare) ;
-		  }
-
-		  //  update default conifg with peer custom config TODO: check if parsing of state.peerCustomConfigs is required or if it can be assigned directly
-		  if (state.peerCustomConfigs[usePeerId]) {
-		    if (Object.hasOwnProperty.call(state.peerCustomConfigs[usePeerId], 'bandwidth')) {
-		      const peerCustomConfigBandwidth = state.peerCustomConfigs[usePeerId].bandwidth;
-
-		      if (isAObj(peerCustomConfigBandwidth)) {
-		        if (isANumber(peerCustomConfigBandwidth.audio)) {
-		          customSettings.settings.bandwidth.audio = peerCustomConfigBandwidth.audio;
-		        }
-		        if (isANumber(peerCustomConfigBandwidth.video)) {
-		          customSettings.settings.bandwidth.video = peerCustomConfigBandwidth.video;
-		        }
-		        if (isANumber(peerCustomConfigBandwidth.data)) {
-		          customSettings.settings.bandwidth.data = peerCustomConfigBandwidth.data;
-		        }
-		      }
-		    }
-
-		    if (Object.hasOwnProperty.call(state.peerCustomConfigs[usePeerId], 'googleXBandwidth')) {
-		      const peerCustomConfigGoogleXBandwidth = state.peerCustomConfigs[usePeerId].googleXBandwidth;
-
-		      if (isAObj(peerCustomConfigGoogleXBandwidth)) {
-		        if (isANumber(peerCustomConfigGoogleXBandwidth.min)) {
-		          customSettings.settings.googleXBandwidth.min = peerCustomConfigGoogleXBandwidth.min;
-		        }
-		        if (isANumber(peerCustomConfigGoogleXBandwidth.max)) {
-		          customSettings.settings.googleXBandwidth.max = peerCustomConfigGoogleXBandwidth.max;
-		        }
-		      }
-		    }
-		  }
-
-		  // Check we are going to send data to peer // TODO: is the above check enough or do we need to parse it from sdp
-		  // if (state.sdpSessions[usePeerId]) {
-		  //   const peerLocalConnection = state.sdpSessions[usePeerId].local.connection;
-		  //   if (isAObj(peerLocalConnection)) {
-		  //     if (state.sdpSessions[usePeerId].local.connection.audio
-		  //       && state.sdpSessions[usePeerId].local.connection.audio.indexOf('send') > -1) {
-		  //       customSettings.settings.audio = true;
-		  //       customSettings.mediaStatus.audioMuted = false;
-		  //     }
-		  //     if (state.sdpSessions[usePeerId].local.connection.video
-		  //       && state.sdpSessions[usePeerId].local.connection.video.indexOf('send') > -1) {
-		  //       customSettings.settings.video = true;
-		  //       customSettings.mediaStatus.videoMuted = false;
-		  //     }
-		  //     if (state.sdpSessions[usePeerId].local.connection.data
-		  //       && state.sdpSessions[usePeerId].local.connection.data.indexOf('send') > -1) {
-		  //       customSettings.settings.data = true;
-		  //     }
-		  //   }
-		  // }
-
-		  return customSettings;
-		};
-
-		/**
-		 * @description Function that gets the list of current custom Peer settings sent and set.
-		 * @param {SkylinkState} roomState
-		 * @return {Object} customSettingsList
-		 * @memberOf PeerDataHelpers
-		 */
-		const getPeersCustomSettings = (roomState) => {
-		  const { peerInformations } = roomState;
-		  const customSettingsList = {};
-
-		  if (hasPeers(peerInformations)) {
-		    const peerIds = Object.keys(peerInformations);
-
-		    for (let peerId = 0; peerId < peerIds.length; peerId += 1) {
-		      customSettingsList[peerIds[peerId]] = getPeerCustomSettings(roomState, peerIds[peerId]);
-		    }
-
-		    return customSettingsList;
-		  }
-
-		  return customSettingsList;
-		};
-
-		/**
-		 * Iterates through all connected peers to find the greatest peerPriorityWeight and sets the current users peerPriorityWeight to max.
-		 * @param {SkylinkState} roomState
-		 * @private
-		 */
-		const setGreatestPeerPriorityWeight = (roomState) => {
-		  const state = Skylink.getSkylinkState(roomState.room.id);
-		  const { peerInformations } = state;
-		  const informationList = Object.entries(peerInformations);
-		  const selfPriorityWeight = state.peerPriorityWeight;
-
-		  let maxPeerPriority = selfPriorityWeight;
-		  for (let i = 0; i < informationList.length; i += 1) {
-		    const peerInformation = informationList[i][1];
-		    const { config: { priorityWeight } } = peerInformation;
-
-		    if (priorityWeight > maxPeerPriority) {
-		      maxPeerPriority = priorityWeight;
-		      state.peerPriorityWeight = maxPeerPriority + 1;
-		    }
-		  }
-		  Skylink.setSkylinkState(state, state.room.id);
-		  logger.log.DEBUG(`User's priorityWeight is set to ${maxPeerPriority}`);
-		};
-
-		/**
-		 * @namespace PeerDataHelpers
-		 * @description All helper and utility functions for <code>{@link PeerData}</code> class are listed here.
-		 * @private
-		 * @type {{getCurrentSessionInfo, getPeerInfo, getUserData, getUserInfo, setUserData, getPeersStreams, getPeersDataChannels, getPeersCustomSettings, setGreatestPeerPriorityWeight}}
-		 */
-		const helpers$7 = {
-		  getPeerInfo,
-		  getCurrentSessionInfo,
-		  getUserInfo,
-		  getUserData,
-		  setUserData,
-		  getPeersStreams,
-		  getPeersDataChannels,
-		  getPeersCustomSettings,
-		  setGreatestPeerPriorityWeight,
-		};
-
-		/**
-		 * @classdesc Class that represents PeerData methods
-		 * @class
-		 * @private
-		 */
-		class PeerData {
-		  /**
-		   * @description Function that returns the User / Peer current session information.
-		   * @private
-		   * @param {String} peerId
-		   * @param {SkylinkRoom} room
-		   * @return {peerInfo}
-		   */
-		  static getPeerInfo(peerId, room) {
-		    return helpers$7.getPeerInfo(peerId, room);
-		  }
-
-		  /**
-		   * @private
-		   * @param {SkylinkRoom} room
-		   * @return {peerInfo}
-		   */
-		  static getCurrentSessionInfo(room) {
-		    return helpers$7.getCurrentSessionInfo(room);
-		  }
-
-		  /**
-		   * @description Function that returns the User session information to be sent to Peers.
-		   * @private
-		   * @param {SkylinkRoom} room
-		   * @return {Object}
-		   */
-		  static getUserInfo(room) {
-		    return helpers$7.getUserInfo(room);
-		  }
-
-		  /**
-		   * @description Function that returns the User / Peer current custom data.
-		   * @private
-		   * @param {Skylink} roomState
-		   * @param {String} peerId
-		   * @return {roomState.userData}
-		   */
-		  static getUserData(roomState, peerId) {
-		    return helpers$7.getUserData(roomState, peerId);
-		  }
-
-		  /**
-		   * @description Function that overwrites the User current custom data.
-		   * @private
-		   * @param {SkylinkRoom} room
-		   * @param {String | Object} userData
-		   */
-		  static setUserData(room, userData) {
-		    helpers$7.setUserData(room, userData);
-		  }
-
-		  /**
-		   * @description  Function that gets the list of connected Peers Streams in the Room.
-		   * @private
-		   * @param {SkylinkState} roomState
-		   * @param {boolean} [includeSelf=true] - The flag if self streams are included.
-		   * @return {Object}
-		   */
-		  static getPeersStreams(roomState, includeSelf) {
-		    return helpers$7.getPeersStreams(roomState, includeSelf);
-		  }
-
-		  /**
-		   * @description Function that gets the current list of connected Peers Datachannel connections in the Room.
-		   * @private
-		   * @param {SkylinkState} roomState
-		   * @return {Object} listOfPeersDataChannels
-		   */
-		  static getPeersDataChannels(roomState) {
-		    return helpers$7.getPeersDataChannels(roomState);
-		  }
-
-		  /**
-		   * @description Function that gets the list of current custom Peer settings sent and set.
-		   * @param {SkylinkState} roomState
-		   * @return {Object}
-		   */
-		  static getPeersCustomSettings(roomState) {
-		    return helpers$7.getPeersCustomSettings(roomState);
-		  }
-
-		  /**
-		   * Iterates through all connected peers to find the greatest peerPriorityWeight and sets the current users peerPriorityWeight to max.
-		   * @param {SkylinkState} roomState
-		   * @return {*|void}
-		   */
-		  static setGreatestPeerPriorityWeight(roomState) {
-		    return helpers$7.setGreatestPeerPriorityWeight(roomState);
 		  }
 		}
+
+		const skylinkEventManager = new SkylinkEventManager();
+		const addEventListener = skylinkEventManager.addPrivateEventListener.bind(skylinkEventManager);
+		const removeEventListener = skylinkEventManager.removePrivateEventListener.bind(skylinkEventManager);
+		const dispatchEvent = skylinkEventManager.dispatchEvent.bind(skylinkEventManager);
+
+		const logMethods = [
+		  'trace',
+		  'debug',
+		  'info',
+		  'warn',
+		  'error',
+		];
+
+		const LEVEL_STORAGE_KEY = 'loglevel:skylinkjs';
+
+		const checkSupport = (methodName) => {
+		  let hasSupport = true;
+		  if (typeof console === 'undefined') {
+		    hasSupport = false;
+		  } else if (typeof console[methodName] === 'undefined') { // eslint-disable-line no-console
+		    hasSupport = false;
+		  }
+		  return hasSupport;
+		};
+
+		const getFormattedMessage = (message) => {
+		  let log = 'SkylinkJS -';
+		  if (Array.isArray(message)) {
+		    // fragment1 - peerId
+		    // fragment2 - tag
+		    // fragment3 - additional info / state
+		    const [fragment1, fragment2, fragment3, messageString] = message;
+		    log += fragment1 ? ` [${fragment1}]` : ' -';
+		    // eslint-disable-next-line no-nested-ternary
+		    log += fragment2 ? ` <<${fragment2}>>` : (fragment1 ? '' : ' <<Method>>');
+		    if (fragment3) {
+		      if (Array.isArray(fragment3)) {
+		        for (let i = 0; i < fragment3.length; i += 1) {
+		          log += ` (${fragment3[i]})`;
+		        }
+		      } else {
+		        log += ` (${fragment3})`;
+		      }
+		    }
+		    log += ` ${messageString}`;
+		  } else {
+		    log += ` ${message}`;
+		  }
+		  return log;
+		};
+
+		const logFn = (logger$1, level, message, debugObject = null) => {
+		  const datetime = `[${(new Date()).toISOString()}]`;
+		  const currentLevel = logger$1.level;
+		  const { logLevels } = logger$1;
+		  if (currentLevel <= level && currentLevel !== logLevels.SILENT) {
+		    const methodName = logMethods[level];
+		    const hasSupport = checkSupport(methodName);
+
+		    if (!hasSupport) {
+		      return;
+		    }
+
+		    const formattedMessage = getFormattedMessage(message);
+		    if (checkSupport(methodName)) {
+		      console[methodName](datetime, formattedMessage, debugObject || ''); // eslint-disable-line no-console
+		      dispatchEvent(loggedOnConsole({ level: methodName, message: formattedMessage, debugObject }));
+		    }
+
+		    if (logger.storeLogs) {
+		      const logItems = [datetime, methodName.toUpperCase(), formattedMessage];
+		      if (debugObject) {
+		        logItems.push(debugObject);
+		      }
+		      logger.storedLogs.push(logItems);
+		    }
+		  }
+		};
+
+		const persistLogLevel = (level) => {
+		  window.localStorage.setItem(LEVEL_STORAGE_KEY, level);
+		};
+
+		const getPersistedLevel = (logLevels) => {
+		  const level = window.localStorage.getItem(LEVEL_STORAGE_KEY);
+		  return level !== null && !Number.isNaN(+level) ? +level : logLevels.ERROR;
+		};
+
+		/**
+		 * @classdesc Class used for logging messages on the console. Exports a singleton logger object.
+		 * @class SkylinkLogger
+		 * @public
+		 * @example
+		 * import { SkylinkLogger } from 'skylinkjs';
+		 *
+		 * const skylinkLogger = new SkylinkLogger();
+		 */
+		class SkylinkLogger {
+		  constructor() {
+		    /**
+		     * @description List of log levels.
+		     * @type {Object} logLevels
+		     * @property {number} TRACE - All logs.
+		     * @property {number} DEBUG
+		     * @property {number} INFO
+		     * @property {number} WARN
+		     * @property {number} ERROR
+		     * @property {number} SILENT - No logs.
+		     */
+		    this.logLevels = {
+		      TRACE: 0, // All Logs
+		      DEBUG: 1,
+		      INFO: 2,
+		      WARN: 3,
+		      ERROR: 4, // Ideal level for Production Env.
+		      SILENT: 5, // No logging
+		    };
+
+		    this.level = getPersistedLevel(this.logLevels);
+
+		    /**
+		     * @description The flag that enables the store logs function.
+		     * @type {boolean}
+		     */
+		    this.storeLogs = false;
+
+		    /**
+		     * @description The stored logs when storeLogs flag is set to true.
+		     * @type {Array.<logItems>} The array of stored logs
+		     */
+		    this.storedLogs = [];
+		  }
+
+		  /**
+		   * @description Method that sets the log level.
+		   * @param {number} level - The log level to be set. REF: {@link SkylinkLogger#logLevels|logLevels}
+		   * @param {Boolean} storeLogs - The flag if logs should be stored.
+		   * @public
+		   * @example
+		   * skylinkLogger.setLogLevels(skylinkLogger.logLevels.TRACE);
+		   * @alias SkylinkLogger#setLevel
+		   */
+		  setLevel(level = this.levels.ERROR, storeLogs) {
+		    if (typeof level === 'number') {
+		      this.level = level;
+		      persistLogLevel(this.level);
+		    } else {
+		      this.level = this.levels.ERROR;
+		    }
+
+		    if (storeLogs) {
+		      this.storeLogs = storeLogs;
+		    }
+		  }
+
+		  /**
+		   * @description Enables logging with highest level (TRACE).
+		   * @public
+		   * @alias SkylinkLogger#enableAll
+		   */
+		  enableAll() {
+		    this.setLevel(this.logLevels.TRACE);
+		  }
+
+		  /**
+		   * @description Disables all logging with lowest level (SILENT).
+		   * @public
+		   * @alias SkylinkLogger#disableAll
+		   */
+		  disableAll() {
+		    this.setLevel(this.logLevels.SILENT);
+		  }
+
+		  getLogs() {
+		    if (this.storeLogs) {
+		      return this.storedLogs;
+		    }
+
+		    this.log.WARN(MESSAGES.LOGGER.LOGS_NOT_STORED);
+		    return null;
+		  }
+
+		  clearLogs() {
+		    this.log.INFO(MESSAGES.LOGGER.LOGS_CLEARED);
+		    this.storedLogs = [];
+		  }
+		}
+
+		/**
+		 * @type {SkylinkLogger}
+		 * @private
+		 */
+		const logger = new SkylinkLogger();
+
+		/**
+		 * @description Method to trigger a log
+		 * @type {{TRACE: SkylinkLogger.log.TRACE, DEBUG: SkylinkLogger.log.DEBUG, INFO: SkylinkLogger.log.INFO, WARN: SkylinkLogger.log.WARN, ERROR: SkylinkLogger.log.ERROR}}
+		 * @private
+		 */
+		SkylinkLogger.prototype.log = {
+		  TRACE: (...params) => {
+		    logFn(logger, logger.logLevels.TRACE, ...params);
+		  },
+		  DEBUG: (...params) => {
+		    logFn(logger, logger.logLevels.DEBUG, ...params);
+		  },
+		  INFO: (...params) => {
+		    logFn(logger, logger.logLevels.INFO, ...params);
+		  },
+		  WARN: (...params) => {
+		    logFn(logger, logger.logLevels.WARN, ...params);
+		  },
+		  ERROR: (...params) => {
+		    logFn(logger, logger.logLevels.ERROR, ...params);
+		  },
+		};
+
+		const getSDPCodecsSupport = (targetMid, sessionDescription) => {
+		  const codecs = { audio: {}, video: {} };
+
+		  if (!(sessionDescription && sessionDescription.sdp)) {
+		    return codecs;
+		  }
+
+		  const sdpLines = sessionDescription.sdp.split('\r\n');
+		  let mediaType = '';
+
+		  for (let i = 0; i < sdpLines.length; i += 1) {
+		    /* eslint-disable prefer-destructuring */
+		    /* eslint-disable no-continue */
+		    if (sdpLines[i].indexOf('m=') === 0) {
+		      mediaType = (sdpLines[i].split('m=')[1] || '').split(' ')[0];
+		      continue;
+		    }
+
+		    if (sdpLines[i].indexOf('a=rtpmap:') === 0) {
+		      const parts = (sdpLines[i].split(' ')[1] || '').split('/');
+		      const codec = (parts[0] || '').toLowerCase();
+		      const info = parts[1] + (parts[2] ? `/${parts[2]}` : '');
+
+		      if (['ulpfec', 'red', 'telephone-event', 'cn', 'rtx'].indexOf(codec) > -1) {
+		        continue;
+		      }
+
+		      codecs[mediaType][codec] = codecs[mediaType][codec] || [];
+
+		      if (codecs[mediaType][codec].indexOf(info) === -1) {
+		        codecs[mediaType][codec].push(info);
+		      }
+		    }
+		  }
+
+		  logger.log.INFO([targetMid || null, 'RTCSessionDescription', sessionDescription.type, 'Parsed codecs support ->'], codecs);
+		  return codecs;
+		};
+
+		const getCodecsSupport = roomKey => new Promise((resolve, reject) => {
+		  const state = Skylink.getSkylinkState(roomKey);
+		  const updatedState = state;
+		  const { AdapterJS, RTCRtpSender, RTCPeerConnection } = window;
+
+		  if (state.currentCodecSupport) {
+		    resolve(state.currentCodecSupport);
+		  }
+
+		  updatedState.currentCodecSupport = { audio: {}, video: {} };
+
+		  // Safari 11 REQUIRES a stream first before connection works, hence let's spoof it for now
+		  if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
+		    updatedState.currentCodecSupport.audio = {
+		      opus: ['48000/2'],
+		    };
+		    updatedState.currentCodecSupport.video = {
+		      h264: ['48000'],
+		    };
+		    resolve(updatedState.currentCodecSupport);
+		  }
+
+		  try {
+		    if (window.webrtcDetectedBrowser === 'edge') {
+		      const { codecs } = RTCRtpSender.getCapabilities();
+
+		      for (let i = 0; i < codecs.length; i += 1) {
+		        if (['audio', 'video'].indexOf(codecs[i].kind) > -1 && codecs[i].name) {
+		          const codec = codecs[i].name.toLowerCase();
+		          updatedState.currentCodecSupport[codecs[i].kind][codec] = codecs[i].clockRate + (codecs[i].numChannels > 1 ? `/${codecs[i].numChannels}` : '');
+		        }
+		      }
+		      // Ignore .fecMechanisms for now
+		      resolve(updatedState.currentCodecSupport);
+		    } else {
+		      const pc = new RTCPeerConnection(null);
+		      const offerConstraints = AdapterJS.webrtcDetectedType !== 'plugin' ? {
+		        offerToReceiveAudio: true,
+		        offerToReceiveVideo: true,
+		      } : {
+		        mandatory: {
+		          OfferToReceiveVideo: true,
+		          OfferToReceiveAudio: true,
+		        },
+		      };
+
+		      // Prevent errors and proceed with create offer still...
+		      try {
+		        const channel = pc.createDataChannel('test');
+		        updatedState.binaryChunkType = channel.binaryType || state.binaryChunkType;
+		        updatedState.binaryChunkType = state.binaryChunkType.toLowerCase().indexOf('array') > -1 ? DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER : state.binaryChunkType;
+		        // Set the value according to the property
+		        const prop = Object.keys(DATA_TRANSFER_DATA_TYPE);
+		        for (let i = 0; i < prop.length; i += 1) {
+		          // eslint-disable-next-line no-prototype-builtins
+		          if (DATA_TRANSFER_DATA_TYPE.hasOwnProperty(prop)
+		              && state.binaryChunkType.toLowerCase() === DATA_TRANSFER_DATA_TYPE[prop].toLowerCase()) {
+		            updatedState.binaryChunkType = DATA_TRANSFER_DATA_TYPE[prop];
+		            break;
+		          }
+		        }
+		        // eslint-disable-next-line no-empty
+		      } catch (e) {}
+
+		      pc.createOffer(offerConstraints)
+		        .then((offer) => {
+		          updatedState.currentCodecSupport = SessionDescription.getSDPCodecsSupport(null, offer, roomKey);
+		          resolve(updatedState.currentCodecSupport);
+		        })
+		        .catch((error) => {
+		          reject(error);
+		        });
+		    }
+		  } catch (error) {
+		    reject(error);
+		  }
+		});
+
+		/* eslint-disable prefer-template */
+
+		const parseFn = (sessionDescription, type, codecName, samplingRate, settings) => {
+		  const mLine = sessionDescription.sdp.match(new RegExp('m=' + type + '\ .*\r\n', 'gi'));
+		  // Find the m= line
+		  if (Array.isArray(mLine) && mLine.length > 0) {
+		    const codecsList = sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codecName + '\/'
+		      + (samplingRate ? samplingRate + (type === 'audio' ? '[\/]*.*' : '.*') : '.*') + '\r\n', 'gi'));
+		    // Get the list of codecs related to it
+		    if (Array.isArray(codecsList) && codecsList.length > 0) {
+		      for (let i = 0; i < codecsList.length; i += 1) {
+		        const payload = (codecsList[i].split('a=rtpmap:')[1] || '').split(' ')[0];
+		        if (!payload) {
+		          continue;
+		        }
+		        const fmtpLine = sessionDescription.sdp.match(new RegExp('a=fmtp:' + payload + '\ .*\r\n', 'gi'));
+		        let updatedFmtpLine = 'a=fmtp:' + payload + ' ';
+		        const addedKeys = [];
+		        // Check if a=fmtp: line exists
+		        if (Array.isArray(fmtpLine) && fmtpLine.length > 0) {
+		          const fmtpParts = (fmtpLine[0].split('a=fmtp:' + payload + ' ')[1] || '').replace(/ /g, '').replace(/\r\n/g, '').split(';');
+		          for (let j = 0; j < fmtpParts.length; j += 1) {
+		            if (!fmtpParts[j]) {
+		              continue;
+		            }
+		            const keyAndValue = fmtpParts[j].split('=');
+		            if (settings.hasOwnProperty(keyAndValue[0])) {
+		              // Dont append parameter key+value if boolean and false
+		              updatedFmtpLine += typeof settings[keyAndValue[0]] === 'boolean' ? (settings[keyAndValue[0]]
+		                ? keyAndValue[0] + '=1;' : '') : keyAndValue[0] + '=' + settings[keyAndValue[0]] + ';';
+		            } else {
+		              updatedFmtpLine += fmtpParts[j] + ';';
+		            }
+		            addedKeys.push(keyAndValue[0]);
+		          }
+		          sessionDescription.sdp = sessionDescription.sdp.replace(fmtpLine[0], '');
+		        }
+		        for (const key in settings) {
+		          if (settings.hasOwnProperty(key) && addedKeys.indexOf(key) === -1) {
+		            // Dont append parameter key+value if boolean and false
+		            updatedFmtpLine += typeof settings[key] === 'boolean' ? (settings[key] ? key + '=1;' : '') : key + '=' + settings[key] + ';';
+		            addedKeys.push(key);
+		          }
+		        }
+		        if (updatedFmtpLine !== 'a=fmtp:' + payload + ' ') {
+		          sessionDescription.sdp = sessionDescription.sdp.replace(codecsList[i], codecsList[i] + updatedFmtpLine + '\r\n');
+		        }
+		      }
+		    }
+		  }
+		};
+
+		const setSDPCodecParams = (targetMid, sessionDescription, roomKey) => {
+		  const state = Skylink.getSkylinkState(roomKey);
+		  const initOptions = Skylink.getInitOptions();
+
+		  // Set audio codecs -> OPUS
+		  // RFC: https://tools.ietf.org/html/draft-ietf-payload-rtp-opus-11
+		  parseFn(sessionDescription, 'audio', AUDIO_CODEC.OPUS, 48000, (() => {
+		    const opusOptions = {};
+		    // let audioSettings = state.streams.screenshare ? state.streams.screenshare.settings.audio : (state.streams.userMedia ? state.streams.userMedia.settings.audio : {});
+		    // TODO: check if settings across different streams are the same
+		    // FIXME: Quickfix to pass in first stream
+		    const streamIds = Object.keys(state.streams.userMedia);
+		    let audioSettings = state.streams.userMedia ? state.streams.userMedia[streamIds[0]].settings.audio : {};
+		    audioSettings = audioSettings && typeof audioSettings === 'object' ? audioSettings : {};
+		    if (typeof initOptions.codecParams.audio.opus.stereo === 'boolean') {
+		      opusOptions.stereo = initOptions.codecParams.audio.opus.stereo;
+		    } else if (typeof audioSettings.stereo === 'boolean') {
+		      opusOptions.stereo = audioSettings.stereo;
+		    }
+		    if (typeof initOptions.codecParams.audio.opus['sprop-stereo'] === 'boolean') {
+		      opusOptions['sprop-stereo'] = initOptions.codecParams.audio.opus['sprop-stereo'];
+		    } else if (typeof audioSettings.stereo === 'boolean') {
+		      opusOptions['sprop-stereo'] = audioSettings.stereo;
+		    }
+		    if (typeof initOptions.codecParams.audio.opus.usedtx === 'boolean') {
+		      opusOptions.usedtx = initOptions.codecParams.audio.opus.usedtx;
+		    } else if (typeof audioSettings.usedtx === 'boolean') {
+		      opusOptions.usedtx = audioSettings.usedtx;
+		    }
+		    if (typeof initOptions.codecParams.audio.opus.useinbandfec === 'boolean') {
+		      opusOptions.useinbandfec = initOptions.codecParams.audio.opus.useinbandfec;
+		    } else if (typeof audioSettings.useinbandfec === 'boolean') {
+		      opusOptions.useinbandfec = audioSettings.useinbandfec;
+		    }
+		    if (typeof initOptions.codecParams.audio.opus.maxplaybackrate === 'number') {
+		      opusOptions.maxplaybackrate = initOptions.codecParams.audio.opus.maxplaybackrate;
+		    } else if (typeof audioSettings.maxplaybackrate === 'number') {
+		      opusOptions.maxplaybackrate = audioSettings.maxplaybackrate;
+		    }
+		    if (typeof initOptions.codecParams.audio.opus.minptime === 'number') {
+		      opusOptions.minptime = initOptions.codecParams.audio.opus.minptime;
+		    } else if (typeof audioSettings.minptime === 'number') {
+		      opusOptions.minptime = audioSettings.minptime;
+		    }
+		    // Possible future params: sprop-maxcapturerate, maxaveragebitrate, sprop-stereo, cbr
+		    // NOT recommended: maxptime, ptime, rate, minptime
+		    return opusOptions;
+		  })());
+
+		  // RFC: https://tools.ietf.org/html/rfc4733
+		  // Future: Set telephone-event: 100 0-15,66,70
+
+		  // RFC: https://tools.ietf.org/html/draft-ietf-payload-vp8-17
+		  // Set video codecs -> VP8
+		  parseFn(sessionDescription, 'video', VIDEO_CODEC.VP8, null, (() => {
+		    const vp8Options = {};
+		    // NOT recommended: max-fr, max-fs (all are codec decoder capabilities)
+		    if (typeof initOptions.codecParams.video.vp8.maxFr === 'number') {
+		      vp8Options['max-fr'] = initOptions.codecParams.video.vp8.maxFr;
+		    }
+		    if (typeof initOptions.codecParams.video.vp8.maxFs === 'number') {
+		      vp8Options['max-fs'] = initOptions.codecParams.video.vp8.maxFs;
+		    }
+		    return vp8Options;
+		  })());
+
+		  // RFC: https://tools.ietf.org/html/draft-ietf-payload-vp9-02
+		  // Set video codecs -> VP9
+		  parseFn(sessionDescription, 'video', VIDEO_CODEC.VP9, null, (() => {
+		    const vp9Options = {};
+		    // NOT recommended: max-fr, max-fs (all are codec decoder capabilities)
+		    if (typeof initOptions.codecParams.video.vp9.maxFr === 'number') {
+		      vp9Options['max-fr'] = initOptions.codecParams.video.vp9.maxFr;
+		    }
+		    if (typeof initOptions.codecParams.video.vp9.maxFs === 'number') {
+		      vp9Options['max-fs'] = initOptions.codecParams.video.vp9.maxFs;
+		    }
+		    return vp9Options;
+		  })());
+
+		  // RFC: https://tools.ietf.org/html/rfc6184
+		  // Set the video codecs -> H264
+		  parseFn(sessionDescription, 'video', VIDEO_CODEC.H264, null, (() => {
+		    const h264Options = {};
+		    if (typeof initOptions.codecParams.video.h264.levelAsymmetryAllowed === 'string') {
+		      h264Options['profile-level-id'] = initOptions.codecParams.video.h264.profileLevelId;
+		    }
+		    if (typeof initOptions.codecParams.video.h264.levelAsymmetryAllowed === 'boolean') {
+		      h264Options['level-asymmetry-allowed'] = initOptions.codecParams.video.h264.levelAsymmetryAllowed;
+		    }
+		    if (typeof initOptions.codecParams.video.h264.packetizationMode === 'boolean') {
+		      h264Options['packetization-mode'] = initOptions.codecParams.video.h264.packetizationMode;
+		    }
+		    // Possible future params (remove if they are decoder/encoder capabilities or info):
+		    //   max-recv-level, max-mbps, max-smbps, max-fs, max-cpb, max-dpb, max-br,
+		    //   max-mbps, max-smbps, max-fs, max-cpb, max-dpb, max-br, redundant-pic-cap, sprop-parameter-sets,
+		    //   sprop-level-parameter-sets, use-level-src-parameter-sets, in-band-parameter-sets,
+		    //   sprop-interleaving-depth, sprop-deint-buf-req, deint-buf-cap, sprop-init-buf-time,
+		    //   sprop-max-don-diff, max-rcmd-nalu-size, sar-understood, sar-supported
+		    //   NOT recommended: profile-level-id (WebRTC uses "42e00a" for the moment)
+		    //   https://bugs.chromium.org/p/chromium/issues/detail?id=645599
+		    return h264Options;
+		  })());
+
+		  return sessionDescription.sdp;
+		};
+
+		/* eslint-disable no-param-reassign */
+		const removeSDPFilteredCandidates = (targetMid, sessionDescription, roomKey) => {
+		  const initOptions = Skylink.getInitOptions();
+		  const state = Skylink.getSkylinkState(roomKey);
+		  // Handle Firefox MCU Peer ICE candidates
+		  if (targetMid === PEER_TYPE.MCU && sessionDescription.type === HANDSHAKE_PROGRESS$1.ANSWER
+		    && window.webrtcDetectedBrowser === 'firefox') {
+		    sessionDescription.sdp = sessionDescription.sdp.replace(/ generation 0/g, '');
+		    sessionDescription.sdp = sessionDescription.sdp.replace(/ udp /g, ' UDP ');
+		  }
+
+		  if (initOptions.forceTURN && state.hasMCU) {
+		    logger.log.WARN([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Not filtering ICE candidates as '
+		    + 'TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate '
+		    + 'flags are not honoured']);
+		    return sessionDescription.sdp;
+		  }
+
+		  if (initOptions.filterCandidatesType.host) {
+		    logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "host" ICE candidates.']);
+		    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*host.*\r\n/g, '');
+		  }
+
+		  if (initOptions.filterCandidatesType.srflx) {
+		    logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "srflx" ICE candidates.']);
+		    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*srflx.*\r\n/g, '');
+		  }
+
+		  if (initOptions.filterCandidatesType.relay) {
+		    logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Removing "relay" ICE candidates.']);
+		    sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:.*relay.*\r\n/g, '');
+		  }
+		  // sessionDescription.sdp = sessionDescription.sdp.replace(/a=candidate:(?!.*relay.*).*\r\n/g, '');
+		  return sessionDescription.sdp;
+		};
+
+		/* eslint-disable prefer-template */
+
+		const setSDPCodec = (targetMid, sessionDescription, roomKey, overrideSettings) => {
+		  const initOptions = Skylink.getInitOptions(roomKey);
+		  const parseFn = (type, codecSettings) => {
+		    const codec = typeof codecSettings === 'object' ? codecSettings.codec : codecSettings;
+		    let samplingRate = typeof codecSettings === 'object' ? codecSettings.samplingRate : null;
+		    let channels = typeof codecSettings === 'object' ? codecSettings.channels : null;
+
+		    if (codec === constants[type === 'audio' ? 'AUDIO_CODEC' : 'VIDEO_CODEC'].AUTO) {
+		      logger.log.WARN([targetMid, 'RTCSessionDesription', sessionDescription.type, `Not preferring any codec for ${type} streaming. Using browser selection.`]);
+		      return;
+		    }
+
+		    const mLine = sessionDescription.sdp.match(new RegExp('m=' + type + ' .*\r\n', 'gi'));
+
+		    if (!(Array.isArray(mLine) && mLine.length > 0)) {
+		      logger.log.ERROR([targetMid, 'RTCSessionDesription', sessionDescription.type, `Not preferring any codec for ${type} streaming as m= line is not found.`]);
+		      return;
+		    }
+
+		    const setLineFn = (codecsList, isSROk, isChnlsOk) => {
+		      if (Array.isArray(codecsList) && codecsList.length > 0) {
+		        if (!isSROk) {
+		          samplingRate = null;
+		        }
+		        if (!isChnlsOk) {
+		          channels = null;
+		        }
+		        logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Preferring "' + codec + '" (samplingRate: ' + (samplingRate || 'n/a') + ', channels: ' + (channels || 'n/a') + ') for "' + type + '" streaming.']);
+
+		        let line = mLine[0];
+		        const lineParts = line.replace('\r\n', '').split(' ');
+		        // Set the m=x x UDP/xxx
+		        line = lineParts[0] + ' ' + lineParts[1] + ' ' + lineParts[2] + ' ';
+		        // Remove them to leave the codecs only
+		        lineParts.splice(0, 3);
+		        // Loop for the codecs list to append first
+		        for (let i = 0; i < codecsList.length; i += 1) {
+		          const parts = (codecsList[i].split('a=rtpmap:')[1] || '').split(' ');
+		          if (parts.length < 2) {
+		            continue;
+		          }
+		          line += parts[0] + ' ';
+		        }
+		        // Loop for later fallback codecs to append
+		        for (let j = 0; j < lineParts.length; j += 1) {
+		          if (line.indexOf(' ' + lineParts[j]) > 0) {
+		            lineParts.splice(j, 1);
+		            j -= 1;
+		          } else if (sessionDescription.sdp.match(new RegExp('a=rtpmap:' + lineParts[j] + '\ ' + codec + '/.*\r\n', 'gi'))) {
+		            line += lineParts[j] + ' ';
+		            lineParts.splice(j, 1);
+		            j -= 1;
+		          }
+		        }
+		        // Append the rest of the codecs
+		        line += lineParts.join(' ') + '\r\n';
+		        sessionDescription.sdp = sessionDescription.sdp.replace(mLine[0], line);
+		        return true;
+		      }
+		    };
+
+		    // If samplingRate & channels
+		    if (samplingRate) {
+		      if (type === 'audio' && channels && setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ '
+		        + codec + '\/' + samplingRate + (channels === 1 ? '[\/1]*' : '\/' + channels) + '\r\n', 'gi')), true, true)) {
+		        return;
+		      } else if (setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/' + samplingRate + '[\/]*.*\r\n', 'gi')), true)) {
+		        return;
+		      }
+		    }
+		    if (type === 'audio' && channels && setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/.*\/' + channels + '\r\n', 'gi')), false, true)) {
+		      return;
+		    }
+
+		    setLineFn(sessionDescription.sdp.match(new RegExp('a=rtpmap:.*\ ' + codec + '\/.*\r\n', 'gi')));
+		  };
+
+		  parseFn('audio', overrideSettings ? overrideSettings.audio : initOptions.audioCodec);
+		  parseFn('video', overrideSettings ? overrideSettings.video : initOptions.videoCodec);
+
+		  return sessionDescription.sdp;
+		};
+
+		/* eslint-disable prefer-template */
+
+		// alternative to munging is to implement RTCRtpSender.setParameters()
+		const setSDPBitrate = (targetMid, sessionDescription, roomKey) => {
+		  const state = Skylink.getSkylinkState(roomKey);
+		  const sdpLines = sessionDescription.sdp.split('\r\n');
+		  const parseFn = function (type, bw) {
+		    let mLineType = type;
+		    let mLineIndex = -1;
+		    let cLineIndex = -1;
+
+		    if (type === 'data') {
+		      mLineType = 'application';
+		    }
+
+		    for (let i = 0; i < sdpLines.length; i += 1) {
+		      if (sdpLines[i].indexOf('m=' + mLineType) === 0) {
+		        mLineIndex = i;
+		      } else if (mLineIndex > 0) {
+		        if (sdpLines[i].indexOf('m=') === 0) {
+		          break;
+		        }
+
+		        if (sdpLines[i].indexOf('c=') === 0) {
+		          cLineIndex = i;
+		          // Remove previous b:AS settings
+		        } else if (sdpLines[i].indexOf('b=AS:') === 0 || sdpLines[i].indexOf('b:TIAS:') === 0) {
+		          sdpLines.splice(i, 1);
+		          i -= 1;
+		        }
+		      }
+		    }
+
+		    if (!(typeof bw === 'number' && bw > 0)) {
+		      logger.log.WARN([targetMid, 'RTCSessionDesription', sessionDescription.type, `Not limiting ${type} bandwidth`]);
+		      return;
+		    }
+
+		    if (cLineIndex === -1) {
+		      logger.log.ERROR([targetMid, 'RTCSessionDesription', sessionDescription.type, `Failed setting ${type} bandwidth as c-line is missing.`]);
+		      return;
+		    }
+
+		    // Follow RFC 4566, that the b-line should follow after c-line.
+		    logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, `Limiting maximum sending ${type} bandwidth ->`], bw);
+		    sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1000 * (window.webrtcDetectedVersion > 52 && window.webrtcDetectedVersion < 55 ? 1000 : 1)).toFixed(0) : 'b=AS:' + bw);
+		  };
+
+		  let bASAudioBw = state.streamsBandwidthSettings.bAS.audio;
+		  let bASVideoBw = state.streamsBandwidthSettings.bAS.video;
+		  let bASDataBw = state.streamsBandwidthSettings.bAS.data;
+		  let googleXMinBw = state.streamsBandwidthSettings.googleX.min;
+		  let googleXMaxBw = state.streamsBandwidthSettings.googleX.max;
+
+		  if (state.peerCustomConfigs[targetMid]) {
+		    if (state.peerCustomConfigs[targetMid].bandwidth
+		      && typeof state.peerCustomConfigs[targetMid].bandwidth === 'object') {
+		      if (typeof state.peerCustomConfigs[targetMid].bandwidth.audio === 'number') {
+		        bASAudioBw = state.peerCustomConfigs[targetMid].bandwidth.audio;
+		      }
+		      if (typeof state.peerCustomConfigs[targetMid].bandwidth.video === 'number') {
+		        bASVideoBw = state.peerCustomConfigs[targetMid].bandwidth.video;
+		      }
+		      if (typeof state.peerCustomConfigs[targetMid].bandwidth.data === 'number') {
+		        bASDataBw = state.peerCustomConfigs[targetMid].bandwidth.data;
+		      }
+		    }
+		    if (state.peerCustomConfigs[targetMid].googleXBandwidth && typeof state.peerCustomConfigs[targetMid].googleXBandwidth === 'object') {
+		      if (typeof state.peerCustomConfigs[targetMid].googleXBandwidth.min === 'number') {
+		        googleXMinBw = state.peerCustomConfigs[targetMid].googleXBandwidth.min;
+		      }
+		      if (typeof state.peerCustomConfigs[targetMid].googleXBandwidth.max === 'number') {
+		        googleXMaxBw = state.peerCustomConfigs[targetMid].googleXBandwidth.max;
+		      }
+		    }
+		  }
+
+		  parseFn('audio', bASAudioBw);
+		  parseFn('video', bASVideoBw);
+		  parseFn('data', bASDataBw);
+
+		  // Sets the experimental google bandwidth
+		  if ((typeof googleXMinBw === 'number') || (typeof googleXMaxBw === 'number')) {
+		    let codec = null;
+		    let codecRtpMapLineIndex = -1;
+		    let codecFmtpLineIndex = -1;
+
+		    for (let j = 0; j < sdpLines.length; j += 1) {
+		      if (sdpLines[j].indexOf('m=video') === 0) {
+		        codec = sdpLines[j].split(' ')[3];
+		      } else if (codec) {
+		        if (sdpLines[j].indexOf('m=') === 0) {
+		          break;
+		        }
+
+		        if (sdpLines[j].indexOf('a=rtpmap:' + codec + ' ') === 0) {
+		          codecRtpMapLineIndex = j;
+		        } else if (sdpLines[j].indexOf('a=fmtp:' + codec + ' ') === 0) {
+		          sdpLines[j] = sdpLines[j].replace(/x-google-(min|max)-bitrate=[0-9]*[;]*/gi, '');
+		          codecFmtpLineIndex = j;
+		          break;
+		        }
+		      }
+		    }
+
+		    if (codecRtpMapLineIndex > -1) {
+		      let xGoogleParams = '';
+
+		      if (typeof googleXMinBw === 'number') {
+		        xGoogleParams += 'x-google-min-bitrate=' + googleXMinBw + ';';
+		      }
+
+		      if (typeof googleXMaxBw === 'number') {
+		        xGoogleParams += 'x-google-max-bitrate=' + googleXMaxBw + ';';
+		      }
+
+		      logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Limiting x-google-bitrate ->'], xGoogleParams);
+
+		      if (codecFmtpLineIndex > -1) {
+		        sdpLines[codecFmtpLineIndex] += (sdpLines[codecFmtpLineIndex].split(' ')[1] ? ';' : '') + xGoogleParams;
+		      } else {
+		        sdpLines.splice(codecRtpMapLineIndex + 1, 0, 'a=fmtp:' + codec + ' ' + xGoogleParams);
+		      }
+		    }
+		  }
+
+		  return sdpLines.join('\r\n');
+		};
 
 		/* eslint-disable prefer-template,no-param-reassign */
 
@@ -22839,12 +23005,14 @@
 		};
 
 		const parseMedia = (state, output, type, value, peerConnection, peerId, isAutoBwStats, direction) => {
-		  const trackKind = value.kind;
+		  const trackKind = value.kind || value.mediaType; // Safari uses mediaType key
 
 		  if (trackKind === TRACK_KIND.AUDIO) {
 		    parsers$1.parseAudio(state, output, type, value, peerId, isAutoBwStats, direction);
-		  } else {
+		  } else if (trackKind === TRACK_KIND.VIDEO) {
 		    parsers$1.parseVideo(state, output, type, value, peerId, isAutoBwStats, direction);
+		  } else {
+		    logger.log.DEBUG([undefined.peerId, TAGS.STATS_MODULE, null, MESSAGES.STATS_MODULE.INVALID_TRACK_KIND], value);
 		  }
 		};
 
@@ -22920,6 +23088,12 @@
 		  }
 
 		  getStatsSuccess(promiseResolve, promiseReject, stats) {
+		    const { AdapterJS } = window;
+		    if (!stats && AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE) {
+		      // get stats in react native will resolve with 'null'
+		      promiseResolve(this.output);
+		      return;
+		    }
 		    const { peerBandwidth, peerStats, room } = this.roomState;
 		    // TODO: Need to do full implementation of success function
 		    if (typeof stats.forEach === 'function') {
@@ -23126,10 +23300,10 @@
 
 		const addScreenStreamToState = (state, stream) => {
 		  const { room, user } = state;
-		  const settings = helpers$6.parseStreamSettings({ video: true });
+		  const settings = helpers$7.parseStreamSettings({ video: true });
 		  const isScreensharing = true;
 		  const isAudioFallback = false;
-		  helpers$6.processStreamInState(stream, settings, room.id, isScreensharing, isAudioFallback);
+		  helpers$7.processStreamInState(stream, settings, room.id, isScreensharing, isAudioFallback);
 
 		  dispatchEvent(onIncomingScreenStream({
 		    stream,
@@ -23237,7 +23411,7 @@
 		   * @param {boolean} hasScreenshare - Is screenshare enabled
 		   */
 		  static addPeer(params) {
-		    helpers$4.addPeer(params);
+		    helpers$5.addPeer(params);
 		  }
 
 		  /**
@@ -23245,7 +23419,7 @@
 		   * @param args
 		   */
 		  static createOffer(...args) {
-		    return helpers$4.createOffer(...args);
+		    return helpers$5.createOffer(...args);
 		  }
 
 		  /**
@@ -23253,7 +23427,7 @@
 		   * @param args
 		   */
 		  static createAnswer(...args) {
-		    return helpers$4.createAnswer(...args);
+		    return helpers$5.createAnswer(...args);
 		  }
 
 		  /**
@@ -23261,7 +23435,7 @@
 		   * @param args
 		   */
 		  static createDataChannel(...args) {
-		    return helpers$4.createDataChannel(...args);
+		    return helpers$5.createDataChannel(...args);
 		  }
 
 		  /**
@@ -23269,7 +23443,7 @@
 		   * @param args
 		   */
 		  static sendP2PMessage(...args) {
-		    return helpers$4.sendP2PMessage(...args);
+		    return helpers$5.sendP2PMessage(...args);
 		  }
 
 		  /**
@@ -23277,7 +23451,7 @@
 		   * @param args
 		   */
 		  static getPeersInRoom(...args) {
-		    return helpers$4.getPeersInRoom(...args);
+		    return helpers$5.getPeersInRoom(...args);
 		  }
 
 		  /**
@@ -23299,7 +23473,7 @@
 		   * @param args
 		   */
 		  static signalingEndOfCandidates(...args) {
-		    return helpers$4.signalingEndOfCandidates(...args);
+		    return helpers$5.signalingEndOfCandidates(...args);
 		  }
 
 		  /**
@@ -23310,7 +23484,7 @@
 		   * @return {Promise<statistics>}
 		   */
 		  static getConnectionStatus(roomState, peerId) {
-		    return helpers$4.getConnectionStatus(roomState, peerId);
+		    return helpers$5.getConnectionStatus(roomState, peerId);
 		  }
 
 		  /**
@@ -23320,23 +23494,23 @@
 		   * @return {{bufferedAmountLow: number, bufferedAmountLowThreshold: number}}
 		   */
 		  static getDataChannelBuffer(channel) {
-		    return helpers$4.getDataChannelBuffer(channel);
+		    return helpers$5.getDataChannelBuffer(channel);
 		  }
 
 		  static refreshDataChannel(roomState, peerId) {
-		    return helpers$4.refreshDataChannel(roomState, peerId);
+		    return helpers$5.refreshDataChannel(roomState, peerId);
 		  }
 
 		  static closeDataChannel(roomState, peerId) {
-		    return helpers$4.closeDataChannel(roomState, peerId);
+		    return helpers$5.closeDataChannel(roomState, peerId);
 		  }
 
 		  static refreshConnection(roomState, targetPeerId, iceRestart, options, callback) {
-		    return helpers$4.refreshConnection(roomState, targetPeerId, iceRestart, options, callback);
+		    return helpers$5.refreshConnection(roomState, targetPeerId, iceRestart, options, callback);
 		  }
 
 		  static refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions) {
-		    return helpers$4.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
+		    return helpers$5.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
 		  }
 
 		  static getPeerScreenshare(roomState) {
@@ -23344,15 +23518,15 @@
 		  }
 
 		  static buildPeerInformations(...args) {
-		    return helpers$4.buildPeerInformations(...args);
+		    return helpers$5.buildPeerInformations(...args);
 		  }
 
 		  static closePeerConnection(roomState, peerId) {
-		    return helpers$4.closePeerConnection(roomState, peerId);
+		    return helpers$5.closePeerConnection(roomState, peerId);
 		  }
 
 		  static updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream) {
-		    return helpers$4.updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream);
+		    return helpers$5.updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream);
 		  }
 		}
 
@@ -23381,7 +23555,7 @@
 		  }
 
 		  streamExists() {
-		    const streamList = helpers$6.getStreams(this.roomState, this.roomState.room.name);
+		    const streamList = helpers$7.getStreams(this.roomState, this.roomState.room.name);
 		    const streamIds = Object.keys(streamList.userMedia);
 
 		    for (let i = 0; i < streamIds.length; i += 1) {
@@ -23394,7 +23568,7 @@
 
 		  // eslint-disable-next-line class-methods-use-this
 		  hasMoreThanOneVideoStream() {
-		    return helpers$6.retrieveVideoStreams(this.roomState.room).length > 1;
+		    return helpers$7.retrieveVideoStreams(this.roomState.room).length > 1;
 		  }
 
 		  hasUserMediaStream() {
@@ -23516,14 +23690,14 @@
 		  replaceUserMediaStream() {
 		    const { peerConnections, streams } = this.roomState;
 		    const peerIds = Object.keys(peerConnections);
-		    const oldStream = this.streamId ? streams.userMedia[this.streamId].stream : helpers$6.retrieveVideoStreams(this.roomState.room)[0];
+		    const oldStream = this.streamId ? streams.userMedia[this.streamId].stream : helpers$7.retrieveVideoStreams(this.roomState.room)[0];
 		    const newStream = this.stream;
 
 		    this.streamId = oldStream.id;
 		    updateReplacedStreamInState(oldStream, newStream, this.roomState, true);
 
 		    peerIds.forEach((peerId) => {
-		      helpers$6.replaceTrack(oldStream, newStream, peerId, this.roomState);
+		      helpers$7.replaceTrack(oldStream, newStream, peerId, this.roomState);
 		    });
 		  }
 
@@ -24202,6 +24376,11 @@
 		  // eslint-disable-next-line class-methods-use-this
 		  init(options = defaultOptions) {
 		    if (options) {
+		      if (options.socketServer) { // set socketServerPath to override socketServerPath value returned from api that only works with default sig
+		        // server url
+		        // eslint-disable-next-line no-param-reassign
+		        options.socketServerPath = '';
+		      }
 		      Skylink.setUserInitOptions(options);
 		    }
 		    dispatchEvent(readyStateChange({
@@ -25552,10 +25731,12 @@
 		class SkylinkPublicInterface {
 		  /**
 		   * @description Method that starts a room session.
+		   * <p>Resolves with an array of <code>MediaStreams</code> or null if pre-fetched
+		   * stream was passed into <code>joinRoom</code> method. First item in array is <code>MediaStream</code> of kind audio and second item is
+		   * <code>MediaStream</code> of kind video.</p>
 		   * @param {joinRoomOptions} [options] - The options available to join the room and configure the session.
 		   * @param {MediaStream} [prefetchedStream] - The pre-fetched media stream object obtained when the user calls {@link Skylink#getUserMedia|getUserMedia} method before {@link Skylink#joinRoom|joinRoom} method.
-		   * @return {Promise.<Array<MediaStream|null>>} Promise object with an array of <code>MediaStreams</code> or null if pre-fetched stream was
-		   * passed into <code>joinRoom</code> method. First item in array is MediaStream of kind audio and second item is MediaStream of kind video.
+		   * @return {Promise.<MediaStreams>}
 		   * @example
 		   * Example 1: Calling joinRoom with options
 		   *
@@ -26235,6 +26416,8 @@
 		   *   than the milliseconds interval configured in the {@link initOptions}.
 		   * </blockquote>
 		   * @description Method that retrieves camera stream.
+		   * <p>Resolves with an array of <code>MediaStreams</code>. First item in array is <code>MediaStream</code> of kind audio and second item is
+		   * <code>MediaStream</code> of kind video.</p>
 		   * @param {String|null} roomName - The room name.
 		   * - If no roomName is passed or <code>getUserMedia()</code> is called before {@link Skylink#joinRoom|joinRoom}, the returned stream will not be associated with a room. The stream must be maintained independently.
 		   * To stop the stream, call {@link Skylink#stopPrefetchedStream|stopPrefetchedStream} method.
@@ -26362,14 +26545,14 @@
 		   * @param {String|JSON} [options.video.facingMode] The video camera facing mode.
 		   *   The list of available video source id can be retrieved by the {@link https://developer.mozilla.org
 		   *   /en-US/docs/Web/API/MediaTrackConstraints/facingMode}.
-		   * @return {Promise<MediaStream>} MediaStream
+		   * @return {Promise.<MediaStreams>}
 		   * @example
 		   * Example 1: Get both audio and video after joinRoom
 		   *
 		   * skylink.getUserMedia(roomName, {
 		   *     audio: true,
 		   *     video: true,
-		   * }).then((stream) => // do something)
+		   * }).then((streams) => // do something)
 		   * .catch((error) => // handle error);
 		   * @example
 		   * Example 2: Get only audio
@@ -26377,7 +26560,7 @@
 		   * skylink.getUserMedia(roomName, {
 		   *     audio: true,
 		   *     video: false,
-		   * }).then((stream) => // do something)
+		   * }).then((streams) => // do something)
 		   * .catch((error) => // handle error);
 		   * @example
 		   * Example 3: Configure resolution for video
@@ -26385,7 +26568,7 @@
 		   * skylink.getUserMedia(roomName, {
 		   *     audio: true,
 		   *     video: { resolution: skylinkConstants.VIDEO_RESOLUTION.HD },
-		   * }).then((stream) => // do something)
+		   * }).then((streams) => // do something)
 		   * .catch((error) => // handle error);
 		   * @example
 		   * Example 4: Configure stereo flag for OPUS codec audio (OPUS is always used by default)
@@ -26395,7 +26578,7 @@
 		   *         stereo: true,
 		   *     },
 		   *     video: true,
-		   * }).then((stream) => // do something)
+		   * }).then((streams) => // do something)
 		   * .catch((error) => // handle error);
 		   * @example
 		   * Example 5: Get both audio and video before joinRoom
@@ -26404,7 +26587,7 @@
 		   * skylink.getUserMedia({
 		   *     audio: true,
 		   *     video: true,
-		   * }).then((stream) => // do something)
+		   * }).then((streams) => // do something)
 		   * .catch((error) => // handle error);
 		   * @example
 		   * Example 6: Get media sources before joinRoom - only available on Chrome browsers
@@ -26431,7 +26614,7 @@
 		   *   video: {
 		   *     deviceId: videoInputDevices[0].deviceId,
 		   *   }
-		   * }).then((stream) => // do something)
+		   * }).then((streams) => // do something)
 		   * .catch((error) => // handle error);
 		   * @fires <b>If retrieval of fallback audio stream is successful:</b> <br/> - {@link SkylinkEvents.event:mediaAccessSuccess|mediaAccessSuccessEvent} with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallback=false</code> if initial retrieval is successful.
 		   * @fires <b>If initial retrieval is unsuccessful:</b> <br/> Fallback to retrieve audio only stream is triggered (configured in {@link initOptions} <code>audioFallback</code>) <br/>&emsp; - {@link SkylinkEvents.event:mediaAccessFallback|mediaAccessFallbackEvent} with parameter payload <code>state=FALLBACKING</code>, <code>isScreensharing=false</code> and <code>isAudioFallback=true</code> and <code>options.video=true</code> and <code>options.audio=true</code>. <br/> No fallback to retrieve audio only stream <br/> - {@link SkylinkEvents.event:mediaAccessError|mediaAccessErrorEvent} with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallbackError=false</code>.
@@ -26884,13 +27067,15 @@
 
 		  /**
 		   * @description Method that sends a new <code>userMedia</code> stream to all connected peers in a room.
+		   * <p>Resolves with an array of <code>MediaStreams</code>. First item in array is <code>MediaStream</code> of kind audio and second item is
+		   * <code>MediaStream</code> of kind video.</p>
 		   * @param {String} roomName - The room name.
 		   * @param {JSON|MediaStream} options - The {@link Skylink#getUserMedia|getUserMedia} <code>options</code> parameter settings. The MediaStream to send to the remote peer.
 		   * - When provided as a <code>MediaStream</code> object, this configures the <code>options.audio</code> and
 		   *   <code>options.video</code> based on the tracks available in the <code>MediaStream</code> object.
 		   *   Object signature matches the <code>options</code> parameter in the
 		   *   <code>getUserMedia</code> method</a>.
-		   * @return {Promise.<MediaStream|Array<MediaStream>>}
+		   * @return {Promise.<MediaStreams>}
 		   * @example
 		   * Example 1: Send new MediaStream with audio and video
 		   *
@@ -26904,6 +27089,15 @@
 		   * })
 		   *
 		   * skylink.sendStream(roomName, options)
+		   *  // streams can also be obtained from resolved promise
+		   *  .then((streams) => {
+		   *        if (streams[0]) {
+		   *          window.attachMediaStream(audioEl, streams[0]); // first item in array is an audio stream
+		   *        }
+		   *        if (streams[1]) {
+		   *          window.attachMediaStream(videoEl, streams[1]); // second item in array is a video stream
+		   *        }
+		   *    })
 		   *   .catch((error) => { console.error(error) });
 		   * }
 		   *

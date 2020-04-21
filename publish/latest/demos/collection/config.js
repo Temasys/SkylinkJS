@@ -24,6 +24,7 @@ const config = {
   audioFallback: !!getParameterByName('audioFallback'),
   enableDataChannel: true,
   forceSSL: true,
+  beSilentOnLogs: true,
 };
 
 /**

@@ -111,35 +111,74 @@
 
         <div class="col-md-9" id="join_room_panel">
           <div class="btn-group col-md-12">
-            <div class="btns">
-              <form role="form">
-                <div>
-                  <label for="join_room_p2p_key">
-                    <input id="join_room_p2p_key" type="radio" name="appKey" value="p2p" checked="true" onclick="setAppKey(this);">
-                    <b>P2P</b>
-                  </label>
+            <div class="col-md-5">
+              <div class="panel panel-default">
+                <div class="panel-heading">Room Configuration</div>
+                <div class="panel-body">
+                  <form role="form">
+                    <div>
+                      <table class="table">
+                        <tr>
+                          <td>
+                            <div>
+                              <label for="join_room_p2p_key">
+                                <input id="join_room_p2p_key" type="radio" name="appKey" value="p2p" checked="true" onclick="setAppKey(this);">
+                                <b>P2P</b>
+                              </label>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <label for="join_room_mcu_key">
+                                <input id="join_room_mcu_key" type="radio" name="appKey" value="mcu" onclick="setAppKey(this);">
+                                <b>MCU</b>
+                              </label>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="checkbox">
+                              <label for="join_room_audio">
+                                <input id="join_room_audio" type="checkbox" checked="true" value="audio" onclick="setMediaOptions(this)">
+                                <b>Audio</b>
+                              </label>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="checkbox">
+                              <label for="join_room_audio_muted">
+                                <input id="join_room_audio_muted" value="audio" type="checkbox" onclick="setMuteOption(this)">
+                                <b>Audio Muted</b>
+                              </label>
+                            </div>
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>
+                            <div class="checkbox">
+                              <label for="join_room_video">
+                                <input id="join_room_video" type="checkbox" checked="true" value="video" onclick="setMediaOptions(this)">
+                                <b>Video</b>
+                              </label>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="checkbox">
+                              <label for="join_room_video_muted">
+                                <input id="join_room_video_muted" value="video" type="checkbox" onclick="setMuteOption(this)">
+                                <b>Video Muted</b>
+                              </label>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+
+                    </div>
+                  </form>
+
                 </div>
-                <div>
-                  <label for="join_room_mcu_key">
-                    <input id="join_room_mcu_key" type="radio" name="appKey" value="mcu" onclick="setAppKey(this);">
-                    <b>MCU</b>
-                  </label>
-                </div>
-              </form>
-              <form role="form">
-                <div class="checkbox">
-                  <label for="join_room_audio">
-                    <input id="join_room_audio" type="checkbox" checked="true">
-                    <b>Audio</b>
-                  </label>
-                </div>
-                <div class="checkbox">
-                  <label for="join_room_video">
-                    <input id="join_room_video" type="checkbox" checked="true">
-                    <b>Video</b>
-                  </label>
-                </div>
-              </form>
+              </div>
               <button id="join_room_btn" type="button" title="Join room" class="btn btn-primary">
                 <span class="glyphicon glyphicon glyphicon-play-circle"></span>
                 Join Room
@@ -251,21 +290,26 @@
                   <td><h4>Call actions:</h4></td>
                   <td>
                     <div >
+                      <button id="send_stream_btn" type="button" title="Send stream" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-play"></span>
+                        Stop Stream & Start Audio & Video
+                      </button>
+                      <button id="start_video_btn" type="button" title="Start Video" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-play"></span>
+                        Stop Stream & Start Video Only
+                      </button>
+                      <button id="start_audio_btn" type="button" title="Start Audio" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-play"></span>
+                        Stop Stream & Start Audio Only
+                      </button>
+                      <br/>
                       <button id="stop_stream_btn" type="button" title="Stop stream" class="btn btn-primary">
                         <span class="glyphicon glyphicon-stop"></span>
                         Stop Stream
                       </button>
-                      <button id="send_stream_btn" type="button" title="Send stream" class="btn btn-primary">
+                      <button id="add_stream_btn" type="button" title="Add stream" class="btn btn-primary">
                         <span class="glyphicon glyphicon-play"></span>
                         Start Audio & Video
-                      </button>
-                      <button id="start_video_btn" type="button" title="Start Video" class="btn btn-primary">
-                        <span class="glyphicon glyphicon-play"></span>
-                        Start Video Only
-                      </button>
-                      <button id="start_audio_btn" type="button" title="Start Audio" class="btn btn-primary">
-                        <span class="glyphicon glyphicon-play"></span>
-                        Start Audio Only
                       </button>
                       <!--<button id="send_video_btn" type="button" title="Send video" class="btn btn-primary">
                   <span class="glyphicon glyphicon-play"></span>

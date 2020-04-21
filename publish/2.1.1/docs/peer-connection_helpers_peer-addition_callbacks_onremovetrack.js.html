@@ -97,7 +97,7 @@
 import { onIncomingStream, peerUpdated, streamEnded } from '../../../../skylink-events';
 import PeerData from '../../../../peer-data';
 import { getStateByKey, hasVideoTrack } from '../../../../utils/helpers';
-import { TRACK_KIND, TAGS } from '../../../../constants';
+import { TRACK_KIND, TAGS, BROWSER_AGENT } from '../../../../constants';
 import logger from '../../../../logger';
 import MESSAGES from '../../../../messages';
 import Skylink from '../../../../index';
@@ -118,14 +118,14 @@ const updateMediaStatus = (state, peerId, streamId) => {
   Skylink.setSkylinkState(updatedState, updatedState.room.id);
 };
 
-const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent) => {
+const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent, stream) => {
   dispatchEvent(streamEnded({
     room: state.room,
     peerId,
     peerInfo: PeerData.getPeerInfo(peerId, state.room),
     isSelf: false,
     isScreensharing,
-    streamId: rtcTrackEvent.track.id,
+    streamId: stream.id,
     isVideo: rtcTrackEvent.track.kind === TRACK_KIND.VIDEO,
     isAudio: rtcTrackEvent.track.kind === TRACK_KIND.AUDIO,
   }));
@@ -159,10 +159,11 @@ const dispatchIncomingCameraStream = (state) => {
  * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
  */
 const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
+  const { AdapterJS } = window;
   const state = getStateByKey(room.id);
   const { peerInformations } = state;
   const { MEDIA_STREAM, PEER_INFORMATIONS } = MESSAGES;
-  const stream = rtcTrackEvent.target;
+  const stream = AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE ? rtcTrackEvent.stream : rtcTrackEvent.target;
 
 
   logger.log.INFO([peerId, TAGS.MEDIA_STREAM, null, MEDIA_STREAM.REMOTE_TRACK_REMOVED], {
@@ -181,7 +182,7 @@ const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
   }
 
   updateMediaStatus(state, peerId, stream.id);
-  dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent);
+  dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent, stream);
 
   if (isScreensharing) {
     // Dispatch to ensure that the client has a way of retrieving the camera stream. Camera stream was not added to pc and therefore ontrack will not trigger on remote.

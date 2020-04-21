@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-connection/helpers/peer-addition/callbacks/oniceconnectionstatechange.js - Documentation
+      peer-connection/helpers/peer-addition/callbacks/onsenderadded.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        peer-connection/helpers/peer-addition/callbacks/oniceconnectionstatechange.js
+        peer-connection/helpers/peer-addition/callbacks/onsenderadded.js
       </h1>
     
 
@@ -93,123 +93,23 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import HandleIceConnectionStats from '../../../../skylink-stats/handleIceConnectionStats';
-import logger from '../../../../logger';
-import messages from '../../../../messages';
-import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import { iceConnectionState } from '../../../../skylink-events';
-import * as constants from '../../../../constants';
-import Skylink from '../../../../index';
-import PeerConnection from '../../../index';
-import HandleBandwidthStats from '../../../../skylink-stats/handleBandwidthStats';
-import BandwidthAdjuster from '../../bandwidthAdjuster';
-
-const isIceConnectionStateCompleted = (pcIceConnectionState) => {
-  const { ICE_CONNECTION_STATE } = constants;
-  return [ICE_CONNECTION_STATE.COMPLETED,
-    ICE_CONNECTION_STATE.CONNECTED].indexOf(pcIceConnectionState) > -1;
-};
+    <pre class="prettyprint source linenums"><code>import Skylink from '../../../../index'; import helpers from '../../index';
 
 /**
- * @param {RTCPeerConnection} peerConnection
- * @param {String} targetMid - The Peer Id
- * @param {SkylinkState} currentRoomState
- * @fires iceConnectionState
+ * React Native only callback to retrieve senders from the peer connection as the sender object is not returned from peerConnection.addTrack.
+ * @param peerConnection
+ * @param targetMid
+ * @param currentRoomState
+ * @param event
  * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
  */
-const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState) => {
-  const { PEER_CONNECTION } = messages;
-  const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE } = constants;
-  const { AdapterJS } = window;
-  const { webrtcDetectedBrowser, webrtcDetectedType } = AdapterJS;
-  const state = Skylink.getSkylinkState(currentRoomState.room.id);
-
-  if (!state) {
-    logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, PEER_CONNECTION.no_room_state]);
-    return;
-  }
-
-  const {
-    hasMCU, bandwidthAdjuster, peerInformations, peerConnStatus, peerStats,
-  } = state;
-  const handleIceConnectionStats = new HandleIceConnectionStats();
-
-  let statsInterval = null;
-  let pcIceConnectionState = peerConnection.iceConnectionState;
-
-  logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, PEER_CONNECTION.ice_connection_state], pcIceConnectionState);
-
-  if (webrtcDetectedBrowser === 'edge') {
-    if (pcIceConnectionState === 'connecting') {
-      pcIceConnectionState = ICE_CONNECTION_STATE.CHECKING;
-    } else if (pcIceConnectionState === 'new') {
-      pcIceConnectionState = ICE_CONNECTION_STATE.FAILED;
-    }
-  }
-
-  if (webrtcDetectedType === 'AppleWebKit' &amp;&amp; pcIceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
-    setTimeout(() => {
-      if (!peerConnection.iceConnectionStateClosed) {
-        handleIceConnectionStats.send(currentRoomState.room.id, ICE_CONNECTION_STATE.CLOSED, targetMid);
-        dispatchEvent(iceConnectionState({
-          state: ICE_CONNECTION_STATE.CLOSED,
-          peerId: targetMid,
-        }));
-      }
-    }, 10);
-    return;
-  }
-
-  if (state &amp;&amp; peerConnection.iceConnectionState !== ICE_CONNECTION_STATE.CONNECTED) {
-    handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
-  }
-
-  dispatchEvent(iceConnectionState({
-    state: pcIceConnectionState,
-    peerId: targetMid,
-  }));
-
-  if (pcIceConnectionState === ICE_CONNECTION_STATE.FAILED) {
-    dispatchEvent(iceConnectionState({
-      state: ICE_CONNECTION_STATE.TRICKLE_FAILED,
-      peerId: targetMid,
-    }));
-  }
-
-  if (peerConnStatus &amp;&amp; peerConnStatus[targetMid]) {
-    peerConnStatus[targetMid].connected = isIceConnectionStateCompleted(pcIceConnectionState);
-  }
-
-  if (!statsInterval &amp;&amp; isIceConnectionStateCompleted(pcIceConnectionState) &amp;&amp; !peerStats[targetMid]) {
-    statsInterval = true;
-    peerStats[targetMid] = {};
-
-    logger.log.DEBUG([targetMid, 'RTCStatsReport', null, 'Retrieving first report to tabulate results']);
-
-    // Do an initial getConnectionStatus() to backfill the first retrieval in order to do (currentTotalStats - lastTotalStats).
-    PeerConnection.getConnectionStatus(state, targetMid).then(() => {
-      handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
-      statsInterval = setInterval(() => {
-        if (peerConnection.signalingState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === PEER_CONNECTION_STATE.CLOSED) {
-          clearInterval(statsInterval);
-        } else {
-          new HandleBandwidthStats().send(state.room.id, peerConnection, targetMid);
-        }
-      }, 20000);
-    });
-  }
-
-  if (!hasMCU &amp;&amp; isIceConnectionStateCompleted(pcIceConnectionState) &amp;&amp; !!bandwidthAdjuster &amp;&amp; AdapterJS.webrtcDetectedBrowser !== 'edge'
-        &amp;&amp; (((peerInformations[targetMid] || {}).agent || {}).name || 'edge') !== 'edge') {
-    new BandwidthAdjuster({
-      targetMid,
-      state,
-      peerConnection,
-    }).setAdjustmentInterval();
-  }
+const onsenderadded = (peerConnection, targetMid, currentRoomState, event) => {
+  const updatedState = Skylink.getSkylinkState(currentRoomState.room.id);
+  const { sender } = event;
+  helpers.processNewSender(updatedState, targetMid, sender);
 };
 
-export default oniceconnectionstatechange;
+export default onsenderadded;
 </code></pre>
   </article>
 </section>
