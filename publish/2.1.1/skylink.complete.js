@@ -1,4 +1,4 @@
-/* SkylinkJS v2.1.1 Tue Apr 21 2020 08:18:10 GMT+0000 (Coordinated Universal Time) */
+/* SkylinkJS v2.1.1 Tue Apr 21 2020 10:16:45 GMT+0000 (Coordinated Universal Time) */
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
 function commonjsRequire () {
