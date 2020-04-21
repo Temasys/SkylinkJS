@@ -5,8 +5,8 @@ import { PEER_TYPE } from '../../constants';
 const sendMediaInfoMsg = (room, updatedMediaInfo) => {
   const signaling = new SkylinkSignalingServer();
   const state = Skylink.getSkylinkState(room.id);
-  const { peerMedias, user, hasMCU } = state;
-  const peerIds = hasMCU ? [PEER_TYPE.MCU] : Object.keys(peerMedias).filter(peerId => peerId !== user.sid);
+  const { user, hasMCU, peerConnections } = state;
+  const peerIds = hasMCU ? [PEER_TYPE.MCU] : Object.keys(peerConnections).filter(peerId => (peerId !== user.sid) && (peerId !== PEER_TYPE.MCU));
 
   peerIds.forEach((target) => {
     signaling.mediaInfoEvent(state, target, updatedMediaInfo);

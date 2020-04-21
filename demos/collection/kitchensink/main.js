@@ -32,7 +32,7 @@ const { $, document } = window;
 const displayName = `name_user_${  Math.floor((Math.random() * 1000) + 1)}`;
 $('#display_user_info').val(displayName);
 const joinRoomOptions = {
-  audio: { stereo: true },
+  audio: true,
   video: true,
   userData: displayName,
 };
@@ -48,6 +48,13 @@ Demo.Methods.toggleInRoomSettings = function(peerId, inRoom) {
     $('#logs_panel').show();
     $('#set_persistent_message').prop('checked', Demo.Skylink.getMessagePersistence(config.defaultRoom));
     $('#room_locked_row').hide();
+
+    // reset joinRoomOptions fto handle duplicate tab
+    $('#join_room_p2p_key').prop('checked', true);
+    $('#join_room_audio').prop('checked', true);
+    $('#join_room_audio_muted').prop('checked', false);
+    $('#join_room_video').prop('checked', true);
+    $('#join_room_video_muted').prop('checked', false);
   } else {
     $('#join_room_btn').removeClass('disabled');
     $('#presence_list_body').empty();
@@ -155,7 +162,7 @@ Demo.Methods.logToConsoleDOM = (message, level) => {
   }
 
   $logListItem.append($logText);
-  $logListItem.appendTo($loggerListParentDOM);
+  $logListItem.prependTo($loggerListParentDOM);
 };
 
 /********************************************************
@@ -185,6 +192,11 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
     $('#isVideoMuted').css('color',
       (videoStreamId && peerInfo.mediaStatus[videoStreamId].videoMuted === 1) ? 'green' : 'red');
   } else {
+    if (Demo.PeerIds.indexOf(peerId) < 0) {
+      Demo.PeerIds.push(peerId);
+      Demo.Peers += 1;
+    }
+
     $('#presence_panel').show();
     Demo.Methods.logToConsoleDOM(`Peer ${peerId} has joined the room`, 'System');
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
@@ -276,6 +288,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_LEFT, (evt) =>
     Demo.PeerIds.splice(Demo.PeerIds.indexOf(peerId), 1);
     Demo.Peers -= 1;
   }
+
   $(`#video${peerId}`).remove();
   $(`#user${peerId}`).remove();
   const index = selectedPeers.indexOf(peerId);
@@ -284,7 +297,9 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_LEFT, (evt) =>
     selectedPeers.splice(index, 1);
   }
 
-  $('#presence_panel').hide();
+  if (Demo.PeerIds.length === 0) {
+    $('#presence_panel').hide();
+  }
 
   delete Demo.Stats[peerId];
   delete Demo.ShowStats[peerId];
@@ -292,9 +307,13 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_LEFT, (evt) =>
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_UPDATED, (evt) => {
   const { peerId, peerInfo, isSelf } = evt.detail;
-  const streamIds = Object.keys(peerInfo.mediaStatus);
+  let streamIds = Object.keys(peerInfo.mediaStatus);
   let audioStreamId = null;
   let videoStreamId = null;
+
+  if (Demo.Streams && Demo.Streams.screenshare) {
+    streamIds = streamIds.filter((id) => id !== Demo.Streams.screenshare.id)
+  }
 
   if (streamIds[0] && streamIds[1]) {
     audioStreamId = streamIds[0];
@@ -337,13 +356,6 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM,
   const { peerId, stream, isSelf, peerInfo, isVideo, isAudio } = eventDetail;
   let peerVideo = $('#video' + peerId + ' .video-obj')[0];
   let peerAudio = $('#video' + peerId + ' .audio-obj')[0];
-
-  if (!isSelf) {
-    if (Demo.PeerIds.indexOf(peerId) < 0) {
-      Demo.PeerIds.push(peerId);
-      Demo.Peers += 1;
-    }
-  }
 
   if ((isVideo && isAudio) || (isVideo && !isAudio)) {
     if (peerVideo.poster) {
@@ -393,6 +405,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_SCREEN_
   setTimeout(function () {
     peerScreen.removeAttribute('controls');
   });
+
+  Demo.Methods.updateStreams();
 });
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.MEDIA_ACCESS_SUCCESS, (evt) => {
@@ -413,7 +427,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STREAM_ENDED, (evt)
   const { isScreensharing, isSelf, peerId } = eventDetail;
 
   if (!isSelf && !isScreensharing) {
-    document.getElementById(`video${eventDetail.peerId}`).firstChild.setAttribute('poster', '../app/img/black.png');
+    document.getElementById(`video${eventDetail.peerId}`).firstChild.setAttribute('poster', '../assets/imgs/black.png');
   }
 
   if (isScreensharing) {
@@ -423,6 +437,11 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STREAM_ENDED, (evt)
 
   Demo.Methods.updateStreams();
 });
+
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STREAM_MUTED, (evt) => {
+  console.log("STREAM_MUTED", evt.detail);
+})
+
 
 // //---------------------------------------------------
 // // ROOM EVENTS
@@ -787,8 +806,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
     $(statsElm)
       .find('.certificate .certleft')
       .html('Certificate algorithm - (local: ' +
-        (stats.certificate.local.fingerprintAlgorithm || '-') + ', remote: ' +
-        (stats.certificate.remote.fingerprintAlgorithm || '-') + ')');
+        (stats.certificate.local && stats.certificate.local.fingerprintAlgorithm || '-') + ', remote: ' +
+        (stats.certificate.remote && stats.certificate.remote.fingerprintAlgorithm || '-') + ')');
     $(statsElm)
       .find('.certificate .certright')
       .html('Ciphers - (srtp: ' +
@@ -884,8 +903,17 @@ $(document).ready(function() {
   });
   //---------------------------------------------------
   const startSendStream = function(mediaOptions) {
-    Demo.Skylink.sendStream(config.defaultRoom,mediaOptions);
+    Demo.Skylink.sendStream(config.defaultRoom, mediaOptions);
   };
+
+  $("#add_stream_btn").click(function() {
+    const options = Object.assign({}, joinRoomOptions);
+    delete options.userData;
+    Demo.Skylink.sendStream(config.defaultRoom, options)
+    .then((streams) => {
+      console.log("added streams", streams);
+    })
+  })
 
   $("#send_stream_btn").click(function() {
     const mediaOptions = {
@@ -977,12 +1005,6 @@ $(document).ready(function() {
   $('#join_room_btn').click(function () {
     config.appKey = selectedAppKey || config.appKey;
     Demo.Skylink = new Skylink(config);
-    if (!$('#join_room_video').prop('checked')) {
-      joinRoomOptions.video = false;
-    }
-    if (!$('#join_room_audio').prop('checked')) {
-      joinRoomOptions.audio = false;
-    }
     Demo.Skylink.joinRoom(joinRoomOptions);
     $('#join_room_btn').addClass('disabled');
   });
@@ -1071,6 +1093,34 @@ $(document).ready(function() {
     $('#display_app_id').html(selectedAppKey);
   };
 
+  window.setMediaOptions = dom => {
+    var type = $(dom).attr('value');
+    var checked = $(dom).prop('checked');
+    joinRoomOptions[type] = checked;
+    if (type === 'audio') {
+      if (!checked) {
+        $('#join_room_audio_muted').prop('checked', checked);
+      }
+      $('#join_room_audio_muted').prop('disabled', !checked);
+    } else if (type === 'video') {
+      if (!checked) {
+        $('#join_room_video_muted').prop('checked', checked);
+      }
+      $('#join_room_video_muted').prop('disabled', !checked);
+    }
+  }
+
+  window.setMuteOption = dom => {
+    var type = $(dom).attr('value');
+    if ($(dom).prop('checked')) {
+      joinRoomOptions[type] = {};
+      joinRoomOptions[type].mute = true;
+    } else {
+      delete joinRoomOptions[type].mute;
+      joinRoomOptions[type] = true;
+    }
+  }
+
   window.selectTargetPeer = dom => {
     var peerId = $(dom).attr('target');
     var panelDom = $('#selected_users_panel');
@@ -1098,7 +1148,7 @@ $(document).ready(function() {
   };
 
   window.onerror = function (error) {
-    let message = '';
+    let message = 'Check console for error';
     if (error.indexOf('Failed decrypting message') > -1) {
       message = `Failed decrypting message: ${error.split('-')[1].trim()}` ;
     }
@@ -1109,6 +1159,11 @@ $(document).ready(function() {
 
     Demo.Methods.logToConsoleDOM(message, 'error');
   };
+
+  window.addEventListener("unhandledrejection", (promiseRejectionEvent) => {
+    let message = promiseRejectionEvent.reason;
+    Demo.Methods.logToConsoleDOM(message, 'error');
+  });
 });
 
 var DemoSkylinkEventManager = SkylinkEventManager;

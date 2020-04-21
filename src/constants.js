@@ -382,7 +382,7 @@ export const CANDIDATE_PROCESSING_STATE = {
  * @property {String} CLOSED         Value <code>"closed"</code>
  *   The value of the state when Peer connection ICE connection has closed.
  *   This happens when Peer connection is closed and no streaming can occur at this stage.
- * @property {String} TRICKLE_FAILED Value <code>"trickeFailed"</code>
+ * @property {String} TRICKLE_FAILED Value <code>"trickleFailed"</code>
  *   The value of the state when Peer connection ICE connection has failed during trickle ICE.
  * @constant
  * @type Object
@@ -1870,6 +1870,7 @@ export const BROWSER_AGENT = {
   CHROME: 'chrome',
   FIREFOX: 'firefox',
   SAFARI: 'safari',
+  REACT_NATIVE: 'react-native',
 };
 
 /**

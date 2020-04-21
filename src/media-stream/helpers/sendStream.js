@@ -128,17 +128,13 @@ const sendStream = (roomState, options = null) => new Promise((resolve, reject) 
     return reject(new Error(MESSAGES.ROOM_STATE.NO_ROOM_NAME));
   }
 
-  const { inRoom, streams } = roomState;
+  const { inRoom } = roomState;
   const { AdapterJS } = window;
   const isNotObjOrNullOrPlugin = (!isAObj(options) || options === null) && !(AdapterJS && AdapterJS.WebRTCPlugin && AdapterJS.WebRTCPlugin.plugin);
 
   if (!inRoom) {
     logger.log.WARN(MESSAGES.ROOM.ERRORS.NOT_IN_ROOM);
     return reject(new Error(`${MESSAGES.ROOM.ERRORS.NOT_IN_ROOM}`));
-  }
-
-  if (streams.userMedia) {
-    return reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.ACTIVE_STREAMS));
   }
 
   if (isNotObjOrNullOrPlugin) {

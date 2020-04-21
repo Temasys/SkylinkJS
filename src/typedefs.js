@@ -837,8 +837,14 @@
 
 /**
  * @typedef {Array} logItems
- * @property {Date} logItems[0] The DateTime of when the log was stored
- * @property {String} logItems[1] The log level
- * @property {String} logItems[2] The log message
- * @property {Object} logItems[3] The debug object
+ * @property {Date} logItems.0 The DateTime of when the log was stored
+ * @property {String} logItems.1 The log level
+ * @property {String} logItems.2 The log message
+ * @property {Object} logItems.3 The debug object
+ */
+
+/**
+ * @typedef {Array} MediaStreams
+ * @property {MediaStream} MediaStreams.0 Audio stream
+ * @property {MediaStream} MediaStreams.1 Video stream
  */

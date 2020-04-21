@@ -1,13 +1,15 @@
 import Skylink from '../../../../index';
 import logger from '../../../../logger';
 import MESSAGES from '../../../../messages';
-import { MEDIA_STATUS, TAGS, MEDIA_STATE } from '../../../../constants';
+import {
+  MEDIA_STATUS, TAGS, MEDIA_STATE, TRACK_KIND, MEDIA_TYPE,
+} from '../../../../constants';
 import PeerMedia from '../../../../peer-media/index';
 import mediaInfoEventHelpers from './helpers/mediaInfoEventHelpers';
 
 const videoStateChangeHandler = (targetMid, message) => {
   const {
-    type, rid, mediaId, mediaState, transceiverMid,
+    type, rid, mediaId, mediaState, transceiverMid, mediaType,
   } = message;
   const updatedState = Skylink.getSkylinkState(rid);
   const { room } = updatedState;
@@ -35,7 +37,7 @@ const videoStateChangeHandler = (targetMid, message) => {
 
   Skylink.setSkylinkState(updatedState, room.id);
 
-  mediaInfoEventHelpers.dispatchMediaStateChangeEvents(updatedState, streamId, targetMid);
+  mediaInfoEventHelpers.dispatchMediaStateChangeEvents(updatedState, streamId, targetMid, TRACK_KIND.VIDEO, mediaType === MEDIA_TYPE.VIDEO_SCREEN);
 };
 
 export default videoStateChangeHandler;

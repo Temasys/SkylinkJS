@@ -12,35 +12,53 @@
 #### New features
 * Our new SDK is module based with full compatibility with ES6
 * All callbacks have been promisified
-* Multiple `getUserMedia` streams support
 * Multiple rooms support
 _______________________
 
 ### Importing the SDK
-##### SDK 0.6.x / 0.9.x
+#### SDK 0.6.x / 0.9.x
 
-Method 1: Include in script tag
+Method 1: Include in script tag of `index.html`
 ``` 
 <script src="./path/to/skylink.complete.js"></script>
 ```
 
-##### SDK 2.x
+#### SDK 2.x
 
-Method 1: Include `skylink.complete.js` script tag as type `module`.
+Method 1: Import as type `module` in script tag of `index.html`
 ```
- <script src="./path/to/skylink.complete.js" type="module"></script>
+ <script type="module">
+    import Skylink, { SkylinkEventManager, SkylinkLogger, SkylinkConstants } from 'https://cdn.temasys.io/skylink/skylinkjs/latest/skylink.complete.js'; 
+    window.Skylink = Skylink; // assign to the window object if Skylink needs to be accessed in other scripts
+ </script>
+ <script src="index.js" type="module"></script>
 ```
-Method 2: Import as npm module
+- access `Skylink` class in `index.js` or directly in the script tag
 ```
- import Skylink, { SkylinkEventManager, SkylinkLogger, SkylinkConstants } from 'skylinkjs'
+ const skylink = new Skylink(config);
+```
+Method 2: Import in `index.js`
+- from cdn
+```
+ import Skylink, { SkylinkEventManager, SkylinkLogger, SkylinkConstants } from 'https://cdn.temasys.io/skylink/skylinkjs/latest/skylink.complete.js';
+ const skylink = new Skylink(config);
+```
+- from NPM module
+```
+ import Skylink, { SkylinkEventManager, SkylinkLogger, SkylinkConstants } from 'skylinkjs';
+ const skylink = new Skylink(config);
+```
+- reference `index.js` as type `module` in `index.html`
+```
+ <script src="index.js" type="module"></script>
 ```
 
 ### Including dependencies
-##### SDK 0.6.x / 0.9.x
+#### SDK 0.6.x / 0.9.x
 
 `socket.io` and `adapterjs` dependency is bundled into `skylink.complete.js`
 
-##### SDK 2.x
+#### SDK 2.x
 
 `socket.io` dependency is no longer bundled into `skylink.complete.js`
 
@@ -52,7 +70,7 @@ Include `socket.io` in script tag.
 `socket.io.js` can be obtained from the [socket.io cdn](https://cdnjs.cloudflare.com/ajax/libs/socket.io/2.2.0/socket.io.js). Check that the version is `2.2.0`
 
 ### Initialising Skylink
-##### SDK 0.6.x / 0.9.x
+#### SDK 0.6.x / 0.9.x
 
 Step 1: Instantiate Skylink
 ```
@@ -63,7 +81,6 @@ Step 2: Init Skylink with config and call joinRoom in success callback function
 const config = {
     appKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX',
     defaultRoom: 'skylinkRoom',
-    enableIceTrickle: true,
     enableDataChannel: true,
     forceSSL: true,
 };
@@ -94,14 +111,13 @@ skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
 });
 ```
 
-##### SDK 2.x
+#### SDK 2.x
  
 Step 1: Instantiate Skylink and init with config 
 ```
 const config = {
     appKey: 'XXXXXXXX-XXXX-XXXX-XXXX-XXXXXXXX',
     defaultRoom: 'skylinkRoom',
-    enableIceTrickle: true,
     enableDataChannel: true,
     forceSSL: true,
 };
@@ -129,7 +145,7 @@ skylink.joinRoom(joinRoomOptions)
 })
 .catch();
 ```
- Step 3: Listen on 'peerJoined' event with isSelf=true for self join room success outcome
+ Step 3: Listen on 'peerJoined' event with `isSelf=true` for self join room success outcome
 ```
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) => {
     const { isSelf, peerId, peerInfo } = evt.detail;
@@ -138,7 +154,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
 ``` 
 
 ### Event Handling
-##### SDK 0.6.x / 0.9.x
+#### SDK 0.6.x / 0.9.x
  
 Subscribing to an event
 ```
@@ -150,7 +166,7 @@ skylink.on('peerJoined', function(peerId, peerInfo, isSelf) {
 ```
 skylink.off('peerJoined');
 ```
-##### SDK 2.x
+#### SDK 2.x
 
 Subscribing to an event
 ```
@@ -167,11 +183,11 @@ SkylinkEventManager.removeEventListener(SkylinkConstants.EVENTS.PEER_JOINED, pee
 ```
 
 ### Logging
-##### SDK 0.6.x / 0.9.x
+#### SDK 0.6.x / 0.9.x
 ```
 skylink.setLogLevel(skylink.LOG_LEVEL.DEBUG);
 ``` 
-##### SDK 2.x
+#### SDK 2.x
 ```
 SkylinkLogger.setLevel(SkylinkLogger.logLevels.DEBUG);
 ```

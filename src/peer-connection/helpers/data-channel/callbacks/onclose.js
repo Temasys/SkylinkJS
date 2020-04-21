@@ -93,7 +93,7 @@ const onclose = (params) => {
             createAsMessagingChannel: true,
             roomState: state,
           });
-          handleDataChannelStats.send(STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.reconnecting, peerId, { label: channelName }, 'main');
+          handleDataChannelStats.send(room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.reconnecting, peerId, { label: channelName }, 'main');
         }
       }, 100);
     }

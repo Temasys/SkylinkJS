@@ -1,9 +1,10 @@
 import Skylink from '../../index';
 import { isEmptyArray } from '../../utils/helpers';
+import helpers from '../../peer-connection/helpers/index';
 
 const isSenderTrackAndTrackMatched = (senderTrack, tracks) => {
   for (let x = 0; x < tracks.length; x += 1) {
-    if (senderTrack === tracks[x]) {
+    if (senderTrack.id === tracks[x].id) {
       return true;
     }
   }
@@ -12,7 +13,7 @@ const isSenderTrackAndTrackMatched = (senderTrack, tracks) => {
 };
 
 const isStreamOnPC = (peerConnection, stream) => {
-  const transceivers = peerConnection.getTransceivers();
+  const transceivers = peerConnection.getTransceivers ? peerConnection.getTransceivers() : [];
   const tracks = stream.getTracks();
 
   if (isEmptyArray(transceivers)) {
@@ -33,11 +34,9 @@ const addTracksToPC = (state, peerId, stream, peerConnection) => {
   const tracks = stream.getTracks();
   for (let track = 0; track < tracks.length; track += 1) {
     const sender = peerConnection.addTrack(tracks[track], stream);
-    if (!updatedState.currentRTCRTPSenders[peerId]) {
-      updatedState.currentRTCRTPSenders[peerId] = [];
+    if (sender) {
+      helpers.processNewSender(updatedState, peerId, sender);
     }
-
-    updatedState.currentRTCRTPSenders[peerId].push(sender);
   }
 
   Skylink.setSkylinkState(updatedState, updatedState.room.id);

@@ -1,7 +1,7 @@
 import helpers from './index';
 import { hasAudioTrack } from '../../utils/helpers';
 
-const onStreamAccessSuccess = (roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve) => {
+const onStreamAccessSuccess = (roomKey, stream, audioSettings, videoSettings, isAudioFallback) => {
   const isScreensharing = false;
   const streams = helpers.splitAudioAndVideoStream(stream);
 
@@ -10,7 +10,7 @@ const onStreamAccessSuccess = (roomKey, stream, audioSettings, videoSettings, is
     helpers.processStreamInState(st, hasAudioTrack(st) ? audioSettings : videoSettings, roomKey, isScreensharing, isAudioFallback);
   });
 
-  resolve(streams);
+  return streams;
 };
 
 export default onStreamAccessSuccess;
