@@ -31,7 +31,7 @@ Method 1: Import as type `module` in script tag of `index.html`
     import Skylink, { SkylinkEventManager, SkylinkLogger, SkylinkConstants } from 'https://cdn.temasys.io/skylink/skylinkjs/latest/skylink.complete.js'; 
     window.Skylink = Skylink; // assign to the window object if Skylink needs to be accessed in other scripts
  </script>
- <script defer src="index.js"></script>
+ <script src="index.js" type="module"></script>
 ```
 - access `Skylink` class in `index.js` or directly in the script tag
 ```

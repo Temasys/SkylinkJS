@@ -100,6 +100,7 @@ const updateMediaInfo = (hasToggledVideo, hasToggledAudio, room, streamId) => {
   }
 };
 
+// eslint-disable-next-line no-unused-vars
 const sendSigMsgs = (hasToggledVideo, hasToggledAudio, room, streamId) => {
   const roomState = Skylink.getSkylinkState(room.id);
   const signaling = new SkylinkSignalingServer();
@@ -202,7 +203,8 @@ const startMuteEvents = (roomKey, streamId, options) => {
   dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, mutedStream, room.id, isScreensharing);
   dispatchPeerUpdatedEvent(room);
   dispatchStreamMutedEvent(room, mutedStream, isScreensharing);
-  sendSigMsgs(hasToggledVideo, hasToggledAudio, room, streamId);
+  // TODO: remove audioMuteEvent and videoMuteEvent
+  // sendSigMsgs(hasToggledVideo, hasToggledAudio, room, streamId);
 
   // wait for at least 1 connection before sending mediaInfoEvent otherwise sig message will be dropped at sendMediaInfoMsg if there are no
   // connections

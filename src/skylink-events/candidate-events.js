@@ -48,10 +48,10 @@ export const candidateGenerationState = detail => new SkylinkEvent(CANDIDATE_GEN
 export const candidatesGathered = detail => new SkylinkEvent(CANDIDATES_GATHERED, { detail });
 
 /**
+ * @event SkylinkEvents.iceConnectionState
  * @description Learn more about how ICE works in this
  *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
  * Event triggered when a Peer connection ICE connection state has changed.
- * @event SkylinkEvent.iceConnectionState
  * @param {SkylinkEvents.ICE_CONNECTION_STATE} state The current Peer connection ICE connection state.
  * @param {String} peerId The Peer ID.
  */
