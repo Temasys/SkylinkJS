@@ -48,6 +48,13 @@ Demo.Methods.toggleInRoomSettings = function(peerId, inRoom) {
     $('#logs_panel').show();
     $('#set_persistent_message').prop('checked', Demo.Skylink.getMessagePersistence(config.defaultRoom));
     $('#room_locked_row').hide();
+
+    // reset joinRoomOptions fto handle duplicate tab
+    $('#join_room_p2p_key').prop('checked', true);
+    $('#join_room_audio').prop('checked', true);
+    $('#join_room_audio_muted').prop('checked', false);
+    $('#join_room_video').prop('checked', true);
+    $('#join_room_video_muted').prop('checked', false);
   } else {
     $('#join_room_btn').removeClass('disabled');
     $('#presence_list_body').empty();
@@ -185,6 +192,11 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
     $('#isVideoMuted').css('color',
       (videoStreamId && peerInfo.mediaStatus[videoStreamId].videoMuted === 1) ? 'green' : 'red');
   } else {
+    if (Demo.PeerIds.indexOf(peerId) < 0) {
+      Demo.PeerIds.push(peerId);
+      Demo.Peers += 1;
+    }
+
     $('#presence_panel').show();
     Demo.Methods.logToConsoleDOM(`Peer ${peerId} has joined the room`, 'System');
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
@@ -276,6 +288,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_LEFT, (evt) =>
     Demo.PeerIds.splice(Demo.PeerIds.indexOf(peerId), 1);
     Demo.Peers -= 1;
   }
+
   $(`#video${peerId}`).remove();
   $(`#user${peerId}`).remove();
   const index = selectedPeers.indexOf(peerId);
@@ -284,7 +297,9 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_LEFT, (evt) =>
     selectedPeers.splice(index, 1);
   }
 
-  $('#presence_panel').hide();
+  if (Demo.PeerIds.length === 0) {
+    $('#presence_panel').hide();
+  }
 
   delete Demo.Stats[peerId];
   delete Demo.ShowStats[peerId];
@@ -341,13 +356,6 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM,
   const { peerId, stream, isSelf, peerInfo, isVideo, isAudio } = eventDetail;
   let peerVideo = $('#video' + peerId + ' .video-obj')[0];
   let peerAudio = $('#video' + peerId + ' .audio-obj')[0];
-
-  if (!isSelf) {
-    if (Demo.PeerIds.indexOf(peerId) < 0) {
-      Demo.PeerIds.push(peerId);
-      Demo.Peers += 1;
-    }
-  }
 
   if ((isVideo && isAudio) || (isVideo && !isAudio)) {
     if (peerVideo.poster) {
@@ -813,12 +821,6 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
   DOM Events
 *********************************************************/
 $(document).ready(function() {
-  // reset joinRoomOptions
-  $('#join_room_p2p_key').prop('checked', true);
-  $('#join_room_audio').prop('checked', true);
-  $('#join_room_audio_muted').prop('checked', false);
-  $('#join_room_video').prop('checked', true);
-  $('#join_room_video_muted').prop('checked', false);
   //---------------------------------------------------
   $('#display_app_id').html(config.appKey || config.apiKey || 'Not Provided');
   // //---------------------------------------------------

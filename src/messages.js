@@ -264,6 +264,7 @@ const MESSAGES = {
       POST_FAILED: 'Failed posting to stats api',
       PARSE_FAILED: 'Failed parsing stats report',
       STATS_IS_NULL: 'Stats object is null',
+      INVALID_TRACK_KIND: 'Media kind is not audio or video',
     },
     HANDLE_ICE_GATHERING_STATS: {
       PROCESS_FAILED: 'process_failed',
