@@ -21,6 +21,9 @@ class SkylinkStats {
     const { fetch } = window;
 
     try {
+      if (!data.client_id) {
+        return;
+      }
       const initOptions = Skylink.getInitOptions();
       const { enableStatsGathering } = initOptions;
 

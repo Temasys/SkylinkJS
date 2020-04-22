@@ -16,10 +16,17 @@ const isNegotiationTypeMsg = (message) => {
   return negTypeMessages.indexOf(message.type) > -1;
 };
 
-const sendBufferedMsg = (currentBufferedMsgs) => {
+const sendBufferedMsg = (state, currentBufferedMsgs) => {
   const signaling = new SkylinkSignalingServer();
   for (let i = currentBufferedMsgs.length - 1; i >= 0; i -= 1) {
     const message = currentBufferedMsgs[i];
+    if (!message.mid) {
+      if (!state.user.sid) {
+        logger.log.DEBUG([state.user.sid, TAGS.SIG_SERVER, null, `${MESSAGES.SIGNALING.BUFFERED_MESSAGES_DROPPED}`]);
+        return;
+      }
+      message.mid = state.user.sid;
+    }
     signaling.sendMessage(message);
     currentBufferedMsgs.splice(i, 1);
   }
@@ -38,7 +45,7 @@ const executeCallbackAndRemoveListener = (rid, evt) => {
     Skylink.setSkylinkState(state, state.room.id);
 
     logger.log.DEBUG([state.user.sid, TAGS.SIG_SERVER, null, `${MESSAGES.SIGNALING.BUFFERED_MESSAGES_SENT}: ${currentBufferedMsgs.length}`]);
-    sendBufferedMsg(currentBufferedMsgs);
+    sendBufferedMsg(state, currentBufferedMsgs);
     SkylinkEventManager.removeEventListener(EVENTS.HANDSHAKE_PROGRESS, executeCallbackAndRemoveListener);
   }
 };

@@ -3,7 +3,7 @@ const renegotiateIfNeeded = (state, peerId) => {
 
   return new Promise((resolve) => {
     const peerConnection = peerConnections[peerId];
-    const pcSenders = peerConnection.getSenders();
+    const pcSenders = peerConnection.getSenders() ? peerConnection.getSenders() : [];
     const senderGetStatsPromises = [];
     const savedSenders = currentRTCRTPSenders[peerId] || [];
     let isRenegoNeeded = false;
@@ -19,6 +19,13 @@ const renegotiateIfNeeded = (state, peerId) => {
         reports.forEach((report) => {
           if (report && report.ssrc) {
             transmittingSenders[report.ssrc] = pcSenders[senderIndex];
+          } else if (report && report.type === 'ssrc' && report.id.indexOf('send') > 1) { // required for retrieving sender information for react
+            // native ios
+            report.values.forEach((value) => {
+              if (value.ssrc) {
+                transmittingSenders[value.ssrc] = pcSenders[senderIndex];
+              }
+            });
           }
         });
       });

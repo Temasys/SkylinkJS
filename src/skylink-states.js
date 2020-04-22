@@ -1,3 +1,7 @@
+import ScreenSharing from './features/screen-sharing';
+import AsyncMessaging from './features/messaging/async-messaging';
+import EncryptedMessaging from './features/messaging/encrypted-messaging';
+
 let instance = null;
 
 /**
@@ -48,6 +52,17 @@ class SkylinkStates {
    */
   removeStateByRoomId(roomId) {
     return delete this.states[roomId];
+  }
+
+  /**
+   *
+   * @param {String} roomKey
+   */
+  clearRoomStateFromSingletons(roomKey) {
+    const roomState = this.getState(roomKey);
+    new ScreenSharing(roomState).deleteScreensharingInstance(roomState.room);
+    AsyncMessaging.deleteAsyncInstance(roomState.room);
+    EncryptedMessaging.deleteEncryptedInstance(roomState.room);
   }
 }
 

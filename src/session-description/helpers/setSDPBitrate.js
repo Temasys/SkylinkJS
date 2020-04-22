@@ -3,6 +3,7 @@
 import Skylink from '../../index';
 import logger from '../../logger';
 
+// alternative to munging is to implement RTCRtpSender.setParameters()
 const setSDPBitrate = (targetMid, sessionDescription, roomKey) => {
   const state = Skylink.getSkylinkState(roomKey);
   const sdpLines = sessionDescription.sdp.split('\r\n');

@@ -2,7 +2,7 @@ import logger from '../../../../logger';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { onDataChannelStateChanged } from '../../../../skylink-events';
 import PeerConnection from '../../../index';
-import { DATA_CHANNEL_STATE } from '../../../../skylink-events/constants';
+import { DATA_CHANNEL_STATE } from '../../../../constants';
 import Skylink from '../../../../index';
 
 /**

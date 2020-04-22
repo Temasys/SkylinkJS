@@ -1,5 +1,6 @@
 import logger from '../logger/index';
 import { TAGS, EVENTS } from '../constants';
+import { isAFunction } from './helpers';
 import MESSAGES from '../messages';
 
 class SkylinkEventManager {
@@ -19,6 +20,11 @@ class SkylinkEventManager {
   addListener(eventName, callback, isPrivate) {
     try {
       const key = isPrivate ? 'privateEvents' : 'events';
+
+      if (!isAFunction(callback)) {
+        logger.log.DEBUG([null, TAGS.SKYLINK_EVENT, eventName, MESSAGES.LOGGER.INVALID_CB]);
+        return;
+      }
 
       if (!this[key][eventName]) {
         this[key][eventName] = {};

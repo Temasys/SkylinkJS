@@ -15,9 +15,8 @@ const getStreams = (roomState) => {
     return streamList;
   }
 
-  const streamIds = Object.keys(userMedia);
-
   if (userMedia) {
+    const streamIds = Object.keys(userMedia);
     streamList.userMedia = {};
     streamIds.forEach((streamId) => {
       streamList.userMedia[streamId] = userMedia[streamId].stream;

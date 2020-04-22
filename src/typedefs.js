@@ -623,243 +623,8 @@
  * Defined only when <code>state</code> payload is <code>RETRIEVE_SUCCESS</code>.
  * @property {String} peerId - The peer to which the statistics belong to
  * @property {JSON} statistics.raw The Peer connection raw statistics.before parsing.
- * @property {JSON} statistics.audio The Peer connection audio streaming statistics.
- * @property {JSON} statistics.audio.sending The Peer connection sending audio streaming statistics.
- * @property {number} statistics.audio.sending.bytes The Peer connection current sending audio streaming bytes.
- *   Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.
- * @property {number} statistics.audio.sending.totalBytes The Peer connection total sending audio streaming bytes.
- *   Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.
- * @property {number} statistics.audio.sending.packets The Peer connection current sending audio streaming packets.
- * @property {number} statistics.audio.sending.totalPackets The Peer connection total sending audio streaming packets.
- * @property {number} statistics.audio.sending.packetsLost <blockquote class="info">
- *   This property has been deprecated and would be removed in future releases
- *   as it should not be in <code>sending</code> property.
- *   </blockquote> The Peer connection current sending audio streaming packets lost.
- * @property {number} statistics.audio.sending.totalPacketsLost <blockquote class="info">
- *   This property has been deprecated and would be removed in future releases
- *   as it should not be in <code>sending</code> property.
- *   </blockquote> The Peer connection total sending audio streaming packets lost.
- * @property {number} statistics.audio.sending.ssrc The Peer connection sending audio streaming RTP packets SSRC.
- * @property {number} statistics.audio.sending.rtt The Peer connection sending audio streaming RTT (Round-trip delay time).
- *   Defined as <code>0</code> if it's not present in original raw statistics.before parsing.
- * @property {number} statistics.audio.sending.jitter <blockquote class="info">
- *   This property has been deprecated and would be removed in future releases
- *   as it should not be in <code>sending</code> property.
- *   </blockquote> The Peer connection sending audio streaming RTP packets jitter in seconds.
- *   Defined as <code>0</code> if it's not present in original raw statistics.before parsing.
- * @property {number} [statistics.audio.sending.jitterBufferMs] - <blockquote class="info">
- *   This property has been deprecated and would be removed in future releases
- *   as it should not be in <code>sending</code> property.
- *   </blockquote> The Peer connection sending audio streaming
- *   RTP packets jitter buffer in miliseconds.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {JSON} [statistics.audio.sending.codec] - The Peer connection sending audio streaming selected codec information.
- *   Defined as <code>null</code> if local session description is not available before parsing.
- * @property {String} statistics.audio.sending.codec.name The Peer connection sending audio streaming selected codec name.
- * @property {number} statistics.audio.sending.codec.payloadType The Peer connection sending audio streaming selected codec payload type.
- * @property {String} [statistics.audio.sending.codec.implementation] - The Peer connection sending audio streaming selected codec implementation.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {number} [statistics.audio.sending.codec.channels] - The Peer connection sending audio streaming selected codec channels (2 for stereo).
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing,
- *   and this is usually present in <code>statistics.audio</code> property.
- * @property {number} [statistics.audio.sending.codec.clockRate] - The Peer connection sending audio streaming selected codec media sampling rate.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {String} [statistics.audio.sending.codec.params] - The Peer connection sending audio streaming selected codec parameters.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {number} [statistics.audio.sending.inputLevel] - The Peer connection sending audio streaming input level.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {number} [statistics.audio.sending.echoReturnLoss] - The Peer connection sending audio streaming echo return loss in db (decibels).
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {number} [statistics.audio.sending.echoReturnLossEnhancement] - The Peer connection sending audio streaming
- *   echo return loss enhancement db (decibels).
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {JSON} statistics.audio.receiving The Peer connection receiving audio streaming statistics.
- * @property {number} statistics.audio.receiving.bytes The Peer connection current sending audio streaming bytes.
- *   Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.
- * @property {number} statistics.audio.receiving.totalBytes The Peer connection total sending audio streaming bytes.
- *   Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.
- * @property {number} statistics.audio.receiving.packets The Peer connection current receiving audio streaming packets.
- * @property {number} statistics.audio.receiving.totalPackets The Peer connection total receiving audio streaming packets.
- * @property {number} statistics.audio.receiving.packetsLost The Peer connection current receiving audio streaming packets lost.
- * @property {number} statistics.audio.receiving.fractionLost The Peer connection current receiving audio streaming fraction packets lost.
- * @property {number} statistics.audio.receiving.packetsDiscarded The Peer connection current receiving audio streaming packets discarded.
- * @property {number} statistics.audio.receiving.totalPacketsLost The Peer connection total receiving audio streaming packets lost.
- * @property {number} statistics.audio.receiving.totalPacketsDiscarded The Peer connection total receiving audio streaming packets discarded.
- * @property {number} statistics.audio.receiving.ssrc The Peer connection receiving audio streaming RTP packets SSRC.
- * @property {Number} statistics.audio.receiving.jitter The Peer connection receiving audio streaming RTP packets jitter in seconds.
- *   Defined as <code>0</code> if it's not present in original raw statistics.before parsing.
- * @property {Number} [statistics.audio.receiving.jitterBufferMs] - The Peer connection receiving audio streaming
- *   RTP packets jitter buffer in miliseconds.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {JSON} [statistics.audio.receiving.codec] - The Peer connection receiving audio streaming selected codec information.
- *   Defined as <code>null</code> if remote session description is not available before parsing.
- *   Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
- *   The value is derived from the remote session description.
- * @property {String} statistics.audio.receiving.codec.name The Peer connection receiving audio streaming selected codec name.
- * @property {Number} statistics.audio.receiving.codec.payloadType The Peer connection receiving audio streaming selected codec payload type.
- * @property {String} [statistics.audio.receiving.codec.implementation] - The Peer connection receiving audio streaming selected codec implementation.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.audio.receiving.codec.channels] - The Peer connection receiving audio streaming selected codec channels (2 for stereo).
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing,
- *   and this is usually present in <code>statistics.audio</code> property.
- * @property {Number} [statistics.audio.receiving.codec.clockRate] - The Peer connection receiving audio streaming selected codec media sampling rate.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {String} [statistics.audio.receiving.codec.params] - The Peer connection receiving audio streaming selected codec parameters.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.audio.receiving.outputLevel] - The Peer connection receiving audio streaming output level.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {JSON} statistics.video The Peer connection video streaming statistics.
- * @property {JSON} statistics.video.sending The Peer connection sending video streaming statistics.
- * @property {Number} statistics.video.sending.bytes The Peer connection current sending video streaming bytes.
- *   Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.
- * @property {Number} statistics.video.sending.totalBytes The Peer connection total sending video streaming bytes.
- *   Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.
- * @property {Number} statistics.video.sending.packets The Peer connection current sending video streaming packets.
- * @property {Number} statistics.video.sending.totalPackets The Peer connection total sending video streaming packets.
- * @property {Number} statistics.video.sending.packetsLost <blockquote class="info">
- *   This property has been deprecated and would be removed in future releases
- *   as it should not be in <code>sending</code> property.
- *   </blockquote> The Peer connection current sending video streaming packets lost.
- * @property {Number} statistics.video.sending.totalPacketsLost <blockquote class="info">
- *   This property has been deprecated and would be removed in future releases
- *   as it should not be in <code>sending</code> property.
- *   </blockquote> The Peer connection total sending video streaming packets lost.
- * @property {Number} statistics.video.sending.ssrc The Peer connection sending video streaming RTP packets SSRC.
- * @property {Number} statistics.video.sending.rtt The Peer connection sending video streaming RTT (Round-trip delay time).
- *   Defined as <code>0</code> if it's not present in original raw statistics.before parsing.
- * @property {Number} statistics.video.sending.jitter <blockquote class="info">
- *   This property has been deprecated and would be removed in future releases
- *   as it should not be in <code>sending</code> property.
- *   </blockquote> The Peer connection sending video streaming RTP packets jitter in seconds.
- *   Defined as <code>0</code> if it's not present in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.jitterBufferMs] - <blockquote class="info">
- *   This property has been deprecated and would be removed in future releases
- *   as it should not be in <code>sending</code> property.
- *   </blockquote> The Peer connection sending video streaming RTP packets jitter buffer in miliseconds.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.qpSum] - The Peer connection sending video streaming sum of the QP values of frames passed.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {JSON} [statistics.video.sending.codec] - The Peer connection sending video streaming selected codec information.
- *   Defined as <code>null</code> if local session description is not available before parsing.
- * @property {String} statistics.video.sending.codec.name The Peer connection sending video streaming selected codec name.
- * @property {Number} statistics.video.sending.codec.payloadType The Peer connection sending video streaming selected codec payload type.
- * @property {String} [statistics.video.sending.codec.implementation] - The Peer connection sending video streaming selected codec implementation.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.codec.channels] - The Peer connection sending video streaming selected codec channels (2 for stereo).
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing,
- *   and this is usually present in <code>statistics.audio</code> property.
- * @property {Number} [statistics.video.sending.codec.clockRate] - The Peer connection sending video streaming selected codec media sampling rate.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {String} [statistics.video.sending.codec.params] - The Peer connection sending video streaming selected codec parameters.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.frames] - The Peer connection sending video streaming frames.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.frameRateInput] - The Peer connection sending video streaming fps input.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.frameRateInput] - The Peer connection sending video streaming fps input.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.framesDropped] - The Peer connection sending video streaming frames dropped.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.frameRateMean] - The Peer connection sending video streaming fps mean.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.frameRateStdDev] - The Peer connection sending video streaming fps standard deviation.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.framesPerSecond] - The Peer connection sending video streaming fps.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.framesDecoded] - The Peer connection sending video streaming frames decoded.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.framesCorrupted] - The Peer connection sending video streaming frames corrupted.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.totalFrames] - The Peer connection total sending video streaming frames.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.nacks] - The Peer connection current sending video streaming nacks.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.totalNacks] - The Peer connection total sending video streaming nacks.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.plis] - The Peer connection current sending video streaming plis.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.totalPlis] - The Peer connection total sending video streaming plis.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.firs] - The Peer connection current sending video streaming firs.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.totalFirs] - The Peer connection total sending video streaming firs.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.slis] - The Peer connection current sending video streaming slis.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.sending.totalSlis] - The Peer connection total sending video streaming slis.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {JSON} statistics.video.receiving The Peer connection receiving video streaming statistics.
- * @property {Number} statistics.video.receiving.bytes The Peer connection current receiving video streaming bytes.
- *   Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.
- * @property {Number} statistics.video.receiving.totalBytes The Peer connection total receiving video streaming bytes.
- *   Note that value is in bytes so you have to convert that to bits for displaying for an example kbps.
- * @property {Number} statistics.video.receiving.packets The Peer connection current receiving video streaming packets.
- * @property {Number} statistics.video.receiving.totalPackets The Peer connection total receiving video streaming packets.
- * @property {Number} statistics.video.receiving.packetsLost The Peer connection current receiving video streaming packets lost.
- * @property {Number} statistics.video.receiving.fractionLost The Peer connection current receiving video streaming fraction packets lost.
- * @property {Number} statistics.video.receiving.packetsDiscarded The Peer connection current receiving video streaming packets discarded.
- * @property {Number} statistics.video.receiving.totalPacketsLost The Peer connection total receiving video streaming packets lost.
- * @property {Number} statistics.video.receiving.totalPacketsDiscarded The Peer connection total receiving video streaming packets discarded.
- * @property {Number} statistics.video.receiving.ssrc The Peer connection receiving video streaming RTP packets SSRC.
- * @property {Number} [statistics.video.receiving.e2eDelay] - The Peer connection receiving video streaming e2e delay.
- *   Defined as <code>null</code> if it's not present in original raw statistics.before parsing, and that
- *   it finds any existing audio, video or object (plugin) DOM elements that has set with the
- *   Peer remote stream object to parse current time. Note that <code>document.getElementsByTagName</code> function
- *   and DOM <code>.currentTime</code> has to be supported inorder for data to be parsed correctly.
- * @property {Number} statistics.video.receiving.jitter The Peer connection receiving video streaming RTP packets jitter in seconds.
- *   Defined as <code>0</code> if it's not present in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.jitterBufferMs] - The Peer connection receiving video streaming
- *   RTP packets jitter buffer in miliseconds.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {JSON} [statistics.video.receiving.codec] - The Peer connection receiving video streaming selected codec information.
- *   Defined as <code>null</code> if remote session description is not available before parsing.
- *   Note that if the value is polyfilled, the value may not be accurate since the remote Peer can override the selected codec.
- *   The value is derived from the remote session description.
- * @property {String} statistics.video.receiving.codec.name The Peer connection receiving video streaming selected codec name.
- * @property {Number} statistics.video.receiving.codec.payloadType The Peer connection receiving video streaming selected codec payload type.
- * @property {String} [statistics.video.receiving.codec.implementation] - The Peer connection receiving video streaming selected codec implementation.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.codec.channels] - The Peer connection receiving video streaming selected codec channels (2 for stereo).
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing,
- *   and this is usually present in <code>statistics.audio</code> property.
- * @property {Number} [statistics.video.receiving.codec.clockRate] - The Peer connection receiving video streaming selected codec media sampling rate.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {String} [statistics.video.receiving.codec.params] - The Peer connection receiving video streaming selected codec parameters.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.frames] - The Peer connection receiving video streaming frames.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.framesOutput] - The Peer connection receiving video streaming fps output.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.framesDecoded] - The Peer connection receiving video streaming frames decoded.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.frameRateMean] - The Peer connection receiving video streaming fps mean.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.frameRateStdDev] - The Peer connection receiving video streaming fps standard deviation.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.framesPerSecond] - The Peer connection receiving video streaming fps.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.framesDecoded] - The Peer connection receiving video streaming frames decoded.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.framesCorrupted] - The Peer connection receiving video streaming frames corrupted.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.totalFrames] - The Peer connection total receiving video streaming frames.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.nacks] - The Peer connection current receiving video streaming nacks.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.totalNacks] - The Peer connection total receiving video streaming nacks.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.plis] - The Peer connection current receiving video streaming plis.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.totalPlis] - The Peer connection total receiving video streaming plis.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.firs] - The Peer connection current receiving video streaming firs.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.totalFirs] - The Peer connection total receiving video streaming firs.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.slis] - The Peer connection current receiving video streaming slis.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {Number} [statistics.video.receiving.totalPlis] - The Peer connection total receiving video streaming slis.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
+ * @property {audioStats} statistics.audio The Peer connection audio streaming statistics.
+ * @property {videoStats} statistics.video The Peer connection video streaming statistics.
  * @property {JSON} statistics.selectedCandidatePair The Peer connection selected ICE candidate pair statistics.
  * @property {JSON} statistics.selectedCandidatePair.local The Peer connection selected local ICE candidate.
  * @property {String} statistics.selectedCandidatePair.local.ipAddress The Peer connection selected
@@ -885,11 +650,9 @@
  *   remote ICE candidate type.
  * @property {boolean} [statistics.selectedCandidatePair.writable] - The flag if Peer has gotten ACK to an ICE request.
  *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {boolean} [statistics.selectedCandidatePair.readable] - The flag if Peer has gotten a valid incoming ICE request.
+ * @property {String} [statistics.selectedCandidatePair.roundTripTime] - The current STUN connectivity checks RTT (Round-trip delay time).
  *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {String} [statistics.selectedCandidatePair.rtt] - The current STUN connectivity checks RTT (Round-trip delay time).
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {String} [statistics.selectedCandidatePair.totalRtt] - The total STUN connectivity checks RTT (Round-trip delay time).
+ * @property {String} [statistics.selectedCandidatePair.totalRoundTripTime] - The total STUN connectivity checks RTT (Round-trip delay time).
  *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
  * @property {JSON} statistics.selectedCandidatePair.requests The ICE connectivity check requests.
  * @property {String} [statistics.selectedCandidatePair.requests.received] - The current ICE connectivity check requests received.
@@ -910,23 +673,12 @@
  * @property {String} [statistics.selectedCandidatePair.responses.totalSent] - The total ICE connectivity check responses sent.
  *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
  * @property {JSON} statistics.selectedCandidatePair.consentRequests The current ICE consent requests.
- * @property {String} [statistics.selectedCandidatePair.consentRequests.received] - The current ICE consent requests received.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
  * @property {String} [statistics.selectedCandidatePair.consentRequests.sent] - The current ICE consent requests sent.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {String} [statistics.selectedCandidatePair.consentRequests.totalReceived] - The total ICE consent requests received.
  *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
  * @property {String} [statistics.selectedCandidatePair.consentRequests.totalSent] - The total ICE consent requests sent.
  *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {JSON} statistics.selectedCandidatePair.consentResponses The current ICE consent responses.
- * @property {String} [statistics.selectedCandidatePair.consentResponses.received] - The current ICE consent responses received.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {String} [statistics.selectedCandidatePair.consentResponses.sent] - The current ICE consent responses sent.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {String} [statistics.selectedCandidatePair.consentResponses.totalReceived] - The total ICE consent responses received.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
- * @property {String} [statistics.selectedCandidatePair.consentResponses.totalSent] - The total ICE consent responses sent.
- *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
+
+
  * @property {JSON} statistics.certificate The Peer connection DTLS/SRTP exchanged certificates information.
  * @property {JSON} statistics.certificate.local The Peer connection local certificate information.
  * @property {String} [statistics.certificate.local.fingerprint] - The Peer connection local certificate fingerprint.
@@ -949,6 +701,8 @@
  * @property {String} [statistics.certificate.srtpCipher] - The certificates SRTP cipher.
  *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
  * @property {String} [statistics.certificate.dtlsCipher] - The certificates DTLS cipher.
+ *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
+ * @property {String} [statistics.certificate.tlsVersion] - The certificates DTLS TLS Version agreed.
  *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
  * @property {JSON} statistics.connection The Peer connection object statistics.
  * @property {String} statistics.connection.iceConnectionState The Peer connection ICE connection state.
@@ -1083,8 +837,14 @@
 
 /**
  * @typedef {Array} logItems
- * @property {Date} logItems[0] The DateTime of when the log was stored
- * @property {String} logItems[1] The log level
- * @property {String} logItems[2] The log message
- * @property {Object} logItems[3] The debug object
+ * @property {Date} logItems.0 The DateTime of when the log was stored
+ * @property {String} logItems.1 The log level
+ * @property {String} logItems.2 The log message
+ * @property {Object} logItems.3 The debug object
+ */
+
+/**
+ * @typedef {Array} MediaStreams
+ * @property {MediaStream} MediaStreams.0 Audio stream
+ * @property {MediaStream} MediaStreams.1 Video stream
  */

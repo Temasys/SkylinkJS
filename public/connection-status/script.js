@@ -1,5 +1,5 @@
 /* eslint-disable import/extensions,no-param-reassign */
-import Skylink, { SkylinkEventManager, SkylinkConstants } from '../../dist/skylink.esm.js';
+import Skylink, { SkylinkEventManager, SkylinkConstants } from '../../dist/skylink.complete.js';
 import config from '../config.js';
 
 const { document } = window;

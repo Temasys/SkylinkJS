@@ -3,17 +3,12 @@ image: node:10.7.0
 pipelines:
   default:
   - step:
-       name: Build and Test
+       name: Build
        script:
-         - echo "Default"
+           - npm install
+           - npm run build
   branches:
-    development-1:
-    - step:
-          name: Build
-          script:
-          - npm install
-          - npm run publish
-    staging-1:
+    staging:
     - step:
           name: Build and Test
           script:

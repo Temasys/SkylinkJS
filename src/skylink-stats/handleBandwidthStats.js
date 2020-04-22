@@ -32,10 +32,12 @@ class HandleBandwidthStats extends SkylinkStats {
   constructor() {
     super();
     this.model = {
+      client_id: null,
+      appKey: null,
+      timestamp: null,
       room_id: null,
       user_id: null,
       peer_id: null,
-      client_id: null,
       audio_send: { tracks: [] },
       audio_recv: {},
       video_send: { tracks: [] },
@@ -48,10 +50,11 @@ class HandleBandwidthStats extends SkylinkStats {
   gatherSendAudioPacketsStats() {
     this.model.audio_send.bytes = formatValue(this.stats, 'audio', 'send', 'bytes');
     this.model.audio_send.packets = formatValue(this.stats, 'audio', 'send', 'packets');
-    this.model.audio_send.nack_count = formatValue(this.stats, 'audio', 'send', 'nacks');
     this.model.audio_send.echo_return_loss = formatValue(this.stats, 'audio', 'send', 'echoReturnLoss');
     this.model.audio_send.echo_return_loss_enhancement = formatValue(this.stats, 'audio', 'send', 'echoReturnLossEnhancement');
-    // this.model.audio_send.round_trip_time = formatValue(this.stats,'audio', 'send', 'rtt');
+    this.model.audio_send.round_trip_time = formatValue(this.stats, 'audio', 'send', 'roundTripTime');
+    this.model.audio_send.audio_level = formatValue(this.stats, 'audio', 'send', 'audioLevel');
+    this.model.audio_send.jitter = formatValue(this.stats, 'audio', 'send', 'jitter');
   }
 
   gatherReceiveAudioPacketsStats() {
@@ -59,12 +62,7 @@ class HandleBandwidthStats extends SkylinkStats {
     this.model.audio_recv.packets = formatValue(this.stats, 'audio', 'recv', 'packets');
     this.model.audio_recv.packets_lost = formatValue(this.stats, 'audio', 'recv', 'packetsLost');
     this.model.audio_recv.jitter = formatValue(this.stats, 'audio', 'recv', 'jitter');
-    this.model.audio_recv.nack_count = formatValue(this.stats, 'audio', 'recv', 'nacks');
     this.model.audio_recv.audio_level = formatValue(this.stats, 'audio', 'recv', 'audioLevel');
-    this.model.audio_recv.audio_energy = formatValue(this.stats, 'audio', 'recv', 'totalAudioEnergy');
-    this.model.audio_recv.jitter_buffer_delay = formatValue(this.stats, 'audio', 'recv', 'jitterBufferDelay');
-    this.model.audio_recv.jitter_buffer_emmited_count = formatValue(this.stats, 'audio', 'recv', 'jitterBufferEmittedCount');
-    // this.model.video_recv.packets_discarded = formatValue(this.stats,'audio', 'recv', 'packetsDiscarded');
   }
 
   gatherSendVideoPacketsStats() {
@@ -76,16 +74,12 @@ class HandleBandwidthStats extends SkylinkStats {
     this.model.video_send.frames_encoded = formatValue(this.stats, 'video', 'send', 'framesEncoded');
     this.model.video_send.frame_width = formatValue(this.stats, 'video', 'send', 'frameWidth');
     this.model.video_send.frame_height = formatValue(this.stats, 'video', 'send', 'frameHeight');
-    // this.model.video_send.round_trip_time = formatValue(this.stats,'video', 'send', 'rtt');
-    // this.model.video_send.frames = formatValue(this.stats,'video', 'send', 'frames');
-    // this.model.video_send.frames_dropped = formatValue(this.stats,'video', 'send', 'framesDropped');
-    // this.model.video_send.framerate = formatValue(this.stats,'video', 'send', 'frameRate');
-    // this.model.video_send.framerate_input = formatValue(this.stats,'video', 'send', 'frameRateInput');
-    // this.model.video_send.framerate_encoded = formatValue(this.stats,'video', 'send', 'frameRateEncoded');
-    // this.model.video_send.framerate_mean = formatValue(this.stats,'video', 'send', 'frameRateMean');
-    // this.model.video_send.framerate_std_dev = formatValue(this.stats,'video', 'send', 'frameRateStdDev');
-    // this.model.video_send.cpu_limited_resolution = formatValue(this.stats,'video', 'send', 'cpuLimitedResolution');
-    // this.model.video_send.bandwidth_limited_resolution = formatValue(this.stats,'video', 'send', 'bandwidthLimitedResolution');
+    this.model.video_send.round_trip_time = formatValue(this.stats, 'video', 'send', 'roundTripTime');
+    this.model.video_send.qp_sum = formatValue(this.stats, 'video', 'send', 'qpSum');
+    this.model.video_send.jitter = formatValue(this.stats, 'video', 'send', 'jitter');
+    this.model.video_send.frames = formatValue(this.stats, 'video', 'send', 'frames');
+    this.model.video_send.hugeFrames = formatValue(this.stats, 'video', 'send', 'hugeFramesSent');
+    this.model.video_send.framesPerSecond = formatValue(this.stats, 'video', 'send', 'framesPerSecond');
   }
 
   gatherReceiveVideoPacketsStats() {
@@ -97,22 +91,23 @@ class HandleBandwidthStats extends SkylinkStats {
     this.model.video_recv.plis_count = formatValue(this.stats, 'video', 'recv', 'plis');
     this.model.video_recv.frames_decoded = formatValue(this.stats, 'video', 'recv', 'framesDecoded');
     this.model.video_recv.qp_sum = formatValue(this.stats, 'video', 'recv', 'qpSum');
-    // this.model.video_recv.packets_discarded = formatValue(this.stats,'video', 'recv', 'packetsDiscarded');
-    // this.model.video_recv.jitter = formatValue(this.stats,'video', 'recv', 'jitter');
-    // this.model.video_recv.frames = formatValue(this.stats,'video', 'recv', 'frames');
-    // this.model.video_recv.frame_width = formatValue(this.stats,'video', 'recv', 'frameWidth');
-    // this.model.video_recv.frame_height = formatValue(this.stats,'video', 'recv', 'frameHeight');
-    // this.model.video_recv.framerate = formatValue(this.stats,'video', 'recv', 'frameRate');
-    // this.model.video_recv.framerate_output = formatValue(this.stats,'video', 'recv', 'frameRateOutput');
-    // this.model.video_recv.framerate_decoded = formatValue(this.stats,'video', 'recv', 'frameRateDecoded');
-    // this.model.video_recv.framerate_mean = formatValue(this.stats,'video', 'recv', 'frameRateMean');
-    // this.model.video_recv.framerate_std_dev = formatValue(this.stats,'video', 'recv', 'frameRateStdDev');
+    this.model.video_recv.frames_decoded = formatValue(this.stats, 'video', 'recv', 'framesDecoded');
+    this.model.video_recv.frames_dropped = formatValue(this.stats, 'video', 'recv', 'framesDropped');
+    this.model.video_recv.decoderImplementation = formatValue(this.stats, 'video', 'recv', 'decoderImplementation');
   }
 
   buildTrackInfo(roomKey) {
     const state = Skylink.getSkylinkState(roomKey);
     const { streams } = state;
-    const streamObjs = Object.values(Object.values(streams.userMedia));
+    let streamObjs = [];
+    if (streams.userMedia) {
+      streamObjs = Object.values(Object.values(streams.userMedia));
+    }
+
+    if (streams.screenshare) {
+      streamObjs.push(streams.screenshare);
+    }
+
     streamObjs.forEach((streamObj) => {
       if (streamObj) {
         const stream = streamObj.stream ? streamObj.stream : streamObj[Object.keys(streamObj)[0]].stream;
@@ -142,12 +137,16 @@ class HandleBandwidthStats extends SkylinkStats {
       return;
     }
 
-    this.model.room_id = roomKey;
-    this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;
-    this.model.peer_id = peerId;
+    if (!roomState.streams.userMedia && !roomState.streams.screenshare) {
+      return;
+    }
+
     this.model.client_id = roomState.clientId;
     this.model.appKey = Skylink.getInitOptions().appKey;
     this.model.timestamp = (new Date()).toISOString();
+    this.model.room_id = roomKey;
+    this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;
+    this.model.peer_id = peerId;
 
     PeerConnection.retrieveStatistics(roomKey, peerId, Skylink.getInitOptions().beSilentOnStatsLogs).then((stats) => {
       if (stats) {

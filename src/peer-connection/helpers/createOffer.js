@@ -82,6 +82,7 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
       PeerConnection.createDataChannel({
         peerId: targetMid,
         roomState: state,
+        createAsMessagingChannel: true,
       });
       state.peerConnections[targetMid].hasMainChannel = true;
     }
@@ -108,7 +109,7 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
       },
     } : offerConstraints)
       .then(offer => onOfferCreated(resolve, targetMid, state, restartOfferMsg, offer))
-      .catch(err => onOfferFailed(reject, targetMid, state, err));
+      .catch(error => onOfferFailed(reject, targetMid, state, error));
   });
 };
 

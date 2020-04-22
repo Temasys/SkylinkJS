@@ -1,5 +1,5 @@
 import {
-  API_VERSION, SDK_TYPE, SDK_VERSION, SIGNALING_VERSION, SOCKET_TYPE,
+  API_VERSION, SDK_NAME, SDK_VERSION, SIGNALING_VERSION, SOCKET_TYPE,
 } from '../constants';
 
 const SOCKET_DEFAULTS = {
@@ -22,13 +22,13 @@ const SOCKET_CONFIG = options => ({
   reconnectionDelay: SOCKET_DEFAULTS.RECONNECTION_DELAY,
   transports: [SOCKET_TYPE.WEBSOCKET.toLowerCase()],
   query: {
-    Skylink_SDK_type: SDK_TYPE.WEB,
+    Skylink_SDK_type: SDK_NAME.WEB,
     Skylink_SDK_version: SDK_VERSION,
     Skylink_API_version: API_VERSION,
     'X-Server-Select': SIGNALING_VERSION,
   },
   extraHeaders: {
-    Skylink_SDK_type: SDK_TYPE.WEB,
+    Skylink_SDK_type: SDK_NAME.WEB,
     Skylink_SDK_version: SDK_VERSION,
     Skylink_API_version: API_VERSION,
     'X-Server-Select': SIGNALING_VERSION,

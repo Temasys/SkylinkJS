@@ -13,8 +13,6 @@ import removeSDPFirefoxH264Pref from './removeSDPFirefoxH264Pref';
 import renderSDPOutput from './renderSDPOutput';
 import getSDPICECandidates from './getSDPICECandidates';
 import getSDPSelectedCodec from './getSDPSelectedCodec';
-import getSDPFingerprint from './getSDPFingerprint';
-import getSDPMediaSSRC from './getSDPMediaSSRC';
 import setOriginalDTLSRole from './setOriginalDTLSRole';
 import modifyDTLSRole from './modifyDTLSRole';
 import getTransceiverMid from './getTransceiverMid';
@@ -35,8 +33,6 @@ const helpers = {
   renderSDPOutput,
   getSDPICECandidates,
   getSDPSelectedCodec,
-  getSDPFingerprint,
-  getSDPMediaSSRC,
   setOriginalDTLSRole,
   modifyDTLSRole,
   getTransceiverMid,

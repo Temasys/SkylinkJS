@@ -41,8 +41,7 @@ const retrievePeerScreenStream = (state) => {
   return peersScreenStream;
 };
 
-const stopScreenStream = (room, screenStream, peerId) => {
-  const fromLeaveRoom = false;
+const stopScreenStream = (room, screenStream, peerId, fromLeaveRoom = false) => {
   const isScreensharing = true;
   stopStreamHelpers.prepStopStreams(room.id, screenStream.id, fromLeaveRoom, isScreensharing)
     .then(() => logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SCREEN_SUCCESS}`]))

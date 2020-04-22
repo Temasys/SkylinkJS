@@ -1,0 +1,53 @@
+#chat_settings_panel,
+#encrypt-secrets-panel {
+    display: none;
+}
+
+label.no-label {
+    vertical-align: -3rem;
+}
+
+#chat_body.chat {
+    height: 350px;
+    max-height: unset;
+}
+
+#chat_log li {
+    margin: 2px 0;
+}
+
+#chat_log .list-group-item.notification {
+    border: none;
+    text-align: center;
+}
+
+#chat_log .list-group-item.error {
+    color: red;
+    border-color: red;
+}
+
+#chat_log .list-group-item.error .badge {
+    background-color: red;
+}
+
+#chat_log .log-message-sender-display-name {
+    font-size: 15px;
+    font-weight: bold;
+    color: #00AAA4;
+}
+
+#chat_log .list-group-item.local-message {
+    text-align: right;
+    width: fit-content;
+    margin-left: auto;
+}
+
+#chat_log .list-group-item.remote-message {
+    text-align: left;
+    width: fit-content;
+}
+
+#chat_log .log-message-info {
+    font-style: italic;
+    font-size: 10px;
+}
