@@ -5,17 +5,16 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 
 #### Supported Browsers
 
-> ##### Browsers in Beta (Edge):
-> _Note that for beta supported browsers, some of the audio / video functionality may not work well. Some older versions of Edge may require you to enable experimental support for H.264 video codec to interop with Chrome and Firefox browsers._
 
-| Features                      | Chrome                   | Firefox                  | Opera                    | Safari | 
-|-------------------------------|--------------------------|--------------------------|--------------------------|--------|
-| Platforms:                    | Win, Mac, Linux, Android | Win, Mac, Linux, Android | Win, Mac, Linux, Android | Mac    |
-| Minimum Recommended Versions: | 52                       | 48                       | 38                       | 11     |
-| Screensharing                 | Yes                      | Yes                      | -                        | -      |
-| Video Call                    | Yes                      | Yes                      | Yes                      | Yes    |
-| Audio Call                    | Yes                      | Yes                      | Yes                      | Yes    |
-| File Transfers                | Yes                      | Yes                      | Yes                      | Yes    |                           |
+
+| Features                      | Chrome                   | Firefox                  | Safari                   | Edge (Chromium) | 
+|-------------------------------|--------------------------|--------------------------|--------------------------|-----------------|
+| Platforms:                    | Win, Mac, Linux, Android | Win, Mac, Linux, Android | Mac                      | Win, Mac        |
+| Minimum Recommended Versions: | 72                       | 66                       | 13                       | 80              |
+| Screensharing                 | Yes                      | Yes                      | Yes                      | Yes             |
+| Video Call                    | Yes                      | Yes                      | Yes                      | Yes             |
+| Audio Call                    | Yes                      | Yes                      | Yes                      | Yes             |
+| Messaging                     | Yes                      | Yes                      | Yes                      | Yes             |
 
 - (+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.
 
@@ -26,13 +25,13 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
 - [Temasys Console  - Get your App key](https://console.temasys.io)
 - [Demos](https://cdn.temasys.io/skylink/skylinkjs/latest/demos/collection/index.html)
-- [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/master/demos)
+- [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/demos)
 
 
 ##### Need help or want something changed?
 You can raise tickets on [our support portal](http://support.temasys.io) or on [our Github Page](https://console.temasys.io/support).
 
-##### Current versions and stability
+#### Current versions and stability
 We recommend that you always use the latest versions of the Temasys SkylinkJS Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
 
 [Latest version: 2.1.1](https://github.com/Temasys/SkylinkJS/releases/tag/2.1.1).
