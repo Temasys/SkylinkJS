@@ -24,10 +24,11 @@ const isIceConnectionStateCompleted = (pcIceConnectionState) => {
  */
 const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState) => {
   const { PEER_CONNECTION } = messages;
-  const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE } = constants;
+  const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
   const { AdapterJS } = window;
   const { webrtcDetectedBrowser, webrtcDetectedType } = AdapterJS;
   const state = Skylink.getSkylinkState(currentRoomState.room.id);
+  const { streams } = state;
 
   if (!state) {
     logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, PEER_CONNECTION.no_room_state]);
@@ -75,6 +76,10 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   }));
 
   if (pcIceConnectionState === ICE_CONNECTION_STATE.FAILED) {
+    if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.FIREFOX && !streams.userMedia) { // no audio and video requested will throw ice trickle
+      // failure although ice candidates are exchanged
+      return;
+    }
     dispatchEvent(iceConnectionState({
       state: ICE_CONNECTION_STATE.TRICKLE_FAILED,
       peerId: targetMid,
