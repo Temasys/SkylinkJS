@@ -31,11 +31,11 @@
   },
   "dependencies": {
     "@babel/polyfill": "^7.2.5",
-    "adapterjs": "0.15.4",
     "braintree-jsdoc-template": "^3.3.0",
     "clone": "^2.1.2",
     "crypto-js": "^3.1.9-1",
-    "socket.io-client": "^2.1.0"
+    "socket.io-client": "^2.1.0",
+    "webrtc-adapter": "^6.3.2"
   },
   "devServer": {
     "contentBase": "./dist"

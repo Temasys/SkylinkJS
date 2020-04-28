@@ -11,7 +11,7 @@ import CONSTANTS from './constants';
 
 const globals = { 'socket.io-client': 'io' };
 const external = ['socket.io-client'];
-const AJS_DEST_PATH = `${paths.appNodeModules}/adapterjs/publish/adapter.min.js`;
+const WRTC_AJS_DEST_PATH = `${paths.appNodeModules}/webrtc-adapter/out/adapter.js`;
 const BUILD_PATH = paths.appBuild;
 const banner = `/* SkylinkJS v${pkg.version} ${new Date().toString()} */`;
 // eslint-disable-next-line prefer-destructuring
@@ -59,11 +59,11 @@ const config = {
   },
   plugins: [
     resolve({
-      only: ['adapterjs', 'clone', 'crypto-js'],
+      only: ['webrtc-adapter', 'clone', 'crypto-js', 'sdp', 'rtcpeerconnection-shim'],
     }),
     commonJS({
       namedExports: {
-        [AJS_DEST_PATH]: ['AdapterJS'],
+        [WRTC_AJS_DEST_PATH]: ['AdapterJS'],
       },
     }),
     terser({
