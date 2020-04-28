@@ -6,6 +6,7 @@ const getSDPCommonSupports = (targetMid, sessionDescription = null, roomKey) => 
   const offer = { audio: false, video: false };
   const { AdapterJS } = window;
   const { currentCodecSupport, peerInformations } = state;
+  const { beSilentOnParseLogs } = Skylink.getInitOptions();
 
   if (!targetMid || !(sessionDescription && sessionDescription.sdp)) {
     // TODO: Implement getCodecsSupport inside room-init
@@ -23,7 +24,7 @@ const getSDPCommonSupports = (targetMid, sessionDescription = null, roomKey) => 
     return offer;
   }
 
-  const remoteCodecs = helpers.getSDPCodecsSupport(targetMid, sessionDescription);
+  const remoteCodecs = helpers.getSDPCodecsSupport(targetMid, sessionDescription, beSilentOnParseLogs);
   const localCodecs = currentCodecSupport;
 
   /* eslint-disable no-restricted-syntax */

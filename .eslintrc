@@ -5,7 +5,8 @@
   },
   "rules": {
     "max-len": "off",
-    "import/no-cycle": "off"
+    "import/no-cycle": "off",
+    "no-console":  2
   },
   "extends": ["airbnb-base"]
 }

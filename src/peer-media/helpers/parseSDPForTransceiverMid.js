@@ -6,8 +6,9 @@ import Skylink from '../../index';
 const parseSDPForTransceiverMid = (room, peerId, sessionDescription) => {
   const state = Skylink.getSkylinkState(room.id);
   const { peerMedias } = state;
+  const { beSilentOnParseLogs } = Skylink.getInitOptions();
   const mediaInfos = Object.values(peerMedias[peerId]);
-  const mediaMids = SessionDescription.getTransceiverMid(sessionDescription);
+  const mediaMids = SessionDescription.getTransceiverMid(sessionDescription, beSilentOnParseLogs);
   const audioMids = mediaMids.audio;
   const videoMids = mediaMids.video;
 

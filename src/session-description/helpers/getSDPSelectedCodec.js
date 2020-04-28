@@ -1,7 +1,7 @@
 /* eslint-disable prefer-destructuring,no-continue */
 import logger from '../../logger/index';
 
-const getSDPSelectedCodec = (targetMid, sessionDescription, type, beSilentOnLogs) => {
+const getSDPSelectedCodec = (targetMid, sessionDescription, type, beSilentOnParseLogs) => {
   // TODO implement getSDPSelectedCodec
   const codecInfo = {
     name: null,
@@ -55,8 +55,8 @@ const getSDPSelectedCodec = (targetMid, sessionDescription, type, beSilentOnLogs
     }
   });
 
-  if (!beSilentOnLogs) {
-    logger.log.DEBUG([targetMid, 'RTCSessionDesription', sessionDescription.type,
+  if (!beSilentOnParseLogs) {
+    logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type,
       `Parsing session description "${type}" codecs ->`], codecInfo);
   }
 
