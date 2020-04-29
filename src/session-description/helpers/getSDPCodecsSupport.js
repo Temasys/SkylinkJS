@@ -1,6 +1,6 @@
 import logger from '../../logger';
 
-const getSDPCodecsSupport = (targetMid, sessionDescription) => {
+const getSDPCodecsSupport = (targetMid, sessionDescription, beSilentOnParseLogs) => {
   const codecs = { audio: {}, video: {} };
 
   if (!(sessionDescription && sessionDescription.sdp)) {
@@ -35,7 +35,10 @@ const getSDPCodecsSupport = (targetMid, sessionDescription) => {
     }
   }
 
-  logger.log.INFO([targetMid || null, 'RTCSessionDescription', sessionDescription.type, 'Parsed codecs support ->'], codecs);
+  if (!beSilentOnParseLogs) {
+    logger.log.INFO([targetMid || null, 'RTCSessionDescription', sessionDescription.type, 'Parsed codecs support ->'], codecs);
+  }
+
   return codecs;
 };
 

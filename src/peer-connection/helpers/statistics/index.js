@@ -54,6 +54,7 @@ class PeerConnectionStatistics {
       certificate: {},
     };
     this.beSilentOnLogs = Skylink.getInitOptions().beSilentOnStatsLogs;
+    this.beSilentOnParseLogs = Skylink.getInitOptions().beSilentOnParseLogs;
     this.isAutoBwStats = false;
     this.bandwidth = null;
   }
@@ -233,10 +234,10 @@ class PeerConnectionStatistics {
    * @private
    */
   gatherSDPIceCandidates() {
-    const { peerConnection, beSilentOnLogs } = this;
+    const { peerConnection, beSilentOnParseLogs } = this;
     this.output.connection.candidates = {
-      sending: SessionDescription.getSDPICECandidates(this.peerId, peerConnection.localDescription, beSilentOnLogs),
-      receiving: SessionDescription.getSDPICECandidates(this.peerId, peerConnection.remoteDescription, beSilentOnLogs),
+      sending: SessionDescription.getSDPICECandidates(this.peerId, peerConnection.localDescription, beSilentOnParseLogs),
+      receiving: SessionDescription.getSDPICECandidates(this.peerId, peerConnection.remoteDescription, beSilentOnParseLogs),
     };
   }
 
@@ -245,11 +246,11 @@ class PeerConnectionStatistics {
    * @private
    */
   gatherSDPCodecs() {
-    const { peerConnection, beSilentOnLogs } = this;
-    this.output.audio.sending.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.remoteDescription, 'audio', beSilentOnLogs);
-    this.output.video.sending.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.remoteDescription, 'video', beSilentOnLogs);
-    this.output.audio.receiving.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.localDescription, 'audio', beSilentOnLogs);
-    this.output.video.receiving.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.localDescription, 'video', beSilentOnLogs);
+    const { peerConnection, beSilentOnParseLogs } = this;
+    this.output.audio.sending.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.remoteDescription, 'audio', beSilentOnParseLogs);
+    this.output.video.sending.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.remoteDescription, 'video', beSilentOnParseLogs);
+    this.output.audio.receiving.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.localDescription, 'audio', beSilentOnParseLogs);
+    this.output.video.receiving.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.localDescription, 'video', beSilentOnParseLogs);
   }
 
   /**

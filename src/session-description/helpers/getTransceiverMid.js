@@ -1,5 +1,7 @@
 /* eslint-disable prefer-destructuring */
-const getTransceiverMid = (sessionDescription) => {
+import logger from '../../logger';
+
+const getTransceiverMid = (sessionDescription, beSilentOnParseLogs) => {
   const results = {
     audio: [],
     video: [],
@@ -33,6 +35,11 @@ const getTransceiverMid = (sessionDescription) => {
       }
     }
   });
+
+  if (!beSilentOnParseLogs) {
+    logger.log.INFO([null, 'RTCSessionDesription', sessionDescription.type,
+      `Parsing session description "${sessionDescription.type}" transceivers ->`], results);
+  }
 
   return results;
 };

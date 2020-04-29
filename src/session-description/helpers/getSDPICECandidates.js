@@ -1,6 +1,6 @@
 import logger from '../../logger/index';
 
-const getSDPICECandidates = (targetMid, sessionDescription, beSilentOnLogs) => {
+const getSDPICECandidates = (targetMid, sessionDescription, beSilentOnParseLogs) => {
   const { RTCIceCandidate } = window;
   // TODO: implement getSDPICECandidates
   const candidates = {
@@ -36,8 +36,8 @@ const getSDPICECandidates = (targetMid, sessionDescription, beSilentOnLogs) => {
     });
   });
 
-  if (!beSilentOnLogs) {
-    logger.log.DEBUG([targetMid, 'RTCSessionDesription', sessionDescription.type,
+  if (!beSilentOnParseLogs) {
+    logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type,
       'Parsing session description ICE candidates ->'], candidates);
   }
 
