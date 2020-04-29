@@ -88,6 +88,7 @@ const defaultOptions = {
     },
   },
   beSilentOnStatsLogs: false,
+  beSilentOnParseLogs: false,
 };
 
 /**

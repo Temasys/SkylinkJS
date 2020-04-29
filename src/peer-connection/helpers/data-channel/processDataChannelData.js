@@ -45,6 +45,7 @@ const processDataChannelData = (roomState, rawData, peerId, channelName, channel
   const state = Skylink.getSkylinkState(roomState.room.id);
   let transferId = null;
   let streamId = null;
+  // eslint-disable-next-line no-unused-vars
   let isStreamChunk = false;
   const channelProp = channelType === DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
 
@@ -119,7 +120,6 @@ const processDataChannelData = (roomState, rawData, peerId, channelName, channel
           logger.log.WARN([peerId, 'RTCDataChannel', channelProp, `Discarded unknown ${protocolData.type} message ->`], protocolData);
       }
     } catch (error) {
-      console.log(isStreamChunk);
       // if (rawData.indexOf('{') > -1 && rawData.indexOf('}') > 0) {
       //   logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Failed parsing protocol step data error ->'], {
       //     data: rawData,

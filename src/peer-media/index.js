@@ -8,6 +8,7 @@ import logger from '../logger';
 import MESSAGES from '../messages';
 import { mediaInfoDeleted } from '../skylink-events';
 import { dispatchEvent } from '../utils/skylinkEventManager';
+import { isEmptyArray } from '../utils/helpers';
 
 class PeerMedia {
   /**
@@ -151,12 +152,24 @@ class PeerMedia {
   static setPeerMediaInfo(room, targetMid, mediaInfoList = []) {
     try {
       const state = Skylink.getSkylinkState(room.id);
-      const clonedPeerMedia = clone(state.peerMedias[targetMid]) || {};
-      const updatedState = helpers.resetPeerMedia(room, targetMid);
-      mediaInfoList.forEach((mediaInfo) => {
-        updatedState.peerMedias[mediaInfo.publisherId] = helpers.populatePeerMediaInfo(updatedState, clonedPeerMedia, mediaInfo);
-      });
-      Skylink.setSkylinkState(updatedState, room.id);
+
+      if (targetMid === PEER_TYPE.MCU && !isEmptyArray(mediaInfoList)) { // targetMid needs to be obtained from
+        // mediaInfoList
+        const targetPeerIds = [];
+        mediaInfoList.forEach((mediaInfo) => {
+          if (targetPeerIds.indexOf(mediaInfo.publisherId) === -1) {
+            targetPeerIds.push(mediaInfo.publisherId);
+          }
+        });
+        targetPeerIds.forEach(peerId => this.setPeerMediaInfo(room, peerId, mediaInfoList));
+      } else if (targetMid !== PEER_TYPE.MCU) {
+        const clonedPeerMedia = clone(state.peerMedias[targetMid]) || {};
+        const updatedState = helpers.resetPeerMedia(room, targetMid);
+        mediaInfoList.forEach((mediaInfo) => {
+          updatedState.peerMedias[mediaInfo.publisherId] = helpers.populatePeerMediaInfo(updatedState, clonedPeerMedia, mediaInfo);
+        });
+        Skylink.setSkylinkState(updatedState, room.id);
+      }
     } catch (err) {
       logger.log.ERROR([targetMid, TAGS.PEER_MEDIA, null, MESSAGES.MEDIA_INFO.ERRORS.FAILED_SETTING_PEER_MEDIA_INFO]);
     }

@@ -255,6 +255,7 @@
  *   If not defined, it will use the default protocol specified.
  * @property {codecParams} [codecParams] The audio and video codecs parameters to configure.
  * @property {boolean} [beSilentOnStatsLogs=false] The flag if error logs triggered by the statistics module should be silent.
+ * @property {boolean} [beSilentOnParseLogs=false] The flag if media and codec parsing logs should be silent.
  */
 
 /**
