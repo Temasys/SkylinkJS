@@ -1,8 +1,8 @@
 /**
  * @description Exports {@link Skylink}, {@link SkylinkLogger} and {@link SkylinkConstants}
  * */
-import AdapterJS from 'adapterjs';
 import io from 'socket.io-client';
+import AdapterJS from './adapter';
 import SkylinkStates from './skylink-states';
 import SkylinkPublicInterface from './public/index';
 import SkylinkLogger from './logger/index';

@@ -4,6 +4,7 @@ import SessionDescription from '../index';
 
 const getCodecsSupport = roomKey => new Promise((resolve, reject) => {
   const state = Skylink.getSkylinkState(roomKey);
+  const { beSilentOnParseLogs } = Skylink.getInitOptions();
   const updatedState = state;
   const { AdapterJS, RTCRtpSender, RTCPeerConnection } = window;
 
@@ -68,7 +69,7 @@ const getCodecsSupport = roomKey => new Promise((resolve, reject) => {
 
       pc.createOffer(offerConstraints)
         .then((offer) => {
-          updatedState.currentCodecSupport = SessionDescription.getSDPCodecsSupport(null, offer, roomKey);
+          updatedState.currentCodecSupport = SessionDescription.getSDPCodecsSupport(null, offer, beSilentOnParseLogs);
           resolve(updatedState.currentCodecSupport);
         })
         .catch((error) => {

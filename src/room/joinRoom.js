@@ -18,6 +18,7 @@ import MediaStream from '../media-stream/index';
  * @private
  */
 const joinRoom = (options = {}, prefetchedStream) => new Promise((resolve, reject) => {
+  const { navigator, AdapterJS } = window;
   const apiServer = new SkylinkAPIServer();
   const signalingServer = new SkylinkSignalingServer();
   let initOptions = Skylink.getInitOptions();
@@ -63,7 +64,14 @@ const joinRoom = (options = {}, prefetchedStream) => new Promise((resolve, rejec
             reject(streamException);
           });
         } else {
-          signalingServer.joinRoom(room);
+          // If no audio is requested for Safari, audio will not be heard on the Safari peer even if the remote peer has audio. Workaround to
+          // request media access but not add the track to the peer connection. Does not seem to apply to video.
+          if (AdapterJS.webrtcDetectedBrowser === constants.BROWSER_AGENT.SAFARI) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+              .then(() => signalingServer.joinRoom(room));
+          } else {
+            signalingServer.joinRoom(room);
+          }
           resolve(null);
         }
       });
