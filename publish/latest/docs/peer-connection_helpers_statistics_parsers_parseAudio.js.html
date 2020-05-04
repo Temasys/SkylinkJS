@@ -277,7 +277,6 @@ const parseSending = (output, value, prevStats) => {
  * @memberOf PeerConnectionStatisticsParsers
  */
 const parseAudio = (state, output, type, value, peerId, isAutoBwStats, direction) => {
-  console.log('parseAudio', type, value, direction);
   const { peerBandwidth, peerStats } = state;
   const prevStats = isAutoBwStats ? peerBandwidth[peerId][value.id] : peerStats[peerId][value.id];
   switch (direction) {

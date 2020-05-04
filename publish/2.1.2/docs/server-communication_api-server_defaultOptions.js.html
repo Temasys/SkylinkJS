@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      index.js - Documentation
+      server-communication/api-server/defaultOptions.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        index.js
+        server-communication/api-server/defaultOptions.js
       </h1>
     
 
@@ -93,172 +93,103 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>/**
- * @description Exports {@link Skylink}, {@link SkylinkLogger} and {@link SkylinkConstants}
- * */
-import AdapterJS from 'adapterjs';
-import io from 'socket.io-client';
-import SkylinkStates from './skylink-states';
-import SkylinkPublicInterface from './public/index';
-import SkylinkLogger from './logger/index';
-import SkylinkEventManager from './utils/skylinkEventManager';
-import * as constants from './constants';
-import messages from './messages';
-import { SkylinkAPIServer } from './server-communication';
+    <pre class="prettyprint source linenums"><code>import {
+  TURN_TRANSPORT,
+  AUDIO_CODEC,
+  VIDEO_CODEC,
+} from '../../constants';
 
 /**
- * @description AdapterJS provides polyfills and cross-browser mediaStreamHelpers for WebRTC.
- * @see {@link https://github.com/Temasys/AdapterJS}
- * @global
- */
-window.AdapterJS = AdapterJS;
-/**
- * @description Socket.IO enables real-time, bidirectional and event-based communication. It works on every platform, browser or device, focusing equally on reliability and speed.
- * @see {@link https://socket.io/}
- * @global
- */
-window.io = io;
-
-/**
- * @description State manager for accessing SkylinkJS states.
- * @type {SkylinkStates}
+ * @namespace initOptions
  * @private
+ * @module skylink/defaultOptions
  */
-const skylinkStates = new SkylinkStates();
-
-/**
- * @description Stores options passed into init.
- * @type {initOptions}
- * @private
- */
-let initOptions = {};
-let userInitOptions = {};
-
-const SkylinkEvents = constants.EVENTS;
-
-/**
- * @classdesc Class representing a SkylinkJS instance.
- * @example
- * import Skylink from 'skylinkjs';
- *
- * const initOptions = {
- *    // Obtain your app key from {@link https://console.temasys.io}
- *    appKey: 'temasys-appKey-XXXXX-XXXXXX',
- *    defaultRoom: "Default_Room",
- * };
- *
- * const skylink = new Skylink(initOptions);
- */
-class Skylink extends SkylinkPublicInterface {
-  /**
-   * @description Creates a SkylinkJS instance.
-   * @param {initOptions} options - Skylink authentication and initialisation configuration options.
-   * @private
+const defaultOptions = {
+  /*
+   * @param {String} options.appKey The App Key.
+   * &lt;small>By default, &lt;code>init()&lt;/code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+   * authentication. For credentials based authentication, see the &lt;code>options.credentials&lt;/code> configuration
+   * below. You can know more about the &lt;a href="http://support.temasys.io/support/solutions/articles/
+   * 12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here&lt;/a>
+   * for more details on the various authentication methods.&lt;/small>
+   * &lt;small>If you are using the Persistent Room feature for scheduled meetings, you will require to
+   * use the credential based authentication. See the &lt;a href="http://support.temasys.io/support
+   * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
+   * &lt;/a> for more information.&lt;/small>
    */
-  constructor(options) {
-    super();
-
-    /**
-     * @description Init options passed to API server to set certain values.
-     * @type {initOptions}
-     * @private
-     */
-    const parsedOptions = new SkylinkAPIServer().init(options);
-
-    Skylink.setInitOptions(parsedOptions);
-  }
-
-  /**
-   * @description Method that retrieves the Skylink state.
-   * @param {SkylinkRoom.id} roomKey - The id/key of the room.
-   * @return {SkylinkState| Object}
-   * @private
-   */
-  static getSkylinkState(roomKey = null) {
-    if (roomKey) {
-      return skylinkStates.getState(roomKey);
-    }
-    return skylinkStates.getAllStates();
-  }
-
-  /**
-   * @description Method that sets the Skylink state keyed by room id.
-   * @param {SkylinkState} state
-   * @param {SkylinkRoom.id} roomKey - The id/key of the room.
-   * @private
-   */
-  static setSkylinkState(state, roomKey) {
-    if (roomKey) {
-      skylinkStates.setState(state);
-    }
-  }
-
-  // eslint-disable-next-line consistent-return
-  static removeSkylinkState(roomKey) {
-    if (roomKey) {
-      return skylinkStates.removeStateByRoomId(roomKey);
-    }
-  }
-
-  // eslint-disable-next-line consistent-return
-  static clearRoomStateFromSingletons(roomKey) {
-    if (roomKey) {
-      return skylinkStates.clearRoomStateFromSingletons(roomKey);
-    }
-  }
-
-  /**
-   * @description Method that retrieves the complete initOptions values (default + user specified).
-   * @return {initOptions}
-   * @private
-   */
-  static getInitOptions() {
-    return initOptions;
-  }
-
-  /**
-   * @description Method that stores the complete initOptions values (default + user specified).
-   * @param {initOptions} options
-   * @private
-   */
-  static setInitOptions(options) {
-    initOptions = options;
-  }
-
-  /**
-   * @description Method that stores the initOptions specified by the user.
-   * @param {initOptions} options
-   * @private
-   */
-  static setUserInitOptions(options) {
-    userInitOptions = options;
-  }
-
-  /**
-   * @description Method that retrieves the initOptions specified by the user.
-   * @private
-   */
-  static getUserInitOptions() {
-    return userInitOptions;
-  }
-
-  /**
-   * @description Logs an error when Skylink state is not found for a roomKey.
-   * @param {String} keyOrName - The id/key of the room or the room name.
-   * @private
-   */
-  static logNoRoomState(keyOrName) {
-    SkylinkLogger.log.ERROR(`${messages.ROOM_STATE.NOT_FOUND} - ${keyOrName}`);
-  }
-}
-
-export default Skylink;
-export {
-  SkylinkLogger,
-  SkylinkEventManager,
-  SkylinkEvents,
-  constants as SkylinkConstants,
+  defaultRoom: new Date().valueOf(),
+  appKey: null,
+  roomServer: '//api.temasys.io',
+  enableDataChannel: true,
+  enableSTUNServer: true,
+  enableTURNServer: true,
+  socketServerPath: null,
+  enableStatsGathering: true,
+  audioFallback: true,
+  socketTimeout: 7000,
+  apiTimeout: 4000,
+  forceTURNSSL: false,
+  forceTURN: false,
+  forceSSL: true,
+  usePublicSTUN: false,
+  disableVideoFecCodecs: false,
+  disableComfortNoiseCodec: false,
+  disableREMB: false,
+  throttleShouldThrowError: false,
+  mcuUseRenegoRestart: true,
+  useEdgeWebRTC: false,
+  enableSimultaneousTransfers: true,
+  TURNServerTransport: TURN_TRANSPORT.ANY,
+  credentials: null,
+  filterCandidatesType: {
+    host: false,
+    srflx: false,
+    relay: false,
+  },
+  throttleIntervals: {
+    shareScreen: 10000,
+    refreshConnection: 5000,
+    getUserMedia: 0,
+  },
+  iceServer: null,
+  socketServer: null,
+  audioCodec: AUDIO_CODEC.AUTO,
+  videoCodec: VIDEO_CODEC.AUTO,
+  codecParams: {
+    audio: {
+      opus: {
+        stereo: null,
+        'sprop-stereo': null,
+        usedtx: null,
+        useinbandfec: null,
+        maxplaybackrate: null,
+        minptime: null,
+      },
+    },
+    video: {
+      h264: {
+        profileLevelId: null,
+        levelAsymmetryAllowed: null,
+        packetizationMode: null,
+      },
+      vp8: {
+        maxFs: null,
+        maxFr: null,
+      },
+      vp9: {
+        maxFs: null,
+        maxFr: null,
+      },
+    },
+  },
+  beSilentOnStatsLogs: false,
+  beSilentOnParseLogs: false,
 };
+
+/**
+ * Default values for options available to initialise SkylinkJS.
+ */
+export default defaultOptions;
 </code></pre>
   </article>
 </section>

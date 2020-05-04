@@ -276,7 +276,9 @@ const updateStreamsMutedSettings = (state, toggleState, streamId) => {
 
 const startMuteEvents = (roomKey, streamId, options) => {
   const roomState = Skylink.getSkylinkState(roomKey);
-  const { streams, room, peerConnections } = roomState;
+  const {
+    streams, room, peerConnections, peerInformations,
+  } = roomState;
   const toggleState = retrieveToggleState(roomState, options, streamId);
   const { hasToggledAudio, hasToggledVideo } = toggleState;
   let mutedStream = null;
@@ -303,7 +305,7 @@ const startMuteEvents = (roomKey, streamId, options) => {
 
   // wait for at least 1 connection before sending mediaInfoEvent otherwise sig message will be dropped at sendMediaInfoMsg if there are no
   // connections
-  if (isEmptyArray(Object.keys(peerConnections).filter(peerId => peerId !== PEER_TYPE.MCU))) {
+  if ((!peerConnections[PEER_TYPE.MCU] &amp;&amp; isEmptyArray(Object.keys(peerConnections))) || (peerConnections[PEER_TYPE.MCU] &amp;&amp; isEmptyArray(Object.keys(peerInformations)))) { // no P2P peers || no MCU peers
     const updateMediaInfoAndRemoveListener = (evt) => {
       const { state } = evt.detail;
       if (state === HANDSHAKE_PROGRESS.ANSWER_ACK) {

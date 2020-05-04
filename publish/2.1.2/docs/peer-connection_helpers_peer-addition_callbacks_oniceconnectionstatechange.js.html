@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      server-communication/api-server/defaultOptions.js - Documentation
+      peer-connection/helpers/peer-addition/callbacks/oniceconnectionstatechange.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        server-communication/api-server/defaultOptions.js
+        peer-connection/helpers/peer-addition/callbacks/oniceconnectionstatechange.js
       </h1>
     
 
@@ -93,102 +93,128 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import {
-  TURN_TRANSPORT,
-  AUDIO_CODEC,
-  VIDEO_CODEC,
-} from '../../constants';
+    <pre class="prettyprint source linenums"><code>import HandleIceConnectionStats from '../../../../skylink-stats/handleIceConnectionStats';
+import logger from '../../../../logger';
+import messages from '../../../../messages';
+import { dispatchEvent } from '../../../../utils/skylinkEventManager';
+import { iceConnectionState } from '../../../../skylink-events';
+import * as constants from '../../../../constants';
+import Skylink from '../../../../index';
+import PeerConnection from '../../../index';
+import HandleBandwidthStats from '../../../../skylink-stats/handleBandwidthStats';
+import BandwidthAdjuster from '../../bandwidthAdjuster';
 
-/**
- * @namespace initOptions
- * @private
- * @module skylink/defaultOptions
- */
-const defaultOptions = {
-  /*
-   * @param {String} options.appKey The App Key.
-   * &lt;small>By default, &lt;code>init()&lt;/code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-   * authentication. For credentials based authentication, see the &lt;code>options.credentials&lt;/code> configuration
-   * below. You can know more about the &lt;a href="http://support.temasys.io/support/solutions/articles/
-   * 12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here&lt;/a>
-   * for more details on the various authentication methods.&lt;/small>
-   * &lt;small>If you are using the Persistent Room feature for scheduled meetings, you will require to
-   * use the credential based authentication. See the &lt;a href="http://support.temasys.io/support
-   * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
-   * &lt;/a> for more information.&lt;/small>
-   */
-  defaultRoom: new Date().valueOf(),
-  appKey: null,
-  roomServer: '//api.temasys.io',
-  enableDataChannel: true,
-  enableSTUNServer: true,
-  enableTURNServer: true,
-  socketServerPath: null,
-  enableStatsGathering: true,
-  audioFallback: true,
-  socketTimeout: 7000,
-  apiTimeout: 4000,
-  forceTURNSSL: false,
-  forceTURN: false,
-  forceSSL: true,
-  usePublicSTUN: false,
-  disableVideoFecCodecs: false,
-  disableComfortNoiseCodec: false,
-  disableREMB: false,
-  throttleShouldThrowError: false,
-  mcuUseRenegoRestart: true,
-  useEdgeWebRTC: false,
-  enableSimultaneousTransfers: true,
-  TURNServerTransport: TURN_TRANSPORT.ANY,
-  credentials: null,
-  filterCandidatesType: {
-    host: false,
-    srflx: false,
-    relay: false,
-  },
-  throttleIntervals: {
-    shareScreen: 10000,
-    refreshConnection: 5000,
-    getUserMedia: 0,
-  },
-  iceServer: null,
-  socketServer: null,
-  audioCodec: AUDIO_CODEC.AUTO,
-  videoCodec: VIDEO_CODEC.AUTO,
-  codecParams: {
-    audio: {
-      opus: {
-        stereo: null,
-        'sprop-stereo': null,
-        usedtx: null,
-        useinbandfec: null,
-        maxplaybackrate: null,
-        minptime: null,
-      },
-    },
-    video: {
-      h264: {
-        profileLevelId: null,
-        levelAsymmetryAllowed: null,
-        packetizationMode: null,
-      },
-      vp8: {
-        maxFs: null,
-        maxFr: null,
-      },
-      vp9: {
-        maxFs: null,
-        maxFr: null,
-      },
-    },
-  },
-  beSilentOnStatsLogs: false,
+const isIceConnectionStateCompleted = (pcIceConnectionState) => {
+  const { ICE_CONNECTION_STATE } = constants;
+  return [ICE_CONNECTION_STATE.COMPLETED,
+    ICE_CONNECTION_STATE.CONNECTED].indexOf(pcIceConnectionState) > -1;
 };
 
 /**
- * Default values for options available to initialise SkylinkJS.
+ * @param {RTCPeerConnection} peerConnection
+ * @param {String} targetMid - The Peer Id
+ * @param {SkylinkState} currentRoomState
+ * @fires iceConnectionState
+ * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
  */
-export default defaultOptions;
+const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState) => {
+  const { PEER_CONNECTION } = messages;
+  const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
+  const { AdapterJS } = window;
+  const { webrtcDetectedBrowser, webrtcDetectedType } = AdapterJS;
+  const state = Skylink.getSkylinkState(currentRoomState.room.id);
+  const { streams } = state;
+
+  if (!state) {
+    logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, PEER_CONNECTION.no_room_state]);
+    return;
+  }
+
+  const {
+    hasMCU, bandwidthAdjuster, peerInformations, peerConnStatus, peerStats,
+  } = state;
+  const handleIceConnectionStats = new HandleIceConnectionStats();
+
+  let statsInterval = null;
+  let pcIceConnectionState = peerConnection.iceConnectionState;
+
+  logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, PEER_CONNECTION.ice_connection_state], pcIceConnectionState);
+
+  if (webrtcDetectedBrowser === 'edge') {
+    if (pcIceConnectionState === 'connecting') {
+      pcIceConnectionState = ICE_CONNECTION_STATE.CHECKING;
+    } else if (pcIceConnectionState === 'new') {
+      pcIceConnectionState = ICE_CONNECTION_STATE.FAILED;
+    }
+  }
+
+  if (webrtcDetectedType === 'AppleWebKit' &amp;&amp; pcIceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
+    setTimeout(() => {
+      if (!peerConnection.iceConnectionStateClosed) {
+        handleIceConnectionStats.send(currentRoomState.room.id, ICE_CONNECTION_STATE.CLOSED, targetMid);
+        dispatchEvent(iceConnectionState({
+          state: ICE_CONNECTION_STATE.CLOSED,
+          peerId: targetMid,
+        }));
+      }
+    }, 10);
+    return;
+  }
+
+  if (state &amp;&amp; peerConnection.iceConnectionState !== ICE_CONNECTION_STATE.CONNECTED) {
+    handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
+  }
+
+  dispatchEvent(iceConnectionState({
+    state: pcIceConnectionState,
+    peerId: targetMid,
+  }));
+
+  if (pcIceConnectionState === ICE_CONNECTION_STATE.FAILED) {
+    if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.FIREFOX &amp;&amp; !streams.userMedia) { // no audio and video requested will throw ice trickle
+      // failure although ice candidates are exchanged
+      return;
+    }
+    dispatchEvent(iceConnectionState({
+      state: ICE_CONNECTION_STATE.TRICKLE_FAILED,
+      peerId: targetMid,
+    }));
+  }
+
+  if (peerConnStatus &amp;&amp; peerConnStatus[targetMid]) {
+    peerConnStatus[targetMid].connected = isIceConnectionStateCompleted(pcIceConnectionState);
+  }
+
+  if (!statsInterval &amp;&amp; isIceConnectionStateCompleted(pcIceConnectionState) &amp;&amp; !peerStats[targetMid]) {
+    statsInterval = true;
+    peerStats[targetMid] = {};
+
+    logger.log.DEBUG([targetMid, 'RTCStatsReport', null, 'Retrieving first report to tabulate results']);
+
+    // Do an initial getConnectionStatus() to backfill the first retrieval in order to do (currentTotalStats - lastTotalStats).
+    PeerConnection.getConnectionStatus(state, targetMid).then(() => {
+      handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
+      statsInterval = setInterval(() => {
+        if (peerConnection.signalingState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === PEER_CONNECTION_STATE.CLOSED) {
+          clearInterval(statsInterval);
+        } else {
+          new HandleBandwidthStats().send(state.room.id, peerConnection, targetMid);
+        }
+      }, 20000);
+    });
+  }
+
+  if (!hasMCU &amp;&amp; isIceConnectionStateCompleted(pcIceConnectionState) &amp;&amp; !!bandwidthAdjuster &amp;&amp; AdapterJS.webrtcDetectedBrowser !== 'edge'
+        &amp;&amp; (((peerInformations[targetMid] || {}).agent || {}).name || 'edge') !== 'edge') {
+    new BandwidthAdjuster({
+      targetMid,
+      state,
+      peerConnection,
+    }).setAdjustmentInterval();
+  }
+};
+
+export default oniceconnectionstatechange;
 </code></pre>
   </article>
 </section>

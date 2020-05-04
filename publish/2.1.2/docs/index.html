@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-connection/helpers/peer-addition/callbacks/ontrack.js - Documentation
+      Home - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -53,16 +51,15 @@
 
   <div class="top-nav-wrapper">
     <ul>
-      <li >
+      <li  class="active" >
         <a href="index.html">
           
-            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          
+            <svg fill="#0095dd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
               <path d="M0 0h24v24H0z" fill="none"/>
             </svg>
-           <div>Web SDK Client Reference</div>
-
-          
+            <div>Web SDK Client Reference</div>
           
         </a>
       </li>
@@ -83,98 +80,115 @@
 
   <div id="main">
     
-      <h1 class="page-title">
-        peer-connection/helpers/peer-addition/callbacks/ontrack.js
-      </h1>
-    
 
     
       
 
-<section>
-  <article>
-    <pre class="prettyprint source linenums"><code>import Skylink from '../../../../index';
-import MediaStream from '../../../../media-stream/index';
-import callbacks from './index';
-import logger from '../../../../logger/index';
-import { TRACK_KIND } from '../../../../constants';
-import PeerMedia from '../../../../peer-media';
-import PeerConnection from '../../../index';
 
-const matchPeerIdWithTransceiverMid = (state, transceiver) => {
-  const { peerMedias, user } = state;
-  const peerIds = Object.keys(peerMedias);
 
-  for (let i = 0; i &lt; peerIds.length; i += 1) {
-    if (peerIds[i] !== user.sid) {
-      const mediaInfos = Object.values(peerMedias[peerIds[i]]);
-      for (let m = 0; m &lt; mediaInfos.length; m += 1) {
-        if (mediaInfos[m].transceiverMid === transceiver.mid) {
-          return peerIds[i];
-        }
-      }
-    }
-  }
+    
 
-  return null;
-};
+      
 
-/**
- * Function that handles the &lt;code>RTCPeerConnection.addTrack&lt;/code> remote MediaTrack received.
- * @param {RTCPeerConnection} RTCPeerConnection
- * @param {String} targetMid
- * @param {SkylinkState} currentRoomState
- * @param {RTCTrackEvent} rtcTrackEvent
- * @returns {null}
- * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
- */
-const ontrack = (RTCPeerConnection, targetMid, currentRoomState, rtcTrackEvent) => {
-  const state = Skylink.getSkylinkState(currentRoomState.room.id);
-  const {
-    peerConnections, room, hasMCU,
-  } = state;
-  const { receiver } = rtcTrackEvent;
-  const { AdapterJS } = window;
-  const stream = rtcTrackEvent.streams[0];
 
-  // eslint-disable-next-line prefer-const
-  let { transceiver, track } = rtcTrackEvent;
-  let peerId = targetMid;
+  <section class="readme">
+    <article>
+      <h1>SKYLINK WEB SDK 2.1.2</h1><blockquote>
+<p>Temasys SkylinkJS Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.</p>
+</blockquote>
+<p>You'll need a Temasys Account and an App key to use this. <a href="https://console.temasys.io">Register here to get your App key</a>.</p>
+<h4>Supported Browsers</h4><table>
+<thead>
+<tr>
+<th>Features</th>
+<th>Chrome</th>
+<th>Firefox</th>
+<th>Safari</th>
+<th>Edge (Chromium)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Platforms:</td>
+<td>Win, Mac, Linux, Android</td>
+<td>Win, Mac, Linux, Android</td>
+<td>Mac</td>
+<td>Win, Mac</td>
+</tr>
+<tr>
+<td>Minimum Recommended Versions:</td>
+<td>72</td>
+<td>66</td>
+<td>13</td>
+<td>80</td>
+</tr>
+<tr>
+<td>Screensharing</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Video Call</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Audio Call</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Messaging</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>(+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.</li>
+</ul>
+<h4>Read more</h4><ul>
+<li><a href="https://temasys.io/getting-started-with-webrtc-and-skylinkjs/">Getting started</a></li>
+<li><a href="http://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html">API Docs</a></li>
+<li><a href="http://github.com/Temasys/SkylinkJS/releases">Versions</a></li>
+<li><a href="https://console.temasys.io">Temasys Console  - Get your App key</a></li>
+<li><a href="https://cdn.temasys.io/skylink/skylinkjs/latest/demos/collection/index.html">Demos</a></li>
+<li><a href="https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/demos">View Code Examples</a></li>
+</ul>
+<h5>Need help or want something changed?</h5><p>You can raise tickets on <a href="http://support.temasys.io">our support portal</a> or on <a href="https://console.temasys.io/support">our Github Page</a>.</p>
+<h4>Current versions and stability</h4><p>We recommend that you always use the latest versions of the Temasys SkylinkJS Web SDK as WebRTC is still evolving and we adapt to changes very frequently.</p>
+<p><a href="https://github.com/Temasys/SkylinkJS/releases/tag/2.1.2">Latest version: 2.1.2</a>.</p>
+<h2>How to build your own Temasys SkylinkJS Web SDK</h2><p>Using <a href="http://git-scm.com/download">Git</a> command line tools, execute the following:</p>
+<pre class="prettyprint source"><code># 1. Clone or download this repository via git terminal.
 
-  if (AdapterJS.webrtcDetectedBrowser === 'safari') {
-    const transceivers = peerConnections[targetMid].getTransceivers();
-    transceivers.forEach((tscvr) => {
-      if (tscvr.receiver.track.id === receiver.track.id) {
-        transceiver = tscvr;
-      }
-    });
-  }
+git clone https://github.com/Temasys/SkylinkJS.git
 
-  if (transceiver.mid === null) {
-    logger.log.WARN('Transceiver mid is null', transceiver);
-  }
+# 2. Install all required dependencies. Use (sudo npm install) if required.
 
-  if (!peerConnections[peerId]) return null;
+npm install
 
-  if (hasMCU) {
-    peerId = matchPeerIdWithTransceiverMid(state, transceiver);
-  }
+# 3. Run the start script to start a local webserver to access the demo and doc folders. This will popup Chrome (Mac). You can configure a different browser in the start.sh file. Alternatively, you can run (sh start.sh)
 
-  const isScreensharing = PeerMedia.isVideoScreenTrack(state, peerId, transceiver.mid);
-  const callbackExtraParams = [peerId, room, isScreensharing];
-  stream.onremovetrack = callbacks.onremovetrack.bind(this, ...callbackExtraParams);
-  PeerMedia.updateStreamIdFromOntrack(state.room, peerId, transceiver.mid, stream.id);
-  PeerConnection.updatePeerInformationsMediaStatus(state.room, peerId, transceiver, stream);
-  MediaStream.updateRemoteStreams(state.room, peerId, stream);
-  MediaStream.onRemoteTrackAdded(stream, currentRoomState, peerId, isScreensharing, track.kind === TRACK_KIND.VIDEO, track.kind === TRACK_KIND.AUDIO);
+npm start # Note that this runs in Chrome currently.</code></pre><p><strong>What's included in the repository?</strong></p>
+<ul>
+<li><code>demos</code> : Reference Code Examples.</li>
+<li><code>docs</code> : Generated documentation for the Temasys Web SDK.</li>
+<li><code>temasys-jsdoc-template</code> : Templates used documentation.</li>
+<li><code>publish</code> : Production version of the library as well as minified variants</li>
+<li><code>src</code> : Temasys Web SDK source</li>
+</ul>
+<h2>License</h2><p><a href="http://www.apache.org/licenses/LICENSE-2.0.html">APACHE 2.0</a></p>
+    </article>
+  </section>
 
-  return null;
-};
-
-export default ontrack;
-</code></pre>
-  </article>
-</section>
 
     
 

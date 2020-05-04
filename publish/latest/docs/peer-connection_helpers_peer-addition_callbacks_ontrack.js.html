@@ -141,6 +141,11 @@ const ontrack = (RTCPeerConnection, targetMid, currentRoomState, rtcTrackEvent) 
   let { transceiver, track } = rtcTrackEvent;
   let peerId = targetMid;
 
+  if (!stream) {
+    logger.log.WARN('ontrack stream is null');
+    return null;
+  }
+
   if (AdapterJS.webrtcDetectedBrowser === 'safari') {
     const transceivers = peerConnections[targetMid].getTransceivers();
     transceivers.forEach((tscvr) => {
