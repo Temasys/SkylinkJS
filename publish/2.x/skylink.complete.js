@@ -1,4 +1,4 @@
-/* SkylinkJS v2.1.2 Wed May 06 2020 04:29:09 GMT+0000 (Coordinated Universal Time) */
+/* SkylinkJS v2.1.2 Wed May 06 2020 15:52:44 GMT+0800 (Singapore Standard Time) */
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
