@@ -3,7 +3,7 @@
   factory();
 }(function () { 'use strict';
 
-  /* SkylinkJS v2.1.2 Mon May 04 2020 02:30:15 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.1.2 Wed May 06 2020 04:29:09 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -30140,6 +30140,7 @@
     const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
       const { room, peerConnections } = state;
       const { ROOM: { LEAVE_ROOM } } = MESSAGES;
+      const { enableDataChannel } = Skylink.getInitOptions();
 
       logger.log.INFO([peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.START]);
 
@@ -30162,15 +30163,19 @@
         PeerConnection.closePeerConnection(state, peerId);
       }
 
-      addEventListener(EVENTS.DATA_CHANNEL_STATE, (evt) => {
-        const { detail } = evt;
-        if (detail.state === DATA_CHANNEL_STATE$1.CLOSED || detail.state === DATA_CHANNEL_STATE$1.CLOSING) {
-          logger.log.INFO([detail.peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.SUCCESS]);
-          resolve(detail.peerId);
-        }
-      });
+      if (enableDataChannel) {
+        addEventListener(EVENTS.DATA_CHANNEL_STATE, (evt) => {
+          const { detail } = evt;
+          if (detail.state === DATA_CHANNEL_STATE$1.CLOSED || detail.state === DATA_CHANNEL_STATE$1.CLOSING) {
+            logger.log.INFO([detail.peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.SUCCESS]);
+            resolve(detail.peerId);
+          }
+        });
 
-      PeerConnection.closeDataChannel(state, peerId);
+        PeerConnection.closeDataChannel(state, peerId);
+      } else {
+        resolve(peerId);
+      }
     });
 
     /**
