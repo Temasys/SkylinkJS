@@ -22,6 +22,7 @@ import { isEmptyArray } from '../utils/helpers';
 const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
   const { room, peerConnections } = state;
   const { ROOM: { LEAVE_ROOM } } = MESSAGES;
+  const { enableDataChannel } = Skylink.getInitOptions();
 
   logger.log.INFO([peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.START]);
 
@@ -44,15 +45,19 @@ const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
     PeerConnection.closePeerConnection(state, peerId);
   }
 
-  addEventListener(SkylinkConstants.EVENTS.DATA_CHANNEL_STATE, (evt) => {
-    const { detail } = evt;
-    if (detail.state === DATA_CHANNEL_STATE.CLOSED || detail.state === DATA_CHANNEL_STATE.CLOSING) {
-      logger.log.INFO([detail.peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.SUCCESS]);
-      resolve(detail.peerId);
-    }
-  });
+  if (enableDataChannel) {
+    addEventListener(SkylinkConstants.EVENTS.DATA_CHANNEL_STATE, (evt) => {
+      const { detail } = evt;
+      if (detail.state === DATA_CHANNEL_STATE.CLOSED || detail.state === DATA_CHANNEL_STATE.CLOSING) {
+        logger.log.INFO([detail.peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.SUCCESS]);
+        resolve(detail.peerId);
+      }
+    });
 
-  PeerConnection.closeDataChannel(state, peerId);
+    PeerConnection.closeDataChannel(state, peerId);
+  } else {
+    resolve(peerId);
+  }
 });
 
 /**
