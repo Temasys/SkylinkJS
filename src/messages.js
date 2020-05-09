@@ -108,7 +108,7 @@ const MESSAGES = {
       ICE_GATHERING_STARTED: 'ICE gathering has started',
       ICE_GATHERING_COMPLETED: 'ICE gathering has completed',
       CANDIDATE_GENERATED: 'Generated ICE candidate ->',
-      DROP_EOC: 'Dropping of sending ICE candidate end-of-candidates signal or unused ICE candidates to prevent errors ->',
+      DROP_EOC: 'Dropping of sending ICE candidate end-of-candidates signal or unused ICE candidates ->',
       ICE_TRICKLE_DISABLED: 'Dropping of sending ICE candidate as trickle ICE is disabled ->',
       SENDING_CANDIDATE: 'Sending ICE candidate ->',
       NO_SDP: 'Not sending any session description after ICE gathering completed as it is not present',

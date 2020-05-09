@@ -100,6 +100,11 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
     if (state.gatheredCandidates[targetMid]) {
       const sendEndOfCandidates = () => {
         if (!state.gatheredCandidates[targetMid]) return;
+        const currentState = Skylink.getSkylinkState(currentRoom.id);
+        if (!currentState) {
+          logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, `${messages.ICE_CANDIDATE.CANDIDATE_HANDLER.DROP_EOC} peer has left the room`]);
+          return;
+        }
 
         signalingServer.sendMessage({
           type: constants.SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
