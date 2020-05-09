@@ -1,12 +1,9 @@
 # SKYLINK WEB SDK 2.1.2
 > Temasys SkylinkJS Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
 
-You'll need a Temasys Account and an App key to use this. [Register here to get your App key](https://console.temasys.io).
+You'll need a Temasys Account, and an App key to use this. [Register here to get your App key](https://console.temasys.io).
 
 #### Supported Browsers
-
-
-
 | Features                      | Chrome                   | Firefox                  | Safari                   | Edge (Chromium) | 
 |-------------------------------|--------------------------|--------------------------|--------------------------|-----------------|
 | Platforms:                    | Win, Mac, Linux, Android | Win, Mac, Linux, Android | Mac                      | Win, Mac        |
@@ -24,17 +21,21 @@ You'll need a Temasys Account and an App key to use this. [Register here to get 
 - [API Docs](http://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
 - [Temasys Console  - Get your App key](https://console.temasys.io)
-- [Demos](https://cdn.temasys.io/skylink/skylinkjs/latest/demos/collection/index.html)
-- [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/demos)
+- [View Code Examples](demos/collection/index.html)
 
 
-##### Need help or want something changed?
-You can raise tickets on [our support portal](http://support.temasys.io) or on [our Github Page](https://console.temasys.io/support).
+#### MCU Behaviour
+- There are certain considerations to note when using an MCU key. Read more [here](MCU_BEHAVIOUR.md)
+
+
+#### Need help or want something changed?
+- You can raise tickets on [our support portal](http://support.temasys.io) or on [our Github Page](https://console.temasys.io/support).
+
 
 #### Current versions and stability
-We recommend that you always use the latest versions of the Temasys SkylinkJS Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
+- We recommend that you always use the latest versions of the Temasys SkylinkJS Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
 
-[Latest version: 2.1.2](https://github.com/Temasys/SkylinkJS/releases/tag/2.1.2).
+[Latest version: 2.1.2](https://github.com/Temasys/SkylinkJS/releases/tag/2.1.2)
 
 
 ## How to build your own Temasys SkylinkJS Web SDK
