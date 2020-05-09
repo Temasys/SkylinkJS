@@ -21,11 +21,11 @@ You'll need a Temasys Account, and an App key to use this. [Register here to get
 - [API Docs](http://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
 - [Temasys Console  - Get your App key](https://console.temasys.io)
-- [View Code Examples](demos/collection/index.html)
+- [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/demos)
 
 
 #### MCU Behaviour
-- There are certain considerations to note when using an MCU key. Read more [here](MCU_BEHAVIOUR.md)
+- There are certain considerations to note when using an MCU key. Read more [here](https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/MCU_BEHAVIOUR.md)
 
 
 #### Need help or want something changed?
