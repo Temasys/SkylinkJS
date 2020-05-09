@@ -3,7 +3,7 @@
   factory();
 }(function () { 'use strict';
 
-  /* SkylinkJS v2.1.2 Fri May 08 2020 09:13:21 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.1.2 Sat May 09 2020 08:23:14 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -8569,7 +8569,7 @@
           ICE_GATHERING_STARTED: 'ICE gathering has started',
           ICE_GATHERING_COMPLETED: 'ICE gathering has completed',
           CANDIDATE_GENERATED: 'Generated ICE candidate ->',
-          DROP_EOC: 'Dropping of sending ICE candidate end-of-candidates signal or unused ICE candidates to prevent errors ->',
+          DROP_EOC: 'Dropping of sending ICE candidate end-of-candidates signal or unused ICE candidates ->',
           ICE_TRICKLE_DISABLED: 'Dropping of sending ICE candidate as trickle ICE is disabled ->',
           SENDING_CANDIDATE: 'Sending ICE candidate ->',
           NO_SDP: 'Not sending any session description after ICE gathering completed as it is not present',
@@ -18814,6 +18814,11 @@
         if (state.gatheredCandidates[targetMid]) {
           const sendEndOfCandidates = () => {
             if (!state.gatheredCandidates[targetMid]) return;
+            const currentState = Skylink.getSkylinkState(currentRoom.id);
+            if (!currentState) {
+              logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, `${MESSAGES.ICE_CANDIDATE.CANDIDATE_HANDLER.DROP_EOC} peer has left the room`]);
+              return;
+            }
 
             signalingServer.sendMessage({
               type: SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
