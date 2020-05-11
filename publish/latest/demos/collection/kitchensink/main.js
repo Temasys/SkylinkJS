@@ -15,6 +15,7 @@ Demo.Skylink = null;
 Demo.ShowStats = {};
 Demo.Streams = null;
 Demo._Skylink = Skylink;
+Demo.isMCU = false;
 
 
 window.Demo = Demo;
@@ -49,7 +50,7 @@ Demo.Methods.toggleInRoomSettings = function(peerId, inRoom) {
     $('#set_persistent_message').prop('checked', Demo.Skylink.getMessagePersistence(config.defaultRoom));
     $('#room_locked_row').hide();
 
-    // reset joinRoomOptions fto handle duplicate tab
+    // reset joinRoomOptions to handle duplicate tab
     $('#join_room_p2p_key').prop('checked', true);
     $('#join_room_audio').prop('checked', true);
     $('#join_room_audio_muted').prop('checked', false);
@@ -68,6 +69,9 @@ Demo.Methods.toggleInRoomSettings = function(peerId, inRoom) {
     $('#display_room_status').html('-');
     $('#console_log').empty();
     $('#logs_panel').hide();
+    if (Demo.isMCU) {
+      $('#join_room_mcu_key').prop('checked', true);
+    }
   }
 };
 
@@ -186,7 +190,9 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
 
   if (isSelf) {
     _peerId = peerId;
-    Demo.Methods.toggleInRoomSettings(peerId, true);
+    if (!Demo.isMCU)  {
+      Demo.Methods.toggleInRoomSettings(peerId, true);
+    }
     $('#isAudioMuted').css('color',
       (audioStreamId && peerInfo.mediaStatus[audioStreamId].audioMuted === 1) ? 'green' : 'red');
     $('#isVideoMuted').css('color',
@@ -347,6 +353,13 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_UPDATED, (evt)
   }
 });
 
+// //---------------------------------------------------
+// // MCU EVENTS
+// //---------------------------------------------------
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.SERVER_PEER_JOINED, (evt) => {
+  $('#mcu_loading').css("display", "none");
+  Demo.Methods.toggleInRoomSettings(_peerId, true);
+});
 
 // //---------------------------------------------------
 // // MEDIA STREAM EVENTS
@@ -993,6 +1006,7 @@ $(document).ready(function() {
     Demo.Skylink.leaveRoom(config.defaultRoom)
     .then(() => {
       Demo.Methods.toggleInRoomSettings('', false);
+      $('#join_room_container').css("display", "block");
       Demo.Peers = 0;
       Demo.PeerIds = [];
     })
@@ -1007,6 +1021,10 @@ $(document).ready(function() {
     Demo.Skylink = new Skylink(config);
     Demo.Skylink.joinRoom(joinRoomOptions);
     $('#join_room_btn').addClass('disabled');
+    if (Demo.isMCU) {
+      $('#join_room_container').css("display", "none");
+      $('#mcu_loading').css("display", "block");
+    }
   });
   // //---------------------------------------------------
   $('#share_screen_btn').click(function () {
@@ -1089,6 +1107,11 @@ $(document).ready(function() {
   window.setAppKey = dom => {
     var appKey = $(dom).attr('value');
     console.log(appKey);
+    if (appKey === 'mcu') {
+      Demo.isMCU = true;
+    } else {
+      Demo.isMCU = false;
+    }
     selectedAppKey = APPKEYS[appKey];
     $('#display_app_id').html(selectedAppKey);
   };

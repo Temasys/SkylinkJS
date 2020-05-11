@@ -1,4 +1,4 @@
-/* SkylinkJS v2.1.2 Wed May 06 2020 15:52:44 GMT+0800 (Singapore Standard Time) */
+/* SkylinkJS v2.1.2 Sat May 09 2020 08:23:14 GMT+0000 (Coordinated Universal Time) */
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -8559,7 +8559,7 @@ const MESSAGES = {
       ICE_GATHERING_STARTED: 'ICE gathering has started',
       ICE_GATHERING_COMPLETED: 'ICE gathering has completed',
       CANDIDATE_GENERATED: 'Generated ICE candidate ->',
-      DROP_EOC: 'Dropping of sending ICE candidate end-of-candidates signal or unused ICE candidates to prevent errors ->',
+      DROP_EOC: 'Dropping of sending ICE candidate end-of-candidates signal or unused ICE candidates ->',
       ICE_TRICKLE_DISABLED: 'Dropping of sending ICE candidate as trickle ICE is disabled ->',
       SENDING_CANDIDATE: 'Sending ICE candidate ->',
       NO_SDP: 'Not sending any session description after ICE gathering completed as it is not present',
@@ -18804,6 +18804,11 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
     if (state.gatheredCandidates[targetMid]) {
       const sendEndOfCandidates = () => {
         if (!state.gatheredCandidates[targetMid]) return;
+        const currentState = Skylink.getSkylinkState(currentRoom.id);
+        if (!currentState) {
+          logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, `${MESSAGES.ICE_CANDIDATE.CANDIDATE_HANDLER.DROP_EOC} peer has left the room`]);
+          return;
+        }
 
         signalingServer.sendMessage({
           type: SIG_MESSAGE_TYPE.END_OF_CANDIDATES,
