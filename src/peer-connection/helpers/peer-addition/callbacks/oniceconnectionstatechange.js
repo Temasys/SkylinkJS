@@ -28,6 +28,13 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   const { AdapterJS } = window;
   const { webrtcDetectedBrowser, webrtcDetectedType } = AdapterJS;
   const state = Skylink.getSkylinkState(currentRoomState.room.id);
+  let statsInterval = null;
+  let pcIceConnectionState = peerConnection.iceConnectionState;
+
+  if (webrtcDetectedType === BROWSER_AGENT.REACT_NATIVE && !state && pcIceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
+    return;
+  }
+
   const { streams } = state;
 
   if (!state) {
@@ -40,8 +47,6 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   } = state;
   const handleIceConnectionStats = new HandleIceConnectionStats();
 
-  let statsInterval = null;
-  let pcIceConnectionState = peerConnection.iceConnectionState;
 
   logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, PEER_CONNECTION.ice_connection_state], pcIceConnectionState);
 
