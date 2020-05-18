@@ -147,7 +147,9 @@ class MediaStream {
       const audioSettings = helpers.parseStreamSettings(streamOptions, TRACK_KIND.AUDIO);
       const videoSettings = helpers.parseStreamSettings(streamOptions, TRACK_KIND.VIDEO);
       const isAudioFallback = false;
-      return helpers.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve);
+      const streams = helpers.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve);
+
+      resolve(streams);
     });
   }
 }
