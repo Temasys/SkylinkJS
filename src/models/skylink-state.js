@@ -308,7 +308,7 @@ class SkylinkState {
     /**
      * Stores the value if ICE restart is supported.
      * @name enableIceRestart
-     * @type string
+     * @type boolean
      * @since 0.6.16
      * @private
      */

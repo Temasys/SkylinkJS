@@ -167,6 +167,8 @@ export const webRTCReadyOperations = () => {
       room: null,
     }));
   }
+
+
   return returnObject;
 };
 

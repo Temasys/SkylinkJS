@@ -183,7 +183,7 @@ class PeerConnectionStatistics {
         }
 
         if (typeof this.peerConnection.getStats !== 'function') {
-          this.getStatsFailure(reject, messages.PEER_CONNECTION.getstats_api_not_available);
+          this.getStatsFailure(reject, messages.PEER_CONNECTION.STATS_API_UNAVAILABLE);
         }
 
         dispatchEvent(getConnectionStatusStateChange({

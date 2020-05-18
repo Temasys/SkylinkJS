@@ -25,13 +25,13 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
   const { CANDIDATE_GENERATION_STATE, TAGS } = constants;
 
   if (!peerConnection) {
-    logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, messages.ICE_CANDIDATE.CANDIDATE_HANDLER.no_peer_connection], candidate);
+    logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, messages.ICE_CANDIDATE.no_peer_connection], candidate);
     return null;
   }
 
   if (candidate.candidate) {
     if (!peerConnection.gathering) {
-      logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, messages.ICE_CANDIDATE.CANDIDATE_HANDLER.ICE_GATHERING_STARTED], candidate);
+      logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, messages.ICE_CONNECTION.ICE_GATHERING_STARTED], candidate);
       peerConnection.gathering = true;
       peerConnection.gathered = false;
       dispatchEvent(candidateGenerationState({
@@ -43,22 +43,22 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
     }
 
     const candidateType = candidate.candidate.split(' ')[7];
-    logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.CANDIDATE_HANDLER.CANDIDATE_GENERATED], candidate);
+    logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.CANDIDATE_GENERATED], candidate);
 
     if (candidateType === 'endOfCandidates' || !(peerConnection
       && peerConnection.localDescription && peerConnection.localDescription.sdp
       && peerConnection.localDescription.sdp.indexOf(`\r\na=mid:${candidate.sdpMid}\r\n`) > -1)) {
-      logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.CANDIDATE_HANDLER.DROP_EOC], candidate);
+      logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CONNECTION.DROP_EOC], candidate);
       return null;
     }
 
     if (initOptions.filterCandidatesType[candidateType]) {
       if (!(state.hasMCU && initOptions.forceTURN)) {
-        logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.CANDIDATE_HANDLER.FILTERED_CANDIDATE], candidate);
+        logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.FILTERED_CANDIDATE], candidate);
         return null;
       }
 
-      logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.CANDIDATE_HANDLER.FILTERING_FLAG_NOT_HONOURED], candidate);
+      logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.FILTERING_FLAG_NOT_HONOURED], candidate);
     }
 
     if (!gatheredCandidates) {
@@ -77,11 +77,11 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
     state.gatheredCandidates[targetMid] = gatheredCandidates;
     Skylink.setSkylinkState(state, currentRoom.id);
 
-    logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.CANDIDATE_HANDLER.SENDING_CANDIDATE], candidate);
+    logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.SENDING_CANDIDATE], candidate);
 
     signalingServer.sendCandidate(targetMid, state, candidate);
   } else {
-    logger.log.INFO([targetMid, TAGS.CANDIDATE_HANDLER, null, messages.ICE_CANDIDATE.CANDIDATE_HANDLER.ICE_GATHERING_COMPLETED]);
+    logger.log.INFO([targetMid, TAGS.CANDIDATE_HANDLER, null, messages.ICE_CONNECTION.ICE_GATHERING_COMPLETED]);
 
     if (peerConnection.gathered) {
       return null;
@@ -102,7 +102,7 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
         if (!state.gatheredCandidates[targetMid]) return;
         const currentState = Skylink.getSkylinkState(currentRoom.id);
         if (!currentState) {
-          logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, `${messages.ICE_CANDIDATE.CANDIDATE_HANDLER.DROP_EOC} peer has left the room`]);
+          logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, `${messages.ICE_CONNECTION.DROP_EOC} peer has left the room`]);
           return;
         }
 

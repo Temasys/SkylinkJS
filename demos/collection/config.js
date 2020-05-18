@@ -10,6 +10,11 @@ function getParameterByName(name, url) {
     results = regex.exec(url);
   if (!results) return null;
   if (!results[2]) return '';
+  if (results[2] === 'false') {
+    return false;
+  } else if (results[2] === 'true') {
+    return true;
+  }
   return decodeURIComponent(results[2].replace(/\+/g, " "));
 }
 
@@ -20,7 +25,7 @@ if (!getParameterByName('room')) {
 const config = {
   appKey: getParameterByName('appKey') || 'c7ae7e8a-2e24-43a5-85c6-d4dafbdfecb6',
   defaultRoom: getParameterByName('room'),
-  audioFallback: !!getParameterByName('audioFallback'),
+  audioFallback: getParameterByName('audioFallback'),
   forceSSL: true,
   beSilentOnParseLogs: true,
   beSilentOnLogs: true,

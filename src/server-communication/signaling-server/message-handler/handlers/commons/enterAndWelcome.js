@@ -1,5 +1,7 @@
 import Skylink from '../../../../../index';
-import { PEER_CERTIFICATE, PEER_CONNECTION_STATE, PEER_TYPE } from '../../../../../constants';
+import {
+  PEER_CERTIFICATE, PEER_CONNECTION_STATE, PEER_TYPE, TAGS,
+} from '../../../../../constants';
 import processPeer from './processPeer';
 import SkylinkSignalingServer from '../../../index';
 import handleNegotiationStats from '../../../../../skylink-stats/handleNegotiationStats';
@@ -21,7 +23,7 @@ const getNextNegotiationStep = (params) => {
     if (hasMCU || peerPriorityWeight > params.message.weight) {
       if (peerMessagesStamps[params.targetMid].hasWelcome) {
         method = 'noop';
-        logger.log.WARN([params.targetMid, 'RTCPeerConnection', null, 'Discarding extra "welcome" received.']);
+        logger.log.WARN([params.targetMid, TAGS.PEER_CONNECTION, null, 'Discarding extra "welcome" received.']);
       } else {
         method = 'offer';
         state.peerMessagesStamps[params.targetMid].hasWelcome = true;
@@ -72,7 +74,7 @@ const logStats = (caller, targetMid, state, message) => {
     callerState = 'welcome';
   }
 
-  logger.log.INFO([targetMid, 'RTCPeerConnection', null, `Peer ${callerState} received ->`], message);
+  logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, `Peer ${callerState} received ->`], message);
   handleNegotiationStats.send(room.id, callerState, targetMid, message, true);
 };
 
@@ -99,7 +101,7 @@ export const parseAndSendWelcome = (message, caller) => {
     callerState = 'welcome';
   }
   if (targetMid !== PEER_TYPE.MCU && hasMCU && state.publishOnly) {
-    logger.log.WARN([targetMid, 'RTCPeerConnection', null, `Discarding ${callerState} for publishOnly case -> `], message);
+    logger.log.WARN([targetMid, TAGS.PEER_CONNECTION, null, `Discarding ${callerState} for publishOnly case -> `], message);
     return;
   }
 

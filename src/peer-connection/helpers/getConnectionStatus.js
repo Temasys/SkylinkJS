@@ -12,17 +12,17 @@ const retrieveValidPeerIdsOrErrorMsg = (roomState, peerId) => {
   let errorMsg = null;
 
   if (isEmptyArray(Object.keys(peerConnections))) {
-    errorMsg = PEER_CONNECTION.not_initialised;
+    errorMsg = PEER_CONNECTION.NOT_INITIALISED;
   } else if (Array.isArray(peerId)) {
     peerIds = peerId;
     peerIds.forEach((id) => {
       if (!isValidPeerId(room, id)) {
-        errorMsg = `${PEER_CONNECTION.peerId_does_not_exist} ${id}`;
+        errorMsg = `${PEER_CONNECTION.PEER_ID_NOT_FOUND} ${id}`;
       }
     });
   } else if (isAString(peerId)) {
     if (!isValidPeerId(room, peerId)) {
-      errorMsg = `${PEER_CONNECTION.peerId_does_not_exist} ${peerId}`;
+      errorMsg = `${PEER_CONNECTION.PEER_ID_NOT_FOUND} ${peerId}`;
     }
 
     peerIds = [peerId];

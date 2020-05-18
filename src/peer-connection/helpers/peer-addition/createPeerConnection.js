@@ -1,5 +1,5 @@
 import {
-  BUNDLE_POLICY, HANDSHAKE_PROGRESS, PEER_TYPE, BROWSER_AGENT,
+  BUNDLE_POLICY, HANDSHAKE_PROGRESS, PEER_TYPE, BROWSER_AGENT, TAGS,
 } from '../../../constants';
 import Skylink from '../../../index';
 import logger from '../../../logger';
@@ -7,12 +7,13 @@ import callbacks from './callbacks/index';
 import { dispatchEvent } from '../../../utils/skylinkEventManager';
 import { handshakeProgress } from '../../../skylink-events';
 import { updateRemoveStream } from '../../../compatibility/index';
+import MESSAGES from '../../../messages';
 
 const createNativePeerConnection = (targetMid, constraints, optional, hasScreenShare, currentRoom) => {
   const initOptions = Skylink.getInitOptions();
   const state = Skylink.getSkylinkState(currentRoom.id);
   const { AdapterJS } = window;
-  logger.log.DEBUG([targetMid, 'RTCPeerConnection', null, 'Creating peer connection ->'], {
+  logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.CREATE_NEW], {
     constraints,
     optional,
   });
@@ -56,6 +57,10 @@ const createNativePeerConnection = (targetMid, constraints, optional, hasScreenS
     if (typeof rtcPeerConnection.addTransceiver === 'function') {
       rtcPeerConnection.addTransceiver('video');
     }
+  }
+
+  if (rtcPeerConnection.restartIce) {
+    state.enableIceRestart = true;
   }
 
   Skylink.setSkylinkState(state, currentRoom.id);
