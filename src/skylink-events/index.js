@@ -64,7 +64,76 @@ import {
 
 /**
  * @namespace SkylinkEvents
- * @description Events triggered by SkylinkJS. Event constants referenced here - {@link SkylinkConstants.EVENTS}
+ * @description
+ * <strong>PEER EVENTS</strong> </br>
+ *  <ul>
+ *    <li>{@link SkylinkEvents.event:PEER_UPDATED|PEER_UPDATED}</li>
+ *    <li>{@link SkylinkEvents.event:PEER_JOINED|PEER_JOINED}</li>
+ *    <li>{@link SkylinkEvents.event:PEER_LEFT|PEER_LEFT}</li>
+ *    <li>{@link SkylinkEvents.event:SERVER_PEER_JOINED|SERVER_PEER_JOINED}</li>
+ *    <li>{@link SkylinkEvents.event:SERVER_PEER_LEFT|SERVER_PEER_LEFT}</li>
+ *    <li>{@link SkylinkEvents.event:GET_PEERS_STATE_CHANGE|GET_PEERS_STATE_CHANGE}</li>
+ *    <li>{@link SkylinkEvents.event:PEER_CONNECTION_STATE|PEER_CONNECTION_STATE}</li>
+ *    <li>{@link SkylinkEvents.event:SESSION_DISCONNECT|SESSION_DISCONNECT}</li>
+ *    <li>{@link SkylinkEvents.event:GET_CONNECTION_STATUS_STATE_CHANGE|GET_CONNECTION_STATUS_STATE_CHANGE}</li>
+ *  </ul>
+ *  <strong>STREAM EVENTS</strong> </br>
+ *  <ul>
+ *    <li>{@link SkylinkEvents.event:ON_INCOMING_STREAM|ON_INCOMING_STREAM}</li>
+ *    <li>{@link SkylinkEvents.event:ON_INCOMING_SCREEN_STREAM|ON_INCOMING_SCREEN_STREAM}</li>
+ *    <li>{@link SkylinkEvents.event:STREAM_ENDED|STREAM_ENDED}</li>
+ *    <li>{@link SkylinkEvents.event:STREAM_MUTED|STREAM_MUTED}</li>
+ *  </ul>
+ *  <strong>MEDIA EVENTS</strong> </br>
+ *  <ul>
+ *    <li>{@link SkylinkEvents.event:MEDIA_ACCESS_FALLBACK|MEDIA_ACCESS_FALLBACK}</li>
+ *    <li>{@link SkylinkEvents.event:MEDIA_ACCESS_REQUIRED|MEDIA_ACCESS_REQUIRED}</li>
+ *    <li>{@link SkylinkEvents.event:MEDIA_ACCESS_STOPPED|MEDIA_ACCESS_STOPPED}</li>
+ *    <li>{@link SkylinkEvents.event:MEDIA_ACCESS_SUCCESS|MEDIA_ACCESS_SUCCESS}</li>
+ *    <li>{@link SkylinkEvents.event:MEDIA_ACCESS_ERROR|MEDIA_ACCESS_ERROR}</li>
+ *    <li>{@link SkylinkEvents.event:RECORDING_STATE|RECORDING_STATE}</li>
+ *    <li>{@link SkylinkEvents.event:RTMP_STATE|RTMP_STATE}</li>
+ *    <li>{@link SkylinkEvents.event:LOCAL_MEDIA_MUTED|LOCAL_MEDIA_MUTED}</li>
+ *  </ul>
+ *  <strong>DATA CHANNEL EVENTS</strong> </br>
+ *  <ul>
+ *    <li>{@link SkylinkEvents.event:DATA_CHANNEL_STATE|DATA_CHANNEL_STATE}</li>
+ *    <li>{@link SkylinkEvents.event:ON_INCOMING_MESSAGE|ON_INCOMING_MESSAGE}</li>
+ *    <li>{@link SkylinkEvents.event:STORED_MESSAGES|STORED_MESSAGES}</li>
+ *    <li>{@link SkylinkEvents.event:ENCRYPT_SECRETS_UPDATED|ENCRYPT_SECRETS_UPDATED}</li>
+ *    <li>{@link SkylinkEvents.event:PERSISTENT_MESSAGE_STATE|PERSISTENT_MESSAGE_STATE}</li>
+ *  </ul>
+ *  <strong>CANDIDATE EVENTS</strong> </br>
+ *  <ul>
+ *    <li>{@link SkylinkEvents.event:CANDIDATE_PROCESSING_STATE|CANDIDATE_PROCESSING_STATE}</li>
+ *    <li>{@link SkylinkEvents.event:CANDIDATE_GENERATION_STATE|CANDIDATE_GENERATION_STATE}</li>
+ *    <li>{@link SkylinkEvents.event:CANDIDATES_GATHERED|CANDIDATES_GATHERED}</li>
+ *    <li>{@link SkylinkEvents.event:ICE_CONNECTION_STATE|ICE_CONNECTION_STATE}</li>
+ *  </ul>
+ *  <strong>INIT EVENTS</strong> </br>
+ *  <ul>
+ *    <li>{@link SkylinkEvents.event:READY_STATE_CHANGE|READY_STATE_CHANGE}</li>
+ *  </ul>
+ *  <strong>PEER HANDSHAKE EVENTS</strong> </br>
+ *  <ul>
+ *    <li>{@link SkylinkEvents.event:HANDSHAKE_PROGRESS|HANDSHAKE_PROGRESS}</li>
+ *  </ul>
+ *  <strong>ROOM EVENTS</strong> </br>
+ *  <ul>
+ *    <li>{@link SkylinkEvents.event:ROOM_LOCK|ROOM_LOCK}</li>
+ *  </ul>
+ *  <strong>SOCKET EVENTS</strong> </br>
+ *  <ul>
+ *    <li>{@link SkylinkEvents.event:CHANNEL_OPEN|CHANNEL_OPEN}</li>
+ *    <li>{@link SkylinkEvents.event:CHANNEL_REOPEN|CHANNEL_REOPEN}</li>
+ *    <li>{@link SkylinkEvents.event:CHANNEL_CLOSE|CHANNEL_CLOSE}</li>
+ *    <li>{@link SkylinkEvents.event:CHANNEL_ERROR|CHANNEL_ERROR}</li>
+ *    <li>{@link SkylinkEvents.event:CHANNEL_MESSAGE|CHANNEL_MESSAGE}</li>
+ *    <li>{@link SkylinkEvents.event:CHANNEL_RETRY|CHANNEL_RETRY}</li>
+ *    <li>{@link SkylinkEvents.event:CHANNEL_OPEN|CHANNEL_OPEN}</li>
+ *    <li>{@link SkylinkEvents.event:SOCKET_ERROR|SOCKET_ERROR}</li>
+ *    <li>{@link SkylinkEvents.event:SYSTEM_ACTION|SYSTEM_ACTION}</li>
+ *  </ul>
  * @example
  * Import SkylinkEventManager and SkylinkConstants from 'skylinkjs'
  *
@@ -79,6 +148,7 @@ import {
  *   const { detail } = evt;
  *   // do something
  * });
+ * @since 2.0
  */
 export {
   onIncomingStream,

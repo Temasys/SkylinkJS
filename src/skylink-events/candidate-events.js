@@ -8,7 +8,7 @@ import {
 import SkylinkEvent from '../utils/skylinkEvent';
 
 /**
- * @event SkylinkEvents.candidateProcessingState
+ * @event SkylinkEvents.CANDIDATE_PROCESSING_STATE
  * @description Event triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.
  * @param {Object} detail - Event's payload.
  * @param {SkylinkRoom} detail.room - The current room
@@ -25,7 +25,7 @@ import SkylinkEvent from '../utils/skylinkEvent';
 export const candidateProcessingState = detail => new SkylinkEvent(CANDIDATE_PROCESSING_STATE, { detail });
 
 /**
- * @event SkylinkEvents.candidateGenerationState
+ * @event SkylinkEvents.CANDIDATE_GENERATION_STATE
  * @description Event triggered when a Peer connection ICE gathering state has changed.
  * @param {Object} detail - Event's payload.
  * @param {SkylinkRoom} detail.room - The current room
@@ -35,7 +35,7 @@ export const candidateProcessingState = detail => new SkylinkEvent(CANDIDATE_PRO
 export const candidateGenerationState = detail => new SkylinkEvent(CANDIDATE_GENERATION_STATE, { detail });
 
 /**
- * @event SkylinkEvents.candidatesGathered
+ * @event SkylinkEvents.CANDIDATES_GATHERED
  * @description Event triggered when all remote ICE candidates gathering has completed and been processed.
  * @param {Object} detail - Event's payload.
  * @param {SkylinkRoom} detail.room - The current room
@@ -48,11 +48,12 @@ export const candidateGenerationState = detail => new SkylinkEvent(CANDIDATE_GEN
 export const candidatesGathered = detail => new SkylinkEvent(CANDIDATES_GATHERED, { detail });
 
 /**
- * @event SkylinkEvents.iceConnectionState
+ * @event SkylinkEvents.ICE_CONNECTION_STATE
  * @description Learn more about how ICE works in this
  *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
  * Event triggered when a Peer connection ICE connection state has changed.
- * @param {SkylinkEvents.ICE_CONNECTION_STATE} state The current Peer connection ICE connection state.
- * @param {String} peerId The Peer ID.
+ * @param {Object} detail - Event's payload.
+ * @param {SkylinkConstants.ICE_CONNECTION_STATE} detail.state - The current Peer connection ICE connection state.
+ * @param {String} detail.state - The Peer ID.
  */
 export const iceConnectionState = detail => new SkylinkEvent(ICE_CONNECTION_STATE, { detail });
