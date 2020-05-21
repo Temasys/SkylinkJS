@@ -131,11 +131,13 @@ class PeerConnectionStatistics {
       this.getStatsFailure(promiseReject, messages.STATS_MODULE.ERRORS.PARSE_FAILED, err);
     }
 
-    dispatchEvent(getConnectionStatusStateChange({
-      state: GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
-      peerId: this.peerId,
-      stats: this.output,
-    }));
+    if (!this.beSilentOnLogs) {
+      dispatchEvent(getConnectionStatusStateChange({
+        state: GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
+        peerId: this.peerId,
+        stats: this.output,
+      }));
+    }
 
     promiseResolve(this.output);
   }
@@ -186,10 +188,12 @@ class PeerConnectionStatistics {
           this.getStatsFailure(reject, messages.PEER_CONNECTION.getstats_api_not_available);
         }
 
-        dispatchEvent(getConnectionStatusStateChange({
-          state: GET_CONNECTION_STATUS_STATE.RETRIEVING,
-          peerId: this.peerId,
-        }));
+        if (!this.beSilentOnLogs) {
+          dispatchEvent(getConnectionStatusStateChange({
+            state: GET_CONNECTION_STATUS_STATE.RETRIEVING,
+            peerId: this.peerId,
+          }));
+        }
 
         this.peerConnection.getStats()
           .then((stats) => { this.getStatsSuccess(resolve, reject, stats); })
