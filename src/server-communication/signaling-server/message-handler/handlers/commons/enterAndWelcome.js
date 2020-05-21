@@ -39,15 +39,15 @@ const checkStampBeforeSendingWelcome = (params) => {
   const { currentRoom, targetMid, message } = params;
   const state = Skylink.getSkylinkState(currentRoom.id);
   const { peerConnections, hasMCU } = state;
-  const { STATS_MODULE, NEGOTIATION_PROGRESS } = messages;
+  const { STATS_MODULE, NEGOTIATION_PROGRESS, PEER_CONNECTION } = messages;
   const signaling = new SkylinkSignalingServer();
   const method = getNextNegotiationStep(params);
 
   if (method === 'offer') {
   // Added checks to ensure that connection object is defined first
     if (!peerConnections[targetMid]) {
-      logger.log.WARN([targetMid, 'RTCSessionDescription', 'offer', NEGOTIATION_PROGRESS.ERRORS.no_peer_connection]);
-      handleNegotiationStats.send(currentRoom.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS.OFFER.dropped, targetMid, message, false, NEGOTIATION_PROGRESS.ERRORS.no_peer_connection);
+      logger.log.WARN([targetMid, 'RTCSessionDescription', 'offer', PEER_CONNECTION.NO_PEER_CONNECTION]);
+      handleNegotiationStats.send(currentRoom.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS.OFFER.dropped, targetMid, message, false, PEER_CONNECTION.NO_PEER_CONNECTION);
       return null;
     }
 

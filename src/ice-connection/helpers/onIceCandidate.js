@@ -25,7 +25,7 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
   const { CANDIDATE_GENERATION_STATE, TAGS } = constants;
 
   if (!peerConnection) {
-    logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, messages.ICE_CANDIDATE.no_peer_connection], candidate);
+    logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, messages.PEER_CONNECTION.NO_PEER_CONNECTION], candidate);
     return null;
   }
 

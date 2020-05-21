@@ -3,7 +3,7 @@ const parseUserInfo = (state, msg, parsedMsg) => {
 
   info.config = info.config ? info.config : {
     enableDataChannel: parsedMsg.enableDataChannel,
-    // enableIceRestart: parsedMsg.enableIceRestart,
+    enableIceRestart: parsedMsg.enableIceRestart,
     priorityWeight: parsedMsg.weight,
     receiveOnly: parsedMsg.receiveOnly,
     publishOnly: parsedMsg.publishOnly,
