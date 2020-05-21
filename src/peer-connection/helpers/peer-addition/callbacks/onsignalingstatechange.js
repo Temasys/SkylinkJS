@@ -19,7 +19,7 @@ const onsignalingstatechange = (peerConnection, targetMid) => {
   const { PEER_CONNECTION_STATE } = constants;
   const { signalingState, signalingStateClosed } = peerConnection;
 
-  logger.log.DEBUG([targetMid, 'RTCSignalingState', null, PEER_CONNECTION.peer_connection_state], signalingState);
+  logger.log.DEBUG([targetMid, 'RTCSignalingState', null, PEER_CONNECTION.STATE_CHANGE], signalingState);
 
   if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && signalingState === PEER_CONNECTION_STATE.CLOSED) {
     setTimeout(() => {

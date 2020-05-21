@@ -6,7 +6,10 @@ import { peerJoined, handshakeProgress, serverPeerJoined } from '../../../../../
 import { dispatchEvent } from '../../../../../utils/skylinkEventManager';
 import PeerData from '../../../../../peer-data';
 import parsers from '../../../parsers/index';
-import { PEER_TYPE, SERVER_PEER_TYPE, HANDSHAKE_PROGRESS } from '../../../../../constants';
+import {
+  PEER_TYPE, SERVER_PEER_TYPE, HANDSHAKE_PROGRESS, TAGS,
+} from '../../../../../constants';
+import MESSAGES from '../../../../../messages';
 
 const setPeerInformations = (state, peerId, userInfo) => {
   const { room } = state;
@@ -59,7 +62,7 @@ const processPeer = (params) => {
     });
 
     if (targetMid === PEER_TYPE.MCU) {
-      logger.log.INFO([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
+      logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.MCU]);
       state.hasMCU = true;
       dispatchEvent(serverPeerJoined({
         peerId: targetMid,

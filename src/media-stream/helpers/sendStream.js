@@ -67,7 +67,7 @@ const restartFn = (roomState, streams, resolve, reject) => {
       refreshPeerConnectionPromise.then(() => {
         resolve(streams);
       }).catch((error) => {
-        logger.log.ERROR(MESSAGES.PEER_CONNECTION.ERRORS.REFRESH);
+        logger.log.ERROR(MESSAGES.PEER_CONNECTION.REFRESH_CONNECTION.FAILED);
         reject(error);
       });
     } else {

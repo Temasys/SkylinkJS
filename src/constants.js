@@ -1562,6 +1562,7 @@ export const SIG_MESSAGE_TYPE = {
   MESSAGE: 'message',
   GET_STORED_MESSAGES: 'getStoredMessages',
   STORED_MESSAGES: 'storedMessages',
+  RESTART: 'restart',
 };
 
 export const STREAM_STATUS = {

@@ -23,7 +23,7 @@ const addIceCandidateSuccess = (room, targetMid, candidateId, candidateType, can
   const { STATS_MODULE, ICE_CANDIDATE } = messages;
   const { CANDIDATE_PROCESSING_STATE, TAGS } = constants;
 
-  logger.log.INFO([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.CANDIDATE_HANDLER.CANDIDATE_ADDED]);
+  logger.log.INFO([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.CANDIDATE_ADDED]);
   dispatchEvent(candidateProcessingState({
     room,
     state: CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS,
@@ -52,7 +52,7 @@ const addIceCandidateFailure = (room, targetMid, candidateId, candidateType, can
   const { STATS_MODULE, ICE_CANDIDATE } = messages;
   const { CANDIDATE_PROCESSING_STATE, TAGS } = constants;
 
-  logger.log.ERROR([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.CANDIDATE_HANDLER.FAILED_ADDING_CANDIDATE], error);
+  logger.log.ERROR([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FAILED_ADDING_CANDIDATE], error);
   dispatchEvent(candidateProcessingState({
     room,
     state: CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
@@ -87,7 +87,7 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
   const { STATS_MODULE, ICE_CANDIDATE, PEER_CONNECTION } = messages;
   const { CANDIDATE_PROCESSING_STATE, PEER_CONNECTION_STATE, TAGS } = constants;
 
-  logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.CANDIDATE_HANDLER.ADDING_CANDIDATE]);
+  logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.ADDING_CANDIDATE]);
   dispatchEvent(candidateProcessingState({
     peerId: targetMid,
     room,
@@ -104,7 +104,7 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
     && peerConnection.remoteDescription
     && peerConnection.remoteDescription.sdp
     && peerConnection.remoteDescription.sdp.indexOf(`\r\na=mid:${candidate.sdpMid}\r\n`) > -1)) {
-    logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, `${ICE_CANDIDATE.CANDIDATE_HANDLER.DROPPING_CANDIDATE} - ${PEER_CONNECTION.NO_PEER_CONNECTION}`]);
+    logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, `${ICE_CANDIDATE.DROPPING_CANDIDATE} - ${PEER_CONNECTION.NO_PEER_CONNECTION}`]);
 
     dispatchEvent(candidateProcessingState({
       peerId: targetMid,

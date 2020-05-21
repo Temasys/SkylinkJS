@@ -23,7 +23,7 @@ const signalingEndOfCandidates = (targetMid, roomState) => {
   const gatheredCandidates = state.gatheredCandidates[targetMid];
   const { AdapterJS, RTCIceCandidate } = window;
   const { TAGS } = constants;
-  const { PEER_CONNECTION } = messages;
+  const { ICE_CONNECTION } = messages;
 
   if (!peerEndOfCandidatesCounter) {
     return null;
@@ -42,7 +42,7 @@ const signalingEndOfCandidates = (targetMid, roomState) => {
     && (peerCandidatesQueue ? peerCandidatesQueue.length === 0 : true)
     // If it has not been set yet
     && !peerEndOfCandidatesCounter.hasSet) {
-    logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.end_of_candidates]);
+    logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, ICE_CONNECTION.END_OF_CANDIDATES_SUCCESS]);
 
     peerEndOfCandidatesCounter.hasSet = true;
 
@@ -93,7 +93,7 @@ const signalingEndOfCandidates = (targetMid, roomState) => {
       state.peerEndOfCandidatesCounter[targetMid] = peerEndOfCandidatesCounter;
       Skylink.setSkylinkState(state, roomState.room.id);
     } catch (error) {
-      logger.log.ERROR([targetMid, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.end_of_candidate_failure], error);
+      logger.log.ERROR([targetMid, TAGS.PEER_CONNECTION, null, ICE_CONNECTION.END_OF_CANDIDATES_FAILURE], error);
     }
   }
   return null;

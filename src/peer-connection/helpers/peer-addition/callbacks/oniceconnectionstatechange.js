@@ -23,7 +23,7 @@ const isIceConnectionStateCompleted = (pcIceConnectionState) => {
  * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
  */
 const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState) => {
-  const { PEER_CONNECTION } = messages;
+  const { PEER_CONNECTION, ICE_CONNECTION } = messages;
   const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
   const { AdapterJS } = window;
   const { webrtcDetectedBrowser, webrtcDetectedType } = AdapterJS;
@@ -48,7 +48,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   const handleIceConnectionStats = new HandleIceConnectionStats();
 
 
-  logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, PEER_CONNECTION.ice_connection_state], pcIceConnectionState);
+  logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ICE_CONNECTION.STATE_CHANGE], pcIceConnectionState);
 
   if (webrtcDetectedBrowser === 'edge') {
     if (pcIceConnectionState === 'connecting') {
