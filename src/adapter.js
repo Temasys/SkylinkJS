@@ -91,8 +91,17 @@ window.webrtcDetectedDCSupport = null;
 AdapterJS.parseWebrtcDetectedBrowser = function () {
   var hasMatch = null;
 
-  // Detect Opera (8.0+)
-  if ((!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
+  // Detect React-Native
+  // Placed before browsers to check - global navigator object is present when react-native debugger is on and takes browser agent of the debugger
+  // React Native adapter adds navigator object
+  if (window.navigator.userAgent.match(/React-Native/gi) || navigator.userAgent.match(/React-Native/gi)) {
+    window.webrtcDetectedBrowser   = 'react-native';
+    window.webrtcDetectedVersion   = "";
+    window.webrtcMinimumVersion    = 0;
+    window.webrtcDetectedType      = 'react-native';
+    window.webrtcDetectedDCSupport = null;
+    // Detect Opera (8.0+)
+  } else if ((!!window.opr && !!opr.addons) || !!window.opera || navigator.userAgent.indexOf(' OPR/') >= 0) {
     hasMatch = navigator.userAgent.match(/OPR\/(\d+)/i) || [];
 
     window.webrtcDetectedBrowser   = 'opera';
