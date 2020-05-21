@@ -3,7 +3,7 @@ import SkylinkEvent from '../utils/skylinkEvent';
 
 /**
  * @description Event triggered when a Peer connection establishment state has changed.
- * @event SkylinkEvents.handshakeProgress
+ * @event SkylinkEvents.HANDSHAKE_PROGRESS
  * @param {Object} detail - Event's payload.
  * @param {SkylinkConstants.HANDSHAKE_PROGRESS} detail.state The current Peer connection establishment state.
  * @param {String} detail.peerId The Peer ID.

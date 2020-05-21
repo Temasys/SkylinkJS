@@ -12,5 +12,6 @@ import SkylinkEvent from '../utils/skylinkEvent';
  * @param {JSON} detail.level - The log level.
  * @param {String} detail.message - The log message.
  * @param {JSON} detail.debugObject - A JavaScript object to be logged to help with analysis.
+ * @private
  */
 export const loggedOnConsole = (detail = {}) => new SkylinkEvent(LOGGED_ON_CONSOLE, { detail });
