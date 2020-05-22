@@ -4,41 +4,42 @@ import * as SkylinkEventsConstants from './skylink-events/constants';
  * @namespace SkylinkConstants
  * @description
  * <ul>
+ *  <li>{@link SkylinkConstants.AUDIO_CODEC|AUDIO_CODEC} </li>
+ *  <li>{@link SkylinkConstants.BUNDLE_POLICY|BUNDLE_POLICY} </li>
+ *  <li>{@link SkylinkConstants.CANDIDATE_GENERATION_STATE|CANDIDATE_GENERATION_STATE} </li>
+ *  <li>{@link SkylinkConstants.CANDIDATE_PROCESSING_STATE|CANDIDATE_PROCESSING_STATE} </li>
  *  <li>{@link SkylinkConstants.DATA_CHANNEL_STATE|DATA_CHANNEL_STATE} </li>
  *  <li>{@link SkylinkConstants.DATA_CHANNEL_TYPE|DATA_CHANNEL_TYPE} </li>
  *  <li>{@link SkylinkConstants.DATA_CHANNEL_MESSAGE_ERROR|DATA_CHANNEL_MESSAGE_ERROR} </li>
- *  <li>{@link SkylinkConstants.CANDIDATE_GENERATION_STATE|CANDIDATE_GENERATION_STATE} </li>
- *  <li>{@link SkylinkConstants.CANDIDATE_PROCESSING_STATE|CANDIDATE_PROCESSING_STATE} </li>
- *  <li>{@link SkylinkConstants.ICE_CONNECTION_STATE|ICE_CONNECTION_STATE} </li>
- *  <li>{@link SkylinkConstants.TURN_TRANSPORT|TURN_TRANSPORT} </li>
- *  <li>{@link SkylinkConstants.PEER_CONNECTION_STATE|PEER_CONNECTION_STATE} </li>
+ *  <li>{@link SkylinkEvents|EVENTS} </li>
  *  <li>{@link SkylinkConstants.GET_CONNECTION_STATUS_STATE|GET_CONNECTION_STATUS_STATE} </li>
- *  <li>{@link SkylinkConstants.SERVER_PEER_TYPE|SERVER_PEER_TYPE} </li>
- *  <li>{@link SkylinkConstants.BUNDLE_POLICY|BUNDLE_POLICY} </li>
- *  <li>{@link SkylinkConstants.RTCP_MUX_POLICY|RTCP_MUX_POLICY} </li>
- *  <li>{@link SkylinkConstants.PEER_CERTIFICATE|PEER_CERTIFICATE} </li>
- *  <li>{@link SkylinkConstants.HANDSHAKE_PROGRESS|HANDSHAKE_PROGRESS} </li>
  *  <li>{@link SkylinkConstants.GET_PEERS_STATE|GET_PEERS_STATE} </li>
- *  <li>{@link SkylinkConstants.SYSTEM_ACTION|SYSTEM_ACTION} </li>
- *  <li>{@link SkylinkConstants.SYSTEM_ACTION_REASON|SYSTEM_ACTION_REASON} </li>
- *  <li>{@link SkylinkConstants.READY_STATE_CHANGE|READY_STATE_CHANGE} </li>
- *  <li>{@link SkylinkConstants.READY_STATE_CHANGE_ERROR|READY_STATE_CHANGE_ERROR} </li>
+ *  <li>{@link SkylinkConstants.HANDSHAKE_PROGRESS|HANDSHAKE_PROGRESS} </li>
+ *  <li>{@link SkylinkConstants.ICE_CONNECTION_STATE|ICE_CONNECTION_STATE} </li>
  *  <li>{@link SkylinkConstants.LOG_LEVEL|LOG_LEVEL} </li>
- *  <li>{@link SkylinkConstants.SOCKET_ERROR|SOCKET_ERROR} </li>
- *  <li>{@link SkylinkConstants.SOCKET_FALLBACK|SOCKET_FALLBACK} </li>
- *  <li>{@link SkylinkConstants.SM_PROTOCOL_VERSION|SM_PROTOCOL_VERSION} </li>
- *  <li>{@link SkylinkConstants.VIDEO_CODEC|VIDEO_CODEC} </li>
- *  <li>{@link SkylinkConstants.AUDIO_CODEC|AUDIO_CODEC} </li>
- *  <li>{@link SkylinkConstants.MEDIA_SOURCE|MEDIA_SOURCE} </li>
- *  <li>{@link SkylinkConstants.VIDEO_RESOLUTION|VIDEO_RESOLUTION} </li>
  *  <li>{@link SkylinkConstants.MEDIA_ACCESS_FALLBACK_STATE|MEDIA_ACCESS_FALLBACK_STATE} </li>
- *  <li>{@link SkylinkConstants.RECORDING_STATE|RECORDING_STATE} </li>
- *  <li>{@link SkylinkConstants.VIDEO_QUALITY|VIDEO_QUALITY} </li>
- *  <li>{@link SkylinkConstants.SDP_SEMANTICS|SDP_SEMANTICS} </li>
- *  <li>{@link SkylinkConstants.RTMP_STATE|RTMP_STATE} </li>
+ *  <li>{@link SkylinkConstants.MEDIA_SOURCE|MEDIA_SOURCE} </li>
  *  <li>{@link SkylinkConstants.MEDIA_STATUS|MEDIA_STATUS} </li>
  *  <li>{@link SkylinkConstants.MEDIA_TYPE|MEDIA_TYPE} </li>
  *  <li>{@link SkylinkConstants.MEDIA_STATE|MEDIA_STATE} </li>
+ *  <li>{@link SkylinkConstants.PEER_CERTIFICATE|PEER_CERTIFICATE} </li>
+ *  <li>{@link SkylinkConstants.PEER_CONNECTION_STATE|PEER_CONNECTION_STATE} </li>
+ *  <li>{@link SkylinkConstants.READY_STATE_CHANGE_ERROR|READY_STATE_CHANGE_ERROR} </li>
+ *  <li>{@link SkylinkConstants.READY_STATE_CHANGE|READY_STATE_CHANGE} </li>
+ *  <li>{@link SkylinkConstants.RTCP_MUX_POLICY|RTCP_MUX_POLICY} </li>
+ *  <li>{@link SkylinkConstants.RTMP_STATE|RTMP_STATE} </li>
+ *  <li>{@link SkylinkConstants.RECORDING_STATE|RECORDING_STATE} </li>
+ *  <li>{@link SkylinkConstants.SDP_SEMANTICS|SDP_SEMANTICS} </li>
+ *  <li>{@link SkylinkConstants.SERVER_PEER_TYPE|SERVER_PEER_TYPE} </li>
+ *  <li>{@link SkylinkConstants.SOCKET_ERROR|SOCKET_ERROR} </li>
+ *  <li>{@link SkylinkConstants.SOCKET_FALLBACK|SOCKET_FALLBACK} </li>
+ *  <li>{@link SkylinkConstants.SYSTEM_ACTION|SYSTEM_ACTION} </li>
+ *  <li>{@link SkylinkConstants.SYSTEM_ACTION_REASON|SYSTEM_ACTION_REASON} </li>
+ *  <li>{@link SkylinkConstants.SM_PROTOCOL_VERSION|SM_PROTOCOL_VERSION} </li>
+ *  <li>{@link SkylinkConstants.TURN_TRANSPORT|TURN_TRANSPORT} </li>
+ *  <li>{@link SkylinkConstants.VIDEO_CODEC|VIDEO_CODEC} </li>
+ *  <li>{@link SkylinkConstants.VIDEO_RESOLUTION|VIDEO_RESOLUTION} </li>
+ *  <li>{@link SkylinkConstants.VIDEO_QUALITY|VIDEO_QUALITY} </li>
  * </ul>
  */
 

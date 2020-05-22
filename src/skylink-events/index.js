@@ -65,6 +65,7 @@ import {
 /**
  * @namespace SkylinkEvents
  * @description
+ * <p>Also referenced as <code>SkylinkConstants.EVENTS</code></p>
  * <strong>PEER EVENTS</strong> </br>
  *  <ul>
  *    <li>{@link SkylinkEvents.event:PEER_UPDATED|PEER_UPDATED}</li>

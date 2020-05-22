@@ -42,7 +42,9 @@ let userInitOptions = {};
 const SkylinkEvents = constants.EVENTS;
 
 /**
+ * @class Skylink
  * @classdesc Class representing a SkylinkJS instance.
+ * @param {initOptions} options - Skylink authentication and initialisation configuration options.
  * @example
  * import Skylink from 'skylinkjs';
  *
