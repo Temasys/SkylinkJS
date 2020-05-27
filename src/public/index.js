@@ -1436,24 +1436,6 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @typedef {Object} screenSources - The list of screensharing media sources and screen sources.
-   * @property {Array.<String>} mediaSource - The screensharing media source item.
-   * @property {Array.<Object>} mediaSourceInput - The list of specific media source screen inputs.
-   * @property {String} mediaSourceInput.sourceId - The screen input item id.
-   * @property {Object} mediaSourceInput.label - The screen input item label name.
-   * @property {Object} mediaSourceInput.mediaSource - The screen input item media source it belongs to.
-   */
-  /**
-   * @description Method that returns the screensharing sources.
-   * @return {Promise.<screenSources>}
-   * @alias Skylink#getScreenSources
-   * @since 2.0.0
-   */
-  getScreenSources() {
-    return MediaStream.getScreenSources();
-  }
-
-  /**
    * @typedef {Object} streamList
    * @property {Object.<string, MediaStream>|null} userMedia - The user media streams keyed by stream id.
    * @property {MediaStream|null} screenshare - The screenshare stream.

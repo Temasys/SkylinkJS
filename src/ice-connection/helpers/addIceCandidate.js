@@ -15,7 +15,7 @@ const handleIceCandidateStats = new HandleIceCandidateStats();
  * @param {String} candidateId - The id of the ICE Candidate
  * @param {String} candidateType - Type of the ICE Candidate
  * @param {RTCIceCandidate} candidate - An RTCIceCandidate Object
- * @fires candidateProcessingState
+ * @fires CANDIDATE_PROCESSING_STATE
  * @memberOf IceConnectionHelpers
  * @private
  */
@@ -44,7 +44,7 @@ const addIceCandidateSuccess = (room, targetMid, candidateId, candidateType, can
  * @param {String} candidateType - Type of the ICE Candidate
  * @param {RTCIceCandidate} candidate - An RTCIceCandidate Object
  * @param {Error} error - Error
- * @fires candidateProcessingState
+ * @fires CANDIDATE_PROCESSING_STATE
  * @memberOf IceConnectionHelpers
  * @private
  */
@@ -71,7 +71,7 @@ const addIceCandidateFailure = (room, targetMid, candidateId, candidateType, can
  * @param {String} candidateType - Type of the ICE Candidate
  * @param {RTCIceCandidate} nativeCandidate - An RTCIceCandidate Object
  * @param {SkylinkState} roomState - Skylink State
- * @fires candidateProcessingState
+ * @fires CANDIDATE_PROCESSING_STATE
  * @memberOf IceConnectionHelpers
  * @private
  */

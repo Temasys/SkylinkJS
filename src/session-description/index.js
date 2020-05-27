@@ -61,14 +61,6 @@ class SessionDescription {
     return helpers.getSDPSelectedCodec(...args);
   }
 
-  static setOriginalDTLSRole(...args) {
-    return helpers.setOriginalDTLSRole(...args);
-  }
-
-  static modifyDTLSRole(...args) {
-    return helpers.modifyDTLSRole(...args);
-  }
-
   static getTransceiverMid(...args) {
     return helpers.getTransceiverMid(...args);
   }

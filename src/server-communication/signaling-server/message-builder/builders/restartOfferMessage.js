@@ -27,7 +27,7 @@ const restartOfferMessage = (roomKey, peerId, doIceRestart) => {
     doIceRestart: doIceRestart === true && enableIceRestart && peerInformations[peerId]
       && peerInformations[peerId].config.enableIceRestart,
     isRestartResend: false,
-    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+    temasysPluginVersion: null,
     SMProtocolVersion: SM_PROTOCOL_VERSION,
     DTProtocolVersion: DT_PROTOCOL_VERSION,
   };

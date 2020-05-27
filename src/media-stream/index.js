@@ -119,10 +119,6 @@ class MediaStream {
     return helpers.getStreamSources();
   }
 
-  static getScreenSources() {
-    return helpers.getScreenSources();
-  }
-
   static updateRemoteStreams(room, peerId, stream) {
     return helpers.updateRemoteStreams(room, peerId, stream);
   }

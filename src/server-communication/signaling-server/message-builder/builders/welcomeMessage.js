@@ -23,7 +23,7 @@ const getWelcomeMessage = (currentRoom, targetMid) => {
     userInfo,
     receiveOnly: PeerData.getCurrentSessionInfo(room).config.receiveOnly,
     weight: peerPriorityWeight,
-    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+    temasysPluginVersion: null,
     enableDataChannel,
     enableIceRestart,
     SMProtocolVersion: SM_PROTOCOL_VERSION,

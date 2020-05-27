@@ -16,7 +16,7 @@ class HandleClientStats extends SkylinkStats {
       agent_name: AdapterJS.webrtcDetectedBrowser,
       agent_version: AdapterJS.webrtcDetectedVersion,
       agent_platform: navigator.platform,
-      agent_plugin_version: (AdapterJS.WebRTCPlugin.plugin && AdapterJS.WebRTCPlugin.plugin.VERSION) || null,
+      agent_plugin_version: null,
       device_version: null,
       enumerated_devices: null,
       device_muted: null,

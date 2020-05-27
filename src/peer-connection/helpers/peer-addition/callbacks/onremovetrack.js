@@ -1,7 +1,7 @@
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { onIncomingStream, peerUpdated, streamEnded } from '../../../../skylink-events';
 import PeerData from '../../../../peer-data';
-import { getStateByKey, hasVideoTrack } from '../../../../utils/helpers';
+import { getStateByKey, hasVideoTrack, isAgent } from '../../../../utils/helpers';
 import { TRACK_KIND, TAGS, BROWSER_AGENT } from '../../../../constants';
 import logger from '../../../../logger';
 import MESSAGES from '../../../../messages';
@@ -64,11 +64,10 @@ const dispatchIncomingCameraStream = (state) => {
  * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
  */
 const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
-  const { AdapterJS } = window;
   const state = getStateByKey(room.id);
   const { peerInformations } = state;
   const { MEDIA_STREAM, PEER_INFORMATIONS } = MESSAGES;
-  const stream = AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE ? rtcTrackEvent.stream : rtcTrackEvent.target;
+  const stream = isAgent(BROWSER_AGENT.REACT_NATIVE) ? rtcTrackEvent.stream : rtcTrackEvent.target;
 
 
   logger.log.INFO([peerId, TAGS.MEDIA_STREAM, null, MEDIA_STREAM.REMOTE_TRACK_REMOVED], {

@@ -145,23 +145,18 @@ const testRTCPeerConnection = () => {
 };
 
 export const webRTCReadyOperations = () => {
-  const { AdapterJS } = window;
   const returnObject = {
     ready: true,
     message: '',
   };
   if (!testRTCPeerConnection()) {
-    if (window.RTCPeerConnection && AdapterJS.webrtcDetectedType === 'plugin') {
-      returnObject.message = 'Plugin is not available. Please check plugin status.';
-    } else {
-      returnObject.message = 'WebRTC not supported. Please upgrade your browser';
-    }
+    returnObject.message = 'WebRTC not supported. Please upgrade your browser';
     returnObject.ready = false;
     dispatchEvent(readyStateChange({
       readyState: READY_STATE_CHANGE.ERROR,
       error: {
         status: -2,
-        content: new Error(AdapterJS.webrtcDetectedType === 'plugin' && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available'),
+        content: new Error(returnObject.message),
         errorCode: READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT,
       },
       room: null,

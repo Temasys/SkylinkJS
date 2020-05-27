@@ -77,10 +77,6 @@ const mungeSDP = (targetMid, sessionDescription, roomKey) => {
   // sessionDescriptionToSet.sdp = SessionDescription.handleSDPConnectionSettings(targetMid, sessionDescriptionToSet, message.rid, 'remote');
   // sessionDescriptionToSet.sdp = SessionDescription.removeSDPUnknownAptRtx(targetMid, sessionDescriptionToSet, message.rid);
 
-  // if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
-  //   SessionDescription.setOriginalDTLSRole(state, sessionDescriptionToSet, true);
-  // }
-
   // logger.log.INFO([targetMid, 'RTCSessionDescription', type, `Updated remote ${type} ->`], sessionDescriptionToSet.sdp);
   return mungedSessionDescription;
 };

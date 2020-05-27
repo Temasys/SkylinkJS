@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import defaultOptions from './defaultOptions';
-import { validateDepencies } from '../../compatibility/index';
+import { validateDependencies } from '../../compatibility/index';
 import {
   authenticateApp,
   parseAndMutateOptions,
@@ -50,7 +50,7 @@ class SkylinkAPIServer {
       error: null,
       room: null,
     }));
-    const dependencies = validateDepencies();
+    const dependencies = validateDependencies();
     const { AdapterJS } = window;
     if (!dependencies.fulfilled) {
       dispatchEvent(readyStateChange({

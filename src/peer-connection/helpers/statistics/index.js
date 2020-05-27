@@ -8,7 +8,7 @@ import {
 import { dispatchEvent } from '../../../utils/skylinkEventManager';
 import { getConnectionStatusStateChange } from '../../../skylink-events/peer-events';
 import parsers from './parsers/index';
-import { isEmptyObj } from '../../../utils/helpers';
+import { isEmptyObj, isAgent } from '../../../utils/helpers';
 
 /**
  * @classdesc This class is used to fetch the statistics for a RTCPeerConnection
@@ -68,8 +68,7 @@ class PeerConnectionStatistics {
   }
 
   getStatsSuccess(promiseResolve, promiseReject, stats) {
-    const { AdapterJS } = window;
-    if (!stats && AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE) {
+    if (!stats && isAgent(BROWSER_AGENT.REACT_NATIVE)) {
       // get stats in react native will resolve with 'null'
       promiseResolve(this.output);
       return;

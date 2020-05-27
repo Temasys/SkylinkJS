@@ -3,6 +3,7 @@ import messages from '../../../../messages';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { peerConnectionState } from '../../../../skylink-events';
 import * as constants from '../../../../constants';
+import { isAgent } from '../../../../utils/helpers';
 
 /**
  *
@@ -14,14 +15,13 @@ import * as constants from '../../../../constants';
  */
 // eslint-disable-next-line no-unused-vars
 const onsignalingstatechange = (peerConnection, targetMid) => {
-  const { AdapterJS } = window;
   const { PEER_CONNECTION } = messages;
-  const { PEER_CONNECTION_STATE } = constants;
+  const { BROWSER_AGENT, PEER_CONNECTION_STATE } = constants;
   const { signalingState, signalingStateClosed } = peerConnection;
 
   logger.log.DEBUG([targetMid, 'RTCSignalingState', null, PEER_CONNECTION.STATE_CHANGE], signalingState);
 
-  if (AdapterJS.webrtcDetectedType === 'AppleWebKit' && signalingState === PEER_CONNECTION_STATE.CLOSED) {
+  if (isAgent(BROWSER_AGENT.SAFARI) && signalingState === PEER_CONNECTION_STATE.CLOSED) {
     setTimeout(() => {
       if (!signalingStateClosed) {
         dispatchEvent(peerConnectionState({

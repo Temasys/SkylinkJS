@@ -92,11 +92,7 @@ const handleSDPConnectionSettings = (targetMid, sessionDescription, roomKey, dir
           continue;
         }
 
-        if (window.webrtcDetectedBrowser === 'edge') {
-          sdpLines.splice(i, 1);
-          i -= 1;
-          continue;
-        } else if (direction === 'remote' || sessionDescription.type === HANDSHAKE_PROGRESS.ANSWER) {
+        if (direction === 'remote' || sessionDescription.type === HANDSHAKE_PROGRESS.ANSWER) {
           const parts = sdpLines[i].split(' ');
           parts[1] = 0;
           sdpLines[i] = parts.join(' ');
@@ -177,14 +173,13 @@ const handleSDPConnectionSettings = (targetMid, sessionDescription, roomKey, dir
     }
   }
 
-  // Append empty space below
-  if (window.webrtcDetectedBrowser !== 'edge') {
-    if (!sdpLines[sdpLines.length - 1].replace(/\n|\r|\s/gi, '')) {
-      sdpLines[sdpLines.length - 1] = '';
-    } else {
-      sdpLines.push('');
-    }
+
+  if (!sdpLines[sdpLines.length - 1].replace(/\n|\r|\s/gi, '')) {
+    sdpLines[sdpLines.length - 1] = '';
+  } else {
+    sdpLines.push('');
   }
+
 
   logger.log.INFO([targetMid, 'RTCSessionDesription', sessionDescription.type, 'Handling connection lines and direction ->'], settings);
 

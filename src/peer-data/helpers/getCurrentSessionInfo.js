@@ -13,7 +13,7 @@ import { SDK_VERSION } from '../../constants';
 const getCurrentSessionInfo = (room) => {
   const state = Skylink.getSkylinkState(room.id);
   const initOptions = Skylink.getInitOptions();
-  const { AdapterJS } = window;
+  const { AdapterJS, navigator } = window;
   const { enableDataChannel, codecParams } = initOptions;
   const { roomName } = room;
   const {
@@ -40,8 +40,8 @@ const getCurrentSessionInfo = (room) => {
     agent: {
       name: AdapterJS.webrtcDetectedBrowser,
       version: AdapterJS.webrtcDetectedVersion,
-      os: window.navigator.platform,
-      pluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+      os: navigator.platform,
+      pluginVersion: null,
       SMProtocolVersion,
       DTProtocolVersion,
       SDKVersion: SDK_VERSION,

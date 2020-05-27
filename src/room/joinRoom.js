@@ -7,6 +7,7 @@ import * as constants from '../constants';
 import SkylinkApiResponse from '../models/api-response';
 import SkylinkState from '../models/skylink-state';
 import MediaStream from '../media-stream/index';
+import { isAgent } from '../utils/helpers';
 
 /**
  * @description Method that starts the Room Session.
@@ -18,7 +19,7 @@ import MediaStream from '../media-stream/index';
  * @private
  */
 const joinRoom = (options = {}, prefetchedStream) => new Promise((resolve, reject) => {
-  const { navigator, AdapterJS } = window;
+  const { navigator } = window;
   const apiServer = new SkylinkAPIServer();
   const signalingServer = new SkylinkSignalingServer();
   let initOptions = Skylink.getInitOptions();
@@ -66,7 +67,7 @@ const joinRoom = (options = {}, prefetchedStream) => new Promise((resolve, rejec
         } else {
           // If no audio is requested for Safari, audio will not be heard on the Safari peer even if the remote peer has audio. Workaround to
           // request media access but not add the track to the peer connection. Does not seem to apply to video.
-          if (AdapterJS.webrtcDetectedBrowser === constants.BROWSER_AGENT.SAFARI) {
+          if (isAgent(constants.BROWSER_AGENT.SAFARI)) {
             navigator.mediaDevices.getUserMedia({ audio: true })
               .then(() => signalingServer.joinRoom(room));
           } else {

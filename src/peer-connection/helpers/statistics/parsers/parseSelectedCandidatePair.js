@@ -1,6 +1,7 @@
 /* eslint-disable prefer-destructuring */
 import parsers from './index';
 import { BROWSER_AGENT } from '../../../../constants';
+import { isAgent } from '../../../../utils/helpers';
 
 const formatCanTypeFn = (type) => {
   if (type === 'relay') {
@@ -27,21 +28,20 @@ const formatCanTypeFn = (type) => {
 const parseSelectedCandidatePair = (roomState, output, type, value, peerConnection, peerId, isAutoBwStats) => {
   const { peerBandwidth, peerStats } = roomState;
   const { raw, selectedCandidatePair } = output;
-  const { AdapterJS } = window;
 
   const keys = Object.keys(output.raw);
   let transportStats = null;
   let selectedLocalCandidateId = null;
   let selectedRemoteCandidateId = null;
 
-  if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.CHROME) {
+  if (isAgent(BROWSER_AGENT.CHROME)) {
     // selectedCandidatePairId can only be obtained from RTCTransportStats and is needed to identify selected candidate pair
     for (let i = 0; i < keys.length; i += 1) {
       if (raw[keys[i]].type === 'transport') {
         transportStats = raw[keys[i]];
       }
     }
-  } else if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.FIREFOX) {
+  } else if (isAgent(BROWSER_AGENT.FIREFOX)) {
     // FF has not implemented RTCTransportStats report and uses .selected available in the  'candidate-pair' stats report
     transportStats = {};
   }

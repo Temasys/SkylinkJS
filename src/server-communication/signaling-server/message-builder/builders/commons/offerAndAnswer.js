@@ -1,25 +1,18 @@
-/* eslint-disable no-unused-vars */
 import Skylink from '../../../../../index';
 import PeerData from '../../../../../peer-data/index';
-import SessionDescription from '../../../../../session-description';
 import logger from '../../../../../logger';
 import handleNegotiationStats from '../../../../../skylink-stats/handleNegotiationStats';
 import messages from '../../../../../messages';
 import { HANDSHAKE_PROGRESS } from '../../../../../constants';
 import PeerMedia from '../../../../../peer-media/index';
-import { handshakeProgress } from '../../../../../skylink-events';
-import { dispatchEvent } from '../../../../../utils/skylinkEventManager';
-import PeerConnection from '../../../../../peer-connection/index';
 
 const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, restartOfferMsg) => {
   // TODO: Full implementation to be done from _setLocalAndSendMessage under peer-handshake.js
   const state = Skylink.getSkylinkState(roomState.room.id);
-  // const initOptions = Skylink.getInitOptions();
   const {
     peerConnections, peerConnectionConfig, bufferedLocalOffer, peerPriorityWeight, room,
   } = state;
   const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = messages;
-  const { AdapterJS } = window;
   const peerConnection = peerConnections[targetMid];
   const sd = {
     type: sessionDescription.type,
@@ -35,11 +28,6 @@ const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, res
   // sd.sdp = SessionDescription.handleSDPConnectionSettings(targetMid, sd, roomState.room.id, 'local');
   // sd.sdp = SessionDescription.removeSDPREMBPackets(targetMid, sd, roomState.room.id);
 
-  if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
-    SessionDescription.setOriginalDTLSRole(state, sd, false);
-    sd.sdp = SessionDescription.modifyDTLSRole(state, sessionDescription);
-  }
-
   if (peerConnectionConfig.disableBundle) {
     sd.sdp = sd.sdp.replace(/a=group:BUNDLE.*\r\n/gi, '');
   }
@@ -54,7 +42,7 @@ const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, res
 
     const offer = {
       type: sd.type,
-      sdp: sd.sdp, // SessionDescription.renderSDPOutput(targetMid, sd, roomState.room.id),
+      sdp: sd.sdp,
       mid: state.user.sid,
       target: targetMid,
       rid: roomState.room.id,
@@ -64,7 +52,7 @@ const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, res
     };
 
     // Merging Restart and Offer messages. The already present keys in offer message will not be overwritten.
-    // Only news keys from restartOfferMsg are added.
+    // Only new keys from restartOfferMsg are added.
     if (restartOfferMsg && Object.keys(restartOfferMsg).length) {
       const keys = Object.keys(restartOfferMsg);
       const currentMessageKeys = Object.keys(offer);

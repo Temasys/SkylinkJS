@@ -38,26 +38,13 @@ const ontrack = (RTCPeerConnection, targetMid, currentRoomState, rtcTrackEvent) 
   const {
     peerConnections, room, hasMCU,
   } = state;
-  const { receiver } = rtcTrackEvent;
-  const { AdapterJS } = window;
   const stream = rtcTrackEvent.streams[0];
-
-  // eslint-disable-next-line prefer-const
-  let { transceiver, track } = rtcTrackEvent;
+  const { transceiver, track } = rtcTrackEvent;
   let peerId = targetMid;
 
   if (!stream) {
     logger.log.WARN('ontrack stream is null');
     return null;
-  }
-
-  if (AdapterJS.webrtcDetectedBrowser === 'safari') {
-    const transceivers = peerConnections[targetMid].getTransceivers();
-    transceivers.forEach((tscvr) => {
-      if (tscvr.receiver.track.id === receiver.track.id) {
-        transceiver = tscvr;
-      }
-    });
   }
 
   if (transceiver.mid === null) {

@@ -13,8 +13,6 @@ import removeSDPFirefoxH264Pref from './removeSDPFirefoxH264Pref';
 import renderSDPOutput from './renderSDPOutput';
 import getSDPICECandidates from './getSDPICECandidates';
 import getSDPSelectedCodec from './getSDPSelectedCodec';
-import setOriginalDTLSRole from './setOriginalDTLSRole';
-import modifyDTLSRole from './modifyDTLSRole';
 import getTransceiverMid from './getTransceiverMid';
 
 const helpers = {
@@ -33,8 +31,6 @@ const helpers = {
   renderSDPOutput,
   getSDPICECandidates,
   getSDPSelectedCodec,
-  setOriginalDTLSRole,
-  modifyDTLSRole,
   getTransceiverMid,
 };
 

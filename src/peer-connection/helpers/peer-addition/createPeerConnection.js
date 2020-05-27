@@ -6,13 +6,12 @@ import logger from '../../../logger';
 import callbacks from './callbacks/index';
 import { dispatchEvent } from '../../../utils/skylinkEventManager';
 import { handshakeProgress } from '../../../skylink-events';
-import { updateRemoveStream } from '../../../compatibility/index';
 import MESSAGES from '../../../messages';
+import { isAgent } from '../../../utils/helpers';
 
 const createNativePeerConnection = (targetMid, constraints, optional, hasScreenShare, currentRoom) => {
   const initOptions = Skylink.getInitOptions();
   const state = Skylink.getSkylinkState(currentRoom.id);
-  const { AdapterJS } = window;
   logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.CREATE_NEW], {
     constraints,
     optional,
@@ -65,10 +64,6 @@ const createNativePeerConnection = (targetMid, constraints, optional, hasScreenS
 
   Skylink.setSkylinkState(state, currentRoom.id);
 
-  if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
-    rtcPeerConnection.removeStream = updateRemoveStream(rtcPeerConnection);
-  }
-
   /* CALLBACKS */
   rtcPeerConnection.ontrack = callbacks.ontrack.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.ondatachannel = callbacks.ondatachannel.bind(rtcPeerConnection, ...callbackExtraParams);
@@ -77,7 +72,7 @@ const createNativePeerConnection = (targetMid, constraints, optional, hasScreenS
   rtcPeerConnection.onsignalingstatechange = callbacks.onsignalingstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.onicegatheringstatechange = callbacks.onicegatheringstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
 
-  if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE) {
+  if (isAgent(BROWSER_AGENT.REACT_NATIVE)) {
     rtcPeerConnection.onsenderadded = callbacks.onsenderadded.bind(rtcPeerConnection, ...callbackExtraParams);
     rtcPeerConnection.onremovetrack = callbacks.onremovetrack.bind(rtcPeerConnection, targetMid, state.room, false);
   }

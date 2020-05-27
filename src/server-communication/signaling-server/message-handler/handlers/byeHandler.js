@@ -46,8 +46,8 @@ const processPeerConnectionState = (roomState, peerId) => {
   state.peerConnections[peerId].signalingStateClosed = true;
 
   dispatchEvent(peerConnectionState({
-    peerId,
     state: PEER_CONNECTION_STATE.CLOSED,
+    peerId,
   }));
 };
 
@@ -67,8 +67,8 @@ const processIceConnectionState = (roomState, peerId) => {
   new HandleIceConnectionStats().send(state.room.id, peerId, roomState);
 
   dispatchEvent(iceConnectionState({
-    peerId,
     state: ICE_CONNECTION_STATE.CLOSED,
+    peerId,
   }));
 };
 
@@ -84,8 +84,8 @@ const closePeerConnection = (roomKey, peerId) => {
 
   roomState.peerConnections[peerId].close();
 
-  // Polyfill for safari 11 "closed" event not triggered for "iceConnectionState" and "signalingState".
-  if (isAgent(BROWSER_AGENT.SAFARI) && isVersion(11)) {
+  // Polyfill for safari 11 and above "closed" event not triggered for "iceConnectionState" and "signalingState".
+  if (isAgent(BROWSER_AGENT.SAFARI) && isVersion(10, '>')) {
     processPeerConnectionState(roomState, peerId);
     processIceConnectionState(roomState, peerId);
   }

@@ -51,12 +51,7 @@ const dispatchEventsToLocalEnd = (roomState, streams) => {
 };
 
 const restartFn = (roomState, streams, resolve, reject) => {
-  const { AdapterJS } = window;
   const { peerConnections, hasMCU } = roomState;
-
-  if (AdapterJS.webrtcDetectedBrowser === 'edge') {
-    reject(new Error(MESSAGES.PEER_CONNECTION.refresh_no_edge_support));
-  }
 
   try {
     dispatchEventsToLocalEnd(roomState, streams);
@@ -129,15 +124,14 @@ const sendStream = (roomState, options = null) => new Promise((resolve, reject) 
   }
 
   const { inRoom } = roomState;
-  const { AdapterJS } = window;
-  const isNotObjOrNullOrPlugin = (!isAObj(options) || options === null) && !(AdapterJS && AdapterJS.WebRTCPlugin && AdapterJS.WebRTCPlugin.plugin);
+  const isNotObjOrNull = (!isAObj(options) || options === null);
 
   if (!inRoom) {
     logger.log.WARN(MESSAGES.ROOM.ERRORS.NOT_IN_ROOM);
     return reject(new Error(`${MESSAGES.ROOM.ERRORS.NOT_IN_ROOM}`));
   }
 
-  if (isNotObjOrNullOrPlugin) {
+  if (isNotObjOrNull) {
     return reject(new Error(`${MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS} ${options}`));
   }
 

@@ -13,7 +13,7 @@ export const getEnterRoomMessage = (roomState) => {
     user, peerPriorityWeight, enableIceRestart, hasMCU,
   } = state;
   const { enableDataChannel } = initOptions;
-  const { AdapterJS } = window;
+  const { AdapterJS, navigator } = window;
   const userInfo = PeerData.getUserInfo(room);
   const enterMsg = {
     type: SIG_MESSAGE_TYPE.ENTER,
@@ -21,11 +21,11 @@ export const getEnterRoomMessage = (roomState) => {
     rid: room.id,
     agent: AdapterJS.webrtcDetectedBrowser,
     version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
-    os: window.navigator.platform,
+    os: navigator.platform,
     userInfo,
     receiveOnly: PeerData.getCurrentSessionInfo(room).config.receiveOnly,
     weight: peerPriorityWeight,
-    temasysPluginVersion: AdapterJS.WebRTCPlugin.plugin ? AdapterJS.WebRTCPlugin.plugin.VERSION : null,
+    temasysPluginVersion: null,
     enableDataChannel,
     enableIceRestart,
     SMProtocolVersion: SM_PROTOCOL_VERSION,

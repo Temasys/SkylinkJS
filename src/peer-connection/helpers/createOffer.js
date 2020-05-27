@@ -50,7 +50,6 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
   const { enableDataChannel } = initOptions;
   const {
     peerConnections,
-    // sdpSettings,
     hasMCU,
     enableIceRestart,
     peerInformations,
@@ -58,7 +57,6 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
     peerConnStatus,
     dataChannels,
   } = state;
-  const { AdapterJS } = window;
   const peerConnection = peerConnections[targetMid];
 
   const offerConstraints = {
@@ -100,14 +98,7 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
   Skylink.setSkylinkState(state, currentRoom.id);
 
   return new Promise((resolve, reject) => {
-    peerConnection.createOffer(AdapterJS.webrtcDetectedType === 'plugin' ? {
-      mandatory: {
-        OfferToReceiveAudio: offerConstraints.offerToReceiveAudio,
-        OfferToReceiveVideo: offerConstraints.offerToReceiveVideo,
-        iceRestart: offerConstraints.iceRestart,
-        voiceActivityDetection: offerConstraints.voiceActivityDetection,
-      },
-    } : offerConstraints)
+    peerConnection.createOffer(offerConstraints)
       .then(offer => onOfferCreated(resolve, targetMid, state, restartOfferMsg, offer))
       .catch(error => onOfferFailed(reject, targetMid, state, error));
   });

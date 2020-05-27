@@ -10,6 +10,7 @@ const MESSAGES = {
       SOCKET_CREATE_FAILED: 'Failed creating socket connection object ->',
       SOCKET_ERROR_ABORT: 'Reconnection aborted as the connection timed out or there no more available ports, transports and final attempts left',
     },
+    INCOMPATIBLE_BROWSER: 'Incompatible browser agent detected',
     INFO: {
       API_SUCCESS: 'Promise resolved: APP Authenticated Successfully!',
     },

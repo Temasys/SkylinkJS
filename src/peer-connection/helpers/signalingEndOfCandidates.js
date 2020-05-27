@@ -2,8 +2,6 @@ import Skylink from '../../index';
 import * as constants from '../../constants';
 import messages from '../../messages';
 import logger from '../../logger';
-import IceCandidate from '../../ice-connection';
-import { isLowerThanVersion } from '../../utils/helpers';
 import { dispatchEvent } from '../../utils/skylinkEventManager';
 import { candidatesGathered } from '../../skylink-events';
 
@@ -19,9 +17,7 @@ const signalingEndOfCandidates = (targetMid, roomState) => {
   const peerEndOfCandidatesCounter = state.peerEndOfCandidatesCounter[targetMid];
   const peerConnection = state.peerConnections[targetMid];
   const peerCandidatesQueue = state.peerCandidatesQueue[targetMid];
-  const peerConnectionConfig = state.peerConnectionConfig[targetMid];
   const gatheredCandidates = state.gatheredCandidates[targetMid];
-  const { AdapterJS, RTCIceCandidate } = window;
   const { TAGS } = constants;
   const { ICE_CONNECTION } = messages;
 
@@ -47,36 +43,6 @@ const signalingEndOfCandidates = (targetMid, roomState) => {
     peerEndOfCandidatesCounter.hasSet = true;
 
     try {
-      if (AdapterJS.webrtcDetectedBrowser === 'edge') {
-        let mLineCounter = -1;
-        const addedMids = [];
-        const sdpLines = peerConnection.remoteDescription.sdp.split('\r\n');
-        let rejected = false;
-
-        for (let i = 0; i < sdpLines.length; i += 1) {
-          if (sdpLines[i].indexOf('m=') === 0) {
-            rejected = sdpLines[i].split(' ')[1] === '0';
-            mLineCounter += 1;
-          } else if (sdpLines[i].indexOf('a=mid:') === 0 && !rejected) {
-            const mid = sdpLines[i].split('a=mid:')[1] || '';
-            if (mid && addedMids.indexOf(mid) === -1) {
-              addedMids.push(mid);
-              IceCandidate.addIceCandidate(targetMid, `endofcan-${(new Date()).getTime()}`, 'endOfCandidates', new RTCIceCandidate({
-                sdpMid: mid,
-                sdpMLineIndex: mLineCounter,
-                candidate: 'candidate:1 1 udp 1 0.0.0.0 9 typ endOfCandidates',
-              }), state);
-              // Start breaking after the first add because of max-bundle option
-              if (peerConnectionConfig.bundlePolicy === constants.BUNDLE_POLICY.MAX_BUNDLE) {
-                break;
-              }
-            }
-          }
-        }
-      } else if (AdapterJS && !isLowerThanVersion(AdapterJS.VERSION, '0.14.0')) {
-        peerConnection.addIceCandidate(null);
-      }
-
       if (gatheredCandidates) {
         const candidatesLength = {
           expected: peerEndOfCandidatesCounter.expectedLen || 0,

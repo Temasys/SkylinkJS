@@ -10,7 +10,6 @@ import muteStreams from './muteStreams';
 import sendStream from './sendStream';
 import getStreamSources from './getStreamSources';
 import getStreams from './getStreams';
-import getScreenSources from './getScreenSources';
 import updateStreamsMediaStatus from './updateStreamsMediaStatus';
 import updateRemoteStreams from './updateRemoteStreams';
 import retrieveVideoStreams from './retrieveVideoStreams';
@@ -23,7 +22,7 @@ import onStreamAccessSuccess from './onStreamAccessSuccess';
  * @namespace MediaStreamHelpers
  * @description All helper and utility functions for <code>{@link MediaStream}</code> class are listed here.
  * @private
- * @type {{parseMediaOptions, processStreamInState, parseStreamSettings, prepMediaAccessRequest, addLocalMediaStreams, onRemoteTrackAdded, onStreamAccessError, buildPeerStreamsInfo, replaceTrack, muteStreams, getStreamSources, sendStream, getStreams, getScreenSources, updateStreamsMediaStatus, updateRemoteStreams, retrieveVideoStreams, splitAudioAndVideoStream, processNewStream, updateStreamsMutedSettings, onStreamAccessSuccess}}
+ * @type {{parseMediaOptions, processStreamInState, parseStreamSettings, prepMediaAccessRequest, addLocalMediaStreams, onRemoteTrackAdded, onStreamAccessError, buildPeerStreamsInfo, replaceTrack, muteStreams, getStreamSources, sendStream, getStreams, updateStreamsMediaStatus, updateRemoteStreams, retrieveVideoStreams, splitAudioAndVideoStream, processNewStream, updateStreamsMutedSettings, onStreamAccessSuccess}}
  */
 const helpers = {
   parseMediaOptions,
@@ -38,7 +37,6 @@ const helpers = {
   sendStream,
   getStreamSources,
   getStreams,
-  getScreenSources,
   updateStreamsMediaStatus,
   updateRemoteStreams,
   retrieveVideoStreams,

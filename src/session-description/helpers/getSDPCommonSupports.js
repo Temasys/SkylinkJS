@@ -1,10 +1,10 @@
 import Skylink from '../../index';
 import helpers from './index';
+import { isAgent } from '../../utils/helpers';
 
 const getSDPCommonSupports = (targetMid, sessionDescription = null, roomKey) => {
   const state = Skylink.getSkylinkState(roomKey);
   const offer = { audio: false, video: false };
-  const { AdapterJS } = window;
   const { currentCodecSupport, peerInformations } = state;
   const { beSilentOnParseLogs } = Skylink.getInitOptions();
 
@@ -16,7 +16,7 @@ const getSDPCommonSupports = (targetMid, sessionDescription = null, roomKey) => 
     if (targetMid) {
       const peerAgent = ((peerInformations[targetMid] || {}).agent || {}).name || '';
 
-      if (AdapterJS.webrtcDetectedBrowser === peerAgent) {
+      if (isAgent(peerAgent)) {
         offer.video = Object.keys(currentCodecSupport.video).length > 0;
         offer.audio = Object.keys(currentCodecSupport.audio).length > 0;
       }
