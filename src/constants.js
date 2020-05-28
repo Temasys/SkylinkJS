@@ -1181,13 +1181,13 @@ export const SM_PROTOCOL_VERSION = '2.1.0';
  * @readOnly
  * @memberOf SkylinkConstants
  * @since 0.5.10
+ * @private
  */
 export const VIDEO_CODEC = {
   AUTO: 'auto',
   VP8: 'VP8',
   H264: 'H264',
   VP9: 'VP9',
-  // H264UC: 'H264UC'
 };
 
 /**
@@ -1219,6 +1219,7 @@ export const VIDEO_CODEC = {
  * @readOnly
  * @memberOf SkylinkConstants
  * @since 0.5.10
+ * @private
  */
 export const AUDIO_CODEC = {
   AUTO: 'auto',
@@ -1228,7 +1229,6 @@ export const AUDIO_CODEC = {
   G722: 'G722',
   PCMU: 'PCMU',
   PCMA: 'PCMA',
-  // SILK: 'SILK'
 };
 
 /**

@@ -2,7 +2,7 @@
  * <blockquote class="info">
  *   Note that some of these parameters are mainly used for experimental or debugging purposes. Toggling any of
  *   these feature may result in disruptions in connectivity.</blockquote>
- * @public
+ * @private
  * @typedef {Object} codecParams
  * @property {JSON} [video] - The video codecs parameters to configure.
  * @property {JSON} [video.h264] - The H264 video codec parameters to configure.
@@ -84,7 +84,7 @@
  *   When not provided, the default browser configuration is used.
  * @property {number} [minptime] <blockquote class="info">
  *   Note that this parameter should only be used for debugging purposes only.</blockquote>
- *   The OPUS audio codec receiving audio data decoder minimum length of time in milleseconds should be
+ *   The OPUS audio codec receiving audio data decoder minimum length of time in milliseconds should be
  *   encapsulated in a single received encoded audio data packet.
  *   This value must be between <code>3</code> to <code>120</code>
  *   When not provided, the default browser configuration is used.
@@ -121,13 +121,7 @@
  * @property {boolean} [forceTURN=false] The flag if Peer connections should enforce
  *   connections over the TURN server.
  *   <blockquote>This overrides <code>enableTURNServer</code> value to <code>true</code> and
- *   <code>enableSTUNServer</code> value to <code>false</code>, <code>filterCandidatesType.host</code>
- *   value to <code>true</code>, <code>filterCandidatesType.srflx</code> value to <code>true</code> and
- *   <code>filterCandidatesType.relay</code> value to <code>false</code>.
- *   Note that currently for MCU enabled Peer connections, the <code>filterCandidatesType</code>
- *   configuration is not honoured as Peers connected with MCU is similar as a forced TURN connection. The flags
- *   will act as if the value is <code>false</code> and ICE candidates will never be filtered regardless of the
- *   <code>filterCandidatesType</code> configuration.</blockquote>
+ *   <code>enableSTUNServer</code> value to <code>false</code>.
  * @property {boolean} [TURNServerTransport] <blockquote class="info">
  *   Note that configuring the protocol may not necessarily result in the desired network transports protocol
  *   used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.
@@ -137,22 +131,12 @@
  *   </blockquote> The option to configure the <code>?transport=</code>
  *   query parameter in TURN ICE servers when constructing a Peer connections. When not provided, its value is <code>ANY</code>.
  *   {@link Skylink.TURN_TRANSPORT}
- * @property {boolean} [disableVideoFecCodecs=false] <blockquote class="info">
- *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled,
- *   and to prevent connectivity issues, these codecs will not be removed for MCU enabled Peer connections.
- *   </blockquote> The flag if video FEC (Forward Error Correction)
- *   codecs like ulpfec and red should be removed in sending session descriptions.
- *   This can be useful for debugging purposes to prevent redundancy and overheads in RTP encoding.
  * @property {boolean} [disableComfortNoiseCodec=false] <blockquote class="info">
  *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
  *   </blockquote> The flag if audio
  *   <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
  *   in sending session descriptions.
  *   This can be useful for debugging purposes to test preferred audio quality and feedback.
- * @property {boolean} [disableREMB=false] <blockquote class="info">
- *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
- *   it may cause disruptions in connections or connectivity issues when toggled. </blockquote>
- *   The flag if video REMB feedback packets should be disabled in sending session descriptions.
  * @property {JSON} [credentials] <blockquote class="info">
  *   Note that we strongly recommend developers to return the <code>credentials.duration</code>,
  *   <code>credentials.startDateTime</code> and <code>defaultRoom</code> and generate the
@@ -189,29 +173,6 @@
  *   during request to Auth server and socket connections to Signaling server
  *   when accessing <code>window.location.protocol</code> value is <code>"http:"</code>.
  *   By default, <code>"https:"</code> protocol connections uses HTTPS connections.
- * @property {String|JSON} [audioCodec] <blockquote class="info">
- *   Note that if the audio codec is not supported, the SDK will not configure the local <code>"offer"</code> or
- *   <code>"answer"</code> session description to prefer the codec.
- *   Note that for Edge browsers, this value is set as <code>OPUS</code> due to its supports.</blockquote>
- *   The option to configure the preferred audio codec to use to encode sending audio data when available for Peer connection.
- * - When not provided, its value is <code>AUTO</code>.
- *   [Rel: Skylink.AUDIO_CODEC]
- * @property {String} audioCodec.codec The audio codec to prefer to encode sending audio data when available.
- *   The value must not be <code>AUTO</code>.
- *   [Rel: Skylink.AUDIO_CODEC]
- * @property {number} [audioCodec.samplingRate] The audio codec sampling to prefer to encode sending audio data when available.
- * @property {number} [audioCodec.channels] The audio codec channels to prefer to encode sending audio data when available.
- * @property {String|JSON} [videoCodec] <blockquote class="info">
- *   Note that if the video codec is not supported, the SDK will not configure the local <code>"offer"</code> or
- *   <code>"answer"</code> session description to prefer the codec.
- *   Note that for Edge browsers, this value is set as <code>H264</code> due to its supports.</blockquote>
- *   The option to configure the preferred video codec to use to encode sending video data when available for Peer connection.
- * - When not provided, its value is <code>AUTO</code>.
- *   [Rel: Skylink.VIDEO_CODEC]
- * @property {String} videoCodec.codec The video codec to prefer to encode sending audio data when available.
- *   The value must not be <code>AUTO</code>.
- *   [Rel: Skylink.VIDEO_CODEC]
- * @property {number} [videoCodec.samplingRate] The video codec sampling to prefer to encode sending video data when available.
  * @property {number} [socketTimeout=7000] The timeout for each attempts for socket connection
  *   with the Signaling server to indicate that connection has timed out and has failed to establish.
  *   Note that the minimum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.
@@ -224,12 +185,6 @@
  *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports and
  *   only port <code>3478</code> is used.</blockquote>
  *   The flag if TURNS protocol should be used when <code>enableTURNServer</code> is enabled.
- * @property {JSON} [filterCandidatesType] <blockquote class="info">
- *   Note that this a debugging feature and there might be connectivity issues when toggling these flags.
- *   </blockquote> The configuration options to filter the type of ICE candidates sent and received.
- * @property {boolean} [filterCandidatesType.host=false] The flag if local network ICE candidates should be filtered out.
- * @property {boolean} [filterCandidatesType.srflx=false] The flag if STUN ICE candidates should be filtered out.
- * @property {boolean} [filterCandidatesType.relay=false] The flag if TURN ICE candidates should be filtered out.
  * @property {JSON} [throttleIntervals] The configuration options to configure the throttling method timeouts.
  * @property {number} [throttleIntervals.shareScreen=10000] The interval timeout for
  *   {@link Skylink#shareScreen} throttling in milliseconds.
@@ -253,7 +208,6 @@
  * @property {number} socketServer.ports.#index The Signaling server port to fallback and use for debugging purposes.
  * @property {String} [socketServer.protocol] The Signaling server protocol for debugging purposes to use.
  *   If not defined, it will use the default protocol specified.
- * @property {codecParams} [codecParams] The audio and video codecs parameters to configure.
  * @property {boolean} [beSilentOnStatsLogs=false] The flag if all logs triggered by the statistics module should be silent.
  * @property {boolean} [beSilentOnParseLogs=false] The flag if media and codec parsing logs should be silent.
  */
@@ -460,51 +414,7 @@
  *   The flag if <code>getUserMedia()</code> should request for camera Stream to match exact requested values of
  *   <code>options.audio.deviceId</code> and <code>options.video.deviceId</code>, <code>options.video.resolution</code>
  *   and <code>options.video.frameRate</code> when provided.
- * @property {boolean|JSON} [options.audio=false]
- *    Note that the current Edge browser implementation does not support the <code>options.audio.optional</code>,
- *    <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.
- *    The audio configuration options.
- * @property {boolean} [options.audio.stereo=false] <b>Deprecation Warning!</b>
- *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code> and
- *   the <code>options.codecParams.audio.opus["sprop-stereo"]</code>
- *   parameter in the {@link initOptions} instead. If the
- *   <code>options.codecParams.audio.opus.stereo</code> or <code>options.codecParams.audio.opus["sprop-stereo"]</code>
- *   is configured, this overrides the <code>options.audio.stereo</code> setting.
- *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
- *   When not provided, the default browser configuration is used.
- * @property {boolean} [options.audio.usedtx] <b>Deprecation Warning!</b>
- *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
- *   parameter in the {@link initOptions} instead. If the
- *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
- *   <code>options.audio.stereo</code> setting.  Note that this feature might
- *   not work depending on the browser support and implementation.
- *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
- *   This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
- *   goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href="#method_joinRoom">
- *   <code>joinRoom()</code> method</a>.
- *   When not provided, the default browser configuration is used.
- * @property {boolean} [options.audio.useinbandfec] <b>Deprecation Warning!</b>
- *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.useinbandfec</code>
- *   parameter in the {@link initOptions} instead. If the
- *   <code>options.codecParams.audio.opus.useinbandfec</code> is configured, this overrides the
- *   <code>options.audio.useinbandfec</code> setting. Note that this parameter should only be used
- *   for debugging purposes only.
- *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
- *   (Forward Error Correction) when sending encoded audio data.
- *   This helps to reduce the harm of packet loss by encoding information about the previous packet loss.
- *   When not provided, the default browser configuration is used.
- * @property {number} [options.audio.maxplaybackrate] <b>Deprecation Warning!</b>
- *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.maxplaybackrate</code>
- *   parameter in the {@link initOptions} instead. If the
- *   <code>options.codecParams.audio.opus.maxplaybackrate</code> is configured, this overrides the
- *   <code>options.audio.maxplaybackrate</code> setting.  Note that this feature might
- *   not work depending on the browser support and implementation.
- *   Note that this parameter should only be used for debugging purposes only.
- *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
- *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
- *   would not encode at a higher sampling rate specified by this.
- *   This value must be between <code>8000</code> to <code>48000</code>.
- *   When not provided, the default browser configuration is used.
+ * @property {boolean|JSON} [options.audio=false] The audio configuration options.
  * @property {boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to

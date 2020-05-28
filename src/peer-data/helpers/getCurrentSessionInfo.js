@@ -1,6 +1,6 @@
 import clone from 'clone';
 import Skylink from '../../index';
-import { isAObj, isABoolean, isANumber } from '../../utils/helpers';
+import { isAObj } from '../../utils/helpers';
 import { SDK_VERSION } from '../../constants';
 
 /**
@@ -14,7 +14,7 @@ const getCurrentSessionInfo = (room) => {
   const state = Skylink.getSkylinkState(room.id);
   const initOptions = Skylink.getInitOptions();
   const { AdapterJS, navigator } = window;
-  const { enableDataChannel, codecParams } = initOptions;
+  const { enableDataChannel } = initOptions;
   const { roomName } = room;
   const {
     streamsMediaStatus,
@@ -84,25 +84,6 @@ const getCurrentSessionInfo = (room) => {
   }
 
   peerInfo.settings.data = enableDataChannel && sdpSettings.connection.data;
-
-  if (peerInfo.settings.audio && isAObj(peerInfo.settings.audio)) {
-    // Override the settings.audio.usedtx
-    if (isABoolean(typeof codecParams.audio.opus.stereo)) {
-      peerInfo.settings.audio.stereo = codecParams.audio.opus.stereo;
-    }
-    // Override the settings.audio.usedtx
-    if (isABoolean(codecParams.audio.opus.usedtx)) {
-      peerInfo.settings.audio.usedtx = codecParams.audio.opus.usedtx;
-    }
-    // Override the settings.audio.maxplaybackrate
-    if (isANumber(codecParams.audio.opus.maxplaybackrate)) {
-      peerInfo.settings.audio.maxplaybackrate = codecParams.audio.opus.maxplaybackrate;
-    }
-    // Override the settings.audio.useinbandfec
-    if (isABoolean(codecParams.audio.opus.useinbandfec)) {
-      peerInfo.settings.audio.useinbandfec = codecParams.audio.opus.useinbandfec;
-    }
-  }
 
   if (peerInfo.settings.video && isAObj(peerInfo.settings.video)) {
     peerInfo.settings.video.customSettings = {};

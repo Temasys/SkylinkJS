@@ -64,18 +64,11 @@ const handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote,
   }));
 };
 
+// modifying the remote description received
 const mungeSDP = (targetMid, sessionDescription, roomKey) => {
   const mungedSessionDescription = sessionDescription;
-  // modifying the remote description received
   // TODO: Below SDP methods needs to be implemented in the SessionDescription Class.
-  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPFilteredCandidates(targetMid, sessionDescriptionToSet, message.rid);
-  // sessionDescriptionToSet.sdp = SessionDescription.setSDPCodec(targetMid, sessionDescriptionToSet, message.rid);
   mungedSessionDescription.sdp = SessionDescription.setSDPBitrate(targetMid, mungedSessionDescription, roomKey);
-  // sessionDescriptionToSet.sdp = SessionDescription.setSDPCodecParams(targetMid, sessionDescriptionToSet, message.rid);
-  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPCodecs(targetMid, sessionDescriptionToSet, message.rid);
-  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPREMBPackets(targetMid, sessionDescriptionToSet, message.rid);
-  // sessionDescriptionToSet.sdp = SessionDescription.handleSDPConnectionSettings(targetMid, sessionDescriptionToSet, message.rid, 'remote');
-  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPUnknownAptRtx(targetMid, sessionDescriptionToSet, message.rid);
 
   // logger.log.INFO([targetMid, 'RTCSessionDescription', type, `Updated remote ${type} ->`], sessionDescriptionToSet.sdp);
   return mungedSessionDescription;
@@ -127,7 +120,7 @@ const setRemoteDescription = (room, targetMid, remoteDescription) => {
   const state = Skylink.getSkylinkState(room.id);
   const { peerConnections } = state;
   const { type } = remoteDescription;
-  const { STATS_MODULE, NEGOTIATION_PROGRESS } = MESSAGES;
+  const { STATS_MODULE } = MESSAGES;
   const peerConnection = peerConnections[targetMid];
   const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
 

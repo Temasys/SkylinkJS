@@ -95,8 +95,6 @@ const createPeerConnection = (params) => {
     cert,
     hasScreenShare,
   } = params;
-  const initOptions = Skylink.getInitOptions();
-  const { filterCandidatesType } = initOptions;
   const state = Skylink.getSkylinkState(currentRoom.id);
   const {
     peerConnectionConfig,
@@ -104,7 +102,7 @@ const createPeerConnection = (params) => {
   } = state;
   const constraints = {
     iceServers: state.room.connection.peerConfig.iceServers,
-    iceTransportPolicy: filterCandidatesType.host && filterCandidatesType.srflx && !filterCandidatesType.relay ? 'relay' : 'all',
+    iceTransportPolicy: 'all',
     bundlePolicy: peerConnectionConfig.bundlePolicy === BUNDLE_POLICY.NONE ? BUNDLE_POLICY.BALANCED : peerConnectionConfig.bundlePolicy,
     rtcpMuxPolicy: peerConnectionConfig.rtcpMuxPolicy,
     iceCandidatePoolSize: peerConnectionConfig.iceCandidatePoolSize,

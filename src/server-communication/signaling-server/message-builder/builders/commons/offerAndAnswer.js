@@ -21,13 +21,6 @@ const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, res
 
   peerConnection.processingLocalSDP = true;
 
-  // sd.sdp = SessionDescription.removeSDPFirefoxH264Pref(targetMid, sd, roomState.room.id);
-  // sd.sdp = SessionDescription.setSDPCodecParams(targetMid, sd, roomState.room.id);
-  // sd.sdp = SessionDescription.removeSDPUnknownAptRtx(targetMid, sd, roomState.room.id);
-  // sd.sdp = SessionDescription.removeSDPCodecs(targetMid, sd, roomState.room.id);
-  // sd.sdp = SessionDescription.handleSDPConnectionSettings(targetMid, sd, roomState.room.id, 'local');
-  // sd.sdp = SessionDescription.removeSDPREMBPackets(targetMid, sd, roomState.room.id);
-
   if (peerConnectionConfig.disableBundle) {
     sd.sdp = sd.sdp.replace(/a=group:BUNDLE.*\r\n/gi, '');
   }

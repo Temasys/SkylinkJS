@@ -18,7 +18,6 @@ import * as constants from '../../constants';
  */
 const onIceCandidate = (targetMid, candidate, currentRoom) => {
   const state = Skylink.getSkylinkState(currentRoom.id);
-  const initOptions = Skylink.getInitOptions();
   const peerConnection = state.peerConnections[targetMid];
   const signalingServer = new SignalingServer();
   let gatheredCandidates = state.gatheredCandidates[targetMid];
@@ -50,15 +49,6 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
       && peerConnection.localDescription.sdp.indexOf(`\r\na=mid:${candidate.sdpMid}\r\n`) > -1)) {
       logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CONNECTION.DROP_EOC], candidate);
       return null;
-    }
-
-    if (initOptions.filterCandidatesType[candidateType]) {
-      if (!(state.hasMCU && initOptions.forceTURN)) {
-        logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.FILTERED_CANDIDATE], candidate);
-        return null;
-      }
-
-      logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.FILTERING_FLAG_NOT_HONOURED], candidate);
     }
 
     if (!gatheredCandidates) {

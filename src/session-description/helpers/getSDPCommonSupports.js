@@ -9,7 +9,6 @@ const getSDPCommonSupports = (targetMid, sessionDescription = null, roomKey) => 
   const { beSilentOnParseLogs } = Skylink.getInitOptions();
 
   if (!targetMid || !(sessionDescription && sessionDescription.sdp)) {
-    // TODO: Implement getCodecsSupport inside room-init
     offer.video = !!(currentCodecSupport.video.h264 || currentCodecSupport.video.vp8);
     offer.audio = !!currentCodecSupport.audio.opus;
 

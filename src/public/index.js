@@ -470,23 +470,23 @@ class SkylinkPublicInterface {
    *   considered as <code>false</code> and the <code>settings.audio.exactConstraints</code>
    *   value is considered as <code>false</code>.
    * @property {Boolean} settings.audio.stereo - The flag if stereo band is configured
-   *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
+   *   when encoding audio codec is <code>OPUS</code> for receiving audio data.
    * @property {Boolean} [settings.audio.usedtx]
    *   Note that this feature might not work depending on the browser support and implementation.
    *   The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec
-   *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   is <code>OPUS</code> for sending audio data.
    *   This might help to reduce bandwidth it reduces the bitrate during silence or background noise.
    *   When not defined, the default browser configuration is used.
    * @property {Boolean} [settings.audio.useinbandfec]
    *   Note that this feature might not work depending on the browser support and implementation.
    *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) is
-   *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   configured when encoding audio codec is <code>OPUS</code> for sending audio data.
    *   This might help to reduce the harm of packet loss by encoding information about the previous packet.
    *   When not defined, the default browser configuration is used.
    * @property {Number} [settings.audio.maxplaybackrate]
    *   Note that this feature might not work depending on the browser support and implementation.
    *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
-   *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
+   *   <code>OPUS</code> for sending audio data.
    *   This value must be between <code>8000</code> to <code>48000</code>.
    *   When not defined, the default browser configuration is used.
    * @property {Boolean} settings.audio.echoCancellation - The flag if echo cancellation is enabled for audio tracks.
@@ -746,46 +746,6 @@ class SkylinkPublicInterface {
    *    Note that the current Edge browser implementation does not support the <code>options.audio.optional</code>,
    *    <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.</blockquote>
    *    The audio configuration options.
-   * @param {Boolean} [options.audio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
-   *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code> and
-   *   the <code>options.codecParams.audio.opus["sprop-stereo"]</code>
-   *   parameter in the {@link initOptions} instead. If the
-   *   <code>options.codecParams.audio.opus.stereo</code> or <code>options.codecParams.audio.opus["sprop-stereo"]</code>
-   *   is configured, this overrides the <code>options.audio.stereo</code> setting.</blockquote>
-   *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
-   *   When not provided, the default browser configuration is used.
-   * @param {Boolean} [options.audio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
-   *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
-   *   parameter in the {@link initOptions} instead. If the
-   *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
-   *   <code>options.audio.stereo</code> setting.  Note that this feature might
-   *   not work depending on the browser support and implementation.</blockquote>
-   *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
-   *   This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
-   *   goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in {@link Skylink#joinRoom|joinRoom} method.
-   *   When not provided, the default browser configuration is used.
-   * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info"><b>Deprecation Warning!</b>
-   *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.useinbandfec</code>
-   *   parameter in the {@link initOptions} instead. If the
-   *   <code>options.codecParams.audio.opus.useinbandfec</code> is configured, this overrides the
-   *   <code>options.audio.useinbandfec</code> setting. Note that this parameter should only be used
-   *   for debugging purposes only.</blockquote>
-   *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
-   *   (Forward Error Correction) when sending encoded audio data.
-   *   This helps to reduce the harm of packet loss by encoding information about the previous packet loss.
-   *   When not provided, the default browser configuration is used.
-   * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info"><b>Deprecation Warning!</b>
-   *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.maxplaybackrate</code>
-   *   parameter in the {@link initOptions} instead. If the
-   *   <code>options.codecParams.audio.opus.maxplaybackrate</code> is configured, this overrides the
-   *   <code>options.audio.maxplaybackrate</code> setting.  Note that this feature might
-   *   not work depending on the browser support and implementation.
-   *   Note that this parameter should only be used for debugging purposes only.</blockquote>
-   *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
-   *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
-   *   would not encode at a higher sampling rate specified by this.
-   *   This value must be between <code>8000</code> to <code>48000</code>.
-   *   When not provided, the default browser configuration is used.
    * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
    *   Providing the value as <code>false</code> sets <code>peerInfo.mediaStatus.audioMuted</code> to <code>1</code>,
    *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
