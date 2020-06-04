@@ -35,7 +35,7 @@ const createSocket = (params) => {
   const initOptions = Skylink.getInitOptions();
   const { config } = params;
   const { socketServer, socketTimeout, socketServerPath } = initOptions;
-  const { socketPorts } = new SkylinkApiResponse();
+  const { socketPorts } = new SkylinkApiResponse(params.roomKey);
   const socketConfig = retrieveConfig('SOCKET', { socketTimeout, socketServerPath });
 
   let ports = [];

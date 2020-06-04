@@ -2,8 +2,9 @@
 import logger from '../logger/index';
 import SkylinkRoom from './skylink-room';
 import SkylinkUser from './skylink-user';
+import { isAString } from '../utils/helpers';
 
-let apiResponseInstance = null;
+const apiResponseInstance = {};
 
 /**
  * @classdesc Class representing a Skylink API response.
@@ -13,8 +14,8 @@ let apiResponseInstance = null;
  */
 class SkylinkApiResponse {
   constructor(rawApiResponse) {
-    if (apiResponseInstance) {
-      return apiResponseInstance;
+    if (isAString(rawApiResponse) && apiResponseInstance[rawApiResponse]) {
+      return apiResponseInstance[rawApiResponse];
     }
 
     const {
@@ -30,6 +31,7 @@ class SkylinkApiResponse {
       hasMCU,
       ipSigserverPath,
       hasPersistentMessage,
+      room_key,
     } = rawApiResponse;
 
     if (!offer_constraints && !pc_constraints) {
@@ -94,12 +96,12 @@ class SkylinkApiResponse {
 
     this.hasPersistentMessage = hasPersistentMessage;
 
-    apiResponseInstance = this;
+    apiResponseInstance[room_key] = this;
   }
 
   // eslint-disable-next-line class-methods-use-this
-  deleteApiResponseInstance() {
-    apiResponseInstance = null;
+  deleteApiResponseInstance(roomKey) {
+    delete apiResponseInstance[roomKey];
   }
 }
 

@@ -6,7 +6,7 @@ const getJoinRoomMessage = (roomState) => {
   const { room, user } = roomState;
   const state = Skylink.getSkylinkState(room.id);
   const initOptions = Skylink.getInitOptions();
-  const apiResponse = new SkylinkApiResponse();
+  const apiResponse = new SkylinkApiResponse(room.id);
   return {
     type: SIG_MESSAGE_TYPE.JOIN_ROOM,
     uid: state.user.uid,

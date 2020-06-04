@@ -64,7 +64,7 @@ class SkylinkStates {
     new ScreenSharing(roomState).deleteScreensharingInstance(roomState.room);
     AsyncMessaging.deleteAsyncInstance(roomState.room);
     EncryptedMessaging.deleteEncryptedInstance(roomState.room);
-    new SkylinkApiResponse().deleteApiResponseInstance();
+    new SkylinkApiResponse(roomKey).deleteApiResponseInstance(roomKey);
   }
 }
 
