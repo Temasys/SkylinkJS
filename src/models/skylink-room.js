@@ -36,40 +36,22 @@ class SkylinkRoom {
     this.roomName = rawApiResponse.roomName;
     /**
      * The peer connection configuration
-     * @type {{mediaConstraints: any, peerConstraints: any, offerConstraints: any, peerConfig: {iceServers: Array}, sdpConstraints: {mandatory: {OfferToReceiveAudio: boolean, OfferToReceiveVideo: boolean}}}}
+     * @type {{mediaConstraints: any, peerConstraints: any, offerConstraints: any, peerConfig: {iceServers: Array}, sdpConstraints: {}}}
      */
     this.connection = {
       peerConstraints: JSON.parse(rawApiResponse.pc_constraints),
       offerConstraints: JSON.parse(rawApiResponse.offer_constraints),
-      sdpConstraints: {
-        mandatory: {
-          OfferToReceiveAudio: true,
-          OfferToReceiveVideo: true,
-        },
-      },
+      sdpConstraints: {},
       peerConfig: {
         iceServers: [],
       },
       mediaConstraints: JSON.parse(rawApiResponse.media_constraints),
     };
-  }
-
-  /**
-   * Get the ID/KEY of this room
-   * @return {String} id - The generated ID of the room
-   * @private
-   */
-  getRoomKey() {
-    return this.id;
-  }
-
-  /**
-   * Get the name of this room
-   * @return {String} roomName - The name of this room
-   * @private
-   */
-  getRoomName() {
-    return this.roomName;
+    /**
+     * Stores the flag that indicates if Room is locked.
+     * @type {boolean}
+     */
+    this.isLocked = false;
   }
 }
 

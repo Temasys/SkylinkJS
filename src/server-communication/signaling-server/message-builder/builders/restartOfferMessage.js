@@ -20,8 +20,6 @@ const restartOfferMessage = (roomKey, peerId, doIceRestart) => {
     userInfo: PeerData.getUserInfo(room),
     target: peerId,
     weight: peerPriorityWeight,
-    receiveOnly: PeerData.getCurrentSessionInfo(room).config.receiveOnly,
-    publishOnly: PeerData.getCurrentSessionInfo(room).config.publishOnly,
     enableDataChannel: initOptions.enableDataChannel,
     enableIceRestart,
     doIceRestart: doIceRestart === true && enableIceRestart && peerInformations[peerId]

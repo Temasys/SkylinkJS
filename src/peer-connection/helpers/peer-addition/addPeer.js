@@ -12,7 +12,6 @@ import handleIceGatheringStats from '../../../skylink-stats/handleIceGatheringSt
  * @param {String} params.targetMid - Peer's id
  * @param {Object} params.peerBrowser - Peer's user agent object
  * @param {RTCCertificate} params.cert - Represents a certificate that an RTCPeerConnection uses to authenticate.
- * @param {boolean} params.receiveOnly
  * @param {boolean} params.hasScreenshare - Is screenshare enabled
  * @memberOf PeerConnection.PeerConnectionHelpers
  */
@@ -23,7 +22,6 @@ const addPeer = (params) => {
     targetMid,
     peerBrowser,
     cert,
-    receiveOnly,
     hasScreenShare,
   } = params;
   const initOptions = Skylink.getInitOptions();
@@ -32,14 +30,8 @@ const addPeer = (params) => {
   const handleIceConnectionStats = new HandleIceConnectionStats();
 
   if (!peerConnections[targetMid]) {
-    state.peerConnStatus[targetMid] = {
-      connected: false,
-      init: false,
-    };
-
     logger.log.INFO([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
       peerBrowser,
-      receiveOnly,
       enableDataChannel: initOptions.enableDataChannel,
     });
 

@@ -2,6 +2,9 @@
 import logger from '../logger/index';
 import SkylinkRoom from './skylink-room';
 import SkylinkUser from './skylink-user';
+
+let apiResponseInstance = null;
+
 /**
  * @classdesc Class representing a Skylink API response.
  * @class SkylinkApiResponse
@@ -10,6 +13,10 @@ import SkylinkUser from './skylink-user';
  */
 class SkylinkApiResponse {
   constructor(rawApiResponse) {
+    if (apiResponseInstance) {
+      return apiResponseInstance;
+    }
+
     const {
       offer_constraints,
       pc_constraints,
@@ -86,6 +93,13 @@ class SkylinkApiResponse {
     };
 
     this.hasPersistentMessage = hasPersistentMessage;
+
+    apiResponseInstance = this;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  deleteApiResponseInstance() {
+    apiResponseInstance = null;
   }
 }
 

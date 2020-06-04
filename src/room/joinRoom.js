@@ -1,3 +1,4 @@
+import clone from 'clone';
 import Skylink from '../index';
 import { SkylinkAPIServer, SkylinkSignalingServer } from '../server-communication/index';
 import HandleClientStats from '../skylink-stats/handleClientStats';
@@ -8,6 +9,13 @@ import SkylinkApiResponse from '../models/api-response';
 import SkylinkState from '../models/skylink-state';
 import MediaStream from '../media-stream/index';
 import { isAgent } from '../utils/helpers';
+
+const buildCachedApiResponse = (skylinkApiResponse) => {
+  const cachedResponse = clone(skylinkApiResponse);
+  delete cachedResponse.room;
+  delete cachedResponse.user;
+  return cachedResponse;
+};
 
 /**
  * @description Method that starts the Room Session.
@@ -29,18 +37,16 @@ const joinRoom = (options = {}, prefetchedStream) => new Promise((resolve, rejec
   dispatchEvent(readyStateChange({
     readyState: constants.READY_STATE_CHANGE.LOADING,
     error: null,
-    room: roomName,
+    room: { roomName },
   }));
 
   apiServer.createRoom(roomName).then((result) => {
-    const { endpoint, response } = result;
+    const { response } = result;
     response.roomName = roomName;
     const skylinkApiResponse = new SkylinkApiResponse(response);
     initOptions = apiServer.enforceUserInitOptions(skylinkApiResponse);
     const skylinkState = new SkylinkState(initOptions);
-
-    skylinkState.userData = options.userData || '';
-    skylinkState.path = endpoint;
+    skylinkState.apiResponse = Object.freeze(buildCachedApiResponse(skylinkApiResponse));
     Skylink.setSkylinkState(skylinkState, roomName);
 
     apiServer.checkCodecSupport(skylinkState.room.id).then(() => {

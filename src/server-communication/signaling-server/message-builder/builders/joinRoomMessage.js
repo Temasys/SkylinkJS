@@ -1,23 +1,25 @@
 import Skylink from '../../../../index';
 import { SIG_MESSAGE_TYPE } from '../../../../constants';
+import SkylinkApiResponse from '../../../../models/api-response';
 
 const getJoinRoomMessage = (roomState) => {
-  const { room } = roomState;
+  const { room, user } = roomState;
   const state = Skylink.getSkylinkState(room.id);
   const initOptions = Skylink.getInitOptions();
+  const apiResponse = new SkylinkApiResponse();
   return {
     type: SIG_MESSAGE_TYPE.JOIN_ROOM,
     uid: state.user.uid,
-    cid: state.key,
+    cid: apiResponse.key,
     rid: room.id,
-    userCred: state.user.token,
-    timeStamp: state.user.timeStamp,
-    apiOwner: state.appKeyOwner,
+    userCred: user.token,
+    timeStamp: user.timeStamp,
+    apiOwner: apiResponse.appKeyOwner,
     roomCred: room.token,
     start: room.startDateTime,
     len: room.duration,
-    isPrivileged: state.isPrivileged,
-    autoIntroduce: state.autoIntroduce,
+    isPrivileged: apiResponse.isPrivileged,
+    autoIntroduce: apiResponse.autoIntroduce,
     key: initOptions.appKey,
   };
 };

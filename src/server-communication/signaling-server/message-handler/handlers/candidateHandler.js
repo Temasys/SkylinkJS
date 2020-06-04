@@ -14,7 +14,7 @@ import HandleIceCandidateStats from '../../../../skylink-stats/handleIceCandidat
  * @param {JSON} message
  * @memberOf SignalingMessageHandler
  * @returns {null}
- * @fires candidateProcessingState
+ * @fires CANDIDATE_PROCESSING_STATE
  */
 const candidateHandler = (message) => {
   const { candidate, mid, rid } = message;

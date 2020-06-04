@@ -27,7 +27,6 @@ class PeerConnectionStatistics {
      * @type {RTCPeerConnection}
      */
     this.peerConnection = this.roomState.peerConnections[peerId] || null;
-    this.peerConnStatus = this.roomState.peerConnStatus[peerId] || null;
     this.dataChannel = this.roomState.dataChannels[peerId] || null;
     this.peerId = peerId;
     this.roomKey = roomKey;
@@ -55,7 +54,6 @@ class PeerConnectionStatistics {
     };
     this.beSilentOnLogs = Skylink.getInitOptions().beSilentOnStatsLogs;
     this.beSilentOnParseLogs = Skylink.getInitOptions().beSilentOnParseLogs;
-    this.isAutoBwStats = false;
     this.bandwidth = null;
   }
 
@@ -73,7 +71,7 @@ class PeerConnectionStatistics {
       promiseResolve(this.output);
       return;
     }
-    const { peerBandwidth, peerStats, room } = this.roomState;
+    const { peerStats, room } = this.roomState;
     // TODO: Need to do full implementation of success function
     if (typeof stats.forEach === 'function') {
       stats.forEach((item, prop) => {
@@ -99,9 +97,9 @@ class PeerConnectionStatistics {
           case 'outbound-rtp':
           case 'inbound-rtp':
             if (type === 'inbound-rtp') {
-              parsers.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, this.isAutoBwStats, 'receiving');
+              parsers.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, 'receiving');
             } else {
-              parsers.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, this.isAutoBwStats, 'sending');
+              parsers.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, 'sending');
             }
             break;
           case 'certificate':
@@ -109,20 +107,16 @@ class PeerConnectionStatistics {
             break;
           case 'local-candidate':
           case 'remote-candidate':
-            parsers.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId, this.isAutoBwStats);
+            parsers.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId);
             break;
           case 'media-source':
-            parsers.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId, this.isAutoBwStats);
+            parsers.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId);
             break;
           default:
             // do nothing
         }
 
-        if (this.isAutoBwStats && !peerBandwidth[this.peerId][key]) {
-          peerBandwidth[this.peerId][key] = this.output.raw[key];
-        } else if (!this.isAutoBwStats && !peerStats[this.peerId][key]) {
-          peerStats[this.peerId][key] = this.output.raw[key];
-        }
+        peerStats[this.peerId][key] = this.output.raw[key];
 
         Skylink.setSkylinkState(this.roomState, room.id);
       });
@@ -160,7 +154,7 @@ class PeerConnectionStatistics {
    * @param beSilentOnLogs
    * @param isAutoBwStats
    * @return {Promise<statistics>}
-   * @fires getConnectionStatusStateChange
+   * @fires GET_CONNECTION_STATUS_STATE_CHANGE
    */
   // eslint-disable-next-line consistent-return
   getStatistics(beSilentOnLogs = false, isAutoBwStats = false) {
@@ -227,9 +221,8 @@ class PeerConnectionStatistics {
       sdp: (peerConnection.localDescription && peerConnection.localDescription.sdp) || '',
     };
 
-    this.output.connection.constraints = this.peerConnStatus ? this.peerConnStatus.constraints : null;
-    this.output.connection.optional = this.peerConnStatus ? this.peerConnStatus.optional : null;
-    this.output.connection.sdpConstraints = this.peerConnStatus ? this.peerConnStatus.sdpConstraints : null;
+    this.output.connection.constraints = this.peerConnection.constraints ? this.peerConnection.constraints : null;
+    this.output.connection.sdpConstraints = this.peerConnection.sdpConstraints ? this.peerConnection.sdpConstraints : null;
   }
 
   /**

@@ -310,9 +310,6 @@ class SkylinkPublicInterface {
 
   /**
    * @description Method that retrieves peer connection bandwidth and ICE connection stats.
-   * <blockquote class="info">
-   * Note that this is not well supported in the Edge browser.
-   * </blockquote>
    * @description Method that retrieves peer connection bandwidth and ICE connection stats.
    * @param {String} roomName - The room name.
    * @param {String|Array} [peerId] The target peer id to retrieve connection stats from.
@@ -456,86 +453,50 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @typedef {Object} customSettings
-   * @property {Object} settings - The peer stream and data settings.
-   * @property {Boolean|JSON} settings.data - The flag if peer has any data channel connections enabled.
+   * @typedef {Object} customSettings - The peer stream and data settings.
+   * @property {Boolean|JSON} data - The flag if peer has any data channel connections enabled.
    *   If <code>isSelf</code> value is <code>true</code>, this determines if user allows
    *   data channel connections, else if value is <code>false</code>, this determines if peer has any active
    *   data channel connections (where {@link SkylinkEvents.event:onDataChannelStateChanged|onDataChannelStateChangedEvent}
    *   triggers <code>state</code> as <code>OPEN</code> and <code>channelType</code> as
    *   <code>MESSAGING</code> for peer) with peer.
-   * @property {Boolean|JSON} settings.audio - The peer stream audio settings.
+   * @property {Boolean|JSON} audio - The peer stream audio settings keyed by stream id.
    *   When defined as <code>false</code>, it means there is no audio being sent from peer.
-   *   When defined as <code>true</code>, the <code>settings.audio.stereo</code> value is
-   *   considered as <code>false</code> and the <code>settings.audio.exactConstraints</code>
-   *   value is considered as <code>false</code>.
-   * @property {Boolean} settings.audio.stereo - The flag if stereo band is configured
+   * @property {Boolean} audio[streamId].stereo - The flag if stereo band is configured
    *   when encoding audio codec is <code>OPUS</code> for receiving audio data.
-   * @property {Boolean} [settings.audio.usedtx]
-   *   Note that this feature might not work depending on the browser support and implementation.
-   *   The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec
-   *   is <code>OPUS</code> for sending audio data.
-   *   This might help to reduce bandwidth it reduces the bitrate during silence or background noise.
-   *   When not defined, the default browser configuration is used.
-   * @property {Boolean} [settings.audio.useinbandfec]
-   *   Note that this feature might not work depending on the browser support and implementation.
-   *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) is
-   *   configured when encoding audio codec is <code>OPUS</code> for sending audio data.
-   *   This might help to reduce the harm of packet loss by encoding information about the previous packet.
-   *   When not defined, the default browser configuration is used.
-   * @property {Number} [settings.audio.maxplaybackrate]
-   *   Note that this feature might not work depending on the browser support and implementation.
-   *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
-   *   <code>OPUS</code> for sending audio data.
-   *   This value must be between <code>8000</code> to <code>48000</code>.
-   *   When not defined, the default browser configuration is used.
-   * @property {Boolean} settings.audio.echoCancellation - The flag if echo cancellation is enabled for audio tracks.
-   * @property {Array} [settings.audio.optional] The peer stream <code>navigator.getUserMedia()</code> API
-   *   <code>audio: { optional [..] }</code> property.
-   * @property {String} [settings.audio.deviceId] - The peer stream audio track source id of the device used.
-   * @property {Boolean} settings.audio.exactConstraints - The flag if peer stream audio track is sending exact
-   *   requested values of <code>settings.audio.deviceId</code> when provided.
-   * @property {Boolean|JSON} settings.video - The peer stream video settings.
+   * @property {Boolean} audio[streamId].echoCancellation - The flag if echo cancellation is enabled for audio tracks.
+   * @property {String} [audio[streamId].deviceId] - The peer stream audio track source id of the device used.
+   * @property {Boolean} audio[streamId].exactConstraints - The flag if peer stream audio track is sending exact
+   *   requested values of <code>audio.deviceId</code> when provided.
+   * @property {Boolean|JSON} video - The peer stream video settings keyed by stream id.
    *   When defined as <code>false</code>, it means there is no video being sent from peer.
-   *   When defined as <code>true</code>, the <code>settings.video.screenshare</code> value is
-   *   considered as <code>false</code>  and the <code>settings.video.exactConstraints</code>
-   *   value is considered as <code>false</code>.
-   * @property {JSON} [settings.video.resolution] - The peer stream video resolution.
+   * @property {JSON} [video[streamId].resolution] - The peer stream video resolution.
    *   [Rel: {@link SkylinkConstants.VIDEO_RESOLUTION|VIDEO_RESOLUTION}]
-   * @property {Number|JSON} settings.video.resolution.width - The peer stream video resolution width or
+   * @property {Number|JSON} video[streamId].resolution.width - The peer stream video resolution width or
    *   video resolution width settings.
    *   When defined as a JSON Object, it is the user set resolution width settings with (<code>"min"</code> or
    *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).
-   * @property {Number|JSON} settings.video.resolution.height - The peer stream video resolution height or
+   * @property {Number|JSON} video[streamId].resolution.height - The peer stream video resolution height or
    *   video resolution height settings.
    *   When defined as a JSON Object, it is the user set resolution height settings with (<code>"min"</code> or
    *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).
-   * @property {Number|JSON} [settings.video.frameRate] - The peer stream video
+   * @property {Number|JSON} [video[streamId].frameRate] - The peer stream video
    *   <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps) or video frameRate settings.
    *   When defined as a JSON Object, it is the user set frameRate settings with (<code>"min"</code> or
    *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).
-   * @property {Boolean} settings.video.screenshare - The flag if peer stream is a screensharing stream.
-   * @property {Array} [settings.video.optional] - The peer stream <code>navigator.getUserMedia()</code> API
-   *   <code>video: { optional [..] }</code> property.
-   * @property {String} [settings.video.deviceId] - The peer stream video track source id of the device used.
-   * @property {Boolean} settings.video.exactConstraints The flag if peer stream video track is sending exact
-   *   requested values of <code>settings.video.resolution</code>,
-   *   <code>settings.video.frameRate</code> and <code>settings.video.deviceId</code>
+   * @property {Boolean} video[streamId].screenshare - The flag if peer stream is a screensharing stream.
+   * @property {String} [video[streamId].deviceId] - The peer stream video track source id of the device used.
+   * @property {Boolean} video[streamId].exactConstraints The flag if peer stream video track is sending exact
+   *   requested values of <code>video.resolution</code>,
+   *   <code>video.frameRate</code> and <code>video.deviceId</code>
    *   when provided.
-   * @property {String|JSON} [settings.video.facingMode] - The peer stream video camera facing mode.
+   * @property {String|JSON} [video[streamId].facingMode] - The peer stream video camera facing mode.
    *   When defined as a JSON Object, it is the user set facingMode settings with (<code>"min"</code> or
    *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).
-   * @property {Object} settings.bandwidth The maximum streaming bandwidth sent from peer.
-   * @property {Number} [settings.bandwidth.audio] - The maximum audio streaming bandwidth sent from peer.
-   * @property {Number} [settings.bandwidth.video] - The maximum video streaming bandwidth sent from peer.
-   * @property {Number} [settings.bandwidth.data] - The maximum data streaming bandwidth sent from peer.
-   * @property {Object} settings.googleXBandwidth
-   *   Note that this feature might not work depending on the browser support and implementation,
-   *   and its properties and values are only defined for user's end and cannot be viewed
-   *   from peer's end (when <code>isSelf</code> value is <code>false</code>).
-   *   The experimental google video streaming bandwidth sent to peers.
-   * @property {Number} [settings.googleXBandwidth.min] - The minimum experimental google video streaming bandwidth sent to peers.
-   * @property {Number} [settings.googleXBandwidth.max] - The maximum experimental google video streaming bandwidth sent to peers.
+   * @property {Object} maxBandwidth The maximum streaming bandwidth sent from peer.
+   * @property {Number} [maxBandwidth.audio] - The maximum audio streaming bandwidth sent from peer.
+   * @property {Number} [maxBandwidth.video] - The maximum video streaming bandwidth sent from peer.
+   * @property {Number} [maxBandwidth.data] - The maximum data streaming bandwidth sent from peer.
    * @property {Object} mediaStatus The peer streaming media status.
    * @property {Boolean} mediaStatus.audioMuted -  The value of the audio status.
    *   <small>If peer <code>mediaStatus</code> is <code>-1</code>, audio is not present in the stream. If peer <code>mediaStatus</code> is <code>1</code>, audio is present
@@ -619,16 +580,12 @@ class SkylinkPublicInterface {
    *   This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which
    *   can be retrieved with the {@link SkylinkEvents.event:ICE_CONNECTION_STATE|ICE CONNECTION STATE} event.
    * @param {JSON} [options] <blockquote class="info">
-   *   Note that for MCU connections, the <code>bandwidth</code> or <code>googleXBandwidth</code>
+   *   Note that for MCU connections, the <code>bandwidth</code>
    *   settings will override for all peers or the current room connection session settings.</blockquote>
    *   The custom peer configuration settings.
    * @param {JSON} [options.bandwidth] The configuration to set the maximum streaming bandwidth to send to peers.
    *   Object signature follows {@link Skylink#joinRoom|joinRoom}
    *   <code>options.bandwidth</code> settings.
-   * @param {JSON} [options.googleXBandwidth] The configuration to set the experimental google
-   *   video streaming bandwidth sent to peers.
-   *   Object signature follows {@link Skylink#joinRoom|joinRoom}
-   *   <code>options.googleXBandwidth</code> settings.
    * @return {Promise.<refreshConnectionResolve>} - The Promise will always resolve.
    * @example
    * Example 1: Refreshing a peer connection
@@ -674,9 +631,6 @@ class SkylinkPublicInterface {
   /**
    * @description Method that returns starts screenshare and returns the stream.
    * @param {String} roomName - The room name.
-   * @param {Boolean} replaceUserMediaStream - The flag if screenshare replaces the <code>userMedia</code> stream.
-   * @param {String} [streamId] - The stream id of the <code>userMedia</code> stream to replace. streamId must be provided if there is more than
-   * one <code>userMedia</code> stream on the peer connection and replaceUserMediaStream is true.
    * @return {MediaStream|null} - The screen share stream.
    * @example
    * Example 1: Replace selected stream with screen share stream
@@ -691,8 +645,10 @@ class SkylinkPublicInterface {
    * @alias Skylink#shareScreen
    * @since 2.0.0
    */
-  shareScreen(roomName, streamId) {
+  shareScreen(roomName) {
+    // TODO: replace stream is not functional yet so set to null for now
     const replaceUserMediaStream = false;
+    const streamId = null;
     const roomState = getRoomStateByName(roomName);
     if (roomState) {
       const screenSharing = new ScreenSharing(roomState);
@@ -729,84 +685,8 @@ class SkylinkPublicInterface {
    * @param {String|null} roomName - The room name.
    * - If no roomName is passed or <code>getUserMedia()</code> is called before {@link Skylink#joinRoom|joinRoom}, the returned stream will not be associated with a room. The stream must be maintained independently.
    * To stop the stream, call {@link Skylink#stopPrefetchedStream|stopPrefetchedStream} method.
-   * @param {JSON} [options] - The camera stream configuration options.
+   * @param {getUserMediaOptions} [options] - The camera stream configuration options.
    * - When not provided, the value is set to <code>{ audio: true, video: true }</code>.
-   *   To fallback to retrieve audio track only when retrieving of audio and video tracks failed,
-   *   enable the <code>audioFallback</code> flag in the {@link initOptions}.
-   * @param {Boolean} [options.useExactConstraints=false] <blockquote class="info">
-   *   Note that by enabling this flag, exact values will be requested when retrieving camera stream,
-   *   but it does not prevent constraints related errors. By default when not enabled,
-   *   expected mandatory maximum values (or optional values for source id) will requested to prevent constraints related
-   *   errors, with an exception for <code>options.video.frameRate</code> option in Safari and IE (any plugin-enabled) browsers,
-   *   where the expected maximum value will not be requested due to the lack of support.</blockquote>
-   *   The flag if <code>getUserMedia()</code> should request for camera stream to match exact requested values of
-   *   <code>options.audio.deviceId</code> and <code>options.video.deviceId</code>, <code>options.video.resolution</code>
-   *   and <code>options.video.frameRate</code> when provided.
-   * @param {Boolean|JSON} [options.audio=false] <blockquote class="info">
-   *    Note that the current Edge browser implementation does not support the <code>options.audio.optional</code>,
-   *    <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.</blockquote>
-   *    The audio configuration options.
-   * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
-   *   Providing the value as <code>false</code> sets <code>peerInfo.mediaStatus.audioMuted</code> to <code>1</code>,
-   *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
-   *   <code>0</code> and mutes any existing {@link Skylink#shareScreen|shareScreen} stream audio tracks as well.
-   * @param {Array} [options.audio.optional] <blockquote class="info">
-   *   This property has been deprecated. "optional" constraints has been moved from specs.<br>
-   *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
-   *   <code>true</code>. If you are looking to set the requested source id of the audio track,
-   *   use <code>options.audio.deviceId</code> instead.</blockquote>
-   *   The <code>navigator.getUserMedia()</code> API <code>audio: { optional [..] }</code> property.
-   * @param {String} [options.audio.deviceId] <blockquote class="info">
-   *   Note this is currently not supported in Firefox browsers.
-   *   </blockquote> The audio track source id of the device to use.
-   *   The list of available audio source id can be retrieved by the {@link https://developer.
-   * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices|mediaDevices.enumerateDevices} method.
-   * @param {Boolean} [options.audio.echoCancellation=true] <blockquote class="info">
-   *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation method may not work and may produce a terrible
-   *   feedback. It is recommended to use headphones or other microphone devices rather than the device
-   *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
-   * @param {Boolean|JSON} [options.video=false] <blockquote class="info">
-   *    Note that the current Edge browser implementation does not support the <code>options.video.optional</code>,
-   *    <code>options.video.deviceId</code>, <code>options.video.resolution</code> and
-   *    <code>options.video.frameRate</code>, <code>options.video.facingMode</code>.</blockquote>
-   *   The video configuration options.
-   * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
-   *   Providing the value as <code>false</code> sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
-   *   <code>1</code>, but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
-   *   <code>0</code> and mutes any existing {@link Skylink#shareScreen|shareScreen} stream video tracks as well.
-   * @param {JSON} [options.video.resolution] The video resolution.
-   *   By default,<code>VGA</code> resolution option is selected when not provided.
-   *   [Rel: {@link SkylinkConstants.VIDEO_RESOLUTION|VIDEO_RESOLUTION}]
-   * @param {Number|JSON} [options.video.resolution.width] The video resolution width.
-   * - When provided as a number, it is the video resolution width.
-   * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.width</code> settings.
-   *   Parameters are <code>"ideal"</code> for ideal resolution width, <code>"exact"</code> for exact video resolution width,
-   *   <code>"min"</code> for min video resolution width and <code>"max"</code> for max video resolution width.
-   *   Note that this may result in constraints related errors depending on the browser/hardware supports.
-   * @param {Number|JSON} [options.video.resolution.height] The video resolution height.
-   * - When provided as a number, it is the video resolution height.
-   * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.height</code> settings.
-   *   Parameters are <code>"ideal"</code> for ideal video resolution height, <code>"exact"</code> for exact video resolution height,
-   *   <code>"min"</code> for min video resolution height and <code>"max"</code> for max video resolution height.
-   *   Note that this may result in constraints related errors depending on the browser/hardware supports.
-   * @param {Number|JSON} [options.video.frameRate] The video {@link https://en.wikipedia.org/wiki/Frame_rate|frame rate} per second (fps).
-   * - When provided as a number, it is the video framerate.
-   * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.frameRate</code> settings.
-   *   Parameters are <code>"ideal"</code> for ideal video framerate, <code>"exact"</code> for exact video framerate,
-   *   <code>"min"</code> for min video framerate and <code>"max"</code> for max video framerate.
-   *   Note that this may result in constraints related errors depending on the browser/hardware supports.
-   * @param {Array} [options.video.optional] <blockquote class="info">
-   *   This property has been deprecated. "optional" constraints has been moved from specs.<br>
-   *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
-   *   <code>true</code>. If you are looking to set the requested source id of the video track,
-   *   use <code>options.video.deviceId</code> instead.</blockquote>
-   *   The <code>navigator.getUserMedia()</code> API <code>video: { optional [..] }</code> property.
-   * @param {String} [options.video.deviceId] <blockquote class="info">
-   *   Note this is currently not supported in Firefox browsers.
-   *   </blockquote> The video track {@link https://developer.mozilla.org/en-US/docs/Web/API/MediaDeviceInfo|source id}  of the device to use.
-   *   The list of available video source id can be retrieved by the {@link https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices|mediaDevices.enumerateDevices} method.
-   * @param {String|JSON} [options.video.facingMode] The video camera {@link https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackSupportedConstraints/facingMode|facing mode}
-   *   The list of available video source id can be retrieved by the {@link https://developer.mozilla.org/en-US/docs/Web/API/MediaDevices/getSupportedConstraints|MediaDevices.getSupportedConstraints} method.
    * @return {Promise.<MediaStreams>}
    * @example
    * Example 1: Get both audio and video after joinRoom

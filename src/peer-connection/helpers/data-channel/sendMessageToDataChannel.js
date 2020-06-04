@@ -16,7 +16,7 @@ import {
  * @private
  * @memberOf PeerConnection
  * @since 2.0.0
- * @fires onDataChannelStateChanged
+ * @fires DATA_CHANNEL_STATE
  */
 const sendMessageToDataChannel = (roomState, peerId, data, channelProperty, doNotConvert) => {
   const state = Skylink.getSkylinkState(roomState.room.id);

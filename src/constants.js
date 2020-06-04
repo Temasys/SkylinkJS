@@ -4,7 +4,6 @@ import * as SkylinkEventsConstants from './skylink-events/constants';
  * @namespace SkylinkConstants
  * @description
  * <ul>
- *  <li>{@link SkylinkConstants.AUDIO_CODEC|AUDIO_CODEC} </li>
  *  <li>{@link SkylinkConstants.BUNDLE_POLICY|BUNDLE_POLICY} </li>
  *  <li>{@link SkylinkConstants.CANDIDATE_GENERATION_STATE|CANDIDATE_GENERATION_STATE} </li>
  *  <li>{@link SkylinkConstants.CANDIDATE_PROCESSING_STATE|CANDIDATE_PROCESSING_STATE} </li>
@@ -37,7 +36,6 @@ import * as SkylinkEventsConstants from './skylink-events/constants';
  *  <li>{@link SkylinkConstants.SYSTEM_ACTION_REASON|SYSTEM_ACTION_REASON} </li>
  *  <li>{@link SkylinkConstants.SM_PROTOCOL_VERSION|SM_PROTOCOL_VERSION} </li>
  *  <li>{@link SkylinkConstants.TURN_TRANSPORT|TURN_TRANSPORT} </li>
- *  <li>{@link SkylinkConstants.VIDEO_CODEC|VIDEO_CODEC} </li>
  *  <li>{@link SkylinkConstants.VIDEO_RESOLUTION|VIDEO_RESOLUTION} </li>
  *  <li>{@link SkylinkConstants.VIDEO_QUALITY|VIDEO_QUALITY} </li>
  * </ul>
@@ -599,7 +597,6 @@ export const GET_CONNECTION_STATUS_STATE = {
  */
 export const SERVER_PEER_TYPE = {
   MCU: 'mcu',
-  // SIP: 'sip'
 };
 
 /**

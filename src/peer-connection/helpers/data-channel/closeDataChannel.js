@@ -52,7 +52,7 @@ const closeAllDataChannels = (roomState, peerId) => {
  * @param {String} peerId - The Peer Id.
  * @param {String} [channelProp=main] - The channel property.
  * @memberOf PeerConnection.PeerConnectionHelpers
- * @fires onDataChannelStateChanged
+ * @fires DATA_CHANNEL_STATE
  */
 const closeDataChannel = (roomState, peerId, channelProp = 'main') => {
   try {

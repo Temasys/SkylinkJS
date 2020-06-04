@@ -118,6 +118,7 @@ import {
  *  <strong>PEER HANDSHAKE EVENTS</strong> </br>
  *  <ul>
  *    <li>{@link SkylinkEvents.event:HANDSHAKE_PROGRESS|HANDSHAKE_PROGRESS}</li>
+ *    <li>{@link SkylinkEvents.event:INTRODUCE_STATE_CHANGE|INTRODUCE_STATE_CHANGE}</li>
  *  </ul>
  *  <strong>ROOM EVENTS</strong> </br>
  *  <ul>

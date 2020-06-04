@@ -11,15 +11,14 @@ import sendRestartOfferMsg from './sendRestartOfferMsg';
  * @param {SkylinkState} roomState
  * @param {Object} options
  * @param {Object} options.bandwidth
- * @param {Object} options.googleXBandwidth
  * @return {Promise}
  * @memberOf PeerConnection.PeerConnectionHelpers
  */
 const restartPeerConnection = (peerId, roomState, options) => {
-  const state = Skylink.getSkylinkState(roomState.room.id);
+  const updateState = Skylink.getSkylinkState(roomState.room.id);
   const {
-    peerConnections, peerCustomConfigs, peerEndOfCandidatesCounter, room, user,
-  } = state;
+    peerConnections, streamsBandwidthSettings, peerEndOfCandidatesCounter, room, user,
+  } = updateState;
   const { doIceRestart, bwOptions } = options;
   const signaling = new SkylinkSignalingServer();
   const errors = [];
@@ -47,35 +46,12 @@ const restartPeerConnection = (peerId, roomState, options) => {
         options: bwOptions,
       });
 
-      peerCustomConfigs[peerId] = peerCustomConfigs[peerId] || {};
-      peerCustomConfigs[peerId].bandwidth = peerCustomConfigs[peerId].bandwidth || {};
-      peerCustomConfigs[peerId].googleXBandwidth = peerCustomConfigs[peerId].googleXBandwidth || {};
+      updateState.streamsBandwidthSettings.bAS = bwOptions.bandwidth || streamsBandwidthSettings.bAS;
+      updateState.peerEndOfCandidatesCounter[peerId] = peerEndOfCandidatesCounter[peerId] || {};
+      updateState.peerEndOfCandidatesCounter[peerId].len = 0;
+      Skylink.setSkylinkState(updateState, updateState.room.id);
 
-      if (bwOptions.bandwidth && typeof bwOptions.bandwidth === 'object') {
-        if (typeof bwOptions.bandwidth.audio === 'number') {
-          peerCustomConfigs[peerId].bandwidth.audio = bwOptions.bandwidth.audio;
-        }
-        if (typeof bwOptions.bandwidth.video === 'number') {
-          peerCustomConfigs[peerId].bandwidth.video = bwOptions.bandwidth.video;
-        }
-        if (typeof bwOptions.bandwidth.data === 'number') {
-          peerCustomConfigs[peerId].bandwidth.data = bwOptions.bandwidth.data;
-        }
-      }
-
-      if (bwOptions.googleXBandwidth && typeof bwOptions.googleXBandwidth === 'object') {
-        if (typeof bwOptions.googleXBandwidth.min === 'number') {
-          peerCustomConfigs[peerId].googleXBandwidth.min = bwOptions.googleXBandwidth.min;
-        }
-        if (typeof bwOptions.googleXBandwidth.max === 'number') {
-          peerCustomConfigs[peerId].googleXBandwidth.max = bwOptions.googleXBandwidth.max;
-        }
-      }
-
-      peerEndOfCandidatesCounter[peerId] = peerEndOfCandidatesCounter[peerId] || {};
-      peerEndOfCandidatesCounter[peerId].len = 0;
-
-      return resolve(sendRestartOfferMsg(state, peerId, doIceRestart));
+      return resolve(sendRestartOfferMsg(updateState, peerId, doIceRestart));
     }
 
     // Checks if the local description is defined first

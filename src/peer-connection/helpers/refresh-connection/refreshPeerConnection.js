@@ -13,7 +13,6 @@ const refreshSinglePeer = (peerId, roomState, options) => restartPeerConnection(
  * @param {boolean} [doIceRestart = false]
  * @param {Object} [bwOptions = {}]
  * @param {JSON} bwOptions.bandwidth
- * @param {JSON} bwOptions.googleXBandwidth
  * @returns {Promise}
  * @memberOf PeerConnection.PeerConnectionHelpers
  */

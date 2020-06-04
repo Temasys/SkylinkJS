@@ -73,8 +73,7 @@ const filterParams = (targetPeerId, iceRestart, options, peerConnections) => {
  * @param {String} targetPeerId
  * @param {boolean} iceRestart
  * @param {Object} options
- * @param {Object} options.andwidth
- * @param {Object} options.googleXBandwidth
+ * @param {Object} options.bandwidth
  * @return {Promise}
  * @memberOf PeerConnection
  */

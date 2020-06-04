@@ -15,13 +15,13 @@ export const lockOrUnlockRoom = (roomState, lockRoom = true) => {
   const { room, user } = updatedState;
   const signalingServer = new SkylinkSignalingServer();
 
-  updatedState.roomLocked = lockRoom;
+  updatedState.room.isLocked = lockRoom;
   Skylink.setSkylinkState(updatedState, room.id);
 
   signalingServer.roomLock(updatedState);
 
   dispatchEvent(roomLock({
-    isLocked: updatedState.roomLocked,
+    isLocked: updatedState.room.isLocked,
     peerInfo: PeerData.getCurrentSessionInfo(room),
     peerId: user.sid,
     isSelf: true,

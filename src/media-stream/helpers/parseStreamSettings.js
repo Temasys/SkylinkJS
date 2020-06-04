@@ -1,6 +1,7 @@
 /* eslint-disable no-nested-ternary */
 import clone from 'clone';
-import { VIDEO_RESOLUTION, TRACK_KIND, BROWSER_AGENT } from '../../constants';
+import { TRACK_KIND, BROWSER_AGENT } from '../../constants';
+import { DEFAULTS } from '../../defaults';
 import {
   isABoolean, isAgent, isANumber, isAObj, isAString,
 } from '../../utils/helpers';
@@ -20,10 +21,6 @@ const parseGumSettings = (settings, type) => {
         gumSettings.audio.echoCancellation = settings.audio.echoCancellation;
       }
 
-      if (Array.isArray(settings.audio.optional)) {
-        gumSettings.audio.optional = clone(settings.audio.optional);
-      }
-
       if (isAgent(BROWSER_AGENT.FIREFOX)) {
         // do nothing
       } else if (settings.audio.deviceId && isAString(settings.audio.deviceId)) {
@@ -36,10 +33,6 @@ const parseGumSettings = (settings, type) => {
   if ((settings.video && !type) || (settings.video && type === TRACK_KIND.VIDEO)) {
     if (settings.video && isAObj(settings.video)) {
       gumSettings.video = {};
-
-      if (Array.isArray(settings.video.optional)) {
-        gumSettings.video.optional = clone(settings.video.optional);
-      }
 
       if (settings.video.deviceId && isAString(settings.video.deviceId)) {
         gumSettings.video.deviceId = settings.video.exactConstraints
@@ -77,36 +70,15 @@ const parseSettings = (options, type = '') => {
   const settings = { audio: false, video: false };
 
   if ((options.audio && !type) || (options.audio && type === TRACK_KIND.AUDIO)) {
-    settings.audio = {
-      stereo: false,
-      exactConstraints: options.useExactConstraints,
-      echoCancellation: true,
-    };
+    settings.audio = clone(DEFAULTS.MEDIA_OPTIONS.AUDIO);
 
     if (isAObj(options.audio)) {
       if (isABoolean(options.audio.stereo)) {
         settings.audio.stereo = options.audio.stereo;
       }
 
-      if (isABoolean(options.audio.useinbandfec)) {
-        settings.audio.useinbandfec = options.audio.useinbandfec;
-      }
-
-      if (isABoolean(options.audio.usedtx)) {
-        settings.audio.usedtx = options.audio.usedtx;
-      }
-
-      if (isANumber(options.audio.maxplaybackrate)
-        && options.audio.maxplaybackrate >= 8000 && options.audio.maxplaybackrate <= 48000) {
-        settings.audio.maxplaybackrate = options.audio.maxplaybackrate;
-      }
-
       if (isABoolean(options.audio.echoCancellation)) {
         settings.audio.echoCancellation = options.audio.echoCancellation;
-      }
-
-      if (Array.isArray(options.audio.optional)) {
-        settings.audio.optional = clone(options.audio.optional);
       }
 
       if (isAgent(BROWSER_AGENT.FIREFOX)) {
@@ -114,38 +86,39 @@ const parseSettings = (options, type = '') => {
       } else if (options.audio.deviceId && isAString(options.audio.deviceId)) {
         settings.audio.deviceId = options.audio.deviceId;
       }
+
+      if ((options.useExactConstraints && isABoolean(options.useExactConstraints))) {
+        settings.audio.exactConstraints = options.useExactConstraints;
+      }
     }
   }
 
   if ((options.video && !type) || (options.video && type === TRACK_KIND.VIDEO)) {
-    settings.video = {
-      resolution: clone(VIDEO_RESOLUTION.VGA),
-      exactConstraints: options.useExactConstraints,
-    };
+    settings.video = clone(DEFAULTS.MEDIA_OPTIONS.VIDEO);
 
     if (isAObj(options.video)) {
-      if (Array.isArray(options.video.optional)) {
-        settings.video.optional = clone(options.video.optional);
-      }
-
       if (options.video.deviceId && isAString(options.video.deviceId)) {
         settings.video.deviceId = options.video.deviceId;
       }
 
-      if (options.video.resolution && isAString(options.video.resolution)) {
-        if ((options.video.resolution.width && isAObj(options.video.resolution.width))
+      if (options.video.resolution && isAObj(options.video.resolution)) {
+        if ((options.video.resolution.width && isAString(options.video.resolution.width))
           || isANumber(options.video.resolution.width)) {
           settings.video.resolution.width = options.video.resolution.width;
         }
-        if ((options.video.resolution.height && isAObj(options.video.resolution.height))
+        if ((options.video.resolution.height && isAString(options.video.resolution.height))
           || isANumber(options.video.resolution.height)) {
           settings.video.resolution.height = options.video.resolution.height;
         }
       }
 
-      if ((options.video.frameRate && isAObj(options.video.frameRate))
+      if ((options.video.frameRate && isAString(options.video.frameRate))
         || isANumber(options.video.frameRate)) {
         settings.video.frameRate = options.video.frameRate;
+      }
+
+      if ((options.useExactConstraints && isABoolean(options.useExactConstraints))) {
+        settings.video.exactConstraints = options.useExactConstraints;
       }
     }
   }

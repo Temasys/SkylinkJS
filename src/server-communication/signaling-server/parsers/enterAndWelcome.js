@@ -32,15 +32,12 @@ const enterAndWelcome = (msg) => {
     enableIceRestart,
     enableDataChannel,
     weight,
-    receiveOnly,
-    publishOnly,
     agent,
     os,
     temasysPluginVersion,
     SMProtocolVersion,
     DTProtocolVersion,
     version,
-    parentId,
     publisherId,
   } = msg;
 
@@ -53,13 +50,10 @@ const enterAndWelcome = (msg) => {
   // eslint-disable-next-line no-nested-ternary
   parsedMsg.DTProtocolVersion = isAString(DTProtocolVersion) ? DTProtocolVersion : (hasMCU || mid === PEER_TYPE.MCU ? DT_PROTOCOL_VERSION : '0.1.0');
   parsedMsg.weight = isANumber(weight) ? weight : 0;
-  parsedMsg.receiveOnly = receiveOnly && receiveOnly !== false;
   parsedMsg.enableDataChannel = isABoolean(enableDataChannel) ? enableDataChannel : true;
   parsedMsg.enableIceRestart = isABoolean(enableIceRestart) ? enableIceRestart : false;
   parsedMsg.os = os && isAString(os) ? os : null;
   parsedMsg.temasysPluginVersion = temasysPluginVersion && isAString(temasysPluginVersion) ? temasysPluginVersion : null;
-  parsedMsg.publishOnly = !!publishOnly;
-  parsedMsg.parentId = !!publishOnly && parentId && isAString(parentId) ? parentId : null;
   parsedMsg.userInfo = parsers.parseUserInfo(state, msg, parsedMsg);
 
   if (hasMCU) {

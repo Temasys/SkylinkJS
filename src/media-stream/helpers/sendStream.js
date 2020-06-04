@@ -115,7 +115,8 @@ const processMediaStreamArray = (roomState, streams, resolve, reject) => {
  * @param {SkylinkState} roomState
  * @param {MediaStream|Object} options
  * @memberOf MediaStreamHelpers
- * @fires onIncomingStream, peerUpdated
+ * @fires ON_INCOMING_STREAM
+ * @fires PEER_UPDATED
  */
 // eslint-disable-next-line consistent-return
 const sendStream = (roomState, options = null) => new Promise((resolve, reject) => {
@@ -123,10 +124,10 @@ const sendStream = (roomState, options = null) => new Promise((resolve, reject) 
     return reject(new Error(MESSAGES.ROOM_STATE.NO_ROOM_NAME));
   }
 
-  const { inRoom } = roomState;
+  const { room } = roomState;
   const isNotObjOrNull = (!isAObj(options) || options === null);
 
-  if (!inRoom) {
+  if (!room.inRoom) {
     logger.log.WARN(MESSAGES.ROOM.ERRORS.NOT_IN_ROOM);
     return reject(new Error(`${MESSAGES.ROOM.ERRORS.NOT_IN_ROOM}`));
   }

@@ -6,6 +6,7 @@ import { TRACK_KIND, TAGS, BROWSER_AGENT } from '../../../../constants';
 import logger from '../../../../logger';
 import MESSAGES from '../../../../messages';
 import Skylink from '../../../../index';
+import Room from '../../../../room';
 
 const dispatchPeerUpdated = (state, peerId) => {
   dispatchEvent(peerUpdated({
@@ -45,7 +46,7 @@ const dispatchIncomingCameraStream = (state) => {
         stream: streamObj.stream,
         streamId: streamObj.id,
         peerId: user.sid,
-        room,
+        room: Room.getRoomInfo(room.id),
         isSelf: true,
         peerInfo: PeerData.getCurrentSessionInfo(room),
         isVideo: true,
@@ -60,7 +61,7 @@ const dispatchIncomingCameraStream = (state) => {
  * @param {String} room
  * @param {boolean} isScreensharing
  * @param {MediaStreamTrackEvent} rtcTrackEvent
- * @fires streamEnded
+ * @fires STREAM_ENDED
  * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
  */
 const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {

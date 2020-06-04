@@ -5,6 +5,7 @@ import { TAGS, CANDIDATE_PROCESSING_STATE } from '../../constants';
 import HandleIceCandidateStats from '../../skylink-stats/handleIceCandidateStats';
 import { dispatchEvent } from '../../utils/skylinkEventManager';
 import { candidateProcessingState } from '../../skylink-events';
+import Room from '../../room';
 
 /**
  * Method that buffers candidates
@@ -26,7 +27,7 @@ const addIceCandidateToQueue = (targetMid, candidateId, candidateType, nativeCan
 
   handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.BUFFERED, targetMid, candidateId, nativeCandidate);
   dispatchEvent(candidateProcessingState({
-    room,
+    room: Room.getRoomInfo(room.id),
     state: CANDIDATE_PROCESSING_STATE.BUFFERED,
     peerId: targetMid,
     candidateId,

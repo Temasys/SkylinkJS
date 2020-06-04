@@ -2,10 +2,15 @@ import PeerConnection from '../index';
 import * as constants from '../../constants';
 import Skylink from '../../index';
 
-const instance = {};
+let instance = {};
 
 class BandwidthAdjuster {
   constructor(params) {
+    if (params.roomKey) {
+      this.resetBandwidthAdjusterInstance(params.roomKey, params.peerId);
+      return null;
+    }
+
     const { peerConnection, state, targetMid } = params;
 
     if (instance[targetMid]) {
@@ -29,7 +34,7 @@ class BandwidthAdjuster {
   }
 
   setAdjustmentInterval() {
-    const { bandwidthAdjuster, peerBandwidth, room } = this.state;
+    const { bandwidthAdjuster, peerStats, room } = this.state;
     const { PEER_CONNECTION_STATE } = constants;
 
     if (this.bandwidth) {
@@ -44,22 +49,22 @@ class BandwidthAdjuster {
 
     const adjustmentInterval = setInterval(() => {
       if (!(this.peerConnection && this.peerConnection.signalingState
-        !== PEER_CONNECTION_STATE.CLOSED) || !bandwidthAdjuster || !peerBandwidth[this.peerId]) {
+        !== PEER_CONNECTION_STATE.CLOSED) || !bandwidthAdjuster || !peerStats[this.peerId]) {
         clearInterval(adjustmentInterval);
         return;
       }
 
-      PeerConnection.retrieveStatistics(room.id, this.peerId, Skylink.getIniOptions().beSilentOnStatsLogs, true)
+      PeerConnection.retrieveStatistics(room.id, this.peerId, Skylink.getInitOptions().beSilentOnStatsLogs, true)
         .then((stats) => {
           if (!(this.peerConnection && this.peerConnection.signalingState
             !== PEER_CONNECTION_STATE.CLOSED) || !bandwidthAdjuster) {
             clearInterval(adjustmentInterval);
           }
 
-          bandwidth.audio.send.push(stats.audio.sending.bytes * 8);
-          bandwidth.audio.recv.push(stats.audio.receiving.bytes * 8);
-          bandwidth.video.send.push(stats.video.sending.bytes * 8);
-          bandwidth.video.recv.push(stats.video.receiving.bytes * 8);
+          bandwidth.audio.send.push(stats.audio.sending.bytes ? stats.audio.sending.bytes * 8 : 0);
+          bandwidth.audio.recv.push(stats.audio.receiving.bytes ? stats.audio.receiving.bytes * 8 : 0);
+          bandwidth.video.send.push(stats.video.sending.bytes ? stats.video.sending.bytes * 8 : 0);
+          bandwidth.video.recv.push(stats.video.receiving.bytes ? stats.video.receiving.bytes * 8 : 0);
 
           currentBlock += 1;
 
@@ -92,6 +97,19 @@ class BandwidthAdjuster {
     }, 1000);
 
     this.bandwidth = bandwidth;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  resetBandwidthAdjusterInstance(roomKey, peerId = null) {
+    const state = Skylink.getSkylinkState(roomKey);
+    state.streamsBandwidthSettings.bAS = {};
+    Skylink.setSkylinkState(state, roomKey);
+
+    if (peerId) {
+      delete instance[peerId];
+    } else {
+      instance = {};
+    }
   }
 }
 

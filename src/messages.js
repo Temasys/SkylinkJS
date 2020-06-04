@@ -133,7 +133,7 @@ const MESSAGES = {
     APPLYING_BUFFERED_REMOTE_OFFER: 'Applying buffered remote offer',
     ERRORS: {
       FAILED_SET_LOCAL_DESCRIPTION: 'Failed setting local description -->',
-      FAILED_SET_REMOTE_DESCRIPTION: 'Failed setting remote description -->',
+      FAILED_SET_REMOTE_DESCRIPTION: 'Failed setting remote description',
       FAILED_SET_REMOTE_ANSWER: 'Peer failed to set remote answer.',
       FAILED_RENEGOTIATION: 'Failed renegotiation after answerAck',
       NOT_STABLE: 'Dropping of message as signaling state is not stable',

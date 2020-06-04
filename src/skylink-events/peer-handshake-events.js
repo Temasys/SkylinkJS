@@ -16,7 +16,7 @@ export const handshakeProgress = (detail = {}) => new SkylinkEvent(HANDSHAKE_PRO
 /**
  * @description Event triggered when {@link Skylink#introducePeer}
  * introduction request state changes.
- * @event SkylinkEvents.introduceStateChange
+ * @event SkylinkEvents.INTRODUCE_STATE_CHANGE
  * @param {Object} detail - Event's payload.
  * @param {SkylinkConstants.INTRODUCE_STATE} detail.state The current <code>introducePeer()</code> introduction request state.
  * @param {String} detail.privilegedPeerId The User's privileged Peer ID.

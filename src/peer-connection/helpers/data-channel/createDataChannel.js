@@ -12,7 +12,7 @@ import HandleDataChannelStats from '../../../skylink-stats/handleDataChannelStat
  * @param params
  * @returns {null}
  * @memberOf PeerConnection.PeerConnectionHelpers
- * @fires onDataChannelStateChanged
+ * @fires DATA_CHANNEL_STATE
  */
 const createDataChannel = (params) => {
   let {

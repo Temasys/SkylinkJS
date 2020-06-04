@@ -10,8 +10,6 @@ import helpers from './index';
 const getUserInfo = (room) => {
   const userInfo = helpers.getCurrentSessionInfo(room);
   delete userInfo.room;
-  // delete userInfo.config;
-  // delete userInfo.settings.data;
   return userInfo;
 };
 

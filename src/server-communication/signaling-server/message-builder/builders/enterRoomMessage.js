@@ -23,7 +23,6 @@ export const getEnterRoomMessage = (roomState) => {
     version: (AdapterJS.webrtcDetectedVersion || 0).toString(),
     os: navigator.platform,
     userInfo,
-    receiveOnly: PeerData.getCurrentSessionInfo(room).config.receiveOnly,
     weight: peerPriorityWeight,
     temasysPluginVersion: null,
     enableDataChannel,

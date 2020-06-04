@@ -8,7 +8,6 @@ import SkylinkPublicInterface from './public/index';
 import SkylinkLogger from './logger/index';
 import SkylinkEventManager from './utils/skylinkEventManager';
 import * as constants from './constants';
-import messages from './messages';
 import { SkylinkAPIServer } from './server-communication';
 
 /**
@@ -147,15 +146,6 @@ class Skylink extends SkylinkPublicInterface {
    */
   static getUserInitOptions() {
     return userInitOptions;
-  }
-
-  /**
-   * @description Logs an error when Skylink state is not found for a roomKey.
-   * @param {String} keyOrName - The id/key of the room or the room name.
-   * @private
-   */
-  static logNoRoomState(keyOrName) {
-    SkylinkLogger.log.ERROR(`${messages.ROOM_STATE.NOT_FOUND} - ${keyOrName}`);
   }
 }
 

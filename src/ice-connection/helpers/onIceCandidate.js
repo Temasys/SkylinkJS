@@ -6,13 +6,14 @@ import { candidateGenerationState } from '../../skylink-events';
 import SignalingServer from '../../server-communication/signaling-server';
 import handleIceGatheringStats from '../../skylink-stats/handleIceGatheringStats';
 import * as constants from '../../constants';
+import Room from '../../room';
 
 /**
  * @param targetMid - The mid of the target peer
  * @param {RTCIceCandidate} candidate - {@link https://developer.mozilla.org/en-US/docs/Web/API/RTCIceCandidate}
  * @param {SkylinkRoom} currentRoom - Current room
  * @memberOf IceConnectionHelpers
- * @fires candidateGenerationState
+ * @fires CANDIDATE_GENERATION_STATE
  * @private
  * @return {null}
  */
@@ -34,7 +35,7 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
       peerConnection.gathering = true;
       peerConnection.gathered = false;
       dispatchEvent(candidateGenerationState({
-        room: currentRoom,
+        room: Room.getRoomInfo(currentRoom.id),
         peerId: targetMid,
         state: constants.CANDIDATE_GENERATION_STATE.GATHERING,
       }));

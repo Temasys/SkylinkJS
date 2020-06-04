@@ -8,7 +8,7 @@ import Skylink from '../../../../index';
 import PeerConnection from '../../../index';
 import HandleBandwidthStats from '../../../../skylink-stats/handleBandwidthStats';
 import BandwidthAdjuster from '../../bandwidthAdjuster';
-import { isAgent } from '../../../../utils/helpers';
+import { isAgent, isEmptyObj } from '../../../../utils/helpers';
 
 const isIceConnectionStateCompleted = (pcIceConnectionState) => {
   const { ICE_CONNECTION_STATE } = constants;
@@ -20,7 +20,7 @@ const isIceConnectionStateCompleted = (pcIceConnectionState) => {
  * @param {RTCPeerConnection} peerConnection
  * @param {String} targetMid - The Peer Id
  * @param {SkylinkState} currentRoomState
- * @fires iceConnectionState
+ * @fires ICE_CONNECTION_STATE
  * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
  */
 const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState) => {
@@ -42,7 +42,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   }
 
   const {
-    hasMCU, bandwidthAdjuster, peerConnStatus, peerStats,
+    hasMCU, bandwidthAdjuster, peerStats, streamsBandwidthSettings,
   } = state;
   const handleIceConnectionStats = new HandleIceConnectionStats();
 
@@ -82,10 +82,6 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
     }));
   }
 
-  if (peerConnStatus && peerConnStatus[targetMid]) {
-    peerConnStatus[targetMid].connected = isIceConnectionStateCompleted(pcIceConnectionState);
-  }
-
   if (!statsInterval && isIceConnectionStateCompleted(pcIceConnectionState) && !peerStats[targetMid]) {
     statsInterval = true;
     peerStats[targetMid] = {};
@@ -105,7 +101,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
     });
   }
 
-  if (!hasMCU && isIceConnectionStateCompleted(pcIceConnectionState) && !!bandwidthAdjuster) {
+  if (!hasMCU && isIceConnectionStateCompleted(pcIceConnectionState) && !!bandwidthAdjuster && isEmptyObj(streamsBandwidthSettings.bAS)) {
     new BandwidthAdjuster({
       targetMid,
       state,

@@ -62,13 +62,6 @@
  *   When not provided, the default browser configuration is used.
  * @property {boolean} [audio.opus.sprop-stereo] The flag if OPUS audio codec is sending stereo packets.
  *   When not provided, the default browser configuration is used.
- * @property {boolean} [audio.opus.usedtx] <blockquote class="info">
- *   Note that this feature might not work depending on the browser support and implementation.</blockquote>
- *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
- *   This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
- *   goes hand-in-hand with the <code>voiceActivityDetection</code> flag in <a href="#method_joinRoom">
- *   <code>joinRoom()</code> method</a>.
- *   When not provided, the default browser configuration is used.
  * @property {boolean} [audio.opus.useinbandfec] <blockquote class="info">
  *   Note that this parameter should only be used for debugging purposes only.</blockquote>
  *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
@@ -110,10 +103,6 @@
  *   This data does not contain any personal information or session content.
  *   To enable the configuration of this option, you need to "Collect Quality Statistics" option on the Temasys console Website under App key settings section.
  * @property {boolean} [enableDataChannel=true] The flag if Datachannel connections should be enabled.
- * <blockquote class="info">
- *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports.
- *   This is required to be enabled for {@link Skylink#sendBlobData}, {@link Skylink#sendURLData} and {@link Skylink#sendP2PMessage}.
- *   </blockquote>
  * @property {boolean} [enableTURNServer=true] The flag if TURN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.
  * @property {boolean} [enableSTUNServer=true] The flag if STUN ICE servers should
@@ -127,16 +116,9 @@
  *   used in the actual TURN network traffic as it depends which protocol the browser selects and connects with.
  *   This simply configures the TURN ICE server urls <code?transport=(protocol)</code> query option when constructing
  *   the Peer connection. When all protocols are selected, the ICE servers urls are duplicated with all protocols.
- *   Note that for Edge browsers, this value is overriden as <code>UDP</code> due to its supports.
  *   </blockquote> The option to configure the <code>?transport=</code>
  *   query parameter in TURN ICE servers when constructing a Peer connections. When not provided, its value is <code>ANY</code>.
  *   {@link Skylink.TURN_TRANSPORT}
- * @property {boolean} [disableComfortNoiseCodec=false] <blockquote class="info">
- *   Note that this is an experimental flag and may cause disruptions in connections or connectivity issues when toggled.
- *   </blockquote> The flag if audio
- *   <a href="https://en.wikipedia.org/wiki/Comfort_noise">Comfort Noise (CN)</a> codec should be removed
- *   in sending session descriptions.
- *   This can be useful for debugging purposes to test preferred audio quality and feedback.
  * @property {JSON} [credentials] <blockquote class="info">
  *   Note that we strongly recommend developers to return the <code>credentials.duration</code>,
  *   <code>credentials.startDateTime</code> and <code>defaultRoom</code> and generate the
@@ -178,23 +160,10 @@
  *   Note that the minimum timeout value is <code>5000</code>. If less, this value will be <code>5000</code>.
  *   Note that it is recommended to use <code>7000</code> as the lowest timeout value if Peers are connecting
  *   using Polling transports to prevent connection errors.
- * @property {number} [apiTimeout=4000] The timeout to wait for response from Auth server.
- * @property {boolean} [forceTURNSSL=false] <blockquote class="info">
+ * @property {boolean} [forceTURNSSL=false] The flag if TURNS protocol should be used when <code>enableTURNServer</code> is enabled.
+ * <blockquote class="info">
  *   Note that currently Firefox does not support the TURNS protocol, and that if TURNS is required,
  *   TURN ICE servers using port <code>443</code> will be used instead.
- *   Note that for Edge browsers, this value is overriden as <code>false</code> due to its supports and
- *   only port <code>3478</code> is used.</blockquote>
- *   The flag if TURNS protocol should be used when <code>enableTURNServer</code> is enabled.
- * @property {JSON} [throttleIntervals] The configuration options to configure the throttling method timeouts.
- * @property {number} [throttleIntervals.shareScreen=10000] The interval timeout for
- *   {@link Skylink#shareScreen} throttling in milliseconds.
- * @property {number} [throttleIntervals.getUserMedia=0] The interval timeout for
- *   {@link Skylink#getUserMedia} throttling in milliseconds.
- * @property {number} [throttleIntervals.refreshConnection=5000] <blockquote class="info">
- *   </blockquote> The interval timeout for {@link Skylink#refreshConnection} throttling in milliseconds.
- *   Note that there will be no throttling when {@link Skylink#refreshConnection} is called internally.
- * @property {boolean} [throttleShouldThrowError=false] The flag if throttled methods should throw errors when
- *   method is invoked less than the interval timeout value configured in <code>throttleIntervals</code>.
  * @property {String|Array} [iceServer] The ICE servers for debugging purposes to use.
  *   - When defined as string, the value is considered as <code>[iceServer]</code>.
  *   Note that this is a debugging feature and is only used when instructed for debugging purposes.
@@ -239,19 +208,11 @@
  * @property {boolean} [voiceActivityDetection=true] The flag if voice activity detection should be enabled.
  *   This can only be toggled if User is and for the offerer, which is determined if User's
  *   <code>peerInfo.config.priorityWeight</code> is higher than Peer's.
- *   <blockquote class="details">
- *   This works hand-in-hand with the <code>disableComfortNoiseCodec</code> flag in the
- *   {@link initOptions} and the <code>audio.usedtx</code> setting in
- *   {@link Skylink#getUserMedia}. VAD (voice activity detection)
- *   detects if there is an active voice in the Stream, and if there is no active voice in the Stream, the
- *   <code>audio.usedtx</code> (if enabled) would prevent sending these empty bits. To prevent huge differences
- *   when there is a silence and an active voice later, the CN codec would produce an empty voice to
- *   make it sound better.</blockquote>
- * @property {JSON} [bandwidth] <blockquote class="info">Note that this is currently not supported
+ * @property {JSON} [bandwidth] The configuration to set the maximum streaming bandwidth to send to Peers. You can also use the preconfigured
+ *   constant <code>VIDEO_QUALITY</code> for recommended values.
+ * <blockquote class="info">Note that this is currently not supported
  *   with Firefox browsers versions 48 and below as noted in an existing
- *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
- *   The configuration to set the maximum streaming bandwidth to send to Peers. You can also use the preconfigured
- *   constant <a href="#attr_VIDEO_QUALITY"><code>VIDEO_QUALITY</code></a> for recommended values.
+ *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>. This option will override the <code>autoBandwidthAdjustment</code> option below.</blockquote>
  * @property {number} [bandwidth.audio] The maximum audio streaming bandwidth sent to Peers in kbps.
  *   Recommended values are <code>50</code> to <code>200</code>. <code>50</code> is sufficient enough for
  *   an audio call. The higher you go if you want clearer audio and to be able to hear music streaming.
@@ -262,104 +223,11 @@
  * @property {number} [bandwidth.data] The maximum data streaming bandwidth sent to Peers.
  *   This affects the P2P messaging in {@link Skylink#sendP2PMessage},
  *   and data transfers in {@link Skylink#sendBlobData} and {@link Skylink#sendURLData}.
- * @property {JSON} [googleXBandwidth] <blockquote class="info">Note that this is an experimental configuration
- *   and may cause disruptions in connections or connectivity issues when toggled, or may not work depending on
- *   browser supports. Currently, this only toggles the video codec bandwidth configuration.</blockquote>
- *   The configuration to set the experimental google video streaming bandwidth sent to Peers.
- *   Note that Peers may override the "receive from" streaming bandwidth depending on the Peers configuration.
- * @property {number} [googleXBandwidth.min] The minimum experimental google video streaming bandwidth sent to Peers.
- *   This toggles the <code>"x-google-min-bitrate"</code> flag in the session description.
- * @property {number} [googleXBandwidth.max] The maximum experimental google video streaming bandwidth sent to Peers.
- *   This toggles the <code>"x-google-max-bitrate"</code> flag in the session description.
- * @property {boolean} [manualGetUserMedia] The flag if {@link Skylink#joinRoom} should trigger
- *   {@link mediaAccessRequired} in which the
- *   {@link Skylink#getUserMedia} stream or
- *   {@link Skylink#shareScreen} stream
- *   must be retrieved as a requirement before Room session may begin.
- *   This ignores the <code>audio</code> and <code>video</code> configuration.
- * @property {JSON} [sdpSettings] <blockquote class="info">
- *   Note that this is mainly used for debugging purposes and that it is an experimental flag, so
- *   it may cause disruptions in connections or connectivity issues when toggled. Note that it might not work
- *   with MCU enabled Peer connections or break MCU enabled Peer connections.</blockquote>
- *   The configuration to set the session description settings.
- * @property {JSON} [sdpSettings.connection] The configuration to set the session description connection settings.
- *   Note that this configuration may disable the media streaming and these settings will be enabled for
- *   MCU server Peer connection regardless of the flags configured.
- * @property {boolean} [sdpSettings.connection.audio=true] The configuration to enable audio session description connection.
- * @property {boolean} [sdpSettings.connection.video=true] The configuration to enable video session description connection.
- * @property {boolean} [sdpSettings.connection.data=true] The configuration to enable Datachannel session description connection.
- * @property {JSON} [sdpSettings.direction] The configuration to set the session description connection direction
- *   to enable or disable uploading and downloading audio or video media streaming.
- *   Note that this configuration does not prevent RTCP packets from being sent and received.
- * @property {JSON} [sdpSettings.direction.audio] The configuration to set the session description
- *   connection direction for audio streaming.
- * @property {boolean} [sdpSettings.direction.audio.send=true] The flag if uploading audio streaming
- *   should be enabled when available.
- * @property {boolean} [sdpSettings.direction.audio.receive=true] The flag if downloading audio
- *   streaming should be enabled when available.
- * @property {JSON} [sdpSettings.direction.video] The configuration to set the session description
- *   connection direction for video streaming.
- * @property {boolean} [sdpSettings.direction.video.send=true] The flag if uploading video streaming
- *   should be enabled when available.
- * @property {boolean} [sdpSettings.direction.video.receive=true] The flag if downloading video streaming
- *   should be enabled when available.
- * @property {JSON|Boolean} [publishOnly] <blockquote class="info">
- *   For MCU enabled Peer connections, defining this flag would make Peer not know other Peers presence in the Room.
- *   For non-MCU enable Peer connections, defining this flag would cause other Peers in the Room to
- *   not to send Stream to Peer, and overrides the config
- *   <code>sdpSettings.direction.audio.receive</code> value to <code>false</code>,
- *   <code>sdpSettings.direction.video.receive</code> value to <code>false</code>,
- *   <code>sdpSettings.direction.video.send</code> value to <code>true</code> and
- *   <code>sdpSettings.direction.audio.send</code> value to <code>true</code>.
- *   Note that this feature is currently is beta, and for any enquiries on enabling and its support for MCU enabled
- *   Peer connections, please  contact <a href="http://support.temasys.io">our support portal</a>.
- *   How does the publish only functionality work? Imagine several Skylink instances like A1, B1, C1 and A1
- *   opening a new instance A2 with publish only enabled with configured A1 as parent.
- *   <table class="table"><thead>
- *   <tr><th></th><th colspan="2">MCU enabled room</th><th colspan="2">MCU disabled room</th></tr>
- *   <tr><th></th><th>Presence</th><th>Stream</th><th>Presence</th><th>Stream</th></tr></thead><tbody>
- *   <tr><th>A1</th><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td><td>B1, C1</td></tr>
- *   <tr><th>B1</th><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td><td>A1, C1, A2</td></tr>
- *   <tr><th>C1</th><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td><td>B1, C1, A2</td></tr>
- *   <tr><th>A2</th><td></td><td></td><td>B1, C1</td><td></td></tr></tbody></table>
- *   Parent and child will not receive each other presence and stream because they are related to each other in the same client page,
- *   hence no uploading or downloading is required. If A2 did not configure A1 as the parent, A1 will receive A2.</blockquote>
- *   The config if Peer would publish only.
- * @property {String} [publishOnly.parentId] <blockquote class="info"><b>Deprecation Warning!</b>
- *   This property has been deprecated. Use <code>parentId</code> instead.
- *   </blockquote> The parent Peer ID to match to when Peer is connected.
- *   This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.
- *   If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
- *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
- *   (or receive the presence of) parent.
- * @property {String} [parentId] The parent Peer ID to match to when Peer is connected.
- *   Note that configuring this value overrides the <code>publishOnly.parentId</code> value.
- *   This is useful for identification for users connecting the Room twice simultaneously for multi-streaming.
- *   If User Peer ID matches the parent Peer ID provided from Peer, User will not be connected to Peer.
- *   Parent will not be connected to (or receive the presence of) child, so will child will not be connected to
- *   (or receive the presence of) parent.
- * @property {JSON} [peerConnection] <blockquote class="info">
- *   Note that this is mainly used for debugging purposes, so it may cause disruptions in connections or
- *   connectivity issues when configured. </blockquote> The Peer connection constraints settings.
- * @property {String} [peerConnection.bundlePolicy] The Peer connection media bundle policy.
- * - When not provided, its value is <code>BALANCED</code>.
- *   [Rel: Skylink.BUNDLE_POLICY]
- * @property {String} [peerConnection.rtcpMuxPolicy] The Peer connection RTP and RTCP ICE candidates mux policy.
- * - When not provided, its value is <code>REQUIRE</code>.
- *   [Rel: Skylink.RTCP_MUX_POLICY]
- * @property {number} [peerConnection.iceCandidatePoolSize=0] The number of ICE candidates to gather before
- *   gathering it when setting local offer / answer session description.
- * @property {String} [peerConnection.certificate] The type of certificate that Peer connection should
- *   generate and use when available.
- * - When not provided, its value is <code>AUTO</code>.
- *   [Rel: Skylink.PEER_CERTIFICATE]
- * @property {String} [peerConnection.disableBundle=false] The flag if for each Peer connection instead of bundling all
- *   media connections into 1 connection, should have all of them negotiated as different separate media connections.
- * @property {boolean|JSON} [autoBandwidthAdjustment=false] <blockquote class="info">
- *   Note that this is an experimental feature which may be removed or changed in the future releases.
- *   This feature is also only available for non-MCU enabled Peer connections and Edge Peer connections.
- *   </blockquote> The flag if Peer connections uploading and downloading bandwidth should be automatically adjusted
- *   each time based on a specified interval. Note this would cause the peer connection to restart.
+ * @property {boolean|JSON} [autoBandwidthAdjustment=false] The flag if Peer connections uploading and downloading bandwidth should be automatically adjusted
+ *   each time based on a specified interval.
+ * <blockquote class="info">
+ *   This feature is also only available for non-MCU enabled Peer connections. Note this will cause the peer connection to restart. If <code>bandwidth</code> option is set above, autoBandwidthAdjustment will not be honoured.
+ *   </blockquote>
  * @property {number} [autoBandwidthAdjustment.interval=10] The interval each time to adjust bandwidth
  *   connections in seconds.
  *   Note that the minimum value is <code>10</code>.
@@ -404,84 +272,66 @@
  */
 
 /**
- * @typedef {Object} GetUserMediaOptions - The camera Stream configuration options.
- * @property {boolean} [options.useExactConstraints=false]
+ * @typedef {Object} getUserMediaOptions - The camera Stream configuration options.
+ * @property {boolean} [useExactConstraints=false]
  *   Note that by enabling this flag, exact values will be requested when retrieving camera Stream,
  *   but it does not prevent constraints related errors. By default when not enabled,
  *   expected mandatory maximum values (or optional values for source ID) will requested to prevent constraints related
- *   errors, with an exception for <code>options.video.frameRate</code> option in Safari and IE (any plugin-enabled) browsers,
+ *   errors, with an exception for <code>video.frameRate</code> option in Safari and IE (any plugin-enabled) browsers,
  *   where the expected maximum value will not be requested due to the lack of support.
  *   The flag if <code>getUserMedia()</code> should request for camera Stream to match exact requested values of
- *   <code>options.audio.deviceId</code> and <code>options.video.deviceId</code>, <code>options.video.resolution</code>
- *   and <code>options.video.frameRate</code> when provided.
- * @property {boolean|JSON} [options.audio=false] The audio configuration options.
- * @property {boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
+ *   <code>audio.deviceId</code> and <code>video.deviceId</code>, <code>video.resolution</code>
+ *   and <code>video.frameRate</code> when provided.
+ * @property {boolean|JSON} [audio=false] The audio configuration options.
+ * @property {boolean} [audio.mute=false] The flag if audio tracks should be muted upon receiving them.
  *   Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.audioMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
- *   <code>true</code> and mutes any existing <a href="#method_shareScreen">
- *   <code>shareScreen()</code> Stream</a> audio tracks as well.
- * @property {Array} [options.audio.optional]
- * This property has been deprecated. "optional" constraints has been moved from specs.
- *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
- *   <code>true</code>. If you are looking to set the requested source ID of the audio track,
- *   use <code>options.audio.deviceId</code> instead.
- *   The <code>navigator.getUserMedia()</code> API <code>audio: { optional [..] }</code> property.
- * @property {String} [options.audio.deviceId]
+ *   <code>true</code> and mutes any existing screen share audio tracks as well.
+ * @property {String} [audio.deviceId]
  *   Note this is currently not supported in Firefox browsers.
  *    The audio track source ID of the device to use.
  *   The list of available audio source ID can be retrieved by the <a href="https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.
- * @property {boolean} [options.audio.echoCancellation=true]
+ * @property {boolean} [audio.echoCancellation=true]
  *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones. The flag to enable echo cancellation for audio track.
- * @property {boolean|JSON} [options.video=false]
- *    Note that the current Edge browser implementation does not support the <code>options.video.optional</code>,
- *    <code>options.video.deviceId</code>, <code>options.video.resolution</code> and
- *    <code>options.video.frameRate</code>, <code>options.video.facingMode</code>.
- *   The video configuration options.
- * @property {boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
+ * @property {boolean|JSON} [video=false] The video configuration options.
+ * @property {boolean} [video.mute=false] The flag if video tracks should be muted upon receiving them.
  *   Providing the value as <code>false</code> does nothing to <code>peerInfo.mediaStatus.videoMuted</code>,
  *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
- *   <code>true</code> and mutes any existing <a href="#method_shareScreen">
- *   <code>shareScreen()</code> Stream</a> video tracks as well.
- * @property {JSON} [options.video.resolution] The video resolution.
+ *   <code>true</code> and mutes any existing screen share video tracks as well.
+ * @property {JSON} [video.resolution] The video resolution.
  *   By default, <a href="#attr_VIDEO_RESOLUTION"><code>VGA</code></a> resolution option
  *   is selected when not provided.
  *   [Rel: Skylink.VIDEO_RESOLUTION]
- * @property {number|JSON} [options.video.resolution.width] The video resolution width.
+ * @property {number|JSON} [video.resolution.width] The video resolution width.
  * - When provided as a number, it is the video resolution width.
  * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.width</code> settings.
  *   Parameters are <code>"ideal"</code> for ideal resolution width, <code>"exact"</code> for exact video resolution width,
  *   <code>"min"</code> for min video resolution width and <code>"max"</code> for max video resolution width.
  *   Note that this may result in constraints related errors depending on the browser/hardware supports.
- * @property {number|JSON} [options.video.resolution.height] The video resolution height.
+ * @property {number|JSON} [video.resolution.height] The video resolution height.
  * - When provided as a number, it is the video resolution height.
  * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.height</code> settings.
  *   Parameters are <code>"ideal"</code> for ideal video resolution height, <code>"exact"</code> for exact video resolution height,
  *   <code>"min"</code> for min video resolution height and <code>"max"</code> for max video resolution height.
  *   Note that this may result in constraints related errors depending on the browser/hardware supports.
- * @property {number|JSON} [options.video.frameRate] The video <a href="https://en.wikipedia.org/wiki/Frame_rate">
+ * @property {number|JSON} [video.frameRate] The video <a href="https://en.wikipedia.org/wiki/Frame_rate">
  *   frameRate</a> per second (fps).
  * - When provided as a number, it is the video framerate.
  * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.frameRate</code> settings.
  *   Parameters are <code>"ideal"</code> for ideal video framerate, <code>"exact"</code> for exact video framerate,
  *   <code>"min"</code> for min video framerate and <code>"max"</code> for max video framerate.
  *   Note that this may result in constraints related errors depending on the browser/hardware supports.
- * @property {Array} [options.video.optional]
- *   This property has been deprecated. "optional" constraints has been moved from specs.
- *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
- *   <code>true</code>. If you are looking to set the requested source ID of the video track,
- *   use <code>options.video.deviceId</code> instead.
- *   The <code>navigator.getUserMedia()</code> API <code>video: { optional [..] }</code> property.
- * @property {String} [options.video.deviceId]
+ * @property {String} [video.deviceId]
  *   Note this is currently not supported in Firefox browsers.
  *    The video track source ID of the device to use.
  *   The list of available video source ID can be retrieved by the <a href="https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.
- * @property {String|JSON} [options.video.facingMode] The video camera facing mode.
+ * @property {String|JSON} [video.facingMode] The video camera facing mode.
  *   The list of available video source ID can be retrieved by the <a href="https://developer.mozilla.org
  *   /en-US/docs/Web/API/MediaTrackConstraints/facingMode">MediaTrackConstraints <code>facingMode</code> API</a>.
  * @property {Function} [callback] The callback function fired when request has completed.
@@ -498,22 +348,22 @@
  */
 
 /**
- * @typedef {Object} peerInfo - The Peer session information.
+ * @typedef peerInfo - The Peer session information.
  * @property {JSON|String} userData - The Peer current custom data.
- * @property {customSettings} settings - The Peer sending Stream settings.
+ * @property {customSettings} settings - The Peer sending stream settings.
  * @property {JSON} agent The Peer agent information.
  * @property {String} agent.name The Peer agent name.
  *   Data may be accessing browser or non-Web SDK name.
  * @property {number} agent.version The Peer agent version.
  *   Data may be accessing browser or non-Web SDK version. If the original value is <code>"0.9.6.1"</code>,
- *   it will be interpreted as <code>0.90601</code> where <code>0</code> helps to seperate the minor dots.
+ *   it will be interpreted as <code>0.90601</code> where <code>0</code> helps to separate the minor dots.
  * @property {String} [agent.os] - The Peer platform name.
  *  Data may be accessing OS platform version from Web SDK.
  * @property {String} [agent.pluginVersion] - The Peer Temasys Plugin version.
  *  Defined only when Peer is using the Temasys Plugin (IE / Safari).
  * @property {String} agent.DTProtocolVersion The Peer data transfer (DT) protocol version.
  * @property {String} agent.SMProtocolVersion The Peer signaling message (SM) protocol version.
- * @property {String} room The Room Peer is from.
+ * @property {SkylinkRoom} room The Room Peer is from.
  * @property {JSON} config The Peer connection configuration.
  * @property {boolean} config.enableDataChannel The flag if Datachannel connections would be enabled for Peer.
  * @property {boolean} config.enableIceRestart The flag if Peer connection has ICE connection restart support.
@@ -521,12 +371,6 @@
  * @property {number} config.priorityWeight The flag if Peer or User should be the offerer.
  *   If User's <code>priorityWeight</code> is higher than Peer's, User is the offerer, else Peer is.
  *   However for the case where the MCU is connected, User will always be the offerer.
- * @property {boolean} config.publishOnly The flag if Peer is publishing only stream but not receiving streams.
- * @property {boolean} config.receiveOnly The flag if Peer is receiving only streams but not publishing stream.
- * @property {boolean} [connected] - The flag if Peer ICE connection has been established successfully.
- *  Defined only when <code>isSelf</code> payload value is <code>false</code>.
- * @property {boolean} [init] - The flag if Peer connection has been created successfully.
- *  Defined only when <code>isSelf</code> payload value is <code>false</code>.
  */
 
 /**

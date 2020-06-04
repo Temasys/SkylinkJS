@@ -1,7 +1,5 @@
 import Skylink from '../../../../../index';
-import {
-  PEER_CERTIFICATE, PEER_CONNECTION_STATE, PEER_TYPE, TAGS,
-} from '../../../../../constants';
+import { PEER_CONNECTION_STATE, TAGS } from '../../../../../constants';
 import processPeer from './processPeer';
 import SkylinkSignalingServer from '../../../index';
 import handleNegotiationStats from '../../../../../skylink-stats/handleNegotiationStats';
@@ -92,18 +90,8 @@ export const parseAndSendWelcome = (message, caller) => {
   const state = Skylink.getSkylinkState(rid);
   const { hasMCU } = state;
   const targetMid = hasMCU && publisherId ? publisherId : mid;
-  const { RTCPeerConnection } = window;
 
   logStats(caller, targetMid, state, parsedMsg);
-
-  let callerState = 'enter';
-  if (caller === CALLERS.WELCOME) {
-    callerState = 'welcome';
-  }
-  if (targetMid !== PEER_TYPE.MCU && hasMCU && state.publishOnly) {
-    logger.log.WARN([targetMid, TAGS.PEER_CONNECTION, null, `Discarding ${callerState} for publishOnly case -> `], message);
-    return;
-  }
 
   const peerParams = {
     currentRoom: state.room,
@@ -113,28 +101,6 @@ export const parseAndSendWelcome = (message, caller) => {
     caller,
   };
 
-  if (state.peerConnectionConfig.certificate !== PEER_CERTIFICATE.AUTO && typeof RTCPeerConnection.generateCertificate === 'function') {
-    let certOptions = {};
-    if (state.peerConnectionConfig.certificate === PEER_CERTIFICATE.ECDSA) {
-      certOptions = {
-        name: 'ECDSA',
-        namedCurve: 'P-256',
-      };
-    } else {
-      certOptions = {
-        name: 'RSASSA-PKCS1-v1_5',
-        modulusLength: 2048,
-        publicExponent: new Uint8Array([1, 0, 1]),
-        hash: 'SHA-256',
-      };
-    }
-    RTCPeerConnection.generateCertificate(certOptions).then((cert) => {
-      peerParams.cert = cert;
-      processPeer(peerParams);
-      checkStampBeforeSendingWelcome(peerParams);
-    });
-  } else {
-    processPeer(peerParams);
-    checkStampBeforeSendingWelcome(peerParams);
-  }
+  processPeer(peerParams);
+  checkStampBeforeSendingWelcome(peerParams);
 };

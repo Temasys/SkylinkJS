@@ -10,7 +10,7 @@ const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, res
   // TODO: Full implementation to be done from _setLocalAndSendMessage under peer-handshake.js
   const state = Skylink.getSkylinkState(roomState.room.id);
   const {
-    peerConnections, peerConnectionConfig, bufferedLocalOffer, peerPriorityWeight, room,
+    peerConnections, bufferedLocalOffer, peerPriorityWeight, room,
   } = state;
   const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = messages;
   const peerConnection = peerConnections[targetMid];
@@ -20,10 +20,6 @@ const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, res
   };
 
   peerConnection.processingLocalSDP = true;
-
-  if (peerConnectionConfig.disableBundle) {
-    sd.sdp = sd.sdp.replace(/a=group:BUNDLE.*\r\n/gi, '');
-  }
 
   logger.log.INFO([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local session description updated ->'], sd.sdp);
 

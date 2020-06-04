@@ -1,6 +1,7 @@
 import ScreenSharing from './features/screen-sharing';
 import AsyncMessaging from './features/messaging/async-messaging';
 import EncryptedMessaging from './features/messaging/encrypted-messaging';
+import SkylinkApiResponse from './models/api-response';
 
 let instance = null;
 
@@ -63,6 +64,7 @@ class SkylinkStates {
     new ScreenSharing(roomState).deleteScreensharingInstance(roomState.room);
     AsyncMessaging.deleteAsyncInstance(roomState.room);
     EncryptedMessaging.deleteEncryptedInstance(roomState.room);
+    new SkylinkApiResponse().deleteApiResponseInstance();
   }
 }
 

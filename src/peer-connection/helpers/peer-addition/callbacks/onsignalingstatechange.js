@@ -10,7 +10,7 @@ import { isAgent } from '../../../../utils/helpers';
  * @param {RTCPeerConnection} peerConnection
  * @param {String} targetMid - The Peer Id
  * @param {SkylinkState} roomState - The current state.
- * @fires peerConnectionState
+ * @fires PEER_CONNECTION_STATE
  * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
  */
 // eslint-disable-next-line no-unused-vars

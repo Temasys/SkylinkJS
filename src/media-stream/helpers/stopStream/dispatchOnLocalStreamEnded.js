@@ -7,6 +7,7 @@ import MESSAGES from '../../../messages';
 import PeerData from '../../../peer-data/index';
 import helpers from '../../../peer-data/helpers';
 import { TAGS } from '../../../constants';
+import Room from '../../../room';
 
 /**
  * Function that handles the <code>RTCPeerConnection.removeTracks(sender)</code> on the local MediaStream.
@@ -14,7 +15,7 @@ import { TAGS } from '../../../constants';
  * @param {MediaStream} stream - The stream.
  * @param {boolean} isScreensharing
  * @memberOf MediaStreamHelpers
- * @fires streamEnded
+ * @fires STREAM_ENDED
  */
 const dispatchOnLocalStreamEnded = (room, stream, isScreensharing = false) => {
   const state = Skylink.getSkylinkState(room.id);
@@ -27,7 +28,7 @@ const dispatchOnLocalStreamEnded = (room, stream, isScreensharing = false) => {
   });
 
   dispatchEvent(streamEnded({
-    room,
+    room: Room.getRoomInfo(room.id),
     peerId: user.sid,
     peerInfo: PeerData.getCurrentSessionInfo(room),
     isSelf,

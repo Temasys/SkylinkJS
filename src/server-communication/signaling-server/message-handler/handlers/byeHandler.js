@@ -12,6 +12,7 @@ import {
 } from '../../../../constants';
 import MESSAGES from '../../../../messages';
 import { isAgent, isVersion } from '../../../../utils/helpers';
+import BandwidthAdjuster from '../../../../peer-connection/helpers/bandwidthAdjuster';
 
 /**
  * Checks if peer is connected.
@@ -107,18 +108,19 @@ export const clearPeerInfo = (roomKey, peerId) => {
     logger.log.INFO([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.SUCCESS]);
   }, 500);
 
+  if (updatedState.bandwidthAdjuster && !updatedState.hasMCU) {
+    // eslint-disable-next-line no-new
+    new BandwidthAdjuster({ roomKey: updatedState.room.id, peerId });
+  }
+
   delete updatedState.peerInformations[peerId];
   delete updatedState.peerMedias[peerId];
   delete updatedState.remoteStreams[peerId];
   delete updatedState.peerMessagesStamps[peerId];
   delete updatedState.peerEndOfCandidatesCounter[peerId];
   delete updatedState.peerCandidatesQueue[peerId];
-  delete updatedState.sdpSessions[peerId];
   delete updatedState.peerStats[peerId];
-  delete updatedState.peerBandwidth[peerId];
   delete updatedState.gatheredCandidates[peerId];
-  delete updatedState.peerCustomConfigs[peerId];
-  delete updatedState.peerConnStatus[peerId];
 };
 
 /**

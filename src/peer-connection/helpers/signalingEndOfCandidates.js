@@ -10,7 +10,7 @@ import { candidatesGathered } from '../../skylink-events';
  * @param {SkylinkState} roomState
  * @return {null}
  * @memberOf PeerConnection.PeerConnectionHelpers
- * @fires candidatesGathered
+ * @fires CANDIDATES_GATHERED
  */
 const signalingEndOfCandidates = (targetMid, roomState) => {
   const state = Skylink.getSkylinkState(roomState.room.id);

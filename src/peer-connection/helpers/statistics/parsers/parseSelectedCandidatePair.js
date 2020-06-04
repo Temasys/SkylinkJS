@@ -20,13 +20,14 @@ const formatCanTypeFn = (type) => {
  * Function that parses the raw stats from the RTCIceCandidatePairStats dictionary.
  * @param {SkylinkState} roomState - The room state.
  * @param {Object} output - Stats output object that stores the parsed stats values.
+ * @param {String} type - Stats output report type.
+ * @param {String} value - Stats output value.
  * @param {RTCPeerConnection} peerConnection - The peer connection.
  * @param {String} peerId - The peer Id.
- * @param {boolean} isAutoBwStats - The flag if auto bandwidth adjustment is true.
  * @memberOf PeerConnectionStatisticsParsers
  */
-const parseSelectedCandidatePair = (roomState, output, type, value, peerConnection, peerId, isAutoBwStats) => {
-  const { peerBandwidth, peerStats } = roomState;
+const parseSelectedCandidatePair = (roomState, output, type, value, peerConnection, peerId) => {
+  const { peerStats } = roomState;
   const { raw, selectedCandidatePair } = output;
 
   const keys = Object.keys(output.raw);
@@ -59,7 +60,7 @@ const parseSelectedCandidatePair = (roomState, output, type, value, peerConnecti
         selectedCandidatePair.priority = candidatePairStats.priority;
         selectedCandidatePair.nominated = candidatePairStats.nominated;
 
-        const prevStats = isAutoBwStats ? peerBandwidth[peerId][statsReport.id] : peerStats[peerId][statsReport.id];
+        const prevStats = peerStats[peerId][statsReport.id];
         // FF has not implemented the following stats
         const totalRoundTripTime = parseInt(statsReport.totalRoundTripTime || '0', 10);
         selectedCandidatePair.totalRoundTripTime = totalRoundTripTime;

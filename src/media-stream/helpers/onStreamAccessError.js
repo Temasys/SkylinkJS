@@ -17,8 +17,8 @@ import helpers from './index';
  * @param {object} resolve - The resolved promise.
  * @return {Promise<MediaStream | never>}
  * @memberOf MediaStreamHelpers
- * @fires mediaAccessError
- * @fires mediaAccessFallback
+ * @fires MEDIA_ACCESS_ERROR
+ * @fires MEDIA_ACCESS_FALLBACK
  */
 const onStreamAccessError = (error, reject, resolve, roomKey, audioSettings, videoSettings) => {
   const initOptions = Skylink.getInitOptions();

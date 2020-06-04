@@ -392,6 +392,9 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM,
     }
   } else {
     $('#user' + peerId + ' .name').html(peerInfo.userData);
+    setTimeout(() => {
+      console.log(Demo.Skylink.getPeersCustomSettings(config.defaultRoom));
+    }, 5000);
   }
 
   if (Demo.ShowStats[peerId]) {
@@ -920,8 +923,14 @@ $(document).ready(function() {
   };
 
   $("#add_stream_btn").click(function() {
-    const options = Object.assign({}, joinRoomOptions);
-    delete options.userData;
+    // const options = Object.assign({}, joinRoomOptions);
+    // delete options.userData;
+    const options = {
+      audio: true,
+      video: {
+        resolution: SkylinkConstants.VIDEO_RESOLUTION.QQVGA,
+      }
+    }
     Demo.Skylink.sendStream(config.defaultRoom, options)
     .then((streams) => {
       console.log("added streams", streams);
@@ -1013,7 +1022,7 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#restart_btn').click(function() {
-    Demo.Skylink.refreshConnection(config.defaultRoom);
+    Demo.Skylink.refreshConnection(config.defaultRoom, null, true, { bandwidth: SkylinkConstants.VIDEO_QUALITY.SQ});
   });
   // //---------------------------------------------------
   $('#join_room_btn').click(function () {

@@ -5,8 +5,6 @@ const parseUserInfo = (state, msg, parsedMsg) => {
     enableDataChannel: parsedMsg.enableDataChannel,
     enableIceRestart: parsedMsg.enableIceRestart,
     priorityWeight: parsedMsg.weight,
-    receiveOnly: parsedMsg.receiveOnly,
-    publishOnly: parsedMsg.publishOnly,
   };
 
   info.agent = info.agent ? info.agent : {
