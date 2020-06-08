@@ -1,5 +1,3 @@
-import { generateUUID } from '../utils/helpers';
-
 /**
  * @class
  * @classdesc Class representing a Skylink State.\
@@ -330,7 +328,7 @@ class SkylinkState {
      * @private
      * @since 0.6.31
      */
-    this.clientId = generateUUID();
+    this.clientId = initOptions.clientId;
     /**
      * Stores all the Stream media status.
      * @name streamsMediaStatus

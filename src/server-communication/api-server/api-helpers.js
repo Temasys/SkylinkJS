@@ -11,8 +11,10 @@ import {
   SDK_NAME,
   SDK_VERSION,
   SIGNALING_VERSION,
+  AUTH_STATE,
 } from '../../constants';
 import Skylink from '../../index';
+import HandleAuthStats from '../../skylink-stats/handleAuthStats';
 import Room from '../../room';
 
 const getEndPoint = (options) => {
@@ -112,6 +114,7 @@ export const enforceUserInitOptions = (apiResponse) => {
 export const authenticateApp = async (options) => {
   const { fetch } = window;
   const endpoint = getEndPoint(options);
+  new HandleAuthStats().send(options.defaultRoom, AUTH_STATE.REQUEST, { endpoint });
   const apiResponse = await fetch(endpoint, {
     headers: {
       Skylink_SDK_type: SDK_NAME.WEB,

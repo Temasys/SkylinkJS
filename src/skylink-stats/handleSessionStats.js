@@ -6,7 +6,7 @@ class HandleSessionStats extends SkylinkStats {
     super();
     this.model = {
       client_id: null,
-      appKey: null,
+      app_key: null,
       timestamp: null,
       room_id: null,
       user_id: null,
@@ -23,7 +23,7 @@ class HandleSessionStats extends SkylinkStats {
     this.model.client_id = roomState.clientId;
     this.model.state = message.type;
     this.model.contents = message;
-    this.model.appKey = Skylink.getInitOptions().appKey;
+    this.model.app_key = Skylink.getInitOptions().appKey;
     this.model.timestamp = (new Date()).toISOString();
 
     this.postStats(this.endpoints.session, this.model);

@@ -7,7 +7,7 @@ class HandleDataChannelStats extends SkylinkStats {
     const { AdapterJS } = window;
     this.model = {
       client_id: null,
-      appKey: null,
+      app_key: null,
       timestamp: null,
       room_id: null,
       user_id: null,
@@ -36,7 +36,7 @@ class HandleDataChannelStats extends SkylinkStats {
     this.model.channel_label = channel.label;
     this.model.channel_type = channelProp === 'main' ? 'persistent' : 'temporal';
     this.model.channel_binary_type = channel.binaryType;
-    this.model.appKey = Skylink.getInitOptions().appKey;
+    this.model.app_key = Skylink.getInitOptions().appKey;
     this.model.timestamp = (new Date()).toISOString();
     this.error = (typeof error === 'string' ? error : (error && error.message)) || null;
 

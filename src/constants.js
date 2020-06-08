@@ -60,6 +60,7 @@ import * as SkylinkEventsConstants from './skylink-events/constants';
  *  {@link SkylinkConstants.DC_PROTOCOL_TYPE|DC_PROTOCOL_TYPE} </br>
  *  // Private
  *  {@link SkylinkConstants.SIG_MESSAGE_TYPE|SIG_MESSAGE_TYPE} </br>
+ *  {@link SkylinkConstants.AUTH_STATE|AUTH_STATE} </br>
  *  {@link SkylinkConstants.STREAM_STATUS|STREAM_STATUS} </br>
  *  {@link SkylinkConstants.GROUP_MESSAGE_LIST|GROUP_MESSAGE_LIST} </br>
  *  {@link SkylinkConstants.TAGS|TAGS} </br>
@@ -319,6 +320,28 @@ export const DATA_TRANSFER_STATE = {
   USER_REJECTED: 'userRejected',
   USER_UPLOAD_REQUEST: 'userRequest',
   START_ERROR: 'startError',
+};
+
+/**
+ * The list of auth states.
+ * @typedef AUTH_STATE
+ * @property {String} REQUEST   Value <code>"request"</code>
+ *   The value of the state when the SDK authenticates with API.
+ * @property {String} SUCCESS Value <code>"success"</code>
+ *   The value of the state when the auth request is successful.
+ * @property {String} ERROR          Value <code>"error"</code>
+ *   The value of the state when the auth request fails.
+ * @constant
+ * @type Object
+ * @readOnly
+ * @memberOf SkylinkConstants
+ * @since 2.0.0
+ * @ignore
+ */
+export const AUTH_STATE = {
+  REQUEST: 'request',
+  SUCCESS: 'success',
+  ERROR: 'error',
 };
 
 /**
@@ -1777,6 +1800,7 @@ export const TAGS = {
   MESSAGING: 'MESSAGING',
   ASYNC_MESSAGING: 'ASYNC MESSAGING',
   ENCRYPTED_MESSAGING: 'ENCRYPTED MESSAGING',
+  STATS: 'STATS',
 };
 
 /**

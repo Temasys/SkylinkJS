@@ -8,7 +8,7 @@ class HandleClientStats extends SkylinkStats {
     const { AdapterJS, navigator } = window;
     this.model = {
       client_id: null,
-      appKey: null,
+      app_key: null,
       timestamp: null,
       username: null,
       sdk_name: SDK_NAME.WEB,
@@ -31,7 +31,7 @@ class HandleClientStats extends SkylinkStats {
     this.model.username = (roomState.user && roomState.user.uid) || null;
     this.model.sdk_version = roomState.VERSION;
     this.model.client_id = roomState.clientId;
-    this.model.appKey = Skylink.getInitOptions().appKey;
+    this.model.app_key = Skylink.getInitOptions().appKey;
     this.model.timestamp = (new Date()).toISOString();
 
     this.postStats(this.endpoints.client, this.model);
