@@ -11,7 +11,6 @@ const parseMediaOptions = (options, roomState) => {
   const state = Skylink.getSkylinkState(roomState.room.id);
   const mediaOptions = options || {};
 
-  state.user.userData = mediaOptions.userData || state.userData || '';
   state.streamsBandwidthSettings = {
     bAS: {},
   };

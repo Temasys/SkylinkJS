@@ -78,9 +78,10 @@ class MediaStream {
    * Function that sets User's Stream to send to Peer connection.
    * @param {String} targetMid - The mid of the target peer
    * @param {SkylinkState} roomState - Skylink State of current room
+   * @param {Boolean} isOffer - The flag if the call is from offer
    */
-  static addLocalMediaStreams(targetMid, roomState) {
-    helpers.addLocalMediaStreams(targetMid, roomState);
+  static addLocalMediaStreams(targetMid, roomState, isOffer) {
+    helpers.addLocalMediaStreams(targetMid, roomState, isOffer);
   }
 
   /**

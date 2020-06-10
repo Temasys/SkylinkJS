@@ -69,6 +69,7 @@ const MESSAGES = {
     STATE_CHANGE: 'Peer connection state changed ->',
     STATS_API_UNAVAILABLE: 'getStats() API is not available',
     MCU: 'MCU connected',
+    ADD_TRANSCEIVER: 'Adding empty transceiver',
     ERRORS: {
       REMOVE_TRACK: 'Error removing track from peer connection',
       REPLACE_TRACK: 'Error replacing track in peer connection',

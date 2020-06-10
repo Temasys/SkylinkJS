@@ -69,7 +69,7 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
 
   // Add stream only at offer/answer end
   if (!hasMCU || targetMid === PEER_TYPE.MCU) {
-    MediaStream.addLocalMediaStreams(targetMid, state);
+    MediaStream.addLocalMediaStreams(targetMid, state, true);
   }
 
   if (enableDataChannel && peerInformations[targetMid].config.enableDataChannel) {

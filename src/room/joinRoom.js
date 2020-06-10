@@ -17,6 +17,17 @@ const buildCachedApiResponse = (skylinkApiResponse) => {
   return cachedResponse;
 };
 
+const addNewStateAndCacheApiResponse = (response, options) => {
+  const apiServer = new SkylinkAPIServer();
+  const skylinkApiResponse = new SkylinkApiResponse(response);
+  const initOptions = apiServer.enforceUserInitOptions(skylinkApiResponse);
+  const skylinkState = new SkylinkState(initOptions);
+  skylinkState.user.userData = options.userData;
+  skylinkState.apiResponse = Object.freeze(buildCachedApiResponse(skylinkApiResponse));
+  Skylink.setSkylinkState(skylinkState, response.roomName);
+  return skylinkState;
+};
+
 /**
  * @description Method that starts the Room Session.
  * @param {joinRoomOptions} [options] The options available to join the room and configure the session.
@@ -30,7 +41,7 @@ const joinRoom = (options = {}, prefetchedStream) => new Promise((resolve, rejec
   const { navigator } = window;
   const apiServer = new SkylinkAPIServer();
   const signalingServer = new SkylinkSignalingServer();
-  let initOptions = Skylink.getInitOptions();
+  const initOptions = Skylink.getInitOptions();
   const handleClientStats = new HandleClientStats();
   const roomName = SkylinkAPIServer.getRoomNameFromParams(options) ? SkylinkAPIServer.getRoomNameFromParams(options) : initOptions.defaultRoom;
 
@@ -43,11 +54,7 @@ const joinRoom = (options = {}, prefetchedStream) => new Promise((resolve, rejec
   apiServer.createRoom(roomName).then((result) => {
     const { response } = result;
     response.roomName = roomName;
-    const skylinkApiResponse = new SkylinkApiResponse(response);
-    initOptions = apiServer.enforceUserInitOptions(skylinkApiResponse);
-    const skylinkState = new SkylinkState(initOptions);
-    skylinkState.apiResponse = Object.freeze(buildCachedApiResponse(skylinkApiResponse));
-    Skylink.setSkylinkState(skylinkState, roomName);
+    const skylinkState = addNewStateAndCacheApiResponse(response, options);
 
     apiServer.checkCodecSupport(skylinkState.room.id).then(() => {
       handleClientStats.send(skylinkState.room.id);
