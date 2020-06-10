@@ -13,7 +13,7 @@ import PeerConnection from '../../index';
  * @lends PeerConnection
  * @param {SkylinkState} roomState
  * @since 2.0.0
- * @fires onIncomingMessage
+ * @fires ON_INCOMING_MESSAGE
  */
 const messageProtocolHandler = (roomState, peerId, data, channelProp) => {
   const senderPeerId = data.sender || peerId;
@@ -39,7 +39,7 @@ const messageProtocolHandler = (roomState, peerId, data, channelProp) => {
  * @lends PeerConnection
  * @private
  * @since 2.0.0
- * @fires onDataChannelStateChanged
+ * @fires DATA_CHANNEL_STATE
  */
 const processDataChannelData = (roomState, rawData, peerId, channelName, channelType) => {
   const state = Skylink.getSkylinkState(roomState.room.id);
@@ -60,7 +60,7 @@ const processDataChannelData = (roomState, rawData, peerId, channelName, channel
     return null; // dataChannel not avaialble propbably having being closed abruptly | ESS-983
   }
 
-  if (streamId && state.dataStreams[streamId]) {
+  if (streamId && state.dataStreams && state.dataStreams[streamId]) {
     isStreamChunk = state.dataStreams[streamId].sessionChunkType === 'string' ? typeof rawData === 'string' : typeof rawData === 'object';
   }
 

@@ -7,7 +7,7 @@ import { getPeersStateChange } from '../../../../skylink-events';
  * Function that handles the Signaling Server message from getPeers() method.
  * @param {JSON} message
  * @memberOf SignalingMessageHandler
- * @fires getPeersStateChange
+ * @fires GET_PEERS_STATE_CHANGE
  */
 const getPeerListHandler = (message) => {
   const { result, type } = message;

@@ -62,3 +62,4 @@ node_modules
 dist
 build
 docs
+config.js

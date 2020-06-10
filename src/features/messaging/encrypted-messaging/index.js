@@ -8,6 +8,7 @@ import { getParamValidity, getRoomStateByName } from '../../../utils/helpers';
 import SkylinkError from '../../../utils/skylinkError';
 import logger from '../../../logger';
 import { TAGS } from '../../../constants';
+import Room from '../../../room';
 
 const instance = {};
 /**
@@ -80,7 +81,7 @@ class EncryptedMessaging {
 
   dispatchEncryptSecretEvent() {
     dispatchEvent(encryptionSecretsUpdated({
-      room: this.room,
+      room: Room.getRoomInfo(this.room.id),
       encryptSecrets: this.encryptSecrets,
       selectedSecretId: this.selectedSecretId,
       peerInfo: getUserInfo(this.room),

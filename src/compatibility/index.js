@@ -4,12 +4,10 @@
  * @private
  */
 
-import validateDepencies from './dependencies';
+import validateDependencies from './dependencies';
 import getConnectionPortsAndProtocolByBrowser from './ice-connection';
-import updateRemoveStream from './peer-connection';
 
 export {
-  validateDepencies,
+  validateDependencies,
   getConnectionPortsAndProtocolByBrowser,
-  updateRemoveStream,
 };

@@ -9,7 +9,7 @@ class HandleIceConnectionStats extends SkylinkStats {
     super();
     this.model = {
       client_id: null,
-      appKey: null,
+      app_key: null,
       timestamp: null,
       room_id: null,
       user_id: null,
@@ -31,7 +31,7 @@ class HandleIceConnectionStats extends SkylinkStats {
       this.model.peer_id = peerId;
       this.model.client_id = roomState.clientId;
       this.model.state = state;
-      this.model.appKey = Skylink.getInitOptions().appKey;
+      this.model.app_key = Skylink.getInitOptions().appKey;
       this.model.timestamp = (new Date()).toISOString();
 
       PeerConnection.retrieveStatistics(roomKey, peerId, Skylink.getInitOptions().beSilentOnStatsLogs).then((stats) => {

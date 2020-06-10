@@ -2,7 +2,80 @@ import * as SkylinkEventsConstants from './skylink-events/constants';
 
 /**
  * @namespace SkylinkConstants
- * @description Constants used by SkylinkJS are described here.
+ * @description
+ * <ul>
+ *  <li>{@link SkylinkConstants.BUNDLE_POLICY|BUNDLE_POLICY} </li>
+ *  <li>{@link SkylinkConstants.CANDIDATE_GENERATION_STATE|CANDIDATE_GENERATION_STATE} </li>
+ *  <li>{@link SkylinkConstants.CANDIDATE_PROCESSING_STATE|CANDIDATE_PROCESSING_STATE} </li>
+ *  <li>{@link SkylinkConstants.DATA_CHANNEL_STATE|DATA_CHANNEL_STATE} </li>
+ *  <li>{@link SkylinkConstants.DATA_CHANNEL_TYPE|DATA_CHANNEL_TYPE} </li>
+ *  <li>{@link SkylinkConstants.DATA_CHANNEL_MESSAGE_ERROR|DATA_CHANNEL_MESSAGE_ERROR} </li>
+ *  <li>{@link SkylinkEvents|EVENTS} </li>
+ *  <li>{@link SkylinkConstants.GET_CONNECTION_STATUS_STATE|GET_CONNECTION_STATUS_STATE} </li>
+ *  <li>{@link SkylinkConstants.GET_PEERS_STATE|GET_PEERS_STATE} </li>
+ *  <li>{@link SkylinkConstants.HANDSHAKE_PROGRESS|HANDSHAKE_PROGRESS} </li>
+ *  <li>{@link SkylinkConstants.ICE_CONNECTION_STATE|ICE_CONNECTION_STATE} </li>
+ *  <li>{@link SkylinkConstants.LOG_LEVEL|LOG_LEVEL} </li>
+ *  <li>{@link SkylinkConstants.MEDIA_ACCESS_FALLBACK_STATE|MEDIA_ACCESS_FALLBACK_STATE} </li>
+ *  <li>{@link SkylinkConstants.MEDIA_SOURCE|MEDIA_SOURCE} </li>
+ *  <li>{@link SkylinkConstants.MEDIA_STATUS|MEDIA_STATUS} </li>
+ *  <li>{@link SkylinkConstants.MEDIA_TYPE|MEDIA_TYPE} </li>
+ *  <li>{@link SkylinkConstants.MEDIA_STATE|MEDIA_STATE} </li>
+ *  <li>{@link SkylinkConstants.PEER_CERTIFICATE|PEER_CERTIFICATE} </li>
+ *  <li>{@link SkylinkConstants.PEER_CONNECTION_STATE|PEER_CONNECTION_STATE} </li>
+ *  <li>{@link SkylinkConstants.READY_STATE_CHANGE_ERROR|READY_STATE_CHANGE_ERROR} </li>
+ *  <li>{@link SkylinkConstants.READY_STATE_CHANGE|READY_STATE_CHANGE} </li>
+ *  <li>{@link SkylinkConstants.RTCP_MUX_POLICY|RTCP_MUX_POLICY} </li>
+ *  <li>{@link SkylinkConstants.RTMP_STATE|RTMP_STATE} </li>
+ *  <li>{@link SkylinkConstants.RECORDING_STATE|RECORDING_STATE} </li>
+ *  <li>{@link SkylinkConstants.SDP_SEMANTICS|SDP_SEMANTICS} </li>
+ *  <li>{@link SkylinkConstants.SERVER_PEER_TYPE|SERVER_PEER_TYPE} </li>
+ *  <li>{@link SkylinkConstants.SOCKET_ERROR|SOCKET_ERROR} </li>
+ *  <li>{@link SkylinkConstants.SOCKET_FALLBACK|SOCKET_FALLBACK} </li>
+ *  <li>{@link SkylinkConstants.SYSTEM_ACTION|SYSTEM_ACTION} </li>
+ *  <li>{@link SkylinkConstants.SYSTEM_ACTION_REASON|SYSTEM_ACTION_REASON} </li>
+ *  <li>{@link SkylinkConstants.SM_PROTOCOL_VERSION|SM_PROTOCOL_VERSION} </li>
+ *  <li>{@link SkylinkConstants.TURN_TRANSPORT|TURN_TRANSPORT} </li>
+ *  <li>{@link SkylinkConstants.VIDEO_RESOLUTION|VIDEO_RESOLUTION} </li>
+ *  <li>{@link SkylinkConstants.VIDEO_QUALITY|VIDEO_QUALITY} </li>
+ * </ul>
+ */
+
+/**
+ *  // Not implemented yet
+ *  {@link SkylinkConstants.DATA_TRANSFER_DATA_TYPE|DATA_TRANSFER_DATA_TYPE} </br>
+ *  {@link SkylinkConstants.DT_PROTOCOL_VERSION|DT_PROTOCOL_VERSION} </br>
+ *  {@link SkylinkConstants.DATA_TRANSFER_TYPE|DATA_TRANSFER_TYPE} </br>
+ *  {@link SkylinkConstants.DATA_TRANSFER_SESSION_TYPE|DATA_TRANSFER_SESSION_TYPE} </br>
+ *  {@link SkylinkConstants.DATA_TRANSFER_STATE|DATA_TRANSFER_STATE} </br>
+ *  {@link SkylinkConstants.DATA_STREAM_STATE|DATA_STREAM_STATE} </br>
+ *  {@link SkylinkConstants.INTRODUCE_STATE|INTRODUCE_STATE} </br>
+ *  {@link SkylinkConstants.REGIONAL_SERVER|REGIONAL_SERVER} </br>
+ *  {@link SkylinkConstants.PRIORITY_WEIGHT_SCHEME|PRIORITY_WEIGHT_SCHEME} </br>
+ *  {@link SkylinkConstants.CHUNK_FILE_SIZE|CHUNK_FILE_SIZE} </br>
+ *  {@link SkylinkConstants.MOZ_CHUNK_FILE_SIZE|MOZ_CHUNK_FILE_SIZE} </br>
+ *  {@link SkylinkConstants.BINARY_FILE_SIZE|BINARY_FILE_SIZE} </br>
+ *  {@link SkylinkConstants.MOZ_BINARY_FILE_SIZE|MOZ_BINARY_FILE_SIZE} </br>
+ *  {@link SkylinkConstants.CHUNK_DATAURL_SIZE|CHUNK_DATAURL_SIZE} </br>
+ *  {@link SkylinkConstants.DC_PROTOCOL_TYPE|DC_PROTOCOL_TYPE} </br>
+ *  // Private
+ *  {@link SkylinkConstants.SIG_MESSAGE_TYPE|SIG_MESSAGE_TYPE} </br>
+ *  {@link SkylinkConstants.AUTH_STATE|AUTH_STATE} </br>
+ *  {@link SkylinkConstants.STREAM_STATUS|STREAM_STATUS} </br>
+ *  {@link SkylinkConstants.GROUP_MESSAGE_LIST|GROUP_MESSAGE_LIST} </br>
+ *  {@link SkylinkConstants.TAGS|TAGS} </br>
+ *  {@link SkylinkConstants.TRACK_READY_STATE|TRACK_READY_STATE} </br>
+ *  {@link SkylinkConstants.TRACK_KIND|TRACK_KIND} </br>
+ *  {@link SkylinkConstants.MEDIA_INFO|MEDIA_INFO} </br>
+ *  {@link SkylinkConstants.SDK_VERSION|SDK_VERSION} </br>
+ *  {@link SkylinkConstants.SDK_NAME|SDK_NAME} </br>
+ *  {@link SkylinkConstants.API_VERSION|API_VERSION} </br>
+ *  {@link SkylinkConstants.SIGNALING_VERSION|SIGNALING_VERSION} </br>
+ *  {@link SkylinkConstants.BROWSER_AGENT|BROWSER_AGENT} </br>
+ *  {@link SkylinkConstants.PEER_TYPE|PEER_TYPE} </br>
+ *  {@link SkylinkConstants.SOCKET_EVENTS|SOCKET_EVENTS} </br>
+ *  {@link SkylinkConstants.SOCKET_TYPE|SOCKET_TYPE} </br>
+ *  {@link SkylinkConstants.STATES|STATES} </br>
  */
 
 /**
@@ -23,12 +96,12 @@ import * as SkylinkEventsConstants from './skylink-events/constants';
  * @property {String} BUFFERED_AMOUNT_LOW Value <code>"bufferedAmountLow"</code>
  *   The value of the state when Datachannel when the amount of data buffered to be sent
  *   falls below the Datachannel threshold.
- *   This state should occur only during after {@link Skylink#sendBlobData} or {@link Skylink#sendURLData} or
- *   {@link Skylink#sendP2PMessage}.
+ *   This state should occur only during after {@link Skylink#sendBlobData|sendBlobData} or {@link Skylink#sendURLData|sendURLData} or
+ *   {@link Skylink#sendP2PMessage|sendP2PMessage}.
  * @property {String} SEND_MESSAGE_ERROR  Value <code>"sendMessageError"</code>
  *   The value of the state when Datachannel when data transfer packets or P2P message fails to send.
- *   This state should occur only during after {@link Skylink#sendBlobData} or {@link Skylink#sendURLData} or
- *   {@link Skylink#sendP2PMessage}.
+ *   This state should occur only during after {@link Skylink#sendBlobData|sendBlobData} or {@link Skylink#sendURLData|sendURLData} or
+ *   {@link Skylink#sendP2PMessage|sendP2PMessage}.
  * @constant
  * @type object
  * @readOnly
@@ -51,18 +124,19 @@ export const DATA_CHANNEL_STATE = {
  * @typedef DATA_CHANNEL_TYPE
  * @property {String} MESSAGING Value <code>"messaging"</code>
  *   The value of the Datachannel type that is used only for messaging in
- *   {@link Skylink#sendP2PMessage}.
+ *   {@link Skylink#sendP2PMessage|sendP2PMessage}.
  *   However for Peers that do not support simultaneous data transfers, this Datachannel
  *   type will be used to do data transfers (1 at a time).
  *   Each Peer connections will only have one of this Datachannel type and the
- *   connection will only close when the Peer connection is closed (happens when {@link SkylinkEvents.event:peerConnectionState|peerConnectionStateEvent} triggers parameter payload <code>state</code> as
+ *   connection will only close when the Peer connection is closed (happens when {@link SkylinkEvents.event:PEER_CONNECTION_STATE|PEER CONNECTION
+  *   STATE} event triggers parameter payload <code>state</code> as
  *   <code>CLOSED</code> for Peer).
- * @property {String} DATA Value <code>"data"</code>
+ * @property {String} DATA [UNAVAILABLE] Value <code>"data"</code>
  *   The value of the Datachannel type that is used only for a data transfer in
- *   {@link Skylink#sendURLData} and
- *   {@link Skylink#sendBlobData}.
+ *   {@link Skylink#sendURLData|sendURLData} and
+ *   {@link Skylink#sendBlobData|sendBlobData}.
  *   The connection will close after the data transfer has been completed or terminated (happens when
- *   {@link SkylinkEvents.event:dataTransferStatedataTransferStateEvent} triggers parameter payload
+ *   {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} triggers parameter payload
  *   <code>state</code> as <code>DOWNLOAD_COMPLETED</code>, <code>UPLOAD_COMPLETED</code>,
  *   <code>REJECTED</code>, <code>CANCEL</code> or <code>ERROR</code> for Peer).
  * @constant
@@ -81,11 +155,11 @@ export const DATA_CHANNEL_TYPE = {
  * @typedef DATA_CHANNEL_MESSAGE_ERROR
  * @property {String} MESSAGE  Value <code>"message"</code>
  *   The value of the Datachannel sending message error type when encountered during
- *   sending P2P message from {@link Skylink#sendP2PMessage}.
+ *   sending P2P message from {@link Skylink#sendP2PMessage|sendP2PMessage}.
  * @property {String} TRANSFER Value <code>"transfer"</code>
  *   The value of the Datachannel sending message error type when encountered during
- *   data transfers from {@link Skylink#sendURLData} or
- *   {@link Skylink#sendBlobData}.
+ *   data transfers from {@link Skylink#sendURLData|sendURLData} or
+ *   {@link Skylink#sendBlobData|sendBlobData}.
  * @constant
  * @type object
  * @readOnly
@@ -103,22 +177,22 @@ export const DATA_CHANNEL_MESSAGE_ERROR = {
  * @property {String} BINARY_STRING Value <code>"binaryString"</code>
  *   The value of data transfer data type when Blob binary data chunks encoded to Base64 encoded string are
  *   sent or received over the Datachannel connection for the data transfer session.
- *   Used only in {@link Skylink#sendBlobData} when
+ *   Used only in {@link Skylink#sendBlobData|sendBlobData} when
  *   parameter <code>sendChunksAsBinary</code> value is <code>false</code>.
  * @property {String} ARRAY_BUFFER  Value <code>"arrayBuffer"</code>
  *   The value of data transfer data type when ArrayBuffer binary data chunks are
  *   sent or received over the Datachannel connection for the data transfer session.
- *   Used only in {@link Skylink#sendBlobData} when
+ *   Used only in {@link Skylink#sendBlobData|sendBlobData} when
  *   parameter <code>sendChunksAsBinary</code> value is <code>true</code>.
  * @property {String} BLOB          Value <code>"blob"</code>
  *   The value of data transfer data type when Blob binary data chunks are
  *   sent or received over the Datachannel connection for the data transfer session.
- *   Used only in {@link Skylink#sendBlobData} when
+ *   Used only in {@link Skylink#sendBlobData|sendBlobData} when
  *   parameter <code>sendChunksAsBinary</code> value is <code>true</code>.
  * @property {String} STRING        Value <code>"string"</code>
  *   The value of data transfer data type when only string data chunks are
  *   sent or received over the Datachannel connection for the data transfer session.
- *   Used only in {@link Skylink#sendURLData}.
+ *   Used only in {@link Skylink#sendURLData|sendURLData}.
  * @constant
  * @type Object
  * @readOnly
@@ -172,10 +246,10 @@ export const DATA_TRANSFER_TYPE = {
  * @typedef DATA_TRANSFER_SESSION_TYPE
  * @property {String} BLOB     Value <code>"blob"</code>
  *   The value of the session type for
- *   {@link Skylink#sendURLData} data transfer.
+ *   {@link Skylink#sendURLData|sendURLData} data transfer.
  * @property {String} DATA_URL Value <code>"dataURL"</code>
  *   The value of the session type for
- *   {@link Skylink#sendBlobData} data transfer.
+ *   {@link Skylink#sendBlobData|sendBlobData} data transfer.
  * @constant
  * @type Object
  * @readOnly
@@ -246,6 +320,28 @@ export const DATA_TRANSFER_STATE = {
   USER_REJECTED: 'userRejected',
   USER_UPLOAD_REQUEST: 'userRequest',
   START_ERROR: 'startError',
+};
+
+/**
+ * The list of auth states.
+ * @typedef AUTH_STATE
+ * @property {String} REQUEST   Value <code>"request"</code>
+ *   The value of the state when the SDK authenticates with API.
+ * @property {String} SUCCESS Value <code>"success"</code>
+ *   The value of the state when the auth request is successful.
+ * @property {String} ERROR          Value <code>"error"</code>
+ *   The value of the state when the auth request fails.
+ * @constant
+ * @type Object
+ * @readOnly
+ * @memberOf SkylinkConstants
+ * @since 2.0.0
+ * @ignore
+ */
+export const AUTH_STATE = {
+  REQUEST: 'request',
+  SUCCESS: 'success',
+  ERROR: 'error',
 };
 
 /**
@@ -361,7 +457,7 @@ export const CANDIDATE_PROCESSING_STATE = {
  * @property {String} CHECKING       Value <code>"checking"</code>
  *   The value of the state when Peer connection is checking for a suitable matching pair of
  *   ICE candidates to establish ICE connection.
- *   Exchanging of ICE candidates happens during {@link SkylinkEvents.event:candidateGenerationState|candidateGenerationStateEvent}.
+ *   Exchanging of ICE candidates happens during {@link SkylinkEvents.event:candidateGenerationState|{@link SkylinkEvents.event:CANDIDATE_GENERATION_STATE|CANDIDATE GENERATION STATE} event}.
  * @property {String} CONNECTED      Value <code>"connected"</code>
  *   The value of the state when Peer connection has found a suitable matching pair of
  *   ICE candidates to establish ICE connection but is still checking for a better
@@ -372,7 +468,7 @@ export const CANDIDATE_PROCESSING_STATE = {
  *   The value of the state when Peer connection has found the best suitable matching pair
  *   of ICE candidates to establish ICE connection and checking has stopped.
  *   At this state, ICE connection is already established and audio, video and
- *   data streaming has already started. This may happpen after <code>CONNECTED</code>.
+ *   data streaming has already started. This may happen after <code>CONNECTED</code>.
  * @property {String} FAILED         Value <code>"failed"</code>
  *   The value of the state when Peer connection ICE connection has failed.
  * @property {String} DISCONNECTED   Value <code>"disconnected"</code>
@@ -382,8 +478,6 @@ export const CANDIDATE_PROCESSING_STATE = {
  * @property {String} CLOSED         Value <code>"closed"</code>
  *   The value of the state when Peer connection ICE connection has closed.
  *   This happens when Peer connection is closed and no streaming can occur at this stage.
- * @property {String} TRICKLE_FAILED Value <code>"trickleFailed"</code>
- *   The value of the state when Peer connection ICE connection has failed during trickle ICE.
  * @constant
  * @type Object
  * @readOnly
@@ -397,7 +491,6 @@ export const ICE_CONNECTION_STATE = {
   COMPLETED: 'completed',
   CLOSED: 'closed',
   FAILED: 'failed',
-  TRICKLE_FAILED: 'trickleFailed',
   DISCONNECTED: 'disconnected',
 };
 
@@ -480,21 +573,27 @@ export const TURN_TRANSPORT = {
  * @since 0.5.0
  */
 export const PEER_CONNECTION_STATE = {
+  // onsignalingstatechange
   STABLE: 'stable',
   HAVE_LOCAL_OFFER: 'have-local-offer',
   HAVE_REMOTE_OFFER: 'have-remote-offer',
   CLOSED: 'closed',
+  // onconnectionstatechange
+  CONNECTING: 'connecting',
+  FAILED: 'failed',
+  DISCONNECTED: 'disconnected',
+  CONNECTED: 'connected',
 };
 
 /**
  * The list of {@link Skylink#getConnectionStatus} retrieval states.
  * @typedef GET_CONNECTION_STATUS_STATE
  * @property {number} RETRIEVING Value <code>0</code>
- *   The value of the state when {@link Skylink#getConnectionStatus} is retrieving the Peer connection stats.
+ *   The value of the state when {@link Skylink#getConnectionStatus|getConnectionStatus} is retrieving the Peer connection stats.
  * @property {number} RETRIEVE_SUCCESS Value <code>1</code>
- *   The value of the state when {@link Skylink#getConnectionStatus} has retrieved the Peer connection stats successfully.
+ *   The value of the state when {@link Skylink#getConnectionStatus|getConnectionStatus} has retrieved the Peer connection stats successfully.
  * @property {number} RETRIEVE_ERROR Value <code>-1</code>
- *   The value of the state when {@link Skylink#getConnectionStatus} has failed retrieving the Peer connection stats.
+ *   The value of the state when {@link Skylink#getConnectionStatus|getConnectionStatus} has failed retrieving the Peer connection stats.
  * @constant
  * @type Object
  * @readOnly
@@ -524,7 +623,6 @@ export const GET_CONNECTION_STATUS_STATE = {
  */
 export const SERVER_PEER_TYPE = {
   MCU: 'mcu',
-  // SIP: 'sip'
 };
 
 /**
@@ -654,13 +752,13 @@ export const HANDSHAKE_PROGRESS = {
  *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
  *   Read more about privileged App Key feature here</a>.
  * </blockquote>
- * The list of <a href="#method_getPeers"><code>getPeers()</code> method</a> retrieval states.
+ * The list of <code>{@link Skylink#getPeers|getPeers}</code> method retrieval states.
  * @typedef GET_PEERS_STATE
  * @property {String} ENQUIRED Value <code>"enquired"</code>
- *   The value of the state when <code>getPeers()</code> is retrieving the list of Peer IDs
+ *   The value of the state when <code>{@link Skylink#getPeers|getPeers}</code> is retrieving the list of Peer IDs
  *   from Rooms within the same App space from the Signaling server.
  * @property {String} RECEIVED Value <code>"received"</code>
- *   The value of the state when <code>getPeers()</code> has retrieved the list of Peer IDs
+ *   The value of the state when <code>{@link Skylink#getPeers|getPeers}</code> has retrieved the list of Peer IDs
  *   from Rooms within the same App space from the Signaling server successfully.
  * @readOnly
  * @type Object
@@ -704,7 +802,7 @@ export const INTRODUCE_STATE = {
 };
 
 /**
- * The list of Signaling server reaction states during {@link Skylink#joinRoom}.
+ * The list of Signaling server reaction states during {@link Skylink#joinRoom|joinRoom}.
  * @typedef SYSTEM_ACTION
  * @property {String} WARNING Value <code>"warning"</code>
  *   The value of the state when Room session is about to end.
@@ -726,41 +824,37 @@ export const SYSTEM_ACTION = {
 
 /**
  * The list of Signaling server reaction states reason of action code during
- * {@link Skylink#joinRoom}.
+ * {@link Skylink#joinRoom|joinRoom}.
  * @typedef SYSTEM_ACTION_REASON
  * @property {String} CREDENTIALS_EXPIRED Value <code>"oldTimeStamp"</code>
  *   The value of the reason code when Room session token has expired.
- *   Happens during {@link Skylink#joinRoom} request.
+ *   Happens during {@link Skylink#joinRoom|joinRoom} request.
  *   Results with: <code>REJECT</code>
  * @property {String} CREDENTIALS_ERROR   Value <code>"credentialError"</code>
  *   The value of the reason code when Room session token provided is invalid.
- *   Happens during {@link Skylink#joinRoom} request.
+ *   Happens during {@link Skylink#joinRoom|joinRoom} request.
  * @property {String} DUPLICATED_LOGIN    Value <code>"duplicatedLogin"</code>
  *   The value of the reason code when Room session token has been used already.
- *   Happens during {@link Skylink#joinRoom} request.
+ *   Happens during {@link Skylink#joinRoom|joinRoom} request.
  *   Results with: <code>REJECT</code>
  * @property {String} ROOM_NOT_STARTED    Value <code>"notStart"</code>
  *   The value of the reason code when Room session has not started.
- *   Happens during {@link Skylink#joinRoom} request.
+ *   Happens during {@link Skylink#joinRoom|joinRoom} request.
  *   Results with: <code>REJECT</code>
  * @property {String} EXPIRED             Value <code>"expired"</code>
  *   The value of the reason code when Room session has ended already.
- *   Happens during {@link Skylink#joinRoom} request.
+ *   Happens during {@link Skylink#joinRoom|joinRoom} request.
  *   Results with: <code>REJECT</code>
  * @property {String} ROOM_LOCKED         Value <code>"locked"</code>
  *   The value of the reason code when Room is locked.
- *   Happens during {@link Skylink#joinRoom} request.
+ *   Happens during {@link Skylink#joinRoom|joinRoom} request.
  *   Results with: <code>REJECT</code>
  * @property {String} FAST_MESSAGE        Value <code>"fastmsg"</code>
  *    The value of the reason code when User is flooding socket messages to the Signaling server
  *    that is sent too quickly within less than a second interval.
  *    Happens after Room session has started. This can be caused by various methods like
- *    {@link Skylink#sendMessage},
- *    {@link Skylink#muteStreams},
- *    {@link Skylink#enableAudio},
- *    {@link Skylink#enableVideo},
- *    {@link Skylink#disableAudio},
- *    {@link Skylink#disableVideo},
+ *    {@link Skylink#sendMessage|sendMessage},
+ *    {@link Skylink#muteStreams|muteStreams}
  *    Results with: <code>WARNING</code>
  * @property {String} ROOM_CLOSING        Value <code>"toClose"</code>
  *    The value of the reason code when Room session is ending.
@@ -773,12 +867,12 @@ export const SYSTEM_ACTION = {
  *    Results with: <code>REJECT</code>
  * @property {String} SERVER_ERROR        Value <code>"serverError"</code>
  *    The value of the reason code when Room session fails to start due to some technical errors.
- *    Happens during {@link Skylink#joinRoom} request.
+ *    Happens during {@link Skylink#joinRoom|joinRoom} request.
  *    Results with: <code>REJECT</code>
  * @property {String} KEY_ERROR           Value <code>"keyFailed"</code>
  *    The value of the reason code when Room session fails to start due to some technical error pertaining to
  *    App Key initialization.
- *    Happens during {@link Skylink#joinRoom} request.
+ *    Happens during {@link Skylink#joinRoom|joinRoom} request.
  *    Results with: <code>REJECT</code>
  * @constant
  * @type Object
@@ -812,7 +906,7 @@ export const SYSTEM_ACTION_REASON = {
  *   The value of the state when <code>init()</code> has successfully authenticated with the Auth server.
  *   Room session token is generated for joining the <codRoom</code> provided in <code>init()</code>.
  *   Room session token has to be generated each time User switches to a different Room
- *   in {@link Skylink#joinRoom}.
+ *   in {@link Skylink#joinRoom|joinRoom} method.
  * @property {number} ERROR     Value <code>-1</code>
  *   The value of the state when <code>init()</code> has failed authenticating with the Auth server.
  * @constant
@@ -950,7 +1044,7 @@ export const REGIONAL_SERVER = {
 };
 
 /**
- * The list of User's priority weight schemes for {@link Skylink#joinRoom} connections.
+ * The list of User's priority weight schemes for {@link Skylink#joinRoom|joinRoom}  connections.
  * @typedef PRIORITY_WEIGHT_SCHEME
  * @property {String} ENFORCE_OFFERER  Value <code>"enforceOfferer"</code>
  *   The value of the priority weight scheme to enforce User as the offerer.
@@ -1007,24 +1101,24 @@ export const LOG_LEVEL = {
 };
 
 /**
- * The list of {@link Skylink#joinRoom} socket connection failure states.
+ * The list of {@link Skylink#joinRoom|joinRoom}  socket connection failure states.
  * @typedef SOCKET_ERROR
  * @property {number} CONNECTION_FAILED    Value <code>0</code>
- *   The value of the failure state when <code>joinRoom()</code> socket connection failed to establish with
+ *   The value of the failure state when <code>{@link Skylink#joinRoom|joinRoom} </code> socket connection failed to establish with
  *   the Signaling server at the first attempt.
  * @property {number} RECONNECTION_FAILED  Value <code>-1</code>
- *   The value of the failure state when <code>joinRoom()</code> socket connection failed to establish
+ *   The value of the failure state when <code>{@link Skylink#joinRoom|joinRoom} </code> socket connection failed to establish
  *   the Signaling server after the first attempt.
  * @property {number} CONNECTION_ABORTED   Value <code>-2</code>
- *   The value of the failure state when <code>joinRoom()</code> socket connection will not attempt
+ *   The value of the failure state when <code>{@link Skylink#joinRoom|joinRoom} </code> socket connection will not attempt
  *   to reconnect after the failure of the first attempt in <code>CONNECTION_FAILED</code> as there
  *   are no more ports or transports to attempt for reconnection.
  * @property {number} RECONNECTION_ABORTED Value <code>-3</code>
- *   The value of the failure state when <code>joinRoom()</code> socket connection will not attempt
+ *   The value of the failure state when <code>{@link Skylink#joinRoom|joinRoom} </code> socket connection will not attempt
  *   to reconnect after the failure of several attempts in <code>RECONNECTION_FAILED</code> as there
  *   are no more ports or transports to attempt for reconnection.
  * @property {number} RECONNECTION_ATTEMPT Value <code>-4</code>
- *   The value of the failure state when <code>joinRoom()</code> socket connection is attempting
+ *   The value of the failure state when <code>{@link Skylink#joinRoom|joinRoom} </code> socket connection is attempting
  *   to reconnect with a new port or transport after the failure of attempts in
  *   <code>CONNECTION_FAILED</code> or <code>RECONNECTED_FAILED</code>.
  * @constant
@@ -1042,22 +1136,22 @@ export const SOCKET_ERROR = {
 };
 
 /**
- * The list of {@link Skylink#joinRoom} socket connection reconnection states.
+ * The list of {@link Skylink#joinRoom|joinRoom}  socket connection reconnection states.
  * @typedef SOCKET_FALLBACK
  * @property {String} NON_FALLBACK      Value <code>"nonfallback"</code>
- *   The value of the reconnection state when <code>joinRoom()</code> socket connection is at its initial state
+ *   The value of the reconnection state when <code>{@link Skylink#joinRoom|joinRoom} </code> socket connection is at its initial state
  *   without transitioning to any new socket port or transports yet.
  * @property {String} FALLBACK_PORT     Value <code>"fallbackPortNonSSL"</code>
- *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   The value of the reconnection state when <code>{@link Skylink#joinRoom|joinRoom} </code> socket connection is reconnecting with
  *   another new HTTP port using WebSocket transports to attempt to establish connection with Signaling server.
  * @property {String} FALLBACK_PORT_SSL Value <code>"fallbackPortSSL"</code>
- *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   The value of the reconnection state when <code>{@link Skylink#joinRoom|joinRoom} </code> socket connection is reconnecting with
  *   another new HTTPS port using WebSocket transports to attempt to establish connection with Signaling server.
  * @property {String} LONG_POLLING      Value <code>"fallbackLongPollingNonSSL"</code>
- *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   The value of the reconnection state when <code>{@link Skylink#joinRoom|joinRoom} </code> socket connection is reconnecting with
  *   another new HTTP port using Polling transports to attempt to establish connection with Signaling server.
  * @property {String} LONG_POLLING_SSL  Value <code>"fallbackLongPollingSSL"</code>
- *   The value of the reconnection state when <code>joinRoom()</code> socket connection is reconnecting with
+ *   The value of the reconnection state when <code>{@link Skylink#joinRoom|joinRoom} </code> socket connection is reconnecting with
  *   another new HTTPS port using Polling transports to attempt to establish connection with Signaling server.
  * @constant
  * @type Object
@@ -1076,7 +1170,7 @@ export const SOCKET_FALLBACK = {
 /**
  * <blockquote class="info">
  *   Note that this is used only for SDK developer purposes.<br>
- *   Current version: <code>0.1.4</code>
+ *   Current version: <code>2.1.0</code>
  * </blockquote>
  * The value of the current version of the Signaling socket message protocol.
  * @typedef SM_PROTOCOL_VERSION
@@ -1110,13 +1204,13 @@ export const SM_PROTOCOL_VERSION = '2.1.0';
  * @readOnly
  * @memberOf SkylinkConstants
  * @since 0.5.10
+ * @private
  */
 export const VIDEO_CODEC = {
   AUTO: 'auto',
   VP8: 'VP8',
   H264: 'H264',
   VP9: 'VP9',
-  // H264UC: 'H264UC'
 };
 
 /**
@@ -1148,6 +1242,7 @@ export const VIDEO_CODEC = {
  * @readOnly
  * @memberOf SkylinkConstants
  * @since 0.5.10
+ * @private
  */
 export const AUDIO_CODEC = {
   AUTO: 'auto',
@@ -1157,12 +1252,11 @@ export const AUDIO_CODEC = {
   G722: 'G722',
   PCMU: 'PCMU',
   PCMA: 'PCMA',
-  // SILK: 'SILK'
 };
 
 /**
  * The list of available screensharing media sources configured in the
- * {@link Skylink#shareScreen}.
+ * {@link Skylink#shareScreen|shareScreen}.
  * @typedef MEDIA_SOURCE
  * @property {String} SCREEN Value <code>"screen"</code>
  *   The value of the option to share entire screen.
@@ -1203,11 +1297,11 @@ export const MEDIA_SOURCE = {
 
 /**
  * <blockquote class="info">
- *   Note that currently {@link Skylink#getUserMedia} only configures
+ *   Note that currently {@link Skylink#getUserMedia|getUserMedia} method only configures
  *   the maximum resolution of the Stream due to browser interopability and support.
  * </blockquote>
  * The list of <a href="https://en.wikipedia.org/wiki/Graphics_display_resolution#Video_Graphics_Array">
- * video resolutions</a> sets configured in the {@link Skylink#getUserMedia}.
+ * video resolutions</a> sets configured in the {@link Skylink#getUserMedia|getUserMedia} method.
  * @typedef VIDEO_RESOLUTION
  * @property {Object} QQVGA Value <code>{ width: 160, height: 120 }</code>
  *   The value of the option to configure QQVGA resolution.
@@ -1316,19 +1410,19 @@ export const VIDEO_RESOLUTION = {
 };
 
 /**
- * The list of {@link Skylink#getUserMedia} or
- * {@link Skylink#shareScreen} Stream fallback states.
+ * The list of {@link Skylink#getUserMedia|getUserMedia} or
+ * {@link Skylink#shareScreen|shareScreen} Stream fallback states.
  * @typedef MEDIA_ACCESS_FALLBACK_STATE
  * @property {Object} FALLBACKING Value <code>0</code>
- *   The value of the state when <code>getUserMedia()</code> will retrieve audio track only
+ *   The value of the state when <code>{@link Skylink#getUserMedia|getUserMedia}</code> method will retrieve audio track only
  *   when retrieving audio and video tracks failed.
  *   This can be configured by Skylink {@link initOptions}
  *   <code>audioFallback</code> option.
  * @property {Object} FALLBACKED  Value <code>1</code>
- *   The value of the state when <code>getUserMedia()</code> or <code>shareScreen()</code>
- *   retrieves camera / screensharing Stream successfully but with missing originally required audio or video tracks.
+ *   The value of the state when <code>{@link Skylink#getUserMedia|getUserMedia}</code> or <code>{@link Skylink#shareScreen|shareScreen}</code>
+ *   method retrieves camera / screensharing Stream successfully but with missing originally required audio or video tracks.
  * @property {Object} ERROR       Value <code>-1</code>
- *   The value of the state when <code>getUserMedia()</code> failed to retrieve audio track only
+ *   The value of the state when <code>{@link Skylink#getUserMedia|getUserMedia}</code> method failed to retrieve audio track only
  *   after retrieving audio and video tracks failed.
  * @readOnly
  * @constant
@@ -1562,6 +1656,7 @@ export const SIG_MESSAGE_TYPE = {
   MESSAGE: 'message',
   GET_STORED_MESSAGES: 'getStoredMessages',
   STORED_MESSAGES: 'storedMessages',
+  RESTART: 'restart',
 };
 
 export const STREAM_STATUS = {
@@ -1708,6 +1803,7 @@ export const TAGS = {
   MESSAGING: 'MESSAGING',
   ASYNC_MESSAGING: 'ASYNC MESSAGING',
   ENCRYPTED_MESSAGING: 'ENCRYPTED MESSAGING',
+  STATS: 'STATS',
 };
 
 /**
@@ -1813,7 +1909,7 @@ export const MEDIA_INFO = {
  * @memberOf SkylinkConstants
  * @since 2.0
  */
-export const SDK_VERSION = '2.0.0';
+export const SDK_VERSION = '2.x.x';
 
 /**
  * The SDK type.
@@ -1939,53 +2035,4 @@ export const STATES = {
   SIGNALING: SOCKET_EVENTS,
 };
 
-/**
- * @namespace SkylinkConstants.EVENTS
- * @type {object}
- * @property {String} ON_INCOMING_STREAM - 'onIncomingStream'
- * @property {String} ON_INCOMING_SCREEN_STREAM - 'onIncomingScreenStream'
- * @property {String} STREAM_ENDED - 'streamEnded'
- * @property {String} PEER_UPDATED - 'peerUpdated'
- * @property {String} PEER_JOINED - 'peerJoined'
- * @property {String} PEER_LEFT - 'peerLeft'
- * @property {String} PEER_CONNECTION_STATE - 'peerConnectionState'
- * @property {String} DATA_CHANNEL_STATE - 'dataChannelState'
- * @property {String} ON_INCOMING_MESSAGE - 'onIncomingMessage'
- * @property {String} HANDSHAKE_PROGRESS - 'handshakeProgress'
- * @property {String} SERVER_PEER_JOINED - 'serverPeerJoined'
- * @property {String} SERVER_PEER_LEFT - 'serverPeerLeft'
- * @property {String} CANDIDATE_PROCESSING_STATE - 'candidateProcessingState'
- * @property {String} CANDIDATE_GENERATION_STATE - 'candidateGenerationState'
- * @property {String} CANDIDATES_GATHERED - 'candidatesGathered'
- * @property {String} ON_INCOMING_DATA - 'onIncomingData'
- * @property {String} GET_PEERS_STATE_CHANGE - 'getPeersStateChange'
- * @property {String} SESSION_DISCONNECT - 'sessionDisconnect'
- * @property {String} STREAM_MUTED - 'streamMuted'
- * @property {String} CHANNEL_OPEN - 'channelOpen'
- * @property {String} CHANNEL_CLOSE - 'channelClose'
- * @property {String} CHANNEL_MESSAGE - 'channelMessage'
- * @property {String} CHANNEL_ERROR - 'channelError'
- * @property {String} CHANNEL_RETRY - 'channelRetry'
- * @property {String} SOCKET_ERROR - 'socketError'
- * @property {String} SYSTEM_ACTION - 'systemAction'
- * @property {String} MEDIA_ACCESS_FALLBACK - 'mediaAccessFallback'
- * @property {String} MEDIA_ACCESS_REQUIRED - 'mediaAccessRequired'
- * @property {String} MEDIA_ACCESS_STOPPED - 'mediaAccessStopped'
- * @property {String} MEDIA_ACCESS_SUCCESS - 'mediaAccessSuccess'
- * @property {String} RECORDING_STATE - 'recordingState'
- * @property {String} LOCAL_MEDIA_MUTED - 'localMediaMuted'
- * @property {String} MEDIA_ACCESS_ERROR - 'mediaAccessError'
- * @property {String} GET_CONNECTION_STATUS_STATE_CHANGE - 'getConnectionStatusStateChange'
- * @property {String} READY_STATE_CHANGE - 'readyStateChange'
- * @property {String} ROOM_LOCK - 'roomLock'
- * @property {String} ICE_CONNECTION_STATE - 'iceConnectionState'
- * @property {String} BYE - 'bye'
- * @property {String} RTMP_STATE - 'rtmpState'
- * @property {String} STORED_MESSAGES - 'storedMessages'
- * @property {String} ENCRYPT_SECRETS_UPDATED - 'encryptSecretsUpdated'
- * @memberOf SkylinkConstants
- * @constant
- * @readonly
- * @since 2.0
- */
 export const EVENTS = SkylinkEventsConstants;

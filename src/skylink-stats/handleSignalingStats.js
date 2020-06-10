@@ -6,7 +6,7 @@ class HandleSignalingStats extends SkylinkStats {
     super();
     this.model = {
       client_id: null,
-      appKey: null,
+      app_key: null,
       timestamp: null,
       room_id: null,
       user_id: null,
@@ -29,7 +29,7 @@ class HandleSignalingStats extends SkylinkStats {
     this.model.signaling_url = roomState.socketSession.socketServer;
     this.model.signaling_transport = roomState.socketSession.socketType.toLowerCase();
     this.model.attempts = socketSession.socketSession.finalAttempts === 0 ? socketSession.socketSession.attempts : (socketSession.socketSession.finalAttempts * 2) + socketSession.socketSession.attempts;
-    this.model.appKey = Skylink.getInitOptions().appKey;
+    this.model.app_key = Skylink.getInitOptions().appKey;
     this.model.timestamp = (new Date()).toISOString();
     this.attempts = typeof error === 'number' ? error : null;
     this.model.error = (typeof error === 'string' ? error : (error && error.message)) || null;

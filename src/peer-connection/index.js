@@ -15,7 +15,6 @@ class PeerConnection {
    * @param {String} params.targetMid - Peer's id
    * @param {Object} params.peerBrowser - Peer's user agent object
    * @param {RTCCertificate} params.cert - Represents a certificate that an RTCPeerConnection uses to authenticate.
-   * @param {boolean} receiveOnly
    * @param {boolean} hasScreenshare - Is screenshare enabled
    */
   static addPeer(params) {

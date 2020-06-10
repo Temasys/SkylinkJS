@@ -12,6 +12,8 @@ import stopStreamHelpers from '../media-stream/helpers/stopStream/index';
 import ScreenSharing from '../features/screen-sharing';
 import MESSAGES from '../messages';
 import { isEmptyArray } from '../utils/helpers';
+import Room from './index';
+import BandwidthAdjuster from '../peer-connection/helpers/bandwidthAdjuster';
 
 /**
  * Emits the peerLeft event when current peer left the room.
@@ -30,14 +32,14 @@ const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
     dispatchEvent(serverPeerLeft({
       peerId,
       serverPeerType: SERVER_PEER_TYPE.MCU,
-      room,
+      room: Room.getRoomInfo(room.id),
     }));
   } else {
     dispatchEvent(peerLeft({
       peerId,
       peerInfo: PeerData.getCurrentSessionInfo(room),
       isSelf: false,
-      room,
+      room: Room.getRoomInfo(room.id),
     }));
   }
 
@@ -73,7 +75,7 @@ const sendByeOrDisconnectSocket = state => new Promise((resolve) => {
   const skylinkSignalingServer = new SkylinkSignalingServer();
   const isInMoreThanOneRoom = Object.keys(Skylink.getSkylinkState()).length > 1;
 
-  updatedState.inRoom = false;
+  room.inRoom = false;
   Skylink.setSkylinkState(updatedState, room.id);
 
   if (isInMoreThanOneRoom) {
@@ -125,6 +127,14 @@ const clearRoomState = (roomKey) => {
   Skylink.removeSkylinkState(roomKey);
 };
 
+const clearBandwidthAdjuster = (roomKey) => {
+  const state = Skylink.getSkylinkState(roomKey);
+  if (state.bandwidthAdjuster && !state.hasMCU) {
+    // eslint-disable-next-line no-new
+    new BandwidthAdjuster({ roomKey });
+  }
+};
+
 /**
  * Method that starts the peer left process.
  * @param {SkylinkState} roomState
@@ -149,8 +159,9 @@ export const leaveRoom = roomState => new Promise((resolve, reject) => {
             peerId: user.sid,
             peerInfo: PeerData.getCurrentSessionInfo(room),
             isSelf: true,
-            room,
+            room: Room.getRoomInfo(room.id),
           }));
+          clearBandwidthAdjuster(removedState.room.id);
           clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);
         });
@@ -172,8 +183,9 @@ export const leaveRoom = roomState => new Promise((resolve, reject) => {
             peerId: user.sid,
             peerInfo: PeerData.getCurrentSessionInfo(room),
             isSelf: true,
-            room,
+            room: Room.getRoomInfo(room.id),
           }));
+          clearBandwidthAdjuster(removedState.room.id);
           clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);
         });

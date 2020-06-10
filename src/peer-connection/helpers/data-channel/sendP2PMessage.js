@@ -6,6 +6,7 @@ import { onIncomingMessage } from '../../../skylink-events';
 import { dispatchEvent } from '../../../utils/skylinkEventManager';
 import PeerData from '../../../peer-data';
 import { getRoomStateByName } from '../../../utils/helpers';
+import Room from '../../../room';
 
 /**
  * @param message
@@ -13,13 +14,13 @@ import { getRoomStateByName } from '../../../utils/helpers';
  * @param {SkylinkState} roomState
  * @returns {null}
  * @memberOf PeerConnection.PeerConnectionHelpers
- * @fires onIncomingMessage
+ * @fires ON_INCOMING_MESSAGE
  */
 const sendP2PMessageForRoom = (roomState, message, targetPeerId) => {
   const initOptions = Skylink.getInitOptions();
   const {
     dataChannels,
-    inRoom,
+    room,
     user,
     hasMCU,
   } = roomState;
@@ -35,7 +36,7 @@ const sendP2PMessageForRoom = (roomState, message, targetPeerId) => {
     isPrivate = true;
   }
 
-  if (!inRoom || !(user && user.sid)) {
+  if (!room.inRoom || !(user && user.sid)) {
     logger.log.ERROR('Unable to send message as User is not in Room. ->', message);
     return null;
   }
@@ -86,7 +87,7 @@ const sendP2PMessageForRoom = (roomState, message, targetPeerId) => {
 
   if (targetPeerId || !hasMCU) {
     dispatchEvent(onIncomingMessage({
-      room: roomState.room,
+      room: Room.getRoomInfo(roomState.room.id),
       message: {
         targetPeerId: targetPeerId || null,
         content: message,

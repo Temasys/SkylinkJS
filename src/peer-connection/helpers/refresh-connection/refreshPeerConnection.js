@@ -2,11 +2,10 @@ import Skylink from '../../..';
 import logger from '../../../logger';
 import restartPeerConnection from './restartPeerConnection';
 import restartMCUConnection from './restartMCUConnection';
+import MESSAGES from '../../../messages';
+import { TAGS } from '../../../constants';
 
-const refreshSinglePeer = (peerId, roomState, options) => {
-  logger.log.INFO([peerId, 'PeerConnection', null, 'Restarting peer connection.']);
-  return restartPeerConnection(peerId, roomState, options);
-};
+const refreshSinglePeer = (peerId, roomState, options) => restartPeerConnection(peerId, roomState, options);
 
 /**
  * @param {String<Array>}listOfPeers
@@ -14,7 +13,6 @@ const refreshSinglePeer = (peerId, roomState, options) => {
  * @param {boolean} [doIceRestart = false]
  * @param {Object} [bwOptions = {}]
  * @param {JSON} bwOptions.bandwidth
- * @param {JSON} bwOptions.googleXBandwidth
  * @returns {Promise}
  * @memberOf PeerConnection.PeerConnectionHelpers
  */
@@ -40,7 +38,7 @@ const refreshPeerConnection = (listOfPeers, roomState, doIceRestart = false, bwO
 
     return restartMCUConnection(roomState, doIceRestart, bwOptions);
   } catch (error) {
-    logger.log.ERROR([null, 'RTCPeerConnection', null, 'Failed restarting.'], error);
+    logger.log.ERROR([null, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.REFRESH_CONNECTION.FAILED], error);
     return null;
   }
 };

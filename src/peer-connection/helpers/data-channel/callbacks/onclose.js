@@ -1,6 +1,6 @@
 import logger from '../../../../logger';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import { dataTransferState, onDataChannelStateChanged } from '../../../../skylink-events';
+import { onDataChannelStateChanged } from '../../../../skylink-events';
 import {
   DATA_CHANNEL_STATE, DATA_CHANNEL_TYPE, PEER_CONNECTION_STATE, HANDSHAKE_PROGRESS,
 } from '../../../../constants';
@@ -8,23 +8,12 @@ import Skylink from '../../../../index';
 import messages from '../../../../messages';
 import HandleDataChannelStats from '../../../../skylink-stats/handleDataChannelStats';
 import PeerConnection from '../../../index';
-
-const getTransferIDByPeerId = (pid, state) => {
-  const { dataTransfers } = state;
-  const transferIds = Object.keys(dataTransfers);
-
-  for (let i = 0; i < transferIds.length; i += 1) {
-    if (transferIds[i].indexOf(pid) !== -1) {
-      return transferIds[i];
-    }
-  }
-  return null;
-};
+import Room from '../../../../room';
 
 /**
  * @param {Object} params
- * @fires onDataChannelStateChanged
- * @fires dataTransferState
+ * @fires DATA_CHANNEL_STATE
+ * @fires DATA_CHANNEL_STATE
  * @memberOf PeerConnection.PeerConnectionHelpers.CreateDataChannelCallbacks
  */
 const onclose = (params) => {
@@ -44,7 +33,6 @@ const onclose = (params) => {
   }
 
   const { room, peerConnections } = state;
-  const transferId = getTransferIDByPeerId(peerId, state);
   const handleDataChannelStats = new HandleDataChannelStats();
 
   logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, DATA_CHANNEL.closed]);
@@ -54,22 +42,11 @@ const onclose = (params) => {
     dispatchEvent(onDataChannelStateChanged({
       state: DATA_CHANNEL_STATE.CLOSED,
       peerId,
-      room,
+      room: Room.getRoomInfo(room.id),
       channelName,
       channelType,
       bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
     }));
-
-    // ESS-983 Handling dataChannel unexpected close to trigger dataTransferState Error.
-    if (transferId) {
-      dispatchEvent(dataTransferState({
-        state: DATA_CHANNEL_STATE.ERROR,
-        transferId,
-        peerId,
-        transferInfo: null, // TODO: implement self._getTransferInfo(transferId, peerId, true, false, false) data-transfer
-        error: new Error(DATA_CHANNEL.closed),
-      }));
-    }
 
     if (peerConnections[peerId] && peerConnections[peerId].remoteDescription
       && peerConnections[peerId].remoteDescription.sdp && (peerConnections[peerId].remoteDescription.sdp.indexOf(

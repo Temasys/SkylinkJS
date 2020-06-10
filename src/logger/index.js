@@ -1,5 +1,6 @@
 import { logFn, persistLogLevel, getPersistedLevel } from './log-helpers';
 import MESSAGES from '../messages';
+import { isANumber } from '../utils/helpers';
 
 /**
  * @classdesc Class used for logging messages on the console. Exports a singleton logger object.
@@ -56,7 +57,7 @@ class SkylinkLogger {
    * @alias SkylinkLogger#setLevel
    */
   setLevel(level = this.levels.ERROR, storeLogs) {
-    if (typeof level === 'number') {
+    if (isANumber(level)) {
       this.level = level;
       persistLogLevel(this.level);
     } else {

@@ -6,13 +6,13 @@ import MESSAGES from '../../../messages';
 const getMessageConfig = (roomState, targetPeerId) => {
   const {
     peerInformations,
-    inRoom,
+    room,
     user,
   } = roomState;
   let listOfPeers;
   let isPrivate = false;
 
-  if (!inRoom || !user) {
+  if (!room.inRoom || !user) {
     throw Error(MESSAGES.ROOM.ERRORS.NOT_IN_ROOM);
   }
 

@@ -12,14 +12,14 @@ import MESSAGES from '../../messages';
  * @param {SkylinkRoom} room
  * @param {String | Object} userData
  * @memberOf PeerDataHelpers
- * @fires peerUpdated
+ * @fires PEER_UPDATED
  */
 const setUserData = (room, userData) => {
   const roomState = Skylink.getSkylinkState(room.id);
   const { PEER_INFORMATIONS: { UPDATE_USER_DATA } } = MESSAGES;
   const updatedUserData = userData || '';
 
-  roomState.userData = updatedUserData;
+  roomState.user.userData = updatedUserData;
   Skylink.setSkylinkState(roomState, roomState.room.id);
 
   new SkylinkSignalingServer().setUserData(roomState);

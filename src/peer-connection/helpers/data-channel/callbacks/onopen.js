@@ -8,7 +8,7 @@ import HandleDataChannelStats from '../../../../skylink-stats/handleDataChannelS
 
 /**
  * @param {Object} params
- * @fires onDataChannelStateChanged
+ * @fires DATA_CHANNEL_STATE
  * @memberOf PeerConnection.PeerConnectionHelpers.CreateDataChannelCallbacks
  */
 const onopen = (params) => {

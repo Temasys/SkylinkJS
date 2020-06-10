@@ -2,7 +2,6 @@
 import logger from '../../logger/index';
 
 const getSDPSelectedCodec = (targetMid, sessionDescription, type, beSilentOnParseLogs) => {
-  // TODO implement getSDPSelectedCodec
   const codecInfo = {
     name: null,
     implementation: null,

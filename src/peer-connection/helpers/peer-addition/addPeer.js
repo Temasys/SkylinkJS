@@ -2,7 +2,6 @@ import Skylink from '../../../index';
 import { SDP_SEMANTICS } from '../../../constants';
 import logger from '../../../logger/index';
 import createPeerConnection from './createPeerConnection';
-import HandleIceConnectionStats from '../../../skylink-stats/handleIceConnectionStats';
 import handleIceGatheringStats from '../../../skylink-stats/handleIceGatheringStats';
 
 /**
@@ -12,7 +11,6 @@ import handleIceGatheringStats from '../../../skylink-stats/handleIceGatheringSt
  * @param {String} params.targetMid - Peer's id
  * @param {Object} params.peerBrowser - Peer's user agent object
  * @param {RTCCertificate} params.cert - Represents a certificate that an RTCPeerConnection uses to authenticate.
- * @param {boolean} params.receiveOnly
  * @param {boolean} params.hasScreenshare - Is screenshare enabled
  * @memberOf PeerConnection.PeerConnectionHelpers
  */
@@ -23,23 +21,15 @@ const addPeer = (params) => {
     targetMid,
     peerBrowser,
     cert,
-    receiveOnly,
     hasScreenShare,
   } = params;
   const initOptions = Skylink.getInitOptions();
   const state = Skylink.getSkylinkState(currentRoom.id);
   const { peerConnections, room } = state;
-  const handleIceConnectionStats = new HandleIceConnectionStats();
 
   if (!peerConnections[targetMid]) {
-    state.peerConnStatus[targetMid] = {
-      connected: false,
-      init: false,
-    };
-
     logger.log.INFO([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
       peerBrowser,
-      receiveOnly,
       enableDataChannel: initOptions.enableDataChannel,
     });
 
@@ -67,7 +57,6 @@ const addPeer = (params) => {
 
     state.peerConnections[targetMid] = connection;
     Skylink.setSkylinkState(state, currentRoom.id);
-    handleIceConnectionStats.send(room.id, connection.iceConnectionState, targetMid);
     handleIceGatheringStats.send(room.id, 'new', targetMid, false);
   } else {
     logger.log.WARN([targetMid, null, null, 'Connection to peer has already been made.']);

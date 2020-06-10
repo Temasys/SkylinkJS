@@ -13,6 +13,7 @@ import handleNegotiationStats from '../../../../../skylink-stats/handleNegotiati
 import MESSAGES from '../../../../../messages';
 import PeerMedia from '../../../../../peer-media/index';
 import SessionDescription from '../../../../../session-description';
+import Room from '../../../../../room';
 
 const handleSetOfferAndAnswerSuccess = (state, targetMid, description, isRemote) => {
   const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
@@ -26,7 +27,7 @@ const handleSetOfferAndAnswerSuccess = (state, targetMid, description, isRemote)
     dispatchEvent(handshakeProgress({
       state: HANDSHAKE_PROGRESS[msgType],
       peerId: targetMid,
-      room,
+      room: Room.getRoomInfo(room.id),
     }));
   }
 
@@ -60,26 +61,15 @@ const handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote,
     state: HANDSHAKE_PROGRESS.ERROR,
     peerId: isRemote ? targetMid : user.sid,
     error,
-    room,
+    room: Room.getRoomInfo(room.id),
   }));
 };
 
+// modifying the remote description received
 const mungeSDP = (targetMid, sessionDescription, roomKey) => {
   const mungedSessionDescription = sessionDescription;
-  // modifying the remote description received
   // TODO: Below SDP methods needs to be implemented in the SessionDescription Class.
-  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPFilteredCandidates(targetMid, sessionDescriptionToSet, message.rid);
-  // sessionDescriptionToSet.sdp = SessionDescription.setSDPCodec(targetMid, sessionDescriptionToSet, message.rid);
   mungedSessionDescription.sdp = SessionDescription.setSDPBitrate(targetMid, mungedSessionDescription, roomKey);
-  // sessionDescriptionToSet.sdp = SessionDescription.setSDPCodecParams(targetMid, sessionDescriptionToSet, message.rid);
-  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPCodecs(targetMid, sessionDescriptionToSet, message.rid);
-  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPREMBPackets(targetMid, sessionDescriptionToSet, message.rid);
-  // sessionDescriptionToSet.sdp = SessionDescription.handleSDPConnectionSettings(targetMid, sessionDescriptionToSet, message.rid, 'remote');
-  // sessionDescriptionToSet.sdp = SessionDescription.removeSDPUnknownAptRtx(targetMid, sessionDescriptionToSet, message.rid);
-
-  // if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
-  //   SessionDescription.setOriginalDTLSRole(state, sessionDescriptionToSet, true);
-  // }
 
   // logger.log.INFO([targetMid, 'RTCSessionDescription', type, `Updated remote ${type} ->`], sessionDescriptionToSet.sdp);
   return mungedSessionDescription;
@@ -131,7 +121,7 @@ const setRemoteDescription = (room, targetMid, remoteDescription) => {
   const state = Skylink.getSkylinkState(room.id);
   const { peerConnections } = state;
   const { type } = remoteDescription;
-  const { STATS_MODULE, NEGOTIATION_PROGRESS } = MESSAGES;
+  const { STATS_MODULE } = MESSAGES;
   const peerConnection = peerConnections[targetMid];
   const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
 
@@ -217,7 +207,6 @@ const updateState = (state, message) => {
     updatedState.peerInformations[targetMid].settings = updatedUserInfo.settings || {};
     updatedState.peerInformations[targetMid].mediaStatus = updatedUserInfo.mediaStatus || {};
     updatedState.peerInformations[targetMid].userData = updatedUserInfo.userData;
-    // updatedState.peerInformations[targetMid].midSourceMap = updatedUserInfo.midSourceMap;
   }
 
   updatedState.peerConnections[targetMid].negotiating = true;
@@ -232,18 +221,20 @@ const canProceed = (state, message) => {
   const {
     peerPriorityWeight, bufferedLocalOffer, room, peerConnections,
   } = state;
+  const { STATS_MODULE, NEGOTIATION_PROGRESS, PEER_CONNECTION } = MESSAGES;
   const targetMid = mid;
-  const {
-    processingRemoteSDP, processingLocalSDP, negotiating,
-  } = peerConnections[targetMid];
-  const { STATS_MODULE, NEGOTIATION_PROGRESS, NO_PEER_CONNECTION } = MESSAGES;
+  const peerConnection = peerConnections[targetMid];
   const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
   let error = null;
 
-  if (!peerConnections[targetMid]) {
-    logger.log.ERROR([targetMid, null, type, `${NO_PEER_CONNECTION.NO_PEER_CONNECTION}. Unable to set${type === 'offer' ? 'Remote' : 'Local'}Offer.`]);
-    error = NO_PEER_CONNECTION.NO_PEER_CONNECTION;
+  if (!peerConnection) {
+    logger.log.ERROR([targetMid, null, type, `${PEER_CONNECTION.NO_PEER_CONNECTION}. Unable to set${type === 'offer' ? 'Remote' : 'Local'}Offer.`]);
+    error = PEER_CONNECTION.NO_PEER_CONNECTION;
   }
+
+  const {
+    processingRemoteSDP, processingLocalSDP, negotiating,
+  } = peerConnection;
 
   if (type === 'offer' && peerConnections[targetMid].signalingState !== PEER_CONNECTION_STATE.STABLE) {
     logger.log.WARN([targetMid, null, type, NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE], {
@@ -288,7 +279,7 @@ const canProceed = (state, message) => {
  * @param {JSON} message
  * @return {null}
  * @memberOf SignalingMessageHandler
- * @fires handshakeProgress
+ * @fires HANDSHAKE_PROGRESS
  */
 // eslint-disable-next-line import/prefer-default-export
 export const parseAndSetRemoteDescription = (message) => {

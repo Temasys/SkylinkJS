@@ -24,11 +24,6 @@ class SkylinkUser {
      */
     this.timeStamp = rawApiResponse.timeStamp;
     /**
-     * Information about this user
-     * @type {JSON}
-     */
-    this.info = {};
-    /**
      * The socket ID of the user
      * @type {JSON}
      */

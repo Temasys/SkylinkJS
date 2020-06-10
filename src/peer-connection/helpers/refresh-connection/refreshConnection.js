@@ -7,6 +7,7 @@ import {
   isEmptyArray, isAObj, isAString, isABoolean,
 } from '../../../utils/helpers';
 import buildRefreshConnectionResult from './buildRefreshConnectionResult';
+import { TAGS } from '../../../constants';
 
 const buildResult = (listOfPeers, refreshErrors, refreshSettings) => {
   const result = {};
@@ -72,8 +73,7 @@ const filterParams = (targetPeerId, iceRestart, options, peerConnections) => {
  * @param {String} targetPeerId
  * @param {boolean} iceRestart
  * @param {Object} options
- * @param {Object} options.andwidth
- * @param {Object} options.googleXBandwidth
+ * @param {Object} options.bandwidth
  * @return {Promise}
  * @memberOf PeerConnection
  */
@@ -91,14 +91,14 @@ const refreshConnection = (roomState, targetPeerId, iceRestart, options) => new 
 
   try {
     if (isEmptyArray(listOfPeers) && !(hasMCU && !mcuUseRenegoRestart)) {
-      logger.log.ERROR(PEER_CONNECTION.refresh_no_peer_connection);
+      logger.log.ERROR(PEER_CONNECTION.NO_PEER_CONNECTION);
       reject({
-        refreshErrors: { self: PEER_CONNECTION.refresh_no_peer_connection },
+        refreshErrors: { self: PEER_CONNECTION.NO_PEER_CONNECTION },
         listOfPeers,
       });
     }
 
-    logger.log.INFO([null, 'PeerConnection', null, PEER_CONNECTION.refresh_start]);
+    logger.log.INFO([null, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.START]);
 
     const refreshPeerConnectionPromises = PeerConnection.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
     refreshPeerConnectionPromises
@@ -109,9 +109,9 @@ const refreshConnection = (roomState, targetPeerId, iceRestart, options) => new 
           if (Array.isArray(mResults[i])) {
             const error = mResults[i];
             refreshErrors.push(buildPeerRefreshErrors(error[0], error[1]));
-            logger.log.WARN([listOfPeers, 'PeerConnection', null, PEER_CONNECTION.refresh_peer_failed], error[0]);
-          } else if (typeof mResults[i] === 'string') {
-            logger.log.INFO([listOfPeers, 'PeerConnection', null, PEER_CONNECTION.refresh_peer_success], mResults[i]);
+            logger.log.WARN([listOfPeers, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.FAILED], error[0]);
+          } else if (isAString(mResults[i])) {
+            logger.log.INFO([listOfPeers, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.SUCCESS], mResults[i]);
           }
         }
 
@@ -121,8 +121,8 @@ const refreshConnection = (roomState, targetPeerId, iceRestart, options) => new 
           resolve(buildResult(listOfPeers, refreshErrors, buildPeerRefreshSettings(listOfPeers, room, doIceRestart)));
         }
       })
-      .catch(error => logger.log.ERROR([null, 'RTCPeerConnection', null, PEER_CONNECTION.refresh_failed], error))
-      .finally(() => logger.log.INFO(PEER_CONNECTION.refresh_completed));
+      .catch(error => logger.log.ERROR([null, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.FAILED], error))
+      .finally(() => logger.log.INFO(PEER_CONNECTION.REFRESH_CONNECTION.COMPLETED));
   } catch (error) {
     reject(error);
   }

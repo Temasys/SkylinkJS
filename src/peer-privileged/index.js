@@ -36,7 +36,7 @@ class PeerPrivileged {
    * @param {SkylinkRoom} room
    * @param {boolean} showAll
    * @return {Promise<object>}
-   * @fires getPeersStateChange
+   * @fires GET_PEERS_STATE_CHANGE
    */
   static getPeerList(room, showAll) {
     return new Promise((resolve, reject) => {

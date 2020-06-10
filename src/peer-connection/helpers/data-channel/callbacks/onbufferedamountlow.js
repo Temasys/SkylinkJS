@@ -4,11 +4,12 @@ import { onDataChannelStateChanged } from '../../../../skylink-events';
 import PeerConnection from '../../../index';
 import { DATA_CHANNEL_STATE } from '../../../../constants';
 import Skylink from '../../../../index';
+import Room from '../../../../room';
 
 /**
  *
  * @param {Object} params
- * @fires onDataChannelStateChanged
+ * @fires DATA_CHANNEL_STATE
  * @memberOf PeerConnection.PeerConnectionHelpers.CreateDataChannelCallbacks
  */
 const onbufferedamountlow = (params) => {
@@ -27,7 +28,7 @@ const onbufferedamountlow = (params) => {
 
   dispatchEvent(onDataChannelStateChanged({
     state: DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW,
-    room,
+    room: Room.getRoomInfo(room.id),
     peerId,
     channelName,
     channelType,

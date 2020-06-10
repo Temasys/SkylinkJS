@@ -6,6 +6,7 @@ import logger from '../../../logger';
 import MESSAGES from '../../../messages';
 import SkylinkSignalingServer from '../../../server-communication/signaling-server/index';
 import { TAGS, STREAM_STATUS } from '../../../constants';
+import { DEFAULTS } from '../../../defaults';
 
 const replaceScreenTrack = (state, peerIds, streams, streamId) => {
   const oldStream = streams.screenshare.stream;
@@ -18,7 +19,7 @@ const replaceScreenTrack = (state, peerIds, streams, streamId) => {
 };
 
 const dispatchScreenEndedEvents = (room, user, stream) => {
-  const options = mediaStreamHelpers.parseStreamSettings({ video: true });
+  const options = mediaStreamHelpers.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
   options.isScreensharing = true;
   new SkylinkSignalingServer().stream(room.id, user, stream, STREAM_STATUS.ENDED, options);
 

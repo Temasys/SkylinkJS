@@ -2,7 +2,6 @@ import logger from '../../logger/index';
 
 const getSDPICECandidates = (targetMid, sessionDescription, beSilentOnParseLogs) => {
   const { RTCIceCandidate } = window;
-  // TODO: implement getSDPICECandidates
   const candidates = {
     host: [],
     srflx: [],

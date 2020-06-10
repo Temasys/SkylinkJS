@@ -72,7 +72,6 @@ class SkylinkPublicInterface {
 
   /**
    * @description Method that sends a message to peers via the data channel connection.
-   * Consider using {@link Skylink#sendURLData|sendURLData} if you are sending large strings to peers.
    * @param {String} [roomName] - The name of the room the message is intended for.
    * When not provided, the message will be broadcast to all rooms where targetPeerId(s) are found (if provided).
    * Note when roomName is provided, targetPeerId should be provided as null.
@@ -126,7 +125,7 @@ class SkylinkPublicInterface {
    *     // handle message from remote peer
    *   }
    * }
-   * @fires {@link SkylinkEvents.event:onIncomingMessage|onIncomingMessage}
+   * @fires {@link SkylinkEvents.event:ON_INCOMING_MESSAGE|ON_INCOMING_MESSAGE} event
    * @alias Skylink#sendP2PMessage
    */
   sendP2PMessage(roomName = '', message = '', targetPeerId = '') {
@@ -135,6 +134,7 @@ class SkylinkPublicInterface {
 
   /**
    * @description Function that sends a message to peers via the Signaling socket connection.
+   * <p><code>sendMessage</code> can also be used to trigger call actions on the remote. Refer to Example 3 for muting the remote peer.</p>
    * @param {String} roomName - room name to send the message.
    * @param {String|JSON} message - The message.
    * @param {String|Array} [targetPeerId] - The target peer id to send message to.
@@ -146,7 +146,7 @@ class SkylinkPublicInterface {
    * let sendMessage = (roomName) => {
    *    const message = "Hi!";
    *    const selectedPeers = this.state[location]['selectedPeers'];
-   *    this.skylink.sendMessage(roomName, message, selectedPeers);
+   *    skylink.sendMessage(roomName, message, selectedPeers);
    * }
    * @example
    * Example 2: Broadcasting to selected peers
@@ -154,9 +154,24 @@ class SkylinkPublicInterface {
    * let sendMessage = (roomName) => {
    *    const message = "Hi all!";
    *    const selectedPeers = ["PeerID_1", "PeerID_2"];
-   *    this.skylink.sendMessage(roomName, message, selectedPeers);
+   *    skylink.sendMessage(roomName, message, selectedPeers);
    * }
-   * @fires {@link SkylinkEvents.event:onIncomingMessage|onIncomingMessage}
+   * @example
+   * Example 3: Muting the remote peer
+   *
+   * // The local peer - send custom message object
+   * const msgObject = JSON.stringify({ data: "data-content", type: "muteStreams", audio: true, video: false });
+   * this.skylink.sendP2PMessage(roomName, msgObject);
+   *
+   * // The remote peer - add an event listener for ON_INCOMING_MESSAGE and check for the custom message object
+   * SkylinkEventManager.addEventListener(skylinkConstants.EVENTS.ON_INCOMING_MESSAGE, (evt) => {
+   *    const {message, peerId, isSelf, room} = evt.detail;
+   *    const msg = JSON.parse(message.content);
+   *    if (msg.type === "muteStreams") {
+   *       skylink.muteStreams(roomName, { audioMuted: msg.audio, videoMuted: msg.video });
+   *      }
+   *    });
+   * @fires {@link SkylinkEvents.event:ON_INCOMING_MESSAGE|ON_INCOMING_MESSAGE} event
    * @alias Skylink#sendMessage
    * @since 0.4.0
    */
@@ -181,7 +196,7 @@ class SkylinkPublicInterface {
    * let getStoredMessages = (roomName) => {
    *    this.skylink.getStoredMessages(roomName);
    * }
-   * @fires {@link SkylinkEvents.event:storedMessages|storedMessages}
+   * @fires {@link SkylinkEvents.event:STORED_MESSAGES|STORED_MESSAGES} event
    * @alias Skylink#getStoredMessages
    * @since 2.1
    */
@@ -270,7 +285,7 @@ class SkylinkPublicInterface {
    * @description Method that overwrites the user current custom data.
    * @param {String} roomName - The room name.
    * @param {JSON|String} userData - The updated custom data.
-   * @fires {@link SkylinkEvents.event:peerUpdated|peerUpdatedEvent} event if peer is in room with <code>isSelf=true</code>.
+   * @fires {@link SkylinkEvents.event:PEER_UPDATED|PEER_UPDATED} event if peer is in room with <code>isSelf=true</code>.
    * @example
    * Example 1: Update user custom data after joinRoom()
    *
@@ -295,9 +310,6 @@ class SkylinkPublicInterface {
 
   /**
    * @description Method that retrieves peer connection bandwidth and ICE connection stats.
-   * <blockquote class="info">
-   * Note that this is not well supported in the Edge browser.
-   * </blockquote>
    * @description Method that retrieves peer connection bandwidth and ICE connection stats.
    * @param {String} roomName - The room name.
    * @param {String|Array} [peerId] The target peer id to retrieve connection stats from.
@@ -346,8 +358,8 @@ class SkylinkPublicInterface {
    * @param {Boolean} [showAll=false] - The flag if Signaling server should also return the list of privileged peer ids.
    * By default, the Signaling server does not include the list of privileged peer ids in the return result.
    * @return {Promise.<Object.<String, Array<String>>>} peerList - Array of peer ids, keyed by room name.
-   * @fires {@link SkylinkEvents.event:getPeersStateChange|getPeersStateChangeEvent} with parameter payload <code>state=ENQUIRED</code> upon calling <code>getPeers</code> method.
-   * @fires {@link SkylinkEvents.event:getPeersStateChange|getPeersStateChangeEvent} with parameter payload <code>state=RECEIVED</code> when peer list is received from Signaling server.
+   * @fires {@link SkylinkEvents.event:GET_PEERS_STATE_CHANGE|GET PEERS STATE CHANGE} event with parameter payload <code>state=ENQUIRED</code> upon calling <code>getPeers</code> method.
+   * @fires {@link SkylinkEvents.event:GET_PEERS_STATE_CHANGE|GET PEERS STATE CHANGE} event with parameter payload <code>state=RECEIVED</code> when peer list is received from Signaling server.
    * @example
    * Example 1: Retrieve un-privileged peers
    *
@@ -441,86 +453,50 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @typedef {Object} customSettings
-   * @property {Object} settings - The peer stream and data settings.
-   * @property {Boolean|JSON} settings.data - The flag if peer has any data channel connections enabled.
+   * @typedef {Object} customSettings - The peer stream and data settings.
+   * @property {Boolean|JSON} data - The flag if peer has any data channel connections enabled.
    *   If <code>isSelf</code> value is <code>true</code>, this determines if user allows
    *   data channel connections, else if value is <code>false</code>, this determines if peer has any active
    *   data channel connections (where {@link SkylinkEvents.event:onDataChannelStateChanged|onDataChannelStateChangedEvent}
    *   triggers <code>state</code> as <code>OPEN</code> and <code>channelType</code> as
    *   <code>MESSAGING</code> for peer) with peer.
-   * @property {Boolean|JSON} settings.audio - The peer stream audio settings.
+   * @property {Boolean|JSON} audio - The peer stream audio settings keyed by stream id.
    *   When defined as <code>false</code>, it means there is no audio being sent from peer.
-   *   When defined as <code>true</code>, the <code>settings.audio.stereo</code> value is
-   *   considered as <code>false</code> and the <code>settings.audio.exactConstraints</code>
-   *   value is considered as <code>false</code>.
-   * @property {Boolean} settings.audio.stereo - The flag if stereo band is configured
-   *   when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for receiving audio data.
-   * @property {Boolean} [settings.audio.usedtx]
-   *   Note that this feature might not work depending on the browser support and implementation.
-   *   The flag if DTX (Discontinuous Transmission) is configured when encoding audio codec
-   *   is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
-   *   This might help to reduce bandwidth it reduces the bitrate during silence or background noise.
-   *   When not defined, the default browser configuration is used.
-   * @property {Boolean} [settings.audio.useinbandfec]
-   *   Note that this feature might not work depending on the browser support and implementation.
-   *   The flag if capability to take advantage of in-band FEC (Forward Error Correction) is
-   *   configured when encoding audio codec is <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
-   *   This might help to reduce the harm of packet loss by encoding information about the previous packet.
-   *   When not defined, the default browser configuration is used.
-   * @property {Number} [settings.audio.maxplaybackrate]
-   *   Note that this feature might not work depending on the browser support and implementation.
-   *   The maximum output sampling rate rendered in Hertz (Hz) when encoding audio codec is
-   *   <a href="#attr_AUDIO_CODEC"><code>OPUS</code></a> for sending audio data.
-   *   This value must be between <code>8000</code> to <code>48000</code>.
-   *   When not defined, the default browser configuration is used.
-   * @property {Boolean} settings.audio.echoCancellation - The flag if echo cancellation is enabled for audio tracks.
-   * @property {Array} [settings.audio.optional] The peer stream <code>navigator.getUserMedia()</code> API
-   *   <code>audio: { optional [..] }</code> property.
-   * @property {String} [settings.audio.deviceId] - The peer stream audio track source id of the device used.
-   * @property {Boolean} settings.audio.exactConstraints - The flag if peer stream audio track is sending exact
-   *   requested values of <code>settings.audio.deviceId</code> when provided.
-   * @property {Boolean|JSON} settings.video - The peer stream video settings.
+   * @property {Boolean} audio[streamId].stereo - The flag if stereo band is configured
+   *   when encoding audio codec is <code>OPUS</code> for receiving audio data.
+   * @property {Boolean} audio[streamId].echoCancellation - The flag if echo cancellation is enabled for audio tracks.
+   * @property {String} [audio[streamId].deviceId] - The peer stream audio track source id of the device used.
+   * @property {Boolean} audio[streamId].exactConstraints - The flag if peer stream audio track is sending exact
+   *   requested values of <code>audio.deviceId</code> when provided.
+   * @property {Boolean|JSON} video - The peer stream video settings keyed by stream id.
    *   When defined as <code>false</code>, it means there is no video being sent from peer.
-   *   When defined as <code>true</code>, the <code>settings.video.screenshare</code> value is
-   *   considered as <code>false</code>  and the <code>settings.video.exactConstraints</code>
-   *   value is considered as <code>false</code>.
-   * @property {JSON} [settings.video.resolution] - The peer stream video resolution.
+   * @property {JSON} [video[streamId].resolution] - The peer stream video resolution.
    *   [Rel: {@link SkylinkConstants.VIDEO_RESOLUTION|VIDEO_RESOLUTION}]
-   * @property {Number|JSON} settings.video.resolution.width - The peer stream video resolution width or
+   * @property {Number|JSON} video[streamId].resolution.width - The peer stream video resolution width or
    *   video resolution width settings.
    *   When defined as a JSON Object, it is the user set resolution width settings with (<code>"min"</code> or
    *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).
-   * @property {Number|JSON} settings.video.resolution.height - The peer stream video resolution height or
+   * @property {Number|JSON} video[streamId].resolution.height - The peer stream video resolution height or
    *   video resolution height settings.
    *   When defined as a JSON Object, it is the user set resolution height settings with (<code>"min"</code> or
    *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).
-   * @property {Number|JSON} [settings.video.frameRate] - The peer stream video
+   * @property {Number|JSON} [video[streamId].frameRate] - The peer stream video
    *   <a href="https://en.wikipedia.org/wiki/Frame_rate">frameRate</a> per second (fps) or video frameRate settings.
    *   When defined as a JSON Object, it is the user set frameRate settings with (<code>"min"</code> or
    *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).
-   * @property {Boolean} settings.video.screenshare - The flag if peer stream is a screensharing stream.
-   * @property {Array} [settings.video.optional] - The peer stream <code>navigator.getUserMedia()</code> API
-   *   <code>video: { optional [..] }</code> property.
-   * @property {String} [settings.video.deviceId] - The peer stream video track source id of the device used.
-   * @property {Boolean} settings.video.exactConstraints The flag if peer stream video track is sending exact
-   *   requested values of <code>settings.video.resolution</code>,
-   *   <code>settings.video.frameRate</code> and <code>settings.video.deviceId</code>
+   * @property {Boolean} video[streamId].screenshare - The flag if peer stream is a screensharing stream.
+   * @property {String} [video[streamId].deviceId] - The peer stream video track source id of the device used.
+   * @property {Boolean} video[streamId].exactConstraints The flag if peer stream video track is sending exact
+   *   requested values of <code>video.resolution</code>,
+   *   <code>video.frameRate</code> and <code>video.deviceId</code>
    *   when provided.
-   * @property {String|JSON} [settings.video.facingMode] - The peer stream video camera facing mode.
+   * @property {String|JSON} [video[streamId].facingMode] - The peer stream video camera facing mode.
    *   When defined as a JSON Object, it is the user set facingMode settings with (<code>"min"</code> or
    *   <code>"max"</code> or <code>"ideal"</code> or <code>"exact"</code> etc configurations).
-   * @property {Object} settings.bandwidth The maximum streaming bandwidth sent from peer.
-   * @property {Number} [settings.bandwidth.audio] - The maximum audio streaming bandwidth sent from peer.
-   * @property {Number} [settings.bandwidth.video] - The maximum video streaming bandwidth sent from peer.
-   * @property {Number} [settings.bandwidth.data] - The maximum data streaming bandwidth sent from peer.
-   * @property {Object} settings.googleXBandwidth
-   *   Note that this feature might not work depending on the browser support and implementation,
-   *   and its properties and values are only defined for user's end and cannot be viewed
-   *   from peer's end (when <code>isSelf</code> value is <code>false</code>).
-   *   The experimental google video streaming bandwidth sent to peers.
-   * @property {Number} [settings.googleXBandwidth.min] - The minimum experimental google video streaming bandwidth sent to peers.
-   * @property {Number} [settings.googleXBandwidth.max] - The maximum experimental google video streaming bandwidth sent to peers.
+   * @property {Object} maxBandwidth The maximum streaming bandwidth sent from peer.
+   * @property {Number} [maxBandwidth.audio] - The maximum audio streaming bandwidth sent from peer.
+   * @property {Number} [maxBandwidth.video] - The maximum video streaming bandwidth sent from peer.
+   * @property {Number} [maxBandwidth.data] - The maximum data streaming bandwidth sent from peer.
    * @property {Object} mediaStatus The peer streaming media status.
    * @property {Boolean} mediaStatus.audioMuted -  The value of the audio status.
    *   <small>If peer <code>mediaStatus</code> is <code>-1</code>, audio is not present in the stream. If peer <code>mediaStatus</code> is <code>1</code>, audio is present
@@ -598,22 +574,18 @@ class SkylinkPublicInterface {
    * @param {Boolean} [iceRestart=false] <blockquote class="info">
    *   Note that this flag will not be honoured for MCU enabled peer connections where
    *   <code>options.mcuUseRenegoRestart</code> flag is set to <code>false</code> as it is not necessary since for MCU
-   *   "restart" case is to invoke {@link Skylink#joinRoom}again, or that it is
+   *   "restart" case is to invoke {@link Skylink#joinRoom|joinRoom} again, or that it is
    *   not supported by the MCU.</blockquote>
    *   The flag if ICE connections should restart when refreshing peer connections.
-   *   This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which state
-   *   can be retrieved with the {@link SkylinkEvents.event:iceConnectionState|iceConnectionStateEvent}
+   *   This is used when ICE connection state is <code>FAILED</code> or <code>DISCONNECTED</code>, which
+   *   can be retrieved with the {@link SkylinkEvents.event:ICE_CONNECTION_STATE|ICE CONNECTION STATE} event.
    * @param {JSON} [options] <blockquote class="info">
-   *   Note that for MCU connections, the <code>bandwidth</code> or <code>googleXBandwidth</code>
+   *   Note that for MCU connections, the <code>bandwidth</code>
    *   settings will override for all peers or the current room connection session settings.</blockquote>
    *   The custom peer configuration settings.
    * @param {JSON} [options.bandwidth] The configuration to set the maximum streaming bandwidth to send to peers.
-   *   Object signature follows {@link Skylink#joinRoom}
+   *   Object signature follows {@link Skylink#joinRoom|joinRoom}
    *   <code>options.bandwidth</code> settings.
-   * @param {JSON} [options.googleXBandwidth] The configuration to set the experimental google
-   *   video streaming bandwidth sent to peers.
-   *   Object signature follows {@link Skylink#joinRoom}
-   *   <code>options.googleXBandwidth</code> settings.
    * @return {Promise.<refreshConnectionResolve>} - The Promise will always resolve.
    * @example
    * Example 1: Refreshing a peer connection
@@ -659,9 +631,6 @@ class SkylinkPublicInterface {
   /**
    * @description Method that returns starts screenshare and returns the stream.
    * @param {String} roomName - The room name.
-   * @param {Boolean} replaceUserMediaStream - The flag if screenshare replaces the <code>userMedia</code> stream.
-   * @param {String} [streamId] - The stream id of the <code>userMedia</code> stream to replace. streamId must be provided if there is more than
-   * one <code>userMedia</code> stream on the peer connection and replaceUserMediaStream is true.
    * @return {MediaStream|null} - The screen share stream.
    * @example
    * Example 1: Replace selected stream with screen share stream
@@ -676,8 +645,10 @@ class SkylinkPublicInterface {
    * @alias Skylink#shareScreen
    * @since 2.0.0
    */
-  shareScreen(roomName, streamId) {
+  shareScreen(roomName) {
+    // TODO: replace stream is not functional yet so set to null for now
     const replaceUserMediaStream = false;
+    const streamId = null;
     const roomState = getRoomStateByName(roomName);
     if (roomState) {
       const screenSharing = new ScreenSharing(roomState);
@@ -714,130 +685,8 @@ class SkylinkPublicInterface {
    * @param {String|null} roomName - The room name.
    * - If no roomName is passed or <code>getUserMedia()</code> is called before {@link Skylink#joinRoom|joinRoom}, the returned stream will not be associated with a room. The stream must be maintained independently.
    * To stop the stream, call {@link Skylink#stopPrefetchedStream|stopPrefetchedStream} method.
-   * @param {JSON} [options] - The camera stream configuration options.
+   * @param {getUserMediaOptions} [options] - The camera stream configuration options.
    * - When not provided, the value is set to <code>{ audio: true, video: true }</code>.
-   *   To fallback to retrieve audio track only when retrieving of audio and video tracks failed,
-   *   enable the <code>audioFallback</code> flag in the {@link initOptions}.
-   * @param {Boolean} [options.useExactConstraints=false] <blockquote class="info">
-   *   Note that by enabling this flag, exact values will be requested when retrieving camera stream,
-   *   but it does not prevent constraints related errors. By default when not enabled,
-   *   expected mandatory maximum values (or optional values for source id) will requested to prevent constraints related
-   *   errors, with an exception for <code>options.video.frameRate</code> option in Safari and IE (any plugin-enabled) browsers,
-   *   where the expected maximum value will not be requested due to the lack of support.</blockquote>
-   *   The flag if <code>getUserMedia()</code> should request for camera stream to match exact requested values of
-   *   <code>options.audio.deviceId</code> and <code>options.video.deviceId</code>, <code>options.video.resolution</code>
-   *   and <code>options.video.frameRate</code> when provided.
-   * @param {Boolean|JSON} [options.audio=false] <blockquote class="info">
-   *    Note that the current Edge browser implementation does not support the <code>options.audio.optional</code>,
-   *    <code>options.audio.deviceId</code>, <code>options.audio.echoCancellation</code>.</blockquote>
-   *    The audio configuration options.
-   * @param {Boolean} [options.audio.stereo=false] <blockquote class="info"><b>Deprecation Warning!</b>
-   *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code> and
-   *   the <code>options.codecParams.audio.opus["sprop-stereo"]</code>
-   *   parameter in the {@link initOptions} instead. If the
-   *   <code>options.codecParams.audio.opus.stereo</code> or <code>options.codecParams.audio.opus["sprop-stereo"]</code>
-   *   is configured, this overrides the <code>options.audio.stereo</code> setting.</blockquote>
-   *   The flag if OPUS audio codec stereo band should be configured for sending encoded audio data.
-   *   When not provided, the default browser configuration is used.
-   * @param {Boolean} [options.audio.usedtx] <blockquote class="info"><b>Deprecation Warning!</b>
-   *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.stereo</code>
-   *   parameter in the {@link initOptions} instead. If the
-   *   <code>options.codecParams.audio.opus.stereo</code> is configured, this overrides the
-   *   <code>options.audio.stereo</code> setting.  Note that this feature might
-   *   not work depending on the browser support and implementation.</blockquote>
-   *   The flag if OPUS audio codec should enable DTX (Discontinuous Transmission) for sending encoded audio data.
-   *   This might help to reduce bandwidth as it reduces the bitrate during silence or background noise, and
-   *   goes hand-in-hand with the <code>options.voiceActivityDetection</code> flag in <a href="#method_joinRoom">
-   *   <code>joinRoom()</code> method</a>.
-   *   When not provided, the default browser configuration is used.
-   * @param {Boolean} [options.audio.useinbandfec] <blockquote class="info"><b>Deprecation Warning!</b>
-   *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.useinbandfec</code>
-   *   parameter in the {@link initOptions} instead. If the
-   *   <code>options.codecParams.audio.opus.useinbandfec</code> is configured, this overrides the
-   *   <code>options.audio.useinbandfec</code> setting. Note that this parameter should only be used
-   *   for debugging purposes only.</blockquote>
-   *   The flag if OPUS audio codec has the capability to take advantage of the in-band FEC
-   *   (Forward Error Correction) when sending encoded audio data.
-   *   This helps to reduce the harm of packet loss by encoding information about the previous packet loss.
-   *   When not provided, the default browser configuration is used.
-   * @param {Number} [options.audio.maxplaybackrate] <blockquote class="info"><b>Deprecation Warning!</b>
-   *   This property has been deprecated. Configure this with the <code>options.codecParams.audio.opus.maxplaybackrate</code>
-   *   parameter in the {@link initOptions} instead. If the
-   *   <code>options.codecParams.audio.opus.maxplaybackrate</code> is configured, this overrides the
-   *   <code>options.audio.maxplaybackrate</code> setting.  Note that this feature might
-   *   not work depending on the browser support and implementation.
-   *   Note that this parameter should only be used for debugging purposes only.</blockquote>
-   *   The OPUS audio codec maximum output sampling rate in Hz (hertz) that is is capable of receiving
-   *   decoded audio data, to adjust to the hardware limitations and ensure that any sending audio data
-   *   would not encode at a higher sampling rate specified by this.
-   *   This value must be between <code>8000</code> to <code>48000</code>.
-   *   When not provided, the default browser configuration is used.
-   * @param {Boolean} [options.audio.mute=false] The flag if audio tracks should be muted upon receiving them.
-   *   Providing the value as <code>false</code> sets <code>peerInfo.mediaStatus.audioMuted</code> to <code>1</code>,
-   *   but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.audioMuted</code> value to
-   *   <code>0</code> and mutes any existing <a href="#method_shareScreen">
-   *   <code>shareScreen()</code> stream</a> audio tracks as well.
-   * @param {Array} [options.audio.optional] <blockquote class="info">
-   *   This property has been deprecated. "optional" constraints has been moved from specs.<br>
-   *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
-   *   <code>true</code>. If you are looking to set the requested source id of the audio track,
-   *   use <code>options.audio.deviceId</code> instead.</blockquote>
-   *   The <code>navigator.getUserMedia()</code> API <code>audio: { optional [..] }</code> property.
-   * @param {String} [options.audio.deviceId] <blockquote class="info">
-   *   Note this is currently not supported in Firefox browsers.
-   *   </blockquote> The audio track source id of the device to use.
-   *   The list of available audio source id can be retrieved by the {@link https://developer.
-   * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices}.
-   * @param {Boolean} [options.audio.echoCancellation=true] <blockquote class="info">
-   *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation @description Methodality may not work and may produce a terrible
-   *   feedback. It is recommended to use headphones or other microphone devices rather than the device
-   *   in-built microphones.</blockquote> The flag to enable echo cancellation for audio track.
-   * @param {Boolean|JSON} [options.video=false] <blockquote class="info">
-   *    Note that the current Edge browser implementation does not support the <code>options.video.optional</code>,
-   *    <code>options.video.deviceId</code>, <code>options.video.resolution</code> and
-   *    <code>options.video.frameRate</code>, <code>options.video.facingMode</code>.</blockquote>
-   *   The video configuration options.
-   * @param {Boolean} [options.video.mute=false] The flag if video tracks should be muted upon receiving them.
-   *   Providing the value as <code>false</code> sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
-   *   <code>1</code>, but when provided as <code>true</code>, this sets the <code>peerInfo.mediaStatus.videoMuted</code> value to
-   *   <code>0</code> and mutes any existing <a href="#method_shareScreen">
-   *   <code>shareScreen()</code> stream</a> video tracks as well.
-   * @param {JSON} [options.video.resolution] The video resolution.
-   *   By default, <a href="#attr_VIDEO_RESOLUTION"><code>VGA</code></a> resolution option
-   *   is selected when not provided.
-   *   [Rel: {@link SkylinkConstants.VIDEO_RESOLUTION|VIDEO_RESOLUTION}]
-   * @param {Number|JSON} [options.video.resolution.width] The video resolution width.
-   * - When provided as a number, it is the video resolution width.
-   * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.width</code> settings.
-   *   Parameters are <code>"ideal"</code> for ideal resolution width, <code>"exact"</code> for exact video resolution width,
-   *   <code>"min"</code> for min video resolution width and <code>"max"</code> for max video resolution width.
-   *   Note that this may result in constraints related errors depending on the browser/hardware supports.
-   * @param {Number|JSON} [options.video.resolution.height] The video resolution height.
-   * - When provided as a number, it is the video resolution height.
-   * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.height</code> settings.
-   *   Parameters are <code>"ideal"</code> for ideal video resolution height, <code>"exact"</code> for exact video resolution height,
-   *   <code>"min"</code> for min video resolution height and <code>"max"</code> for max video resolution height.
-   *   Note that this may result in constraints related errors depending on the browser/hardware supports.
-   * @param {Number|JSON} [options.video.frameRate] The video {@link https://en.wikipedia.org/wiki/Frame_rate} per second (fps).
-   * - When provided as a number, it is the video framerate.
-   * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.frameRate</code> settings.
-   *   Parameters are <code>"ideal"</code> for ideal video framerate, <code>"exact"</code> for exact video framerate,
-   *   <code>"min"</code> for min video framerate and <code>"max"</code> for max video framerate.
-   *   Note that this may result in constraints related errors depending on the browser/hardware supports.
-   * @param {Array} [options.video.optional] <blockquote class="info">
-   *   This property has been deprecated. "optional" constraints has been moved from specs.<br>
-   *   Note that this may result in constraints related error when <code>options.useExactConstraints</code> value is
-   *   <code>true</code>. If you are looking to set the requested source id of the video track,
-   *   use <code>options.video.deviceId</code> instead.</blockquote>
-   *   The <code>navigator.getUserMedia()</code> API <code>video: { optional [..] }</code> property.
-   * @param {String} [options.video.deviceId] <blockquote class="info">
-   *   Note this is currently not supported in Firefox browsers.
-   *   </blockquote> The video track source id of the device to use.
-   *   The list of available video source id can be retrieved by the {@link https://developer.
-   * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices}.
-   * @param {String|JSON} [options.video.facingMode] The video camera facing mode.
-   *   The list of available video source id can be retrieved by the {@link https://developer.mozilla.org
-   *   /en-US/docs/Web/API/MediaTrackConstraints/facingMode}.
    * @return {Promise.<MediaStreams>}
    * @example
    * Example 1: Get both audio and video after joinRoom
@@ -909,10 +758,10 @@ class SkylinkPublicInterface {
    *   }
    * }).then((streams) => // do something)
    * .catch((error) => // handle error);
-   * @fires <b>If retrieval of fallback audio stream is successful:</b> <br/> - {@link SkylinkEvents.event:mediaAccessSuccess|mediaAccessSuccessEvent} with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallback=false</code> if initial retrieval is successful.
-   * @fires <b>If initial retrieval is unsuccessful:</b> <br/> Fallback to retrieve audio only stream is triggered (configured in {@link initOptions} <code>audioFallback</code>) <br/>&emsp; - {@link SkylinkEvents.event:mediaAccessFallback|mediaAccessFallbackEvent} with parameter payload <code>state=FALLBACKING</code>, <code>isScreensharing=false</code> and <code>isAudioFallback=true</code> and <code>options.video=true</code> and <code>options.audio=true</code>. <br/> No fallback to retrieve audio only stream <br/> - {@link SkylinkEvents.event:mediaAccessError|mediaAccessErrorEvent} with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallbackError=false</code>.
-   * @fires <b>If retrieval of fallback audio stream is successful:</b> <br/> - {@link SkylinkEvents.event:mediaAccessSuccess|mediaAccessSuccessEvent} with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallback=true</code>.
-   * @fires <b>If retrieval of fallback audio stream is unsuccessful:</b> <br/> - {@link SkylinkEvents.event:mediaAccessFallback|mediaAccessFallbackEvent} with parameter payload <code>state=ERROR</code>, <code>isScreensharing=false</code> and <code>isAudioFallback=true</code>. <br/> - {@link SkylinkEvents.event:mediaAccessError|mediaAccessErrorEvent} with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallbackError=true</code>.
+   * @fires <b>If retrieval of fallback audio stream is successful:</b> <br/> - {@link SkylinkEvents.event:MEDIA_ACCESS_SUCCESS|MEDIA ACCESS SUCCESS} event with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallback=false</code> if initial retrieval is successful.
+   * @fires <b>If initial retrieval is unsuccessful:</b> <br/> Fallback to retrieve audio only stream is triggered (configured in {@link initOptions} <code>audioFallback</code>) <br/>&emsp; - {@link SkylinkEvents.event:MEDIA_ACCESS_SUCCESS|MEDIA ACCESS SUCCESS} event{@link SkylinkEvents.event:MEDIA_ACCESS_FALLBACK|MEDIA ACCESS FALLBACK} event with parameter payload <code>state=FALLBACKING</code>, <code>isScreensharing=false</code> and <code>isAudioFallback=true</code> and <code>options.video=true</code> and <code>options.audio=true</code>. <br/> No fallback to retrieve audio only stream <br/> - {@link SkylinkEvents.event:MEDIA_ACCESS_ERROR|MEDIA ACCESS ERROR} event with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallbackError=false</code>.
+   * @fires <b>If retrieval of fallback audio stream is successful:</b> <br/> - {@link SkylinkEvents.event:MEDIA_ACCESS_SUCCESS|MEDIA ACCESS SUCCESS} event with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallback=true</code>.
+   * @fires <b>If retrieval of fallback audio stream is unsuccessful:</b> <br/> - {@link SkylinkEvents.event:MEDIA_ACCESS_SUCCESS|MEDIA ACCESS SUCCESS} event{@link SkylinkEvents.event:MEDIA_ACCESS_FALLBACK|MEDIA ACCESS FALLBACK} event with parameter payload <code>state=ERROR</code>, <code>isScreensharing=false</code> and <code>isAudioFallback=true</code>. <br/> - {@link SkylinkEvents.event:MEDIA_ACCESS_ERROR|MEDIA ACCESS ERROR} event with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallbackError=true</code>.
    * @alias Skylink#getUserMedia
    * @since 0.5.6
    */
@@ -936,7 +785,7 @@ class SkylinkPublicInterface {
    * @description Method that stops the {@link Skylink#getUserMedia} stream that is called without roomName param or before {@link Skylink#joinRoom|joinRoom} is called.
    * @param {MediaStream} stream - The prefetched stream.
    * @return {null}
-   * @fires {@link SkylinkEvents.event:streamEnded|streamEndedEvent}
+   * @fires {@link SkylinkEvents.event:STREAM_ENDED|STREAM ENDED} event
    * @alias Skylink#stopPrefetchedStream
    * @since 2.0
    * @ignore
@@ -969,10 +818,10 @@ class SkylinkPublicInterface {
    *
    * skylink.stopScreen(roomName);
    *
-   * @fires {@link SkylinkEvents.event:mediaAccessStopped|mediaAccessStoppedEvent} with parameter payload <code>isScreensharing</code> value as <code>true</code> and <code>isAudioFallback</code> value as <code>false</code> if there is a screen stream
-   * @fires {@link SkylinkEvents.event:streamEnded|streamEndedEvent} with parameter payload <code>isSelf</code> value as <code>true</code> and <code>isScreensharing</code> value as <code>true</code> if user is in the room
-   * @fires {@link SkylinkEvents.event:peerUpdated|peerUpdatedEvent} with parameter payload <code>isSelf</code> value as <code>true</code>
-   * @fires {@link SkylinkEvents.event:onIncomingStream|onIncomingStreamEvent} with parameter payload <code>isSelf</code> value as <code>true</code> and <code>stream</code> as {@link Skylink#getUserMedia} stream</a> if there is an existing <code>userMedia</code> stream
+   * @fires {@link SkylinkEvents.event:MEDIA_ACCESS_STOPPED|MEDIA ACCESS STOPPED} event with parameter payload <code>isScreensharing</code> value as <code>true</code> and <code>isAudioFallback</code> value as <code>false</code> if there is a screen stream
+   * @fires {@link SkylinkEvents.event:STREAM_ENDED|STREAM ENDED} event with parameter payload <code>isSelf</code> value as <code>true</code> and <code>isScreensharing</code> value as <code>true</code> if user is in the room
+   * @fires {@link SkylinkEvents.event:PEER_UPDATED|PEER UPDATED} event with parameter payload <code>isSelf</code> value as <code>true</code>
+   * @fires {@link SkylinkEvents.event:ON_INCOMING_STREAM|ON INCOMING STREAM} event  with parameter payload <code>isSelf</code> value as <code>true</code> and <code>stream</code> as {@link Skylink#getUserMedia} stream</a> if there is an existing <code>userMedia</code> stream
    * @alias Skylink#stopScreen
    * @since 0.6.0
    */
@@ -994,9 +843,9 @@ class SkylinkPublicInterface {
    * @example
    * skylink.stopStreams(roomName)
    * .then(() => // do some thing);
-   * @fires {@link SkylinkEvents.event:mediaAccessStopped|mediaAccessStoppedEvent} with parameter payload <code>isSelf=true</code> and <code>isScreensharing=false</code> if there is a <code>getUserMedia</code> stream.
-   * @fires {@link SkylinkEvents.event:streamEnded|streamEndedEvent} with parameter payload <code>isSelf=true</code> and <code>isScreensharing=false</code> if there is a <code>getUserMedia</code> stream and user is in a room.
-   * @fires {@link SkylinkEvents.event:peerUpdated|peerUpdatedEvent} with parameter payload <code>isSelf=true</code>.
+   * @fires {@link SkylinkEvents.event:MEDIA_ACCESS_STOPPED|MEDIA ACCESS STOPPED} event with parameter payload <code>isSelf=true</code> and <code>isScreensharing=false</code> if there is a <code>getUserMedia</code> stream.
+   * @fires {@link SkylinkEvents.event:STREAM_ENDED|STREAM ENDED} event with parameter payload <code>isSelf=true</code> and <code>isScreensharing=false</code> if there is a <code>getUserMedia</code> stream and user is in a room.
+   * @fires {@link SkylinkEvents.event:PEER_UPDATED|PEER UPDATED} event with parameter payload <code>isSelf=true</code>.
    * @alias Skylink#stopStreams
    * @since 0.5.6
    */
@@ -1027,7 +876,7 @@ class SkylinkPublicInterface {
    *   // handle local peer left
    * })
    * .catch((error) => // handle error);
-   * @fires {@link SkylinkEvents.event:peerLeft|peerLeft} on the remote end of the connection.
+   * @fires {@link SkylinkEvents.event:PEER_LEFT|PEER LEFT} event on the remote end of the connection.
    * @alias Skylink#leaveRoom
    * @since 0.5.5
    */
@@ -1069,8 +918,9 @@ class SkylinkPublicInterface {
    * .catch(error => {
    *   // handle error
    * });
-   * @fires {@link SkylinkEvents.recordingState|recordingStateEvent} with payload <code>state=START</code> if recording has started successfully.
-   * @fires {@link SkylinkEvents.recordingState|recordingStateEvent} with payload <code>error</code> if an error occurred during recording.
+   * @fires {@link SkylinkEvents.event:RECORDING_STATE|RECORDING STATE} event with payload <code>state=START</code> if recording has started
+   * successfully.
+   * @fires {@link SkylinkEvents.event:RECORDING_STATE|RECORDING STATE} event with payload <code>error</code> if an error occurred during recording.
    * @alias Skylink#startRecording
    * @since 0.6.16
    */
@@ -1109,8 +959,9 @@ class SkylinkPublicInterface {
    * .catch(error => {
    *   // handle error
    * });
-   * @fires {@link SkylinkEvents.recordingState|recordingStateEvent} with payload <code>state=STOP</code> if recording has stopped successfully.
-   * @fires {@link SkylinkEvents.recordingState|recordingStateEvent} with payload <code>error</code> if an error occurred during recording.
+   * @fires {@link SkylinkEvents.event:RECORDING_STATE|RECORDING STATE} event with payload <code>state=STOP</code> if recording has stopped
+   * successfully.
+   * @fires {@link SkylinkEvents.event:RECORDING_STATE|RECORDING STATE} event with payload <code>error</code> if an error occurred during recording.
    * @alias Skylink#stopRecording
    * @since 0.6.16
    */
@@ -1127,7 +978,7 @@ class SkylinkPublicInterface {
    * @description Method that locks a room.
    * @param {String} roomName - The room name.
    * @return {Boolean}
-   * @fires {@link SkylinkEvents.event:roomLock|roomLockEvent} with payload parameters <code>isLocked=true</code> when the room is successfully locked.
+   * @fires {@link SkylinkEvents.event:ROOM_LOCK|ROOM LOCK} event with payload parameters <code>isLocked=true</code> when the room is successfully locked.
    * @example
    * // add event listener to listen for room locked state when peer tries to join a locked room
    * skylinkEventManager.addEventListener(SkylinkEvents.SYSTEM_ACTION, (evt) => {
@@ -1164,7 +1015,7 @@ class SkylinkPublicInterface {
    * @description Method that unlocks a room.
    * @param {String} roomName - The room name.
    * @return {Boolean}
-   * @fires {@link SkylinkEvents.event:roomLock|roomLockEvent} with payload parameters <code>isLocked=false</code> when the room is successfully locked.
+   * @fires {@link SkylinkEvents.event:ROOM_LOCK|ROOM LOCK} event with payload parameters <code>isLocked=false</code> when the room is successfully locked.
    * @alias Skylink#unlockRoom
    * @since 0.5.0
    */
@@ -1195,7 +1046,7 @@ class SkylinkPublicInterface {
    *   Defined only when <code>state</code> is <code>LINK</code>.
    * @property {String} #recordingId.links - The recording session links.
    *   Object signature matches the <code>link</code> parameter payload received in the
-   *   {@link SkylinkEvents.event:recordingState|recordingStateEvent} event.
+   *   {@link SkylinkEvents.event:RECORDING_STATE|RECORDING STATE} event event.
    * @property {Error} #recordingId.error - The recording session error.
    *   Defined only when <code>state</code> is <code>ERROR</code>.
    */
@@ -1257,8 +1108,8 @@ class SkylinkPublicInterface {
    *    audioMuted: false,
    *    videoMuted: true
    * });
-   * @fires <b>On local peer:</b> {@link SkylinkEvents.event:localMediaMuted|localMediaMutedEvent}, {@link SkylinkEvents.event:streamMuted|streamMuted}, {@link SkylinkEvents.event:peerUpdated|peerUpdatedEvent} with payload parameters <code>isSelf=true</code> and <code>isAudio=true</code> if a local audio stream is muted or <code>isVideo</code> if local video stream is muted.
-   * @fires <b>On remote peer:</b> {@link SkylinkEvents.event:streamMuted|streamMuted}, {@link SkylinkEvents.event:peerUpdated|peerUpdatedEvent} with with parameter payload <code>isSelf=false</code> and <code>isAudio=true</code> if a remote audio stream is muted or <code>isVideo</code> if remote video stream is muted.
+   * @fires <b>On local peer:</b> {@link SkylinkEvents.event:LOCAL_MEDIA_MUTED|LOCAL MEDIA MUTED} event, {@link SkylinkEvents.event:STREAM_MUTED|STREAM MUTED} event, {@link SkylinkEvents.event:PEER_UPDATED|PEER UPDATED} event with payload parameters <code>isSelf=true</code> and <code>isAudio=true</code> if a local audio stream is muted or <code>isVideo</code> if local video stream is muted.
+   * @fires <b>On remote peer:</b> {@link SkylinkEvents.event:STREAM_MUTED|STREAM MUTED} event, {@link SkylinkEvents.event:PEER_UPDATED|PEER UPDATED} event with with parameter payload <code>isSelf=false</code> and <code>isAudio=true</code> if a remote audio stream is muted or <code>isVideo</code> if remote video stream is muted.
    * @alias Skylink#muteStreams
    * @since 0.5.7
    */
@@ -1291,7 +1142,7 @@ class SkylinkPublicInterface {
    * .catch(error => {
    *   // handle error
    * });
-   * @fires {@link SkylinkEvents.event:rtmpState|rtmpStateEvent} with parameter payload <code>state=START</code>.
+   * @fires {@link SkylinkEvents.event:RTMP_STATE|RTMP STATE} event with parameter payload <code>state=START</code>.
    * @alias Skylink#startRTMPSession
    * @since 0.6.36
    */
@@ -1322,7 +1173,7 @@ class SkylinkPublicInterface {
    * .catch(error => {
    *   // handle error
    * });
-   * @fires {@link SkylinkEvents.event:rtmpState|rtmpStateEvent} with parameter payload <code>state=STOP</code>.
+   * @fires {@link SkylinkEvents.event:RTMP_STATE|RTMP STATE} event with parameter payload <code>state=STOP</code>.
    * @alias Skylink#stopRTMPSession
    * @since 0.6.36
    */
@@ -1367,7 +1218,7 @@ class SkylinkPublicInterface {
    * - When provided as a <code>MediaStream</code> object, this configures the <code>options.audio</code> and
    *   <code>options.video</code> based on the tracks available in the <code>MediaStream</code> object.
    *   Object signature matches the <code>options</code> parameter in the
-   *   <code>getUserMedia</code> method</a>.
+   *   <code>{@link Skylink#getUserMedia|getUserMedia}</code> method</a>.
    * @return {Promise.<MediaStreams>}
    * @example
    * Example 1: Send new MediaStream with audio and video
@@ -1409,12 +1260,12 @@ class SkylinkPublicInterface {
    *   .catch((error) => { console.error(error) });
    * }
    *
-   * @fires {@link SkylinkEvents.event:mediaAccessSuccess} with parameter payload <code>isScreensharing=false</code> and
+   * @fires {@link SkylinkEvents.event:MEDIA_ACCESS_SUCCESS|MEDIA ACCESS SUCCESS} event with parameter payload <code>isScreensharing=false</code> and
    * <code>isAudioFallback=false</code> if <code>userMedia</code> <code>options</code> is passed into
    * <code>sendStream</code> method.
-   * @fires {@link SkylinkEvents.event:onIncomingStream} with parameter payload <code>isSelf=true</code> and
+   * @fires {@link SkylinkEvents.event:ON_INCOMING_STREAM|ON INCOMING STREAM} event with parameter payload <code>isSelf=true</code> and
    * <code>stream</code> as <code>userMedia</code> stream.
-   * @fires {@link SkylinkEvents.event:peerUpdated} with parameter payload <code>isSelf=true</code>.
+   * @fires {@link SkylinkEvents.event:PEER_UPDATED|PEER UPDATED} event with parameter payload <code>isSelf=true</code>.
    * @alias Skylink#sendStream
    * @since 0.5.6
    */
@@ -1422,24 +1273,6 @@ class SkylinkPublicInterface {
     const roomState = getRoomStateByName(roomName);
 
     return MediaStream.sendStream(roomState, options);
-  }
-
-  /**
-   * @typedef {Object} screenSources - The list of screensharing media sources and screen sources.
-   * @property {Array.<String>} mediaSource - The screensharing media source item.
-   * @property {Array.<Object>} mediaSourceInput - The list of specific media source screen inputs.
-   * @property {String} mediaSourceInput.sourceId - The screen input item id.
-   * @property {Object} mediaSourceInput.label - The screen input item label name.
-   * @property {Object} mediaSourceInput.mediaSource - The screen input item media source it belongs to.
-   */
-  /**
-   * @description Method that returns the screensharing sources.
-   * @return {Promise.<screenSources>}
-   * @alias Skylink#getScreenSources
-   * @since 2.0.0
-   */
-  getScreenSources() {
-    return MediaStream.getScreenSources();
   }
 
   /**
@@ -1545,10 +1378,12 @@ class SkylinkPublicInterface {
    * <blockquote class="info">
    *   Note that to set message persistence at the app level, the persistent message feature MUST be enabled at the key level in the Temasys
    *   Developers Console. Messages will also only be persisted if the messages are encrypted, are public messages and, are sent via the signaling
-   *   server using the [{@link Skylink#sendMessage|sendMessage}] method.
+   *   server using the {@link Skylink#sendMessage|sendMessage} method.
    * </blockquote>
    * @param {String} roomName - The room name.
    * @param {Boolean} isPersistent - The flag if messages should be persisted.
+   * @alias Skylink#setMessagePersistence
+   * @since 2.0.0
    */
   setMessagePersistence(roomName, isPersistent) {
     const roomState = getRoomStateByName(roomName);
@@ -1560,6 +1395,8 @@ class SkylinkPublicInterface {
    * @description Method that retrieves the persistent message feature configured.
    * @param {String} roomName - The room name.
    * @returns {Boolean} isPersistent
+   * @alias Skylink#getMessagePersistence
+   * @since 2.0.0
    */
   getMessagePersistence(roomName) {
     const roomState = getRoomStateByName(roomName);

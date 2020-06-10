@@ -10,7 +10,7 @@ import { INTRODUCE_STATE_CHANGE } from '../../../../skylink-events/constants';
  * Function that handles the "introduceError" socket message received.
  * @param {JSON} message
  * @memberOf SignalingMessageHandler
- * @fires introduceStateChange
+ * @fires INTRODUCE_STATE_CHANGE
  */
 const introduceErrorHandler = (message) => {
   const state = Skylink.getSkylinkState();
