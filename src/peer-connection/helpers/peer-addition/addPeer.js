@@ -2,7 +2,6 @@ import Skylink from '../../../index';
 import { SDP_SEMANTICS } from '../../../constants';
 import logger from '../../../logger/index';
 import createPeerConnection from './createPeerConnection';
-import HandleIceConnectionStats from '../../../skylink-stats/handleIceConnectionStats';
 import handleIceGatheringStats from '../../../skylink-stats/handleIceGatheringStats';
 
 /**
@@ -27,7 +26,6 @@ const addPeer = (params) => {
   const initOptions = Skylink.getInitOptions();
   const state = Skylink.getSkylinkState(currentRoom.id);
   const { peerConnections, room } = state;
-  const handleIceConnectionStats = new HandleIceConnectionStats();
 
   if (!peerConnections[targetMid]) {
     logger.log.INFO([targetMid, null, null, 'Starting the connection to peer. Options provided:'], {
@@ -59,7 +57,6 @@ const addPeer = (params) => {
 
     state.peerConnections[targetMid] = connection;
     Skylink.setSkylinkState(state, currentRoom.id);
-    handleIceConnectionStats.send(room.id, connection.iceConnectionState, targetMid);
     handleIceGatheringStats.send(room.id, 'new', targetMid, false);
   } else {
     logger.log.WARN([targetMid, null, null, 'Connection to peer has already been made.']);

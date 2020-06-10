@@ -15,7 +15,7 @@ import SkylinkEvent from '../utils/skylinkEvent';
  * @event SkylinkEvents.PEER_UPDATED
  * @description Event triggered when a Peer session information has been updated.
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room
+ * @param {roomInfo} detail.room - The current room
  * @param {String} detail.peerId - The peer's id
  * @param {boolean} detail.isSelf -The flag if Peer is User.
  * @param {peerInfo} detail.peerInfo - The Peer session information. Object signature matches the <code>peerInfo</code> parameter payload received in the <code> {@link SkylinkEvents.event:PEER_JOINED|PEER JOINED}</code> event.
@@ -31,7 +31,7 @@ export const peerUpdated = (detail = {}) => new SkylinkEvent(PEER_UPDATED, { det
  * corresponding event.
  * </blockquote>
  * @param {Object} detail - Event's payload
- * @param {SkylinkRoom} detail.room - The current room.
+ * @param {roomInfo} detail.room - The current room.
  * @param {String} detail.peerId - The Peer ID.
  * @param {peerInfo} detail.peerInfo - The Peer session information.
  * @param {boolean} detail.isSelf - The flag if Peer is User.
@@ -57,7 +57,7 @@ export const peerLeft = (detail = {}) => new SkylinkEvent(PEER_LEFT, { detail })
  * corresponding event.
  * </blockquote>
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room
+ * @param {roomInfo} detail.room - The current room
  * @param {String} detail.peerId - The peer's id
  * @param {SkylinkConstants.SERVER_PEER_TYPE} detail.serverPeerType - The server Peer type
  */
@@ -68,7 +68,7 @@ export const serverPeerJoined = (detail = {}) => new SkylinkEvent(SERVER_PEER_JO
  * @description Event triggered when a server Peer leaves the room.
  * @param {Object} detail - Event's payload
  * @param {String} detail.peerId - The Peer ID
- * @param {SkylinkRoom} detail.room - The room.
+ * @param {roomInfo} detail.room - The room.
  * @param {SkylinkConstants.SERVER_PEER_TYPE} detail.serverPeerType - The server Peer type
  */
 export const serverPeerLeft = (detail = {}) => new SkylinkEvent(SERVER_PEER_LEFT, { detail });

@@ -50,3 +50,4 @@ export const MEDIA_INFO_DELETED = 'mediaInfoDeleted';
 export const STORED_MESSAGES = 'storedMessages';
 export const ENCRYPT_SECRETS_UPDATED = 'encryptSecretsUpdated';
 export const PERSISTENT_MESSAGE_STATE = 'persistentMessageState';
+export const ROOM_REJOIN = 'roomRejoin';

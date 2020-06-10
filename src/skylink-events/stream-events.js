@@ -11,7 +11,7 @@ import SkylinkEvent from '../utils/skylinkEvent';
  * @event SkylinkEvents.ON_INCOMING_STREAM
  * @description Event triggered when receiving Peer Stream.
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room
+ * @param {roomInfo} detail.room - The current room
  * @param {String} detail.peerId - The peer's id
  * @param {MediaStream} detail.stream - The Stream object. To attach it to an element: <code>attachMediaStream(videoElement, stream);</code>.
  * @param {String} detail.streamId - The stream id.
@@ -28,7 +28,7 @@ export const onIncomingStream = (detail = {}) => new SkylinkEvent(ON_INCOMING_ST
  * @event SkylinkEvents.ON_INCOMING_SCREEN_STREAM
  * @description Event triggered when receiving Peer Screenshare Stream.
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room.
+ * @param {roomInfo} detail.room - The current room.
  * @param {String} detail.peerId - The peer's id.
  * @param {MediaStream} detail.stream - The Stream object.
  * @param {String} detail.streamId - The Stream id.
@@ -46,7 +46,7 @@ export const onIncomingScreenStream = (detail = {}) => new SkylinkEvent(ON_INCOM
  * @description Event triggered when a Peer Stream streaming has stopped. Note that it may not be the currently sent Stream to User, and it also triggers when User leaves the Room for any currently sent Stream to User from Peer.
  * @param {Object} detail - Event's payload.
  * @param {String} detail.peerId - The Peer ID.
- * @param {SkylinkRoom} detail.room - The room.
+ * @param {roomInfo} detail.room - The room.
  * @param {peerInfo} detail.peerInfo - The Peer session information. Object signature matches the <code>peerInfo</code> parameter payload received
  * in the <code> {@link SkylinkEvents.event:PEER_JOINED|PEER JOINED}</code> event.
  * @param {Boolean} detail.isSelf The flag if Peer is User.

@@ -363,7 +363,7 @@
  *  Defined only when Peer is using the Temasys Plugin (IE / Safari).
  * @property {String} agent.DTProtocolVersion The Peer data transfer (DT) protocol version.
  * @property {String} agent.SMProtocolVersion The Peer signaling message (SM) protocol version.
- * @property {SkylinkRoom} room The Room Peer is from.
+ * @property {roomInfo} room The Room Peer is from.
  * @property {JSON} config The Peer connection configuration.
  * @property {boolean} config.enableDataChannel The flag if Datachannel connections would be enabled for Peer.
  * @property {boolean} config.enableIceRestart The flag if Peer connection has ICE connection restart support.

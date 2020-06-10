@@ -469,6 +469,10 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ROOM_LOCK, (evt) =>
   Demo.Methods.logToConsoleDOM(`Room is ${(isLocked ? 'locked' : 'unlocked')}`);
 });
 
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ROOM_REJOIN, (evt) => {
+  Demo.Skylink.joinRoom(joinRoomOptions)
+});
+
 // //---------------------------------------------------
 // // MESSAGING EVENTS
 // //---------------------------------------------------

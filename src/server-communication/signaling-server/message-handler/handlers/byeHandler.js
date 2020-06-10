@@ -1,17 +1,13 @@
 import logger from '../../../../logger';
 import Skylink from '../../../../index';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import {
-  peerLeft, serverPeerLeft, peerConnectionState, iceConnectionState,
-} from '../../../../skylink-events';
+import { peerLeft, serverPeerLeft } from '../../../../skylink-events';
 import PeerData from '../../../../peer-data';
-import HandleIceConnectionStats from '../../../../skylink-stats/handleIceConnectionStats';
 import PeerConnection from '../../../../peer-connection/index';
 import {
-  PEER_TYPE, PEER_CONNECTION_STATE, ICE_CONNECTION_STATE, SERVER_PEER_TYPE, BROWSER_AGENT, TAGS,
+  PEER_TYPE, PEER_CONNECTION_STATE, SERVER_PEER_TYPE, TAGS,
 } from '../../../../constants';
 import MESSAGES from '../../../../messages';
-import { isAgent, isVersion } from '../../../../utils/helpers';
 import BandwidthAdjuster from '../../../../peer-connection/helpers/bandwidthAdjuster';
 
 /**
@@ -34,46 +30,6 @@ const isPeerConnected = (roomState, peerId) => {
 };
 
 /**
- * Sets to true signalingStateClosed and dispatches peer connection state closed.
- * @param {SkylinkState} roomState
- * @param {String} peerId
- * @private
- */
-const processPeerConnectionState = (roomState, peerId) => {
-  const state = roomState;
-
-  if (state.peerConnections[peerId].signalingStateClosed) return;
-
-  state.peerConnections[peerId].signalingStateClosed = true;
-
-  dispatchEvent(peerConnectionState({
-    state: PEER_CONNECTION_STATE.CLOSED,
-    peerId,
-  }));
-};
-
-/**
- * Sets to true iceConnectionStateClosed and dispatches ICE connection state closed.
- * @param {SkylinkState} roomState
- * @param {String} peerId
- * @private
- */
-const processIceConnectionState = (roomState, peerId) => {
-  const state = roomState;
-
-  if (state.peerConnections[peerId].iceConnectionStateClosed) return;
-
-  state.peerConnections[peerId].iceConnectionStateClosed = true;
-
-  new HandleIceConnectionStats().send(state.room.id, peerId, roomState);
-
-  dispatchEvent(iceConnectionState({
-    state: ICE_CONNECTION_STATE.CLOSED,
-    peerId,
-  }));
-};
-
-/**
  * Closes a peer connection for a particular peerId.
  * @param {String} roomKey
  * @param {String} peerId
@@ -84,12 +40,6 @@ const closePeerConnection = (roomKey, peerId) => {
   if (roomState.peerConnections[peerId].signalingState === PEER_CONNECTION_STATE.CLOSED) return;
 
   roomState.peerConnections[peerId].close();
-
-  // Polyfill for safari 11 and above "closed" event not triggered for "iceConnectionState" and "signalingState".
-  if (isAgent(BROWSER_AGENT.SAFARI) && isVersion(10, '>')) {
-    processPeerConnectionState(roomState, peerId);
-    processIceConnectionState(roomState, peerId);
-  }
 };
 
 /**

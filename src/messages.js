@@ -15,6 +15,9 @@ const MESSAGES = {
       API_SUCCESS: 'Promise resolved: APP Authenticated Successfully!',
     },
   },
+  SOCKET: {
+    ABORT_RECONNECT: 'Aborting socket reconnect',
+  },
   JOIN_ROOM: {
     ERRORS: {
       CODEC_SUPPORT: 'No audio/video codecs available to start connection',
@@ -69,6 +72,7 @@ const MESSAGES = {
     STATE_CHANGE: 'Peer connection state changed ->',
     STATS_API_UNAVAILABLE: 'getStats() API is not available',
     MCU: 'MCU connected',
+    FAILED_STATE: 'Peer Connection state: failed',
     ADD_TRANSCEIVER: 'Adding empty transceiver',
     ERRORS: {
       REMOVE_TRACK: 'Error removing track from peer connection',

@@ -4,7 +4,6 @@ import logger from '../../logger';
 import messages from '../../messages';
 import { DATA_CHANNEL_STATE } from '../../constants';
 import PeerData from '../index';
-import Room from '../../room';
 
 const isUser = (peerId, roomState) => {
   const { user } = roomState;
@@ -42,7 +41,7 @@ const getPeerInfo = (peerId, room) => {
     return peerInfo;
   }
 
-  peerInfo.room = Room.getRoomInfo(room.id);
+  peerInfo.room = room.roomName;
   peerInfo.settings.data = !!(state.dataChannels[peerId] && state.dataChannels[peerId].main && state.dataChannels[peerId].main.channel && state.dataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE.OPEN);
 
   return peerInfo;

@@ -11,11 +11,12 @@ const apiResponseInstance = {};
  * @class SkylinkApiResponse
  * @private
  * @param {RawApiResponse} rawApiResponse - API response received from the API Server
+ * @param {String} roomKey - Room id for retrieving ApiResponse instance
  */
 class SkylinkApiResponse {
-  constructor(rawApiResponse) {
-    if (isAString(rawApiResponse) && apiResponseInstance[rawApiResponse]) {
-      return apiResponseInstance[rawApiResponse];
+  constructor(rawApiResponse, roomKey) {
+    if (isAString(roomKey) && apiResponseInstance[roomKey]) {
+      return apiResponseInstance[roomKey];
     }
 
     const {

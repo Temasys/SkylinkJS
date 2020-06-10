@@ -1,6 +1,6 @@
 import clone from 'clone';
 import Skylink from '../../index';
-import { SDK_VERSION } from '../../constants';
+import { SDK_VERSION, DT_PROTOCOL_VERSION, SM_PROTOCOL_VERSION } from '../../constants';
 import Room from '../../room';
 
 /**
@@ -19,8 +19,6 @@ const getCurrentSessionInfo = (room) => {
     streamsMediaStatus,
     peerPriorityWeight,
     enableIceRestart,
-    SMProtocolVersion,
-    DTProtocolVersion,
     streams,
     streamsBandwidthSettings,
     user,
@@ -38,8 +36,8 @@ const getCurrentSessionInfo = (room) => {
       version: AdapterJS.webrtcDetectedVersion,
       os: navigator.platform,
       pluginVersion: null,
-      SMProtocolVersion,
-      DTProtocolVersion,
+      SMProtocolVersion: SM_PROTOCOL_VERSION,
+      DTProtocolVersion: DT_PROTOCOL_VERSION,
       SDKVersion: SDK_VERSION,
     },
     room: Room.getRoomInfo(room.id),

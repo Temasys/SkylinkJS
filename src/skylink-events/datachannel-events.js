@@ -8,7 +8,7 @@ import SkylinkEvent from '../utils/skylinkEvent';
  * @event SkylinkEvents.DATA_CHANNEL_STATE
  * @description Event triggered when a Datachannel connection state has changed.
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room
+ * @param {roomInfo} detail.room - The current room
  * @param {String} detail.peerId - The peer's id
  * @param {SkylinkConstants.DATA_CHANNEL_STATE} detail.state - The current Datachannel connection state.
  * @param {Error} detail.error - The error object. Defined only when <code>state</code> payload is <code>ERROR</code> or <code>SEND_MESSAGE_ERROR</code>.
@@ -26,7 +26,7 @@ export const onDataChannelStateChanged = (detail = {}) => new SkylinkEvent(DATA_
  * @event SkylinkEvents.ON_INCOMING_MESSAGE
  * @description Event triggered when receiving message from Peer.
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room
+ * @param {roomInfo} detail.room - The current room
  * @param {JSON} detail.message - The message result.
  * @param {JSON|string} detail.message.content - The message.
  * @param {String} detail.message.senderPeerId - The sender Peer ID.
@@ -56,7 +56,7 @@ export const onIncomingMessage = (detail = {}) => new SkylinkEvent(ON_INCOMING_M
  * @event SkylinkEvents.STORED_MESSAGES
  * @description Event triggered when receiving stored messages from the Signaling Server.
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room
+ * @param {roomInfo} detail.room - The current room
  * @param {Array} detail.storedMessages - The stored messages result.
  * @param {String} detail.storedMessages[].targetPeerId - The value of the <code>targetPeerId</code>
  *   defined in {@link Skylink#sendP2PMessage|sendP2PMessage} or {@link Skylink#sendMessage|sendMessage}.
@@ -83,7 +83,7 @@ export const storedMessages = (detail = {}) => new SkylinkEvent(STORED_MESSAGES,
  * @event SkylinkEvents.ENCRYPT_SECRETS_UPDATED
  * @description Event triggered when encrypt secret data is updated.
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room
+ * @param {roomInfo} detail.room - The current room
  * @param {Object} detail.encryptSecrets - The secretId and secret pair.
  * @param {String} detail.selectedSecretId - The id of the secret that is used for encryption and decryption of messages. If value is an
  * empty string, message will not be encrypted.
@@ -98,7 +98,7 @@ export const encryptionSecretsUpdated = (detail = {}) => new SkylinkEvent(ENCRYP
  * @event SkylinkEvents.PERSISTENT_MESSAGE_STATE
  * @description Event triggered when persistent message state changes.
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room
+ * @param {roomInfo} detail.room - The current room
  * @param {Object} detail.isPersistent - The flag if messages should be persistent.
  * @param {String} detail.peerId - The Peer ID.
  * @param {peerInfo} detail.peerInfo - The Peer session information.

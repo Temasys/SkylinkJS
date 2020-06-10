@@ -11,7 +11,7 @@ import SkylinkEvent from '../utils/skylinkEvent';
  * @event SkylinkEvents.CANDIDATE_PROCESSING_STATE
  * @description Event triggered when remote ICE candidate processing state has changed when Peer is using trickle ICE.
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room
+ * @param {roomInfo} detail.room - The current room
  * @param {String} detail.peerId - The peer's id
  * @param {SkylinkConstants.CANDIDATE_PROCESSING_STATE} detail.state - The ICE candidate processing state.
  * @param {String} detail.candidateId - The remote ICE candidate session ID.
@@ -28,7 +28,7 @@ export const candidateProcessingState = detail => new SkylinkEvent(CANDIDATE_PRO
  * @event SkylinkEvents.CANDIDATE_GENERATION_STATE
  * @description Event triggered when a Peer connection ICE gathering state has changed.
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room
+ * @param {roomInfo} detail.room - The current room
  * @param {String} detail.peerId - The peer's id
  * @param {SkylinkConstants.CANDIDATE_GENERATION_STATE} detail.state - The current Peer connection ICE gathering state.
  */
@@ -38,7 +38,7 @@ export const candidateGenerationState = detail => new SkylinkEvent(CANDIDATE_GEN
  * @event SkylinkEvents.CANDIDATES_GATHERED
  * @description Event triggered when all remote ICE candidates gathering has completed and been processed.
  * @param {Object} detail - Event's payload.
- * @param {SkylinkRoom} detail.room - The current room
+ * @param {roomInfo} detail.room - The current room
  * @param {String} detail.peerId - The peer's id
  * @param {Object} detail.candidatesLength - The remote ICE candidates length.
  * @param {number} detail.candidatesLength.expected - The expected total number of remote ICE candidates to be received.

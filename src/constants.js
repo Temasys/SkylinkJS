@@ -478,8 +478,6 @@ export const CANDIDATE_PROCESSING_STATE = {
  * @property {String} CLOSED         Value <code>"closed"</code>
  *   The value of the state when Peer connection ICE connection has closed.
  *   This happens when Peer connection is closed and no streaming can occur at this stage.
- * @property {String} TRICKLE_FAILED Value <code>"trickleFailed"</code>
- *   The value of the state when Peer connection ICE connection has failed during trickle ICE.
  * @constant
  * @type Object
  * @readOnly
@@ -493,7 +491,6 @@ export const ICE_CONNECTION_STATE = {
   COMPLETED: 'completed',
   CLOSED: 'closed',
   FAILED: 'failed',
-  TRICKLE_FAILED: 'trickleFailed',
   DISCONNECTED: 'disconnected',
 };
 
@@ -576,10 +573,16 @@ export const TURN_TRANSPORT = {
  * @since 0.5.0
  */
 export const PEER_CONNECTION_STATE = {
+  // onsignalingstatechange
   STABLE: 'stable',
   HAVE_LOCAL_OFFER: 'have-local-offer',
   HAVE_REMOTE_OFFER: 'have-remote-offer',
   CLOSED: 'closed',
+  // onconnectionstatechange
+  CONNECTING: 'connecting',
+  FAILED: 'failed',
+  DISCONNECTED: 'disconnected',
+  CONNECTED: 'connected',
 };
 
 /**
@@ -1906,7 +1909,7 @@ export const MEDIA_INFO = {
  * @memberOf SkylinkConstants
  * @since 2.0
  */
-export const SDK_VERSION = '2.0.0';
+export const SDK_VERSION = '2.x.x';
 
 /**
  * The SDK type.

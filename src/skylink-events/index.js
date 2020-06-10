@@ -15,7 +15,7 @@ import {
   candidatesGathered,
   iceConnectionState,
 } from './candidate-events';
-import { roomLock, bye } from './room-events';
+import { roomLock, bye, roomRejoin } from './room-events';
 import {
   dataStreamState,
   dataTransferState,
@@ -123,6 +123,7 @@ import {
  *  <strong>ROOM EVENTS</strong> </br>
  *  <ul>
  *    <li>{@link SkylinkEvents.event:ROOM_LOCK|ROOM_LOCK}</li>
+ *    <li>{@link SkylinkEvents.event:ROOM_REJOIN|ROOM_REJOIN}</li>
  *  </ul>
  *  <strong>SOCKET EVENTS</strong> </br>
  *  <ul>
@@ -205,4 +206,5 @@ export {
   mediaInfoDeleted,
   encryptionSecretsUpdated,
   persistentMessageState,
+  roomRejoin,
 };

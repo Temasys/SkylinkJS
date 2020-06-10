@@ -1,6 +1,7 @@
 import {
   ROOM_LOCK,
   BYE,
+  ROOM_REJOIN,
 } from './constants';
 
 import SkylinkEvent from '../utils/skylinkEvent';
@@ -15,6 +16,17 @@ import SkylinkEvent from '../utils/skylinkEvent';
  * @param {Boolean} detail.isSelf The flag if User changed the Room locked status.
  */
 export const roomLock = (detail = {}) => new SkylinkEvent(ROOM_LOCK, { detail });
+
+/**
+ * @event SkylinkEvents.ROOM_REJOIN
+ * @description Event triggered when <code>joinRoom</code> can be re-initiated. This event is preceded by <code>leaveRoom</code> initiated by the
+ * SDK in response to peer connection changing to <code>FAILED</code> state.
+ * @param {Object} detail - Event's payload
+ * @param {roomInfo} detail.room - The previous room
+ * @param {String} detail.peerId - The previous peer id
+ * @return {SkylinkEvent}
+ */
+export const roomRejoin = (detail = {}) => new SkylinkEvent(ROOM_REJOIN, { detail });
 
 /**
  * @event SkylinkEvents.BYE

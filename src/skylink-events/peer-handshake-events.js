@@ -7,7 +7,7 @@ import SkylinkEvent from '../utils/skylinkEvent';
  * @param {Object} detail - Event's payload.
  * @param {SkylinkConstants.HANDSHAKE_PROGRESS} detail.state The current Peer connection establishment state.
  * @param {String} detail.peerId The Peer ID.
- * @param {SkylinkRoom} detail.room The room.
+ * @param {roomInfo} detail.room The room.
  * @param {Error|String} [detail.error] The error object.
  *   Defined only when <code>state</code> is <code>ERROR</code>.
  */

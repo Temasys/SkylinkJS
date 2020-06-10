@@ -31,10 +31,6 @@ const createNativePeerConnection = (targetMid, constraints, hasScreenShare, curr
   rtcPeerConnection.gathered = false;
   rtcPeerConnection.gathering = false;
 
-  // Used for safari 11
-  rtcPeerConnection.iceConnectionStateClosed = false;
-  rtcPeerConnection.signalingStateClosed = false;
-
   // candidates
   state.gatheredCandidates[targetMid] = {
     sending: { host: [], srflx: [], relay: [] },
@@ -62,6 +58,7 @@ const createNativePeerConnection = (targetMid, constraints, hasScreenShare, curr
   rtcPeerConnection.ondatachannel = callbacks.ondatachannel.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.onicecandidate = callbacks.onicecandidate.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.oniceconnectionstatechange = callbacks.oniceconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.onconnectionstatechange = callbacks.onconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.onsignalingstatechange = callbacks.onsignalingstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.onicegatheringstatechange = callbacks.onicegatheringstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
 
