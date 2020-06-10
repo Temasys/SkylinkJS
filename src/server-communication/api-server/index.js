@@ -1,6 +1,6 @@
 /* eslint-disable class-methods-use-this */
 import defaultOptions from './defaultOptions';
-import { validateDepencies } from '../../compatibility/index';
+import { validateDependencies } from '../../compatibility/index';
 import {
   authenticateApp,
   parseAndMutateOptions,
@@ -12,10 +12,11 @@ import {
   enforceUserInitOptions,
 } from './api-helpers';
 import Skylink from '../../index';
-import { getStateByKey } from '../../utils/helpers';
+import { getStateByKey, generateUUID } from '../../utils/helpers';
 import { dispatchEvent } from '../../utils/skylinkEventManager';
-import { READY_STATE_CHANGE, READY_STATE_CHANGE_ERROR } from '../../constants';
+import { READY_STATE_CHANGE, READY_STATE_CHANGE_ERROR, AUTH_STATE } from '../../constants';
 import { readyStateChange } from '../../skylink-events';
+import HandleAuthStats from '../../skylink-stats/handleAuthStats';
 
 let instance = null;
 
@@ -43,6 +44,8 @@ class SkylinkAPIServer {
         // eslint-disable-next-line no-param-reassign
         options.socketServerPath = '';
       }
+      // eslint-disable-next-line no-param-reassign
+      options.clientId = generateUUID();
       Skylink.setUserInitOptions(options);
     }
     dispatchEvent(readyStateChange({
@@ -50,7 +53,7 @@ class SkylinkAPIServer {
       error: null,
       room: null,
     }));
-    const dependencies = validateDepencies();
+    const dependencies = validateDependencies();
     const { AdapterJS } = window;
     if (!dependencies.fulfilled) {
       dispatchEvent(readyStateChange({
@@ -94,6 +97,7 @@ class SkylinkAPIServer {
             room,
           }));
           response.json().then((apiResponse) => {
+            new HandleAuthStats().send(apiResponse.room_key, AUTH_STATE.SUCCESS, response);
             resolve({
               endpoint,
               response: apiResponse,
@@ -109,7 +113,10 @@ class SkylinkAPIServer {
             },
             room,
           }));
-          reject(response.json());
+          response.json().then((error) => {
+            new HandleAuthStats().send(room, AUTH_STATE.ERROR, response, error.info);
+            reject(error);
+          });
         }
       }).catch((error) => {
         dispatchEvent(readyStateChange({

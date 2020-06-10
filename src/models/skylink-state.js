@@ -1,6 +1,3 @@
-import { DATA_TRANSFER_DATA_TYPE, SM_PROTOCOL_VERSION, DT_PROTOCOL_VERSION } from '../constants';
-import { generateUUID } from '../utils/helpers';
-
 /**
  * @class
  * @classdesc Class representing a Skylink State.\
@@ -12,34 +9,24 @@ class SkylinkState {
    */
   constructor(initOptions) {
     /**
+     * Stores the api response.
+     * @name apiResponse
+     * @type {SkylinkApiResponse}
+     * @since 2.0.0
+     * @private
+     */
+    this.apiResponse = {};
+    /**
      * Stores the list of Peer DataChannel connections.
      * @name dataChannels
      * @type {Object}
      * @property {String} peerId - The list of DataChannels associated with Peer ID.
-     * @property {RTCDataChannel} channeLabel - The DataChannel connection.
+     * @property {RTCDataChannel} channelLabel - The DataChannel connection.
      * The property name <code>"main"</code> is reserved for messaging Datachannel type.
      * @since 0.2.0
      * @private
      */
     this.dataChannels = {};
-    /**
-     * Stores the list of data transfers from / to Peers.
-     * @name dataTransfers
-     * @property {JSON} #transferId The data transfer session.
-     * @type JSON
-     * @since 0.6.16
-     * @private
-     */
-    this.dataTransfers = {};
-    /**
-     * Stores the list of sending data streaming sessions to Peers.
-     * @name dataStreams
-     * @property {JSON} #streamId The data stream session.
-     * @type JSON
-     * @since 0.6.18
-     * @private
-     */
-    this.dataStreams = {};
     /**
      * Stores the list of buffered ICE candidates that is received before
      *   remote session description is received and set.
@@ -98,23 +85,6 @@ class SkylinkState {
      */
     this.peerStats = {};
     /**
-     * Stores the list of the Peer connections stats.
-     * @name peerBandwidth
-     * @property {JSON} <#peerId> The Peer connection stats.
-     * @type JSON
-     * @since 0.6.16
-     * @private
-     */
-    this.peerBandwidth = {};
-    /**
-     * Stores the list of the Peer custom configs.
-     * @name peerCustomConfigs
-     * @type JSON
-     * @since 0.6.18
-     * @private
-     */
-    this.peerCustomConfigs = {};
-    /**
      * Stores the list of Peers session information.
      * @name peerInformations
      * @property {JSON} <#peerId> The Peer session information.
@@ -140,16 +110,6 @@ class SkylinkState {
      */
     this.user = initOptions.user;
     /**
-     * Stores the User custom data.
-     * By default, if no custom user data is set, it is an empty string <code>""</code>.
-     * @name userData
-     * @type JSON|string
-     * @default ""
-     * @since 0.5.6
-     * @private
-     */
-    this.userData = '';
-    /**
      * Stores the User connection priority weight.
      * If Peer has a higher connection weight, it will do the offer from its Peer connection first.
      * @name peerPriorityWeight
@@ -158,16 +118,6 @@ class SkylinkState {
      * @private
      */
     this.peerPriorityWeight = 0;
-    /**
-     * Stores the flag that indicates if "autoIntroduce" is enabled.
-     * If enabled, the Peers connecting the same Room will receive each others "enter" message ping.
-     * @name autoIntroduce
-     * @type boolean
-     * @default true
-     * @since 0.6.1
-     * @private
-     */
-    this.autoIntroduce = initOptions.autoIntroduce;
     /**
      * Stores the flag that indicates if "isPrivileged" is enabled.
      * If enabled, the User has Privileged features which has the ability to retrieve the list of
@@ -180,45 +130,6 @@ class SkylinkState {
      * @private
      */
     this.isPrivileged = initOptions.isPrivileged;
-    /**
-     * Stores the current Room name that User is connected to.
-     * @name selectedRoom
-     * @type string
-     * @since 0.3.0
-     * @private
-     */
-    this.selectedRoom = null;
-    /**
-     * Stores the flag that indicates if Room is locked.
-     * @name roomLocked
-     * @type boolean
-     * @since 0.5.2
-     * @private
-     */
-    this.roomLocked = false;
-    /**
-     * Stores the flag that indicates if User is connected to the Room.
-     * @name inRoom
-     * @type boolean
-     * @since 0.4.0
-     * @private
-     */
-    this.inRoom = false;
-    /**
-    /**
-     * Stores the timestamps data used for throttling.
-     * @name timestamp
-     * @type JSON
-     * @since 0.5.8
-     * @private
-     */
-    this.timestamp = {
-      socketMessage: null,
-      shareScreen: null,
-      refreshConnection: null,
-      getUserMedia: null,
-      lastRestart: null,
-    };
     /**
      * Stores the current socket connection information.
      * @name socketSession
@@ -237,26 +148,6 @@ class SkylinkState {
      * @private
      */
     this.socketMessageQueue = [];
-    /**
-     * Stores the <code>setTimeout</code> to sent queued socket messages.
-     * @name socketMessageTimeout
-     * @type Object
-     * @since 0.5.8
-     * @private
-     */
-    this.socketMessageTimeout = null;
-    /**
-     * Stores the list of socket ports to use to connect to the Signaling.
-     * These ports are defined by default which is commonly used currently by the Signaling.
-     * Should re-evaluate this sometime.
-     * @name socketPorts
-     * @property {Array} http: The list of HTTP socket ports.
-     * @property {Array} https: The list of HTTPS socket ports.
-     * @type JSON
-     * @since 0.5.8
-     * @private
-     */
-    this.socketPorts = initOptions.socketPorts;
     /**
      * Stores the flag that indicates if socket connection to the Signaling has opened.
      * @name channelOpen
@@ -282,33 +173,9 @@ class SkylinkState {
      */
     this.signalingServerProtocol = initOptions.forceSSL ? 'https:' : window.location.protocol;
     /**
-     * Stores the Signaling server port.
-     * @name signalingServerPort
-     * @type number
-     * @since 0.5.4
-     * @private
-     */
-    this.signalingServerPort = null;
-    /**
-     * Stores the Signaling socket connection object.
-     * @name socket
-     * @type io
-     * @since 0.1.0
-     * @private
-     */
-    this.socket = null;
-    /**
-     * Stores the flag that indicates if XDomainRequest is used for IE 8/9.
-     * @name socketUseXDR
-     * @type boolean
-     * @since 0.5.4
-     * @private
-     */
-    this.socketUseXDR = false;
-    /**
      * Stores the value if ICE restart is supported.
      * @name enableIceRestart
-     * @type string
+     * @type boolean
      * @since 0.6.16
      * @private
      */
@@ -321,37 +188,6 @@ class SkylinkState {
      * @private
      */
     this.hasMCU = initOptions.hasMCU;
-    /**
-     * Stores the construct API REST path to obtain Room credentials.
-     * @name path
-     * @type string
-     * @since 0.1.0
-     * @private
-     */
-    this.path = null;
-    /**
-     * Stores the current <code>init()</code> readyState.
-     * @name readyState
-     * @type number
-     * @since 0.1.0
-     * @private
-     */
-    /**
-     * Stores the "cid" used for <code>joinRoom()</code>.
-     * @name key
-     * @type string
-     * @since 0.1.0
-     * @private
-     */
-    this.key = initOptions.key;
-    /**
-     * Stores the "apiOwner" used for <code>joinRoom()</code>.
-     * @name appKeyOwner
-     * @type string
-     * @since 0.5.2
-     * @private
-     */
-    this.appKeyOwner = initOptions.appKeyOwner;
     /**
      * Stores the Room credentials information for <code>joinRoom()</code>.
      * @name room
@@ -386,30 +222,6 @@ class SkylinkState {
       screenshare: null,
     };
     /**
-     * Stores the default camera Stream settings.
-     * @name streamsDefaultSettings
-     * @type JSON
-     * @since 0.6.15
-     * @private
-     */
-    this.streamsDefaultSettings = {
-      userMedia: {
-        audio: {
-          stereo: false,
-        },
-        video: {
-          resolution: {
-            width: 640,
-            height: 480,
-          },
-          frameRate: 50,
-        },
-      },
-      screenshare: {
-        video: true,
-      },
-    };
-    /**
      * Stores all the Stream required muted settings.
      * @name streamsMutedSettings
      * @type JSON
@@ -425,42 +237,8 @@ class SkylinkState {
      * @private
      */
     this.streamsBandwidthSettings = {
-      googleX: {},
       bAS: {},
     };
-    /**
-     * Stores all the Stream stopped callbacks.
-     * @name streamsStoppedCbs
-     * @type JSON
-     * @since 0.6.15
-     * @private
-     */
-    /**
-     * Stores the session description settings.
-     * @name sdpSettings
-     * @type JSON
-     * @since 0.6.16
-     * @private
-     */
-    this.sdpSettings = {
-      connection: {
-        audio: true,
-        video: true,
-        data: true,
-      },
-      direction: {
-        audio: { send: true, receive: true },
-        video: { send: true, receive: true },
-      },
-    };
-    /**
-     * Stores the publish only settings.
-     * @name publishOnly
-     * @type boolean
-     * @since 0.6.16
-     * @private
-     */
-    this.publishOnly = false;
     /**
      * Stores the list of recordings.
      * @name recordings
@@ -495,14 +273,6 @@ class SkylinkState {
      */
     this.currentCodecSupport = null;
     /**
-     * Stores the session description orders and info.
-     * @name sdpSessions
-     * @type JSON
-     * @since 0.6.18
-     * @private
-     */
-    this.sdpSessions = {};
-    /**
      * Stores the flag if voice activity detection should be enabled.
      * @name voiceActivityDetection
      * @type boolean
@@ -512,22 +282,6 @@ class SkylinkState {
      */
     this.voiceActivityDetection = true;
     /**
-     * Stores the datachannel binary data chunk type.
-     * @name binaryChunkType
-     * @type JSON
-     * @since 0.6.18
-     * @private
-     */
-    this.binaryChunkType = DATA_TRANSFER_DATA_TYPE.ARRAY_BUFFER;
-    /**
-     * Stores the RTCPeerConnection configuration.
-     * @name peerConnectionConfig
-     * @type JSON
-     * @since 0.6.18
-     * @private
-     */
-    this.peerConnectionConfig = {};
-    /**
      * Stores the auto bandwidth settings.
      * @name bandwidthAdjuster
      * @type JSON
@@ -536,33 +290,6 @@ class SkylinkState {
      */
     this.bandwidthAdjuster = null;
     /**
-     * Stores the Peer connection status.
-     * @name peerConnStatus
-     * @type JSON
-     * @since 0.6.19
-     * @private
-     */
-    this.peerConnStatus = {};
-    /**
-     * Stores the flag to temporarily halt joinRoom() from processing.
-     * @name joinRoomManager
-     * @type boolean
-     * @since 0.6.19
-     * @private
-     */
-    this.joinRoomManager = {
-      timestamp: 0,
-      socketsFn: [],
-    };
-    /**
-     * Stores the unique random number used for generating the "client_id".
-     * @name statIdRandom
-     * @type number
-     * @since 0.6.31
-     * @private
-     */
-    this.statIdRandom = Date.now() + Math.floor(Math.random() * 100000000);
-    /**
      * Stores the list of RTMP Sessions.
      * @name rtmpSessions
      * @type JSON
@@ -570,24 +297,6 @@ class SkylinkState {
      * @private
      */
     this.rtmpSessions = {};
-    /**
-     * Stores the SM Protocol Version
-     * @type {String}
-     */
-    this.SMProtocolVersion = SM_PROTOCOL_VERSION;
-    /**
-     * Stores the DT Protocol Version
-     * @type {String}
-     */
-    this.DTProtocolVersion = DT_PROTOCOL_VERSION;
-    /**
-     * Originally negotiated DTLS role of this peer.
-     * @name originalDTLSRole
-     * @type string
-     * @since 1.0.0
-     * @private
-     */
-    this.originalDTLSRole = null;
     /**
      * Offer buffered in order to apply when received answer
      * @name bufferedLocalOffer
@@ -619,7 +328,7 @@ class SkylinkState {
      * @private
      * @since 0.6.31
      */
-    this.clientId = generateUUID();
+    this.clientId = initOptions.clientId;
     /**
      * Stores all the Stream media status.
      * @name streamsMediaStatus

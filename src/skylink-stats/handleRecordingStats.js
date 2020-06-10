@@ -6,7 +6,7 @@ class HandleRecordingStats extends SkylinkStats {
     super();
     this.model = {
       client_id: null,
-      appKey: null,
+      app_key: null,
       timestamp: null,
       room_id: null,
       user_id: null,
@@ -21,7 +21,7 @@ class HandleRecordingStats extends SkylinkStats {
     const roomState = Skylink.getSkylinkState(roomKey);
 
     this.model.client_id = roomState.clientId;
-    this.model.appKey = Skylink.getInitOptions().appKey;
+    this.model.app_key = Skylink.getInitOptions().appKey;
     this.model.timestamp = (new Date()).toISOString();
     this.model.room_id = roomKey;
     this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;

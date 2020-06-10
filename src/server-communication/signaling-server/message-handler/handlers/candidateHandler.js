@@ -14,21 +14,20 @@ import HandleIceCandidateStats from '../../../../skylink-stats/handleIceCandidat
  * @param {JSON} message
  * @memberOf SignalingMessageHandler
  * @returns {null}
- * @fires candidateProcessingState
+ * @fires CANDIDATE_PROCESSING_STATE
  */
 const candidateHandler = (message) => {
   const { candidate, mid, rid } = message;
   const state = Skylink.getSkylinkState(rid);
   const { room } = state;
-  const initOptions = Skylink.getInitOptions();
   const peerConnection = state.peerConnections[mid];
   const peerEndOfCandidatesCounter = state.peerEndOfCandidatesCounter[mid] || {};
   const { RTCIceCandidate } = window;
-  const { ICE_CANDIDATE: { CANDIDATE_HANDLER }, PEER_CONNECTION, STATS_MODULE: { HANDLE_ICE_GATHERING_STATS } } = messages;
+  const { ICE_CANDIDATE, PEER_CONNECTION, STATS_MODULE: { HANDLE_ICE_GATHERING_STATS } } = messages;
   const handleIceCandidateStats = new HandleIceCandidateStats();
 
   if (!candidate && !message.id) {
-    logger.log.WARN([mid, CANDIDATE_HANDLER.tag, null, CANDIDATE_HANDLER.INVALID_CANDIDATE], message);
+    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, null, ICE_CANDIDATE.INVALID_CANDIDATE], message);
     return null;
   }
 
@@ -40,7 +39,7 @@ const candidateHandler = (message) => {
   const candidateId = `can-${nativeCandidate.foundation}`;
   const candidateType = nativeCandidate.candidate.split(' ')[7] || '';
 
-  logger.log.DEBUG([mid, CANDIDATE_HANDLER.tag, `${candidateId}:${candidateType}`, CANDIDATE_HANDLER.VALID_CANDIDATE], nativeCandidate);
+  logger.log.DEBUG([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.VALID_CANDIDATE], nativeCandidate);
 
   peerEndOfCandidatesCounter.len = peerEndOfCandidatesCounter.len || 0;
   peerEndOfCandidatesCounter.hasSet = false;
@@ -68,7 +67,7 @@ const candidateHandler = (message) => {
   }));
 
   if (!(peerConnection && peerConnection.signalingState !== constants.PEER_CONNECTION_STATE.CLOSED)) {
-    logger.log.WARN([mid, CANDIDATE_HANDLER.tag, `${candidateId}:${candidateType}`, PEER_CONNECTION.NO_PEER_CONNECTION]);
+    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, PEER_CONNECTION.NO_PEER_CONNECTION]);
 
     candidateProcessingStateEventDetail.error = new Error(PEER_CONNECTION.NO_PEER_CONNECTION);
     handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
@@ -84,29 +83,6 @@ const candidateHandler = (message) => {
 
     PeerConnection.signalingEndOfCandidates(mid, state);
     return null;
-  }
-
-  if (initOptions.filterCandidatesType[candidateType]) {
-    if (!(state.hasMCU && initOptions.forceTURN)) {
-      logger.log.WARN([mid, CANDIDATE_HANDLER.tag, `${candidateId}:${candidateType}`, CANDIDATE_HANDLER.FILTERED_CANDIDATE], nativeCandidate);
-
-      candidateProcessingStateEventDetail.error = new Error(CANDIDATE_HANDLER.FILTERED_CANDIDATE);
-      handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.DROPPED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
-      dispatchEvent(candidateProcessingState({
-        room,
-        state: constants.CANDIDATE_PROCESSING_STATE.DROPPED,
-        peerId: mid,
-        candidateId,
-        candidateType,
-        candidate: candidateProcessingStateEventDetail.candidate,
-        error: candidateProcessingStateEventDetail.error,
-      }));
-
-      PeerConnection.signalingEndOfCandidates(mid, state);
-      return null;
-    }
-
-    logger.log.WARN([mid, CANDIDATE_HANDLER.tag, `${candidateId}:${candidateType}`, CANDIDATE_HANDLER.FILTERING_FLAG_NOT_HONOURED], nativeCandidate);
   }
 
   if (peerConnection.remoteDescription && peerConnection.remoteDescription.sdp && peerConnection.localDescription && peerConnection.localDescription.sdp) {

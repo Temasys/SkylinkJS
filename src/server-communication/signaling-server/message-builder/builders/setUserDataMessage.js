@@ -19,7 +19,7 @@ const setUserDataMessage = roomState => ({
   type: SIG_MESSAGE_TYPE.UPDATE_USER,
   mid: roomState.user.sid,
   rid: roomState.room.id,
-  userData: isAString(roomState.userData) ? roomState.userData : JSON.stringify(roomState.userData),
+  userData: isAString(roomState.user.userData) ? roomState.user.userData : JSON.stringify(roomState.user.userData),
   stamp: (new Date()).getTime(),
 });
 

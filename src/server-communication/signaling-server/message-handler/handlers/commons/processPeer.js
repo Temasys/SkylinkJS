@@ -6,7 +6,11 @@ import { peerJoined, handshakeProgress, serverPeerJoined } from '../../../../../
 import { dispatchEvent } from '../../../../../utils/skylinkEventManager';
 import PeerData from '../../../../../peer-data';
 import parsers from '../../../parsers/index';
-import { PEER_TYPE, SERVER_PEER_TYPE, HANDSHAKE_PROGRESS } from '../../../../../constants';
+import {
+  PEER_TYPE, SERVER_PEER_TYPE, HANDSHAKE_PROGRESS, TAGS,
+} from '../../../../../constants';
+import MESSAGES from '../../../../../messages';
+import Room from '../../../../../room';
 
 const setPeerInformations = (state, peerId, userInfo) => {
   const { room } = state;
@@ -19,9 +23,9 @@ const setPeerInformations = (state, peerId, userInfo) => {
  * Function that adds a Peer Connection and updates the state(Skylink State).
  * @param {JSON} params
  * @memberOf SignalingMessageHandler
- * @fires serverPeerJoined
- * @fires peerJoined
- * @fires handshakeProgress
+ * @fires SERVER_PEER_JOINED
+ * @fires PEER_JOINED
+ * @fires HANDSHAKE_PROGRESS
  */
 const processPeer = (params) => {
   const {
@@ -54,24 +58,23 @@ const processPeer = (params) => {
       targetMid,
       peerBrowser,
       cert,
-      receiveOnly: message.receiveOnly,
       hasScreenshare,
     });
 
     if (targetMid === PEER_TYPE.MCU) {
-      logger.log.INFO([targetMid, 'RTCPeerConnection', null, 'MCU feature has been enabled']);
+      logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.MCU]);
       state.hasMCU = true;
       dispatchEvent(serverPeerJoined({
         peerId: targetMid,
         serverPeerType: SERVER_PEER_TYPE.MCU,
-        room: currentRoom,
+        room: Room.getRoomInfo(currentRoom.id),
       }));
     } else {
       dispatchEvent(peerJoined({
         peerId: targetMid,
         peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
         isSelf: false,
-        room: currentRoom,
+        room: Room.getRoomInfo(currentRoom.id),
       }));
     }
   }
@@ -98,7 +101,7 @@ const processPeer = (params) => {
           peerId: PEER_ID,
           peerInfo: PeerData.getPeerInfo(PEER_ID, currentRoom),
           isSelf: false,
-          room: currentRoom,
+          room: Room.getRoomInfo(currentRoom.id),
         }));
       }
     }
@@ -108,7 +111,7 @@ const processPeer = (params) => {
       peerId: targetMid,
       peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
       isSelf: false,
-      room: currentRoom,
+      room: Room.getRoomInfo(currentRoom.id),
     }));
   }
 
@@ -119,7 +122,7 @@ const processPeer = (params) => {
       peerId: targetMid,
       state: HANDSHAKE_PROGRESS.WELCOME,
       error: null,
-      room: currentRoom,
+      room: Room.getRoomInfo(currentRoom.id),
     }));
   }
 };

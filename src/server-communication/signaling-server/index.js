@@ -16,6 +16,7 @@ import { dispatchEvent } from '../../utils/skylinkEventManager';
 import Skylink from '../../index';
 import MESSAGES from '../../messages';
 import { TAGS, SOCKET_ERROR, HANDSHAKE_PROGRESS } from '../../constants';
+import Room from '../../room';
 
 const SOCKET_TYPE = {
   POLLING: 'Polling',
@@ -88,7 +89,7 @@ class SkylinkSignalingServer {
   /**
    * Method that creates a socket - Returns the same instance of socket if already created.
    * @param {SkylinkRoom.id} roomKey
-   * @fires socketError
+   * @fires SOCKET_ERROR
    * @return {Promise}
    */
   createSocket(roomKey) {
@@ -143,7 +144,7 @@ class SkylinkSignalingServer {
       peerId: roomState.user.sid,
       state: HANDSHAKE_PROGRESS[state],
       error: null,
-      room: roomState.room,
+      room: Room.getRoomInfo(roomState.room.id),
     }));
   }
 

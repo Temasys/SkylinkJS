@@ -1,3 +1,4 @@
+import clone from 'clone';
 import Skylink from '../index';
 import { SkylinkAPIServer, SkylinkSignalingServer } from '../server-communication/index';
 import HandleClientStats from '../skylink-stats/handleClientStats';
@@ -7,6 +8,25 @@ import * as constants from '../constants';
 import SkylinkApiResponse from '../models/api-response';
 import SkylinkState from '../models/skylink-state';
 import MediaStream from '../media-stream/index';
+import { isAgent } from '../utils/helpers';
+
+const buildCachedApiResponse = (skylinkApiResponse) => {
+  const cachedResponse = clone(skylinkApiResponse);
+  delete cachedResponse.room;
+  delete cachedResponse.user;
+  return cachedResponse;
+};
+
+const addNewStateAndCacheApiResponse = (response, options) => {
+  const apiServer = new SkylinkAPIServer();
+  const skylinkApiResponse = new SkylinkApiResponse(response);
+  const initOptions = apiServer.enforceUserInitOptions(skylinkApiResponse);
+  const skylinkState = new SkylinkState(initOptions);
+  skylinkState.user.userData = options.userData;
+  skylinkState.apiResponse = Object.freeze(buildCachedApiResponse(skylinkApiResponse));
+  Skylink.setSkylinkState(skylinkState, response.roomName);
+  return skylinkState;
+};
 
 /**
  * @description Method that starts the Room Session.
@@ -18,29 +38,23 @@ import MediaStream from '../media-stream/index';
  * @private
  */
 const joinRoom = (options = {}, prefetchedStream) => new Promise((resolve, reject) => {
-  const { navigator, AdapterJS } = window;
+  const { navigator } = window;
   const apiServer = new SkylinkAPIServer();
   const signalingServer = new SkylinkSignalingServer();
-  let initOptions = Skylink.getInitOptions();
+  const initOptions = Skylink.getInitOptions();
   const handleClientStats = new HandleClientStats();
   const roomName = SkylinkAPIServer.getRoomNameFromParams(options) ? SkylinkAPIServer.getRoomNameFromParams(options) : initOptions.defaultRoom;
 
   dispatchEvent(readyStateChange({
     readyState: constants.READY_STATE_CHANGE.LOADING,
     error: null,
-    room: roomName,
+    room: { roomName },
   }));
 
   apiServer.createRoom(roomName).then((result) => {
-    const { endpoint, response } = result;
+    const { response } = result;
     response.roomName = roomName;
-    const skylinkApiResponse = new SkylinkApiResponse(response);
-    initOptions = apiServer.enforceUserInitOptions(skylinkApiResponse);
-    const skylinkState = new SkylinkState(initOptions);
-
-    skylinkState.userData = options.userData || '';
-    skylinkState.path = endpoint;
-    Skylink.setSkylinkState(skylinkState, roomName);
+    const skylinkState = addNewStateAndCacheApiResponse(response, options);
 
     apiServer.checkCodecSupport(skylinkState.room.id).then(() => {
       handleClientStats.send(skylinkState.room.id);
@@ -66,7 +80,7 @@ const joinRoom = (options = {}, prefetchedStream) => new Promise((resolve, rejec
         } else {
           // If no audio is requested for Safari, audio will not be heard on the Safari peer even if the remote peer has audio. Workaround to
           // request media access but not add the track to the peer connection. Does not seem to apply to video.
-          if (AdapterJS.webrtcDetectedBrowser === constants.BROWSER_AGENT.SAFARI) {
+          if (isAgent(constants.BROWSER_AGENT.SAFARI)) {
             navigator.mediaDevices.getUserMedia({ audio: true })
               .then(() => signalingServer.joinRoom(room));
           } else {

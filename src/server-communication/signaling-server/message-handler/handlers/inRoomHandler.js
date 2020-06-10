@@ -7,14 +7,15 @@ import { peerJoined, onIncomingStream } from '../../../../skylink-events';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { hasAudioTrack, hasVideoTrack } from '../../../../utils/helpers';
 import * as constants from '../../../../constants';
+import Room from '../../../../room';
 
 /**
  * Function that handles the "inRoom" socket message received.
  * @param {JSON} message
  * @memberOf SignalingMessageHandler
- * @fires peerJoined
- * @fires handshakeProgress
- * @fires onIncomingStream
+ * @fires PEER_JOINED
+ * @fires HANDSHAKE_PROGRESS
+ * @fires ON_INCOMING_STREAM
  */
 const inRoomHandler = (message) => {
   const {
@@ -42,7 +43,6 @@ const inRoomHandler = (message) => {
 
   roomState.peerPriorityWeight = tieBreaker + weightAppendValue;
   roomState.user.sid = sid;
-  roomState.inRoom = true;
 
   PeerMedia.updatePeerMediaWithUserSid(roomState.room, sid);
   Skylink.setSkylinkState(roomState, rid);
@@ -62,7 +62,7 @@ const inRoomHandler = (message) => {
         stream: mediaStream,
         streamId: mediaStream.id,
         peerId: roomState.user.sid,
-        room: roomState.room,
+        room: Room.getRoomInfo(roomState.room.id),
         isSelf: true,
         peerInfo: PeerData.getCurrentSessionInfo(roomState.room),
         isVideo: hasVideoTrack(mediaStream),

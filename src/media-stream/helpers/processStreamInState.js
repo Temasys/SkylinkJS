@@ -31,7 +31,7 @@ const isStreamInState = (state, stream) => {
  * @param {boolean} [isScreensharing=false] isScreensharing
  * @param {boolean} [isAudioFallback=false] isAudioFallback
  * @memberOf MediaStreamHelpers
- * @fires mediaAccessSuccess
+ * @fires MEDIA_ACCESS_SUCCESS
  * @private
  * */
 const processStreamInState = (stream = null, settings = {}, roomkey, isScreensharing = false, isAudioFallback = false) => {

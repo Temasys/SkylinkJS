@@ -5,10 +5,12 @@ import { onIncomingScreenStream } from '../../../skylink-events';
 import PeerData from '../../../peer-data';
 import { TRACK_KIND } from '../../../constants';
 import PeerMedia from '../../../peer-media';
+import { DEFAULTS } from '../../../defaults';
+import Room from '../../../room';
 
 const addScreenStreamToState = (state, stream) => {
   const { room, user } = state;
-  const settings = helpers.parseStreamSettings({ video: true });
+  const settings = helpers.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
   const isScreensharing = true;
   const isAudioFallback = false;
   helpers.processStreamInState(stream, settings, room.id, isScreensharing, isAudioFallback);
@@ -16,7 +18,7 @@ const addScreenStreamToState = (state, stream) => {
   dispatchEvent(onIncomingScreenStream({
     stream,
     peerId: user.sid,
-    room,
+    room: Room.getRoomInfo(room.id),
     isSelf: true,
     peerInfo: PeerData.getCurrentSessionInfo(room),
     streamId: stream.id,

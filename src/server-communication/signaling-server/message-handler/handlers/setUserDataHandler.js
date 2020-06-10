@@ -17,7 +17,7 @@ import MESSAGES from '../../../../messages';
  * @param {String|Object} message.userData - The updated peer userData.
  * @param {Number} message.stamp - The time stamp for the current updateUserEvent userData.
  * @member SignalingMessageHandler
- * @fires peerUpdated
+ * @fires PEER_UPDATED
  * @private
  */
 const setUserDataHandler = (message) => {

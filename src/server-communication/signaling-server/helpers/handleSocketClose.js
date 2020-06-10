@@ -9,7 +9,7 @@ const handleSocketClose = (roomKey, reason) => {
   const state = Skylink.getSkylinkState(roomKey) || Object.values(Skylink.getSkylinkState())[0]; // to handle leaveAllRooms method
 
   const {
-    socketSession, inRoom, room, user,
+    socketSession, room, user,
   } = state;
 
   logger.log.INFO([null, 'Socket', null, `Channel closed. Reason - ${reason}`]);
@@ -21,7 +21,7 @@ const handleSocketClose = (roomKey, reason) => {
     socketSession: clone(socketSession),
   }));
 
-  if (inRoom && user && user.sid) {
+  if (room.inRoom && user && user.sid) {
     dispatchEvent(sessionDisconnect({
       peerId: user.sid,
       peerInfo: PeerData.getCurrentSessionInfo(room),

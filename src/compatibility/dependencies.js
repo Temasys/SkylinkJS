@@ -1,6 +1,7 @@
 import MESSAGES from '../messages';
 import logger from '../logger';
-import { READY_STATE_CHANGE_ERROR } from '../constants';
+import { READY_STATE_CHANGE_ERROR, BROWSER_AGENT } from '../constants';
+import { isAgent } from '../utils/helpers';
 
 /**
  * @private
@@ -8,12 +9,13 @@ import { READY_STATE_CHANGE_ERROR } from '../constants';
  * @memberOf module:Compatibility
  * @return {{fulfilled: boolean, message: string}}
  */
-const validateDepencies = () => {
+const validateDependencies = () => {
   const dependencies = {
     fulfilled: true,
     message: '',
   };
   const { AdapterJS, io, fetch } = window;
+  const header = 'Validating Dependencies';
   if (typeof (AdapterJS || window.AdapterJS || window.AdapterJS || {}).webRTCReady !== 'function') {
     dependencies.message = MESSAGES.INIT.ERRORS.NO_ADAPTER;
     dependencies.fulfilled = false;
@@ -27,10 +29,13 @@ const validateDepencies = () => {
     dependencies.fulfilled = false;
     dependencies.readyStateChangeErrorCode = READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT;
   }
+  if (!((isAgent(BROWSER_AGENT.FIREFOX) && AdapterJS.webrtcDetectedType === 'moz') || isAgent(BROWSER_AGENT.SAFARI) || (isAgent(BROWSER_AGENT.CHROME) && AdapterJS.webrtcDetectedType === 'webkit') || isAgent(BROWSER_AGENT.REACT_NATIVE))) {
+    logger.log.WARN([header, null, null, MESSAGES.INIT.INCOMPATIBLE_BROWSER]);
+  }
   if (!dependencies.fulfilled) {
-    logger.log.ERROR(['Validating Dependencies', null, null, dependencies.message]);
+    logger.log.ERROR([header, null, null, dependencies.message]);
   }
   return dependencies;
 };
 
-export default validateDepencies;
+export default validateDependencies;

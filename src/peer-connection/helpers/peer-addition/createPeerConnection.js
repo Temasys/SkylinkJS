@@ -1,42 +1,35 @@
 import {
-  BUNDLE_POLICY, HANDSHAKE_PROGRESS, PEER_TYPE, BROWSER_AGENT,
+  HANDSHAKE_PROGRESS, PEER_TYPE, BROWSER_AGENT, TAGS,
 } from '../../../constants';
 import Skylink from '../../../index';
 import logger from '../../../logger';
 import callbacks from './callbacks/index';
 import { dispatchEvent } from '../../../utils/skylinkEventManager';
 import { handshakeProgress } from '../../../skylink-events';
-import { updateRemoveStream } from '../../../compatibility/index';
+import MESSAGES from '../../../messages';
+import { isAgent } from '../../../utils/helpers';
+import retrieveConfig from '../../../defaults';
+import Room from '../../../room';
 
-const createNativePeerConnection = (targetMid, constraints, optional, hasScreenShare, currentRoom) => {
+const createNativePeerConnection = (targetMid, constraints, hasScreenShare, currentRoom) => {
   const initOptions = Skylink.getInitOptions();
   const state = Skylink.getSkylinkState(currentRoom.id);
-  const { AdapterJS } = window;
-  logger.log.DEBUG([targetMid, 'RTCPeerConnection', null, 'Creating peer connection ->'], {
+  logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.CREATE_NEW], {
     constraints,
-    optional,
   });
   const { RTCPeerConnection, msRTCPeerConnection } = window;
-  const rtcPeerConnection = new (initOptions.useEdgeWebRTC && msRTCPeerConnection ? window.msRTCPeerConnection : RTCPeerConnection)(constraints, optional);
+  const rtcPeerConnection = new (initOptions.useEdgeWebRTC && msRTCPeerConnection ? window.msRTCPeerConnection : RTCPeerConnection)(constraints);
   const callbackExtraParams = [rtcPeerConnection, targetMid, state];
 
   // attributes (added on by Temasys)
   rtcPeerConnection.setOffer = '';
   rtcPeerConnection.setAnswer = '';
   rtcPeerConnection.negotiating = false;
-  rtcPeerConnection.hasStream = false;
   rtcPeerConnection.hasMainChannel = false;
-  rtcPeerConnection.firefoxStreamId = '';
   rtcPeerConnection.processingLocalSDP = false;
   rtcPeerConnection.processingRemoteSDP = false;
   rtcPeerConnection.gathered = false;
   rtcPeerConnection.gathering = false;
-  rtcPeerConnection.localStream = null;
-  rtcPeerConnection.localStreamId = null;
-
-  // Used for safari 11
-  rtcPeerConnection.iceConnectionStateClosed = false;
-  rtcPeerConnection.signalingStateClosed = false;
 
   // candidates
   state.gatheredCandidates[targetMid] = {
@@ -44,11 +37,7 @@ const createNativePeerConnection = (targetMid, constraints, optional, hasScreenS
     receiving: { host: [], srflx: [], relay: [] },
   };
 
-  // self._streamsSession[targetMid] = self._streamsSession[targetMid] || {}; from SkylinkJS
   state.peerEndOfCandidatesCounter[targetMid] = state.peerEndOfCandidatesCounter[targetMid] || {};
-  state.sdpSessions[targetMid] = { local: {}, remote: {} };
-  state.peerBandwidth[targetMid] = {};
-  // state.peerStats[targetMid] = {}; // initialised only after peerConnationStatus === 'completed'
 
   // FIXME: ESS-1620 - To check if still needed
   if (targetMid === PEER_TYPE.MCU) {
@@ -58,21 +47,22 @@ const createNativePeerConnection = (targetMid, constraints, optional, hasScreenS
     }
   }
 
-  Skylink.setSkylinkState(state, currentRoom.id);
-
-  if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
-    rtcPeerConnection.removeStream = updateRemoveStream(rtcPeerConnection);
+  if (rtcPeerConnection.restartIce) {
+    state.enableIceRestart = true;
   }
+
+  Skylink.setSkylinkState(state, currentRoom.id);
 
   /* CALLBACKS */
   rtcPeerConnection.ontrack = callbacks.ontrack.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.ondatachannel = callbacks.ondatachannel.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.onicecandidate = callbacks.onicecandidate.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.oniceconnectionstatechange = callbacks.oniceconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.onconnectionstatechange = callbacks.onconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.onsignalingstatechange = callbacks.onsignalingstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
   rtcPeerConnection.onicegatheringstatechange = callbacks.onicegatheringstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
 
-  if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE) {
+  if (isAgent(BROWSER_AGENT.REACT_NATIVE)) {
     rtcPeerConnection.onsenderadded = callbacks.onsenderadded.bind(rtcPeerConnection, ...callbackExtraParams);
     rtcPeerConnection.onremovetrack = callbacks.onremovetrack.bind(rtcPeerConnection, targetMid, state.room, false);
   }
@@ -85,7 +75,7 @@ const createNativePeerConnection = (targetMid, constraints, optional, hasScreenS
  * @param {JSON} params
  * @return {RTCPeerConnection} peerConnection
  * @memberOf PeerConnection.PeerConnectionHelpers
- * @fires handshakeProgress
+ * @fires HANDSHAKE_PROGRESS
  */
 const createPeerConnection = (params) => {
   let peerConnection = null;
@@ -95,40 +85,19 @@ const createPeerConnection = (params) => {
     cert,
     hasScreenShare,
   } = params;
-  const initOptions = Skylink.getInitOptions();
-  const { filterCandidatesType } = initOptions;
   const state = Skylink.getSkylinkState(currentRoom.id);
-  const {
-    peerConnectionConfig,
-    room,
-  } = state;
-  const constraints = {
-    iceServers: state.room.connection.peerConfig.iceServers,
-    iceTransportPolicy: filterCandidatesType.host && filterCandidatesType.srflx && !filterCandidatesType.relay ? 'relay' : 'all',
-    bundlePolicy: peerConnectionConfig.bundlePolicy === BUNDLE_POLICY.NONE ? BUNDLE_POLICY.BALANCED : peerConnectionConfig.bundlePolicy,
-    rtcpMuxPolicy: peerConnectionConfig.rtcpMuxPolicy,
-    iceCandidatePoolSize: peerConnectionConfig.iceCandidatePoolSize,
-  };
-  const optional = {
-    optional: [
-      { DtlsSrtpKeyAgreement: true },
-      { googIPv6: true },
-    ],
-  };
+  const { room } = state;
+  const constraints = Object.assign({ iceServers: room.connection.peerConfig.iceServers }, retrieveConfig('PEER_CONNECTION'));
 
   if (cert) {
     constraints.certificates = [cert];
   }
 
-  if (state.peerConnStatus[targetMid]) {
-    state.peerConnStatus[targetMid].constraints = constraints;
-    state.peerConnStatus[targetMid].optional = optional;
-  }
-
   Skylink.setSkylinkState(state, currentRoom.id);
 
   try {
-    peerConnection = createNativePeerConnection(targetMid, constraints, optional, hasScreenShare, currentRoom);
+    peerConnection = createNativePeerConnection(targetMid, constraints, hasScreenShare, currentRoom);
+    peerConnection.constraints = constraints;
   } catch (error) {
     logger.log.ERROR([targetMid, null, null, 'Failed creating peer connection:'], error);
     peerConnection = null;
@@ -136,7 +105,7 @@ const createPeerConnection = (params) => {
       state: HANDSHAKE_PROGRESS.ERROR,
       peerId: targetMid,
       error,
-      room,
+      room: Room.getRoomInfo(room.id),
     }));
   }
 

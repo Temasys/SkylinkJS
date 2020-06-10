@@ -4,6 +4,7 @@ import {
 import PeerConnectionCallbacks from '../../peer-connection/helpers/peer-addition/callbacks';
 import logger from '../../logger';
 import MESSAGES from '../../messages';
+import { isAgent } from '../../utils/helpers';
 
 const processOnRemoveTrack = (state, peerId, clonedMediaInfo) => {
   // This method is required because react native android does not have a way for the remote to register onremovetrack event
@@ -12,8 +13,7 @@ const processOnRemoveTrack = (state, peerId, clonedMediaInfo) => {
   // Although react native ios has didRemoveReceiver callback, and onremovetrack can be artificially attached to the peerConnection to process
   // a stopped stream, the type of stream is not identifiable i.e is screenshare or not.
   // Therefore react native ios and android will implement the same workaround for now.
-  const { AdapterJS } = window;
-  if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE && clonedMediaInfo) {
+  if (isAgent(BROWSER_AGENT.REACT_NATIVE) && clonedMediaInfo) {
     const { room } = state;
     const trackInfo = {
       track: {

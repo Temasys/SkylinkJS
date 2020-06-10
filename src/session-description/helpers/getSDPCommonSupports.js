@@ -1,22 +1,21 @@
 import Skylink from '../../index';
 import helpers from './index';
+import { isAgent } from '../../utils/helpers';
 
 const getSDPCommonSupports = (targetMid, sessionDescription = null, roomKey) => {
   const state = Skylink.getSkylinkState(roomKey);
   const offer = { audio: false, video: false };
-  const { AdapterJS } = window;
   const { currentCodecSupport, peerInformations } = state;
   const { beSilentOnParseLogs } = Skylink.getInitOptions();
 
   if (!targetMid || !(sessionDescription && sessionDescription.sdp)) {
-    // TODO: Implement getCodecsSupport inside room-init
     offer.video = !!(currentCodecSupport.video.h264 || currentCodecSupport.video.vp8);
     offer.audio = !!currentCodecSupport.audio.opus;
 
     if (targetMid) {
       const peerAgent = ((peerInformations[targetMid] || {}).agent || {}).name || '';
 
-      if (AdapterJS.webrtcDetectedBrowser === peerAgent) {
+      if (isAgent(peerAgent)) {
         offer.video = Object.keys(currentCodecSupport.video).length > 0;
         offer.audio = Object.keys(currentCodecSupport.audio).length > 0;
       }

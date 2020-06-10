@@ -2,22 +2,23 @@ import logger from '../../../../logger';
 import messages from '../../../../messages';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { candidateGenerationState } from '../../../../skylink-events';
+import Room from '../../../../room';
 
 /**
  * @param {RTCPeerConnection} peerConnection
  * @param {String} targetMid - The Peer Id
  * @param {SkylinkState} roomState - The current state
- * @fires candidateGenerationState
+ * @fires CANDIDATE_GENERATION_STATE
  * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
  */
 const onicegatheringstatechange = (peerConnection, targetMid, roomState) => {
-  const { PEER_CONNECTION } = messages;
+  const { ICE_CONNECTION } = messages;
   const { iceGatheringState } = peerConnection;
 
-  logger.log.INFO([targetMid, 'RTCIceGatheringState', null, PEER_CONNECTION.ice_gathering_state], iceGatheringState);
+  logger.log.INFO([targetMid, 'RTCIceGatheringState', null, ICE_CONNECTION.STATE_CHANGE], iceGatheringState);
   dispatchEvent(candidateGenerationState({
     state: iceGatheringState,
-    room: roomState.room,
+    room: Room.getRoomInfo(roomState.room.id),
     peerId: targetMid,
   }));
 };

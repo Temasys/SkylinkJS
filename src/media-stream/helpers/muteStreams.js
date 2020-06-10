@@ -265,7 +265,9 @@ const isValidStreamId = (streamId, state) => {
  * @param {boolean} options.videoMuted
  * @param {String} streamId
  * @memberOf MediaStreamHelpers
- * @fires streamMuted, peerUpdated, localMediaMuted
+ * @fires STREAM_MUTED
+ * @fires PEER_UPDATED
+ * @fires LOCAL_MEDIA_MUTED
  */
 const muteStreams = (roomState, options, streamId = null) => {
   const {

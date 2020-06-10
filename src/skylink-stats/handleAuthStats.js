@@ -6,7 +6,7 @@ class HandleAuthStats extends SkylinkStats {
     super();
     this.model = {
       client_id: null,
-      appKey: null,
+      app_key: null,
       timestamp: null,
       room_id: null,
       state: null,
@@ -17,15 +17,14 @@ class HandleAuthStats extends SkylinkStats {
     };
   }
 
-  send(roomKey, state, result, status, error) {
-    const roomState = Skylink.getSkylinkState(roomKey);
-
-    this.model.room_id = roomKey;
-    this.model.http_status = status;
+  send(roomName, state, response, error) {
+    this.model.room_id = roomName;
+    // eslint-disable-next-line no-nested-ternary
+    this.model.http_status = error ? (-1) : (response && response.status ? response.status : null);
     this.model.http_error = (typeof error === 'string' ? error : (error && error.message)) || null;
-    this.model.api_url = roomState.path;
-    this.model.client_id = roomState.clientId;
-    this.model.appKey = Skylink.getInitOptions().appKey;
+    this.model.api_url = response && response.endpoint ? response.endpoint : response.url;
+    this.model.client_id = Skylink.getInitOptions().clientId;
+    this.model.app_key = Skylink.getInitOptions().appKey;
     this.model.state = state;
     this.model.timestamp = (new Date()).toISOString();
 

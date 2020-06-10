@@ -1,3 +1,6 @@
+import { isAgent } from '../utils/helpers';
+import { BROWSER_AGENT } from '../constants';
+
 /**
  * @description Gets TCP and UDP ports based on the browser
  * @param {Object} params
@@ -8,8 +11,7 @@
  * @return {{tcp: Array, udp: Array, both: Array, iceServerProtocol: string}}
  */
 const getConnectionPortsAndProtocolByBrowser = (params) => {
-  const { forceTURNSSL, CONSTANTS, serverConfig } = params;
-  const { AdapterJS } = window;
+  const { forceTURNSSL, serverConfig } = params;
   const connectionConfig = {
     tcp: serverConfig.iceServerPorts.tcp,
     udp: serverConfig.iceServerPorts.udp,
@@ -18,24 +20,11 @@ const getConnectionPortsAndProtocolByBrowser = (params) => {
     iceServerPorts: serverConfig.iceServerPorts,
   };
 
-  if (AdapterJS.webrtcDetectedBrowser === 'edge') {
-    connectionConfig.tcp = [];
+  if (forceTURNSSL) {
+    connectionConfig.iceServerPorts.udp = [];
+    connectionConfig.iceServerProtocol = 'turns';
+  } else if (isAgent(BROWSER_AGENT.FIREFOX)) { // default configs are specific to Chrome
     connectionConfig.udp = [3478];
-    connectionConfig.iceServerPorts.both = [];
-    connectionConfig.iceServerProtocol = CONSTANTS.TURN;
-  } else if (forceTURNSSL) {
-    if (AdapterJS.webrtcDetectedBrowser === 'firefox' && AdapterJS.webrtcDetectedVersion < 53) {
-      connectionConfig.udp = [];
-      connectionConfig.tcp = [443];
-      connectionConfig.both = [];
-      connectionConfig.iceServerProtocol = CONSTANTS.TURN;
-    } else {
-      connectionConfig.iceServerPorts.udp = [];
-      connectionConfig.iceServerProtocol = 'turns';
-    }
-  } else if (AdapterJS.webrtcDetectedBrowser === 'firefox') {
-    connectionConfig.udp = [3478];
-    connectionConfig.tcp = [443, 80];
     connectionConfig.both = [];
   }
 

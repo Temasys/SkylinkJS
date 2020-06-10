@@ -78,9 +78,10 @@ class MediaStream {
    * Function that sets User's Stream to send to Peer connection.
    * @param {String} targetMid - The mid of the target peer
    * @param {SkylinkState} roomState - Skylink State of current room
+   * @param {Boolean} isOffer - The flag if the call is from offer
    */
-  static addLocalMediaStreams(targetMid, roomState) {
-    helpers.addLocalMediaStreams(targetMid, roomState);
+  static addLocalMediaStreams(targetMid, roomState, isOffer) {
+    helpers.addLocalMediaStreams(targetMid, roomState, isOffer);
   }
 
   /**
@@ -119,10 +120,6 @@ class MediaStream {
     return helpers.getStreamSources();
   }
 
-  static getScreenSources() {
-    return helpers.getScreenSources();
-  }
-
   static updateRemoteStreams(room, peerId, stream) {
     return helpers.updateRemoteStreams(room, peerId, stream);
   }
@@ -147,7 +144,9 @@ class MediaStream {
       const audioSettings = helpers.parseStreamSettings(streamOptions, TRACK_KIND.AUDIO);
       const videoSettings = helpers.parseStreamSettings(streamOptions, TRACK_KIND.VIDEO);
       const isAudioFallback = false;
-      return helpers.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve);
+      const streams = helpers.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve);
+
+      resolve(streams);
     });
   }
 }

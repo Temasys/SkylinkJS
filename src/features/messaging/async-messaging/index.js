@@ -13,6 +13,7 @@ import { storedMessages, persistentMessageState } from '../../../skylink-events'
 import PeerData from '../../../peer-data';
 import asyncHelpers from './helpers/index';
 import getUserInfo from '../../../peer-data/helpers/getUserInfo';
+import Room from '../../../room';
 
 const instance = {};
 
@@ -48,7 +49,7 @@ class AsyncMessaging {
     this.isPersistent = isPersistent;
 
     dispatchEvent(persistentMessageState({
-      room: this.room,
+      room: Room.getRoomInfo(this.room.id),
       isPersistent: this.isPersistent,
       peerInfo: getUserInfo(this.room),
       peerId: this.peerId,
@@ -127,7 +128,7 @@ class AsyncMessaging {
     }
 
     dispatchEvent(storedMessages({
-      room,
+      room: Room.getRoomInfo(room.id),
       storedMessages: messages,
       isSelf: false,
       peerId: targetMid,

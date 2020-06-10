@@ -10,7 +10,7 @@ import HandleDataChannelStats from '../../../../skylink-stats/handleDataChannelS
  *
  * @param {Object} params
  * @param {Error} error
- * @fires onDataChannelStateChanged
+ * @fires DATA_CHANNEL_STATE
  * @memberOf PeerConnection.PeerConnectionHelpers.CreateDataChannelCallbacks
  */
 const onerror = (params, error) => {
@@ -31,7 +31,6 @@ const onerror = (params, error) => {
     handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE.ERROR, peerId, dataChannel, channelProp, error);
     dispatchEvent(onDataChannelStateChanged({
       state: DATA_CHANNEL_STATE.ERROR,
-      room,
       peerId,
       channelName,
       channelType,

@@ -2,13 +2,13 @@ import Skylink from '../../index';
 import logger from '../../logger';
 import PeerConnection from '../index';
 import MediaStream from '../../media-stream/index';
-import SessionDescription from '../../session-description';
 import { HANDSHAKE_PROGRESS, PEER_TYPE } from '../../constants';
 import getCommonOfferAnswerMessage from '../../server-communication/signaling-server/message-builder/builders/commons/offerAndAnswer';
 import handleNegotiationStats from '../../skylink-stats/handleNegotiationStats';
 import MESSAGES from '../../messages';
 import { dispatchEvent } from '../../utils/skylinkEventManager';
 import { handshakeProgress } from '../../skylink-events';
+import Room from '../../room';
 
 const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
 
@@ -30,7 +30,7 @@ const onOfferFailed = (reject, targetMid, roomState, error) => {
     state: HANDSHAKE_PROGRESS.ERROR,
     peerId: targetMid,
     error,
-    room: roomState.room,
+    room: Room.getRoomInfo(roomState.room.id),
   }));
   reject(error);
 };
@@ -42,7 +42,7 @@ const onOfferFailed = (reject, targetMid, roomState, error) => {
  * @param {object} restartOfferMsg
  * @return {*}
  * @memberOf PeerConnection.PeerConnectionHelpers
- * @fires handshakeProgress
+ * @fires HANDSHAKE_PROGRESS
  */
 const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg) => {
   const state = Skylink.getSkylinkState(currentRoom.id);
@@ -50,20 +50,15 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
   const { enableDataChannel } = initOptions;
   const {
     peerConnections,
-    // sdpSettings,
     hasMCU,
     enableIceRestart,
     peerInformations,
     voiceActivityDetection,
-    peerConnStatus,
     dataChannels,
   } = state;
-  const { AdapterJS } = window;
   const peerConnection = peerConnections[targetMid];
 
   const offerConstraints = {
-    offerToReceiveAudio: !(!state.sdpSettings.connection.audio && targetMid !== PEER_TYPE.MCU) && SessionDescription.getSDPCommonSupports(targetMid, null, currentRoom.id).video,
-    offerToReceiveVideo: !(!state.sdpSettings.connection.video && targetMid !== PEER_TYPE.MCU) && SessionDescription.getSDPCommonSupports(targetMid, null, currentRoom.id).audio,
     iceRestart: !!((peerInformations[targetMid] || {}).config || {}).enableIceRestart && iceRestart && enableIceRestart,
     voiceActivityDetection,
   };
@@ -74,7 +69,7 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
 
   // Add stream only at offer/answer end
   if (!hasMCU || targetMid === PEER_TYPE.MCU) {
-    MediaStream.addLocalMediaStreams(targetMid, state);
+    MediaStream.addLocalMediaStreams(targetMid, state, true);
   }
 
   if (enableDataChannel && peerInformations[targetMid].config.enableDataChannel) {
@@ -92,22 +87,12 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
 
   peerConnection.endOfCandidates = false;
   peerConnection.negotiating = true;
-
-  if (peerConnStatus[targetMid]) {
-    state.peerConnStatus[targetMid].sdpConstraints = offerConstraints;
-  }
+  peerConnection.sdpConstraints = offerConstraints;
 
   Skylink.setSkylinkState(state, currentRoom.id);
 
   return new Promise((resolve, reject) => {
-    peerConnection.createOffer(AdapterJS.webrtcDetectedType === 'plugin' ? {
-      mandatory: {
-        OfferToReceiveAudio: offerConstraints.offerToReceiveAudio,
-        OfferToReceiveVideo: offerConstraints.offerToReceiveVideo,
-        iceRestart: offerConstraints.iceRestart,
-        voiceActivityDetection: offerConstraints.voiceActivityDetection,
-      },
-    } : offerConstraints)
+    peerConnection.createOffer(offerConstraints)
       .then(offer => onOfferCreated(resolve, targetMid, state, restartOfferMsg, offer))
       .catch(error => onOfferFailed(reject, targetMid, state, error));
   });

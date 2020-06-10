@@ -163,25 +163,6 @@ export const getRoomStateByName = (roomName) => {
 };
 
 /**
- * Function that checks the agent version compatibility.
- * @param {String} agentVer
- * @param {String} requiredVer
- * @returns {boolean}
- * @memberOf UtilHelpers
- */
-export const isLowerThanVersion = (agentVer, requiredVer) => {
-  const partsA = (agentVer || '').split('.');
-  const partsB = (requiredVer || '').split('.');
-
-  for (let i = 0; i < partsB.length; i += 1) {
-    if ((partsA[i] || '0') < (partsB[i] || '0')) {
-      return true;
-    }
-  }
-  return false;
-};
-
-/**
  * Disconnects from the signaling server.
  * @memberOf UtilHelpers
  */
@@ -314,6 +295,8 @@ export const isAgent = (agent) => {
       return AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.SAFARI;
     case BROWSER_AGENT.FIREFOX:
       return AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.FIREFOX;
+    case BROWSER_AGENT.REACT_NATIVE:
+      return AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE;
     default:
       logger.log.DEBUG(MESSAGES.UTILS.INVALID_BROWSER_AGENT);
       return false;
@@ -323,12 +306,20 @@ export const isAgent = (agent) => {
 /**
  * Function that checks the browser version.
  * @param {number} version
+ * @param {string} operator
  * @returns {boolean}
  * @memberOf UtilHelpers
  */
-export const isVersion = (version) => {
+export const isVersion = (version, operator = '===') => {
   const { AdapterJS } = window;
-  return AdapterJS.webrtcDetectedVersion === version;
+  switch (operator) {
+    case '>':
+      return AdapterJS.webrtcDetectedVersion > version;
+    case '<':
+      return AdapterJS.webrtcDetectedVersion < version;
+    default:
+      return AdapterJS.webrtcDetectedVersion === version;
+  }
 };
 
 /**

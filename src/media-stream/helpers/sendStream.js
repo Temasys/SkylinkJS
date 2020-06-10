@@ -51,12 +51,7 @@ const dispatchEventsToLocalEnd = (roomState, streams) => {
 };
 
 const restartFn = (roomState, streams, resolve, reject) => {
-  const { AdapterJS } = window;
   const { peerConnections, hasMCU } = roomState;
-
-  if (AdapterJS.webrtcDetectedBrowser === 'edge') {
-    reject(new Error(MESSAGES.PEER_CONNECTION.refresh_no_edge_support));
-  }
 
   try {
     dispatchEventsToLocalEnd(roomState, streams);
@@ -67,7 +62,7 @@ const restartFn = (roomState, streams, resolve, reject) => {
       refreshPeerConnectionPromise.then(() => {
         resolve(streams);
       }).catch((error) => {
-        logger.log.ERROR(MESSAGES.PEER_CONNECTION.ERRORS.REFRESH);
+        logger.log.ERROR(MESSAGES.PEER_CONNECTION.REFRESH_CONNECTION.FAILED);
         reject(error);
       });
     } else {
@@ -120,7 +115,8 @@ const processMediaStreamArray = (roomState, streams, resolve, reject) => {
  * @param {SkylinkState} roomState
  * @param {MediaStream|Object} options
  * @memberOf MediaStreamHelpers
- * @fires onIncomingStream, peerUpdated
+ * @fires ON_INCOMING_STREAM
+ * @fires PEER_UPDATED
  */
 // eslint-disable-next-line consistent-return
 const sendStream = (roomState, options = null) => new Promise((resolve, reject) => {
@@ -128,16 +124,15 @@ const sendStream = (roomState, options = null) => new Promise((resolve, reject) 
     return reject(new Error(MESSAGES.ROOM_STATE.NO_ROOM_NAME));
   }
 
-  const { inRoom } = roomState;
-  const { AdapterJS } = window;
-  const isNotObjOrNullOrPlugin = (!isAObj(options) || options === null) && !(AdapterJS && AdapterJS.WebRTCPlugin && AdapterJS.WebRTCPlugin.plugin);
+  const { room } = roomState;
+  const isNotObjOrNull = (!isAObj(options) || options === null);
 
-  if (!inRoom) {
+  if (!room.inRoom) {
     logger.log.WARN(MESSAGES.ROOM.ERRORS.NOT_IN_ROOM);
     return reject(new Error(`${MESSAGES.ROOM.ERRORS.NOT_IN_ROOM}`));
   }
 
-  if (isNotObjOrNullOrPlugin) {
+  if (isNotObjOrNull) {
     return reject(new Error(`${MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS} ${options}`));
   }
 

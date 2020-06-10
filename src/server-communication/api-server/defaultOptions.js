@@ -32,35 +32,20 @@ const defaultOptions = {
   enableStatsGathering: true,
   audioFallback: true,
   socketTimeout: 7000,
-  apiTimeout: 4000,
   forceTURNSSL: false,
   forceTURN: false,
   forceSSL: true,
   usePublicSTUN: false,
-  disableVideoFecCodecs: false,
-  disableComfortNoiseCodec: false,
-  disableREMB: false,
-  throttleShouldThrowError: false,
   mcuUseRenegoRestart: true,
   useEdgeWebRTC: false,
   enableSimultaneousTransfers: true,
   TURNServerTransport: TURN_TRANSPORT.ANY,
   credentials: null,
-  filterCandidatesType: {
-    host: false,
-    srflx: false,
-    relay: false,
-  },
-  throttleIntervals: {
-    shareScreen: 10000,
-    refreshConnection: 5000,
-    getUserMedia: 0,
-  },
   iceServer: null,
   socketServer: null,
   audioCodec: AUDIO_CODEC.AUTO,
   videoCodec: VIDEO_CODEC.AUTO,
-  codecParams: {
+  codecParams: { // TODO: review if codec setting is needed
     audio: {
       opus: {
         stereo: null,

@@ -177,13 +177,12 @@ const parseSending = (output, value, prevStats) => {
  * @param {String} type - Stats dictionary identifier.
  * @param {RTCPeerConnection} value - Stats value.
  * @param {String} peerId - The peer Id.
- * @param {Boolean} isAutoBwStats - The flag if auto bandwidth adjustment is true.
  * @param {String} direction - The direction of the media flow, i.e. sending or receiving
  * @memberOf PeerConnectionStatisticsParsers
  */
-const parseAudio = (state, output, type, value, peerId, isAutoBwStats, direction) => {
-  const { peerBandwidth, peerStats } = state;
-  const prevStats = isAutoBwStats ? peerBandwidth[peerId][value.id] : peerStats[peerId][value.id];
+const parseAudio = (state, output, type, value, peerId, direction) => {
+  const { peerStats } = state;
+  const prevStats = peerStats[peerId][value.id];
   switch (direction) {
     case 'receiving':
       parseReceiving(output, value, prevStats);

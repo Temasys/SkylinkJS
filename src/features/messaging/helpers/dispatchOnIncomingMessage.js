@@ -5,6 +5,7 @@ import PeerData from '../../../peer-data';
 import logger from '../../../logger';
 import { TAGS } from '../../../constants';
 import MESSAGES from '../../../messages';
+import Room from '../../../room';
 
 // if isSelf = true, targetPeerId is the peer id targeted in sendMessage
 // else targetPeerId is the targetMid of the incoming sig msg
@@ -27,7 +28,7 @@ const dispatchOnIncomingMessage = (roomState, config, messageContent, isSelf, ta
   }
 
   dispatchEvent(onIncomingMessage({
-    room,
+    room: Room.getRoomInfo(room.id),
     message,
     isSelf,
     peerId: isSelf ? user.sid : targetPeerId,

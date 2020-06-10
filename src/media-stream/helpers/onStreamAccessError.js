@@ -17,8 +17,8 @@ import helpers from './index';
  * @param {object} resolve - The resolved promise.
  * @return {Promise<MediaStream | never>}
  * @memberOf MediaStreamHelpers
- * @fires mediaAccessError
- * @fires mediaAccessFallback
+ * @fires MEDIA_ACCESS_ERROR
+ * @fires MEDIA_ACCESS_FALLBACK
  */
 const onStreamAccessError = (error, reject, resolve, roomKey, audioSettings, videoSettings) => {
   const initOptions = Skylink.getInitOptions();
@@ -34,20 +34,25 @@ const onStreamAccessError = (error, reject, resolve, roomKey, audioSettings, vid
       isAudioFallback,
     }));
 
-    return window.navigator.mediaDevices.getUserMedia({ audio: true }).then(stream => helpers.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve)).catch((fallbackError) => {
-      logger.log.ERROR([state.user.sid, TAGS.MEDIA_STREAM, null, messages.MEDIA_STREAM.ERRORS.FALLBACK, fallbackError]);
-      dispatchEvent(mediaAccessError({
-        error: fallbackError,
-        isAudioFallbackError: true,
-      }));
-      dispatchEvent(mediaAccessFallback({
-        error,
-        state: MEDIA_ACCESS_FALLBACK_STATE.ERROR,
-        isAudioFallback,
-      }));
+    return window.navigator.mediaDevices.getUserMedia({ audio: true })
+      .then((stream) => {
+        const streams = helpers.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback);
+        resolve(streams);
+      })
+      .catch((fallbackError) => {
+        logger.log.ERROR([state.user.sid, TAGS.MEDIA_STREAM, null, messages.MEDIA_STREAM.ERRORS.FALLBACK, fallbackError]);
+        dispatchEvent(mediaAccessError({
+          error: fallbackError,
+          isAudioFallbackError: true,
+        }));
+        dispatchEvent(mediaAccessFallback({
+          error,
+          state: MEDIA_ACCESS_FALLBACK_STATE.ERROR,
+          isAudioFallback,
+        }));
 
-      reject(fallbackError);
-    });
+        reject(fallbackError);
+      });
   }
 
   logger.log.ERROR([state.user.sid, TAGS.MEDIA_STREAM, null, messages.MEDIA_STREAM.ERRORS.GET_USER_MEDIA], error);

@@ -11,8 +11,11 @@ import {
   SDK_NAME,
   SDK_VERSION,
   SIGNALING_VERSION,
+  AUTH_STATE,
 } from '../../constants';
 import Skylink from '../../index';
+import HandleAuthStats from '../../skylink-stats/handleAuthStats';
+import Room from '../../room';
 
 const getEndPoint = (options) => {
   const {
@@ -87,9 +90,6 @@ export const parseAndMutateOptions = (options) => {
   if (updatedOptions.forceTURN === true) {
     updatedOptions.enableTURNServer = true;
     updatedOptions.enableSTUNServer = false;
-    updatedOptions.filterCandidatesType.host = true;
-    updatedOptions.filterCandidatesType.srflx = true;
-    updatedOptions.filterCandidatesType.relay = false;
   }
 
   return updatedOptions;
@@ -114,6 +114,7 @@ export const enforceUserInitOptions = (apiResponse) => {
 export const authenticateApp = async (options) => {
   const { fetch } = window;
   const endpoint = getEndPoint(options);
+  new HandleAuthStats().send(options.defaultRoom, AUTH_STATE.REQUEST, { endpoint });
   const apiResponse = await fetch(endpoint, {
     headers: {
       Skylink_SDK_type: SDK_NAME.WEB,
@@ -145,28 +146,25 @@ const testRTCPeerConnection = () => {
 };
 
 export const webRTCReadyOperations = () => {
-  const { AdapterJS } = window;
   const returnObject = {
     ready: true,
     message: '',
   };
   if (!testRTCPeerConnection()) {
-    if (window.RTCPeerConnection && AdapterJS.webrtcDetectedType === 'plugin') {
-      returnObject.message = 'Plugin is not available. Please check plugin status.';
-    } else {
-      returnObject.message = 'WebRTC not supported. Please upgrade your browser';
-    }
+    returnObject.message = 'WebRTC not supported. Please upgrade your browser';
     returnObject.ready = false;
     dispatchEvent(readyStateChange({
       readyState: READY_STATE_CHANGE.ERROR,
       error: {
         status: -2,
-        content: new Error(AdapterJS.webrtcDetectedType === 'plugin' && window.RTCPeerConnection ? 'Plugin is not available' : 'WebRTC not available'),
+        content: new Error(returnObject.message),
         errorCode: READY_STATE_CHANGE_ERROR.NO_WEBRTC_SUPPORT,
       },
       room: null,
     }));
   }
+
+
   return returnObject;
 };
 
@@ -185,7 +183,7 @@ export const codecSupport = roomKey => new Promise((resolve, reject) => {
             content: new Error(MESSAGES.JOIN_ROOM.ERRORS.CODEC_SUPPORT),
             errorCode: READY_STATE_CHANGE_ERROR.PARSE_CODECS,
           },
-          room: room.roomName,
+          room: Room.getRoomInfo(room.id),
         }));
         reject(new Error(MESSAGES.JOIN_ROOM.ERRORS.CODEC_SUPPORT));
       } else {
@@ -207,7 +205,7 @@ export const codecSupport = roomKey => new Promise((resolve, reject) => {
           content: new Error(error.message || error.toString()),
           errorCode: READY_STATE_CHANGE_ERROR.PARSE_CODECS,
         },
-        room: room.roomName,
+        room: Room.getRoomInfo(room.id),
       }));
       reject(new Error(error.message || error.toString()));
     });

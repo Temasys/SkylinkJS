@@ -9,6 +9,13 @@ import { STATES } from '../../../constants';
 // eslint-disable-next-line no-unused-vars
 const onReconnectAttempt = (roomKey, attempt) => {
   const state = Skylink.getSkylinkState(roomKey);
+
+  // Handle cases where reconnect attempts are in progress but peer connection state changes to 'failed' and client calls leaveRoom and
+  // joinRoom
+  if (!state) {
+    return;
+  }
+
   const { socketSession } = state;
   const signaling = new SkylinkSignalingServer();
   let currentAttempt = 0;

@@ -37,7 +37,7 @@ class IceConnection {
    * @param {String} candidateType - Type of the ICE Candidate
    * @param {RTCIceCandidate} nativeCandidate - An RTCIceCandidate Object | {@link https://developer.mozilla.org/en-US/docs/Web/API/RTCIceCandidate}
    * @param {SkylinkState} roomState - Skylink State
-   * @fires candidateProcessingState
+   * @fires CANDIDATE_PROCESSING_STATE
    */
   static addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState) {
     return helpers.addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState);
@@ -48,7 +48,7 @@ class IceConnection {
    * @param targetMid - The mid of the target peer
    * @param {RTCPeerConnectionIceEvent} rtcIceConnectionEvent - {@link https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnectionIceEvent}
    * @param {SkylinkRoom} room - Current room
-   * @fires candidateGenerationState
+   * @fires CANDIDATE_GENERATION_STATE
    * @return {null}
    */
   static onIceCandidate(targetMid, rtcIceConnectionEvent, room) {

@@ -6,7 +6,7 @@ class HandleIceCandidateStats extends SkylinkStats {
     super();
     this.model = {
       client_id: null,
-      appKey: null,
+      app_key: null,
       timestamp: null,
       room_id: null,
       user_id: null,
@@ -34,7 +34,7 @@ class HandleIceCandidateStats extends SkylinkStats {
     this.model.candidate_sdp_mid = candidate.sdpMid;
     this.model.candidate_sdp_mindex = candidate.sdpMLineIndex;
     this.model.candidate_candidate = candidate.candidate;
-    this.model.appKey = Skylink.getInitOptions().appKey;
+    this.model.app_key = Skylink.getInitOptions().appKey;
     this.model.timestamp = (new Date()).toISOString();
     this.model.error = (typeof error === 'string' ? error : (error && error.message)) || null;
 

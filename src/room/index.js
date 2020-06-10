@@ -1,6 +1,7 @@
 import { leaveRoom, leaveAllRooms } from './leaveRoom';
 import joinRoom from './joinRoom';
 import { lockRoom, unlockRoom } from './lockRoom';
+import getRoomInfo from './getRoomInfo';
 
 /**
  * @classdesc Class that contains the methods for Room.
@@ -26,6 +27,10 @@ class Room {
 
   static joinRoom(args) {
     return joinRoom(args);
+  }
+
+  static getRoomInfo(args) {
+    return getRoomInfo(args);
   }
 }
 

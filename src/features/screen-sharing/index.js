@@ -4,6 +4,7 @@ import mediaStreamHelpers from '../../media-stream/helpers/index';
 import logger from '../../logger';
 import MESSAGES from '../../messages';
 import { isEmptyObj, isAString, updateReplacedStreamInState } from '../../utils/helpers';
+import { DEFAULTS } from '../../defaults';
 import screenshareHelpers from './helpers/index';
 import { TAGS } from '../../constants';
 
@@ -117,7 +118,7 @@ class ScreenSharing {
   startScreenCapture() {
     const { navigator } = window;
     if (navigator.mediaDevices.getDisplayMedia) {
-      return navigator.mediaDevices.getDisplayMedia({ video: true })
+      return navigator.mediaDevices.getDisplayMedia(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE)
         .then(stream => stream)
         .catch((error) => {
           if (error.name === 'NotAllowedError') {

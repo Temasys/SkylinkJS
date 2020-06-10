@@ -15,7 +15,7 @@ const getUserData = (roomState, peerId) => {
     }
     return peerUserData;
   }
-  return roomState.userData;
+  return roomState.user.userData;
 };
 
 export default getUserData;

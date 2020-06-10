@@ -1,6 +1,7 @@
 import { dispatchEvent } from '../../utils/skylinkEventManager';
 import { onIncomingStream, peerUpdated, onIncomingScreenStream } from '../../skylink-events/index';
 import PeerData from '../../peer-data/index';
+import Room from '../../room';
 
 /**
  * Function that handles the <code>RTCPeerConnection.ontrack</code> event on remote stream added.
@@ -11,8 +12,8 @@ import PeerData from '../../peer-data/index';
  * @param {boolean} isVideo - The flag if incoming stream has a video track.
  * @param {boolean} isAudio- The flag if incoming stream has an audio track.
  * @memberOf MediaStreamHelpers
- * @fires onIncomingStream
- * @fires peerUpdated
+ * @fires ON_INCOMING_STREAM
+ * @fires PEER_UPDATED
  * @private
  */
 const onRemoteTrackAdded = (stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio) => {
@@ -28,7 +29,7 @@ const onRemoteTrackAdded = (stream, currentRoomState, targetMid, isScreensharing
   const detail = {
     stream,
     peerId: targetMid,
-    room,
+    room: Room.getRoomInfo(room.id),
     isSelf: hasMCU ? (targetMid === user.sid || false) : false,
     peerInfo: PeerData.getPeerInfo(targetMid, room),
     streamId: stream.id,
