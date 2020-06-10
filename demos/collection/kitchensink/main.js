@@ -625,15 +625,15 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_CONNECTION_STA
   let color = 'red';
   switch (state) {
     case SkylinkConstants.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER:
-    case SkylinkConstants.PEER_CONNECTION_STATE.HAVE_REMOTE_PRANSWER:
     case SkylinkConstants.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER:
-    case SkylinkConstants.PEER_CONNECTION_STATE.HAVE_LOCAL_PRANSWER:
+    case SkylinkConstants.PEER_CONNECTION_STATE.CONNECTING:
       color = 'orange';
       break;
     case SkylinkConstants.PEER_CONNECTION_STATE.CLOSED:
       color = 'red';
       break;
     case SkylinkConstants.PEER_CONNECTION_STATE.STABLE:
+    case SkylinkConstants.PEER_CONNECTION_STATE.CONNECTED:
       color = 'green';
       break;
   }
