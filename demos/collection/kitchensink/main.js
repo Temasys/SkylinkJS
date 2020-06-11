@@ -227,6 +227,17 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
     newListEntry += '</td></tr>';
     $('#presence_list').append(newListEntry);
     $('#user' + peerId + ' .0').css('color', 'green');
+
+    // LOGGING
+    setTimeout(() => {
+      console.log("***** START *****")
+      console.log("getPeersCustomSettings", Demo.Skylink.getPeersCustomSettings(config.defaultRoom));
+      console.log("getPeerInfo", Demo.Skylink.getPeerInfo(config.defaultRoom, peerId));
+      console.log("getPeersDataChannels", Demo.Skylink.getPeersDataChannels(config.defaultRoom));
+      console.log("getStreams", Demo.Skylink.getStreams(config.defaultRoom));
+      console.log("getUserData", Demo.Skylink.getUserData(config.defaultRoom));
+      console.log("***** END *****")
+    }, 10000);
   }
 
   // create the peer video element
@@ -392,9 +403,6 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM,
     }
   } else {
     $('#user' + peerId + ' .name').html(peerInfo.userData);
-    setTimeout(() => {
-      console.log(Demo.Skylink.getPeersCustomSettings(config.defaultRoom));
-    }, 5000);
   }
 
   if (Demo.ShowStats[peerId]) {
