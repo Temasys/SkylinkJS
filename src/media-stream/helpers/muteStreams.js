@@ -4,7 +4,6 @@ import MESSAGES from '../../messages';
 import {
   isABoolean, isANumber, isAObj, hasAudioTrack, hasVideoTrack, isEmptyArray,
 } from '../../utils/helpers';
-import SkylinkSignalingServer from '../../server-communication/signaling-server/index';
 import { localMediaMuted, peerUpdated, streamMuted } from '../../skylink-events';
 import { dispatchEvent, addEventListener, removeEventListener } from '../../utils/skylinkEventManager';
 import PeerData from '../../peer-data/index';
@@ -60,13 +59,22 @@ const dispatchLocalMediaMutedEvent = (hasToggledVideo, hasToggledAudio, stream, 
 
 const retrieveOriginalActiveStreamId = (roomState, currentActiveStreamId, replacedStreamIds) => {
   let originalActiveStreamId = currentActiveStreamId;
-  const { streams: { userMedia } } = roomState;
-  const pReplacedStreamIds = replacedStreamIds || Object.keys(userMedia).filter(streamId => userMedia[streamId].isReplaced);
+  const { streams: { userMedia, screenshare } } = roomState;
+  let pReplacedStreamIds = replacedStreamIds || [];
+
+  if (pReplacedStreamIds.length === 0) {
+    pReplacedStreamIds = userMedia ? Object.keys(userMedia).filter(streamId => userMedia[streamId].isReplaced) : [];
+  }
+
+  if (screenshare && screenshare.isReplaced) {
+    pReplacedStreamIds.push(screenshare.id);
+  }
 
   if (pReplacedStreamIds.length === 0) {
     return originalActiveStreamId;
   }
 
+  // FIXME: replace streams is not available currently so the following code should never execute
   if (pReplacedStreamIds.indexOf(originalActiveStreamId) > -1) {
     pReplacedStreamIds.splice(pReplacedStreamIds.indexOf(originalActiveStreamId), 1);
   }
@@ -97,21 +105,6 @@ const updateMediaInfo = (hasToggledVideo, hasToggledAudio, room, streamId) => {
   if (hasToggledAudio) {
     const mediaId = PeerMedia.retrieveMediaId(TRACK_KIND.AUDIO, originalStreamId);
     setTimeout(() => PeerMedia.updatePeerMediaInfo(room, roomState.user.sid, mediaId, MEDIA_INFO.MEDIA_STATE, streamsMutedSettings[originalStreamId].audioMuted ? MEDIA_STATE.MUTED : MEDIA_STATE.ACTIVE), hasToggledVideo ? 1050 : 0);
-  }
-};
-
-// eslint-disable-next-line no-unused-vars
-const sendSigMsgs = (hasToggledVideo, hasToggledAudio, room, streamId) => {
-  const roomState = Skylink.getSkylinkState(room.id);
-  const signaling = new SkylinkSignalingServer();
-  const originalStreamId = retrieveOriginalActiveStreamId(roomState, streamId);
-
-  if (hasToggledVideo) {
-    signaling.muteVideoEvent(room, originalStreamId);
-  }
-
-  if (hasToggledAudio) {
-    setTimeout(() => signaling.muteAudioEvent(room, originalStreamId), hasToggledVideo ? 1050 : 0);
   }
 };
 
@@ -205,8 +198,6 @@ const startMuteEvents = (roomKey, streamId, options) => {
   dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, mutedStream, room.id, isScreensharing);
   dispatchPeerUpdatedEvent(room);
   dispatchStreamMutedEvent(room, mutedStream, isScreensharing);
-  // TODO: remove audioMuteEvent and videoMuteEvent
-  // sendSigMsgs(hasToggledVideo, hasToggledAudio, room, streamId);
 
   // wait for at least 1 connection before sending mediaInfoEvent otherwise sig message will be dropped at sendMediaInfoMsg if there are no
   // connections
@@ -298,7 +289,7 @@ const muteStreams = (roomState, options, streamId = null) => {
   if (streamId && ((streams.userMedia[streamId] && !streams.userMedia[streamId].isReplaced) || (streams.screenshare.id === streamId && !streams.screenshare.isReplaced))) {
     streamIdsThatCanBeMuted.push(streamId);
   } else {
-    streamIdsThatCanBeMuted = Object.keys(streams.userMedia).filter(id => !streams.userMedia[id].isReplaced);
+    streamIdsThatCanBeMuted = streams.userMedia ? Object.keys(streams.userMedia).filter(id => !streams.userMedia[id].isReplaced) : [];
     if (streams.screenshare && !streams.screenshare.isReplaced) {
       streamIdsThatCanBeMuted.push(streams.screenshare.id);
     }

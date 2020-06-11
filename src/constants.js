@@ -1579,10 +1579,6 @@ export const DC_PROTOCOL_TYPE = {
  * Message that is broadcast by peer to all peers in the room when the peer's custom userData has changed.
  * @property {String} ROOM_LOCK Value <code>roomLockEvent</code>
  * Message that is broadcast by peer to all peers in the room to toggle the Signaling server Room lock status
- * @property {String} MUTE_VIDEO_EVENT Value <code>muteVideoEvent</code>
- * Message that is broadcast by peer to all peers in the room to inform other peers that its sent stream object video tracks muted status have changed.
- * @property {String} MUTE_AUDIO_EVENT Value <code>muteAudioEvent</code>
- * Message that is broadcast by peer to all peers in the room to inform other peers that its sent stream object audio tracks muted status have changed.
  * @property {String} PUBLIC_MESSAGE Value <code>public</code>
  * Message sent by peer to all peers in the room as a public message.
  * @property {String} PRIVATE_MESSAGE Value <code>private</code>
@@ -1651,8 +1647,6 @@ export const SIG_MESSAGE_TYPE = {
   STOP_RTMP: 'stopRTMP',
   RTMP: 'rtmpEvent',
   MEDIA_INFO_EVENT: 'mediaInfoEvent',
-  MUTE_VIDEO_EVENT: 'muteVideoEvent',
-  MUTE_AUDIO_EVENT: 'muteAudioEvent',
   MESSAGE: 'message',
   GET_STORED_MESSAGES: 'getStoredMessages',
   STORED_MESSAGES: 'storedMessages',

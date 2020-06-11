@@ -140,17 +140,33 @@ Demo.Methods.updateStreams = function() {
 };
 
 Demo.Methods.getMediaStatus = function(type) {
-  if (!Demo.Streams || !Demo.Streams.userMedia) {
+  if (!Demo.Streams || (!Demo.Streams.userMedia && !Demo.Streams.screenshare)) {
     return { audioMuted: -1, videoMuted: -1 };
   }
 
   if (type === 'audio') {
-    const audioSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams.userMedia).filter((sId) => { return Demo.Streams.userMedia[sId].getAudioTracks().length > 0 })]
+    let audioSId = '';
+    if (Demo.Streams.userMedia) {
+      audioSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams.userMedia).filter((sId) => { return Demo.Streams.userMedia[sId].getAudioTracks().length > 0 })]
+
+      if (!audioSId && Demo.Streams.screenshare) {
+        audioSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Demo.Streams.screenshare.id];
+      }
+    }
+
     return audioSId ? audioSId: { audioMuted: -1, videoMuted: -1 };
   }
 
   if (type === 'video') {
-    const videoSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams.userMedia).filter((sId) => { return Demo.Streams.userMedia[sId].getVideoTracks().length > 0 })]
+    let videoSId = '';
+    if (Demo.Streams.userMedia) {
+      videoSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams.userMedia).filter((sId) => { return Demo.Streams.userMedia[sId].getVideoTracks().length > 0 })]
+    }
+
+    if (!videoSId && Demo.Streams.screenshare) {
+      videoSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Demo.Streams.screenshare.id];
+    }
+
     return videoSId ? videoSId: { audioMuted: -1, videoMuted: -1 };
   }
 };

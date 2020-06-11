@@ -252,20 +252,6 @@ class SkylinkSignalingServer {
     this.sendMessage(rtmpMessage);
   }
 
-  muteAudioEvent(roomState, streamIds) {
-    const muteAudio = this.messageBuilder.getMuteAudioMessage(roomState, streamIds);
-    if (muteAudio) {
-      this.sendMessage(muteAudio);
-    }
-  }
-
-  muteVideoEvent(roomState, streamId) {
-    const muteVideo = this.messageBuilder.getMuteVideoMessage(roomState, streamId);
-    if (muteVideo) {
-      this.sendMessage(muteVideo);
-    }
-  }
-
   roomLock(roomState) {
     const roomLock = this.messageBuilder.getRoomLockMessage(roomState);
     if (roomLock) {

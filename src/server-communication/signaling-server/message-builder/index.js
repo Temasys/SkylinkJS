@@ -63,14 +63,6 @@ class SignalingMessageBuilder {
     return this.messageBuilders.signalingMessages(...args);
   }
 
-  getMuteAudioMessage(...args) {
-    return this.messageBuilders.muteAudioEvent(...args);
-  }
-
-  getMuteVideoMessage(...args) {
-    return this.messageBuilders.muteVideoEvent(...args);
-  }
-
   getRTMPMessage(...args) {
     return this.messageBuilders.rtmp(...args);
   }
