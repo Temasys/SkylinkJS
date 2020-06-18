@@ -6,8 +6,10 @@ import PeerMedia from '../../../../peer-media/index';
 import { peerJoined, onIncomingStream } from '../../../../skylink-events';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { hasAudioTrack, hasVideoTrack } from '../../../../utils/helpers';
-import * as constants from '../../../../constants';
 import Room from '../../../../room';
+import logger from '../../../../logger';
+import { TAGS } from '../../../../constants';
+import MESSAGES from '../../../../messages';
 
 /**
  * Function that handles the "inRoom" socket message received.
@@ -25,24 +27,13 @@ const inRoomHandler = (message) => {
     tieBreaker,
   } = message;
   const roomState = Skylink.getSkylinkState(rid);
-  const initOptions = Skylink.getInitOptions();
-  const { priorityWeightScheme } = initOptions;
   const signaling = new SkylinkSignalingServer();
-  let weightAppendValue = 0;
 
   roomState.room.connection.peerConfig = IceConnection.setIceServers(iceServers);
   roomState.room.inRoom = true;
-
-  if (priorityWeightScheme === constants.PRIORITY_WEIGHT_SCHEME.AUTO) {
-    weightAppendValue = 0;
-  } else if (priorityWeightScheme === constants.PRIORITY_WEIGHT_SCHEME.ENFORCE_OFFERER) {
-    weightAppendValue = 2e+15;
-  } else {
-    weightAppendValue = -(2e+15);
-  }
-
-  roomState.peerPriorityWeight = tieBreaker + weightAppendValue;
   roomState.user.sid = sid;
+  logger.log.INFO([null, TAGS.SIG_SERVER, null, `${MESSAGES.PEER_INFORMATIONS.SET_PEER_PRIORITY_WEIGHT}: `], tieBreaker);
+  roomState.peerPriorityWeight = tieBreaker;
 
   PeerMedia.updatePeerMediaWithUserSid(roomState.room, sid);
   Skylink.setSkylinkState(roomState, rid);

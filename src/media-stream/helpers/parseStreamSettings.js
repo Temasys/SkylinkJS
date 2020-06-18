@@ -128,7 +128,7 @@ const parseSettings = (options, type = '') => {
 
 /**
  * Parse the options provided to make sure they are compatible
- * @param {GetUserMediaOptions} options
+ * @param {getUserMediaOptions} options
  * @param {String} type - The type of stream i.e. audio or video if options contain both audio and video options
  * @memberOf MediaStreamHelpers
  * @private

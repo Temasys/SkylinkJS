@@ -15,7 +15,7 @@ class MediaStream {
   /**
    * @description Function that retrieves camera Stream.
    * @param {SkylinkState} state
-   * @param {GetUserMediaOptions} mediaOptions - The camera Stream configuration options.
+   * @param {getUserMediaOptions} mediaOptions - The camera Stream configuration options.
    * @return {Promise}
    */
   static getUserMedia(state, mediaOptions = {}) {
@@ -36,7 +36,7 @@ class MediaStream {
   /**
    * @description Function that filters user input from getUserMedia public method
    * @param {SkylinkState} roomState
-   * @param {GetUserMediaOptions} options
+   * @param {getUserMediaOptions} options
    */
   static getUserMediaLayer(roomState, options = null) {
     return new Promise((resolve, reject) => {

@@ -26,7 +26,7 @@ const isStreamInState = (state, stream) => {
 /**
  * Function that processes the streams object in the state.
  * @param {MediaStream} stream - User MediaStream object
- * @param {GetUserMediaOptions} settings - Options used to get the peer-media stream
+ * @param {getUserMediaOptions} settings - Options used to get the peer-media stream
  * @param {SkylinkRoom.id} roomkey - Room's id
  * @param {boolean} [isScreensharing=false] isScreensharing
  * @param {boolean} [isAudioFallback=false] isAudioFallback

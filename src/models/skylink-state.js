@@ -110,8 +110,8 @@ class SkylinkState {
      */
     this.user = initOptions.user;
     /**
-     * Stores the User connection priority weight.
-     * If Peer has a higher connection weight, it will do the offer from its Peer connection first.
+     * Stores the User connection priority weight received from signalling server inRoom message.
+     * In case of crossing offers, the offer that contains the lower weight will be dropped.
      * @name peerPriorityWeight
      * @type number
      * @since 0.5.0

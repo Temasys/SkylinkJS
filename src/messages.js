@@ -63,6 +63,7 @@ const MESSAGES = {
     UPDATE_USER_DATA: 'Peer updated userData: ',
     OUTDATED_MSG: 'Dropping outdated status ->',
     USER_DATA_NOT_JSON: 'UserData is not JSON',
+    SET_PEER_PRIORITY_WEIGHT: 'Setting peerPriorityWeight with tiebreaker value from inRoom signalling message',
   },
   PEER_CONNECTION: {
     NOT_INITIALISED: 'Peer Connection not initialised',

@@ -51,7 +51,6 @@ import * as SkylinkEventsConstants from './skylink-events/constants';
  *  {@link SkylinkConstants.DATA_STREAM_STATE|DATA_STREAM_STATE} </br>
  *  {@link SkylinkConstants.INTRODUCE_STATE|INTRODUCE_STATE} </br>
  *  {@link SkylinkConstants.REGIONAL_SERVER|REGIONAL_SERVER} </br>
- *  {@link SkylinkConstants.PRIORITY_WEIGHT_SCHEME|PRIORITY_WEIGHT_SCHEME} </br>
  *  {@link SkylinkConstants.CHUNK_FILE_SIZE|CHUNK_FILE_SIZE} </br>
  *  {@link SkylinkConstants.MOZ_CHUNK_FILE_SIZE|MOZ_CHUNK_FILE_SIZE} </br>
  *  {@link SkylinkConstants.BINARY_FILE_SIZE|BINARY_FILE_SIZE} </br>
@@ -1041,29 +1040,6 @@ export const READY_STATE_CHANGE_ERROR = {
 export const REGIONAL_SERVER = {
   APAC1: '',
   US1: '',
-};
-
-/**
- * The list of User's priority weight schemes for {@link Skylink#joinRoom|joinRoom}  connections.
- * @typedef PRIORITY_WEIGHT_SCHEME
- * @property {String} ENFORCE_OFFERER  Value <code>"enforceOfferer"</code>
- *   The value of the priority weight scheme to enforce User as the offerer.
- * @property {String} ENFORCE_ANSWERER Value <code>"enforceAnswerer"</code>
- *   The value of the priority weight scheme to enforce User as the answerer.
- * @property {String} AUTO             Value <code>"auto"</code>
- *   The value of the priority weight scheme to let User be offerer or answerer based on Signaling server selection.
- * @constant
- * @type Object
- * @readOnly
- * @memberOf SkylinkConstants
- * @since 0.6.18
- * @deprecated
- * @ignore
- */
-export const PRIORITY_WEIGHT_SCHEME = {
-  ENFORCE_OFFERER: 'enforceOfferer',
-  ENFORCE_ANSWERER: 'enforceAnswerer',
-  AUTO: 'auto',
 };
 
 /**
