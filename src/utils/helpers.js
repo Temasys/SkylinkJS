@@ -221,27 +221,6 @@ export const rejectPromise = errorMsg => new Promise((resolve, reject) => {
 });
 
 /**
- * Function that updates the replaced state of the streams
- * @param {MediaStream} replacedStream
- * @param {MediaStream} newStream
- * @param {SkylinkState} state
- * @param {boolean} isReplaced
- * @memberOf UtilHelpers
- */
-export const updateReplacedStreamInState = (replacedStream, newStream, state, isReplaced) => {
-  const { streams, room } = state;
-  const streamObjs = Object.values(streams.userMedia);
-  for (let i = 0; i < streamObjs.length; i += 1) {
-    if (streamObjs[i].id === replacedStream.id) {
-      streamObjs[i].isReplaced = isReplaced;
-      streamObjs[i].newStream = newStream;
-    }
-  }
-
-  Skylink.setSkylinkState(state, room.id);
-};
-
-/**
  * Function that checks if the peerId exists on the peerConnection
  * @param {SkylinkRoom} room
  * @param {String} peerId

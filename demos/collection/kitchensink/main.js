@@ -52,10 +52,10 @@ Demo.Methods.toggleInRoomSettings = function(peerId, inRoom) {
 
     // reset joinRoomOptions to handle duplicate tab
     $('#join_room_p2p_key').prop('checked', true);
-    $('#join_room_audio').prop('checked', true);
-    $('#join_room_audio_muted').prop('checked', false);
-    $('#join_room_video').prop('checked', true);
-    $('#join_room_video_muted').prop('checked', false);
+    // $('#join_room_audio').prop('checked', true);
+    // $('#join_room_audio_muted').prop('checked', false);
+    // $('#join_room_video').prop('checked', true);
+    // $('#join_room_video_muted').prop('checked', false);
   } else {
     $('#join_room_btn').removeClass('disabled');
     $('#presence_list_body').empty();
@@ -140,31 +140,27 @@ Demo.Methods.updateStreams = function() {
 };
 
 Demo.Methods.getMediaStatus = function(type) {
-  if (!Demo.Streams || (!Demo.Streams.userMedia && !Demo.Streams.screenshare)) {
+  if (!Demo.Streams && !Demo.Streams[_peerId]) {
     return { audioMuted: -1, videoMuted: -1 };
   }
 
   if (type === 'audio') {
     let audioSId = '';
-    if (Demo.Streams.userMedia) {
-      audioSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams.userMedia).filter((sId) => { return Demo.Streams.userMedia[sId].getAudioTracks().length > 0 })]
-
-      if (!audioSId && Demo.Streams.screenshare) {
-        audioSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Demo.Streams.screenshare.id];
-      }
+    if (Demo.Streams[_peerId].streams.audio) {
+      audioSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams[_peerId].streams.audio)[0]]
     }
 
-    return audioSId ? audioSId: { audioMuted: -1, videoMuted: -1 };
+    return audioSId ? audioSId : { audioMuted: -1, videoMuted: -1 };
   }
 
   if (type === 'video') {
     let videoSId = '';
-    if (Demo.Streams.userMedia) {
-      videoSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams.userMedia).filter((sId) => { return Demo.Streams.userMedia[sId].getVideoTracks().length > 0 })]
+    if (Demo.Streams[_peerId].streams.video) {
+      videoSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams[_peerId].streams.video)[0]]
     }
 
-    if (!videoSId && Demo.Streams.screenshare) {
-      videoSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Demo.Streams.screenshare.id];
+    if (!videoSId && Demo.Streams[_peerId].screenShare) {
+      videoSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams[_peerId].stream.screenShare)[0]];
     }
 
     return videoSId ? videoSId: { audioMuted: -1, videoMuted: -1 };
@@ -253,7 +249,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
       console.log("getStreams", Demo.Skylink.getStreams(config.defaultRoom));
       console.log("getUserData", Demo.Skylink.getUserData(config.defaultRoom));
       console.log("***** END *****")
-    }, 10000);
+    }, 5000);
   }
 
   // create the peer video element
@@ -344,8 +340,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_UPDATED, (evt)
   let audioStreamId = null;
   let videoStreamId = null;
 
-  if (Demo.Streams && Demo.Streams.screenshare) {
-    streamIds = streamIds.filter((id) => id !== Demo.Streams.screenshare.id)
+  if (Demo.Streams && Demo.Streams[_peerId] && Demo.Streams[_peerId].streams.screenShare) {
+    streamIds = streamIds.filter((id) => id !== Object.keys(Demo.Streams[_peerId].streams.screenShare)[0]);
   }
 
   if (streamIds[0] && streamIds[1]) {
@@ -939,7 +935,7 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#stop_stream_btn').click(function() {
-    if (Demo.Streams && Demo.Streams.userMedia) {
+    if (Demo.Streams && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
       Demo.Skylink.stopStreams(config.defaultRoom)
       .then(() => console.log("stopStreams resolved"))
       .catch((err) => console.error("stopStreams rejected", err));

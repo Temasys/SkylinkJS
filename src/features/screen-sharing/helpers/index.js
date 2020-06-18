@@ -1,9 +1,9 @@
 import handleScreenStreamStates from './updateScreenStreamState';
 import { MEDIA_TYPE, TAGS } from '../../../constants';
-import { isEmptyObj } from '../../../utils/helpers';
 import stopStreamHelpers from '../../../media-stream/helpers/stopStream';
 import logger from '../../../logger';
 import MESSAGES from '../../../messages';
+import mediaStreamHelpers from '../../../media-stream/helpers/index';
 
 const retrievePeersScreenStreamId = (state) => {
   const { peerMedias, user } = state;
@@ -22,25 +22,6 @@ const retrievePeersScreenStreamId = (state) => {
   return peersScreenStreamId;
 };
 
-const retrievePeerScreenStream = (state) => {
-  const { remoteStreams } = state;
-  const peersScreenStreamId = retrievePeersScreenStreamId(state);
-
-  if (isEmptyObj(peersScreenStreamId)) {
-    return null;
-  }
-
-  const peersScreenStream = {};
-
-  Object.keys(peersScreenStreamId).forEach((peerId) => {
-    const peerRemoteStreams = Object.values(remoteStreams[peerId]);
-    // eslint-disable-next-line prefer-destructuring
-    peersScreenStream[peerId] = peerRemoteStreams.filter(stream => stream.id === peersScreenStreamId[peerId].id);
-  });
-
-  return peersScreenStream;
-};
-
 const stopScreenStream = (room, screenStream, peerId, fromLeaveRoom = false) => {
   const isScreensharing = true;
   stopStreamHelpers.prepStopStreams(room.id, screenStream.id, fromLeaveRoom, isScreensharing)
@@ -56,12 +37,16 @@ const addScreenStreamCallbacks = (state, stream) => {
   });
 };
 
+const onScreenStreamAccessSuccess = (roomKey, stream, audioSettings, videoSettings, isAudioFallback, isScreensharing) => {
+  mediaStreamHelpers.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, isScreensharing);
+};
+
 const helpers = {
   handleScreenStreamStates,
   addScreenStreamCallbacks,
   retrievePeersScreenStreamId,
-  retrievePeerScreenStream,
   stopScreenStream,
+  onScreenStreamAccessSuccess,
 };
 
 export default helpers;

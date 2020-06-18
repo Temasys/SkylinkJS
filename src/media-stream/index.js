@@ -38,7 +38,7 @@ class MediaStream {
    * @param {SkylinkState} roomState
    * @param {getUserMediaOptions} options
    */
-  static getUserMediaLayer(roomState, options = null) {
+  static processUserMediaOptions(roomState, options = null) {
     return new Promise((resolve, reject) => {
       let mediaOptions = {
         audio: true,
@@ -78,10 +78,9 @@ class MediaStream {
    * Function that sets User's Stream to send to Peer connection.
    * @param {String} targetMid - The mid of the target peer
    * @param {SkylinkState} roomState - Skylink State of current room
-   * @param {Boolean} isOffer - The flag if the call is from offer
    */
-  static addLocalMediaStreams(targetMid, roomState, isOffer) {
-    helpers.addLocalMediaStreams(targetMid, roomState, isOffer);
+  static addLocalMediaStreams(targetMid, roomState) {
+    helpers.addLocalMediaStreams(targetMid, roomState);
   }
 
   /**
@@ -120,17 +119,14 @@ class MediaStream {
     return helpers.getStreamSources();
   }
 
-  static updateRemoteStreams(room, peerId, stream) {
-    return helpers.updateRemoteStreams(room, peerId, stream);
-  }
-
   /**
    * Function that returns all active streams including screenshare stream if present.
    * @param {SkylinkState} roomState
+   * @param {boolean} includeSelf
    * @return {streamList} streamList
    */
-  static getStreams(roomState) {
-    return helpers.getStreams(roomState);
+  static getStreams(roomState, includeSelf) {
+    return helpers.getStreams(roomState, includeSelf);
   }
 
   static usePrefetchedStream(roomKey, stream, options = null) {
@@ -148,6 +144,10 @@ class MediaStream {
 
       resolve(streams);
     });
+  }
+
+  static buildStreamSettings(room, stream, settings) {
+    return helpers.buildStreamSettings(room, stream, settings);
   }
 }
 

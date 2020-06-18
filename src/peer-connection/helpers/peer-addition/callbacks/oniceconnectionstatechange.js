@@ -27,14 +27,13 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   const { ROOM_STATE, ICE_CONNECTION, PEER_CONNECTION } = messages;
   const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
   const state = Skylink.getSkylinkState(currentRoomState.room.id);
+  const { peerStreams, user } = state;
   let statsInterval = null;
   const pcIceConnectionState = peerConnection.iceConnectionState;
 
   if (isAgent(BROWSER_AGENT.REACT_NATIVE) && !state && pcIceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
     return;
   }
-
-  const { streams } = state;
 
   if (!state) {
     logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ROOM_STATE.NOT_FOUND]);
@@ -46,7 +45,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   } = state;
 
   if (pcIceConnectionState === ICE_CONNECTION_STATE.FAILED) { // peer connection 'failed' state is dispatched in onconnectionstatechange
-    if (isAgent(BROWSER_AGENT.FIREFOX) && !streams.userMedia) {
+    if (isAgent(BROWSER_AGENT.FIREFOX) && !peerStreams[user.sid]) {
       // no audio and video requested will throw ice connection state failed although ice candidates are exchanged
       return;
     }
@@ -70,7 +69,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
     PeerConnection.getConnectionStatus(state, targetMid).then(() => {
       statsInterval = setInterval(() => {
         const currentState = Skylink.getSkylinkState(state.room.id);
-        if (!currentState.room.inRoom) {
+        if (!currentState || !currentState.room.inRoom) {
           return;
         }
         if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {

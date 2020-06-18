@@ -3,7 +3,6 @@ import retrieveMediaState from './retrieveMediaState';
 import retrieveMediaId from './retrieveMediaId';
 import buildPeerMediaInfo from './buildPeerMediaInfo';
 import retrieveStreamIdOfTrack from './retrieveStreamIdOfTrack';
-import retrieveTracks from './retrieveTracks';
 import updatePeerMediaInfo from './updatePeerMediaInfo';
 import sendMediaInfoMsg from './sendMediaInfoMsg';
 import parseSDPForTransceiverMid from './parseSDPForTransceiverMid';
@@ -19,7 +18,6 @@ const helpers = {
   retrieveMediaId,
   buildPeerMediaInfo,
   retrieveStreamIdOfTrack,
-  retrieveTracks,
   updatePeerMediaInfo,
   sendMediaInfoMsg,
   parseSDPForTransceiverMid,

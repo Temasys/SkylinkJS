@@ -17,7 +17,7 @@ const renegotiateIfNeeded = (state, peerId) => {
     Promise.all(senderGetStatsPromises).then((reslovedResults) => {
       reslovedResults.forEach((reports, senderIndex) => {
         reports.forEach((report) => {
-          if (report && report.ssrc) {
+          if (report && report.ssrc && report.bytesSent !== 0) {
             transmittingSenders[report.ssrc] = pcSenders[senderIndex];
           } else if (report && report.type === 'ssrc' && report.id.indexOf('send') > 1) { // required for retrieving sender information for react
             // native ios

@@ -3,13 +3,34 @@ import SkylinkSignalingServer from '../../index';
 import IceConnection from '../../../../ice-connection/index';
 import PeerData from '../../../../peer-data';
 import PeerMedia from '../../../../peer-media/index';
-import { peerJoined, onIncomingStream } from '../../../../skylink-events';
+import { peerJoined } from '../../../../skylink-events';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import { hasAudioTrack, hasVideoTrack } from '../../../../utils/helpers';
 import Room from '../../../../room';
+import PeerStream from '../../../../peer-stream';
+import { ON_INCOMING_STREAM } from '../../../../skylink-events/constants';
 import logger from '../../../../logger';
 import { TAGS } from '../../../../constants';
 import MESSAGES from '../../../../messages';
+
+const dispatchIncomingStream = (room, sid) => {
+  const state = Skylink.getSkylinkState(room.id);
+  if (!state.peerStreams[sid]) {
+    return;
+  }
+
+  Object.values(state.peerStreams[sid]).forEach((stream) => {
+    PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
+      stream,
+      peerId: sid,
+      room: Room.getRoomInfo(room.id),
+      isSelf: true,
+      peerInfo: PeerData.getCurrentSessionInfo(room),
+      streamId: stream.id,
+      isVideo: stream.getVideoTracks().length > 0,
+      isAudio: stream.getAudioTracks().length > 0,
+    });
+  });
+};
 
 /**
  * Function that handles the "inRoom" socket message received.
@@ -36,6 +57,7 @@ const inRoomHandler = (message) => {
   roomState.peerPriorityWeight = tieBreaker;
 
   PeerMedia.updatePeerMediaWithUserSid(roomState.room, sid);
+  PeerStream.updatePeerStreamWithUserSid(roomState.room, sid);
   Skylink.setSkylinkState(roomState, rid);
 
   dispatchEvent(peerJoined({
@@ -45,23 +67,7 @@ const inRoomHandler = (message) => {
     room: roomState.room,
   }));
 
-  if (roomState.streams.userMedia) {
-    const streamIds = Object.keys(roomState.streams.userMedia);
-    streamIds.forEach((streamId) => {
-      const mediaStream = roomState.streams.userMedia[streamId].stream;
-      dispatchEvent(onIncomingStream({
-        stream: mediaStream,
-        streamId: mediaStream.id,
-        peerId: roomState.user.sid,
-        room: Room.getRoomInfo(roomState.room.id),
-        isSelf: true,
-        peerInfo: PeerData.getCurrentSessionInfo(roomState.room),
-        isVideo: hasVideoTrack(mediaStream),
-        isAudio: hasAudioTrack(mediaStream),
-      }));
-    });
-  }
-
+  dispatchIncomingStream(roomState.room, sid);
   signaling.enterRoom(roomState);
 };
 

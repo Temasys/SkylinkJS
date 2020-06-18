@@ -5,6 +5,7 @@ import logger from '../../../../logger/index';
 import { TRACK_KIND } from '../../../../constants';
 import PeerMedia from '../../../../peer-media';
 import PeerConnection from '../../../index';
+import PeerStream from '../../../../peer-stream';
 
 const matchPeerIdWithTransceiverMid = (state, transceiver) => {
   const { peerMedias, user } = state;
@@ -57,12 +58,12 @@ const ontrack = (RTCPeerConnection, targetMid, currentRoomState, rtcTrackEvent) 
     peerId = matchPeerIdWithTransceiverMid(state, transceiver);
   }
 
-  const isScreensharing = PeerMedia.isVideoScreenTrack(state, peerId, transceiver.mid);
+  const isScreensharing = PeerMedia.retrieveScreenMediaInfo(state.room, peerId, { transceiverMid: transceiver.mid });
   const callbackExtraParams = [peerId, room, isScreensharing];
   stream.onremovetrack = callbacks.onremovetrack.bind(this, ...callbackExtraParams);
   PeerMedia.updateStreamIdFromOntrack(state.room, peerId, transceiver.mid, stream.id);
   PeerConnection.updatePeerInformationsMediaStatus(state.room, peerId, transceiver, stream);
-  MediaStream.updateRemoteStreams(state.room, peerId, stream);
+  PeerStream.addStream(peerId, stream, room.id);
   MediaStream.onRemoteTrackAdded(stream, currentRoomState, peerId, isScreensharing, track.kind === TRACK_KIND.VIDEO, track.kind === TRACK_KIND.AUDIO);
 
   return null;

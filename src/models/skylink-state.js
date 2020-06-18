@@ -211,17 +211,6 @@ class SkylinkState {
      */
     this.peerMessagesStamps = {};
     /**
-     * Stores the Streams.
-     * @name streams
-     * @type JSON
-     * @since 0.6.15
-     * @private
-     */
-    this.streams = {
-      userMedia: null,
-      screenshare: null,
-    };
-    /**
      * Stores all the Stream required muted settings.
      * @name streamsMutedSettings
      * @type JSON
@@ -346,14 +335,6 @@ class SkylinkState {
      */
     this.peerMedias = {};
     /**
-     * Stores the remote streams of all peers.
-     * @name remoteStreams
-     * @type Object
-     * @private
-     * @since 2.0.0
-     */
-    this.remoteStreams = {};
-    /**
      * Stores the flag if messages should be persisted. Value determined by the hasPersistentMessage value returned from the API.
      * This feature is enabled in the Temasys Developer Console by toggling the Persistent Message feature at the key level.
      * @name hasPersistentMessage
@@ -362,6 +343,8 @@ class SkylinkState {
      * @since 2.0.0
      */
     this.hasPersistentMessage = initOptions.hasPersistentMessage;
+    this.peerStreams = {};
+    this.streamsSettings = {};
   }
 }
 export default SkylinkState;

@@ -30,7 +30,7 @@ const dispatchMediaInfoMsg = (room, peerId, dispatchEvent, mediaId) => {
 // dispatch event when:
 // 1) not from offer and answer
 // 2) self mediaInfo is updated
-// 3) self a new stream (with new mediaInfo obj) will replace an existing stream - e.g. screen share, send stream
+// 3) a new stream (with new mediaInfo obj) will replace an existing stream - e.g. screen share, send stream
 
 const updatePeerMediaInfo = (room, peerId, dispatchEvent, mediaId, key = false, value = false, mediaInfo = false) => {
   try {

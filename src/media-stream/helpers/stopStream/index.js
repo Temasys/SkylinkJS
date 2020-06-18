@@ -6,12 +6,9 @@ import removeTracks from './removeTracks';
 import listenForEventAndDeleteMediaInfo from './listenForEventAndDeleteMediaInfo';
 import stopAddedStreams from './stopAddedStreams';
 import updateMediaInfoMediaState from './updateMediaInfoMediaState';
-import deleteStreamFromState from './deleteStreamFromState';
-import dispatchOnLocalStreamEnded from './dispatchOnLocalStreamEnded';
+import dispatchEvents from './dispatchEvents';
 import prepStopScreenStream from './prepStopScreenStream';
 import initRefreshConnectionAndResolve from './initRefreshConnectionAndResolve';
-import stopReplacedStream from './stopReplacedStream';
-import stopReplacedStreams from './stopReplacedStreams';
 
 const stopStreamHelpers = {
   prepStopStreams,
@@ -22,12 +19,9 @@ const stopStreamHelpers = {
   listenForEventAndDeleteMediaInfo,
   stopAddedStreams,
   updateMediaInfoMediaState,
-  deleteStreamFromState,
-  dispatchOnLocalStreamEnded,
+  dispatchEvents,
   prepStopScreenStream,
   initRefreshConnectionAndResolve,
-  stopReplacedStream,
-  stopReplacedStreams,
 };
 
 export default stopStreamHelpers;
