@@ -98,20 +98,13 @@ class HandleBandwidthStats extends SkylinkStats {
 
   buildTrackInfo(roomKey) {
     const state = Skylink.getSkylinkState(roomKey);
-    const { streams } = state;
-    let streamObjs = [];
-    if (streams.userMedia) {
-      streamObjs = Object.values(Object.values(streams.userMedia));
-    }
-
-    if (streams.screenshare) {
-      streamObjs.push(streams.screenshare);
-    }
+    const { peerStreams, user, streamsSettings } = state;
+    const streamObjs = Object.values(peerStreams[user.sid]);
 
     streamObjs.forEach((streamObj) => {
       if (streamObj) {
-        const stream = streamObj.stream ? streamObj.stream : streamObj[Object.keys(streamObj)[0]].stream;
-        const settings = streamObj.settings ? streamObj.settings : streamObj[Object.keys(streamObj)[0]].settings;
+        const stream = streamObj;
+        const { settings } = streamsSettings[streamObj.id];
         const audioTracks = stream.getAudioTracks();
         const videoTracks = stream.getVideoTracks();
 
@@ -137,7 +130,7 @@ class HandleBandwidthStats extends SkylinkStats {
       return;
     }
 
-    if (!roomState.streams.userMedia && !roomState.streams.screenshare) {
+    if (!roomState.peerStreams[roomState.user.sid]) {
       return;
     }
 

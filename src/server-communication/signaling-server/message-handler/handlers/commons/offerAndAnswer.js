@@ -230,6 +230,8 @@ const canProceed = (state, message) => {
   if (!peerConnection) {
     logger.log.ERROR([targetMid, null, type, `${PEER_CONNECTION.NO_PEER_CONNECTION}. Unable to set${type === 'offer' ? 'Remote' : 'Local'}Offer.`]);
     error = PEER_CONNECTION.NO_PEER_CONNECTION;
+    handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType].dropped, targetMid, message, true, error);
+    return false;
   }
 
   const {

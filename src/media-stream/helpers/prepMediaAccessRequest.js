@@ -6,7 +6,7 @@ import Skylink from '../../index';
 
 /**
  * @description Helper function for {@link MediaStream.getUserMedia}
- * @param {GetUserMediaOptions} params - The camera Stream configuration options.
+ * @param {getUserMediaOptions} params - The camera Stream configuration options.
  * @memberOf MediaStreamHelpers
  * @return {Promise}
  */

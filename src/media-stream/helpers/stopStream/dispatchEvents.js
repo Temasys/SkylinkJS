@@ -1,4 +1,4 @@
-import { mediaAccessStopped, peerUpdated, streamEnded } from '../../../skylink-events';
+import { mediaAccessStopped, peerUpdated } from '../../../skylink-events';
 import Skylink from '../../../index';
 import { dispatchEvent } from '../../../utils/skylinkEventManager';
 import { hasVideoTrack, hasAudioTrack } from '../../../utils/helpers';
@@ -8,6 +8,8 @@ import PeerData from '../../../peer-data/index';
 import helpers from '../../../peer-data/helpers';
 import { TAGS } from '../../../constants';
 import Room from '../../../room';
+import PeerStream from '../../../peer-stream';
+import { STREAM_ENDED } from '../../../skylink-events/constants';
 
 /**
  * Function that handles the <code>RTCPeerConnection.removeTracks(sender)</code> on the local MediaStream.
@@ -17,7 +19,7 @@ import Room from '../../../room';
  * @memberOf MediaStreamHelpers
  * @fires STREAM_ENDED
  */
-const dispatchOnLocalStreamEnded = (room, stream, isScreensharing = false) => {
+const dispatchEvents = (room, stream, isScreensharing = false) => {
   const state = Skylink.getSkylinkState(room.id);
   const { MEDIA_STREAM } = MESSAGES;
   const { user } = state;
@@ -27,7 +29,7 @@ const dispatchOnLocalStreamEnded = (room, stream, isScreensharing = false) => {
     peerId: user.sid, isSelf, isScreensharing, stream,
   });
 
-  dispatchEvent(streamEnded({
+  PeerStream.dispatchStreamEvent(STREAM_ENDED, {
     room: Room.getRoomInfo(room.id),
     peerId: user.sid,
     peerInfo: PeerData.getCurrentSessionInfo(room),
@@ -36,7 +38,7 @@ const dispatchOnLocalStreamEnded = (room, stream, isScreensharing = false) => {
     streamId: stream.id,
     isVideo: hasVideoTrack(stream),
     isAudio: hasAudioTrack(stream),
-  }));
+  });
 
   dispatchEvent(mediaAccessStopped({
     isScreensharing,
@@ -50,4 +52,4 @@ const dispatchOnLocalStreamEnded = (room, stream, isScreensharing = false) => {
   }));
 };
 
-export default dispatchOnLocalStreamEnded;
+export default dispatchEvents;

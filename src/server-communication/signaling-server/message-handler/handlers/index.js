@@ -15,8 +15,6 @@ import redirect from './redirectHandler';
 import rtmp from './rtmpHandler';
 import setUserData from './setUserDataHandler';
 import mediaInfoEvent from './mediaInfoEventHandler';
-import muteVideoEvent from './muteVideoEventHandler';
-import muteAudioEvent from './muteAudioEventHandler';
 import storedMessages from './storedMessagesHandler';
 
 const handlers = {
@@ -35,8 +33,6 @@ const handlers = {
   recording,
   redirect,
   rtmp,
-  muteVideoEvent,
-  muteAudioEvent,
   setUserData,
   mediaInfoEvent,
   storedMessages,

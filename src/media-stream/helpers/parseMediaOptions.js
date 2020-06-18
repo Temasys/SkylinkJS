@@ -1,7 +1,7 @@
 import Skylink from '../../index';
 
 /**
- * @param {GetUserMediaOptions} options
+ * @param {getUserMediaOptions} options
  * @param {SkylinkState} roomState
  * @return {SkylinkState}
  * @memberOf MediaStreamHelpers

@@ -19,8 +19,9 @@ const getCurrentSessionInfo = (room) => {
     streamsMediaStatus,
     peerPriorityWeight,
     enableIceRestart,
-    streams,
+    peerStreams,
     streamsBandwidthSettings,
+    streamsSettings,
     user,
   } = state;
 
@@ -49,30 +50,22 @@ const getCurrentSessionInfo = (room) => {
     sid: user.sid,
   };
 
-  if (streams && streams.userMedia) {
-    const streamIds = Object.keys(streams.userMedia);
+  if (peerStreams[user.sid]) {
+    const streamIds = Object.keys(peerStreams[user.sid]);
     streamIds.forEach((id) => {
-      if (streams.userMedia[id].settings.audio) {
-        peerInfo.settings.audio = peerInfo.settings.audio || {};
-        peerInfo.settings.audio[id] = clone(streams.userMedia[id].settings.audio);
-      } else if (streams.userMedia[id].settings.video) {
-        peerInfo.settings.video = peerInfo.settings.video || {};
-        peerInfo.settings.video[id] = clone(streams.userMedia[id].settings.video);
+      if (streamsSettings[id].settings.audio) {
+        peerInfo.settings.audio = {};
+        peerInfo.settings.audio[id] = clone(streamsSettings[id].settings.audio);
+      } else if (streamsSettings[id].settings.video) {
+        peerInfo.settings.video = {};
+        peerInfo.settings.video[id] = clone(streamsSettings[id].settings.video);
       }
     });
   }
 
   peerInfo.mediaStatus = streamsMediaStatus;
   peerInfo.userData = user.userData || null;
-
-  if (streams.screenshare) {
-    peerInfo.settings.video = peerInfo.settings.video || {};
-    peerInfo.settings.video[streams.screenshare.id] = clone(streams.screenshare.settings.video);
-    peerInfo.settings.video[streams.screenshare.id].screenshare = true;
-  }
-
   peerInfo.settings.maxBandwidth = clone(streamsBandwidthSettings.bAS);
-
   peerInfo.settings.data = enableDataChannel;
 
   return clone(peerInfo);

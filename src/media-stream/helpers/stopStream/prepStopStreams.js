@@ -5,13 +5,12 @@ import MESSAGES from '../../../messages';
 // eslint-disable-next-line consistent-return
 const prepStopStreams = (roomId, streamId, fromLeaveRoom = false, isScreensharing = false) => new Promise((resolve, reject) => {
   const state = Skylink.getSkylinkState(roomId);
-  const { streams } = state;
-
-  if (!state || !streams) {
+  const { user, peerStreams } = state;
+  if (!state) {
     reject(new Error(`${MESSAGES.ROOM_STATE.NOT_FOUND} - ${roomId}`));
   }
 
-  if (!streams || (!isScreensharing && !streams.userMedia) || (isScreensharing && !streams.screenshare) || (isScreensharing && streams.screenshare && (streams.screenshare.id !== streamId))) {
+  if (!peerStreams[user.sid] || (streamId && !peerStreams[user.sid][streamId])) {
     reject(new Error(`${MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM} - ${streamId}`));
   }
 

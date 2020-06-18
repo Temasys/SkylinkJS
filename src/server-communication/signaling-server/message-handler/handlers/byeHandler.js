@@ -65,12 +65,12 @@ export const clearPeerInfo = (roomKey, peerId) => {
 
   delete updatedState.peerInformations[peerId];
   delete updatedState.peerMedias[peerId];
-  delete updatedState.remoteStreams[peerId];
   delete updatedState.peerMessagesStamps[peerId];
   delete updatedState.peerEndOfCandidatesCounter[peerId];
   delete updatedState.peerCandidatesQueue[peerId];
   delete updatedState.peerStats[peerId];
   delete updatedState.gatheredCandidates[peerId];
+  delete updatedState.peerStreams[peerId];
 };
 
 /**

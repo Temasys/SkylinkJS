@@ -14,8 +14,6 @@ import rtmpMessage from './rtmpMessage';
 import byeMessage from './byeMessage';
 import roomLockMessage from './roomLockMeessage';
 import mediaInfoEventMessage from './mediaInfoEventMessage';
-import muteAudioEventMessage from './muteAudioEventMessage';
-import muteVideoEventMessage from './muteVideoEventMessage';
 import getStoredMessagesMessage from './getStoredMessagesMessage';
 import userMessagesMessage from './getUserMessages';
 
@@ -36,8 +34,6 @@ const messageBuilders = {
   bye: byeMessage,
   roomLock: roomLockMessage,
   mediaInfoEvent: mediaInfoEventMessage,
-  muteAudioEvent: muteAudioEventMessage,
-  muteVideoEvent: muteVideoEventMessage,
   getStoredMessages: getStoredMessagesMessage,
   userMessages: userMessagesMessage,
 };

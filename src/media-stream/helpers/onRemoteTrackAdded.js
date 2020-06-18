@@ -20,8 +20,6 @@ const onRemoteTrackAdded = (stream, currentRoomState, targetMid, isScreensharing
   const { user, hasMCU, room } = currentRoomState;
   const dispatchOnIncomingStream = (detail) => { dispatchEvent(onIncomingStream(detail)); };
   const dispatchOnIncomingScreenStream = (detail) => {
-    // eslint-disable-next-line no-param-reassign
-    detail.isReplace = false;
     dispatchEvent(onIncomingScreenStream(detail));
   };
   const methods = { dispatchOnIncomingStream, dispatchOnIncomingScreenStream };

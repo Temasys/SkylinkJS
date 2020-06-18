@@ -3,7 +3,7 @@ import SkylinkSignalingServer from '../../server-communication/signaling-server'
 import mediaStreamHelpers from '../../media-stream/helpers/index';
 import logger from '../../logger';
 import MESSAGES from '../../messages';
-import { isEmptyObj, isAString, updateReplacedStreamInState } from '../../utils/helpers';
+import { isEmptyObj } from '../../utils/helpers';
 import { DEFAULTS } from '../../defaults';
 import screenshareHelpers from './helpers/index';
 import { TAGS } from '../../constants';
@@ -26,7 +26,6 @@ class ScreenSharing {
     this.roomState = roomState;
     this.stream = null;
     this.signaling = new SkylinkSignalingServer();
-    this.isReplace = null;
     this.streamId = null;
 
     screensharingInstance[room.id] = this;
@@ -44,31 +43,16 @@ class ScreenSharing {
     return false;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  hasMoreThanOneVideoStream() {
-    return mediaStreamHelpers.retrieveVideoStreams(this.roomState.room).length > 1;
-  }
-
-  hasUserMediaStream() {
-    const { streams } = this.roomState;
-
-    return streams.userMedia;
-  }
-
-  // TODO: Implement replace logic
   /**
    * Function that starts the screenshare.
-   * @param {boolean} isReplace
    * @param {String} streamId
    * @return {MediaStream}
    */
-  async start(isReplace, streamId = null) {
-    this.isReplace = false;
+  async start(streamId = null) {
     this.streamId = streamId;
 
     try {
       this.checkForExistingScreenStreams();
-      this.checksForReplaceScreen();
 
       this.stream = await this.startScreenCapture();
       if (!this.stream) {
@@ -76,16 +60,11 @@ class ScreenSharing {
         return null;
       }
 
-      screenshareHelpers.handleScreenStreamStates.addScreenStreamToState(this.roomState, this.stream, this.isReplace);
+      screenshareHelpers.onScreenStreamAccessSuccess(this.roomState.room.id, this.stream, null, mediaStreamHelpers.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE), false, true);
       screenshareHelpers.addScreenStreamCallbacks(this.roomState, this.stream);
-
-      if (this.isReplace) {
-        this.replaceUserMediaStream();
-      } else {
-        this.addScreenshareStream();
-      }
+      this.addScreenshareStream();
     } catch (error) {
-      logger.log.ERROR([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.REPLACE_SCREEN], error);
+      logger.log.ERROR([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.START_SCREEN], error);
     }
 
     return this.stream;
@@ -104,8 +83,6 @@ class ScreenSharing {
 
     try {
       screenshareHelpers.stopScreenStream(this.roomState.room, this.stream, this.roomState.user.sid, fromLeaveRoom);
-
-      this.isReplace = null;
       this.streamId = null;
       this.stream = null;
     } catch (error) {
@@ -137,46 +114,12 @@ class ScreenSharing {
       });
   }
 
-  checksForReplaceScreen() {
-    if (!this.isReplace) return;
-
-    if (!this.hasUserMediaStream()) {
-      throw new Error(MESSAGES.MEDIA_STREAM.ERRORS.NO_USER_MEDIA_STREAMS);
-    }
-
-    if (this.hasMoreThanOneVideoStream() && !this.streamId) {
-      throw new Error(MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM_ID);
-    }
-
-    if (this.streamId && !isAString(this.streamId)) {
-      throw new Error(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_STREAM_ID_TYPE);
-    }
-
-    if (this.streamId && !this.streamExists()) {
-      throw new Error(`${MESSAGES.MEDIA_STREAM.ERRORS.INVALID_STREAM_ID} - ${this.streamId}`);
-    }
-  }
-
   checkForExistingScreenStreams() {
     const peersScreenStream = screenshareHelpers.retrievePeersScreenStreamId(this.roomState);
 
     if (!isEmptyObj(peersScreenStream)) {
       logger.log.WARN([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.PEER_SCREEN_ACTIVE]);
     }
-  }
-
-  replaceUserMediaStream() {
-    const { peerConnections, streams } = this.roomState;
-    const peerIds = Object.keys(peerConnections);
-    const oldStream = this.streamId ? streams.userMedia[this.streamId].stream : mediaStreamHelpers.retrieveVideoStreams(this.roomState.room)[0];
-    const newStream = this.stream;
-
-    this.streamId = oldStream.id;
-    updateReplacedStreamInState(oldStream, newStream, this.roomState, true);
-
-    peerIds.forEach((peerId) => {
-      mediaStreamHelpers.replaceTrack(oldStream, newStream, peerId, this.roomState);
-    });
   }
 
   addScreenshareStream() {
@@ -191,10 +134,6 @@ class ScreenSharing {
   // eslint-disable-next-line class-methods-use-this
   deleteScreensharingInstance(room) {
     delete screensharingInstance[room.id];
-  }
-
-  isReplaceScreenStream() {
-    return this.isReplace;
   }
 }
 

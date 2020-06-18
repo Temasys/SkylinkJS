@@ -76,14 +76,6 @@ class SignalingMessageHandler {
     handlers.mediaInfoEvent(...args);
   }
 
-  muteAudioEventHandler(...args) {
-    handlers.muteAudioEvent(...args);
-  }
-
-  muteVideoEventHandler(...args) {
-    handlers.muteVideoEvent(...args);
-  }
-
   storedMessagesHandler(...args) {
     handlers.storedMessages(...args);
   }

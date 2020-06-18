@@ -1,5 +1,6 @@
 import { getRoomStateByName } from '../../utils/helpers';
 import PeerData from '../../peer-data';
+import { PEER_TYPE } from '../../constants';
 
 /**
  * @param {String} roomName
@@ -14,8 +15,10 @@ const getPeersInRoom = (roomName) => {
     const listOfPeers = Object.keys(roomState.peerInformations);
 
     for (let i = 0; i < listOfPeers.length; i += 1) {
-      listOfPeersInfo[listOfPeers[i]] = Object.assign({}, PeerData.getPeerInfo(listOfPeers[i], roomState.room));
-      listOfPeersInfo[listOfPeers[i]].isSelf = false;
+      if (listOfPeers[i] !== PEER_TYPE.MCU) {
+        listOfPeersInfo[listOfPeers[i]] = Object.assign({}, PeerData.getPeerInfo(listOfPeers[i], roomState.room));
+        listOfPeersInfo[listOfPeers[i]].isSelf = false;
+      }
     }
 
     if (roomState.user && roomState.user.sid) {
