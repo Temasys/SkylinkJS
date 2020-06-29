@@ -4,28 +4,35 @@ import {
 import logger from '../../logger';
 import { dispatchEvent } from '../../utils/skylinkEventManager';
 import PeerData from '../../peer-data';
-import { peerUpdated, onIncomingStream } from '../../skylink-events';
+import { peerUpdated } from '../../skylink-events';
 import PeerConnection from '../../peer-connection/index';
 import MediaStream from '../index';
 import MESSAGES from '../../messages';
+import PeerStream from '../../peer-stream';
+import { ON_INCOMING_STREAM } from '../../skylink-events/constants';
+import Room from '../../room';
 
-const dispatchEvents = (roomState, stream) => {
+const dispatchEvents = (roomState, stream, prefetchedStream) => {
   const { user, room } = roomState;
   const isSelf = true;
   const peerId = user.sid;
   const peerInfo = PeerData.getCurrentSessionInfo(room);
 
-  dispatchEvent(onIncomingStream({
-    room,
-    stream,
-    streamId: stream.id,
-    isSelf,
-    peerId,
-    peerInfo,
-    isScreensharing: false,
-    isVideo: hasVideoTrack(stream),
-    isAudio: hasAudioTrack(stream),
-  }));
+  if (prefetchedStream) {
+    // if mediaOptions passed, getUserMedia already triggers onIncomingStream in onStreamAccessSuccess
+    // if prefetchedStream is used, dispatch onIncomingStream locally
+    PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
+      room: Room.getRoomInfo(room.id),
+      stream,
+      streamId: stream.id,
+      isSelf,
+      peerId,
+      peerInfo,
+      isScreensharing: false,
+      isVideo: hasVideoTrack(stream),
+      isAudio: hasAudioTrack(stream),
+    });
+  }
 
   dispatchEvent(peerUpdated({
     isSelf,
@@ -34,27 +41,27 @@ const dispatchEvents = (roomState, stream) => {
   }));
 };
 
-const dispatchEventsToLocalEnd = (roomState, streams) => {
+const dispatchEventsToLocalEnd = (roomState, streams, prefetchedStream) => {
   for (let i = 0; i < streams.length; i += 1) {
     if (streams[i]) {
       if (Array.isArray(streams[i])) {
         for (let x = 0; x < streams[i].length; x += 1) {
           if (streams[i][x]) {
-            dispatchEvents(roomState, streams[i][x]);
+            dispatchEvents(roomState, streams[i][x], prefetchedStream);
           }
         }
       } else {
-        dispatchEvents(roomState, streams[i]);
+        dispatchEvents(roomState, streams[i], prefetchedStream);
       }
     }
   }
 };
 
-const restartFn = (roomState, streams, resolve, reject) => {
+const restartFn = (roomState, streams, prefetchedStream, resolve, reject) => {
   const { peerConnections, hasMCU } = roomState;
 
   try {
-    dispatchEventsToLocalEnd(roomState, streams);
+    dispatchEventsToLocalEnd(roomState, streams, prefetchedStream);
 
     if (Object.keys(peerConnections).length > 0 || hasMCU) {
       const refreshPeerConnectionPromise = PeerConnection.refreshPeerConnection(Object.keys(peerConnections), roomState, false, {});
@@ -78,7 +85,7 @@ const processMediaOptions = (roomState, stream, resolve, reject) => {
   const getUserMediaPromise = MediaStream.getUserMedia(roomState, stream);
 
   return getUserMediaPromise.then((userMediaStreams) => {
-    restartFn(roomState, userMediaStreams, resolve, reject);
+    restartFn(roomState, userMediaStreams, false, resolve, reject);
   }).catch((error) => {
     reject(error);
   });
@@ -88,7 +95,7 @@ const processMediaStream = (roomState, stream, resolve, reject) => {
   const usePrefetchedStreamPromise = MediaStream.usePrefetchedStream(roomState.room.id, stream);
 
   return usePrefetchedStreamPromise.then((prefetchedStreams) => {
-    restartFn(roomState, prefetchedStreams, resolve, reject);
+    restartFn(roomState, prefetchedStreams, true, resolve, reject);
   }).catch((error) => {
     reject(error);
   });
@@ -103,7 +110,7 @@ const processMediaStreamArray = (roomState, streams, resolve, reject) => {
 
   return Promise.all(usePrefetchedStreamsPromises)
     .then((results) => {
-      restartFn(roomState, results, resolve, reject);
+      restartFn(roomState, results, true, resolve, reject);
     })
     .catch((error) => {
       reject(error);

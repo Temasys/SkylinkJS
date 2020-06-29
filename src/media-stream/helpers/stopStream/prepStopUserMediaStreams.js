@@ -27,7 +27,7 @@ const prepStopUserMediaStreams = (state, streamId, fromLeaveRoom) => new Promise
     if (!streamId) {
       stopStreamHelpers.stopAddedStreams(state, mediaStreams, isScreensharing, fromLeaveRoom);
     } else {
-      const { stream } = peerStreams[user.sid][streamId];
+      const stream = peerStreams[user.sid][streamId];
       stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
     }
 

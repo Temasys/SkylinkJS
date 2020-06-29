@@ -1228,10 +1228,13 @@ class SkylinkPublicInterface {
    * @property {Boolean} #peerId.isSelf - The flag if the peer is local or remote.
    * @property {Object} #peerId.streams - The peer streams.
    * @property {Object} #peerId.streams.audio - The peer audio streams keyed by streamId.
+   * @property {MediaStream} #peerId.streams.audio#streamId - streams keyed by stream id.
    * @property {Object} #peerId.streams.video - The peer video streams keyed by streamId.
+   * @property {MediaStream} #peerId.streams.video#streamId - streams keyed by stream id.
    * @property {Object} #peerId.streams.screenShare - The peer screen share streams keyed by streamId.
-   * @property {MediaStream} #peerId.#streamId - streams keyed by stream id.
-   /**
+   * @property {MediaStream} #peerId.streams.screenShare#streamId - streams keyed by stream id.
+   */
+  /**
    * @description Method that returns the list of connected peers streams in the room both user media streams and screen share streams.
    * @param {String} roomName - The room name.
    * @param {Boolean} [includeSelf=true] - The flag if self streams are included.
