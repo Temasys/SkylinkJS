@@ -145,7 +145,8 @@ export const leaveRoom = roomState => new Promise((resolve, reject) => {
   const { ROOM: { LEAVE_ROOM } } = MESSAGES;
 
   try {
-    const peerIds = hasMCU ? [PEER_TYPE.MCU] : Array.from(new Set([...Object.keys(peerConnections), ...Object.keys(peerInformations)]));
+    // eslint-disable-next-line no-nested-ternary
+    const peerIds = hasMCU ? (peerConnections.MCU ? [PEER_TYPE.MCU] : []) : Array.from(new Set([...Object.keys(peerConnections), ...Object.keys(peerInformations)]));
 
     if (isEmptyArray(peerIds)) {
       logger.log.DEBUG([room.roomName, null, null, LEAVE_ROOM.NO_PEERS]);
