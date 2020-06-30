@@ -3,7 +3,7 @@
   factory();
 }(function () { 'use strict';
 
-  /* SkylinkJS v2.1.4 Thu Jun 18 2020 09:44:33 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.1.4 Tue Jun 30 2020 03:35:01 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -10368,7 +10368,8 @@
       // eslint-disable-next-line class-methods-use-this
       init(options = defaultOptions) {
         if (options) {
-          if (options.socketServer) { // set socketServerPath to override socketServerPath value returned from api that only works with default sig
+          if (options.socketServer && !options.socketServerPath) { // set socketServerPath to override socketServerPath value returned from api that only works with
+            // default sig
             // server url
             // eslint-disable-next-line no-param-reassign
             options.socketServerPath = '';
@@ -18797,7 +18798,7 @@
         if (!streamId) {
           stopStreamHelpers.stopAddedStreams(state, mediaStreams, isScreensharing, fromLeaveRoom);
         } else {
-          const { stream } = peerStreams[user.sid][streamId];
+          const stream = peerStreams[user.sid][streamId];
           stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
         }
 
@@ -24722,7 +24723,8 @@
       const { ROOM: { LEAVE_ROOM } } = MESSAGES;
 
       try {
-        const peerIds = hasMCU ? [PEER_TYPE.MCU] : Array.from(new Set([...Object.keys(peerConnections), ...Object.keys(peerInformations)]));
+        // eslint-disable-next-line no-nested-ternary
+        const peerIds = hasMCU ? (peerConnections.MCU ? [PEER_TYPE.MCU] : []) : Array.from(new Set([...Object.keys(peerConnections), ...Object.keys(peerInformations)]));
 
         if (isEmptyArray(peerIds)) {
           logger.log.DEBUG([room.roomName, null, null, LEAVE_ROOM.NO_PEERS]);
@@ -26118,23 +26120,27 @@
       reject(error);
     };
 
-    const dispatchEvents$1 = (roomState, stream) => {
+    const dispatchEvents$1 = (roomState, stream, prefetchedStream) => {
       const { user, room } = roomState;
       const isSelf = true;
       const peerId = user.sid;
       const peerInfo = PeerData.getCurrentSessionInfo(room);
 
-      dispatchEvent(onIncomingStream({
-        room,
-        stream,
-        streamId: stream.id,
-        isSelf,
-        peerId,
-        peerInfo,
-        isScreensharing: false,
-        isVideo: hasVideoTrack(stream),
-        isAudio: hasAudioTrack(stream),
-      }));
+      if (prefetchedStream) {
+        // if mediaOptions passed, getUserMedia already triggers onIncomingStream in onStreamAccessSuccess
+        // if prefetchedStream is used, dispatch onIncomingStream locally
+        PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
+          room: Room.getRoomInfo(room.id),
+          stream,
+          streamId: stream.id,
+          isSelf,
+          peerId,
+          peerInfo,
+          isScreensharing: false,
+          isVideo: hasVideoTrack(stream),
+          isAudio: hasAudioTrack(stream),
+        });
+      }
 
       dispatchEvent(peerUpdated({
         isSelf,
@@ -26143,27 +26149,27 @@
       }));
     };
 
-    const dispatchEventsToLocalEnd = (roomState, streams) => {
+    const dispatchEventsToLocalEnd = (roomState, streams, prefetchedStream) => {
       for (let i = 0; i < streams.length; i += 1) {
         if (streams[i]) {
           if (Array.isArray(streams[i])) {
             for (let x = 0; x < streams[i].length; x += 1) {
               if (streams[i][x]) {
-                dispatchEvents$1(roomState, streams[i][x]);
+                dispatchEvents$1(roomState, streams[i][x], prefetchedStream);
               }
             }
           } else {
-            dispatchEvents$1(roomState, streams[i]);
+            dispatchEvents$1(roomState, streams[i], prefetchedStream);
           }
         }
       }
     };
 
-    const restartFn = (roomState, streams, resolve, reject) => {
+    const restartFn = (roomState, streams, prefetchedStream, resolve, reject) => {
       const { peerConnections, hasMCU } = roomState;
 
       try {
-        dispatchEventsToLocalEnd(roomState, streams);
+        dispatchEventsToLocalEnd(roomState, streams, prefetchedStream);
 
         if (Object.keys(peerConnections).length > 0 || hasMCU) {
           const refreshPeerConnectionPromise = PeerConnection.refreshPeerConnection(Object.keys(peerConnections), roomState, false, {});
@@ -26187,7 +26193,7 @@
       const getUserMediaPromise = MediaStream.getUserMedia(roomState, stream);
 
       return getUserMediaPromise.then((userMediaStreams) => {
-        restartFn(roomState, userMediaStreams, resolve, reject);
+        restartFn(roomState, userMediaStreams, false, resolve, reject);
       }).catch((error) => {
         reject(error);
       });
@@ -26197,7 +26203,7 @@
       const usePrefetchedStreamPromise = MediaStream.usePrefetchedStream(roomState.room.id, stream);
 
       return usePrefetchedStreamPromise.then((prefetchedStreams) => {
-        restartFn(roomState, prefetchedStreams, resolve, reject);
+        restartFn(roomState, prefetchedStreams, true, resolve, reject);
       }).catch((error) => {
         reject(error);
       });
@@ -26212,7 +26218,7 @@
 
       return Promise.all(usePrefetchedStreamsPromises)
         .then((results) => {
-          restartFn(roomState, results, resolve, reject);
+          restartFn(roomState, results, true, resolve, reject);
         })
         .catch((error) => {
           reject(error);
@@ -30017,10 +30023,13 @@
        * @property {Boolean} #peerId.isSelf - The flag if the peer is local or remote.
        * @property {Object} #peerId.streams - The peer streams.
        * @property {Object} #peerId.streams.audio - The peer audio streams keyed by streamId.
+       * @property {MediaStream} #peerId.streams.audio#streamId - streams keyed by stream id.
        * @property {Object} #peerId.streams.video - The peer video streams keyed by streamId.
+       * @property {MediaStream} #peerId.streams.video#streamId - streams keyed by stream id.
        * @property {Object} #peerId.streams.screenShare - The peer screen share streams keyed by streamId.
-       * @property {MediaStream} #peerId.#streamId - streams keyed by stream id.
-       /**
+       * @property {MediaStream} #peerId.streams.screenShare#streamId - streams keyed by stream id.
+       */
+      /**
        * @description Method that returns the list of connected peers streams in the room both user media streams and screen share streams.
        * @param {String} roomName - The room name.
        * @param {Boolean} [includeSelf=true] - The flag if self streams are included.
