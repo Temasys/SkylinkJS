@@ -63,6 +63,7 @@ const MESSAGES = {
     UPDATE_USER_DATA: 'Peer updated userData: ',
     OUTDATED_MSG: 'Dropping outdated status ->',
     USER_DATA_NOT_JSON: 'UserData is not JSON',
+    SET_PEER_PRIORITY_WEIGHT: 'Setting peerPriorityWeight with tiebreaker value from inRoom signalling message',
   },
   PEER_CONNECTION: {
     NOT_INITIALISED: 'Peer Connection not initialised',
@@ -76,7 +77,6 @@ const MESSAGES = {
     ADD_TRANSCEIVER: 'Adding empty transceiver',
     ERRORS: {
       REMOVE_TRACK: 'Error removing track from peer connection',
-      REPLACE_TRACK: 'Error replacing track in peer connection',
       NOT_FOUND: 'Peer Connection not found',
     },
     REFRESH_CONNECTION: {
@@ -208,6 +208,7 @@ const MESSAGES = {
       FAILED_PROCESSING_PEER_MEDIA: 'Failed to process media info',
       FAILED_UPDATING_TRANSCEIVER_MID: 'Failed updating media info transceiverMid after setLocalDescription',
       FAILED_SETTING_PEER_MEDIA_INFO: 'Failed setting peer media at offer / answer',
+      STREAM_ID_NOT_MATCHED: 'There is no mediaInfo associated with the streamId',
     },
     WARN: {
       READ_ONLY_VALUE: 'Attempting to change media info read only value: ',
@@ -219,7 +220,7 @@ const MESSAGES = {
   },
   MEDIA_STREAM: {
     STOP_SETTINGS: 'Stopped streams with settings:',
-    STOP_SUCCESS: 'Successfully stopped and removed stream from state',
+    STOP_SUCCESS: 'Successfully stopped stream',
     REMOTE_TRACK_REMOVED: 'Remote MediaStreamTrack removed',
     START_FALLBACK: 'Fall back to retrieve audio only stream',
     NO_OPTIONS: 'No user media options provided',
@@ -235,7 +236,6 @@ const MESSAGES = {
       STOP_SCREEN: 'Error stopping screen share stream',
       START_SCREEN: 'Error starting screen share stream',
       STOP_ADDED_STREAM: 'Error stopping added stream',
-      STOP_REPLACED_STREAM: 'Error stopping replaced stream',
       STOP_USER_MEDIA: 'Error stopping user media',
       STOP_AUDIO_TRACK: 'Error stopping audio tracks in stream',
       STOP_VIDEO_TRACK: 'Error stopping video tracks in stream',
@@ -248,7 +248,6 @@ const MESSAGES = {
       INVALID_STREAM_ID_TYPE: 'Stream id is not a string',
       NO_STREAM_ID: 'No stream id provided',
       PEER_SCREEN_ACTIVE: 'Peer has existing screen share',
-      REPLACE_SCREEN: 'Error replacing user media stream with screenshare stream',
       FALLBACK: 'Error retrieving fallback audio stream',
       INVALID_GUM_OPTIONS: 'Invalid user media options',
       GET_USER_MEDIA: 'Error retrieving stream from \'getUserMedia\' method',

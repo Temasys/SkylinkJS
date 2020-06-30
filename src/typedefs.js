@@ -603,3 +603,7 @@
  * @property {MediaStream} MediaStreams.0 Audio stream
  * @property {MediaStream} MediaStreams.1 Video stream
  */
+
+/**
+ * @typedef {Object} MediaStream - <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaStream">MediaStream interface</a>
+ */

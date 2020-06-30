@@ -23,9 +23,6 @@ const processSignalingMessage = (messageHandler, message) => {
     case SIG_MESSAGE_TYPE.MEDIA_INFO_EVENT: messageHandler.mediaInfoEventHandler(message); break;
     case SIG_MESSAGE_TYPE.MESSAGE: messageHandler.userMessageHandler(message, null); break;
     case SIG_MESSAGE_TYPE.STORED_MESSAGES: messageHandler.storedMessagesHandler(message); break;
-    // Backward compatibility for 0.9.x
-    case SIG_MESSAGE_TYPE.MUTE_AUDIO_EVENT: messageHandler.muteAudioEventHandler(message); break;
-    case SIG_MESSAGE_TYPE.MUTE_VIDEO_EVENT: messageHandler.muteVideoEventHandler(message); break;
     // Backward compatibility for public and private message protocol
     case SIG_MESSAGE_TYPE.PUBLIC_MESSAGE: messageHandler.userMessageHandler(message, true); break;
     case SIG_MESSAGE_TYPE.PRIVATE_MESSAGE: messageHandler.userMessageHandler(message, false); break;

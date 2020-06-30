@@ -1,6 +1,5 @@
 import PeerConnectionStatistics from './helpers/statistics';
 import helpers from './helpers/index';
-import screenshareHelpers from '../features/screen-sharing/helpers/index';
 
 /**
  * @classdesc Class that represents a PeerConnection
@@ -118,10 +117,6 @@ class PeerConnection {
 
   static refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions) {
     return helpers.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
-  }
-
-  static getPeerScreenshare(roomState) {
-    return screenshareHelpers.retrievePeerScreenStream(roomState);
   }
 
   static buildPeerInformations(...args) {

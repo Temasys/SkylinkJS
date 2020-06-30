@@ -51,7 +51,6 @@ import * as SkylinkEventsConstants from './skylink-events/constants';
  *  {@link SkylinkConstants.DATA_STREAM_STATE|DATA_STREAM_STATE} </br>
  *  {@link SkylinkConstants.INTRODUCE_STATE|INTRODUCE_STATE} </br>
  *  {@link SkylinkConstants.REGIONAL_SERVER|REGIONAL_SERVER} </br>
- *  {@link SkylinkConstants.PRIORITY_WEIGHT_SCHEME|PRIORITY_WEIGHT_SCHEME} </br>
  *  {@link SkylinkConstants.CHUNK_FILE_SIZE|CHUNK_FILE_SIZE} </br>
  *  {@link SkylinkConstants.MOZ_CHUNK_FILE_SIZE|MOZ_CHUNK_FILE_SIZE} </br>
  *  {@link SkylinkConstants.BINARY_FILE_SIZE|BINARY_FILE_SIZE} </br>
@@ -1044,29 +1043,6 @@ export const REGIONAL_SERVER = {
 };
 
 /**
- * The list of User's priority weight schemes for {@link Skylink#joinRoom|joinRoom}  connections.
- * @typedef PRIORITY_WEIGHT_SCHEME
- * @property {String} ENFORCE_OFFERER  Value <code>"enforceOfferer"</code>
- *   The value of the priority weight scheme to enforce User as the offerer.
- * @property {String} ENFORCE_ANSWERER Value <code>"enforceAnswerer"</code>
- *   The value of the priority weight scheme to enforce User as the answerer.
- * @property {String} AUTO             Value <code>"auto"</code>
- *   The value of the priority weight scheme to let User be offerer or answerer based on Signaling server selection.
- * @constant
- * @type Object
- * @readOnly
- * @memberOf SkylinkConstants
- * @since 0.6.18
- * @deprecated
- * @ignore
- */
-export const PRIORITY_WEIGHT_SCHEME = {
-  ENFORCE_OFFERER: 'enforceOfferer',
-  ENFORCE_ANSWERER: 'enforceAnswerer',
-  AUTO: 'auto',
-};
-
-/**
  * The list of the SDK <code>console</code> API log levels.
  * @typedef LOG_LEVEL
  * @property {number} DEBUG Value <code>4</code>
@@ -1579,10 +1555,6 @@ export const DC_PROTOCOL_TYPE = {
  * Message that is broadcast by peer to all peers in the room when the peer's custom userData has changed.
  * @property {String} ROOM_LOCK Value <code>roomLockEvent</code>
  * Message that is broadcast by peer to all peers in the room to toggle the Signaling server Room lock status
- * @property {String} MUTE_VIDEO_EVENT Value <code>muteVideoEvent</code>
- * Message that is broadcast by peer to all peers in the room to inform other peers that its sent stream object video tracks muted status have changed.
- * @property {String} MUTE_AUDIO_EVENT Value <code>muteAudioEvent</code>
- * Message that is broadcast by peer to all peers in the room to inform other peers that its sent stream object audio tracks muted status have changed.
  * @property {String} PUBLIC_MESSAGE Value <code>public</code>
  * Message sent by peer to all peers in the room as a public message.
  * @property {String} PRIVATE_MESSAGE Value <code>private</code>
@@ -1651,8 +1623,6 @@ export const SIG_MESSAGE_TYPE = {
   STOP_RTMP: 'stopRTMP',
   RTMP: 'rtmpEvent',
   MEDIA_INFO_EVENT: 'mediaInfoEvent',
-  MUTE_VIDEO_EVENT: 'muteVideoEvent',
-  MUTE_AUDIO_EVENT: 'muteAudioEvent',
   MESSAGE: 'message',
   GET_STORED_MESSAGES: 'getStoredMessages',
   STORED_MESSAGES: 'storedMessages',
@@ -1661,9 +1631,6 @@ export const SIG_MESSAGE_TYPE = {
 
 export const STREAM_STATUS = {
   ENDED: 'ended',
-  REPLACED_STREAM_ENDED: 'replacedStreamEnded',
-  SCREENSHARE_REPLACE_START: 'screenshareStart',
-  USER_MEDIA_REPLACE_START: 'userMediaReplaceStart',
 };
 
 /**
@@ -1678,8 +1645,6 @@ export const STREAM_STATUS = {
 export const GROUP_MESSAGE_LIST = [
   SIG_MESSAGE_TYPE.STREAM,
   SIG_MESSAGE_TYPE.UPDATE_USER,
-  SIG_MESSAGE_TYPE.MUTE_AUDIO_EVENT,
-  SIG_MESSAGE_TYPE.MUTE_VIDEO_EVENT,
   SIG_MESSAGE_TYPE.PUBLIC_MESSAGE,
 ];
 

@@ -393,31 +393,6 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @typedef {Object.<String, Object>} peersStreamsInfo
-   * @property {Object.<String, Object>} #peerId - Peer streams info keyed by peer id.
-   * @property {Boolean} #peerId.isSelf - The flag if the peer is local or remote.
-   * @property {MediaStream} #peerId.#streamId - streams keyed by stream id.
-  /**
-   * @description Method that returns the list of connected peers streams in the room both user media streams and screen share streams.
-   * @param {String} roomName - The room name.
-   * @param {Boolean} [includeSelf=true] - The flag if self streams are included.
-   * @return {JSON.<String, peersStreamsInfo>} - The list of peer stream objects keyed by peer id.
-   * @example
-   * Example 1: Get the list of current peers streams in the same room
-   *
-   * const streams = skylink.getPeersStreams("Room_1");
-   * @alias Skylink#getPeersStreams
-   * @since 0.6.16
-   */
-  getPeersStreams(roomName, includeSelf = true) {
-    const roomState = getRoomStateByName(roomName);
-    if (roomState) {
-      return PeerData.getPeersStreams(roomState, includeSelf);
-    }
-    return null;
-  }
-
-  /**
    * @typedef {Object} dataChannelInfo
    * @property {String} channelName - The data channel id.
    * @property {String} channelProp - The data channel property.
@@ -632,43 +607,15 @@ class SkylinkPublicInterface {
    * @description Method that returns starts screenshare and returns the stream.
    * @param {String} roomName - The room name.
    * @return {MediaStream|null} - The screen share stream.
-   * @example
-   * Example 1: Replace selected stream with screen share stream
-   *
-   * let shareScreenReplace = () => {
-   *    // Retrieve all userMedia streams
-   *    const streamList = skylink.getStreams(roomName);
-   *    skylink.shareScreen(roomName, true, Object.keys(streamList.userMedia)[0]).then((screenStream) => {
-   *      window.attachMediaStream(localVideoElement, screenStream);
-   *    });
-   * }
    * @alias Skylink#shareScreen
    * @since 2.0.0
    */
   shareScreen(roomName) {
-    // TODO: replace stream is not functional yet so set to null for now
-    const replaceUserMediaStream = false;
     const streamId = null;
     const roomState = getRoomStateByName(roomName);
     if (roomState) {
       const screenSharing = new ScreenSharing(roomState);
-      return screenSharing.start(replaceUserMediaStream, streamId);
-    }
-
-    return null;
-  }
-
-  /**
-   * @description Method that returns the screenshare stream id of peers.
-   * @param {String} roomName - The room name.
-   * @return {Object.<String, MediaStream>|null} screenshareStream - The peer screen share stream keyed by peer id if there is one.
-   * @alias Skylink#getPeersScreenshare
-   * @since 2.0.0
-   */
-  getPeersScreenshare(roomName) {
-    const roomState = getRoomStateByName(roomName);
-    if (roomState) {
-      return PeerConnection.getPeerScreenshare(roomState);
+      return screenSharing.start(streamId);
     }
 
     return null;
@@ -774,7 +721,7 @@ class SkylinkPublicInterface {
     if (isAString(roomName)) {
       const roomState = getRoomStateByName(roomName);
       if (roomState) {
-        return MediaStream.getUserMediaLayer(roomState, options);
+        return MediaStream.processUserMediaOptions(roomState, options);
       }
     } else if (isAObj(roomName)) {
       return statelessGetUserMedia(roomName);
@@ -1276,21 +1223,33 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @typedef {Object} streamList
-   * @property {Object.<string, MediaStream>|null} userMedia - The user media streams keyed by stream id.
-   * @property {MediaStream|null} screenshare - The screenshare stream.
+   * @typedef {Object.<String, Object>} streamsList
+   * @property {Object.<String, Object>} #peerId - Peer streams info keyed by peer id.
+   * @property {Boolean} #peerId.isSelf - The flag if the peer is local or remote.
+   * @property {Object} #peerId.streams - The peer streams.
+   * @property {Object} #peerId.streams.audio - The peer audio streams keyed by streamId.
+   * @property {MediaStream} #peerId.streams.audio#streamId - streams keyed by stream id.
+   * @property {Object} #peerId.streams.video - The peer video streams keyed by streamId.
+   * @property {MediaStream} #peerId.streams.video#streamId - streams keyed by stream id.
+   * @property {Object} #peerId.streams.screenShare - The peer screen share streams keyed by streamId.
+   * @property {MediaStream} #peerId.streams.screenShare#streamId - streams keyed by stream id.
    */
   /**
-   * @description Method that returns all active user streams including screenshare stream if present.
+   * @description Method that returns the list of connected peers streams in the room both user media streams and screen share streams.
    * @param {String} roomName - The room name.
-   * @return {streamList|null}
+   * @param {Boolean} [includeSelf=true] - The flag if self streams are included.
+   * @return {JSON.<String, streamsList>} - The list of peer stream objects keyed by peer id.
+   * @example
+   * Example 1: Get the list of current peers streams in the same room
+   *
+   * const streams = skylink.getStreams("Room_1");
    * @alias Skylink#getStreams
-   * @since 2.0.0
+   * @since 0.6.16
    */
-  getStreams(roomName) {
+  getStreams(roomName, includeSelf = true) {
     const roomState = getRoomStateByName(roomName);
     if (roomState) {
-      return MediaStream.getStreams(roomState);
+      return MediaStream.getStreams(roomState, includeSelf);
     }
 
     return null;

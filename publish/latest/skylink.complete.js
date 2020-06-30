@@ -1,4 +1,4 @@
-/* SkylinkJS v2.1.3 Wed Jun 10 2020 11:31:03 GMT+0000 (Coordinated Universal Time) */
+/* SkylinkJS v2.1.4 Tue Jun 30 2020 03:35:01 GMT+0000 (Coordinated Universal Time) */
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -5755,8 +5755,6 @@ class SkylinkEvent {
  * @param {String} detail.streamId - The stream id.
  * @param {boolean} detail.isSelf -The flag if Peer is User.
  * @param {peerInfo} detail.peerInfo - The Peer session information.
- * @param {String} detail.isReplace - The The flag if the incoming stream has replaced an existing stream.
- * @param {String} detail.replacedStreamId - The streamId of the replaced stream.
  * @param {boolean} detail.isVideo - The flag if the incoming stream has a video track.
  * @param {boolean} detail.isAudio - The flag if the incoming stream has an audio track.
  * */
@@ -5772,8 +5770,6 @@ const onIncomingStream = (detail = {}) => new SkylinkEvent(ON_INCOMING_STREAM, {
  * @param {String} detail.streamId - The Stream id.
  * @param {Boolean} detail.isSelf - The flag if Peer is User.
  * @param {peerInfo} detail.peerInfo - The Peer session information.
- * @param {Boolean} detail.isReplace - The flag if the incoming screenshare stream results from {@link Skylink#shareScreen|shareScreen} called
- * with <code>replaceUserMediaStream=true</code>.
  * @param {boolean} detail.isVideo - The flag if the incoming screen stream has a video track.
  * @param {boolean} detail.isAudio - The flag if the incoming screen stream has an audio track.
  * */
@@ -6386,7 +6382,6 @@ const loggedOnConsole = (detail = {}) => new SkylinkEvent(LOGGED_ON_CONSOLE, { d
  *  {@link SkylinkConstants.DATA_STREAM_STATE|DATA_STREAM_STATE} </br>
  *  {@link SkylinkConstants.INTRODUCE_STATE|INTRODUCE_STATE} </br>
  *  {@link SkylinkConstants.REGIONAL_SERVER|REGIONAL_SERVER} </br>
- *  {@link SkylinkConstants.PRIORITY_WEIGHT_SCHEME|PRIORITY_WEIGHT_SCHEME} </br>
  *  {@link SkylinkConstants.CHUNK_FILE_SIZE|CHUNK_FILE_SIZE} </br>
  *  {@link SkylinkConstants.MOZ_CHUNK_FILE_SIZE|MOZ_CHUNK_FILE_SIZE} </br>
  *  {@link SkylinkConstants.BINARY_FILE_SIZE|BINARY_FILE_SIZE} </br>
@@ -7379,29 +7374,6 @@ const REGIONAL_SERVER = {
 };
 
 /**
- * The list of User's priority weight schemes for {@link Skylink#joinRoom|joinRoom}  connections.
- * @typedef PRIORITY_WEIGHT_SCHEME
- * @property {String} ENFORCE_OFFERER  Value <code>"enforceOfferer"</code>
- *   The value of the priority weight scheme to enforce User as the offerer.
- * @property {String} ENFORCE_ANSWERER Value <code>"enforceAnswerer"</code>
- *   The value of the priority weight scheme to enforce User as the answerer.
- * @property {String} AUTO             Value <code>"auto"</code>
- *   The value of the priority weight scheme to let User be offerer or answerer based on Signaling server selection.
- * @constant
- * @type Object
- * @readOnly
- * @memberOf SkylinkConstants
- * @since 0.6.18
- * @deprecated
- * @ignore
- */
-const PRIORITY_WEIGHT_SCHEME = {
-  ENFORCE_OFFERER: 'enforceOfferer',
-  ENFORCE_ANSWERER: 'enforceAnswerer',
-  AUTO: 'auto',
-};
-
-/**
  * The list of the SDK <code>console</code> API log levels.
  * @typedef LOG_LEVEL
  * @property {number} DEBUG Value <code>4</code>
@@ -7914,10 +7886,6 @@ const DC_PROTOCOL_TYPE = {
  * Message that is broadcast by peer to all peers in the room when the peer's custom userData has changed.
  * @property {String} ROOM_LOCK Value <code>roomLockEvent</code>
  * Message that is broadcast by peer to all peers in the room to toggle the Signaling server Room lock status
- * @property {String} MUTE_VIDEO_EVENT Value <code>muteVideoEvent</code>
- * Message that is broadcast by peer to all peers in the room to inform other peers that its sent stream object video tracks muted status have changed.
- * @property {String} MUTE_AUDIO_EVENT Value <code>muteAudioEvent</code>
- * Message that is broadcast by peer to all peers in the room to inform other peers that its sent stream object audio tracks muted status have changed.
  * @property {String} PUBLIC_MESSAGE Value <code>public</code>
  * Message sent by peer to all peers in the room as a public message.
  * @property {String} PRIVATE_MESSAGE Value <code>private</code>
@@ -7986,8 +7954,6 @@ const SIG_MESSAGE_TYPE = {
   STOP_RTMP: 'stopRTMP',
   RTMP: 'rtmpEvent',
   MEDIA_INFO_EVENT: 'mediaInfoEvent',
-  MUTE_VIDEO_EVENT: 'muteVideoEvent',
-  MUTE_AUDIO_EVENT: 'muteAudioEvent',
   MESSAGE: 'message',
   GET_STORED_MESSAGES: 'getStoredMessages',
   STORED_MESSAGES: 'storedMessages',
@@ -7996,9 +7962,6 @@ const SIG_MESSAGE_TYPE = {
 
 const STREAM_STATUS = {
   ENDED: 'ended',
-  REPLACED_STREAM_ENDED: 'replacedStreamEnded',
-  SCREENSHARE_REPLACE_START: 'screenshareStart',
-  USER_MEDIA_REPLACE_START: 'userMediaReplaceStart',
 };
 
 /**
@@ -8013,8 +7976,6 @@ const STREAM_STATUS = {
 const GROUP_MESSAGE_LIST = [
   SIG_MESSAGE_TYPE.STREAM,
   SIG_MESSAGE_TYPE.UPDATE_USER,
-  SIG_MESSAGE_TYPE.MUTE_AUDIO_EVENT,
-  SIG_MESSAGE_TYPE.MUTE_VIDEO_EVENT,
   SIG_MESSAGE_TYPE.PUBLIC_MESSAGE,
 ];
 
@@ -8401,7 +8362,6 @@ var constants = /*#__PURE__*/Object.freeze({
   READY_STATE_CHANGE: READY_STATE_CHANGE$1,
   READY_STATE_CHANGE_ERROR: READY_STATE_CHANGE_ERROR,
   REGIONAL_SERVER: REGIONAL_SERVER,
-  PRIORITY_WEIGHT_SCHEME: PRIORITY_WEIGHT_SCHEME,
   LOG_LEVEL: LOG_LEVEL,
   SOCKET_ERROR: SOCKET_ERROR$1,
   SOCKET_FALLBACK: SOCKET_FALLBACK,
@@ -8508,6 +8468,7 @@ const MESSAGES = {
     UPDATE_USER_DATA: 'Peer updated userData: ',
     OUTDATED_MSG: 'Dropping outdated status ->',
     USER_DATA_NOT_JSON: 'UserData is not JSON',
+    SET_PEER_PRIORITY_WEIGHT: 'Setting peerPriorityWeight with tiebreaker value from inRoom signalling message',
   },
   PEER_CONNECTION: {
     NOT_INITIALISED: 'Peer Connection not initialised',
@@ -8521,7 +8482,6 @@ const MESSAGES = {
     ADD_TRANSCEIVER: 'Adding empty transceiver',
     ERRORS: {
       REMOVE_TRACK: 'Error removing track from peer connection',
-      REPLACE_TRACK: 'Error replacing track in peer connection',
       NOT_FOUND: 'Peer Connection not found',
     },
     REFRESH_CONNECTION: {
@@ -8653,6 +8613,7 @@ const MESSAGES = {
       FAILED_PROCESSING_PEER_MEDIA: 'Failed to process media info',
       FAILED_UPDATING_TRANSCEIVER_MID: 'Failed updating media info transceiverMid after setLocalDescription',
       FAILED_SETTING_PEER_MEDIA_INFO: 'Failed setting peer media at offer / answer',
+      STREAM_ID_NOT_MATCHED: 'There is no mediaInfo associated with the streamId',
     },
     WARN: {
       READ_ONLY_VALUE: 'Attempting to change media info read only value: ',
@@ -8664,7 +8625,7 @@ const MESSAGES = {
   },
   MEDIA_STREAM: {
     STOP_SETTINGS: 'Stopped streams with settings:',
-    STOP_SUCCESS: 'Successfully stopped and removed stream from state',
+    STOP_SUCCESS: 'Successfully stopped stream',
     REMOTE_TRACK_REMOVED: 'Remote MediaStreamTrack removed',
     START_FALLBACK: 'Fall back to retrieve audio only stream',
     NO_OPTIONS: 'No user media options provided',
@@ -8680,7 +8641,6 @@ const MESSAGES = {
       STOP_SCREEN: 'Error stopping screen share stream',
       START_SCREEN: 'Error starting screen share stream',
       STOP_ADDED_STREAM: 'Error stopping added stream',
-      STOP_REPLACED_STREAM: 'Error stopping replaced stream',
       STOP_USER_MEDIA: 'Error stopping user media',
       STOP_AUDIO_TRACK: 'Error stopping audio tracks in stream',
       STOP_VIDEO_TRACK: 'Error stopping video tracks in stream',
@@ -8693,7 +8653,6 @@ const MESSAGES = {
       INVALID_STREAM_ID_TYPE: 'Stream id is not a string',
       NO_STREAM_ID: 'No stream id provided',
       PEER_SCREEN_ACTIVE: 'Peer has existing screen share',
-      REPLACE_SCREEN: 'Error replacing user media stream with screenshare stream',
       FALLBACK: 'Error retrieving fallback audio stream',
       INVALID_GUM_OPTIONS: 'Invalid user media options',
       GET_USER_MEDIA: 'Error retrieving stream from \'getUserMedia\' method',
@@ -9143,7 +9102,7 @@ SkylinkLogger.prototype.log = {
 };
 
 /**
- * @param {GetUserMediaOptions} options
+ * @param {getUserMediaOptions} options
  * @param {SkylinkState} roomState
  * @return {SkylinkState}
  * @memberOf MediaStreamHelpers
@@ -9453,124 +9412,6 @@ if (module.exports) {
 }
 });
 
-// requires the mid to be set after setOffer both local or remote
-const retrieveTransceiverMid = (room, track) => {
-  const roomState = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = roomState;
-  const RTCPeerConnections = Object.values(peerConnections);
-  let transceiverMid = null;
-
-  for (let p = 0; p < RTCPeerConnections.length; p += 1) {
-    const transceivers = RTCPeerConnections[p].getTransceivers();
-    for (let t = 0; t < transceivers.length; t += 1) {
-      if (transceivers[t].sender.track && transceivers[t].sender.track.id === track.id) {
-        transceiverMid = transceivers[t].mid;
-        break;
-      }
-    }
-  }
-  return transceiverMid;
-};
-
-const retrieveMediaState = (track) => {
-  if (track.readyState === TRACK_READY_STATE.ENDED) {
-    return MEDIA_STATE.UNAVAILABLE;
-  } if (track.muted) {
-    return MEDIA_STATE.MUTED;
-  }
-  return MEDIA_STATE.ACTIVE;
-};
-
-const retrieveMediaId = (trackKind, streamId) => {
-  const prefix = trackKind === TRACK_KIND.AUDIO ? 'AUDIO' : 'VIDEO';
-  return `${prefix}_${streamId}`;
-};
-
-const buildPeerMediaInfo = (room, mid, track, streamId, mediaType) => ({
-  publisherId: mid,
-  mediaId: helpers$6.retrieveMediaId(track.kind, streamId),
-  mediaType,
-  mediaState: helpers$6.retrieveMediaState(track),
-  transceiverMid: helpers$6.retrieveTransceiverMid(room, track),
-  streamId,
-  trackId: track.id,
-  mediaMetaData: '',
-  simulcast: '',
-});
-
-const isMatchedTrack = (streamTrack, track) => streamTrack.id === track.id;
-
-const retrieveStreamIdOfTrack = (room, track) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { streams } = state;
-  const streamObjs = Object.values(streams.userMedia);
-  let streamId = null;
-
-  for (let i = 0; i < streamObjs.length; i += 1) {
-    const tracks = streamObjs[i].stream.getTracks();
-
-    for (let j = 0; j < tracks.length; j += 1) {
-      if (isMatchedTrack(tracks[j], track)) {
-        streamId = streamObjs[i].id;
-        break;
-      }
-    }
-  }
-
-  return streamId;
-};
-
-const retrieveTracks = (room) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { streams } = state;
-  const tracks = [];
-
-  const fStreams = Object.values(streams.userMedia).map(streamObj => streamObj.stream);
-  fStreams.forEach((stream) => {
-    stream.getTracks().forEach((track) => {
-      tracks.push(track);
-    });
-  });
-
-  return tracks;
-};
-
-const doUpdate = (room, peerId, dispatchEvent, mediaId, key = false, value = false, mediaInfo = false) => {
-  const updatedState = Skylink.getSkylinkState(room.id);
-  // Check for key + value || mediaInfo but not both
-  if (!mediaInfo && key && value) {
-    updatedState.peerMedias[peerId][mediaId][key] = value;
-    logger.log.INFO([peerId, TAGS.PEER_MEDIA, null, `${MESSAGES.MEDIA_INFO.UPDATE_SUCCESS} -- ${mediaId} - ${key}: ${value}`]);
-  } else if (mediaInfo && !key && !value) {
-    updatedState.peerMedias[peerId] = updatedState.peerMedias[peerId] || {};
-    updatedState.peerMedias[peerId][mediaId] = mediaInfo;
-  }
-
-  Skylink.setSkylinkState(updatedState, room.id);
-};
-
-const dispatchMediaInfoMsg = (room, peerId, dispatchEvent, mediaId) => {
-  const updatedState = Skylink.getSkylinkState(room.id);
-  if (updatedState.user.sid === peerId && dispatchEvent) {
-    helpers$6.sendMediaInfoMsg(room, updatedState.peerMedias[peerId][mediaId]);
-  }
-};
-
-// dispatch event when:
-// 1) not from offer and answer
-// 2) self mediaInfo is updated
-// 3) self a new stream (with new mediaInfo obj) will replace an existing stream - e.g. screen share, send stream
-
-const updatePeerMediaInfo = (room, peerId, dispatchEvent, mediaId, key = false, value = false, mediaInfo = false) => {
-  try {
-    doUpdate(room, peerId, dispatchEvent, mediaId, key, value, mediaInfo);
-    dispatchMediaInfoMsg(room, peerId, dispatchEvent, mediaId);
-  } catch (err) {
-    const msg = mediaInfo ? JSON.stringify(mediaInfo) : `${mediaId} - ${key}: ${value}`;
-    logger.log.ERROR([peerId, TAGS.PEER_MEDIA, null, `${MESSAGES.MEDIA_INFO.ERRORS.FAILED_UPDATING} -- ${msg}`], err);
-  }
-};
-
 const SOCKET_DEFAULTS = {
   RECONNECTION_ATTEMPTS: {
     WEBSOCKET: 5,
@@ -9640,6 +9481,325 @@ const retrieveConfig = (name, options) => {
 
   return CONFIGS[name];
 };
+
+/* eslint-disable no-nested-ternary */
+
+const parseGumSettings = (settings, type) => {
+  const gumSettings = {
+    audio: false,
+    video: false,
+  };
+
+  if ((settings.audio && !type) || (settings.audio && type === TRACK_KIND.AUDIO)) {
+    if (settings.audio && isAObj(settings.audio)) {
+      gumSettings.audio = {};
+      gumSettings.audio.echoCancellation = true;
+
+      if (isABoolean(settings.audio.echoCancellation)) {
+        gumSettings.audio.echoCancellation = settings.audio.echoCancellation;
+      }
+
+      if (isAgent(BROWSER_AGENT.FIREFOX)) ; else if (settings.audio.deviceId && isAString(settings.audio.deviceId)) {
+        gumSettings.audio.deviceId = settings.audio.exactConstraints
+          ? { exact: settings.audio.deviceId } : { ideal: settings.audio.deviceId };
+      }
+    }
+  }
+
+  if ((settings.video && !type) || (settings.video && type === TRACK_KIND.VIDEO)) {
+    if (settings.video && isAObj(settings.video)) {
+      gumSettings.video = {};
+
+      if (settings.video.deviceId && isAString(settings.video.deviceId)) {
+        gumSettings.video.deviceId = settings.video.exactConstraints
+          ? { exact: settings.video.deviceId } : { ideal: settings.video.deviceId };
+      }
+
+      gumSettings.video.width = isAObj(settings.video.resolution.width)
+        ? settings.video.resolution.width : (settings.video.exactConstraints
+          ? { exact: settings.video.resolution.width } : { max: settings.video.resolution.width });
+
+      gumSettings.video.height = isAObj(settings.video.resolution.height)
+        ? settings.video.resolution.height : (settings.video.exactConstraints
+          ? { exact: settings.video.resolution.height } : { max: settings.video.resolution.height });
+
+      if ((settings.video.frameRate && isAObj(settings.video.frameRate))
+        || isANumber(settings.video.frameRate)) {
+        gumSettings.video.frameRate = isAObj(settings.video.frameRate)
+          ? settings.video.frameRate : (settings.video.exactConstraints
+            ? { exact: settings.video.frameRate } : { max: settings.video.frameRate });
+      }
+    } else if (settings.video) {
+      gumSettings.video = {
+        width: settings.video.exactConstraints ? { exact: settings.video.resolution.width }
+          : { max: settings.video.resolution.width },
+        height: settings.video.exactConstraints ? { exact: settings.video.resolution.height }
+          : { max: settings.video.resolution.height },
+      };
+    }
+  }
+
+  return gumSettings;
+};
+
+const parseSettings = (options, type = '') => {
+  const settings = { audio: false, video: false };
+
+  if ((options.audio && !type) || (options.audio && type === TRACK_KIND.AUDIO)) {
+    settings.audio = clone_1(DEFAULTS.MEDIA_OPTIONS.AUDIO);
+
+    if (isAObj(options.audio)) {
+      if (isABoolean(options.audio.stereo)) {
+        settings.audio.stereo = options.audio.stereo;
+      }
+
+      if (isABoolean(options.audio.echoCancellation)) {
+        settings.audio.echoCancellation = options.audio.echoCancellation;
+      }
+
+      if (isAgent(BROWSER_AGENT.FIREFOX)) ; else if (options.audio.deviceId && isAString(options.audio.deviceId)) {
+        settings.audio.deviceId = options.audio.deviceId;
+      }
+
+      if ((options.useExactConstraints && isABoolean(options.useExactConstraints))) {
+        settings.audio.exactConstraints = options.useExactConstraints;
+      }
+    }
+  }
+
+  if ((options.video && !type) || (options.video && type === TRACK_KIND.VIDEO)) {
+    settings.video = clone_1(DEFAULTS.MEDIA_OPTIONS.VIDEO);
+
+    if (isAObj(options.video)) {
+      if (options.video.deviceId && isAString(options.video.deviceId)) {
+        settings.video.deviceId = options.video.deviceId;
+      }
+
+      if (options.video.resolution && isAObj(options.video.resolution)) {
+        if ((options.video.resolution.width && isAString(options.video.resolution.width))
+          || isANumber(options.video.resolution.width)) {
+          settings.video.resolution.width = options.video.resolution.width;
+        }
+        if ((options.video.resolution.height && isAString(options.video.resolution.height))
+          || isANumber(options.video.resolution.height)) {
+          settings.video.resolution.height = options.video.resolution.height;
+        }
+      }
+
+      if ((options.video.frameRate && isAString(options.video.frameRate))
+        || isANumber(options.video.frameRate)) {
+        settings.video.frameRate = options.video.frameRate;
+      }
+
+      if ((options.useExactConstraints && isABoolean(options.useExactConstraints))) {
+        settings.video.exactConstraints = options.useExactConstraints;
+      }
+    }
+  }
+
+  return settings;
+};
+
+/**
+ * Parse the options provided to make sure they are compatible
+ * @param {getUserMediaOptions} options
+ * @param {String} type - The type of stream i.e. audio or video if options contain both audio and video options
+ * @memberOf MediaStreamHelpers
+ * @private
+ * @return {{settings: {audio: boolean, video: boolean}, mutedSettings: {shouldAudioMuted: Event | boolean | Boolean, shouldVideoMuted: Event | boolean | Boolean}, getUserMediaSettings: {audio: boolean, video: boolean}}}
+ */
+const parseStreamSettings = (options, type = '') => {
+  const settings = parseSettings(options, type);
+  const mutedSettings = { shouldAudioMuted: options.audio && isABoolean(options.audio.mute) ? options.audio.mute : false, shouldVideoMuted: options.video && isABoolean(options.video.mute) ? options.video.mute : false };
+  const getUserMediaSettings = parseGumSettings(settings, type);
+
+  return {
+    settings,
+    mutedSettings,
+    getUserMediaSettings,
+  };
+};
+
+const isUser = (peerId, roomState) => {
+  const { user } = roomState;
+  return peerId === user.sid;
+};
+
+/**
+ * @description Function that returns the User / Peer current session information.
+ * @private
+ * @param {String} peerId
+ * @param {SkylinkRoom} room
+ * @return {peerInfo}
+ * @memberOf PeerDataHelpers
+ */
+const getPeerInfo = (peerId, room) => {
+  let peerInfo = null;
+  if (!peerId) {
+    return null;
+  }
+  const state = Skylink.getSkylinkState(room.id);
+
+  if (!state) {
+    logger.log.ERROR(`${MESSAGES.ROOM_STATE.NOT_FOUND} ${room.id}`);
+    return peerInfo;
+  }
+
+  if (isUser(peerId, state)) {
+    return PeerData.getCurrentSessionInfo(room);
+  }
+
+  peerInfo = clone_1(state.peerInformations[peerId]);
+
+  if (!peerInfo) {
+    logger.log.ERROR(`${MESSAGES.PEER_INFORMATIONS.NO_PEER_INFO} ${peerId}`);
+    return peerInfo;
+  }
+
+  peerInfo.room = room.roomName;
+  peerInfo.settings.data = !!(state.dataChannels[peerId] && state.dataChannels[peerId].main && state.dataChannels[peerId].main.channel && state.dataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
+
+  return peerInfo;
+};
+
+/**
+ * @namespace initOptions
+ * @private
+ * @module skylink/defaultOptions
+ */
+const defaultOptions = {
+  /*
+   * @param {String} options.appKey The App Key.
+   * <small>By default, <code>init()</code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+   * authentication. For credentials based authentication, see the <code>options.credentials</code> configuration
+   * below. You can know more about the <a href="http://support.temasys.io/support/solutions/articles/
+   * 12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here</a>
+   * for more details on the various authentication methods.</small>
+   * <small>If you are using the Persistent Room feature for scheduled meetings, you will require to
+   * use the credential based authentication. See the <a href="http://support.temasys.io/support
+   * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
+   * </a> for more information.</small>
+   */
+  defaultRoom: new Date().valueOf(),
+  appKey: null,
+  roomServer: '//api.temasys.io',
+  enableDataChannel: true,
+  enableSTUNServer: true,
+  enableTURNServer: true,
+  socketServerPath: null,
+  enableStatsGathering: true,
+  audioFallback: true,
+  socketTimeout: 7000,
+  forceTURNSSL: false,
+  forceTURN: false,
+  forceSSL: true,
+  usePublicSTUN: false,
+  mcuUseRenegoRestart: true,
+  useEdgeWebRTC: false,
+  enableSimultaneousTransfers: true,
+  TURNServerTransport: TURN_TRANSPORT.ANY,
+  credentials: null,
+  iceServer: null,
+  socketServer: null,
+  audioCodec: AUDIO_CODEC.AUTO,
+  videoCodec: VIDEO_CODEC.AUTO,
+  codecParams: { // TODO: review if codec setting is needed
+    audio: {
+      opus: {
+        stereo: null,
+        'sprop-stereo': null,
+        usedtx: null,
+        useinbandfec: null,
+        maxplaybackrate: null,
+        minptime: null,
+      },
+    },
+    video: {
+      h264: {
+        profileLevelId: null,
+        levelAsymmetryAllowed: null,
+        packetizationMode: null,
+      },
+      vp8: {
+        maxFs: null,
+        maxFr: null,
+      },
+      vp9: {
+        maxFs: null,
+        maxFr: null,
+      },
+    },
+  },
+  beSilentOnStatsLogs: false,
+  beSilentOnParseLogs: false,
+};
+
+/**
+ * @private
+ * @description Checks for the dependencies required for SkylinkJS
+ * @memberOf module:Compatibility
+ * @return {{fulfilled: boolean, message: string}}
+ */
+const validateDependencies = () => {
+  const dependencies = {
+    fulfilled: true,
+    message: '',
+  };
+  const { AdapterJS, io, fetch } = window;
+  const header = 'Validating Dependencies';
+  if (typeof (AdapterJS || window.AdapterJS || window.AdapterJS || {}).webRTCReady !== 'function') {
+    dependencies.message = MESSAGES.INIT.ERRORS.NO_ADAPTER;
+    dependencies.fulfilled = false;
+    dependencies.readyStateChangeErrorCode = READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED;
+  } else if (!(io || window.io)) {
+    dependencies.message = MESSAGES.INIT.ERRORS.NO_SOCKET_IO;
+    dependencies.fulfilled = false;
+    dependencies.readyStateChangeErrorCode = READY_STATE_CHANGE_ERROR.NO_SOCKET_IO;
+  } else if (!fetch || !window.fetch) {
+    dependencies.message = MESSAGES.INIT.ERRORS.NO_FETCH_SUPPORT;
+    dependencies.fulfilled = false;
+    dependencies.readyStateChangeErrorCode = READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT;
+  }
+  if (!((isAgent(BROWSER_AGENT.FIREFOX) && AdapterJS.webrtcDetectedType === 'moz') || isAgent(BROWSER_AGENT.SAFARI) || (isAgent(BROWSER_AGENT.CHROME) && AdapterJS.webrtcDetectedType === 'webkit') || isAgent(BROWSER_AGENT.REACT_NATIVE))) {
+    logger.log.WARN([header, null, null, MESSAGES.INIT.INCOMPATIBLE_BROWSER]);
+  }
+  if (!dependencies.fulfilled) {
+    logger.log.ERROR([header, null, null, dependencies.message]);
+  }
+  return dependencies;
+};
+
+/**
+ * @description Gets TCP and UDP ports based on the browser
+ * @param {Object} params
+ * @param {boolean} params.forceTURNSSL
+ * @param {boolean} params.enableTURNServer
+ * @param {enum} params.CONSTANTS
+ * @memberOf module:Compatibility
+ * @return {{tcp: Array, udp: Array, both: Array, iceServerProtocol: string}}
+ */
+const getConnectionPortsAndProtocolByBrowser = (params) => {
+  const { forceTURNSSL, serverConfig } = params;
+  const connectionConfig = {
+    tcp: serverConfig.iceServerPorts.tcp,
+    udp: serverConfig.iceServerPorts.udp,
+    both: serverConfig.iceServerPorts.both,
+    iceServerProtocol: serverConfig.iceServerProtocol,
+    iceServerPorts: serverConfig.iceServerPorts,
+  };
+
+  if (forceTURNSSL) {
+    connectionConfig.iceServerPorts.udp = [];
+    connectionConfig.iceServerProtocol = 'turns';
+  } else if (isAgent(BROWSER_AGENT.FIREFOX)) { // default configs are specific to Chrome
+    connectionConfig.udp = [3478];
+    connectionConfig.both = [];
+  }
+
+  return connectionConfig;
+};
+
+/* eslint-disable import/prefer-default-export */
 
 /**
  * @classdesc Class representing a Skylink Room.
@@ -9841,300 +10001,6 @@ class SkylinkApiResponse {
     delete apiResponseInstance[roomKey];
   }
 }
-
-/* eslint-disable prefer-destructuring */
-
-const isFirstConnectionAttempt = config => !config.signalingServerPort;
-
-const isLastPort = (ports, config) => ports.indexOf(config.signalingServerPort) === ports.length - 1;
-
-const getSignalingServerUrl = (params) => {
-  const {
-    signalingServerProtocol,
-    signalingServer,
-    signalingServerPort,
-    socketServer,
-  } = params;
-
-  let url = '';
-
-  if (isAString(signalingServer)) {
-    url = `${signalingServerProtocol}//${signalingServer}`;
-  } else if (signalingServer && isAObj(signalingServer) && signalingServer.protocol) {
-    url = `${signalingServer.protocol}//${socketServer.url}:${signalingServerPort}?rand=${Date.now()}`;
-  } else {
-    url = `${signalingServerProtocol}//${signalingServer}:${signalingServerPort}?rand=${Date.now()}`;
-  }
-
-  return url;
-};
-
-const createSocket = (params) => {
-  const skylinkState = Skylink.getSkylinkState(params.roomKey);
-  const initOptions = Skylink.getInitOptions();
-  const { config } = params;
-  const { socketServer, socketTimeout, socketServerPath } = initOptions;
-  const { socketPorts } = new SkylinkApiResponse(null, params.roomKey);
-  const socketConfig = retrieveConfig('SOCKET', { socketTimeout, socketServerPath });
-
-  let ports = [];
-
-  if (socketServer && isAObj(socketServer) && Array.isArray(socketServer.ports) && socketServer.ports.length) {
-    ({ ports } = socketServer);
-  } else {
-    ports = socketPorts[config.signalingServerProtocol];
-  }
-
-  if (isFirstConnectionAttempt(config)) {
-    config.signalingServerPort = ports[0];
-    config.fallbackType = SOCKET_FALLBACK.NON_FALLBACK;
-  } else if (isLastPort(ports, config) || isAString(initOptions.socketServer)) {
-    // re-refresh to long-polling port
-    if (config.socketType === SOCKET_TYPE.WEBSOCKET) {
-      config.socketType = SOCKET_TYPE.POLLING;
-      config.signalingServerPort = ports[0];
-    } else {
-      config.socketSession.finalAttempts += 1;
-      config.signalingServerPort = ports[0];
-    }
-  // move to the next port
-  } else {
-    config.signalingServerPort = ports[ports.indexOf(config.signalingServerPort) + 1];
-  }
-
-  if (config.socketType === SOCKET_TYPE.POLLING) {
-    socketConfig.reconnectionDelayMax = DEFAULTS.SOCKET.RECONNECTION_DELAY_MAX;
-    socketConfig.reconnectionAttempts = DEFAULTS.SOCKET.RECONNECTION_ATTEMPTS.POLLING;
-    socketConfig.transports = [SOCKET_TYPE.XHR_POLLING, SOCKET_TYPE.JSONP_POLLING, SOCKET_TYPE.POLLING.toLowerCase()];
-  }
-
-  const url = getSignalingServerUrl({
-    signalingServerProtocol: config.signalingServerProtocol,
-    signalingServer: skylinkState.socketServer,
-    signalingServerPort: config.signalingServerPort,
-    socketServer,
-  });
-
-  config.socketServer = socketServer;
-  config.socketServerPath = socketServerPath;
-  skylinkState.socketSession = config;
-  Skylink.setSkylinkState(skylinkState, params.roomKey);
-
-  return window.io(url, socketConfig);
-};
-
-const processSignalingMessage = (messageHandler, message) => {
-  const { type } = message;
-  logger.log.INFO(['SIG SERVER', null, type, 'received']);
-  switch (type) {
-    case SIG_MESSAGE_TYPE.IN_ROOM: messageHandler.inRoomHandler(message); break;
-    case SIG_MESSAGE_TYPE.ENTER: messageHandler.enterRoomHandler(message); break;
-    case SIG_MESSAGE_TYPE.OFFER: messageHandler.offerHandler(message); break;
-    case SIG_MESSAGE_TYPE.WELCOME: messageHandler.welcomeHandler(message); break;
-    case SIG_MESSAGE_TYPE.ANSWER: messageHandler.answerHandler(message); break;
-    case SIG_MESSAGE_TYPE.ANSWER_ACK: messageHandler.answerAckHandler(message); break;
-    case SIG_MESSAGE_TYPE.CANDIDATE: messageHandler.candidateHandler(message); break;
-    case SIG_MESSAGE_TYPE.PEER_LIST: messageHandler.getPeerListHandler(message); break;
-    case SIG_MESSAGE_TYPE.INTRODUCE_ERROR: messageHandler.introduceError(message); break;
-    case SIG_MESSAGE_TYPE.BYE: messageHandler.byeHandler(message); break;
-    case SIG_MESSAGE_TYPE.STREAM: messageHandler.streamHandler(message); break;
-    case SIG_MESSAGE_TYPE.RECORDING: messageHandler.recordingHandler(message); break;
-    case SIG_MESSAGE_TYPE.REDIRECT: messageHandler.redirectHandler(message); break;
-    case SIG_MESSAGE_TYPE.RTMP: messageHandler.rtmpHandler(message); break;
-    case SIG_MESSAGE_TYPE.UPDATE_USER: messageHandler.setUserDataHandler(message); break;
-    case SIG_MESSAGE_TYPE.MEDIA_INFO_EVENT: messageHandler.mediaInfoEventHandler(message); break;
-    case SIG_MESSAGE_TYPE.MESSAGE: messageHandler.userMessageHandler(message, null); break;
-    case SIG_MESSAGE_TYPE.STORED_MESSAGES: messageHandler.storedMessagesHandler(message); break;
-    // Backward compatibility for 0.9.x
-    case SIG_MESSAGE_TYPE.MUTE_AUDIO_EVENT: messageHandler.muteAudioEventHandler(message); break;
-    case SIG_MESSAGE_TYPE.MUTE_VIDEO_EVENT: messageHandler.muteVideoEventHandler(message); break;
-    // Backward compatibility for public and private message protocol
-    case SIG_MESSAGE_TYPE.PUBLIC_MESSAGE: messageHandler.userMessageHandler(message, true); break;
-    case SIG_MESSAGE_TYPE.PRIVATE_MESSAGE: messageHandler.userMessageHandler(message, false); break;
-    default: break;
-  }
-};
-
-const isUser = (peerId, roomState) => {
-  const { user } = roomState;
-  return peerId === user.sid;
-};
-
-/**
- * @description Function that returns the User / Peer current session information.
- * @private
- * @param {String} peerId
- * @param {SkylinkRoom} room
- * @return {peerInfo}
- * @memberOf PeerDataHelpers
- */
-const getPeerInfo = (peerId, room) => {
-  let peerInfo = null;
-  if (!peerId) {
-    return null;
-  }
-  const state = Skylink.getSkylinkState(room.id);
-
-  if (!state) {
-    logger.log.ERROR(`${MESSAGES.ROOM_STATE.NOT_FOUND} ${room.id}`);
-    return peerInfo;
-  }
-
-  if (isUser(peerId, state)) {
-    return PeerData.getCurrentSessionInfo(room);
-  }
-
-  peerInfo = clone_1(state.peerInformations[peerId]);
-
-  if (!peerInfo) {
-    logger.log.ERROR(`${MESSAGES.PEER_INFORMATIONS.NO_PEER_INFO} ${peerId}`);
-    return peerInfo;
-  }
-
-  peerInfo.room = room.roomName;
-  peerInfo.settings.data = !!(state.dataChannels[peerId] && state.dataChannels[peerId].main && state.dataChannels[peerId].main.channel && state.dataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
-
-  return peerInfo;
-};
-
-/**
- * @namespace initOptions
- * @private
- * @module skylink/defaultOptions
- */
-const defaultOptions = {
-  /*
-   * @param {String} options.appKey The App Key.
-   * <small>By default, <code>init()</code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
-   * authentication. For credentials based authentication, see the <code>options.credentials</code> configuration
-   * below. You can know more about the <a href="http://support.temasys.io/support/solutions/articles/
-   * 12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here</a>
-   * for more details on the various authentication methods.</small>
-   * <small>If you are using the Persistent Room feature for scheduled meetings, you will require to
-   * use the credential based authentication. See the <a href="http://support.temasys.io/support
-   * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
-   * </a> for more information.</small>
-   */
-  defaultRoom: new Date().valueOf(),
-  appKey: null,
-  roomServer: '//api.temasys.io',
-  enableDataChannel: true,
-  enableSTUNServer: true,
-  enableTURNServer: true,
-  socketServerPath: null,
-  enableStatsGathering: true,
-  audioFallback: true,
-  socketTimeout: 7000,
-  forceTURNSSL: false,
-  forceTURN: false,
-  forceSSL: true,
-  usePublicSTUN: false,
-  mcuUseRenegoRestart: true,
-  useEdgeWebRTC: false,
-  enableSimultaneousTransfers: true,
-  TURNServerTransport: TURN_TRANSPORT.ANY,
-  credentials: null,
-  iceServer: null,
-  socketServer: null,
-  audioCodec: AUDIO_CODEC.AUTO,
-  videoCodec: VIDEO_CODEC.AUTO,
-  codecParams: { // TODO: review if codec setting is needed
-    audio: {
-      opus: {
-        stereo: null,
-        'sprop-stereo': null,
-        usedtx: null,
-        useinbandfec: null,
-        maxplaybackrate: null,
-        minptime: null,
-      },
-    },
-    video: {
-      h264: {
-        profileLevelId: null,
-        levelAsymmetryAllowed: null,
-        packetizationMode: null,
-      },
-      vp8: {
-        maxFs: null,
-        maxFr: null,
-      },
-      vp9: {
-        maxFs: null,
-        maxFr: null,
-      },
-    },
-  },
-  beSilentOnStatsLogs: false,
-  beSilentOnParseLogs: false,
-};
-
-/**
- * @private
- * @description Checks for the dependencies required for SkylinkJS
- * @memberOf module:Compatibility
- * @return {{fulfilled: boolean, message: string}}
- */
-const validateDependencies = () => {
-  const dependencies = {
-    fulfilled: true,
-    message: '',
-  };
-  const { AdapterJS, io, fetch } = window;
-  const header = 'Validating Dependencies';
-  if (typeof (AdapterJS || window.AdapterJS || window.AdapterJS || {}).webRTCReady !== 'function') {
-    dependencies.message = MESSAGES.INIT.ERRORS.NO_ADAPTER;
-    dependencies.fulfilled = false;
-    dependencies.readyStateChangeErrorCode = READY_STATE_CHANGE_ERROR.ADAPTER_NO_LOADED;
-  } else if (!(io || window.io)) {
-    dependencies.message = MESSAGES.INIT.ERRORS.NO_SOCKET_IO;
-    dependencies.fulfilled = false;
-    dependencies.readyStateChangeErrorCode = READY_STATE_CHANGE_ERROR.NO_SOCKET_IO;
-  } else if (!fetch || !window.fetch) {
-    dependencies.message = MESSAGES.INIT.ERRORS.NO_FETCH_SUPPORT;
-    dependencies.fulfilled = false;
-    dependencies.readyStateChangeErrorCode = READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT;
-  }
-  if (!((isAgent(BROWSER_AGENT.FIREFOX) && AdapterJS.webrtcDetectedType === 'moz') || isAgent(BROWSER_AGENT.SAFARI) || (isAgent(BROWSER_AGENT.CHROME) && AdapterJS.webrtcDetectedType === 'webkit') || isAgent(BROWSER_AGENT.REACT_NATIVE))) {
-    logger.log.WARN([header, null, null, MESSAGES.INIT.INCOMPATIBLE_BROWSER]);
-  }
-  if (!dependencies.fulfilled) {
-    logger.log.ERROR([header, null, null, dependencies.message]);
-  }
-  return dependencies;
-};
-
-/**
- * @description Gets TCP and UDP ports based on the browser
- * @param {Object} params
- * @param {boolean} params.forceTURNSSL
- * @param {boolean} params.enableTURNServer
- * @param {enum} params.CONSTANTS
- * @memberOf module:Compatibility
- * @return {{tcp: Array, udp: Array, both: Array, iceServerProtocol: string}}
- */
-const getConnectionPortsAndProtocolByBrowser = (params) => {
-  const { forceTURNSSL, serverConfig } = params;
-  const connectionConfig = {
-    tcp: serverConfig.iceServerPorts.tcp,
-    udp: serverConfig.iceServerPorts.udp,
-    both: serverConfig.iceServerPorts.both,
-    iceServerProtocol: serverConfig.iceServerProtocol,
-    iceServerPorts: serverConfig.iceServerPorts,
-  };
-
-  if (forceTURNSSL) {
-    connectionConfig.iceServerPorts.udp = [];
-    connectionConfig.iceServerProtocol = 'turns';
-  } else if (isAgent(BROWSER_AGENT.FIREFOX)) { // default configs are specific to Chrome
-    connectionConfig.udp = [3478];
-    connectionConfig.both = [];
-  }
-
-  return connectionConfig;
-};
-
-/* eslint-disable import/prefer-default-export */
 
 const config = {
   apiBase: 'https://api.temasys.io',
@@ -10492,7 +10358,8 @@ class SkylinkAPIServer {
   // eslint-disable-next-line class-methods-use-this
   init(options = defaultOptions) {
     if (options) {
-      if (options.socketServer) { // set socketServerPath to override socketServerPath value returned from api that only works with default sig
+      if (options.socketServer && !options.socketServerPath) { // set socketServerPath to override socketServerPath value returned from api that only works with
+        // default sig
         // server url
         // eslint-disable-next-line no-param-reassign
         options.socketServerPath = '';
@@ -10615,1924 +10482,115 @@ class SkylinkAPIServer {
   }
 }
 
-// eslint-disable-next-line consistent-return
-const prepStopStreams = (roomId, streamId, fromLeaveRoom = false, isScreensharing = false) => new Promise((resolve, reject) => {
-  const state = Skylink.getSkylinkState(roomId);
-  const { streams } = state;
+/* eslint-disable prefer-destructuring */
 
-  if (!state || !streams) {
-    reject(new Error(`${MESSAGES.ROOM_STATE.NOT_FOUND} - ${roomId}`));
-  }
+const isFirstConnectionAttempt = config => !config.signalingServerPort;
 
-  if (!streams || (!isScreensharing && !streams.userMedia) || (isScreensharing && !streams.screenshare) || (isScreensharing && streams.screenshare && (streams.screenshare.id !== streamId))) {
-    reject(new Error(`${MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM} - ${streamId}`));
-  }
+const isLastPort = (ports, config) => ports.indexOf(config.signalingServerPort) === ports.length - 1;
 
-  if (isScreensharing) {
-    stopStreamHelpers.prepStopScreenStream(state.room, streamId, fromLeaveRoom)
-      .then(() => resolve())
-      .catch(rej => reject(rej));
-  } else {
-    stopStreamHelpers.prepStopUserMediaStreams(state, streamId, fromLeaveRoom)
-      .then(() => resolve())
-      .catch(rej => reject(rej));
-  }
-});
-
-const hasStreamBeenReplaced = (state, stoppedStream) => {
-  const { streams } = state;
-
-  if (!streams.userMedia) {
-    return false;
-  }
-
-  const streamObjs = Object.values(streams.userMedia);
-
-  return streamObjs.some(streamObj => streamObj.isReplaced && (streamObj.id === stoppedStream.id));
-};
-
-const filterUserMediaStreams = (state) => {
-  const { streams } = state;
-  const filteredStreams = {
-    replacedStreams: [],
-    addedStreams: [],
-  };
-  const streamIds = Object.keys(streams.userMedia);
-  streamIds.forEach((userMediaStreamId) => {
-    if (hasStreamBeenReplaced(state, streams.userMedia[userMediaStreamId].stream)) {
-      filteredStreams.replacedStreams.push(streams.userMedia[userMediaStreamId].stream);
-    } else {
-      filteredStreams.addedStreams.push(streams.userMedia[userMediaStreamId].stream);
-    }
-  });
-
-  return filteredStreams;
-};
-
-// eslint-disable-next-line consistent-return
-const prepStopUserMediaStreams = (state, streamId, fromLeaveRoom) => new Promise((resolve, reject) => {
-  const { user } = state;
-  const filteredStreams = filterUserMediaStreams(state);
-  const isScreensharing = false;
-
-  try {
-    if (!streamId) {
-      stopStreamHelpers.stopAddedStreams(state, filteredStreams.addedStreams, isScreensharing, fromLeaveRoom);
-
-      // TODO:
-      // added streams must be stopped first and renegotiation started before replaced streams are stopped
-      // add event listener to listen for handshake offer to trigger stopReplacedStreams
-
-      stopStreamHelpers.stopReplacedStreams(state, filteredStreams.replacedStreams, isScreensharing, fromLeaveRoom);
-    } else {
-      const { stream } = state.streams.userMedia[streamId];
-      if (hasStreamBeenReplaced(state, stream)) {
-        // TODO
-        stopStreamHelpers.stopReplacedStream(state, stream, fromLeaveRoom);
-      } else {
-        stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
-      }
-    }
-
-    return stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
-  } catch (error) {
-    logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA], error);
-    reject(MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA);
-  }
-});
-
-const stopAddedStream = (state, stream, isScreensharing = false, fromLeaveRoom = false) => {
-  const { room, user } = state;
-
-  try {
-    stopStreamHelpers.tryStopStream(stream, user.sid);
-
-    if (!fromLeaveRoom) {
-      stopStreamHelpers.removeTracks(room, stream);
-      stopStreamHelpers.updateMediaInfoMediaState(room, stream);
-      stopStreamHelpers.deleteStreamFromState(room, stream, isScreensharing);
-      stopStreamHelpers.listenForEventAndDeleteMediaInfo(room, stream);
-      stopStreamHelpers.dispatchOnLocalStreamEnded(room, stream, isScreensharing);
-
-      if (isScreensharing) {
-        new ScreenSharing(state).deleteScreensharingInstance(room);
-      }
-    }
-  } catch (err) {
-    logger.log.ERROR([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_ADDED_STREAM], err);
-  }
-};
-
-const stopMediaTracks = (tracks, peerId) => {
-  if (!tracks || !tracks[0]) {
-    return false;
-  }
-
-  tracks.forEach((track) => {
-    try {
-      track.stop();
-    } catch (error) {
-      logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_MEDIA_TRACK} - track id: ${track.id}`], error);
-    }
-  });
-
-  return true;
-};
-
-const tryStopStream = (stream, peerId) => {
-  if (!stream) return;
-
-  try {
-    stopMediaTracks(stream.getAudioTracks());
-  } catch (error) {
-    logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_AUDIO_TRACK} - stream id: ${stream.id}`], error);
-  }
-
-  try {
-    stopMediaTracks(stream.getVideoTracks());
-  } catch (error) {
-    logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_VIDEO_TRACK} - stream id: ${stream.id}`], error);
-  }
-};
-
-const removeSenderFromList = (state, peerId, sender) => {
-  const { room } = state;
-  const updatedState = state;
-  let indexToRemove = -1;
-
-  if (!updatedState.currentRTCRTPSenders[peerId]) {
-    return;
-  }
-
-  const listOfSenders = updatedState.currentRTCRTPSenders[peerId];
-
-  for (let i = 0; i < listOfSenders.length; i += 1) {
-    if (sender === listOfSenders[i]) {
-      indexToRemove = i;
-      break;
-    }
-  }
-
-  if (indexToRemove !== -1) {
-    listOfSenders.splice(indexToRemove, 1);
-    updatedState.currentRTCRTPSenders[peerId] = listOfSenders;
-    Skylink.setSkylinkState(updatedState, room.id);
-  } else {
-    logger.log.WARN([peerId, null, null, 'No matching sender was found for the peer.'], sender);
-  }
-};
-
-const removeTrack = (state, peerConnections, track) => {
-  const trackId = track.id;
-  const peerIds = Object.keys(peerConnections);
-
-  for (let i = 0; i < peerIds.length; i += 1) {
-    try {
-      const targetMid = peerIds[i];
-      const peerConnection = peerConnections[targetMid];
-
-      if (peerConnection.connectionState === PEER_CONNECTION_STATE$1.CLOSED) {
-        break;
-      }
-
-      const senders = peerConnection.getSenders();
-      let sender = null;
-      for (let y = 0; y < senders.length; y += 1) {
-        if (senders[y].track && senders[y].track.id === trackId) {
-          sender = senders[y];
-          peerConnection.removeTrack(sender);
-          removeSenderFromList(state, targetMid, sender);
-        }
-      }
-    } catch (error) {
-      logger.log.ERROR([peerIds[i], TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.ERRORS.REMOVE_TRACK], error);
-    }
-  }
-};
-
-/**
- * Function that removes the tracks from the peer connection.
- * @param {SkylinkRoom} room
- * @param {MediaStream} stream
- * @memberOf MediaStreamHelpers
- */
-const removeTracks = (room, stream) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections, user } = state;
-  const tracks = stream.getTracks();
-
-  try {
-    tracks.forEach((track) => {
-      removeTrack(state, peerConnections, track);
-    });
-  } catch (error) {
-    logger.log.ERROR([user.sid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.ERRORS.REMOVE_TRACK], error);
-  }
-};
-
-const listenForEventAndDeleteMediaInfo = (room, stream) => {
-  const state = Skylink.getSkylinkState(room.id);
-
-  const executeOfferCallback = (evt) => {
-    const s = stream;
-    const { user } = state;
-    const { detail } = evt;
-    if (detail.state === HANDSHAKE_PROGRESS$1.OFFER) {
-      const mediaId = PeerMedia.retrieveMediaId(hasAudioTrack(s) ? TRACK_KIND.AUDIO : TRACK_KIND.VIDEO, s.id);
-      PeerMedia.deleteUnavailableMedia(room, user.sid, mediaId);
-    }
-  };
-
-  const executeMediaDeletedCallback = () => {
-    removeEventListener(EVENTS.HANDSHAKE_PROGRESS, executeOfferCallback);
-    removeEventListener(EVENTS.MEDIA_INFO_DELETED, executeMediaDeletedCallback);
-  };
-
-  addEventListener(EVENTS.HANDSHAKE_PROGRESS, executeOfferCallback);
-  addEventListener(EVENTS.MEDIA_INFO_DELETED, executeMediaDeletedCallback);
-};
-
-const stopAddedStreams = (state, streams, isScreensharing, fromLeaveRoom) => {
-  streams.forEach((stream) => {
-    stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
-  });
-};
-
-const updateMediaInfoMediaState = (room, stream) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { user } = state;
-  const streamId = stream.id;
-  const mediaId = PeerMedia.retrieveMediaId(stream.getTracks()[0].kind, streamId);
-  PeerMedia.setMediaStateToUnavailable(room, user.sid, mediaId);
-};
-
-const deleteStreamFromState = (room, stream, isScreensharing = null) => {
-  const updatedState = Skylink.getSkylinkState(room.id);
-  const { user } = updatedState;
-  const streamIdToRemove = stream.id;
-
-  if (isScreensharing) {
-    delete updatedState.streams.screenshare;
-    delete updatedState.streamsMediaStatus[stream.id];
-    delete updatedState.streamsMutedSettings[stream.id];
-    updatedState.streams.screenshare = null;
-
-    logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SUCCESS} - stream id: ${stream.id} (screenshare)`]);
-  } else {
-    delete updatedState.streams.userMedia[streamIdToRemove];
-    delete updatedState.streamsMediaStatus[stream.id];
-    delete updatedState.streamsMutedSettings[stream.id];
-
-    if (isEmptyObj(updatedState.streams.userMedia)) {
-      updatedState.streams.userMedia = null;
-    }
-
-    logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SUCCESS} - stream id: ${stream.id}`]);
-  }
-
-  Skylink.setSkylinkState(updatedState, updatedState.room.id);
-};
-
-/**
- * Function that handles the <code>RTCPeerConnection.removeTracks(sender)</code> on the local MediaStream.
- * @param {SkylinkRoom} room
- * @param {MediaStream} stream - The stream.
- * @param {boolean} isScreensharing
- * @memberOf MediaStreamHelpers
- * @fires STREAM_ENDED
- */
-const dispatchOnLocalStreamEnded = (room, stream, isScreensharing = false) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { MEDIA_STREAM } = MESSAGES;
-  const { user } = state;
-  const isSelf = true;
-
-  logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, MEDIA_STREAM.STOP_SETTINGS], {
-    peerId: user.sid, isSelf, isScreensharing, stream,
-  });
-
-  dispatchEvent(streamEnded({
-    room: Room.getRoomInfo(room.id),
-    peerId: user.sid,
-    peerInfo: PeerData.getCurrentSessionInfo(room),
-    isSelf,
-    isScreensharing,
-    streamId: stream.id,
-    isVideo: hasVideoTrack(stream),
-    isAudio: hasAudioTrack(stream),
-  }));
-
-  dispatchEvent(mediaAccessStopped({
-    isScreensharing,
-    streamId: stream.id,
-  }));
-
-  dispatchEvent(peerUpdated({
-    peerId: user.sid,
-    peerInfo: helpers.getCurrentSessionInfo(room),
-    isSelf: true,
-  }));
-};
-
-const hasStreamBeenReplaced$1 = (state, stoppedStream) => {
-  const { streams } = state;
-
-  if (!streams.userMedia) {
-    return false;
-  }
-
-  const streamObjs = Object.values(streams.userMedia);
-
-  return streamObjs.some(streamObj => streamObj.isReplaced && (streamObj.id === stoppedStream.id));
-};
-
-const prepStopScreenStream = (room, streamId, fromLeaveRoom = false) => new Promise((resolve, reject) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { user, streams } = state;
-  const screenStream = streams.screenshare.stream;
-  const isScreensharing = true;
-
-  try {
-    if (hasStreamBeenReplaced$1(state, screenStream)) {
-      stopStreamHelpers.stopReplacedStream(state, screenStream, isScreensharing, fromLeaveRoom);
-    } else {
-      stopStreamHelpers.stopAddedStream(state, screenStream, isScreensharing, fromLeaveRoom);
-    }
-
-    stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
-  } catch (error) {
-    logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN], error);
-    reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN));
-  }
-});
-
-const dispatchPeerUpdatedEvent = (roomState) => {
-  const { room, user } = roomState;
-
-  dispatchEvent(peerUpdated({
-    peerId: user.sid,
-    isSelf: true,
-    peerInfo: PeerData.getCurrentSessionInfo(room),
-  }));
-};
-
-// eslint-disable-next-line consistent-return
-const initRefreshConnectionAndResolve = (room, fromLeaveRoom, resolve, reject) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-
-  try {
-    if (!fromLeaveRoom) {
-      if (!isEmptyArray(Object.keys(peerConnections))) {
-        // eslint-disable-next-line consistent-return
-        const executeAnswerAckCallback = (evt) => {
-          const { detail } = evt;
-          if (detail.state === HANDSHAKE_PROGRESS$1.ANSWER_ACK) {
-            return (resolve());
-          }
-        };
-
-        addEventListener(EVENTS.HANDSHAKE_PROGRESS, executeAnswerAckCallback);
-
-        PeerConnection.refreshConnection(state);
-      } else {
-        dispatchPeerUpdatedEvent(state);
-        PeerMedia.deleteUnavailableMedia(state.room, state.user.sid);
-        return resolve();
-      }
-    }
-  } catch (err) {
-    reject(err);
-  }
-};
-
-const sendStreamReplaceEndedMsg = (state, stoppedStream) => {
-  const { room, user } = state;
-  const signaling = new SkylinkSignalingServer();
-  signaling.stream(room.id, user, stoppedStream, STREAM_STATUS.REPLACED_STREAM_ENDED, null);
-};
-
-// TODO:
-//  implement stop user media stream
-//  stop screen stream will be implemented diff - need to replace the screen stream with the original user media stream
-//  ref: onScreenStreamEnded for previous implementation
-const stopReplacedStream = (state, stream, isScreensharing, fromLeaveRoom) => {
-  const { user, room } = state;
-
-  try {
-    stopStreamHelpers.tryStopStream(stream);
-
-    if (!fromLeaveRoom) {
-      sendStreamReplaceEndedMsg(state, stream);
-      stopStreamHelpers.deleteStreamFromState(room, stream, isScreensharing);
-      stopStreamHelpers.dispatchOnLocalStreamEnded(room, stream);
-    }
-  } catch (err) {
-    logger.log.ERROR([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_REPLACED_STREAM], err);
-  }
-};
-
-const stopReplacedStreams = (state, streams, isScreensharing, fromLeaveRoom) => {
-  streams.forEach((stream) => {
-    stopStreamHelpers.stopReplacedStream(state, stream, isScreensharing, fromLeaveRoom);
-  });
-};
-
-const stopStreamHelpers = {
-  prepStopStreams,
-  prepStopUserMediaStreams,
-  stopAddedStream,
-  tryStopStream,
-  removeTracks,
-  listenForEventAndDeleteMediaInfo,
-  stopAddedStreams,
-  updateMediaInfoMediaState,
-  deleteStreamFromState,
-  dispatchOnLocalStreamEnded,
-  prepStopScreenStream,
-  initRefreshConnectionAndResolve,
-  stopReplacedStream,
-  stopReplacedStreams,
-};
-
-let instance$1 = {};
-
-class BandwidthAdjuster {
-  constructor(params) {
-    if (params.roomKey) {
-      this.resetBandwidthAdjusterInstance(params.roomKey, params.peerId);
-      return null;
-    }
-
-    const { peerConnection, state, targetMid } = params;
-
-    if (instance$1[targetMid]) {
-      return instance$1[targetMid];
-    }
-
-    this.peerId = targetMid;
-    this.state = state;
-    this.peerConnection = peerConnection;
-    this.bandwidth = null;
-
-    instance$1[this.peerId] = this;
-  }
-
-  static formatTotalFn(arr) {
-    let total = 0;
-    for (let i = 0; i < arr.length; i += 1) {
-      total += arr[i];
-    }
-    return total / arr.length;
-  }
-
-  setAdjustmentInterval() {
-    const { bandwidthAdjuster, peerStats, room } = this.state;
-    const { PEER_CONNECTION_STATE } = constants;
-
-    if (this.bandwidth) {
-      return;
-    }
-
-    const bandwidth = {
-      audio: { send: [], recv: [] },
-      video: { send: [], recv: [] },
-    };
-    let currentBlock = 0;
-
-    const adjustmentInterval = setInterval(() => {
-      if (!(this.peerConnection && this.peerConnection.signalingState
-        !== PEER_CONNECTION_STATE.CLOSED) || !bandwidthAdjuster || !peerStats[this.peerId]) {
-        clearInterval(adjustmentInterval);
-        return;
-      }
-
-      PeerConnection.retrieveStatistics(room.id, this.peerId, Skylink.getInitOptions().beSilentOnStatsLogs, true)
-        .then((stats) => {
-          if (!(this.peerConnection && this.peerConnection.signalingState
-            !== PEER_CONNECTION_STATE.CLOSED) || !bandwidthAdjuster) {
-            clearInterval(adjustmentInterval);
-          }
-
-          bandwidth.audio.send.push(stats.audio.sending.bytes ? stats.audio.sending.bytes * 8 : 0);
-          bandwidth.audio.recv.push(stats.audio.receiving.bytes ? stats.audio.receiving.bytes * 8 : 0);
-          bandwidth.video.send.push(stats.video.sending.bytes ? stats.video.sending.bytes * 8 : 0);
-          bandwidth.video.recv.push(stats.video.receiving.bytes ? stats.video.receiving.bytes * 8 : 0);
-
-          currentBlock += 1;
-
-          if (currentBlock === bandwidthAdjuster.interval) {
-            currentBlock = 0;
-            let totalAudioBw = BandwidthAdjuster.formatTotalFn(bandwidth.audio.send);
-            let totalVideoBw = BandwidthAdjuster.formatTotalFn(bandwidth.video.send);
-
-            if (!bandwidthAdjuster.useUploadBwOnly) {
-              totalAudioBw += BandwidthAdjuster.formatTotalFn(bandwidth.audio.recv);
-              totalVideoBw += BandwidthAdjuster.formatTotalFn(bandwidth.video.recv);
-              totalAudioBw /= 2;
-              totalVideoBw /= 2;
-            }
-
-            totalAudioBw = parseInt((totalAudioBw * (bandwidthAdjuster.limitAtPercentage / 100)) / 1000, 10);
-            totalVideoBw = parseInt((totalVideoBw * (bandwidthAdjuster.limitAtPercentage / 100)) / 1000, 10);
-
-            PeerConnection.refreshConnection(this.state, this.peerId, false, {
-              bandwidth: { audio: totalAudioBw, video: totalVideoBw },
-            });
-          }
-        })
-        .catch(() => {
-          bandwidth.audio.send.push(0);
-          bandwidth.audio.recv.push(0);
-          bandwidth.video.send.push(0);
-          bandwidth.video.recv.push(0);
-        });
-    }, 1000);
-
-    this.bandwidth = bandwidth;
-  }
-
-  // eslint-disable-next-line class-methods-use-this
-  resetBandwidthAdjusterInstance(roomKey, peerId = null) {
-    const state = Skylink.getSkylinkState(roomKey);
-    state.streamsBandwidthSettings.bAS = {};
-    Skylink.setSkylinkState(state, roomKey);
-
-    if (peerId) {
-      delete instance$1[peerId];
-    } else {
-      instance$1 = {};
-    }
-  }
-}
-
-/**
- * Emits the peerLeft event when current peer left the room.
- * @param {SkylinkState} state
- * @param {String} peerId
- * @private
- */
-const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
-  const { room, peerConnections } = state;
-  const { ROOM: { LEAVE_ROOM } } = MESSAGES;
-  const { enableDataChannel } = Skylink.getInitOptions();
-
-  logger.log.INFO([peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.START]);
-
-  if (peerId === PEER_TYPE.MCU) {
-    dispatchEvent(serverPeerLeft({
-      peerId,
-      serverPeerType: SERVER_PEER_TYPE.MCU,
-      room: Room.getRoomInfo(room.id),
-    }));
-  } else {
-    dispatchEvent(peerLeft({
-      peerId,
-      peerInfo: PeerData.getCurrentSessionInfo(room),
-      isSelf: false,
-      room: Room.getRoomInfo(room.id),
-    }));
-  }
-
-  if (peerConnections[peerId] && peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE$1.CLOSED) {
-    PeerConnection.closePeerConnection(state, peerId);
-  }
-
-  if (enableDataChannel) {
-    addEventListener(EVENTS.DATA_CHANNEL_STATE, (evt) => {
-      const { detail } = evt;
-      if (detail.state === DATA_CHANNEL_STATE$1.CLOSED || detail.state === DATA_CHANNEL_STATE$1.CLOSING) {
-        logger.log.INFO([detail.peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.SUCCESS]);
-        resolve(detail.peerId);
-      }
-    });
-
-    PeerConnection.closeDataChannel(state, peerId);
-  } else {
-    resolve(peerId);
-  }
-});
-
-/**
- * Method that sends a bye message to the all the peers in order remove the peer information or disconnects the socket connection.
- * @param state
- * @returns {Promise<SkylinkState>}
- * @private
- */
-const sendByeOrDisconnectSocket = state => new Promise((resolve) => {
-  const updatedState = Skylink.getSkylinkState(state.room.id);
-  const { room, peerConnections } = updatedState;
-  const { ROOM: { LEAVE_ROOM } } = MESSAGES;
-  const skylinkSignalingServer = new SkylinkSignalingServer();
-  const isInMoreThanOneRoom = Object.keys(Skylink.getSkylinkState()).length > 1;
-
-  room.inRoom = false;
-  Skylink.setSkylinkState(updatedState, room.id);
-
-  if (isInMoreThanOneRoom) {
-    // broadcast bye to all peers in the room if there is more than one room
-    logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.SENDING_BYE]);
-    Object.keys(peerConnections).forEach((peerId) => {
-      skylinkSignalingServer.bye(updatedState, peerId);
-    });
-    resolve(updatedState);
-  } else {
-    // disconnect socket if it is the last room
-    skylinkSignalingServer.config = skylinkSignalingServer.resetSocketConfig(window.location.protocol);
-
-    const handleChannelClose = () => {
-      logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.DISCONNECT_SOCKET.SUCCESS]);
-      removeEventListener(EVENTS.CHANNEL_CLOSE, handleChannelClose);
-      resolve(updatedState);
-    };
-
-    addEventListener(EVENTS.CHANNEL_CLOSE, handleChannelClose);
-
-    if (skylinkSignalingServer.socket.connected) {
-      skylinkSignalingServer.socket.disconnect();
-    } else {
-      resolve(updatedState);
-    }
-  }
-});
-
-/**
- * Stops streams within a Skylink state.
- * @private
- * @param {SkylinkState} state
- */
-const stopStreams = (state) => {
-  const { room, streams } = state;
-
-  if (streams.userMedia) {
-    stopStreamHelpers.prepStopStreams(room.id, null, true);
-  }
-
-  if (streams.screenshare) {
-    new ScreenSharing(state).stop(true);
-  }
-};
-
-const clearRoomState = (roomKey) => {
-  Skylink.clearRoomStateFromSingletons(roomKey);
-  Skylink.removeSkylinkState(roomKey);
-};
-
-const clearBandwidthAdjuster = (roomKey) => {
-  const state = Skylink.getSkylinkState(roomKey);
-  if (state.bandwidthAdjuster && !state.hasMCU) {
-    // eslint-disable-next-line no-new
-    new BandwidthAdjuster({ roomKey });
-  }
-};
-
-/**
- * Method that starts the peer left process.
- * @param {SkylinkState} roomState
- * @private
- */
-const leaveRoom = roomState => new Promise((resolve, reject) => {
+const getSignalingServerUrl = (params) => {
   const {
-    peerConnections, peerInformations, room, hasMCU, user,
-  } = roomState;
-  const { ROOM: { LEAVE_ROOM } } = MESSAGES;
+    signalingServerProtocol,
+    signalingServer,
+    signalingServerPort,
+    socketServer,
+  } = params;
 
-  try {
-    const peerIds = hasMCU ? [PEER_TYPE.MCU] : Array.from(new Set([...Object.keys(peerConnections), ...Object.keys(peerInformations)]));
+  let url = '';
 
-    if (isEmptyArray(peerIds)) {
-      logger.log.DEBUG([room.roomName, null, null, LEAVE_ROOM.NO_PEERS]);
-      stopStreams(roomState);
-      sendByeOrDisconnectSocket(roomState)
-        .then((removedState) => {
-          logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.REMOVE_STATE.SUCCESS]);
-          dispatchEvent(peerLeft({
-            peerId: user.sid,
-            peerInfo: PeerData.getCurrentSessionInfo(room),
-            isSelf: true,
-            room: Room.getRoomInfo(room.id),
-          }));
-          clearBandwidthAdjuster(removedState.room.id);
-          clearRoomState(removedState.room.id);
-          resolve(removedState.room.roomName);
-        });
-    } else {
-      const peerLeftPromises = [];
-
-      peerIds.forEach((peerId) => {
-        peerLeftPromises.push(executePeerLeftProcess(roomState, peerId));
-      });
-
-      Promise.all(peerLeftPromises)
-        .then(() => {
-          stopStreams(roomState);
-          return sendByeOrDisconnectSocket(roomState);
-        })
-        .then((removedState) => {
-          logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.REMOVE_STATE.SUCCESS]);
-          dispatchEvent(peerLeft({
-            peerId: user.sid,
-            peerInfo: PeerData.getCurrentSessionInfo(room),
-            isSelf: true,
-            room: Room.getRoomInfo(room.id),
-          }));
-          clearBandwidthAdjuster(removedState.room.id);
-          clearRoomState(removedState.room.id);
-          resolve(removedState.room.roomName);
-        });
-    }
-  } catch (error) {
-    logger.log.ERROR([room.roomName, null, null, LEAVE_ROOM.ERROR], error);
-    reject(error);
-  }
-});
-
-/**
- * Method that triggers self to leave all rooms.
- * @param {Array} closedRooms - Array of rooms that have been left
- * @param {Array} resolves - Array of resolves for each room that have been left
- * @private
- */
-const leaveAllRooms = (closedRooms = [], resolves = []) => new Promise((resolve, reject) => {
-  const { ROOM: { LEAVE_ROOM } } = MESSAGES;
-
-  try {
-    const states = Skylink.getSkylinkState();
-    const roomStates = Object.values(states);
-
-    if (roomStates[0]) { // Checks for existing roomStates and picks the first in the array
-      leaveRoom(roomStates[0])
-        .then((roomName) => {
-          closedRooms.push(roomName);
-          resolves.push(resolve);
-          leaveAllRooms(closedRooms, resolves);
-        });
-    } else {
-      logger.log.INFO([closedRooms, 'Room', null, LEAVE_ROOM.LEAVE_ALL_ROOMS.SUCCESS]);
-      resolves.forEach(res => res(closedRooms)); // resolves all promises
-    }
-  } catch (err) {
-    logger.log.ERROR([null, 'Room', null, LEAVE_ROOM.LEAVE_ALL_ROOMS.ERROR], err);
-    reject(err);
-  }
-});
-
-class HandleClientStats extends SkylinkStats {
-  constructor() {
-    super();
-    const { AdapterJS, navigator } = window;
-    this.model = {
-      client_id: null,
-      app_key: null,
-      timestamp: null,
-      username: null,
-      sdk_name: SDK_NAME.WEB,
-      sdk_version: null,
-      agent_name: AdapterJS.webrtcDetectedBrowser,
-      agent_version: AdapterJS.webrtcDetectedVersion,
-      agent_platform: navigator.platform,
-      agent_plugin_version: null,
-      device_version: null,
-      enumerated_devices: null,
-      device_muted: null,
-      network_type: navigator.connection ? navigator.connection.type : '-',
-      language: navigator.language,
-    };
+  if (isAString(signalingServer)) {
+    url = `${signalingServerProtocol}//${signalingServer}`;
+  } else if (signalingServer && isAObj(signalingServer) && signalingServer.protocol) {
+    url = `${signalingServer.protocol}//${socketServer.url}:${signalingServerPort}?rand=${Date.now()}`;
+  } else {
+    url = `${signalingServerProtocol}//${signalingServer}:${signalingServerPort}?rand=${Date.now()}`;
   }
 
-  send(roomKey) {
-    const roomState = Skylink.getSkylinkState(roomKey);
-
-    this.model.username = (roomState.user && roomState.user.uid) || null;
-    this.model.sdk_version = roomState.VERSION;
-    this.model.client_id = roomState.clientId;
-    this.model.app_key = Skylink.getInitOptions().appKey;
-    this.model.timestamp = (new Date()).toISOString();
-
-    this.postStats(this.endpoints.client, this.model);
-  }
-}
-
-/**
- * @class
- * @classdesc Class representing a Skylink State.\
- * @private
- */
-class SkylinkState {
-  /**
-   * @property {SkylinkApiResponse} skylinkApiResponse
-   */
-  constructor(initOptions) {
-    /**
-     * Stores the api response.
-     * @name apiResponse
-     * @type {SkylinkApiResponse}
-     * @since 2.0.0
-     * @private
-     */
-    this.apiResponse = {};
-    /**
-     * Stores the list of Peer DataChannel connections.
-     * @name dataChannels
-     * @type {Object}
-     * @property {String} peerId - The list of DataChannels associated with Peer ID.
-     * @property {RTCDataChannel} channelLabel - The DataChannel connection.
-     * The property name <code>"main"</code> is reserved for messaging Datachannel type.
-     * @since 0.2.0
-     * @private
-     */
-    this.dataChannels = {};
-    /**
-     * Stores the list of buffered ICE candidates that is received before
-     *   remote session description is received and set.
-     * @name peerCandidatesQueue
-     * @property {Array} <#peerId> The list of the Peer connection buffered ICE candidates received.
-     * @property {RTCIceCandidate} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
-     * @type JSON
-     * @since 0.5.1
-     * @private
-     */
-    this.peerCandidatesQueue = {};
-    /**
-     * Stores the list of ICE candidates received before signaling end.
-     * @name peerEndOfCandidatesCounter
-     * @type JSON
-     * @since 0.6.16
-     * @private
-     */
-    this.peerEndOfCandidatesCounter = {};
-    /**
-     * Stores the list of Peer connection ICE candidates.
-     * @name gatheredCandidates
-     * @property {JSON} <#peerId> The list of the Peer connection ICE candidates.
-     * @property {JSON} <#peerId>.sending The list of the Peer connection ICE candidates sent.
-     * @property {JSON} <#peerId>.receiving The list of the Peer connection ICE candidates received.
-     * @type JSON
-     * @since 0.6.14
-     * @private
-     */
-    this.gatheredCandidates = {};
-    /**
-     * Stores the window number of Peer connection retries that would increase the wait-for-response timeout
-     *   for the Peer connection health timer.
-     * @name retryCounters
-     * @type JSON
-     * @since 0.5.10
-     * @private
-     */
-    this.retryCounters = {};
-    /**
-     * Stores the list of the Peer connections.
-     * @name peerConnections
-     * @property {RTCPeerConnection} <#peerId> The Peer connection.
-     * @type JSON
-     * @since 0.1.0
-     * @private
-     */
-    this.peerConnections = {};
-    /**
-     * Stores the list of the Peer connections stats.
-     * @name peerStats
-     * @property {JSON} <#peerId> The Peer connection stats.
-     * @type JSON
-     * @since 0.6.16
-     * @private
-     */
-    this.peerStats = {};
-    /**
-     * Stores the list of Peers session information.
-     * @name peerInformations
-     * @property {JSON} <#peerId> The Peer session information.
-     * @property {JSON|string} <#peerId>.userData The Peer custom data.
-     * @property {JSON} <#peerId>.settings The Peer streaming information.
-     * @property {JSON} <#peerId>.mediaStatus The Peer streaming media status.
-     * @property {JSON} <#peerId>.agent The Peer agent information.
-     * @type JSON
-     * @since 0.3.0
-     * @private
-     */
-    this.peerInformations = {};
-    /**
-     * Stores the Signaling user credentials from the API response required for connecting to the Signaling server.
-     * @name user
-     * @property {String} uid The API result "username".
-     * @property {String} token The API result "userCred".
-     * @property {String} timeStamp The API result "timeStamp".
-     * @property {String} sid The Signaling server receive user Peer ID.
-     * @type SkylinkUser
-     * @since 0.5.6
-     * @private
-     */
-    this.user = initOptions.user;
-    /**
-     * Stores the User connection priority weight.
-     * If Peer has a higher connection weight, it will do the offer from its Peer connection first.
-     * @name peerPriorityWeight
-     * @type number
-     * @since 0.5.0
-     * @private
-     */
-    this.peerPriorityWeight = 0;
-    /**
-     * Stores the flag that indicates if "isPrivileged" is enabled.
-     * If enabled, the User has Privileged features which has the ability to retrieve the list of
-     *   Peers in the same App space with <code>getPeers()</code> method
-     *   and introduce Peers to each other with <code>introducePeer</code> method.
-     * @name isPrivileged
-     * @type boolean
-     * @default false
-     * @since 0.6.1
-     * @private
-     */
-    this.isPrivileged = initOptions.isPrivileged;
-    /**
-     * Stores the current socket connection information.
-     * @name socketSession
-     * @type {socketSession}
-     * @since 0.6.13
-     * @private
-     */
-    this.socketSession = {};
-    /**
-     * Stores the queued socket messages.
-     * This is to prevent too many sent over less than a second interval that might cause DROPPED messages
-     *   or jams to the Signaling connection.
-     * @name socketMessageQueue
-     * @type Array
-     * @since 0.5.8
-     * @private
-     */
-    this.socketMessageQueue = [];
-    /**
-     * Stores the flag that indicates if socket connection to the Signaling has opened.
-     * @name channelOpen
-     * @type boolean
-     * @since 0.5.2
-     * @private
-     */
-    this.channelOpen = false;
-    /**
-     * Stores the Signaling server url.
-     * @name signalingServer
-     * @type string
-     * @since 0.5.2
-     * @private
-     */
-    this.socketServer = initOptions.socketServer;
-    /**
-     * Stores the Signaling server protocol.
-     * @name signalingServerProtocol
-     * @type string
-     * @since 0.5.4
-     * @private
-     */
-    this.signalingServerProtocol = initOptions.forceSSL ? 'https:' : window.location.protocol;
-    /**
-     * Stores the value if ICE restart is supported.
-     * @name enableIceRestart
-     * @type boolean
-     * @since 0.6.16
-     * @private
-     */
-    this.enableIceRestart = false;
-    /**
-     * Stores the flag if MCU environment is enabled.
-     * @name hasMCU
-     * @type boolean
-     * @since 0.5.4
-     * @private
-     */
-    this.hasMCU = initOptions.hasMCU;
-    /**
-     * Stores the Room credentials information for <code>joinRoom()</code>.
-     * @name room
-     * @property {String} id The "rid" for <code>joinRoom()</code>.
-     * @property {String} token The "roomCred" for <code>joinRoom()</code>.
-     * @property {String} startDateTime The "start" for <code>joinRoom()</code>.
-     * @property {String} duration The "len" for <code>joinRoom()</code>.
-     * @property {String} connection The RTCPeerConnection constraints and configuration. This is not used in the SDK
-     *   except for the "mediaConstraints" property that sets the default <code>getUserMedia()</code> settings.
-     * @type SkylinkRoom
-     * @since 0.5.2
-     * @private
-     */
-    this.room = initOptions.room;
-    /**
-     * Stores the list of Peer messages timestamp.
-     * @name peerMessagesStamps
-     * @type JSON
-     * @since 0.6.15
-     * @private
-     */
-    this.peerMessagesStamps = {};
-    /**
-     * Stores the Streams.
-     * @name streams
-     * @type JSON
-     * @since 0.6.15
-     * @private
-     */
-    this.streams = {
-      userMedia: null,
-      screenshare: null,
-    };
-    /**
-     * Stores all the Stream required muted settings.
-     * @name streamsMutedSettings
-     * @type JSON
-     * @since 0.6.15
-     * @private
-     */
-    this.streamsMutedSettings = {};
-    /**
-     * Stores all the Stream sending maximum bandwidth settings.
-     * @name streamsBandwidthSettings
-     * @type JSON
-     * @since 0.6.15
-     * @private
-     */
-    this.streamsBandwidthSettings = {
-      bAS: {},
-    };
-    /**
-     * Stores the list of recordings.
-     * @name recordings
-     * @type JSON
-     * @since 0.6.16
-     * @private
-     */
-    this.recordings = {};
-    /**
-     * Stores the current active recording session ID.
-     * There can only be 1 recording session at a time in a Room
-     * @name currentRecordingId
-     * @type JSON
-     * @since 0.6.16
-     * @private
-     */
-    this.currentRecordingId = false;
-    /**
-     * Stores the recording session timeout to ensure 4 seconds has been recorded.
-     * @name recordingStartInterval
-     * @type number
-     * @since 0.6.16
-     * @private
-     */
-    this.recordingStartInterval = null;
-    /**
-     * Stores the currently supported codecs.
-     * @name currentCodecSupport
-     * @type JSON
-     * @since 0.6.18
-     * @private
-     */
-    this.currentCodecSupport = null;
-    /**
-     * Stores the flag if voice activity detection should be enabled.
-     * @name voiceActivityDetection
-     * @type boolean
-     * @default true
-     * @since 0.6.18
-     * @private
-     */
-    this.voiceActivityDetection = true;
-    /**
-     * Stores the auto bandwidth settings.
-     * @name bandwidthAdjuster
-     * @type JSON
-     * @since 0.6.18
-     * @private
-     */
-    this.bandwidthAdjuster = null;
-    /**
-     * Stores the list of RTMP Sessions.
-     * @name rtmpSessions
-     * @type JSON
-     * @since 0.6.36
-     * @private
-     */
-    this.rtmpSessions = {};
-    /**
-     * Offer buffered in order to apply when received answer
-     * @name bufferedLocalOffer
-     * @type Object
-     * @private
-     * @since 1.0.0
-     */
-    this.bufferedLocalOffer = {};
-    /**
-     * Offers buffered in order to apply when answerAck has been received
-     * @name bufferedRemoteOffers
-     * @type Object
-     * @private
-     * @since 2.0.0
-     */
-    this.bufferedRemoteOffers = {};
-    /**
-     * Map of RTCRTPSenders that are added via addTrack
-     * @name currentRTCRTPSenders
-     * @type Object
-     * @private
-     * @since 1.0.0
-     */
-    this.currentRTCRTPSenders = {};
-    /**
-     * Stores the unique random number used for generating the "client_id".
-     * @name clientId
-     * @type string
-     * @private
-     * @since 0.6.31
-     */
-    this.clientId = initOptions.clientId;
-    /**
-     * Stores all the Stream media status.
-     * @name streamsMediaStatus
-     * @type Object
-     * @private
-     * @since 1.0.0
-     */
-    this.streamsMediaStatus = {};
-    /**
-     * Stores the media info of all peers.
-     * @name peerMedias
-     * @type Object
-     * @private
-     * @since 2.0.0
-     */
-    this.peerMedias = {};
-    /**
-     * Stores the remote streams of all peers.
-     * @name remoteStreams
-     * @type Object
-     * @private
-     * @since 2.0.0
-     */
-    this.remoteStreams = {};
-    /**
-     * Stores the flag if messages should be persisted. Value determined by the hasPersistentMessage value returned from the API.
-     * This feature is enabled in the Temasys Developer Console by toggling the Persistent Message feature at the key level.
-     * @name hasPersistentMessage
-     * @type Object
-     * @private
-     * @since 2.0.0
-     */
-    this.hasPersistentMessage = initOptions.hasPersistentMessage;
-  }
-}
-
-/**
- * @private
- * @classdesc Class used for handling RTCMediaStream. Helper methods are listed inside <code>{@link MediaStreamHelpers}</code>.
- * @class
- */
-class MediaStream {
-  /**
-   * @description Function that retrieves camera Stream.
-   * @param {SkylinkState} state
-   * @param {GetUserMediaOptions} mediaOptions - The camera Stream configuration options.
-   * @return {Promise}
-   */
-  static getUserMedia(state, mediaOptions = {}) {
-    const { room } = state;
-    const updatedRoomState = helpers$7.parseMediaOptions(mediaOptions, state);
-    const { audio, video } = mediaOptions;
-    const useExactConstraints = !!mediaOptions.useExactConstraints;
-    Skylink.setSkylinkState(updatedRoomState, room.id);
-
-    return helpers$7.prepMediaAccessRequest({
-      useExactConstraints,
-      audio,
-      video,
-      roomKey: room.id,
-    });
-  }
-
-  /**
-   * @description Function that filters user input from getUserMedia public method
-   * @param {SkylinkState} roomState
-   * @param {GetUserMediaOptions} options
-   */
-  static getUserMediaLayer(roomState, options = null) {
-    return new Promise((resolve, reject) => {
-      let mediaOptions = {
-        audio: true,
-        video: true,
-      };
-
-      if (!options) {
-        logger.log.WARN([roomState.user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.NO_OPTIONS} - ${MESSAGES.MEDIA_STREAM.DEFAULT_OPTIONS}`], mediaOptions);
-      }
-
-      if (!isAObj(options)) {
-        logger.log.ERROR([roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS], options);
-        reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS), null);
-      }
-
-      mediaOptions = options;
-
-      const getUserMediaPromise = MediaStream.getUserMedia(roomState, mediaOptions);
-      getUserMediaPromise.then((stream) => {
-        resolve(stream);
-      }).catch((error) => {
-        reject(error);
-      });
-    });
-  }
-
-  /**
-   * Function that stops the getUserMedia() streams.
-   * @param {SkylinkState} roomState
-   * @param {String} streamId - The id of the stream to stop if there is more than one getUserMedia stream.
-   */
-  static stopStreams(roomState, streamId) {
-    return stopStreamHelpers.prepStopStreams(roomState.room.id, streamId);
-  }
-
-  /**
-   * Function that sets User's Stream to send to Peer connection.
-   * @param {String} targetMid - The mid of the target peer
-   * @param {SkylinkState} roomState - Skylink State of current room
-   * @param {Boolean} isOffer - The flag if the call is from offer
-   */
-  static addLocalMediaStreams(targetMid, roomState, isOffer) {
-    helpers$7.addLocalMediaStreams(targetMid, roomState, isOffer);
-  }
-
-  /**
-   * Function that handles the <code>RTCPeerConnection.ontrack</code> event on remote stream added.
-   * @param {MediaStream} stream - {@link https://developer.mozilla.org/en-US/docs/Web/API/MediaStream}
-   * @param {SkylinkState} currentRoomState - Current room state
-   * @param {String} targetMid - The mid of the target peer
-   * @param {boolean} [isScreensharing=false] - The flag if stream is a screenshare stream.
-   */
-  static onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio) {
-    helpers$7.onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio);
-  }
-
-  /**
-   * Function that mutes the stream.
-   * @param {SkylinkState} roomState
-   * @param {Object} options
-   * @param {boolean} options.audioMuted
-   * @param {boolean} options.videoMuted
-   * @param {String} streamId
-   */
-  static muteStreams(roomState, options, streamId) {
-    return helpers$7.muteStreams(roomState, options, streamId);
-  }
-
-  /**
-   * Function that sends the MediaStream object if present or mediaStream settings.
-   * @param {SkylinkState} roomState
-   * @param {MediaStream|Object} options
-   */
-  static sendStream(roomState, options) {
-    return helpers$7.sendStream(roomState, options);
-  }
-
-  static getStreamSources() {
-    return helpers$7.getStreamSources();
-  }
-
-  static updateRemoteStreams(room, peerId, stream) {
-    return helpers$7.updateRemoteStreams(room, peerId, stream);
-  }
-
-  /**
-   * Function that returns all active streams including screenshare stream if present.
-   * @param {SkylinkState} roomState
-   * @return {streamList} streamList
-   */
-  static getStreams(roomState) {
-    return helpers$7.getStreams(roomState);
-  }
-
-  static usePrefetchedStream(roomKey, stream, options = null) {
-    return new Promise((resolve) => {
-      if (!stream && (options.id && options.active)) {
-        // eslint-disable-next-line no-param-reassign
-        stream = options;
-      }
-
-      const streamOptions = { audio: stream.getAudioTracks().length !== 0, video: stream.getVideoTracks().length !== 0 };
-      const audioSettings = helpers$7.parseStreamSettings(streamOptions, TRACK_KIND.AUDIO);
-      const videoSettings = helpers$7.parseStreamSettings(streamOptions, TRACK_KIND.VIDEO);
-      const isAudioFallback = false;
-      const streams = helpers$7.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve);
-
-      resolve(streams);
-    });
-  }
-}
-
-const buildCachedApiResponse = (skylinkApiResponse) => {
-  const cachedResponse = clone_1(skylinkApiResponse);
-  delete cachedResponse.room;
-  delete cachedResponse.user;
-  return cachedResponse;
+  return url;
 };
 
-const addNewStateAndCacheApiResponse = (response, options) => {
-  const apiServer = new SkylinkAPIServer();
-  const skylinkApiResponse = new SkylinkApiResponse(response);
-  const initOptions = apiServer.enforceUserInitOptions(skylinkApiResponse);
-  const skylinkState = new SkylinkState(initOptions);
-  skylinkState.user.userData = options.userData;
-  skylinkState.apiResponse = Object.freeze(buildCachedApiResponse(skylinkApiResponse));
-  Skylink.setSkylinkState(skylinkState, response.roomName);
-  return skylinkState;
-};
-
-/**
- * @description Method that starts the Room Session.
- * @param {joinRoomOptions} [options] The options available to join the room and configure the session.
- * @param {MediaStream} [prefetchedStream] The prefetched media stream object obtained when the user calls getUserMedia before joinRoom.
- * @return {Promise} Promise object with MediaStream.
- * @memberOf Room
- * @alias Room.joinRoom
- * @private
- */
-const joinRoom = (options = {}, prefetchedStream) => new Promise((resolve, reject) => {
-  const { navigator } = window;
-  const apiServer = new SkylinkAPIServer();
-  const signalingServer = new SkylinkSignalingServer();
+const createSocket = (params) => {
+  const skylinkState = Skylink.getSkylinkState(params.roomKey);
   const initOptions = Skylink.getInitOptions();
-  const handleClientStats = new HandleClientStats();
-  const roomName = SkylinkAPIServer.getRoomNameFromParams(options) ? SkylinkAPIServer.getRoomNameFromParams(options) : initOptions.defaultRoom;
+  const { config } = params;
+  const { socketServer, socketTimeout, socketServerPath } = initOptions;
+  const { socketPorts } = new SkylinkApiResponse(null, params.roomKey);
+  const socketConfig = retrieveConfig('SOCKET', { socketTimeout, socketServerPath });
 
-  dispatchEvent(readyStateChange({
-    readyState: READY_STATE_CHANGE$1.LOADING,
-    error: null,
-    room: { roomName },
-  }));
+  let ports = [];
 
-  apiServer.createRoom(roomName).then((result) => {
-    const { response } = result;
-    response.roomName = roomName;
-    const skylinkState = addNewStateAndCacheApiResponse(response, options);
+  if (socketServer && isAObj(socketServer) && Array.isArray(socketServer.ports) && socketServer.ports.length) {
+    ({ ports } = socketServer);
+  } else {
+    ports = socketPorts[config.signalingServerProtocol];
+  }
 
-    apiServer.checkCodecSupport(skylinkState.room.id).then(() => {
-      handleClientStats.send(skylinkState.room.id);
-      return signalingServer.createSocket(response.room_key).then(() => {
-        const room = SkylinkAPIServer.getStateByKey(response.room_key);
-        const userMediaParams = Object.assign({}, options);
+  if (isFirstConnectionAttempt(config)) {
+    config.signalingServerPort = ports[0];
+    config.fallbackType = SOCKET_FALLBACK.NON_FALLBACK;
+  } else if (isLastPort(ports, config) || isAString(initOptions.socketServer)) {
+    // re-refresh to long-polling port
+    if (config.socketType === SOCKET_TYPE.WEBSOCKET) {
+      config.socketType = SOCKET_TYPE.POLLING;
+      config.signalingServerPort = ports[0];
+    } else {
+      config.socketSession.finalAttempts += 1;
+      config.signalingServerPort = ports[0];
+    }
+  // move to the next port
+  } else {
+    config.signalingServerPort = ports[ports.indexOf(config.signalingServerPort) + 1];
+  }
 
-        userMediaParams.room = room;
-        if (prefetchedStream || (options.id && options.active)) { // check for prefetched stream as the only arg
-          MediaStream.usePrefetchedStream(response.room_key, prefetchedStream, options).then(() => {
-            signalingServer.joinRoom(room);
-            resolve(null);
-          }).catch((error) => {
-            reject(error);
-          });
-        } else if (options.audio || options.video) {
-          MediaStream.getUserMedia(skylinkState, userMediaParams).then((stream) => {
-            signalingServer.joinRoom(room);
-            resolve(stream);
-          }).catch((streamException) => {
-            reject(streamException);
-          });
-        } else {
-          // If no audio is requested for Safari, audio will not be heard on the Safari peer even if the remote peer has audio. Workaround to
-          // request media access but not add the track to the peer connection. Does not seem to apply to video.
-          if (isAgent(BROWSER_AGENT.SAFARI)) {
-            navigator.mediaDevices.getUserMedia({ audio: true })
-              .then(() => signalingServer.joinRoom(room));
-          } else {
-            signalingServer.joinRoom(room);
-          }
-          resolve(null);
-        }
-      });
-    }).catch((codecError) => {
-      reject(codecError);
-    });
-  }).catch((socketException) => {
-    reject(socketException);
+  if (config.socketType === SOCKET_TYPE.POLLING) {
+    socketConfig.reconnectionDelayMax = DEFAULTS.SOCKET.RECONNECTION_DELAY_MAX;
+    socketConfig.reconnectionAttempts = DEFAULTS.SOCKET.RECONNECTION_ATTEMPTS.POLLING;
+    socketConfig.transports = [SOCKET_TYPE.XHR_POLLING, SOCKET_TYPE.JSONP_POLLING, SOCKET_TYPE.POLLING.toLowerCase()];
+  }
+
+  const url = getSignalingServerUrl({
+    signalingServerProtocol: config.signalingServerProtocol,
+    signalingServer: skylinkState.socketServer,
+    signalingServerPort: config.signalingServerPort,
+    socketServer,
   });
-});
 
-/**
- * @description Method that locks or unlocks a room.
- * @param {SkylinkState} roomState - The room state.
- * @param {boolean} lockRoom - The flag if the room should be locked or unlocked.
- * @private
- */
-const lockOrUnlockRoom = (roomState, lockRoom = true) => {
-  const updatedState = roomState;
-  const { room, user } = updatedState;
-  const signalingServer = new SkylinkSignalingServer();
+  config.socketServer = socketServer;
+  config.socketServerPath = socketServerPath;
+  skylinkState.socketSession = config;
+  Skylink.setSkylinkState(skylinkState, params.roomKey);
 
-  updatedState.room.isLocked = lockRoom;
-  Skylink.setSkylinkState(updatedState, room.id);
-
-  signalingServer.roomLock(updatedState);
-
-  dispatchEvent(roomLock({
-    isLocked: updatedState.room.isLocked,
-    peerInfo: PeerData.getCurrentSessionInfo(room),
-    peerId: user.sid,
-    isSelf: true,
-  }));
+  return window.io(url, socketConfig);
 };
 
-/**
- * @description Method that locks a room.
- * @param {SkylinkState} roomState - The room state.
- * @private
- */
-const lockRoom = roomState => lockOrUnlockRoom(roomState, true);
-
-/**
- * @description Method that unlocls a room.
- * @param {SkylinkState} roomState - The room state.
- * @private
- */
-const unlockRoom = roomState => lockOrUnlockRoom(roomState, false);
-
-/**
- * @typedef roomInfo
- * @property {String} roomName - The room name
- * @property {Number} duration - The maximum allowed room duration
- * @property {String} id - The room id
- * @property {Boolean} inRoom - The flag if the peer is in the room
- */
-/**
- * @param roomKey
- * @return {roomInfo}
- * @private
- */
-const getRoomInfo = (roomKey) => {
-  const state = Skylink.getSkylinkState(roomKey);
-  const { room } = state;
-  const roomInfo = Object.assign({}, room);
-  delete roomInfo.connection;
-  delete roomInfo.token;
-  delete roomInfo.startDateTime;
-  return roomInfo;
+const processSignalingMessage = (messageHandler, message) => {
+  const { type } = message;
+  logger.log.INFO(['SIG SERVER', null, type, 'received']);
+  switch (type) {
+    case SIG_MESSAGE_TYPE.IN_ROOM: messageHandler.inRoomHandler(message); break;
+    case SIG_MESSAGE_TYPE.ENTER: messageHandler.enterRoomHandler(message); break;
+    case SIG_MESSAGE_TYPE.OFFER: messageHandler.offerHandler(message); break;
+    case SIG_MESSAGE_TYPE.WELCOME: messageHandler.welcomeHandler(message); break;
+    case SIG_MESSAGE_TYPE.ANSWER: messageHandler.answerHandler(message); break;
+    case SIG_MESSAGE_TYPE.ANSWER_ACK: messageHandler.answerAckHandler(message); break;
+    case SIG_MESSAGE_TYPE.CANDIDATE: messageHandler.candidateHandler(message); break;
+    case SIG_MESSAGE_TYPE.PEER_LIST: messageHandler.getPeerListHandler(message); break;
+    case SIG_MESSAGE_TYPE.INTRODUCE_ERROR: messageHandler.introduceError(message); break;
+    case SIG_MESSAGE_TYPE.BYE: messageHandler.byeHandler(message); break;
+    case SIG_MESSAGE_TYPE.STREAM: messageHandler.streamHandler(message); break;
+    case SIG_MESSAGE_TYPE.RECORDING: messageHandler.recordingHandler(message); break;
+    case SIG_MESSAGE_TYPE.REDIRECT: messageHandler.redirectHandler(message); break;
+    case SIG_MESSAGE_TYPE.RTMP: messageHandler.rtmpHandler(message); break;
+    case SIG_MESSAGE_TYPE.UPDATE_USER: messageHandler.setUserDataHandler(message); break;
+    case SIG_MESSAGE_TYPE.MEDIA_INFO_EVENT: messageHandler.mediaInfoEventHandler(message); break;
+    case SIG_MESSAGE_TYPE.MESSAGE: messageHandler.userMessageHandler(message, null); break;
+    case SIG_MESSAGE_TYPE.STORED_MESSAGES: messageHandler.storedMessagesHandler(message); break;
+    // Backward compatibility for public and private message protocol
+    case SIG_MESSAGE_TYPE.PUBLIC_MESSAGE: messageHandler.userMessageHandler(message, true); break;
+    case SIG_MESSAGE_TYPE.PRIVATE_MESSAGE: messageHandler.userMessageHandler(message, false); break;
+    default: break;
+  }
 };
-
-/**
- * @classdesc Class that contains the methods for Room.
- * @private
- */
-class Room {
-  /** @lends Room */
-  static leaveRoom(args) {
-    return leaveRoom(args);
-  }
-
-  static leaveAllRooms() {
-    return leaveAllRooms();
-  }
-
-  static lockRoom(roomState) {
-    return lockRoom(roomState);
-  }
-
-  static unlockRoom(roomState) {
-    return unlockRoom(roomState);
-  }
-
-  static joinRoom(args) {
-    return joinRoom(args);
-  }
-
-  static getRoomInfo(args) {
-    return getRoomInfo(args);
-  }
-}
-
-/**
- * @description Function that returns the current session peerInfo is peer isSelf.
- * @private
- * @param {SkylinkRoom} room
- * @return {peerInfo}
- * @memberOf PeerDataHelpers
- */
-const getCurrentSessionInfo = (room) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const initOptions = Skylink.getInitOptions();
-  const { AdapterJS, navigator } = window;
-  const { enableDataChannel } = initOptions;
-  const {
-    streamsMediaStatus,
-    peerPriorityWeight,
-    enableIceRestart,
-    streams,
-    streamsBandwidthSettings,
-    user,
-  } = state;
-
-  const peerInfo = {
-    userData: '',
-    settings: {
-      audio: false,
-      video: false,
-    },
-    mediaStatus: {},
-    agent: {
-      name: AdapterJS.webrtcDetectedBrowser,
-      version: AdapterJS.webrtcDetectedVersion,
-      os: navigator.platform,
-      pluginVersion: null,
-      SMProtocolVersion: SM_PROTOCOL_VERSION,
-      DTProtocolVersion: DT_PROTOCOL_VERSION,
-      SDKVersion: SDK_VERSION,
-    },
-    room: Room.getRoomInfo(room.id),
-    config: {
-      enableDataChannel,
-      enableIceRestart,
-      priorityWeight: peerPriorityWeight,
-    },
-    sid: user.sid,
-  };
-
-  if (streams && streams.userMedia) {
-    const streamIds = Object.keys(streams.userMedia);
-    streamIds.forEach((id) => {
-      if (streams.userMedia[id].settings.audio) {
-        peerInfo.settings.audio = peerInfo.settings.audio || {};
-        peerInfo.settings.audio[id] = clone_1(streams.userMedia[id].settings.audio);
-      } else if (streams.userMedia[id].settings.video) {
-        peerInfo.settings.video = peerInfo.settings.video || {};
-        peerInfo.settings.video[id] = clone_1(streams.userMedia[id].settings.video);
-      }
-    });
-  }
-
-  peerInfo.mediaStatus = streamsMediaStatus;
-  peerInfo.userData = user.userData || null;
-
-  if (streams.screenshare) {
-    peerInfo.settings.video = peerInfo.settings.video || {};
-    peerInfo.settings.video[streams.screenshare.id] = clone_1(streams.screenshare.settings.video);
-    peerInfo.settings.video[streams.screenshare.id].screenshare = true;
-  }
-
-  peerInfo.settings.maxBandwidth = clone_1(streamsBandwidthSettings.bAS);
-
-  peerInfo.settings.data = enableDataChannel;
-
-  return clone_1(peerInfo);
-};
-
-/**
- * @description Function that returns the userInfo to be sent to Signaling.
- * @private
- * @param {SkylinkRoom} room
- * @return {Object}
- * @memberOf PeerDataHelpers
- */
-const getUserInfo = (room) => {
-  const userInfo = helpers.getCurrentSessionInfo(room);
-  delete userInfo.room;
-  return userInfo;
-};
-
-/**
- * @description Function that returns the User / Peer current custom data.
- * @private
- * @param {Skylink} roomState
- * @param {String} peerId
- * @return {roomState.userData}
- * @memberOf PeerDataHelpers
- */
-const getUserData = (roomState, peerId) => {
-  if (peerId && roomState.peerInformations[peerId]) {
-    let peerUserData = roomState.peerInformations[peerId].userData;
-
-    if (!peerUserData) {
-      peerUserData = '';
-    }
-    return peerUserData;
-  }
-  return roomState.user.userData;
-};
-
-/**
- * @description Function that overwrites the User current custom data.
- * @private
- * @param {SkylinkRoom} room
- * @param {String | Object} userData
- * @memberOf PeerDataHelpers
- * @fires PEER_UPDATED
- */
-const setUserData = (room, userData) => {
-  const roomState = Skylink.getSkylinkState(room.id);
-  const { PEER_INFORMATIONS: { UPDATE_USER_DATA } } = MESSAGES;
-  const updatedUserData = userData || '';
-
-  roomState.user.userData = updatedUserData;
-  Skylink.setSkylinkState(roomState, roomState.room.id);
-
-  new SkylinkSignalingServer().setUserData(roomState);
-
-  dispatchEvent(peerUpdated({
-    peerId: roomState.user.sid,
-    peerInfo: helpers.getCurrentSessionInfo(room),
-    isSelf: true,
-  }));
-
-  logger.log.INFO(UPDATE_USER_DATA, updatedUserData);
-};
-
-const hasPeerConnections = (peerConnections, hasMCU) => (hasMCU ? !!peerConnections.MCU.maps : !isEmptyObj(peerConnections));
-
-const getSelfStreams = (streams) => {
-  if (streams.userMedia) {
-    return streams.userMedia;
-  }
-  return null;
-};
-
-const getSelfScreen = (streams) => {
-  if (streams.screenshare) {
-    return streams.screenshare;
-  }
-  return null;
-};
-
-/**
- * @description Function that gets the list of connected Peers Streams in the Room.
- * @param {SkylinkState} roomState
- * @param {boolean} [includeSelf=true] - The flag if self streams are included.
- * @return {Object}
- * @memberOf PeerDataHelpers
- */
-const getPeersStreams = (roomState, includeSelf = true) => {
-  const listOfPeersStreams = {};
-  const {
-    peerConnections,
-    user,
-    streams,
-    hasMCU,
-  } = roomState;
-
-  if (user && user.sid && includeSelf) {
-    const selfStreams = getSelfStreams(streams);
-    const selfScreen = getSelfScreen(streams);
-    listOfPeersStreams[user.sid] = selfStreams || selfScreen ? {} : null;
-
-    if (selfStreams) {
-      Object.keys(selfStreams).forEach((streamId) => {
-        listOfPeersStreams[user.sid].isSelf = true;
-        listOfPeersStreams[user.sid][streamId] = selfStreams[streamId].stream;
-      });
-    }
-
-    if (selfScreen) {
-      listOfPeersStreams[user.sid].isSelf = true;
-      listOfPeersStreams[user.sid][selfScreen.id] = selfScreen;
-    }
-  }
-
-  if (hasPeerConnections(peerConnections, hasMCU)) {
-    const listOfPeers = hasMCU ? Object.keys(peerConnections.MCU.maps) : Object.keys(peerConnections);
-    for (let i = 0; i < listOfPeers.length; i += 1) {
-      listOfPeersStreams[listOfPeers[i]] = {};
-      const remoteStreams = MediaStream.retrieveRemoteStreams(roomState, listOfPeers[i]);
-      remoteStreams.forEach((stream) => {
-        listOfPeersStreams[listOfPeers[i]][stream.id] = stream;
-      });
-    }
-  }
-
-  return isEmptyObj(listOfPeersStreams) ? null : listOfPeersStreams;
-};
-
-const hasPeerDataChannels = dataChannels => !isEmptyObj(dataChannels);
-
-/**
- * @description Function that gets the current list of connected Peers Datachannel connections in the Room.
- * @private
- * @param {SkylinkState} roomState
- * @return {Object} listOfPeersDataChannels
- * @memberOf PeerDataHelpers
- */
-const getPeersDataChannels = (roomState) => {
-  const { dataChannels } = roomState;
-  const listOfPeersDataChannels = {};
-  const listOfPeers = Object.keys(dataChannels);
-
-  for (let i = 0; i < listOfPeers.length; i += 1) {
-    const peerId = listOfPeers[i];
-    listOfPeersDataChannels[peerId] = {};
-
-    if (hasPeerDataChannels(dataChannels)) {
-      const channelProp = Object.keys(dataChannels[peerId]);
-      for (let y = 0; y < channelProp.length; y += 1) {
-        const channel = dataChannels[peerId][channelProp[y]];
-        const {
-          channelName,
-          channelType,
-          transferId,
-          streamId,
-        } = channel;
-        let peerChannel = null;
-        peerChannel = PeerConnection.getDataChannelBuffer(channel);
-        peerChannel.channelProp = channelProp[y];
-        peerChannel.channelName = channelName;
-        peerChannel.channelType = channelType;
-        peerChannel.currentTransferId = transferId;
-        peerChannel.currentStreamId = streamId;
-        peerChannel.readyState = channel.channel
-          ? channel.channel.readyState : DATA_CHANNEL_STATE$1.CREATE_ERROR;
-
-        listOfPeersDataChannels[peerId][channelName] = peerChannel;
-      }
-    }
-  }
-
-  return listOfPeersDataChannels;
-};
-
-const hasPeers = peerInformations => !isEmptyObj(peerInformations);
-
-/**
- * Function that gets a current custom Peer settings.
- * @param {SkylinkState} state
- * @param {String} peerId
- * @private
- * @return {Object}
- * @memberOf PeerDataHelpers
- */
-const getPeerCustomSettings = (state, peerId) => {
-  const usePeerId = state.hasMCU ? PEER_TYPE.MCU : peerId;
-  let customSettings = {};
-
-  if (state.peerConnections[usePeerId].signalingState !== PEER_CONNECTION_STATE$1.CLOSED) {
-    const peerInfo = PeerData.getPeerInfo(usePeerId, state.room);
-
-    customSettings = clone_1(peerInfo.settings);
-  }
-
-  return customSettings;
-};
-
-/**
- * @description Function that gets the list of current custom Peer settings sent and set.
- * @param {SkylinkState} roomState
- * @return {Object} customSettingsList
- * @memberOf PeerDataHelpers
- */
-const getPeersCustomSettings = (roomState) => {
-  const { peerInformations } = roomState;
-  const customSettingsList = {};
-
-  if (hasPeers(peerInformations)) {
-    const peerIds = Object.keys(peerInformations);
-
-    for (let peerId = 0; peerId < peerIds.length; peerId += 1) {
-      customSettingsList[peerIds[peerId]] = getPeerCustomSettings(roomState, peerIds[peerId]);
-    }
-
-    return customSettingsList;
-  }
-
-  return customSettingsList;
-};
-
-/**
- * Iterates through all connected peers to find the greatest peerPriorityWeight and sets the current users peerPriorityWeight to max.
- * @param {SkylinkState} roomState
- * @private
- */
-const setGreatestPeerPriorityWeight = (roomState) => {
-  const state = Skylink.getSkylinkState(roomState.room.id);
-  const { peerInformations } = state;
-  const informationList = Object.entries(peerInformations);
-  const selfPriorityWeight = state.peerPriorityWeight;
-
-  let maxPeerPriority = selfPriorityWeight;
-  for (let i = 0; i < informationList.length; i += 1) {
-    const peerInformation = informationList[i][1];
-    const { config: { priorityWeight } } = peerInformation;
-
-    if (priorityWeight > maxPeerPriority) {
-      maxPeerPriority = priorityWeight;
-      state.peerPriorityWeight = maxPeerPriority + 1;
-    }
-  }
-  Skylink.setSkylinkState(state, state.room.id);
-  logger.log.DEBUG(`User's priorityWeight is set to ${maxPeerPriority}`);
-};
-
-/**
- * @namespace PeerDataHelpers
- * @description All helper and utility functions for <code>{@link PeerData}</code> class are listed here.
- * @private
- * @type {{getCurrentSessionInfo, getPeerInfo, getUserData, getUserInfo, setUserData, getPeersStreams, getPeersDataChannels, getPeersCustomSettings, setGreatestPeerPriorityWeight}}
- */
-const helpers = {
-  getPeerInfo,
-  getCurrentSessionInfo,
-  getUserInfo,
-  getUserData,
-  setUserData,
-  getPeersStreams,
-  getPeersDataChannels,
-  getPeersCustomSettings,
-  setGreatestPeerPriorityWeight,
-};
-
-/**
- * @classdesc Class that represents PeerData methods
- * @class
- * @private
- */
-class PeerData {
-  /**
-   * @description Function that returns the User / Peer current session information.
-   * @private
-   * @param {String} peerId
-   * @param {SkylinkRoom} room
-   * @return {peerInfo}
-   */
-  static getPeerInfo(peerId, room) {
-    return helpers.getPeerInfo(peerId, room);
-  }
-
-  /**
-   * @private
-   * @param {SkylinkRoom} room
-   * @return {peerInfo}
-   */
-  static getCurrentSessionInfo(room) {
-    return helpers.getCurrentSessionInfo(room);
-  }
-
-  /**
-   * @description Function that returns the User session information to be sent to Peers.
-   * @private
-   * @param {SkylinkRoom} room
-   * @return {Object}
-   */
-  static getUserInfo(room) {
-    return helpers.getUserInfo(room);
-  }
-
-  /**
-   * @description Function that returns the User / Peer current custom data.
-   * @private
-   * @param {Skylink} roomState
-   * @param {String} peerId
-   * @return {roomState.userData}
-   */
-  static getUserData(roomState, peerId) {
-    return helpers.getUserData(roomState, peerId);
-  }
-
-  /**
-   * @description Function that overwrites the User current custom data.
-   * @private
-   * @param {SkylinkRoom} room
-   * @param {String | Object} userData
-   */
-  static setUserData(room, userData) {
-    helpers.setUserData(room, userData);
-  }
-
-  /**
-   * @description  Function that gets the list of connected Peers Streams in the Room.
-   * @private
-   * @param {SkylinkState} roomState
-   * @param {boolean} [includeSelf=true] - The flag if self streams are included.
-   * @return {Object}
-   */
-  static getPeersStreams(roomState, includeSelf) {
-    return helpers.getPeersStreams(roomState, includeSelf);
-  }
-
-  /**
-   * @description Function that gets the current list of connected Peers Datachannel connections in the Room.
-   * @private
-   * @param {SkylinkState} roomState
-   * @return {Object} listOfPeersDataChannels
-   */
-  static getPeersDataChannels(roomState) {
-    return helpers.getPeersDataChannels(roomState);
-  }
-
-  /**
-   * @description Function that gets the list of current custom Peer settings sent and set.
-   * @param {SkylinkState} roomState
-   * @return {Object}
-   */
-  static getPeersCustomSettings(roomState) {
-    return helpers.getPeersCustomSettings(roomState);
-  }
-
-  /**
-   * Iterates through all connected peers to find the greatest peerPriorityWeight and sets the current users peerPriorityWeight to max.
-   * @param {SkylinkState} roomState
-   * @return {*|void}
-   */
-  static setGreatestPeerPriorityWeight(roomState) {
-    return helpers.setGreatestPeerPriorityWeight(roomState);
-  }
-}
 
 const handleSocketClose = (roomKey, reason) => {
   const state = Skylink.getSkylinkState(roomKey) || Object.values(Skylink.getSkylinkState())[0]; // to handle leaveAllRooms method
@@ -12864,13 +10922,13 @@ const deleteEncryptSecrets = (encryptSecrets, selectedSecretId, secretId) => {
 
     // selectedSecretId should be set to default if there are no encryptSecrets stored
     if (updatedData.selectedSecretId === secretId) {
-      updatedData.selectedSecretId = helpers$2.setSelectedSecretId();
+      updatedData.selectedSecretId = helpers$1.setSelectedSecretId();
     }
 
     delete updatedData.encryptSecrets[secretId];
   } else {
     logger.log.DEBUG([null, TAGS.ENCRYPTED_MESSAGING, null, `${MESSAGES.MESSAGING.ENCRYPTION.DELETE_ALL}`]);
-    updatedData.selectedSecretId = helpers$2.setSelectedSecretId();
+    updatedData.selectedSecretId = helpers$1.setSelectedSecretId();
     updatedData.encryptSecrets = {};
   }
 
@@ -12882,7 +10940,7 @@ const isValidSecret = (secret) => {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.NO_SECRET_OR_SECRET_ID);
   }
 
-  if (!helpers$2.utils.isValidString(secret)) {
+  if (!helpers$1.utils.isValidString(secret)) {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_TYPE);
   }
 
@@ -12894,11 +10952,11 @@ const isValidSecretId = (secretId, updatedEncryptSecrets) => {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.NO_SECRET_OR_SECRET_ID);
   }
 
-  if (!helpers$2.utils.isValidString(secretId)) {
+  if (!helpers$1.utils.isValidString(secretId)) {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_TYPE);
   }
 
-  if (helpers$2.utils.isExisting(secretId, updatedEncryptSecrets)) {
+  if (helpers$1.utils.isExisting(secretId, updatedEncryptSecrets)) {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SECRET_ID_NOT_UNIQUE);
   }
 
@@ -19379,7 +17437,7 @@ const setSelectedSecretId = (encryptSecrets, secretId) => {
     return '';
   }
 
-  if (!helpers$2.utils.isValidString(secretId)) ;
+  if (!helpers$1.utils.isValidString(secretId)) ;
 
   if (!encryptSecrets[secretId]) {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SECRET_ID_NOT_FOUND);
@@ -19430,7 +17488,7 @@ const getMessageConfig = (roomState, targetPeerId) => {
 const sendMessageToSig = (roomState, config, message, encryptedMessage = '', targetPeerId) => {
   const signaling = new SkylinkSignalingServer();
   signaling.sendUserMessage(roomState, config, encryptedMessage || message);
-  helpers$1.dispatchOnIncomingMessage(roomState, config, message, true, targetPeerId);
+  helpers.dispatchOnIncomingMessage(roomState, config, message, true, targetPeerId);
 };
 
 // if isSelf = true, targetPeerId is the peer id targeted in sendMessage
@@ -19471,14 +17529,14 @@ class SkylinkError {
 
 const trySendMessage = (roomState, message, targetPeerId) => {
   try {
-    const config = helpers$1.getMessageConfig(roomState, targetPeerId);
-    helpers$1.sendMessageToSig(roomState, config, message, null, targetPeerId);
+    const config = helpers.getMessageConfig(roomState, targetPeerId);
+    helpers.sendMessageToSig(roomState, config, message, null, targetPeerId);
   } catch (error) {
     SkylinkError.throwError(MESSAGES.MESSAGING.ERRORS.FAILED_SENDING_MESSAGE);
   }
 };
 
-const helpers$1 = {
+const helpers = {
   getMessageConfig,
   sendMessageToSig,
   dispatchOnIncomingMessage,
@@ -19486,9 +17544,9 @@ const helpers$1 = {
 };
 
 const getMessageConfig$1 = (roomState, targetPeerId, encryptSecrets, selectedSecretId, isPersistent) => {
-  const config = helpers$1.getMessageConfig(roomState, targetPeerId);
+  const config = helpers.getMessageConfig(roomState, targetPeerId);
 
-  if (helpers$2.utils.hasCrypto() && helpers$2.utils.canEncrypt(selectedSecretId, encryptSecrets)) {
+  if (helpers$1.utils.hasCrypto() && helpers$1.utils.canEncrypt(selectedSecretId, encryptSecrets)) {
     config.secretId = selectedSecretId;
   }
 
@@ -19516,7 +17574,7 @@ const encryptMessage = (message, secret, decrypt = false) => {
 };
 
 const tryDecryptMessage = (message, secretId, encryptSecrets) => {
-  const decryptedMessage = helpers$2.encryptMessage(message, encryptSecrets[secretId], true);
+  const decryptedMessage = helpers$1.encryptMessage(message, encryptSecrets[secretId], true);
   if (isEmptyString(decryptedMessage)) {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.ENCRYPT_SECRET);
   } else {
@@ -19524,7 +17582,7 @@ const tryDecryptMessage = (message, secretId, encryptSecrets) => {
   }
 };
 
-const helpers$2 = {
+const helpers$1 = {
   deleteEncryptSecrets,
   setEncryptSecret,
   setSelectedSecretId,
@@ -19534,7 +17592,20 @@ const helpers$2 = {
   tryDecryptMessage,
 };
 
-const instance$2 = {};
+/**
+ * @description Function that returns the userInfo to be sent to Signaling.
+ * @private
+ * @param {SkylinkRoom} room
+ * @return {Object}
+ * @memberOf PeerDataHelpers
+ */
+const getUserInfo = (room) => {
+  const userInfo = helpers$6.getCurrentSessionInfo(room);
+  delete userInfo.room;
+  return userInfo;
+};
+
+const instance$1 = {};
 /**
  * @classdesc Class used for handling encryption
  * @class
@@ -19544,8 +17615,8 @@ class EncryptedMessaging {
   constructor(roomState) {
     const { room, user } = roomState;
 
-    if (!instance$2[room.id]) {
-      instance$2[room.id] = this;
+    if (!instance$1[room.id]) {
+      instance$1[room.id] = this;
     }
 
     this.room = room;
@@ -19563,12 +17634,12 @@ class EncryptedMessaging {
      */
     this.selectedSecretId = '';
 
-    return instance$2[room.id];
+    return instance$1[room.id];
   }
 
   setEncryptSecret(secret, secretId) {
     try {
-      this.encryptSecrets = helpers$2.setEncryptSecret(this.encryptSecrets, secret, secretId);
+      this.encryptSecrets = helpers$1.setEncryptSecret(this.encryptSecrets, secret, secretId);
       this.dispatchEncryptSecretEvent();
     } catch (error) {
       SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_ENCRYPT_SECRET, error.message);
@@ -19581,7 +17652,7 @@ class EncryptedMessaging {
 
   deleteEncryptSecrets(secretId) {
     try {
-      const updatedData = helpers$2.deleteEncryptSecrets(this.encryptSecrets, this.selectedSecretId, secretId);
+      const updatedData = helpers$1.deleteEncryptSecrets(this.encryptSecrets, this.selectedSecretId, secretId);
       this.encryptSecrets = updatedData.encryptSecrets;
       this.selectedSecretId = updatedData.selectedSecretId;
       this.dispatchEncryptSecretEvent();
@@ -19592,7 +17663,7 @@ class EncryptedMessaging {
 
   setSelectedSecretId(secretId) {
     try {
-      this.selectedSecretId = helpers$2.setSelectedSecretId(this.encryptSecrets, secretId);
+      this.selectedSecretId = helpers$1.setSelectedSecretId(this.encryptSecrets, secretId);
       this.dispatchEncryptSecretEvent();
     } catch (error) {
       SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_SELECTED_SECRET, error.message);
@@ -19615,8 +17686,8 @@ class EncryptedMessaging {
 
   canEncrypt(throwError) {
     try {
-      if (helpers$2.utils.canEncrypt(this.selectedSecretId, this.encryptSecrets)) {
-        return helpers$2.utils.isValidString(this.selectedSecretId) && helpers$2.utils.isValidString(this.encryptSecrets[this.selectedSecretId]);
+      if (helpers$1.utils.canEncrypt(this.selectedSecretId, this.encryptSecrets)) {
+        return helpers$1.utils.isValidString(this.selectedSecretId) && helpers$1.utils.isValidString(this.encryptSecrets[this.selectedSecretId]);
       }
 
       return false;
@@ -19629,7 +17700,7 @@ class EncryptedMessaging {
   }
 
   decryptStoredMessages(message, secretId) {
-    if (helpers$2.utils.canEncrypt(secretId, this.encryptSecrets) && !Object.keys(this.encryptSecrets).filter(key => key === secretId).length) {
+    if (helpers$1.utils.canEncrypt(secretId, this.encryptSecrets) && !Object.keys(this.encryptSecrets).filter(key => key === secretId).length) {
       throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SECRET_ID_NOT_FOUND);
     }
 
@@ -19637,8 +17708,8 @@ class EncryptedMessaging {
   }
 
   decryptMessage(message, secretId = '') {
-    if (secretId && helpers$2.utils.canDecrypt(this.encryptSecrets)) {
-      return helpers$2.tryDecryptMessage(message, secretId, this.encryptSecrets);
+    if (secretId && helpers$1.utils.canDecrypt(this.encryptSecrets)) {
+      return helpers$1.tryDecryptMessage(message, secretId, this.encryptSecrets);
     }
 
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_SECRETS);
@@ -19649,9 +17720,9 @@ class EncryptedMessaging {
     if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
       try {
         logger.log.DEBUG([null, TAGS.ASYNC_MESSAGING, null, MESSAGES.MESSAGING.ENCRYPTION.SEND_MESSAGE]);
-        const config = helpers$2.getMessageConfig(roomState, targetPeerId, this.encryptSecrets, this.selectedSecretId, isPersistent);
-        const encryptedMessage = helpers$2.encryptMessage(message, this.encryptSecrets[this.selectedSecretId]);
-        helpers$1.sendMessageToSig(roomState, config, message, encryptedMessage, targetPeerId);
+        const config = helpers$1.getMessageConfig(roomState, targetPeerId, this.encryptSecrets, this.selectedSecretId, isPersistent);
+        const encryptedMessage = helpers$1.encryptMessage(message, this.encryptSecrets[this.selectedSecretId]);
+        helpers.sendMessageToSig(roomState, config, message, encryptedMessage, targetPeerId);
       } catch (error) {
         SkylinkError.throwError(MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
       }
@@ -19659,12 +17730,12 @@ class EncryptedMessaging {
   }
 
   static deleteEncryptedInstance(room) {
-    delete instance$2[room.id];
+    delete instance$1[room.id];
   }
 }
 
 const getMessageConfig$2 = (roomState, targetPeerId) => {
-  const config = helpers$2.getMessageConfig(roomState, targetPeerId);
+  const config = helpers$1.getMessageConfig(roomState, targetPeerId);
   config.isPersistent = true;
 
   return config;
@@ -19679,12 +17750,12 @@ const parseDecryptedMessageData = (message, targetMid) => ({
   isDataChannel: false,
 });
 
-const helpers$3 = {
+const helpers$2 = {
   getMessageConfig: getMessageConfig$2,
   parseDecryptedMessageData,
 };
 
-const instance$3 = {};
+const instance$2 = {};
 
 /**
  * @classdesc Class used for handling the asynchronous messaging feature
@@ -19695,8 +17766,8 @@ class AsyncMessaging {
   constructor(roomState) {
     const { user, room, hasPersistentMessage } = roomState;
 
-    if (!instance$3[room.id]) {
-      instance$3[room.id] = this;
+    if (!instance$2[room.id]) {
+      instance$2[room.id] = this;
     }
 
     this.room = room;
@@ -19704,7 +17775,7 @@ class AsyncMessaging {
     this.isPersistent = hasPersistentMessage; // Value defaults to hasPersistentMessage
     this.hasPersistentMessage = hasPersistentMessage;
 
-    return instance$3[room.id];
+    return instance$2[room.id];
   }
 
   setMessagePersistence(isPersistent) {
@@ -19790,7 +17861,7 @@ class AsyncMessaging {
     try {
       for (let i = 0; i < messageData.length; i += 1) {
         messageData[i].data = encryptedMessaging.decryptStoredMessages(messageData[i].data, messageData[i].secretId);
-        messages.push(helpers$3.parseDecryptedMessageData(messageData[i], targetMid));
+        messages.push(helpers$2.parseDecryptedMessageData(messageData[i], targetMid));
       }
     } catch (error) {
       throw SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.FAILED_DECRYPTING_MESSAGE, error.message);
@@ -19806,7 +17877,7 @@ class AsyncMessaging {
   }
 
   static deleteAsyncInstance(room) {
-    delete instance$3[room.id];
+    delete instance$2[room.id];
   }
 }
 
@@ -19826,7 +17897,7 @@ class Messaging {
       } else if (encryptedMessaging.canEncrypt()) {
         encryptedMessaging.sendMessage(roomName, message, targetPeerId);
       } else {
-        helpers$1.trySendMessage(roomState, message, targetPeerId);
+        helpers.trySendMessage(roomState, message, targetPeerId);
       }
     }
   }
@@ -19859,7 +17930,7 @@ class Messaging {
       }
     }
 
-    helpers$1.dispatchOnIncomingMessage(roomState, { isPrivate: isABoolean(isPublic) ? !isPublic : !!target }, messageData, false, targetMid);
+    helpers.dispatchOnIncomingMessage(roomState, { isPrivate: isABoolean(isPublic) ? !isPublic : !!target }, messageData, false, targetMid);
   }
 }
 
@@ -20410,7 +18481,7 @@ const addIceCandidateToQueue = (targetMid, candidateId, candidateType, nativeCan
  * @private
  * @type {{setIceServers, addIceCandidateFromQueue, addIceCandidate, onIceCandidate, addIceCandidateToQueue}}
  */
-const helpers$4 = {
+const helpers$3 = {
   setIceServers,
   addIceCandidateFromQueue,
   addIceCandidate,
@@ -20431,7 +18502,7 @@ class IceConnection {
    * @return {filteredIceServers}
    */
   static setIceServers(iceServers) {
-    return helpers$4.setIceServers(iceServers);
+    return helpers$3.setIceServers(iceServers);
   }
 
   /**
@@ -20441,11 +18512,11 @@ class IceConnection {
    * @param {SkylinkRoom} room - Current Room
    */
   static addIceCandidateFromQueue(targetMid, room) {
-    return helpers$4.addIceCandidateFromQueue(targetMid, room);
+    return helpers$3.addIceCandidateFromQueue(targetMid, room);
   }
 
   static addIceCandidateToQueue(targetMid, candidateId, candidateType, nativeCandidate, state) {
-    return helpers$4.addIceCandidateToQueue(targetMid, candidateId, candidateType, nativeCandidate, state);
+    return helpers$3.addIceCandidateToQueue(targetMid, candidateId, candidateType, nativeCandidate, state);
   }
 
   /**
@@ -20458,7 +18529,7 @@ class IceConnection {
    * @fires CANDIDATE_PROCESSING_STATE
    */
   static addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState) {
-    return helpers$4.addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState);
+    return helpers$3.addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState);
   }
 
   /**
@@ -20470,277 +18541,744 @@ class IceConnection {
    * @return {null}
    */
   static onIceCandidate(targetMid, rtcIceConnectionEvent, room) {
-    return helpers$4.onIceCandidate(targetMid, rtcIceConnectionEvent, room);
+    return helpers$3.onIceCandidate(targetMid, rtcIceConnectionEvent, room);
   }
 }
 
-/**
- * Function that handles the "inRoom" socket message received.
- * @param {JSON} message
- * @memberOf SignalingMessageHandler
- * @fires PEER_JOINED
- * @fires HANDSHAKE_PROGRESS
- * @fires ON_INCOMING_STREAM
- */
-const inRoomHandler = (message) => {
-  const {
-    pc_config: { iceServers },
-    sid,
-    rid,
-    tieBreaker,
-  } = message;
-  const roomState = Skylink.getSkylinkState(rid);
-  const initOptions = Skylink.getInitOptions();
-  const { priorityWeightScheme } = initOptions;
-  const signaling = new SkylinkSignalingServer();
-  let weightAppendValue = 0;
+// requires the mid to be set after setOffer both local or remote
+const retrieveTransceiverMid = (room, track) => {
+  const roomState = Skylink.getSkylinkState(room.id);
+  const { peerConnections } = roomState;
+  const RTCPeerConnections = Object.values(peerConnections);
+  let transceiverMid = null;
 
-  roomState.room.connection.peerConfig = IceConnection.setIceServers(iceServers);
-  roomState.room.inRoom = true;
-
-  if (priorityWeightScheme === PRIORITY_WEIGHT_SCHEME.AUTO) {
-    weightAppendValue = 0;
-  } else if (priorityWeightScheme === PRIORITY_WEIGHT_SCHEME.ENFORCE_OFFERER) {
-    weightAppendValue = 2e+15;
-  } else {
-    weightAppendValue = -(2e+15);
-  }
-
-  roomState.peerPriorityWeight = tieBreaker + weightAppendValue;
-  roomState.user.sid = sid;
-
-  PeerMedia.updatePeerMediaWithUserSid(roomState.room, sid);
-  Skylink.setSkylinkState(roomState, rid);
-
-  dispatchEvent(peerJoined({
-    peerId: roomState.user.sid,
-    peerInfo: PeerData.getCurrentSessionInfo(roomState.room),
-    isSelf: true,
-    room: roomState.room,
-  }));
-
-  if (roomState.streams.userMedia) {
-    const streamIds = Object.keys(roomState.streams.userMedia);
-    streamIds.forEach((streamId) => {
-      const mediaStream = roomState.streams.userMedia[streamId].stream;
-      dispatchEvent(onIncomingStream({
-        stream: mediaStream,
-        streamId: mediaStream.id,
-        peerId: roomState.user.sid,
-        room: Room.getRoomInfo(roomState.room.id),
-        isSelf: true,
-        peerInfo: PeerData.getCurrentSessionInfo(roomState.room),
-        isVideo: hasVideoTrack(mediaStream),
-        isAudio: hasAudioTrack(mediaStream),
-      }));
-    });
-  }
-
-  signaling.enterRoom(roomState);
-};
-
-const parseVersion = (version) => {
-  if (!(version && typeof version === 'string')) {
-    return 0;
-  }
-  // E.g. 0.9.6, replace minor "." with 0
-  if (version.indexOf('.') > -1) {
-    const parts = version.split('.');
-    if (parts.length > 2) {
-      const majorVer = parts[0] || '0';
-      parts.splice(0, 1);
-      return parseFloat(`${majorVer}.${parts.join('0')}`, 10);
-    }
-    return parseFloat(version || '0', 10);
-  }
-  return parseInt(version || '0', 10);
-};
-
-
-const enterAndWelcome = (msg) => {
-  const state = Skylink.getSkylinkState(msg.rid);
-  const parsedMsg = {};
-  const { hasMCU } = state;
-  const {
-    rid,
-    mid,
-    enableIceRestart,
-    enableDataChannel,
-    weight,
-    agent,
-    os,
-    temasysPluginVersion,
-    SMProtocolVersion,
-    DTProtocolVersion,
-    version,
-    publisherId,
-  } = msg;
-
-  parsedMsg.publisherId = publisherId || null;
-  parsedMsg.rid = rid;
-  parsedMsg.mid = mid;
-  parsedMsg.agent = agent && isAString(agent) ? agent : 'other';
-  parsedMsg.version = parseVersion(version);
-  parsedMsg.SMProtocolVersion = isAString(SMProtocolVersion) ? SMProtocolVersion : SM_PROTOCOL_VERSION;
-  // eslint-disable-next-line no-nested-ternary
-  parsedMsg.DTProtocolVersion = isAString(DTProtocolVersion) ? DTProtocolVersion : (hasMCU || mid === PEER_TYPE.MCU ? DT_PROTOCOL_VERSION : '0.1.0');
-  parsedMsg.weight = isANumber(weight) ? weight : 0;
-  parsedMsg.enableDataChannel = isABoolean(enableDataChannel) ? enableDataChannel : true;
-  parsedMsg.enableIceRestart = isABoolean(enableIceRestart) ? enableIceRestart : false;
-  parsedMsg.os = os && isAString(os) ? os : null;
-  parsedMsg.temasysPluginVersion = temasysPluginVersion && isAString(temasysPluginVersion) ? temasysPluginVersion : null;
-  parsedMsg.userInfo = parsers.parseUserInfo(state, msg, parsedMsg);
-
-  if (hasMCU) {
-    parsedMsg.peersInRoom = msg.peersInRoom;
-  }
-
-  return clone_1(parsedMsg);
-};
-
-const parseUserInfo = (state, msg, parsedMsg) => {
-  const info = Object.assign({}, msg.userInfo);
-
-  info.config = info.config ? info.config : {
-    enableDataChannel: parsedMsg.enableDataChannel,
-    enableIceRestart: parsedMsg.enableIceRestart,
-    priorityWeight: parsedMsg.weight,
-  };
-
-  info.agent = info.agent ? info.agent : {
-    name: parsedMsg.agent,
-    version: parsedMsg.version,
-    os: parsedMsg.os,
-    pluginVersion: parsedMsg.temasysPluginVersion,
-    SMProtocolVersion: parsedMsg.SMProtocolVersion,
-    DTProtocolVersion: parsedMsg.DTProtocolVersion,
-  };
-
-  info.settings = info.settings ? info.settings : {};
-  info.mediaStatus = info.mediaStatus ? info.mediaStatus : {};
-
-  return info;
-};
-
-const parsers = {
-  enterAndWelcome,
-  parseUserInfo,
-};
-
-const setPeerInformations = (state, peerId, userInfo) => {
-  const { room } = state;
-  // eslint-disable-next-line no-param-reassign
-  state.peerInformations[peerId] = PeerConnection.buildPeerInformations(userInfo, state);
-  Skylink.setSkylinkState(state, room.id);
-};
-
-/**
- * Function that adds a Peer Connection and updates the state(Skylink State).
- * @param {JSON} params
- * @memberOf SignalingMessageHandler
- * @fires SERVER_PEER_JOINED
- * @fires PEER_JOINED
- * @fires HANDSHAKE_PROGRESS
- */
-const processPeer = (params) => {
-  const {
-    currentRoom,
-    targetMid,
-    cert,
-    userInfo,
-    message,
-    caller,
-  } = params;
-  let isNewPeer = false;
-  const state = Skylink.getSkylinkState(currentRoom.id);
-  const { hasMCU } = state;
-  const { peerInformations } = state;
-  if ((!peerInformations[targetMid] && !hasMCU) || (hasMCU && targetMid === PEER_TYPE.MCU && !peerInformations.MCU)) {
-    const hasScreenshare = !!userInfo.screenshare;
-    isNewPeer = true;
-    state.peerInformations[targetMid] = PeerConnection.buildPeerInformations(message.userInfo, state);
-
-    const peerBrowser = {
-      agent: userInfo.agent.name,
-      version: userInfo.agent.version,
-      os: userInfo.agent.os,
-    };
-
-    Skylink.setSkylinkState(state, currentRoom.id);
-
-    PeerConnection.addPeer({
-      currentRoom,
-      targetMid,
-      peerBrowser,
-      cert,
-      hasScreenshare,
-    });
-
-    if (targetMid === PEER_TYPE.MCU) {
-      logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.MCU]);
-      state.hasMCU = true;
-      dispatchEvent(serverPeerJoined({
-        peerId: targetMid,
-        serverPeerType: SERVER_PEER_TYPE.MCU,
-        room: Room.getRoomInfo(currentRoom.id),
-      }));
-    } else {
-      dispatchEvent(peerJoined({
-        peerId: targetMid,
-        peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
-        isSelf: false,
-        room: Room.getRoomInfo(currentRoom.id),
-      }));
-    }
-  }
-
-  state.peerMessagesStamps[targetMid] = state.peerMessagesStamps[targetMid] || {
-    userData: 0,
-    audioMuted: 0,
-    videoMuted: 0,
-  };
-
-  if (caller === CALLERS.WELCOME) {
-    state.peerMessagesStamps[targetMid].hasWelcome = false;
-  }
-
-  if (caller === CALLERS.WELCOME && hasMCU && Array.isArray(message.peersInRoom) && message.peersInRoom.length) {
-    const userId = state.user.sid;
-    for (let peersInRoomIndex = 0; peersInRoomIndex < message.peersInRoom.length; peersInRoomIndex += 1) {
-      const PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
-      if (PEER_ID !== userId) {
-        const parsedMsg = parsers.enterAndWelcome(message.peersInRoom[peersInRoomIndex]);
-        const peerUserInfo = parsedMsg.userInfo;
-        setPeerInformations(state, PEER_ID, peerUserInfo);
-        dispatchEvent(peerJoined({
-          peerId: PEER_ID,
-          peerInfo: PeerData.getPeerInfo(PEER_ID, currentRoom),
-          isSelf: false,
-          room: Room.getRoomInfo(currentRoom.id),
-        }));
+  for (let p = 0; p < RTCPeerConnections.length; p += 1) {
+    const transceivers = RTCPeerConnections[p].getTransceivers();
+    for (let t = 0; t < transceivers.length; t += 1) {
+      if (transceivers[t].sender.track && transceivers[t].sender.track.id === track.id) {
+        transceiverMid = transceivers[t].mid;
+        break;
       }
     }
-  } else if (hasMCU && targetMid !== state.user.sid && targetMid !== PEER_TYPE.MCU) {
-    setPeerInformations(state, targetMid, userInfo);
-    dispatchEvent(peerJoined({
-      peerId: targetMid,
-      peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
-      isSelf: false,
-      room: Room.getRoomInfo(currentRoom.id),
-    }));
+  }
+  return transceiverMid;
+};
+
+const retrieveMediaState = (track) => {
+  if (track.readyState === TRACK_READY_STATE.ENDED) {
+    return MEDIA_STATE.UNAVAILABLE;
+  } if (track.muted) {
+    return MEDIA_STATE.MUTED;
+  }
+  return MEDIA_STATE.ACTIVE;
+};
+
+const retrieveMediaId = (trackKind, streamId) => {
+  const prefix = trackKind === TRACK_KIND.AUDIO ? 'AUDIO' : 'VIDEO';
+  return `${prefix}_${streamId}`;
+};
+
+const buildPeerMediaInfo = (room, mid, track, streamId, mediaType) => ({
+  publisherId: mid,
+  mediaId: helpers$5.retrieveMediaId(track.kind, streamId),
+  mediaType,
+  mediaState: helpers$5.retrieveMediaState(track),
+  transceiverMid: helpers$5.retrieveTransceiverMid(room, track),
+  streamId,
+  trackId: track.id,
+  mediaMetaData: '',
+  simulcast: '',
+});
+
+const isMatchedTrack = (streamTrack, track) => streamTrack.id === track.id;
+
+const retrieveStreamIdOfTrack = (room, track) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { peerStreams, user } = state;
+  const streams = Object.values(peerStreams[user.sid]);
+  let streamId = null;
+
+  for (let i = 0; i < streams.length; i += 1) {
+    const tracks = streams[i].getTracks();
+
+    for (let j = 0; j < tracks.length; j += 1) {
+      if (isMatchedTrack(tracks[j], track)) {
+        streamId = streams[i].id;
+        break;
+      }
+    }
   }
 
-  Skylink.setSkylinkState(state, currentRoom.id);
+  return streamId;
+};
 
-  if (isNewPeer) {
-    dispatchEvent(handshakeProgress({
-      peerId: targetMid,
-      state: HANDSHAKE_PROGRESS$1.WELCOME,
-      error: null,
-      room: Room.getRoomInfo(currentRoom.id),
-    }));
+const doUpdate = (room, peerId, dispatchEvent, mediaId, key = false, value = false, mediaInfo = false) => {
+  const updatedState = Skylink.getSkylinkState(room.id);
+  // Check for key + value || mediaInfo but not both
+  if (!mediaInfo && key && value) {
+    updatedState.peerMedias[peerId][mediaId][key] = value;
+    logger.log.INFO([peerId, TAGS.PEER_MEDIA, null, `${MESSAGES.MEDIA_INFO.UPDATE_SUCCESS} -- ${mediaId} - ${key}: ${value}`]);
+  } else if (mediaInfo && !key && !value) {
+    updatedState.peerMedias[peerId] = updatedState.peerMedias[peerId] || {};
+    updatedState.peerMedias[peerId][mediaId] = mediaInfo;
+  }
+
+  Skylink.setSkylinkState(updatedState, room.id);
+};
+
+const dispatchMediaInfoMsg = (room, peerId, dispatchEvent, mediaId) => {
+  const updatedState = Skylink.getSkylinkState(room.id);
+  if (updatedState.user.sid === peerId && dispatchEvent) {
+    helpers$5.sendMediaInfoMsg(room, updatedState.peerMedias[peerId][mediaId]);
   }
 };
+
+// dispatch event when:
+// 1) not from offer and answer
+// 2) self mediaInfo is updated
+// 3) a new stream (with new mediaInfo obj) will replace an existing stream - e.g. screen share, send stream
+
+const updatePeerMediaInfo = (room, peerId, dispatchEvent, mediaId, key = false, value = false, mediaInfo = false) => {
+  try {
+    doUpdate(room, peerId, dispatchEvent, mediaId, key, value, mediaInfo);
+    dispatchMediaInfoMsg(room, peerId, dispatchEvent, mediaId);
+  } catch (err) {
+    const msg = mediaInfo ? JSON.stringify(mediaInfo) : `${mediaId} - ${key}: ${value}`;
+    logger.log.ERROR([peerId, TAGS.PEER_MEDIA, null, `${MESSAGES.MEDIA_INFO.ERRORS.FAILED_UPDATING} -- ${msg}`], err);
+  }
+};
+
+const sendMediaInfoMsg = (room, updatedMediaInfo) => {
+  const signaling = new SkylinkSignalingServer();
+  const state = Skylink.getSkylinkState(room.id);
+  const { user, hasMCU, peerConnections } = state;
+  const peerIds = hasMCU ? [PEER_TYPE.MCU] : Object.keys(peerConnections).filter(peerId => (peerId !== user.sid) && (peerId !== PEER_TYPE.MCU));
+
+  peerIds.forEach((target) => {
+    signaling.mediaInfoEvent(state, target, updatedMediaInfo);
+  });
+};
+
+const parseSDPForTransceiverMid = (room, peerId, sessionDescription) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { peerMedias } = state;
+  const { beSilentOnParseLogs } = Skylink.getInitOptions();
+  const mediaInfos = Object.values(peerMedias[peerId]);
+  const mediaMids = SessionDescription.getTransceiverMid(sessionDescription, beSilentOnParseLogs);
+  const audioMids = mediaMids.audio;
+  const videoMids = mediaMids.video;
+
+  for (let m = 0; m < mediaInfos.length; m += 1) {
+    const mediaInfo = mediaInfos[m];
+    // If mediaState is unavailable, there is no corresponding transceiverMid in the SDP and mediaInfo.transceiverMid will be 'null'. mediaInfo.transceiverMid cannot be 'null'.
+    mediaInfo.transceiverMid = mediaInfo.mediaState === MEDIA_STATE.UNAVAILABLE ? mediaInfo.transceiverMid : null;
+    for (let a = 0; a < audioMids.length; a += 1) {
+      if (audioMids[a].streamId === mediaInfo.streamId && (audioMids[a].direction === 'sendonly' || audioMids[a].direction === 'sendrecv')) {
+        helpers$5.updatePeerMediaInfo(room, peerId, false, mediaInfo.mediaId, MEDIA_INFO.TRANSCEIVER_MID, audioMids[a].transceiverMid);
+        break;
+      }
+    }
+
+    for (let v = 0; v < videoMids.length; v += 1) {
+      if (videoMids[v].streamId === mediaInfo.streamId && (videoMids[v].direction === 'sendonly' || videoMids[v].direction === 'sendrecv')) {
+        helpers$5.updatePeerMediaInfo(room, peerId, false, mediaInfo.mediaId, MEDIA_INFO.TRANSCEIVER_MID, videoMids[v].transceiverMid);
+        break;
+      }
+    }
+  }
+};
+
+const retrieveValueGivenTransceiverMid = (state, peerId, transceiverMid, key) => {
+  const { peerMedias } = state;
+  const mediaInfos = Object.values(peerMedias[peerId]);
+  for (let m = 0; m < mediaInfos.length; m += 1) {
+    if (mediaInfos[m].transceiverMid === transceiverMid) {
+      return mediaInfos[m][key];
+    }
+  }
+
+  return null;
+};
+
+const retrieveFormattedMediaInfo = (room, peerId) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { peerMedias } = state;
+  const mediaInfos = Object.values(peerMedias[peerId]);
+  const formattedMediaInfos = [];
+
+  for (let m = 0; m < mediaInfos.length; m += 1) {
+    const mediaInfo = mediaInfos[m];
+    const clonedMediaInfo = clone_1(mediaInfo);
+    delete clonedMediaInfo.trackId;
+    delete clonedMediaInfo.streamId;
+    formattedMediaInfos.push(clonedMediaInfo);
+  }
+
+  return formattedMediaInfos;
+};
+
+const resetPeerMedia = (room, peerId) => {
+  const updatedState = Skylink.getSkylinkState(room.id);
+  const peerMedia = updatedState.peerMedias[peerId];
+
+  if (peerMedia) {
+    updatedState.peerMedias[peerId] = {};
+  }
+
+  return updatedState;
+};
+
+// peerMedia will have a previous state if setPeerMediaInfo is called from renegotiation
+const peerMediaHasPreviousState = (clonedPeerMedia, mediaId) => !isEmptyObj(clonedPeerMedia) && clonedPeerMedia[mediaId];
+
+const populatePeerMediaInfo = (updatedState, clonedPeerMedia, mediaInfo) => {
+  const peerMedia = updatedState.peerMedias[mediaInfo.publisherId] || {};
+  peerMedia[mediaInfo.mediaId] = mediaInfo;
+
+  if (peerMediaHasPreviousState(clonedPeerMedia, mediaInfo.mediaId)) {
+    peerMedia[mediaInfo.mediaId].streamId = (mediaInfo.transceiverMid === clonedPeerMedia[mediaInfo.mediaId].transceiverMid) ? clonedPeerMedia[mediaInfo.mediaId].streamId : '';
+  }
+
+  return peerMedia;
+};
+
+// eslint-disable-next-line consistent-return
+const prepStopStreams = (roomId, streamId, fromLeaveRoom = false, isScreensharing = false) => new Promise((resolve, reject) => {
+  const state = Skylink.getSkylinkState(roomId);
+  const { user, peerStreams } = state;
+  if (!state) {
+    reject(new Error(`${MESSAGES.ROOM_STATE.NOT_FOUND} - ${roomId}`));
+  }
+
+  if (!peerStreams[user.sid] || (streamId && !peerStreams[user.sid][streamId])) {
+    reject(new Error(`${MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM} - ${streamId}`));
+  }
+
+  if (isScreensharing) {
+    stopStreamHelpers.prepStopScreenStream(state.room, streamId, fromLeaveRoom)
+      .then(() => resolve())
+      .catch(rej => reject(rej));
+  } else {
+    stopStreamHelpers.prepStopUserMediaStreams(state, streamId, fromLeaveRoom)
+      .then(() => resolve())
+      .catch(rej => reject(rej));
+  }
+});
+
+const retrieveUserMediaStreams = (state) => {
+  const { peerStreams, user, room } = state;
+  const streamIds = Object.keys(peerStreams[user.sid]);
+  const streams = streamIds.map((id) => {
+    if (!PeerMedia.retrieveScreenMediaInfo(room, user.sid, { streamId: id })) {
+      return peerStreams[user.sid][id];
+    }
+    return null;
+  });
+
+  return streams.filter(i => i !== null);
+};
+
+// eslint-disable-next-line consistent-return
+const prepStopUserMediaStreams = (state, streamId, fromLeaveRoom) => new Promise((resolve, reject) => {
+  const { user, peerStreams } = state;
+  const mediaStreams = retrieveUserMediaStreams(state);
+  const isScreensharing = false;
+
+  try {
+    if (!streamId) {
+      stopStreamHelpers.stopAddedStreams(state, mediaStreams, isScreensharing, fromLeaveRoom);
+    } else {
+      const stream = peerStreams[user.sid][streamId];
+      stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
+    }
+
+    return stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
+  } catch (error) {
+    logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA], error);
+    reject(MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA);
+  }
+});
+
+class PeerStream {
+  static updatePeerStreamWithUserSid(room, sid) {
+    const updatedState = Skylink.getSkylinkState(room.id);
+    if (!updatedState.peerStreams.null) {
+      return;
+    }
+
+    updatedState.peerStreams[sid] = Object.assign({}, updatedState.peerStreams.null);
+    delete updatedState.peerStreams.null;
+    Skylink.setSkylinkState(updatedState, room.id);
+  }
+
+  static addStream(peerId, stream = null, roomkey) {
+    if (!stream) return;
+    const updatedState = Skylink.getSkylinkState(roomkey);
+    const { peerStreams } = updatedState;
+
+    if (peerStreams[peerId] && peerStreams[peerId][stream.id]) {
+      return;
+    }
+
+    peerStreams[peerId] = peerStreams[peerId] || {};
+    peerStreams[peerId][stream.id] = stream;
+    Skylink.setSkylinkState(updatedState, roomkey);
+  }
+
+  static deleteStream(room, stream) {
+    const updatedState = Skylink.getSkylinkState(room.id);
+    const { user } = updatedState;
+    const streamIdToRemove = stream.id;
+    delete updatedState.peerStreams[user.sid][streamIdToRemove];
+
+    if (isEmptyObj(updatedState.peerStreams[user.sid])) {
+      delete updatedState.peerStreams[user.sid];
+    }
+
+    Skylink.setSkylinkState(updatedState, updatedState.room.id);
+  }
+
+  static dispatchStreamEvent(eventName, detail) {
+    switch (eventName) {
+      case ON_INCOMING_STREAM:
+        dispatchEvent(onIncomingStream(detail));
+        break;
+      case ON_INCOMING_SCREEN_STREAM:
+        dispatchEvent(onIncomingScreenStream(detail));
+        break;
+      case STREAM_ENDED:
+        dispatchEvent(streamEnded(detail));
+        break;
+      case STREAM_MUTED:
+        dispatchEvent(streamMuted(detail));
+        break;
+      default:
+        // do nothing
+    }
+  }
+}
+
+const stopAddedStream = (state, stream, isScreensharing = false, fromLeaveRoom = false) => {
+  const { room, user } = state;
+
+  try {
+    stopStreamHelpers.tryStopStream(stream, user.sid);
+
+    if (!fromLeaveRoom) {
+      stopStreamHelpers.removeTracks(room, stream);
+      PeerMedia.setMediaStateToUnavailable(room, user.sid, PeerMedia.retrieveMediaId(stream.getTracks()[0].kind, stream.id));
+      PeerStream.deleteStream(room, stream);
+      stopStreamHelpers.listenForEventAndDeleteMediaInfo(room, stream);
+      stopStreamHelpers.dispatchEvents(room, stream, isScreensharing);
+
+      if (isScreensharing) {
+        new ScreenSharing(state).deleteScreensharingInstance(room);
+      }
+    }
+
+    logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SUCCESS} - stream id: ${stream.id} ${(isScreensharing ? '(screenshare)' : '')}`]);
+  } catch (err) {
+    logger.log.ERROR([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_ADDED_STREAM], err);
+  }
+};
+
+const stopMediaTracks = (tracks, peerId) => {
+  if (!tracks || !tracks[0]) {
+    return false;
+  }
+
+  tracks.forEach((track) => {
+    try {
+      track.stop();
+    } catch (error) {
+      logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_MEDIA_TRACK} - track id: ${track.id}`], error);
+    }
+  });
+
+  return true;
+};
+
+const tryStopStream = (stream, peerId) => {
+  if (!stream) return;
+
+  try {
+    stopMediaTracks(stream.getAudioTracks());
+  } catch (error) {
+    logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_AUDIO_TRACK} - stream id: ${stream.id}`], error);
+  }
+
+  try {
+    stopMediaTracks(stream.getVideoTracks());
+  } catch (error) {
+    logger.log.ERROR([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_VIDEO_TRACK} - stream id: ${stream.id}`], error);
+  }
+};
+
+const removeSenderFromList = (state, peerId, sender) => {
+  const { room } = state;
+  const updatedState = state;
+  let indexToRemove = -1;
+
+  if (!updatedState.currentRTCRTPSenders[peerId]) {
+    return;
+  }
+
+  const listOfSenders = updatedState.currentRTCRTPSenders[peerId];
+
+  for (let i = 0; i < listOfSenders.length; i += 1) {
+    if (sender === listOfSenders[i]) {
+      indexToRemove = i;
+      break;
+    }
+  }
+
+  if (indexToRemove !== -1) {
+    listOfSenders.splice(indexToRemove, 1);
+    updatedState.currentRTCRTPSenders[peerId] = listOfSenders;
+    Skylink.setSkylinkState(updatedState, room.id);
+  } else {
+    logger.log.WARN([peerId, null, null, 'No matching sender was found for the peer.'], sender);
+  }
+};
+
+const removeTrack = (state, peerConnections, track) => {
+  const trackId = track.id;
+  const peerIds = Object.keys(peerConnections);
+
+  for (let i = 0; i < peerIds.length; i += 1) {
+    try {
+      const targetMid = peerIds[i];
+      const peerConnection = peerConnections[targetMid];
+
+      if (peerConnection.connectionState === PEER_CONNECTION_STATE$1.CLOSED) {
+        break;
+      }
+
+      const senders = peerConnection.getSenders();
+      let sender = null;
+      for (let y = 0; y < senders.length; y += 1) {
+        if (senders[y].track && senders[y].track.id === trackId) {
+          sender = senders[y];
+          peerConnection.removeTrack(sender);
+          removeSenderFromList(state, targetMid, sender);
+        }
+      }
+    } catch (error) {
+      logger.log.ERROR([peerIds[i], TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.ERRORS.REMOVE_TRACK], error);
+    }
+  }
+};
+
+/**
+ * Function that removes the tracks from the peer connection.
+ * @param {SkylinkRoom} room
+ * @param {MediaStream} stream
+ * @memberOf MediaStreamHelpers
+ */
+const removeTracks = (room, stream) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { peerConnections, user } = state;
+  const tracks = stream.getTracks();
+
+  try {
+    tracks.forEach((track) => {
+      removeTrack(state, peerConnections, track);
+    });
+  } catch (error) {
+    logger.log.ERROR([user.sid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.ERRORS.REMOVE_TRACK], error);
+  }
+};
+
+const listenForEventAndDeleteMediaInfo = (room, stream) => {
+  const state = Skylink.getSkylinkState(room.id);
+
+  const executeOfferCallback = (evt) => {
+    const s = stream;
+    const { user } = state;
+    const { detail } = evt;
+    if (detail.state === HANDSHAKE_PROGRESS$1.OFFER) {
+      const mediaId = PeerMedia.retrieveMediaId(hasAudioTrack(s) ? TRACK_KIND.AUDIO : TRACK_KIND.VIDEO, s.id);
+      PeerMedia.deleteUnavailableMedia(room, user.sid, mediaId);
+    }
+  };
+
+  const executeMediaDeletedCallback = () => {
+    removeEventListener(EVENTS.HANDSHAKE_PROGRESS, executeOfferCallback);
+    removeEventListener(EVENTS.MEDIA_INFO_DELETED, executeMediaDeletedCallback);
+  };
+
+  addEventListener(EVENTS.HANDSHAKE_PROGRESS, executeOfferCallback);
+  addEventListener(EVENTS.MEDIA_INFO_DELETED, executeMediaDeletedCallback);
+};
+
+const stopAddedStreams = (state, streams, isScreensharing, fromLeaveRoom) => {
+  streams.forEach((stream) => {
+    stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
+  });
+};
+
+const updateMediaInfoMediaState = (room, stream) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { user } = state;
+  const streamId = stream.id;
+  const mediaId = PeerMedia.retrieveMediaId(stream.getTracks()[0].kind, streamId);
+  PeerMedia.setMediaStateToUnavailable(room, user.sid, mediaId);
+};
+
+/**
+ * Function that handles the <code>RTCPeerConnection.removeTracks(sender)</code> on the local MediaStream.
+ * @param {SkylinkRoom} room
+ * @param {MediaStream} stream - The stream.
+ * @param {boolean} isScreensharing
+ * @memberOf MediaStreamHelpers
+ * @fires STREAM_ENDED
+ */
+const dispatchEvents = (room, stream, isScreensharing = false) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { MEDIA_STREAM } = MESSAGES;
+  const { user } = state;
+  const isSelf = true;
+
+  logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, MEDIA_STREAM.STOP_SETTINGS], {
+    peerId: user.sid, isSelf, isScreensharing, stream,
+  });
+
+  PeerStream.dispatchStreamEvent(STREAM_ENDED, {
+    room: Room.getRoomInfo(room.id),
+    peerId: user.sid,
+    peerInfo: PeerData.getCurrentSessionInfo(room),
+    isSelf,
+    isScreensharing,
+    streamId: stream.id,
+    isVideo: hasVideoTrack(stream),
+    isAudio: hasAudioTrack(stream),
+  });
+
+  dispatchEvent(mediaAccessStopped({
+    isScreensharing,
+    streamId: stream.id,
+  }));
+
+  dispatchEvent(peerUpdated({
+    peerId: user.sid,
+    peerInfo: helpers$6.getCurrentSessionInfo(room),
+    isSelf: true,
+  }));
+};
+
+const prepStopScreenStream = (room, streamId, fromLeaveRoom = false) => new Promise((resolve, reject) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { user, peerStreams } = state;
+  const screenStream = peerStreams[user.sid][streamId];
+  const isScreensharing = true;
+
+  try {
+    stopStreamHelpers.stopAddedStream(state, screenStream, isScreensharing, fromLeaveRoom);
+    stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
+  } catch (error) {
+    logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN], error);
+    reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN));
+  }
+});
+
+const dispatchPeerUpdatedEvent = (roomState) => {
+  const { room, user } = roomState;
+
+  dispatchEvent(peerUpdated({
+    peerId: user.sid,
+    isSelf: true,
+    peerInfo: PeerData.getCurrentSessionInfo(room),
+  }));
+};
+
+// eslint-disable-next-line consistent-return
+const initRefreshConnectionAndResolve = (room, fromLeaveRoom, resolve, reject) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { peerConnections } = state;
+
+  try {
+    if (!fromLeaveRoom) {
+      if (!isEmptyArray(Object.keys(peerConnections))) {
+        // eslint-disable-next-line consistent-return
+        const executeAnswerAckCallback = (evt) => {
+          const { detail } = evt;
+          if (detail.state === HANDSHAKE_PROGRESS$1.ANSWER_ACK) {
+            return (resolve());
+          }
+        };
+
+        addEventListener(EVENTS.HANDSHAKE_PROGRESS, executeAnswerAckCallback);
+
+        PeerConnection.refreshConnection(state);
+      } else {
+        dispatchPeerUpdatedEvent(state);
+        PeerMedia.deleteUnavailableMedia(state.room, state.user.sid);
+        return resolve();
+      }
+    }
+  } catch (err) {
+    reject(err);
+  }
+};
+
+const stopStreamHelpers = {
+  prepStopStreams,
+  prepStopUserMediaStreams,
+  stopAddedStream,
+  tryStopStream,
+  removeTracks,
+  listenForEventAndDeleteMediaInfo,
+  stopAddedStreams,
+  updateMediaInfoMediaState,
+  dispatchEvents,
+  prepStopScreenStream,
+  initRefreshConnectionAndResolve,
+};
+
+/**
+ * @private
+ * @classdesc Class used for handling RTCMediaStream. Helper methods are listed inside <code>{@link MediaStreamHelpers}</code>.
+ * @class
+ */
+class MediaStream {
+  /**
+   * @description Function that retrieves camera Stream.
+   * @param {SkylinkState} state
+   * @param {getUserMediaOptions} mediaOptions - The camera Stream configuration options.
+   * @return {Promise}
+   */
+  static getUserMedia(state, mediaOptions = {}) {
+    const { room } = state;
+    const updatedRoomState = helpers$7.parseMediaOptions(mediaOptions, state);
+    const { audio, video } = mediaOptions;
+    const useExactConstraints = !!mediaOptions.useExactConstraints;
+    Skylink.setSkylinkState(updatedRoomState, room.id);
+
+    return helpers$7.prepMediaAccessRequest({
+      useExactConstraints,
+      audio,
+      video,
+      roomKey: room.id,
+    });
+  }
+
+  /**
+   * @description Function that filters user input from getUserMedia public method
+   * @param {SkylinkState} roomState
+   * @param {getUserMediaOptions} options
+   */
+  static processUserMediaOptions(roomState, options = null) {
+    return new Promise((resolve, reject) => {
+      let mediaOptions = {
+        audio: true,
+        video: true,
+      };
+
+      if (!options) {
+        logger.log.WARN([roomState.user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.NO_OPTIONS} - ${MESSAGES.MEDIA_STREAM.DEFAULT_OPTIONS}`], mediaOptions);
+      }
+
+      if (!isAObj(options)) {
+        logger.log.ERROR([roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS], options);
+        reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS), null);
+      }
+
+      mediaOptions = options;
+
+      const getUserMediaPromise = MediaStream.getUserMedia(roomState, mediaOptions);
+      getUserMediaPromise.then((stream) => {
+        resolve(stream);
+      }).catch((error) => {
+        reject(error);
+      });
+    });
+  }
+
+  /**
+   * Function that stops the getUserMedia() streams.
+   * @param {SkylinkState} roomState
+   * @param {String} streamId - The id of the stream to stop if there is more than one getUserMedia stream.
+   */
+  static stopStreams(roomState, streamId) {
+    return stopStreamHelpers.prepStopStreams(roomState.room.id, streamId);
+  }
+
+  /**
+   * Function that sets User's Stream to send to Peer connection.
+   * @param {String} targetMid - The mid of the target peer
+   * @param {SkylinkState} roomState - Skylink State of current room
+   */
+  static addLocalMediaStreams(targetMid, roomState) {
+    helpers$7.addLocalMediaStreams(targetMid, roomState);
+  }
+
+  /**
+   * Function that handles the <code>RTCPeerConnection.ontrack</code> event on remote stream added.
+   * @param {MediaStream} stream - {@link https://developer.mozilla.org/en-US/docs/Web/API/MediaStream}
+   * @param {SkylinkState} currentRoomState - Current room state
+   * @param {String} targetMid - The mid of the target peer
+   * @param {boolean} [isScreensharing=false] - The flag if stream is a screenshare stream.
+   */
+  static onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio) {
+    helpers$7.onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio);
+  }
+
+  /**
+   * Function that mutes the stream.
+   * @param {SkylinkState} roomState
+   * @param {Object} options
+   * @param {boolean} options.audioMuted
+   * @param {boolean} options.videoMuted
+   * @param {String} streamId
+   */
+  static muteStreams(roomState, options, streamId) {
+    return helpers$7.muteStreams(roomState, options, streamId);
+  }
+
+  /**
+   * Function that sends the MediaStream object if present or mediaStream settings.
+   * @param {SkylinkState} roomState
+   * @param {MediaStream|Object} options
+   */
+  static sendStream(roomState, options) {
+    return helpers$7.sendStream(roomState, options);
+  }
+
+  static getStreamSources() {
+    return helpers$7.getStreamSources();
+  }
+
+  /**
+   * Function that returns all active streams including screenshare stream if present.
+   * @param {SkylinkState} roomState
+   * @param {boolean} includeSelf
+   * @return {streamList} streamList
+   */
+  static getStreams(roomState, includeSelf) {
+    return helpers$7.getStreams(roomState, includeSelf);
+  }
+
+  static usePrefetchedStream(roomKey, stream, options = null) {
+    return new Promise((resolve) => {
+      if (!stream && (options.id && options.active)) {
+        // eslint-disable-next-line no-param-reassign
+        stream = options;
+      }
+
+      const streamOptions = { audio: stream.getAudioTracks().length !== 0, video: stream.getVideoTracks().length !== 0 };
+      const audioSettings = helpers$7.parseStreamSettings(streamOptions, TRACK_KIND.AUDIO);
+      const videoSettings = helpers$7.parseStreamSettings(streamOptions, TRACK_KIND.VIDEO);
+      const isAudioFallback = false;
+      const streams = helpers$7.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve);
+
+      resolve(streams);
+    });
+  }
+
+  static buildStreamSettings(room, stream, settings) {
+    return helpers$7.buildStreamSettings(room, stream, settings);
+  }
+}
 
 class HandleNegotiationStats extends SkylinkStats {
   constructor() {
@@ -20791,1035 +19329,6 @@ class HandleNegotiationStats extends SkylinkStats {
 }
 
 const handleNegotationStats = new HandleNegotiationStats();
-
-const CALLERS = {
-  ENTER: 'enterHandler',
-  WELCOME: 'welcomeHander',
-};
-
-const getNextNegotiationStep = (params) => {
-  let method = 'welcome';
-
-  if (params.caller === CALLERS.WELCOME) {
-    const state = Skylink.getSkylinkState(params.currentRoom.id);
-    const { peerMessagesStamps, peerPriorityWeight, hasMCU } = state;
-    if (hasMCU || peerPriorityWeight > params.message.weight) {
-      if (peerMessagesStamps[params.targetMid].hasWelcome) {
-        method = 'noop';
-        logger.log.WARN([params.targetMid, TAGS.PEER_CONNECTION, null, 'Discarding extra "welcome" received.']);
-      } else {
-        method = 'offer';
-        state.peerMessagesStamps[params.targetMid].hasWelcome = true;
-        Skylink.setSkylinkState(state, params.currentRoom.id);
-      }
-    }
-  }
-  return method;
-};
-
-// eslint-disable-next-line consistent-return
-const checkStampBeforeSendingWelcome = (params) => {
-  const { currentRoom, targetMid, message } = params;
-  const state = Skylink.getSkylinkState(currentRoom.id);
-  const { peerConnections, hasMCU } = state;
-  const { STATS_MODULE, NEGOTIATION_PROGRESS, PEER_CONNECTION } = MESSAGES;
-  const signaling = new SkylinkSignalingServer();
-  const method = getNextNegotiationStep(params);
-
-  if (method === 'offer') {
-  // Added checks to ensure that connection object is defined first
-    if (!peerConnections[targetMid]) {
-      logger.log.WARN([targetMid, 'RTCSessionDescription', 'offer', PEER_CONNECTION.NO_PEER_CONNECTION]);
-      handleNegotationStats.send(currentRoom.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS.OFFER.dropped, targetMid, message, false, PEER_CONNECTION.NO_PEER_CONNECTION);
-      return null;
-    }
-
-    const { signalingState } = peerConnections[targetMid];
-
-    // Added checks to ensure that state is "stable" if setting local "offer"
-    if (signalingState !== PEER_CONNECTION_STATE$1.STABLE) {
-      logger.log.WARN([targetMid, 'RTCSessionDescription', 'offer', NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE], signalingState);
-      handleNegotationStats.send(currentRoom.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS.OFFER.dropped, targetMid, message, false, NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE);
-      return null;
-    }
-
-    signaling[method](params.currentRoom, params.targetMid);
-  } else if (!hasMCU) {
-    signaling[method](params.currentRoom, params.targetMid);
-  }
-};
-
-const logStats = (caller, targetMid, state, message) => {
-  const { room } = state;
-
-  let callerState = 'enter';
-  if (caller === CALLERS.WELCOME) {
-    callerState = 'welcome';
-  }
-
-  logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, `Peer ${callerState} received ->`], message);
-  handleNegotationStats.send(room.id, callerState, targetMid, message, true);
-};
-
-/**
- * Function that parses the enterAndWelcome and welcome message and sends the offer or welcome message.
- * @param {JSON} message
- * @param {String} caller
- * @memberOf SignalingMessageHandler
- */
-const parseAndSendWelcome = (message, caller) => {
-  const parsedMsg = parsers.enterAndWelcome(message);
-  const {
-    rid, mid, userInfo, publisherId,
-  } = parsedMsg;
-  const state = Skylink.getSkylinkState(rid);
-  const { hasMCU } = state;
-  const targetMid = hasMCU && publisherId ? publisherId : mid;
-
-  logStats(caller, targetMid, state, parsedMsg);
-
-  const peerParams = {
-    currentRoom: state.room,
-    targetMid,
-    userInfo,
-    message: parsedMsg,
-    caller,
-  };
-
-  processPeer(peerParams);
-  checkStampBeforeSendingWelcome(peerParams);
-};
-
-const enterHandler = (message) => {
-  parseAndSendWelcome(message, CALLERS.ENTER);
-};
-
-/* eslint-disable no-unused-vars,no-multi-assign */
-
-const handleSetOfferAndAnswerSuccess = (state, targetMid, description, isRemote) => {
-  const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
-  const { peerConnections, bufferedLocalOffer, room } = state;
-  const peerConnection = peerConnections[targetMid];
-  const msgType = description.type === 'offer' ? 'OFFER' : 'ANSWER';
-
-  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS[msgType].set, targetMid, description, isRemote);
-
-  if (isRemote) { // handshake progress is triggered on the local end after sdp it is created
-    dispatchEvent(handshakeProgress({
-      state: HANDSHAKE_PROGRESS$1[msgType],
-      peerId: targetMid,
-      room: Room.getRoomInfo(room.id),
-    }));
-  }
-
-  if (isRemote) {
-    if (description.type === 'offer') {
-      peerConnection.setOffer = 'remote';
-    } else {
-      peerConnection.setAnswer = 'remote';
-    }
-    IceConnection.addIceCandidateFromQueue(targetMid, room);
-  } else {
-    bufferedLocalOffer[targetMid] = null;
-    if (description.type === 'offer') {
-      peerConnection.setOffer = 'local';
-    } else {
-      peerConnection.setAnswer = 'local';
-    }
-  }
-
-  Skylink.setSkylinkState(state, room.id);
-};
-
-const handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote, error) => {
-  const { room, user } = state;
-  const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
-  const msgType = description.type === 'offer' ? 'OFFER' : 'ANSWER';
-
-  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS[msgType].set_error, targetMid, description, isRemote, error);
-
-  dispatchEvent(handshakeProgress({
-    state: HANDSHAKE_PROGRESS$1.ERROR,
-    peerId: isRemote ? targetMid : user.sid,
-    error,
-    room: Room.getRoomInfo(room.id),
-  }));
-};
-
-// modifying the remote description received
-const mungeSDP = (targetMid, sessionDescription, roomKey) => {
-  const mungedSessionDescription = sessionDescription;
-  // TODO: Below SDP methods needs to be implemented in the SessionDescription Class.
-  mungedSessionDescription.sdp = SessionDescription.setSDPBitrate(targetMid, mungedSessionDescription, roomKey);
-
-  // logger.log.INFO([targetMid, 'RTCSessionDescription', type, `Updated remote ${type} ->`], sessionDescriptionToSet.sdp);
-  return mungedSessionDescription;
-};
-
-const setLocalDescription = (room, targetMid, localDescription) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const { type } = localDescription;
-  const peerConnection = peerConnections[targetMid];
-  const { STATS_MODULE } = MESSAGES;
-  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-
-  peerConnection.processingLocalSDP = true;
-
-  handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, localDescription, false);
-
-  return peerConnection.setLocalDescription(localDescription)
-    .then(() => peerConnection);
-};
-
-const onLocalDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, localDescription) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const { NEGOTIATION_PROGRESS } = MESSAGES;
-  const peerConnection = peerConnections[targetMid] = RTCPeerConnection;
-
-  logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, localDescription.type, NEGOTIATION_PROGRESS.SET_LOCAL_DESCRIPTION], localDescription);
-
-  peerConnection.processingLocalSDP = false;
-  handleSetOfferAndAnswerSuccess(state, targetMid, localDescription, false);
-};
-
-const onLocalDescriptionSetFailure = (room, targetMid, localDescription, error) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const peerConnection = peerConnections[targetMid];
-  const { NEGOTIATION_PROGRESS } = MESSAGES;
-
-  logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, localDescription.type, NEGOTIATION_PROGRESS.FAILED_SET_LOCAL_DESCRIPTION], error);
-
-  peerConnection.processingLocalSDP = false;
-  peerConnection.negotiating = false;
-
-  handleSetOfferAndAnswerFailure(state, targetMid, localDescription, false, error);
-};
-
-const setRemoteDescription = (room, targetMid, remoteDescription) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const { type } = remoteDescription;
-  const { STATS_MODULE } = MESSAGES;
-  const peerConnection = peerConnections[targetMid];
-  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-
-  peerConnection.processingRemoteSDP = true;
-  handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, remoteDescription, true);
-  const mungedSessionDescription = mungeSDP(targetMid, remoteDescription, room.id);
-  return peerConnection.setRemoteDescription(mungedSessionDescription)
-    .then(() => peerConnection);
-};
-
-const sendAnswerAck = (state, targetMid, success) => {
-  const updatedState = state;
-  updatedState.peerConnections[targetMid].negotiating = false;
-  Skylink.setSkylinkState(updatedState, targetMid);
-
-  const signaling = new SkylinkSignalingServer();
-  signaling.answerAck(state, targetMid, success);
-};
-
-const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remoteDescription) => {
-  const signaling = new SkylinkSignalingServer();
-  const { type } = remoteDescription;
-  const { NEGOTIATION_PROGRESS, DATA_CHANNEL } = MESSAGES;
-
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const peerConnection = peerConnections[targetMid] = RTCPeerConnection;
-
-  logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.SET_REMOTE_DESCRIPTION], remoteDescription);
-
-  peerConnection.processingRemoteSDP = false;
-
-  if (type === 'offer') {
-    handleSetOfferAndAnswerSuccess(state, targetMid, remoteDescription, true);
-    return signaling.answer(state, targetMid);
-  }
-  // FIXME: why is this needed?
-  if (state.peerMessagesStamps[targetMid]) {
-    state.peerMessagesStamps[targetMid].hasRestart = false;
-  }
-
-  // if remote peer does not have data channel
-  if (state.dataChannels[targetMid] && (peerConnection.remoteDescription.sdp.indexOf('m=application') === -1 || peerConnection.remoteDescription.sdp.indexOf('m=application 0') > 0)) {
-    logger.log.WARN([targetMid, TAGS.PEER_CONNECTION, null, `${DATA_CHANNEL.CLOSING} - ${DATA_CHANNEL.NO_REMOTE_DATA_CHANNEL}`]);
-    PeerConnection.closeDataChannel(state, targetMid);
-  }
-
-  handleSetOfferAndAnswerSuccess(state, targetMid, remoteDescription, true);
-  sendAnswerAck(state, targetMid, true);
-  return true;
-};
-
-const onRemoteDescriptionSetFailure = (room, targetMid, remoteDescription, error) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const peerConnection = peerConnections[targetMid];
-  const { type } = remoteDescription;
-
-  logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, type, `${MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_SET_REMOTE_DESCRIPTION} ->`], {
-    error,
-    state: peerConnection.signalingState,
-    [type]: remoteDescription,
-  });
-
-  peerConnection.processingRemoteSDP = false;
-  peerConnection.negotiating = false;
-
-  handleSetOfferAndAnswerFailure(state, targetMid, remoteDescription, true, error);
-
-  if (type === 'answer') {
-    sendAnswerAck(state, targetMid, false);
-  }
-};
-
-const updateState = (state, message) => {
-  const updatedState = state;
-  const { userInfo, rid, mid } = message;
-  const updatedUserInfo = userInfo;
-  const targetMid = mid;
-
-  if (userInfo && typeof userInfo === 'object') {
-    updatedUserInfo.settings.data = !!(updatedState.dataChannels[targetMid] && updatedState.dataChannels[targetMid].main && updatedState.dataChannels[targetMid].main.channel && updatedState.dataChannels[targetMid].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
-    updatedState.peerInformations[targetMid].settings = updatedUserInfo.settings || {};
-    updatedState.peerInformations[targetMid].mediaStatus = updatedUserInfo.mediaStatus || {};
-    updatedState.peerInformations[targetMid].userData = updatedUserInfo.userData;
-  }
-
-  updatedState.peerConnections[targetMid].negotiating = true;
-
-  Skylink.setSkylinkState(updatedState, rid);
-};
-
-const canProceed = (state, message) => {
-  const {
-    weight, type, mid, sdp, resend,
-  } = message;
-  const {
-    peerPriorityWeight, bufferedLocalOffer, room, peerConnections,
-  } = state;
-  const { STATS_MODULE, NEGOTIATION_PROGRESS, PEER_CONNECTION } = MESSAGES;
-  const targetMid = mid;
-  const peerConnection = peerConnections[targetMid];
-  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-  let error = null;
-
-  if (!peerConnection) {
-    logger.log.ERROR([targetMid, null, type, `${PEER_CONNECTION.NO_PEER_CONNECTION}. Unable to set${type === 'offer' ? 'Remote' : 'Local'}Offer.`]);
-    error = PEER_CONNECTION.NO_PEER_CONNECTION;
-  }
-
-  const {
-    processingRemoteSDP, processingLocalSDP, negotiating,
-  } = peerConnection;
-
-  if (type === 'offer' && peerConnections[targetMid].signalingState !== PEER_CONNECTION_STATE$1.STABLE) {
-    logger.log.WARN([targetMid, null, type, NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE], {
-      signalingState: peerConnections[targetMid].signalingState,
-      isRestart: !!resend,
-    });
-    error = `Peer connection state is ${peerConnections[targetMid].signalingState}.`;
-  }
-
-  if (type === 'offer' && bufferedLocalOffer[targetMid] && peerPriorityWeight > weight) {
-    logger.log.WARN([targetMid, null, type, NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER], {
-      selfWeight: peerPriorityWeight,
-      messageWeight: weight,
-    });
-    error = NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER;
-  }
-
-  // if processing remote SDP
-  if (processingRemoteSDP) {
-    logger.log.WARN([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP], sdp);
-    error = NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP;
-
-    // or completed processing local and remote sdp but answerAck has not been received
-  } else if ((!processingLocalSDP && !processingRemoteSDP && negotiating) && type === 'offer') {
-    // add to bufferedRemoteOffer
-    const updatedState = state;
-    logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.ERRORS.ADDING_REMOTE_OFFER_TO_BUFFER], message);
-    updatedState.bufferedRemoteOffers[targetMid] = updatedState.bufferedRemoteOffers[targetMid] ? updatedState.bufferedRemoteOffers[targetMid] : [];
-    updatedState.bufferedRemoteOffers[targetMid].push(message);
-    Skylink.setSkylinkState(updatedState, room.id);
-  }
-
-  if (error) {
-    handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType].dropped, targetMid, message, true, error);
-  }
-
-  return !error;
-};
-
-/**
- * Function that parses and sets the remote description for offer and answer.
- * @param {JSON} message
- * @return {null}
- * @memberOf SignalingMessageHandler
- * @fires HANDSHAKE_PROGRESS
- */
-// eslint-disable-next-line import/prefer-default-export
-const parseAndSetRemoteDescription = (message) => {
-  const {
-    rid,
-    mid,
-    type,
-    sdp,
-    mediaInfoList,
-  } = message;
-  const state = Skylink.getSkylinkState(rid);
-  const {
-    hasMCU,
-    room,
-    bufferedLocalOffer,
-  } = state;
-  const targetMid = mid;
-  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-  const { NEGOTIATION_PROGRESS } = MESSAGES;
-
-  logger.log.INFO([targetMid, null, type, `Received ${type} from peer. ${msgType}:`], message);
-
-  if (canProceed(state, message)) {
-    try {
-      updateState(state, message);
-
-      PeerMedia.setPeerMediaInfo(room, targetMid, mediaInfoList);
-      PeerMedia.deleteUnavailableMedia(room, targetMid); // mediaState can be unavailable during renegotiation
-
-      if (type === 'offer') {
-        let localDescription = null;
-        const remoteDescription = {
-          type,
-          sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
-        };
-
-        setRemoteDescription(room, targetMid, remoteDescription)
-          .then(peerConnection => onRemoteDescriptionSetSuccess(peerConnection, room, targetMid, remoteDescription))
-          .catch(error => onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error))
-          .then((answer) => {
-            localDescription = {
-              type: answer.type,
-              sdp: answer.sdp,
-            };
-            return setLocalDescription(room, targetMid, localDescription);
-          })
-          .then(peerConnection => onLocalDescriptionSetSuccess(peerConnection, room, targetMid, localDescription))
-          .catch(error => onLocalDescriptionSetFailure(room, targetMid, localDescription, error));
-      } else if (bufferedLocalOffer[targetMid]) {
-        const localDescription = bufferedLocalOffer[targetMid];
-        const remoteDescription = {
-          type,
-          sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
-        };
-
-        setLocalDescription(room, targetMid, localDescription)
-          .then(peerConnection => onLocalDescriptionSetSuccess(peerConnection, room, targetMid, localDescription))
-          .catch(error => onLocalDescriptionSetFailure(room, targetMid, localDescription, error))
-          .then(() => setRemoteDescription(room, targetMid, remoteDescription))
-          .then(peerConnection => onRemoteDescriptionSetSuccess(peerConnection, room, targetMid, remoteDescription))
-          .catch(error => onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error));
-      } else {
-        logger.log.ERROR([targetMid, TAGS.PEER_CONNECTION, null, NEGOTIATION_PROGRESS.ERRORS.NO_LOCAL_BUFFERED_OFFER]);
-      }
-    } catch (error) {
-      logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, type, `Failed processing ${msgType} ->`], error);
-    }
-  }
-
-  return null;
-};
-
-const offerHandler = (message) => {
-  parseAndSetRemoteDescription(message);
-};
-
-const answerHandler = (message) => {
-  parseAndSetRemoteDescription(message);
-};
-
-const renegotiateIfNeeded = (state, peerId) => {
-  const { peerConnections, currentRTCRTPSenders } = state;
-
-  return new Promise((resolve) => {
-    const peerConnection = peerConnections[peerId];
-    const pcSenders = peerConnection.getSenders() ? peerConnection.getSenders() : [];
-    const senderGetStatsPromises = [];
-    const savedSenders = currentRTCRTPSenders[peerId] || [];
-    let isRenegoNeeded = false;
-
-    pcSenders.forEach((pcSender) => {
-      senderGetStatsPromises.push(pcSender.getStats());
-    });
-
-    const transmittingSenders = {};
-
-    Promise.all(senderGetStatsPromises).then((reslovedResults) => {
-      reslovedResults.forEach((reports, senderIndex) => {
-        reports.forEach((report) => {
-          if (report && report.ssrc) {
-            transmittingSenders[report.ssrc] = pcSenders[senderIndex];
-          } else if (report && report.type === 'ssrc' && report.id.indexOf('send') > 1) { // required for retrieving sender information for react
-            // native ios
-            report.values.forEach((value) => {
-              if (value.ssrc) {
-                transmittingSenders[value.ssrc] = pcSenders[senderIndex];
-              }
-            });
-          }
-        });
-      });
-
-      const transmittingSendersKeys = Object.keys(transmittingSenders);
-
-      if (transmittingSendersKeys.length !== savedSenders.length) {
-        isRenegoNeeded = true;
-      } else {
-        let senderMatchedCount = 0;
-        for (let tKey = 0; tKey < transmittingSendersKeys.length; tKey += 1) {
-          const tSender = transmittingSenders[transmittingSendersKeys[tKey]];
-          for (let sIndex = 0; sIndex < savedSenders.length; sIndex += 1) {
-            const sSender = savedSenders[sIndex];
-            if (tSender === sSender) {
-              senderMatchedCount += 1;
-              break;
-            }
-          }
-        }
-        isRenegoNeeded = senderMatchedCount !== transmittingSendersKeys.length;
-      }
-      resolve(isRenegoNeeded);
-    });
-  });
-};
-
-/**
- * Method that returns the refreshConnection result.
- * @param {String} peerId
- * @param {SkylinkRoom} room
- * @param {boolean} doIceRestart
- * @param {Array} [errors]
- * @private
- */
-const buildRefreshConnectionResult = (peerId, room, doIceRestart, errors) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { hasMCU, peerInformations, enableIceRestart } = state;
-  const peersCustomSettings = PeerData.getPeersCustomSettings(state);
-  const result = {};
-
-  result[peerId] = {
-    iceRestart: !hasMCU && peerInformations[peerId] && peerInformations[peerId].config
-      && peerInformations[peerId].config.enableIceRestart && enableIceRestart && doIceRestart,
-    customSettings: peersCustomSettings[peerId] || {},
-  };
-
-  if (errors) {
-    result.errors = errors;
-  }
-
-  return result;
-};
-
-/* eslint-disable prefer-promise-reject-errors */
-
-const buildResult = (listOfPeers, refreshErrors, refreshSettings) => {
-  const result = {};
-  result.listOfPeers = listOfPeers;
-  result.refreshErrors = refreshErrors;
-  result.refreshSettings = refreshSettings;
-
-  return result;
-};
-
-const buildPeerRefreshSettings = (listOfPeers, room, doIceRestart) => {
-  const refreshSettings = [];
-
-  Object.keys(listOfPeers).forEach((i) => {
-    refreshSettings.push(buildRefreshConnectionResult(listOfPeers[i], room, doIceRestart));
-  });
-
-  return refreshSettings;
-};
-
-const buildPeerRefreshErrors = (peerId, errors) => {
-  const peerRefreshError = {};
-  peerRefreshError[peerId] = errors;
-
-  return peerRefreshError;
-};
-
-const filterParams = (targetPeerId, iceRestart, options, peerConnections) => {
-  let doIceRestart = false;
-  let bwOptions = {};
-  let listOfPeers = Object.keys(peerConnections);
-
-  if (Array.isArray(targetPeerId)) {
-    listOfPeers = targetPeerId;
-  } else if (isAString(targetPeerId)) {
-    listOfPeers = [targetPeerId];
-  } else if (isABoolean(targetPeerId)) {
-    doIceRestart = targetPeerId;
-  } else if (targetPeerId && isAObj(targetPeerId)) {
-    bwOptions = targetPeerId;
-  }
-
-  if (isABoolean(iceRestart)) {
-    doIceRestart = iceRestart;
-  } else if (iceRestart && isAObj(iceRestart)) {
-    bwOptions = iceRestart;
-  }
-
-  if (options && isAObj(options)) {
-    bwOptions = options;
-  }
-
-  return {
-    listOfPeers,
-    doIceRestart,
-    bwOptions,
-  };
-};
-
-/**
- * Function that refreshes Peer connections to update with the current streaming.
- * @param {SkylinkState} roomState
- * @param {String} targetPeerId
- * @param {boolean} iceRestart
- * @param {Object} options
- * @param {Object} options.bandwidth
- * @return {Promise}
- * @memberOf PeerConnection
- */
-const refreshConnection = (roomState, targetPeerId, iceRestart, options) => new Promise((resolve, reject) => {
-  if (!roomState) {
-    reject(new Error(MESSAGES.ROOM_STATE.NO_ROOM_NAME));
-  }
-
-  const { peerConnections, hasMCU, room } = roomState;
-  const initOptions = Skylink.getInitOptions();
-  const { mcuUseRenegoRestart } = initOptions;
-  const { PEER_CONNECTION } = MESSAGES;
-  const params = filterParams(targetPeerId, iceRestart, options, peerConnections);
-  const { listOfPeers, doIceRestart, bwOptions } = params;
-
-  try {
-    if (isEmptyArray(listOfPeers) && !(hasMCU && !mcuUseRenegoRestart)) {
-      logger.log.ERROR(PEER_CONNECTION.NO_PEER_CONNECTION);
-      reject({
-        refreshErrors: { self: PEER_CONNECTION.NO_PEER_CONNECTION },
-        listOfPeers,
-      });
-    }
-
-    logger.log.INFO([null, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.START]);
-
-    const refreshPeerConnectionPromises = PeerConnection.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
-    refreshPeerConnectionPromises
-      .then((results) => {
-        const mResults = hasMCU ? [results] : results;
-        const refreshErrors = [];
-        for (let i = 0; i < mResults.length; i += 1) {
-          if (Array.isArray(mResults[i])) {
-            const error = mResults[i];
-            refreshErrors.push(buildPeerRefreshErrors(error[0], error[1]));
-            logger.log.WARN([listOfPeers, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.FAILED], error[0]);
-          } else if (isAString(mResults[i])) {
-            logger.log.INFO([listOfPeers, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.SUCCESS], mResults[i]);
-          }
-        }
-
-        if (refreshErrors.length === listOfPeers.length) {
-          reject(buildResult(listOfPeers, refreshErrors, buildPeerRefreshSettings(listOfPeers, room, doIceRestart)));
-        } else {
-          resolve(buildResult(listOfPeers, refreshErrors, buildPeerRefreshSettings(listOfPeers, room, doIceRestart)));
-        }
-      })
-      .catch(error => logger.log.ERROR([null, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.FAILED], error))
-      .finally(() => logger.log.INFO(PEER_CONNECTION.REFRESH_CONNECTION.COMPLETED));
-  } catch (error) {
-    reject(error);
-  }
-});
-
-const hasAppliedBufferedRemoteOffer = (updatedState, targetMid) => {
-  if (updatedState.bufferedRemoteOffers[targetMid] && !isEmptyArray(updatedState.bufferedRemoteOffers[targetMid])) {
-    const offerMessage = updatedState.bufferedRemoteOffers[targetMid].shift(); // the first buffered message
-    logger.log.DEBUG([targetMid, 'RTCSessionDescription', offerMessage.type, MESSAGES.NEGOTIATION_PROGRESS.APPLYING_BUFFERED_REMOTE_OFFER], offerMessage);
-    parseAndSetRemoteDescription(offerMessage);
-    Skylink.setSkylinkState(updatedState, updatedState.room.id);
-    return true;
-  }
-
-  return false;
-};
-
-/**
- * Method that handles the "answerAck" socket message received.
- * See confluence docs for the "answerAck" expected properties to be received
- *   based on the current <code>SM_PROTOCOL_VERSION</code>.
- * @memberOf SignalingMessageHandler
- * @private
- * @since 1.0.0
- */
-const answerAckHandler = (message) => {
-  const { mid, rid, success } = message;
-  const updatedState = Skylink.getSkylinkState(rid);
-  const targetMid = mid;
-
-  dispatchEvent(handshakeProgress({
-    state: HANDSHAKE_PROGRESS$1.ANSWER_ACK,
-    peerId: targetMid,
-    room: updatedState.room,
-  }));
-
-  updatedState.peerConnections[targetMid].negotiating = false;
-  Skylink.setSkylinkState(updatedState, rid);
-
-  if (!success) {
-    logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, HANDSHAKE_PROGRESS$1.ANSWER, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_SET_REMOTE_ANSWER]);
-    return;
-  }
-
-  if (!hasAppliedBufferedRemoteOffer(updatedState, targetMid)) {
-    renegotiateIfNeeded(updatedState, targetMid).then((shouldRenegotiate) => {
-      if (shouldRenegotiate) {
-        refreshConnection(updatedState, targetMid)
-          .catch((error) => {
-            logger.log.ERROR([mid, TAGS.SESSION_DESCRIPTION, HANDSHAKE_PROGRESS$1.ANSWER_ACK, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_RENEGOTIATION], error);
-          });
-      }
-    });
-  }
-};
-
-const welcomeHandler = (message) => {
-  parseAndSendWelcome(message, CALLERS.WELCOME);
-};
-
-/**
- * Function that handles the "candidate" socket message received.
- * @param {JSON} message
- * @memberOf SignalingMessageHandler
- * @returns {null}
- * @fires CANDIDATE_PROCESSING_STATE
- */
-const candidateHandler = (message) => {
-  const { candidate, mid, rid } = message;
-  const state = Skylink.getSkylinkState(rid);
-  const { room } = state;
-  const peerConnection = state.peerConnections[mid];
-  const peerEndOfCandidatesCounter = state.peerEndOfCandidatesCounter[mid] || {};
-  const { RTCIceCandidate } = window;
-  const { ICE_CANDIDATE, PEER_CONNECTION, STATS_MODULE: { HANDLE_ICE_GATHERING_STATS } } = MESSAGES;
-  const handleIceCandidateStats = new HandleIceCandidateStats();
-
-  if (!candidate && !message.id) {
-    logger.log.WARN([mid, TAGS.CANDIDATE_HANDLER, null, ICE_CANDIDATE.INVALID_CANDIDATE], message);
-    return null;
-  }
-
-  const nativeCandidate = new RTCIceCandidate({
-    sdpMLineIndex: message.label,
-    candidate,
-    sdpMid: message.id,
-  });
-  const candidateId = `can-${nativeCandidate.foundation}`;
-  const candidateType = nativeCandidate.candidate.split(' ')[7] || '';
-
-  logger.log.DEBUG([mid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.VALID_CANDIDATE], nativeCandidate);
-
-  peerEndOfCandidatesCounter.len = peerEndOfCandidatesCounter.len || 0;
-  peerEndOfCandidatesCounter.hasSet = false;
-  peerEndOfCandidatesCounter.len += 1;
-
-  Skylink.setSkylinkState(state, rid);
-
-  const candidateProcessingStateEventDetail = {
-    candidate: {
-      candidate: nativeCandidate.candidate,
-      sdpMid: nativeCandidate.sdpMid,
-      sdpMLineIndex: nativeCandidate.sdpMLineIndex,
-    },
-    error: null,
-  };
-
-  dispatchEvent(candidateProcessingState({
-    room,
-    state: CANDIDATE_PROCESSING_STATE$1.RECEIVED,
-    peerId: mid,
-    candidateId,
-    candidateType,
-    candidate: candidateProcessingStateEventDetail.candidate,
-    error: candidateProcessingStateEventDetail.error,
-  }));
-
-  if (!(peerConnection && peerConnection.signalingState !== PEER_CONNECTION_STATE$1.CLOSED)) {
-    logger.log.WARN([mid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, PEER_CONNECTION.NO_PEER_CONNECTION]);
-
-    candidateProcessingStateEventDetail.error = new Error(PEER_CONNECTION.NO_PEER_CONNECTION);
-    handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
-    dispatchEvent(candidateProcessingState({
-      room,
-      state: CANDIDATE_PROCESSING_STATE$1.DROPPED,
-      peerId: mid,
-      candidateId,
-      candidateType,
-      candidate: candidateProcessingStateEventDetail.candidate,
-      error: candidateProcessingStateEventDetail.error,
-    }));
-
-    PeerConnection.signalingEndOfCandidates(mid, state);
-    return null;
-  }
-
-  if (peerConnection.remoteDescription && peerConnection.remoteDescription.sdp && peerConnection.localDescription && peerConnection.localDescription.sdp) {
-    IceConnection.addIceCandidate(mid, candidateId, candidateType, nativeCandidate, state);
-  } else {
-    IceConnection.addIceCandidateToQueue(mid, candidateId, candidateType, nativeCandidate, state);
-  }
-
-  PeerConnection.signalingEndOfCandidates(mid, state);
-
-  let gatheredCandidates = state.gatheredCandidates[mid];
-  if (!gatheredCandidates) {
-    gatheredCandidates = {
-      sending: { host: [], srflx: [], relay: [] },
-      receiving: { host: [], srflx: [], relay: [] },
-    };
-  }
-
-  gatheredCandidates.receiving[candidateType].push({
-    sdpMid: nativeCandidate.sdpMid,
-    sdpMLineIndex: nativeCandidate.sdpMLineIndex,
-    candidate: nativeCandidate.candidate,
-  });
-
-  state.gatheredCandidates[mid] = gatheredCandidates;
-  Skylink.setSkylinkState(state, rid);
-
-  return null;
-};
-
-/**
- * Function that handles the Signaling Server message from getPeers() method.
- * @param {JSON} message
- * @memberOf SignalingMessageHandler
- * @fires GET_PEERS_STATE_CHANGE
- */
-const getPeerListHandler = (message) => {
-  const { result, type } = message;
-  const peerList = result;
-  logger.log.INFO(['Server', null, type, 'Received list of peers'], peerList);
-  dispatchEvent(getPeersStateChange({
-    state: GET_PEERS_STATE.DISPATCHED,
-    privilegePeerId: null,
-    peerList,
-  }));
-};
-
-class HandleSessionStats extends SkylinkStats {
-  constructor() {
-    super();
-    this.model = {
-      client_id: null,
-      app_key: null,
-      timestamp: null,
-      room_id: null,
-      user_id: null,
-      state: null,
-      contents: null,
-    };
-  }
-
-  send(roomKey, message) {
-    const roomState = Skylink.getSkylinkState(roomKey);
-
-    this.model.room_id = roomKey;
-    this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;
-    this.model.client_id = roomState.clientId;
-    this.model.state = message.type;
-    this.model.contents = message;
-    this.model.app_key = Skylink.getInitOptions().appKey;
-    this.model.timestamp = (new Date()).toISOString();
-
-    this.postStats(this.endpoints.session, this.model);
-  }
-}
-
-/**
- * Function that handles the "introduceError" socket message received.
- * @param {JSON} message
- * @memberOf SignalingMessageHandler
- * @fires INTRODUCE_STATE_CHANGE
- */
-const introduceErrorHandler = (message) => {
-  const state = Skylink.getSkylinkState();
-  const { room, user } = state;
-  logger.log.WARN(['Server', null, message.type, `Introduce failed. Reason: ${message.reason}`]);
-
-  const handleSessionStats = new HandleSessionStats();
-  handleSessionStats.send(room.id, message);
-  dispatchEvent(introduceStateChange({
-    state: INTRODUCE_STATE_CHANGE.ERROR,
-    privilegedPeerId: user.sid,
-    receivingPeerId: message.receivingPeerId,
-    sendingPeerId: message.sendingPeerId,
-    reason: message.reason,
-  }));
-};
-
-/**
- * Checks if peer is connected.
- * @param {SkylinkState} roomState
- * @param {String} peerId
- * @private
- */
-const isPeerConnected = (roomState, peerId) => {
-  const roomStateObj = roomState;
-
-  if (!roomStateObj) return false;
-
-  if (!roomStateObj.peerConnections[peerId] && !roomStateObj.peerInformations[peerId]) {
-    logger.log.DEBUG([peerId, TAGS.PEER_CONNECTION, null, `${MESSAGES.ROOM.LEAVE_ROOM.DROPPING_HANGUP} - ${MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION}`]);
-    return false;
-  }
-
-  return true;
-};
-
-/**
- * Closes a peer connection for a particular peerId.
- * @param {String} roomKey
- * @param {String} peerId
- * @private
- */
-const closePeerConnection = (roomKey, peerId) => {
-  const roomState = Skylink.getSkylinkState(roomKey);
-  if (roomState.peerConnections[peerId].signalingState === PEER_CONNECTION_STATE$1.CLOSED) return;
-
-  roomState.peerConnections[peerId].close();
-};
-
-/**
- * Clears peer information in SkylinkState.
- * @param {String} roomKey
- * @param {String} peerId
- * @private
- */
-const clearPeerInfo = (roomKey, peerId) => {
-  const updatedState = Skylink.getSkylinkState(roomKey);
-
-  // Otherwise stats module fails.
-  setTimeout(() => {
-    delete updatedState.peerConnections[peerId];
-    Skylink.setSkylinkState(updatedState, updatedState.room.id);
-    logger.log.INFO([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.SUCCESS]);
-  }, 500);
-
-  if (updatedState.bandwidthAdjuster && !updatedState.hasMCU) {
-    // eslint-disable-next-line no-new
-    new BandwidthAdjuster({ roomKey: updatedState.room.id, peerId });
-  }
-
-  delete updatedState.peerInformations[peerId];
-  delete updatedState.peerMedias[peerId];
-  delete updatedState.remoteStreams[peerId];
-  delete updatedState.peerMessagesStamps[peerId];
-  delete updatedState.peerEndOfCandidatesCounter[peerId];
-  delete updatedState.peerCandidatesQueue[peerId];
-  delete updatedState.peerStats[peerId];
-  delete updatedState.gatheredCandidates[peerId];
-};
-
-/**
- * Check if health timer exists.
- * @param {String} roomKey
- * @param {String} peerId
- * @private
- */
-const checksIfHealthTimerExists = (roomKey, peerId) => {
-  const roomState = Skylink.getSkylinkState(roomKey);
-  if (!roomState.peerConnections[peerId]) return;
-
-  closePeerConnection(roomKey, peerId);
-};
-
-/**
- * Triggers peerLeft event and changes state for serverPeerLeft.
- * @param {String} roomKey
- * @param {String} peerId
- * @private
- */
-const triggerPeerLeftEventAndChangeState = (roomKey, peerId) => {
-  const roomState = Skylink.getSkylinkState(roomKey);
-
-  if (!isPeerConnected(roomState, peerId)) return;
-
-  const { room } = roomState;
-  const peerInfo = PeerData.getPeerInfo(peerId, room);
-
-  if (peerId === PEER_TYPE.MCU) {
-    const updatedState = roomState;
-    dispatchEvent(serverPeerLeft({
-      peerId,
-      serverPeerType: SERVER_PEER_TYPE.MCU,
-      room,
-    }));
-    updatedState.hasMCU = false;
-
-    Skylink.setSkylinkState(updatedState, room.id);
-    return;
-  }
-
-  dispatchEvent(peerLeft({
-    peerId,
-    peerInfo,
-    isSelf: false,
-    room,
-  }));
-};
-
-/**
- * Closes datachannel for a particular room.
- * @param {String} roomKey
- * @param {String} peerId
- * @private
- */
-const tryCloseDataChannel = (roomKey, peerId) => {
-  const roomState = Skylink.getSkylinkState(roomKey);
-  PeerConnection.closeDataChannel(roomState, peerId);
-};
-
-/**
- * Function that handles the bye Signaling Server message.
- * @param {JSON} message
- * @memberOf SignalingMessageHandler
- * @private
- */
-const byeHandler = (message) => {
-  const { mid, rid, publisherId } = message;
-  const roomKey = rid;
-  const roomState = Skylink.getSkylinkState(roomKey);
-  let peerId = mid;
-
-  if (roomState.hasMCU) {
-    peerId = publisherId;
-  }
-
-  logger.log.INFO([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.START]);
-
-  try {
-    triggerPeerLeftEventAndChangeState(roomKey, peerId);
-    checksIfHealthTimerExists(roomKey, peerId);
-    clearPeerInfo(roomKey, peerId);
-    tryCloseDataChannel(roomKey, peerId);
-  } catch (error) {
-    logger.log.DEBUG([peerId, TAGS.ROOM, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.ERROR], error);
-  }
-};
 
 const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, restartOfferMsg) => {
   // TODO: Full implementation to be done from _setLocalAndSendMessage under peer-handshake.js
@@ -21945,7 +19454,7 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
 
   // Add stream only at offer/answer end
   if (!hasMCU || targetMid === PEER_TYPE.MCU) {
-    MediaStream.addLocalMediaStreams(targetMid, state, true);
+    MediaStream.addLocalMediaStreams(targetMid, state);
   }
 
   if (enableDataChannel && peerInformations[targetMid].config.enableDataChannel) {
@@ -22915,8 +20424,10 @@ const getPeersInRoom = (roomName) => {
     const listOfPeers = Object.keys(roomState.peerInformations);
 
     for (let i = 0; i < listOfPeers.length; i += 1) {
-      listOfPeersInfo[listOfPeers[i]] = Object.assign({}, PeerData.getPeerInfo(listOfPeers[i], roomState.room));
-      listOfPeersInfo[listOfPeers[i]].isSelf = false;
+      if (listOfPeers[i] !== PEER_TYPE.MCU) {
+        listOfPeersInfo[listOfPeers[i]] = Object.assign({}, PeerData.getPeerInfo(listOfPeers[i], roomState.room));
+        listOfPeersInfo[listOfPeers[i]].isSelf = false;
+      }
     }
 
     if (roomState.user && roomState.user.sid) {
@@ -22999,7 +20510,7 @@ const getDataChannelBuffer = channel => ({
   bufferedAmountLowThreshold: parseInt(channel.bufferedAmountLowThreshold, 10) || 0,
 });
 
-const hasPeerDataChannels$1 = dataChannels => !isEmptyObj(dataChannels);
+const hasPeerDataChannels = dataChannels => !isEmptyObj(dataChannels);
 
 /**
  * Function that refreshes the main messaging Datachannel.
@@ -23010,7 +20521,7 @@ const hasPeerDataChannels$1 = dataChannels => !isEmptyObj(dataChannels);
 const refreshDataChannel = (state, peerId) => {
   const { dataChannels, peerConnections } = state;
 
-  if (hasPeerDataChannels$1(dataChannels) && Object.hasOwnProperty.call(dataChannels, peerId)) {
+  if (hasPeerDataChannels(dataChannels) && Object.hasOwnProperty.call(dataChannels, peerId)) {
     if (Object.hasOwnProperty.call(dataChannels[peerId], 'main')) {
       const mainDataChannel = dataChannels[peerId].main;
       const { channelName, channelType } = mainDataChannel;
@@ -23109,6 +20620,154 @@ const closeDataChannel = (roomState, peerId, channelProp = 'main') => {
       MESSAGES.DATA_CHANNEL.ERRORS.FAILED_CLOSING], error);
   }
 };
+
+/**
+ * Method that returns the refreshConnection result.
+ * @param {String} peerId
+ * @param {SkylinkRoom} room
+ * @param {boolean} doIceRestart
+ * @param {Array} [errors]
+ * @private
+ */
+const buildRefreshConnectionResult = (peerId, room, doIceRestart, errors) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { hasMCU, peerInformations, enableIceRestart } = state;
+  const peersCustomSettings = PeerData.getPeersCustomSettings(state);
+  const result = {};
+
+  result[peerId] = {
+    iceRestart: !hasMCU && peerInformations[peerId] && peerInformations[peerId].config
+      && peerInformations[peerId].config.enableIceRestart && enableIceRestart && doIceRestart,
+    customSettings: peersCustomSettings[peerId] || {},
+  };
+
+  if (errors) {
+    result.errors = errors;
+  }
+
+  return result;
+};
+
+/* eslint-disable prefer-promise-reject-errors */
+
+const buildResult = (listOfPeers, refreshErrors, refreshSettings) => {
+  const result = {};
+  result.listOfPeers = listOfPeers;
+  result.refreshErrors = refreshErrors;
+  result.refreshSettings = refreshSettings;
+
+  return result;
+};
+
+const buildPeerRefreshSettings = (listOfPeers, room, doIceRestart) => {
+  const refreshSettings = [];
+
+  Object.keys(listOfPeers).forEach((i) => {
+    refreshSettings.push(buildRefreshConnectionResult(listOfPeers[i], room, doIceRestart));
+  });
+
+  return refreshSettings;
+};
+
+const buildPeerRefreshErrors = (peerId, errors) => {
+  const peerRefreshError = {};
+  peerRefreshError[peerId] = errors;
+
+  return peerRefreshError;
+};
+
+const filterParams = (targetPeerId, iceRestart, options, peerConnections) => {
+  let doIceRestart = false;
+  let bwOptions = {};
+  let listOfPeers = Object.keys(peerConnections);
+
+  if (Array.isArray(targetPeerId)) {
+    listOfPeers = targetPeerId;
+  } else if (isAString(targetPeerId)) {
+    listOfPeers = [targetPeerId];
+  } else if (isABoolean(targetPeerId)) {
+    doIceRestart = targetPeerId;
+  } else if (targetPeerId && isAObj(targetPeerId)) {
+    bwOptions = targetPeerId;
+  }
+
+  if (isABoolean(iceRestart)) {
+    doIceRestart = iceRestart;
+  } else if (iceRestart && isAObj(iceRestart)) {
+    bwOptions = iceRestart;
+  }
+
+  if (options && isAObj(options)) {
+    bwOptions = options;
+  }
+
+  return {
+    listOfPeers,
+    doIceRestart,
+    bwOptions,
+  };
+};
+
+/**
+ * Function that refreshes Peer connections to update with the current streaming.
+ * @param {SkylinkState} roomState
+ * @param {String} targetPeerId
+ * @param {boolean} iceRestart
+ * @param {Object} options
+ * @param {Object} options.bandwidth
+ * @return {Promise}
+ * @memberOf PeerConnection
+ */
+const refreshConnection = (roomState, targetPeerId, iceRestart, options) => new Promise((resolve, reject) => {
+  if (!roomState) {
+    reject(new Error(MESSAGES.ROOM_STATE.NO_ROOM_NAME));
+  }
+
+  const { peerConnections, hasMCU, room } = roomState;
+  const initOptions = Skylink.getInitOptions();
+  const { mcuUseRenegoRestart } = initOptions;
+  const { PEER_CONNECTION } = MESSAGES;
+  const params = filterParams(targetPeerId, iceRestart, options, peerConnections);
+  const { listOfPeers, doIceRestart, bwOptions } = params;
+
+  try {
+    if (isEmptyArray(listOfPeers) && !(hasMCU && !mcuUseRenegoRestart)) {
+      logger.log.ERROR(PEER_CONNECTION.NO_PEER_CONNECTION);
+      reject({
+        refreshErrors: { self: PEER_CONNECTION.NO_PEER_CONNECTION },
+        listOfPeers,
+      });
+    }
+
+    logger.log.INFO([null, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.START]);
+
+    const refreshPeerConnectionPromises = PeerConnection.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
+    refreshPeerConnectionPromises
+      .then((results) => {
+        const mResults = hasMCU ? [results] : results;
+        const refreshErrors = [];
+        for (let i = 0; i < mResults.length; i += 1) {
+          if (Array.isArray(mResults[i])) {
+            const error = mResults[i];
+            refreshErrors.push(buildPeerRefreshErrors(error[0], error[1]));
+            logger.log.WARN([listOfPeers, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.FAILED], error[0]);
+          } else if (isAString(mResults[i])) {
+            logger.log.INFO([listOfPeers, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.SUCCESS], mResults[i]);
+          }
+        }
+
+        if (refreshErrors.length === listOfPeers.length) {
+          reject(buildResult(listOfPeers, refreshErrors, buildPeerRefreshSettings(listOfPeers, room, doIceRestart)));
+        } else {
+          resolve(buildResult(listOfPeers, refreshErrors, buildPeerRefreshSettings(listOfPeers, room, doIceRestart)));
+        }
+      })
+      .catch(error => logger.log.ERROR([null, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.FAILED], error))
+      .finally(() => logger.log.INFO(PEER_CONNECTION.REFRESH_CONNECTION.COMPLETED));
+  } catch (error) {
+    reject(error);
+  }
+});
 
 const sendRestartOfferMsg = (state, peerId, doIceRestart) => {
   const { room } = state;
@@ -23333,7 +20992,7 @@ const getConnectionStatus = (roomState, peerId = null) => {
   return Promise.all(connectionStatusPromises);
 };
 
-const closePeerConnection$1 = (roomState, peerId) => {
+const closePeerConnection = (roomState, peerId) => {
   const updatedState = Skylink.getSkylinkState(roomState.room.id);
   const { peerConnections, room } = updatedState;
 
@@ -23388,7 +21047,7 @@ const processNewSender = (state, targetMid, sender) => {
  * @memberOf PeerConnection
  * @type {{createOffer, createAnswer, addPeer, createDataChannel, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, getDataChannelBuffer, refreshDataChannel, closeDataChannel, refreshConnection, refreshPeerConnection, restartPeerConnection, buildPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus, processNewSender  }}
  */
-const helpers$5 = {
+const helpers$4 = {
   createOffer,
   createAnswer,
   addPeer,
@@ -23404,7 +21063,7 @@ const helpers$5 = {
   restartPeerConnection,
   buildPeerInformations,
   getConnectionStatus,
-  closePeerConnection: closePeerConnection$1,
+  closePeerConnection,
   updatePeerInformationsMediaStatus,
   processNewSender,
 };
@@ -23430,7 +21089,7 @@ const ondatachannel = (peerConnection, targetMid, currentRoomState, event) => {
     if (!peerConnection.hasMainChannel) {
       peerConnection.hasMainChannel = true;
     }
-    helpers$5.createDataChannel({ peerId: targetMid, dataChannel, roomState: currentRoomState });
+    helpers$4.createDataChannel({ peerId: targetMid, dataChannel, roomState: currentRoomState });
   } else {
     logger.log.WARN([targetMid, 'RTCDataChannel', dataChannel.label, 'Not adding datachannel as enable datachannel is set to false']);
   }
@@ -23603,20 +21262,13 @@ class HandleBandwidthStats extends SkylinkStats {
 
   buildTrackInfo(roomKey) {
     const state = Skylink.getSkylinkState(roomKey);
-    const { streams } = state;
-    let streamObjs = [];
-    if (streams.userMedia) {
-      streamObjs = Object.values(Object.values(streams.userMedia));
-    }
-
-    if (streams.screenshare) {
-      streamObjs.push(streams.screenshare);
-    }
+    const { peerStreams, user, streamsSettings } = state;
+    const streamObjs = Object.values(peerStreams[user.sid]);
 
     streamObjs.forEach((streamObj) => {
       if (streamObj) {
-        const stream = streamObj.stream ? streamObj.stream : streamObj[Object.keys(streamObj)[0]].stream;
-        const settings = streamObj.settings ? streamObj.settings : streamObj[Object.keys(streamObj)[0]].settings;
+        const stream = streamObj;
+        const { settings } = streamsSettings[streamObj.id];
         const audioTracks = stream.getAudioTracks();
         const videoTracks = stream.getVideoTracks();
 
@@ -23642,7 +21294,7 @@ class HandleBandwidthStats extends SkylinkStats {
       return;
     }
 
-    if (!roomState.streams.userMedia && !roomState.streams.screenshare) {
+    if (!roomState.peerStreams[roomState.user.sid]) {
       return;
     }
 
@@ -23670,6 +21322,117 @@ class HandleBandwidthStats extends SkylinkStats {
   }
 }
 
+let instance$3 = {};
+
+class BandwidthAdjuster {
+  constructor(params) {
+    if (params.roomKey) {
+      this.resetBandwidthAdjusterInstance(params.roomKey, params.peerId);
+      return null;
+    }
+
+    const { peerConnection, state, targetMid } = params;
+
+    if (instance$3[targetMid]) {
+      return instance$3[targetMid];
+    }
+
+    this.peerId = targetMid;
+    this.state = state;
+    this.peerConnection = peerConnection;
+    this.bandwidth = null;
+
+    instance$3[this.peerId] = this;
+  }
+
+  static formatTotalFn(arr) {
+    let total = 0;
+    for (let i = 0; i < arr.length; i += 1) {
+      total += arr[i];
+    }
+    return total / arr.length;
+  }
+
+  setAdjustmentInterval() {
+    const { bandwidthAdjuster, peerStats, room } = this.state;
+    const { PEER_CONNECTION_STATE } = constants;
+
+    if (this.bandwidth) {
+      return;
+    }
+
+    const bandwidth = {
+      audio: { send: [], recv: [] },
+      video: { send: [], recv: [] },
+    };
+    let currentBlock = 0;
+
+    const adjustmentInterval = setInterval(() => {
+      if (!(this.peerConnection && this.peerConnection.signalingState
+        !== PEER_CONNECTION_STATE.CLOSED) || !bandwidthAdjuster || !peerStats[this.peerId]) {
+        clearInterval(adjustmentInterval);
+        return;
+      }
+
+      PeerConnection.retrieveStatistics(room.id, this.peerId, Skylink.getInitOptions().beSilentOnStatsLogs, true)
+        .then((stats) => {
+          if (!(this.peerConnection && this.peerConnection.signalingState
+            !== PEER_CONNECTION_STATE.CLOSED) || !bandwidthAdjuster) {
+            clearInterval(adjustmentInterval);
+          }
+
+          bandwidth.audio.send.push(stats.audio.sending.bytes ? stats.audio.sending.bytes * 8 : 0);
+          bandwidth.audio.recv.push(stats.audio.receiving.bytes ? stats.audio.receiving.bytes * 8 : 0);
+          bandwidth.video.send.push(stats.video.sending.bytes ? stats.video.sending.bytes * 8 : 0);
+          bandwidth.video.recv.push(stats.video.receiving.bytes ? stats.video.receiving.bytes * 8 : 0);
+
+          currentBlock += 1;
+
+          if (currentBlock === bandwidthAdjuster.interval) {
+            currentBlock = 0;
+            let totalAudioBw = BandwidthAdjuster.formatTotalFn(bandwidth.audio.send);
+            let totalVideoBw = BandwidthAdjuster.formatTotalFn(bandwidth.video.send);
+
+            if (!bandwidthAdjuster.useUploadBwOnly) {
+              totalAudioBw += BandwidthAdjuster.formatTotalFn(bandwidth.audio.recv);
+              totalVideoBw += BandwidthAdjuster.formatTotalFn(bandwidth.video.recv);
+              totalAudioBw /= 2;
+              totalVideoBw /= 2;
+            }
+
+            totalAudioBw = parseInt((totalAudioBw * (bandwidthAdjuster.limitAtPercentage / 100)) / 1000, 10);
+            totalVideoBw = parseInt((totalVideoBw * (bandwidthAdjuster.limitAtPercentage / 100)) / 1000, 10);
+
+            PeerConnection.refreshConnection(this.state, this.peerId, false, {
+              bandwidth: { audio: totalAudioBw, video: totalVideoBw },
+            });
+          }
+        })
+        .catch(() => {
+          bandwidth.audio.send.push(0);
+          bandwidth.audio.recv.push(0);
+          bandwidth.video.send.push(0);
+          bandwidth.video.recv.push(0);
+        });
+    }, 1000);
+
+    this.bandwidth = bandwidth;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  resetBandwidthAdjusterInstance(roomKey, peerId = null) {
+    const state = Skylink.getSkylinkState(roomKey);
+    state.streamsBandwidthSettings.bAS = {};
+    Skylink.setSkylinkState(state, roomKey);
+
+    if (peerId) {
+      delete instance$3[peerId];
+    } else {
+      instance$3 = {};
+    }
+  }
+}
+
 const isIceConnectionStateCompleted = (pcIceConnectionState) => {
   const { ICE_CONNECTION_STATE } = constants;
   return [ICE_CONNECTION_STATE.COMPLETED,
@@ -23687,14 +21450,13 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   const { ROOM_STATE, ICE_CONNECTION, PEER_CONNECTION } = MESSAGES;
   const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
   const state = Skylink.getSkylinkState(currentRoomState.room.id);
+  const { peerStreams, user } = state;
   let statsInterval = null;
   const pcIceConnectionState = peerConnection.iceConnectionState;
 
   if (isAgent(BROWSER_AGENT.REACT_NATIVE) && !state && pcIceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
     return;
   }
-
-  const { streams } = state;
 
   if (!state) {
     logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ROOM_STATE.NOT_FOUND]);
@@ -23706,7 +21468,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   } = state;
 
   if (pcIceConnectionState === ICE_CONNECTION_STATE.FAILED) { // peer connection 'failed' state is dispatched in onconnectionstatechange
-    if (isAgent(BROWSER_AGENT.FIREFOX) && !streams.userMedia) {
+    if (isAgent(BROWSER_AGENT.FIREFOX) && !peerStreams[user.sid]) {
       // no audio and video requested will throw ice connection state failed although ice candidates are exchanged
       return;
     }
@@ -23730,7 +21492,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
     PeerConnection.getConnectionStatus(state, targetMid).then(() => {
       statsInterval = setInterval(() => {
         const currentState = Skylink.getSkylinkState(state.room.id);
-        if (!currentState.room.inRoom) {
+        if (!currentState || !currentState.room.inRoom) {
           return;
         }
         if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
@@ -23857,12 +21619,12 @@ const ontrack = (RTCPeerConnection, targetMid, currentRoomState, rtcTrackEvent) 
     peerId = matchPeerIdWithTransceiverMid(state, transceiver);
   }
 
-  const isScreensharing = PeerMedia.isVideoScreenTrack(state, peerId, transceiver.mid);
+  const isScreensharing = PeerMedia.retrieveScreenMediaInfo(state.room, peerId, { transceiverMid: transceiver.mid });
   const callbackExtraParams = [peerId, room, isScreensharing];
   stream.onremovetrack = callbacks$2.onremovetrack.bind(undefined, ...callbackExtraParams);
   PeerMedia.updateStreamIdFromOntrack(state.room, peerId, transceiver.mid, stream.id);
   PeerConnection.updatePeerInformationsMediaStatus(state.room, peerId, transceiver, stream);
-  MediaStream.updateRemoteStreams(state.room, peerId, stream);
+  PeerStream.addStream(peerId, stream, room.id);
   MediaStream.onRemoteTrackAdded(stream, currentRoomState, peerId, isScreensharing, track.kind === TRACK_KIND.VIDEO, track.kind === TRACK_KIND.AUDIO);
 
   return null;
@@ -23885,7 +21647,7 @@ const updateMediaStatus = (state, peerId, streamId) => {
 };
 
 const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent, stream) => {
-  dispatchEvent(streamEnded({
+  PeerStream.dispatchStreamEvent(STREAM_ENDED, {
     room: state.room,
     peerId,
     peerInfo: PeerData.getPeerInfo(peerId, state.room),
@@ -23894,25 +21656,6 @@ const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent,
     streamId: stream.id,
     isVideo: rtcTrackEvent.track.kind === TRACK_KIND.VIDEO,
     isAudio: rtcTrackEvent.track.kind === TRACK_KIND.AUDIO,
-  }));
-};
-
-const dispatchIncomingCameraStream = (state) => {
-  const { streams, room, user } = state;
-  const userMediaStreams = streams.userMedia ? Object.values(streams.userMedia) : [];
-  userMediaStreams.forEach((streamObj) => {
-    if (hasVideoTrack(streamObj.stream)) {
-      dispatchEvent(onIncomingStream({
-        stream: streamObj.stream,
-        streamId: streamObj.id,
-        peerId: user.sid,
-        room: Room.getRoomInfo(room.id),
-        isSelf: true,
-        peerInfo: PeerData.getCurrentSessionInfo(room),
-        isVideo: true,
-        isAudio: false,
-      }));
-    }
   });
 };
 
@@ -23948,12 +21691,6 @@ const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
 
   updateMediaStatus(state, peerId, stream.id);
   dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent, stream);
-
-  if (isScreensharing) {
-    // Dispatch to ensure that the client has a way of retrieving the camera stream. Camera stream was not added to pc and therefore ontrack will not trigger on remote.
-    dispatchIncomingCameraStream(state);
-  }
-
   dispatchPeerUpdated(state, peerId);
 };
 
@@ -23968,7 +21705,7 @@ const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
 const onsenderadded = (peerConnection, targetMid, currentRoomState, event) => {
   const updatedState = Skylink.getSkylinkState(currentRoomState.room.id);
   const { sender } = event;
-  helpers$5.processNewSender(updatedState, targetMid, sender);
+  helpers$4.processNewSender(updatedState, targetMid, sender);
 };
 
 const onconnectionstatechange = (peerConnection, targetMid, state) => {
@@ -24017,6 +21754,1446 @@ const callbacks$2 = {
   onconnectionstatechange,
 };
 
+const processOnRemoveTrack = (state, peerId, clonedMediaInfo) => {
+  // This method is required because react native android does not have a way for the remote to register onremovetrack event
+  // onremovetrack needs to be caught in the renegotiation when the remote calls stopStreams and sends an offer
+  // the removed track/stream will be set to unavailable
+  // Although react native ios has didRemoveReceiver callback, and onremovetrack can be artificially attached to the peerConnection to process
+  // a stopped stream, the type of stream is not identifiable i.e is screenshare or not.
+  // Therefore react native ios and android will implement the same workaround for now.
+  if (isAgent(BROWSER_AGENT.REACT_NATIVE) && clonedMediaInfo) {
+    const { room } = state;
+    const trackInfo = {
+      track: {
+        id: null,
+        kind: null,
+      },
+    };
+    const stream = {
+      id: null,
+    };
+    trackInfo.track.id = clonedMediaInfo.trackId;
+    trackInfo.track.kind = (clonedMediaInfo.mediaType === MEDIA_TYPE.AUDIO || clonedMediaInfo.mediaType === MEDIA_TYPE.AUDIO_MIC) ? TRACK_KIND.AUDIO : TRACK_KIND.VIDEO;
+    stream.id = clonedMediaInfo.streamId;
+    trackInfo.stream = stream;
+    if (!(trackInfo.track.id || trackInfo.track.kind || stream.id)) {
+      logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.BROWSER_AGENT.REACT_NATIVE.ERRORS.DROPPING_ONREMOVETRACK}`], trackInfo);
+      return;
+    }
+    callbacks$2.onremovetrack(peerId, room, clonedMediaInfo.mediaType === MEDIA_TYPE.VIDEO_SCREEN, trackInfo);
+  }
+};
+
+const helpers$5 = {
+  retrieveTransceiverMid,
+  retrieveMediaState,
+  retrieveMediaId,
+  buildPeerMediaInfo,
+  retrieveStreamIdOfTrack,
+  updatePeerMediaInfo,
+  sendMediaInfoMsg,
+  parseSDPForTransceiverMid,
+  retrieveValueGivenTransceiverMid,
+  retrieveFormattedMediaInfo,
+  resetPeerMedia,
+  populatePeerMediaInfo,
+  processOnRemoveTrack,
+};
+
+class PeerMedia {
+  /**
+   * Method that updates local media info with user sid returned from inRoom message. There is no user.sid information prior to inRoom message.
+   * @param room
+   * @param sid
+   * @private
+   */
+  static updatePeerMediaWithUserSid(room, sid) {
+    const updatedState = Skylink.getSkylinkState(room.id);
+
+    updatedState.peerMedias[sid] = Object.assign({}, updatedState.peerMedias.null);
+    delete updatedState.peerMedias.null;
+    Skylink.setSkylinkState(updatedState, room.id);
+    Object.keys(updatedState.peerMedias[sid]).forEach((mediaId) => {
+      helpers$5.updatePeerMediaInfo(room, sid, false, mediaId, MEDIA_INFO.PUBLISHER_ID, sid);
+    });
+  }
+
+  /**
+   * Method that updates the stream id of the remote peer in the peer media info
+   * @param room
+   * @param peerId
+   * @param transceiverMid
+   * @param streamId
+   */
+  static updateStreamIdFromOntrack(room, peerId, transceiverMid, streamId) {
+    const state = Skylink.getSkylinkState(room.id);
+    const mediaId = helpers$5.retrieveValueGivenTransceiverMid(state, peerId, transceiverMid, MEDIA_INFO.MEDIA_ID);
+    helpers$5.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.STREAM_ID, streamId);
+  }
+
+  /**
+   * Method that checks if a transceiver mid corresponds to a screen stream
+   * @param state
+   * @param peerId
+   * @param transceiverMid
+   * @returns {boolean}
+   */
+  static isVideoScreenTrack(state, peerId, transceiverMid) {
+    const { peerMedias } = state;
+    const mediaInfos = Object.values(peerMedias[peerId]);
+
+    for (let m = 0; m < mediaInfos.length; m += 1) {
+      if (mediaInfos[m].transceiverMid === transceiverMid) {
+        return mediaInfos[m].mediaType === MEDIA_TYPE.VIDEO_SCREEN;
+      }
+    }
+
+    return false;
+  }
+
+  /**
+   * Method that updates the peer media info state to unavailable.
+   * @param room
+   * @param peerId
+   * @param mediaId
+   */
+  static setMediaStateToUnavailable(room, peerId, mediaId) {
+    helpers$5.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.MEDIA_STATE, MEDIA_STATE.UNAVAILABLE);
+  }
+
+  /**
+   * Method that removes mediaInfo that has mediaState set to unavailable.
+   * @param {SkylinkRoom} room
+   * @param {String} peerId
+   * @param {String|null} mediaId
+   */
+  static deleteUnavailableMedia(room, peerId, mediaId = null) {
+    const updatedState = Skylink.getSkylinkState(room.id);
+
+    if (peerId === PEER_TYPE.MCU || !updatedState.peerMedias[peerId]) {
+      return;
+    }
+
+    let clonedMediaInfo;
+    if (!mediaId) {
+      const mediaInfos = updatedState.peerMedias[peerId];
+      Object.values(mediaInfos).forEach((mInfo) => {
+        if (mInfo.mediaState === MEDIA_STATE.UNAVAILABLE) {
+          clonedMediaInfo = clone_1(mInfo);
+          delete updatedState.peerMedias[peerId][mInfo.mediaId];
+        }
+      });
+    } else {
+      clonedMediaInfo = clone_1(updatedState.peerMedias[peerId][mediaId]);
+      delete updatedState.peerMedias[peerId][mediaId];
+    }
+
+    Skylink.setSkylinkState(updatedState, room.id);
+
+    helpers$5.processOnRemoveTrack(updatedState, peerId, clonedMediaInfo);
+
+    if (clonedMediaInfo) {
+      dispatchEvent(mediaInfoDeleted({
+        mediaInfo: clonedMediaInfo,
+      }));
+    }
+  }
+
+  /**
+   * Method that updates the peer media info.
+   * @param room
+   * @param peerId
+   * @param mediaId
+   * @param key
+   * @param value
+   * @private
+   */
+  static updatePeerMediaInfo(room, peerId, mediaId, key, value) {
+    helpers$5.updatePeerMediaInfo(room, peerId, true, mediaId, key, value);
+  }
+
+  /**
+   * Method that sets the remote peer media info from the offer.
+   * @param room
+   * @param targetMid
+   * @param mediaInfoList
+   */
+  static setPeerMediaInfo(room, targetMid, mediaInfoList = []) {
+    try {
+      const state = Skylink.getSkylinkState(room.id);
+
+      if (targetMid === PEER_TYPE.MCU && !isEmptyArray(mediaInfoList)) { // targetMid needs to be obtained from
+        // mediaInfoList
+        const targetPeerIds = [];
+        mediaInfoList.forEach((mediaInfo) => {
+          if (targetPeerIds.indexOf(mediaInfo.publisherId) === -1) {
+            targetPeerIds.push(mediaInfo.publisherId);
+          }
+        });
+        targetPeerIds.forEach((peerId) => {
+          // eslint-disable-next-line array-callback-return,consistent-return
+          const targetMediaInfoList = mediaInfoList.filter((mediaInfo) => {
+            if (mediaInfo.publisherId === peerId) {
+              return mediaInfo;
+            }
+          });
+          this.setPeerMediaInfo(room, peerId, targetMediaInfoList);
+        });
+      } else if (targetMid !== PEER_TYPE.MCU) {
+        const clonedPeerMedia = clone_1(state.peerMedias[targetMid]) || {};
+        const updatedState = helpers$5.resetPeerMedia(room, targetMid);
+        mediaInfoList.forEach((mediaInfo) => {
+          updatedState.peerMedias[mediaInfo.publisherId] = helpers$5.populatePeerMediaInfo(updatedState, clonedPeerMedia, mediaInfo);
+        });
+        Skylink.setSkylinkState(updatedState, room.id);
+      }
+    } catch (err) {
+      logger.log.ERROR([targetMid, TAGS.PEER_MEDIA, null, MESSAGES.MEDIA_INFO.ERRORS.FAILED_SETTING_PEER_MEDIA_INFO]);
+    }
+  }
+
+  /**
+   * Method that returns the streamId from the peer media info.
+   * @param room
+   * @param peerId
+   * @param mediaId
+   * @param transceiverMid
+   * @returns {String} streamId
+   */
+  static retrieveStreamId(room, peerId, mediaId, transceiverMid) {
+    const state = Skylink.getSkylinkState(room.id);
+    const { peerMedias } = state;
+    const mediaInfo = peerMedias[peerId][mediaId];
+    const streamId = mediaInfo.transceiverMid === transceiverMid ? mediaInfo.streamId : null;
+
+    if (!streamId) {
+      logger.log.ERROR([peerId, TAGS.PEER_MEDIA, null, MESSAGES.MEDIA_INFO.ERRORS.NO_ASSOCIATED_STREAM_ID]);
+    }
+
+    return streamId;
+  }
+
+  /**
+   * Method that returns the mediaId
+   * @param trackKind
+   * @param streamId
+   * @returns {String} mediaId
+   */
+  static retrieveMediaId(trackKind, streamId) {
+    return helpers$5.retrieveMediaId(trackKind, streamId);
+  }
+
+  /**
+   * Method that returns the local media info format for offer and answer message.
+   * @param room
+   * @param peerId
+   * @param sessionDescription
+   * @returns {object} mediaInfo
+   * @private
+   */
+  static retrieveMediaInfoForOfferAnswer(room, sessionDescription) {
+    const state = Skylink.getSkylinkState(room.id);
+    const peerId = state.user.sid;
+
+    helpers$5.parseSDPForTransceiverMid(room, peerId, sessionDescription);
+    return helpers$5.retrieveFormattedMediaInfo(room, peerId);
+  }
+
+  /**
+   * Method that processes the peer media and adds it to the state after successfully obtaining the stream from getUserMedia. MediaInfoEvent is not dispatched.
+   * @param room
+   * @param peerId
+   * @param stream
+   * @param isScreensharing
+   * @param dispatchEvt - The flag if the update should dispatch mediaInfoEvent signaling message.
+   * @private
+   */
+  static processPeerMedia(room, peerId, stream, isScreensharing, dispatchEvt = false) {
+    const updatedState = Skylink.getSkylinkState(room.id);
+    const peerMedia = updatedState.peerMedias[peerId] || {};
+    const tracks = stream.getTracks();
+    let mediaId = null;
+
+    try {
+      tracks.forEach((track) => {
+        mediaId = helpers$5.retrieveMediaId(track.kind, stream.id);
+        // eslint-disable-next-line no-nested-ternary
+        peerMedia[mediaId] = helpers$5.buildPeerMediaInfo(room, peerId, track, stream.id, track.kind === TRACK_KIND.AUDIO ? MEDIA_TYPE.AUDIO_MIC : (isScreensharing ? MEDIA_TYPE.VIDEO_SCREEN : MEDIA_TYPE.VIDEO_CAMERA));
+        helpers$5.updatePeerMediaInfo(room, peerId, dispatchEvt, mediaId, null, null, peerMedia[mediaId]);
+      });
+    } catch (err) {
+      logger.log.ERROR([peerId, TAGS.MEDIA_INFO, MESSAGES.MEDIA_INFO.ERRORS.FAILED_PROCESSING_PEER_MEDIA], err);
+    }
+  }
+
+  static retrieveScreenMediaInfo(room, peerId, options) {
+    const state = Skylink.getSkylinkState(room.id);
+    const { peerMedias } = state;
+    const mediaInfos = Object.values(peerMedias[peerId]);
+    for (let i = 0; i < mediaInfos.length; i += 1) {
+      if (options.streamId && mediaInfos[i].streamId === options.streamId) {
+        return mediaInfos[i].mediaType === MEDIA_TYPE.VIDEO_SCREEN ? mediaInfos[i] : false;
+      }
+
+      if (options.transceiverMid && mediaInfos[i].transceiverMid === options.transceiverMid) {
+        return mediaInfos[i].mediaType === MEDIA_TYPE.VIDEO_SCREEN;
+      }
+
+      if (!options) {
+        return mediaInfos[i].mediaType === MEDIA_TYPE.VIDEO_SCREEN;
+      }
+    }
+
+    logger.log.ERROR([peerId, TAGS.PEER_MEDIA, null, MESSAGES.MEDIA_INFO.ERRORS.STREAM_ID_NOT_MATCHED]);
+    return false;
+  }
+}
+
+const dispatchIncomingStream = (room, sid) => {
+  const state = Skylink.getSkylinkState(room.id);
+  if (!state.peerStreams[sid]) {
+    return;
+  }
+
+  Object.values(state.peerStreams[sid]).forEach((stream) => {
+    PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
+      stream,
+      peerId: sid,
+      room: Room.getRoomInfo(room.id),
+      isSelf: true,
+      peerInfo: PeerData.getCurrentSessionInfo(room),
+      streamId: stream.id,
+      isVideo: stream.getVideoTracks().length > 0,
+      isAudio: stream.getAudioTracks().length > 0,
+    });
+  });
+};
+
+/**
+ * Function that handles the "inRoom" socket message received.
+ * @param {JSON} message
+ * @memberOf SignalingMessageHandler
+ * @fires PEER_JOINED
+ * @fires HANDSHAKE_PROGRESS
+ * @fires ON_INCOMING_STREAM
+ */
+const inRoomHandler = (message) => {
+  const {
+    pc_config: { iceServers },
+    sid,
+    rid,
+    tieBreaker,
+  } = message;
+  const roomState = Skylink.getSkylinkState(rid);
+  const signaling = new SkylinkSignalingServer();
+
+  roomState.room.connection.peerConfig = IceConnection.setIceServers(iceServers);
+  roomState.room.inRoom = true;
+  roomState.user.sid = sid;
+  logger.log.INFO([null, TAGS.SIG_SERVER, null, `${MESSAGES.PEER_INFORMATIONS.SET_PEER_PRIORITY_WEIGHT}: `], tieBreaker);
+  roomState.peerPriorityWeight = tieBreaker;
+
+  PeerMedia.updatePeerMediaWithUserSid(roomState.room, sid);
+  PeerStream.updatePeerStreamWithUserSid(roomState.room, sid);
+  Skylink.setSkylinkState(roomState, rid);
+
+  dispatchEvent(peerJoined({
+    peerId: roomState.user.sid,
+    peerInfo: PeerData.getCurrentSessionInfo(roomState.room),
+    isSelf: true,
+    room: roomState.room,
+  }));
+
+  dispatchIncomingStream(roomState.room, sid);
+  signaling.enterRoom(roomState);
+};
+
+const parseVersion = (version) => {
+  if (!(version && typeof version === 'string')) {
+    return 0;
+  }
+  // E.g. 0.9.6, replace minor "." with 0
+  if (version.indexOf('.') > -1) {
+    const parts = version.split('.');
+    if (parts.length > 2) {
+      const majorVer = parts[0] || '0';
+      parts.splice(0, 1);
+      return parseFloat(`${majorVer}.${parts.join('0')}`, 10);
+    }
+    return parseFloat(version || '0', 10);
+  }
+  return parseInt(version || '0', 10);
+};
+
+
+const enterAndWelcome = (msg) => {
+  const state = Skylink.getSkylinkState(msg.rid);
+  const parsedMsg = {};
+  const { hasMCU } = state;
+  const {
+    rid,
+    mid,
+    enableIceRestart,
+    enableDataChannel,
+    weight,
+    agent,
+    os,
+    temasysPluginVersion,
+    SMProtocolVersion,
+    DTProtocolVersion,
+    version,
+    publisherId,
+  } = msg;
+
+  parsedMsg.publisherId = publisherId || null;
+  parsedMsg.rid = rid;
+  parsedMsg.mid = mid;
+  parsedMsg.agent = agent && isAString(agent) ? agent : 'other';
+  parsedMsg.version = parseVersion(version);
+  parsedMsg.SMProtocolVersion = isAString(SMProtocolVersion) ? SMProtocolVersion : SM_PROTOCOL_VERSION;
+  // eslint-disable-next-line no-nested-ternary
+  parsedMsg.DTProtocolVersion = isAString(DTProtocolVersion) ? DTProtocolVersion : (hasMCU || mid === PEER_TYPE.MCU ? DT_PROTOCOL_VERSION : '0.1.0');
+  parsedMsg.weight = isANumber(weight) ? weight : 0;
+  parsedMsg.enableDataChannel = isABoolean(enableDataChannel) ? enableDataChannel : true;
+  parsedMsg.enableIceRestart = isABoolean(enableIceRestart) ? enableIceRestart : false;
+  parsedMsg.os = os && isAString(os) ? os : null;
+  parsedMsg.temasysPluginVersion = temasysPluginVersion && isAString(temasysPluginVersion) ? temasysPluginVersion : null;
+  parsedMsg.userInfo = parsers.parseUserInfo(state, msg, parsedMsg);
+
+  if (hasMCU) {
+    parsedMsg.peersInRoom = msg.peersInRoom;
+  }
+
+  return clone_1(parsedMsg);
+};
+
+const parseUserInfo = (state, msg, parsedMsg) => {
+  const info = Object.assign({}, msg.userInfo);
+
+  info.config = info.config ? info.config : {
+    enableDataChannel: parsedMsg.enableDataChannel,
+    enableIceRestart: parsedMsg.enableIceRestart,
+    priorityWeight: parsedMsg.weight,
+  };
+
+  info.agent = info.agent ? info.agent : {
+    name: parsedMsg.agent,
+    version: parsedMsg.version,
+    os: parsedMsg.os,
+    pluginVersion: parsedMsg.temasysPluginVersion,
+    SMProtocolVersion: parsedMsg.SMProtocolVersion,
+    DTProtocolVersion: parsedMsg.DTProtocolVersion,
+  };
+
+  info.settings = info.settings ? info.settings : {};
+  info.mediaStatus = info.mediaStatus ? info.mediaStatus : {};
+
+  return info;
+};
+
+const parsers = {
+  enterAndWelcome,
+  parseUserInfo,
+};
+
+const setPeerInformations = (state, peerId, userInfo) => {
+  const { room } = state;
+  // eslint-disable-next-line no-param-reassign
+  state.peerInformations[peerId] = PeerConnection.buildPeerInformations(userInfo, state);
+  Skylink.setSkylinkState(state, room.id);
+};
+
+/**
+ * Function that adds a Peer Connection and updates the state(Skylink State).
+ * @param {JSON} params
+ * @memberOf SignalingMessageHandler
+ * @fires SERVER_PEER_JOINED
+ * @fires PEER_JOINED
+ * @fires HANDSHAKE_PROGRESS
+ */
+const processPeer = (params) => {
+  const {
+    currentRoom,
+    targetMid,
+    cert,
+    userInfo,
+    message,
+    caller,
+  } = params;
+  let isNewPeer = false;
+  const state = Skylink.getSkylinkState(currentRoom.id);
+  const { hasMCU } = state;
+  const { peerInformations } = state;
+  if ((!peerInformations[targetMid] && !hasMCU) || (hasMCU && targetMid === PEER_TYPE.MCU && !peerInformations.MCU)) {
+    const hasScreenshare = !!userInfo.screenshare;
+    isNewPeer = true;
+    state.peerInformations[targetMid] = PeerConnection.buildPeerInformations(message.userInfo, state);
+
+    const peerBrowser = {
+      agent: userInfo.agent.name,
+      version: userInfo.agent.version,
+      os: userInfo.agent.os,
+    };
+
+    Skylink.setSkylinkState(state, currentRoom.id);
+
+    PeerConnection.addPeer({
+      currentRoom,
+      targetMid,
+      peerBrowser,
+      cert,
+      hasScreenshare,
+    });
+
+    if (targetMid === PEER_TYPE.MCU) {
+      logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.MCU]);
+      state.hasMCU = true;
+      dispatchEvent(serverPeerJoined({
+        peerId: targetMid,
+        serverPeerType: SERVER_PEER_TYPE.MCU,
+        room: Room.getRoomInfo(currentRoom.id),
+      }));
+    } else {
+      dispatchEvent(peerJoined({
+        peerId: targetMid,
+        peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+        isSelf: false,
+        room: Room.getRoomInfo(currentRoom.id),
+      }));
+    }
+  }
+
+  state.peerMessagesStamps[targetMid] = state.peerMessagesStamps[targetMid] || {
+    userData: 0,
+    audioMuted: 0,
+    videoMuted: 0,
+  };
+
+  if (caller === CALLERS.WELCOME) {
+    state.peerMessagesStamps[targetMid].hasWelcome = false;
+  }
+
+  if (caller === CALLERS.WELCOME && hasMCU && Array.isArray(message.peersInRoom) && message.peersInRoom.length) {
+    const userId = state.user.sid;
+    for (let peersInRoomIndex = 0; peersInRoomIndex < message.peersInRoom.length; peersInRoomIndex += 1) {
+      const PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
+      if (PEER_ID !== userId) {
+        const parsedMsg = parsers.enterAndWelcome(message.peersInRoom[peersInRoomIndex]);
+        const peerUserInfo = parsedMsg.userInfo;
+        setPeerInformations(state, PEER_ID, peerUserInfo);
+        dispatchEvent(peerJoined({
+          peerId: PEER_ID,
+          peerInfo: PeerData.getPeerInfo(PEER_ID, currentRoom),
+          isSelf: false,
+          room: Room.getRoomInfo(currentRoom.id),
+        }));
+      }
+    }
+  } else if (hasMCU && targetMid !== state.user.sid && targetMid !== PEER_TYPE.MCU) {
+    setPeerInformations(state, targetMid, userInfo);
+    dispatchEvent(peerJoined({
+      peerId: targetMid,
+      peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+      isSelf: false,
+      room: Room.getRoomInfo(currentRoom.id),
+    }));
+  }
+
+  Skylink.setSkylinkState(state, currentRoom.id);
+
+  if (isNewPeer) {
+    dispatchEvent(handshakeProgress({
+      peerId: targetMid,
+      state: HANDSHAKE_PROGRESS$1.WELCOME,
+      error: null,
+      room: Room.getRoomInfo(currentRoom.id),
+    }));
+  }
+};
+
+const CALLERS = {
+  ENTER: 'enterHandler',
+  WELCOME: 'welcomeHander',
+};
+
+const getNextNegotiationStep = (params) => {
+  let method = 'welcome';
+
+  if (params.caller === CALLERS.WELCOME) {
+    const state = Skylink.getSkylinkState(params.currentRoom.id);
+    const { peerMessagesStamps, peerPriorityWeight, hasMCU } = state;
+    if (hasMCU || peerPriorityWeight > params.message.weight) {
+      if (peerMessagesStamps[params.targetMid].hasWelcome) {
+        method = 'noop';
+        logger.log.WARN([params.targetMid, TAGS.PEER_CONNECTION, null, 'Discarding extra "welcome" received.']);
+      } else {
+        method = 'offer';
+        state.peerMessagesStamps[params.targetMid].hasWelcome = true;
+        Skylink.setSkylinkState(state, params.currentRoom.id);
+      }
+    }
+  }
+  return method;
+};
+
+// eslint-disable-next-line consistent-return
+const checkStampBeforeSendingWelcome = (params) => {
+  const { currentRoom, targetMid, message } = params;
+  const state = Skylink.getSkylinkState(currentRoom.id);
+  const { peerConnections, hasMCU } = state;
+  const { STATS_MODULE, NEGOTIATION_PROGRESS, PEER_CONNECTION } = MESSAGES;
+  const signaling = new SkylinkSignalingServer();
+  const method = getNextNegotiationStep(params);
+
+  if (method === 'offer') {
+  // Added checks to ensure that connection object is defined first
+    if (!peerConnections[targetMid]) {
+      logger.log.WARN([targetMid, 'RTCSessionDescription', 'offer', PEER_CONNECTION.NO_PEER_CONNECTION]);
+      handleNegotationStats.send(currentRoom.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS.OFFER.dropped, targetMid, message, false, PEER_CONNECTION.NO_PEER_CONNECTION);
+      return null;
+    }
+
+    const { signalingState } = peerConnections[targetMid];
+
+    // Added checks to ensure that state is "stable" if setting local "offer"
+    if (signalingState !== PEER_CONNECTION_STATE$1.STABLE) {
+      logger.log.WARN([targetMid, 'RTCSessionDescription', 'offer', NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE], signalingState);
+      handleNegotationStats.send(currentRoom.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS.OFFER.dropped, targetMid, message, false, NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE);
+      return null;
+    }
+
+    signaling[method](params.currentRoom, params.targetMid);
+  } else if (!hasMCU) {
+    signaling[method](params.currentRoom, params.targetMid);
+  }
+};
+
+const logStats = (caller, targetMid, state, message) => {
+  const { room } = state;
+
+  let callerState = 'enter';
+  if (caller === CALLERS.WELCOME) {
+    callerState = 'welcome';
+  }
+
+  logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, `Peer ${callerState} received ->`], message);
+  handleNegotationStats.send(room.id, callerState, targetMid, message, true);
+};
+
+/**
+ * Function that parses the enterAndWelcome and welcome message and sends the offer or welcome message.
+ * @param {JSON} message
+ * @param {String} caller
+ * @memberOf SignalingMessageHandler
+ */
+const parseAndSendWelcome = (message, caller) => {
+  const parsedMsg = parsers.enterAndWelcome(message);
+  const {
+    rid, mid, userInfo, publisherId,
+  } = parsedMsg;
+  const state = Skylink.getSkylinkState(rid);
+  const { hasMCU } = state;
+  const targetMid = hasMCU && publisherId ? publisherId : mid;
+
+  logStats(caller, targetMid, state, parsedMsg);
+
+  const peerParams = {
+    currentRoom: state.room,
+    targetMid,
+    userInfo,
+    message: parsedMsg,
+    caller,
+  };
+
+  processPeer(peerParams);
+  checkStampBeforeSendingWelcome(peerParams);
+};
+
+const enterHandler = (message) => {
+  parseAndSendWelcome(message, CALLERS.ENTER);
+};
+
+/* eslint-disable no-unused-vars,no-multi-assign */
+
+const handleSetOfferAndAnswerSuccess = (state, targetMid, description, isRemote) => {
+  const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
+  const { peerConnections, bufferedLocalOffer, room } = state;
+  const peerConnection = peerConnections[targetMid];
+  const msgType = description.type === 'offer' ? 'OFFER' : 'ANSWER';
+
+  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS[msgType].set, targetMid, description, isRemote);
+
+  if (isRemote) { // handshake progress is triggered on the local end after sdp it is created
+    dispatchEvent(handshakeProgress({
+      state: HANDSHAKE_PROGRESS$1[msgType],
+      peerId: targetMid,
+      room: Room.getRoomInfo(room.id),
+    }));
+  }
+
+  if (isRemote) {
+    if (description.type === 'offer') {
+      peerConnection.setOffer = 'remote';
+    } else {
+      peerConnection.setAnswer = 'remote';
+    }
+    IceConnection.addIceCandidateFromQueue(targetMid, room);
+  } else {
+    bufferedLocalOffer[targetMid] = null;
+    if (description.type === 'offer') {
+      peerConnection.setOffer = 'local';
+    } else {
+      peerConnection.setAnswer = 'local';
+    }
+  }
+
+  Skylink.setSkylinkState(state, room.id);
+};
+
+const handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote, error) => {
+  const { room, user } = state;
+  const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
+  const msgType = description.type === 'offer' ? 'OFFER' : 'ANSWER';
+
+  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS[msgType].set_error, targetMid, description, isRemote, error);
+
+  dispatchEvent(handshakeProgress({
+    state: HANDSHAKE_PROGRESS$1.ERROR,
+    peerId: isRemote ? targetMid : user.sid,
+    error,
+    room: Room.getRoomInfo(room.id),
+  }));
+};
+
+// modifying the remote description received
+const mungeSDP = (targetMid, sessionDescription, roomKey) => {
+  const mungedSessionDescription = sessionDescription;
+  // TODO: Below SDP methods needs to be implemented in the SessionDescription Class.
+  mungedSessionDescription.sdp = SessionDescription.setSDPBitrate(targetMid, mungedSessionDescription, roomKey);
+
+  // logger.log.INFO([targetMid, 'RTCSessionDescription', type, `Updated remote ${type} ->`], sessionDescriptionToSet.sdp);
+  return mungedSessionDescription;
+};
+
+const setLocalDescription = (room, targetMid, localDescription) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { peerConnections } = state;
+  const { type } = localDescription;
+  const peerConnection = peerConnections[targetMid];
+  const { STATS_MODULE } = MESSAGES;
+  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
+
+  peerConnection.processingLocalSDP = true;
+
+  handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, localDescription, false);
+
+  return peerConnection.setLocalDescription(localDescription)
+    .then(() => peerConnection);
+};
+
+const onLocalDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, localDescription) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { peerConnections } = state;
+  const { NEGOTIATION_PROGRESS } = MESSAGES;
+  const peerConnection = peerConnections[targetMid] = RTCPeerConnection;
+
+  logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, localDescription.type, NEGOTIATION_PROGRESS.SET_LOCAL_DESCRIPTION], localDescription);
+
+  peerConnection.processingLocalSDP = false;
+  handleSetOfferAndAnswerSuccess(state, targetMid, localDescription, false);
+};
+
+const onLocalDescriptionSetFailure = (room, targetMid, localDescription, error) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { peerConnections } = state;
+  const peerConnection = peerConnections[targetMid];
+  const { NEGOTIATION_PROGRESS } = MESSAGES;
+
+  logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, localDescription.type, NEGOTIATION_PROGRESS.FAILED_SET_LOCAL_DESCRIPTION], error);
+
+  peerConnection.processingLocalSDP = false;
+  peerConnection.negotiating = false;
+
+  handleSetOfferAndAnswerFailure(state, targetMid, localDescription, false, error);
+};
+
+const setRemoteDescription = (room, targetMid, remoteDescription) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { peerConnections } = state;
+  const { type } = remoteDescription;
+  const { STATS_MODULE } = MESSAGES;
+  const peerConnection = peerConnections[targetMid];
+  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
+
+  peerConnection.processingRemoteSDP = true;
+  handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, remoteDescription, true);
+  const mungedSessionDescription = mungeSDP(targetMid, remoteDescription, room.id);
+  return peerConnection.setRemoteDescription(mungedSessionDescription)
+    .then(() => peerConnection);
+};
+
+const sendAnswerAck = (state, targetMid, success) => {
+  const updatedState = state;
+  updatedState.peerConnections[targetMid].negotiating = false;
+  Skylink.setSkylinkState(updatedState, targetMid);
+
+  const signaling = new SkylinkSignalingServer();
+  signaling.answerAck(state, targetMid, success);
+};
+
+const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remoteDescription) => {
+  const signaling = new SkylinkSignalingServer();
+  const { type } = remoteDescription;
+  const { NEGOTIATION_PROGRESS, DATA_CHANNEL } = MESSAGES;
+
+  const state = Skylink.getSkylinkState(room.id);
+  const { peerConnections } = state;
+  const peerConnection = peerConnections[targetMid] = RTCPeerConnection;
+
+  logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.SET_REMOTE_DESCRIPTION], remoteDescription);
+
+  peerConnection.processingRemoteSDP = false;
+
+  if (type === 'offer') {
+    handleSetOfferAndAnswerSuccess(state, targetMid, remoteDescription, true);
+    return signaling.answer(state, targetMid);
+  }
+  // FIXME: why is this needed?
+  if (state.peerMessagesStamps[targetMid]) {
+    state.peerMessagesStamps[targetMid].hasRestart = false;
+  }
+
+  // if remote peer does not have data channel
+  if (state.dataChannels[targetMid] && (peerConnection.remoteDescription.sdp.indexOf('m=application') === -1 || peerConnection.remoteDescription.sdp.indexOf('m=application 0') > 0)) {
+    logger.log.WARN([targetMid, TAGS.PEER_CONNECTION, null, `${DATA_CHANNEL.CLOSING} - ${DATA_CHANNEL.NO_REMOTE_DATA_CHANNEL}`]);
+    PeerConnection.closeDataChannel(state, targetMid);
+  }
+
+  handleSetOfferAndAnswerSuccess(state, targetMid, remoteDescription, true);
+  sendAnswerAck(state, targetMid, true);
+  return true;
+};
+
+const onRemoteDescriptionSetFailure = (room, targetMid, remoteDescription, error) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const { peerConnections } = state;
+  const peerConnection = peerConnections[targetMid];
+  const { type } = remoteDescription;
+
+  logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, type, `${MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_SET_REMOTE_DESCRIPTION} ->`], {
+    error,
+    state: peerConnection.signalingState,
+    [type]: remoteDescription,
+  });
+
+  peerConnection.processingRemoteSDP = false;
+  peerConnection.negotiating = false;
+
+  handleSetOfferAndAnswerFailure(state, targetMid, remoteDescription, true, error);
+
+  if (type === 'answer') {
+    sendAnswerAck(state, targetMid, false);
+  }
+};
+
+const updateState = (state, message) => {
+  const updatedState = state;
+  const { userInfo, rid, mid } = message;
+  const updatedUserInfo = userInfo;
+  const targetMid = mid;
+
+  if (userInfo && typeof userInfo === 'object') {
+    updatedUserInfo.settings.data = !!(updatedState.dataChannels[targetMid] && updatedState.dataChannels[targetMid].main && updatedState.dataChannels[targetMid].main.channel && updatedState.dataChannels[targetMid].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
+    updatedState.peerInformations[targetMid].settings = updatedUserInfo.settings || {};
+    updatedState.peerInformations[targetMid].mediaStatus = updatedUserInfo.mediaStatus || {};
+    updatedState.peerInformations[targetMid].userData = updatedUserInfo.userData;
+  }
+
+  updatedState.peerConnections[targetMid].negotiating = true;
+
+  Skylink.setSkylinkState(updatedState, rid);
+};
+
+const canProceed = (state, message) => {
+  const {
+    weight, type, mid, sdp, resend,
+  } = message;
+  const {
+    peerPriorityWeight, bufferedLocalOffer, room, peerConnections,
+  } = state;
+  const { STATS_MODULE, NEGOTIATION_PROGRESS, PEER_CONNECTION } = MESSAGES;
+  const targetMid = mid;
+  const peerConnection = peerConnections[targetMid];
+  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
+  let error = null;
+
+  if (!peerConnection) {
+    logger.log.ERROR([targetMid, null, type, `${PEER_CONNECTION.NO_PEER_CONNECTION}. Unable to set${type === 'offer' ? 'Remote' : 'Local'}Offer.`]);
+    error = PEER_CONNECTION.NO_PEER_CONNECTION;
+    handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType].dropped, targetMid, message, true, error);
+    return false;
+  }
+
+  const {
+    processingRemoteSDP, processingLocalSDP, negotiating,
+  } = peerConnection;
+
+  if (type === 'offer' && peerConnections[targetMid].signalingState !== PEER_CONNECTION_STATE$1.STABLE) {
+    logger.log.WARN([targetMid, null, type, NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE], {
+      signalingState: peerConnections[targetMid].signalingState,
+      isRestart: !!resend,
+    });
+    error = `Peer connection state is ${peerConnections[targetMid].signalingState}.`;
+  }
+
+  if (type === 'offer' && bufferedLocalOffer[targetMid] && peerPriorityWeight > weight) {
+    logger.log.WARN([targetMid, null, type, NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER], {
+      selfWeight: peerPriorityWeight,
+      messageWeight: weight,
+    });
+    error = NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER;
+  }
+
+  // if processing remote SDP
+  if (processingRemoteSDP) {
+    logger.log.WARN([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP], sdp);
+    error = NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP;
+
+    // or completed processing local and remote sdp but answerAck has not been received
+  } else if ((!processingLocalSDP && !processingRemoteSDP && negotiating) && type === 'offer') {
+    // add to bufferedRemoteOffer
+    const updatedState = state;
+    logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.ERRORS.ADDING_REMOTE_OFFER_TO_BUFFER], message);
+    updatedState.bufferedRemoteOffers[targetMid] = updatedState.bufferedRemoteOffers[targetMid] ? updatedState.bufferedRemoteOffers[targetMid] : [];
+    updatedState.bufferedRemoteOffers[targetMid].push(message);
+    Skylink.setSkylinkState(updatedState, room.id);
+  }
+
+  if (error) {
+    handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType].dropped, targetMid, message, true, error);
+  }
+
+  return !error;
+};
+
+/**
+ * Function that parses and sets the remote description for offer and answer.
+ * @param {JSON} message
+ * @return {null}
+ * @memberOf SignalingMessageHandler
+ * @fires HANDSHAKE_PROGRESS
+ */
+// eslint-disable-next-line import/prefer-default-export
+const parseAndSetRemoteDescription = (message) => {
+  const {
+    rid,
+    mid,
+    type,
+    sdp,
+    mediaInfoList,
+  } = message;
+  const state = Skylink.getSkylinkState(rid);
+  const {
+    hasMCU,
+    room,
+    bufferedLocalOffer,
+  } = state;
+  const targetMid = mid;
+  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
+  const { NEGOTIATION_PROGRESS } = MESSAGES;
+
+  logger.log.INFO([targetMid, null, type, `Received ${type} from peer. ${msgType}:`], message);
+
+  if (canProceed(state, message)) {
+    try {
+      updateState(state, message);
+
+      PeerMedia.setPeerMediaInfo(room, targetMid, mediaInfoList);
+      PeerMedia.deleteUnavailableMedia(room, targetMid); // mediaState can be unavailable during renegotiation
+
+      if (type === 'offer') {
+        let localDescription = null;
+        const remoteDescription = {
+          type,
+          sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
+        };
+
+        setRemoteDescription(room, targetMid, remoteDescription)
+          .then(peerConnection => onRemoteDescriptionSetSuccess(peerConnection, room, targetMid, remoteDescription))
+          .catch(error => onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error))
+          .then((answer) => {
+            localDescription = {
+              type: answer.type,
+              sdp: answer.sdp,
+            };
+            return setLocalDescription(room, targetMid, localDescription);
+          })
+          .then(peerConnection => onLocalDescriptionSetSuccess(peerConnection, room, targetMid, localDescription))
+          .catch(error => onLocalDescriptionSetFailure(room, targetMid, localDescription, error));
+      } else if (bufferedLocalOffer[targetMid]) {
+        const localDescription = bufferedLocalOffer[targetMid];
+        const remoteDescription = {
+          type,
+          sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
+        };
+
+        setLocalDescription(room, targetMid, localDescription)
+          .then(peerConnection => onLocalDescriptionSetSuccess(peerConnection, room, targetMid, localDescription))
+          .catch(error => onLocalDescriptionSetFailure(room, targetMid, localDescription, error))
+          .then(() => setRemoteDescription(room, targetMid, remoteDescription))
+          .then(peerConnection => onRemoteDescriptionSetSuccess(peerConnection, room, targetMid, remoteDescription))
+          .catch(error => onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error));
+      } else {
+        logger.log.ERROR([targetMid, TAGS.PEER_CONNECTION, null, NEGOTIATION_PROGRESS.ERRORS.NO_LOCAL_BUFFERED_OFFER]);
+      }
+    } catch (error) {
+      logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, type, `Failed processing ${msgType} ->`], error);
+    }
+  }
+
+  return null;
+};
+
+const offerHandler = (message) => {
+  parseAndSetRemoteDescription(message);
+};
+
+const answerHandler = (message) => {
+  parseAndSetRemoteDescription(message);
+};
+
+const renegotiateIfNeeded = (state, peerId) => {
+  const { peerConnections, currentRTCRTPSenders } = state;
+
+  return new Promise((resolve) => {
+    const peerConnection = peerConnections[peerId];
+    const pcSenders = peerConnection.getSenders() ? peerConnection.getSenders() : [];
+    const senderGetStatsPromises = [];
+    const savedSenders = currentRTCRTPSenders[peerId] || [];
+    let isRenegoNeeded = false;
+
+    pcSenders.forEach((pcSender) => {
+      senderGetStatsPromises.push(pcSender.getStats());
+    });
+
+    const transmittingSenders = {};
+
+    Promise.all(senderGetStatsPromises).then((reslovedResults) => {
+      reslovedResults.forEach((reports, senderIndex) => {
+        reports.forEach((report) => {
+          if (report && report.ssrc && report.bytesSent !== 0) {
+            transmittingSenders[report.ssrc] = pcSenders[senderIndex];
+          } else if (report && report.type === 'ssrc' && report.id.indexOf('send') > 1) { // required for retrieving sender information for react
+            // native ios
+            report.values.forEach((value) => {
+              if (value.ssrc) {
+                transmittingSenders[value.ssrc] = pcSenders[senderIndex];
+              }
+            });
+          }
+        });
+      });
+
+      const transmittingSendersKeys = Object.keys(transmittingSenders);
+
+      if (transmittingSendersKeys.length !== savedSenders.length) {
+        isRenegoNeeded = true;
+      } else {
+        let senderMatchedCount = 0;
+        for (let tKey = 0; tKey < transmittingSendersKeys.length; tKey += 1) {
+          const tSender = transmittingSenders[transmittingSendersKeys[tKey]];
+          for (let sIndex = 0; sIndex < savedSenders.length; sIndex += 1) {
+            const sSender = savedSenders[sIndex];
+            if (tSender === sSender) {
+              senderMatchedCount += 1;
+              break;
+            }
+          }
+        }
+        isRenegoNeeded = senderMatchedCount !== transmittingSendersKeys.length;
+      }
+      resolve(isRenegoNeeded);
+    });
+  });
+};
+
+const hasAppliedBufferedRemoteOffer = (updatedState, targetMid) => {
+  if (updatedState.bufferedRemoteOffers[targetMid] && !isEmptyArray(updatedState.bufferedRemoteOffers[targetMid])) {
+    const offerMessage = updatedState.bufferedRemoteOffers[targetMid].shift(); // the first buffered message
+    logger.log.DEBUG([targetMid, 'RTCSessionDescription', offerMessage.type, MESSAGES.NEGOTIATION_PROGRESS.APPLYING_BUFFERED_REMOTE_OFFER], offerMessage);
+    parseAndSetRemoteDescription(offerMessage);
+    Skylink.setSkylinkState(updatedState, updatedState.room.id);
+    return true;
+  }
+
+  return false;
+};
+
+/**
+ * Method that handles the "answerAck" socket message received.
+ * See confluence docs for the "answerAck" expected properties to be received
+ *   based on the current <code>SM_PROTOCOL_VERSION</code>.
+ * @memberOf SignalingMessageHandler
+ * @private
+ * @since 1.0.0
+ */
+const answerAckHandler = (message) => {
+  const { mid, rid, success } = message;
+  const updatedState = Skylink.getSkylinkState(rid);
+  const targetMid = mid;
+
+  dispatchEvent(handshakeProgress({
+    state: HANDSHAKE_PROGRESS$1.ANSWER_ACK,
+    peerId: targetMid,
+    room: updatedState.room,
+  }));
+
+  updatedState.peerConnections[targetMid].negotiating = false;
+  Skylink.setSkylinkState(updatedState, rid);
+
+  if (!success) {
+    logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, HANDSHAKE_PROGRESS$1.ANSWER, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_SET_REMOTE_ANSWER]);
+    return;
+  }
+
+  if (!hasAppliedBufferedRemoteOffer(updatedState, targetMid)) {
+    renegotiateIfNeeded(updatedState, targetMid).then((shouldRenegotiate) => {
+      if (shouldRenegotiate) {
+        refreshConnection(updatedState, targetMid)
+          .catch((error) => {
+            logger.log.ERROR([mid, TAGS.SESSION_DESCRIPTION, HANDSHAKE_PROGRESS$1.ANSWER_ACK, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_RENEGOTIATION], error);
+          });
+      }
+    });
+  }
+};
+
+const welcomeHandler = (message) => {
+  parseAndSendWelcome(message, CALLERS.WELCOME);
+};
+
+/**
+ * Function that handles the "candidate" socket message received.
+ * @param {JSON} message
+ * @memberOf SignalingMessageHandler
+ * @returns {null}
+ * @fires CANDIDATE_PROCESSING_STATE
+ */
+const candidateHandler = (message) => {
+  const { candidate, mid, rid } = message;
+  const state = Skylink.getSkylinkState(rid);
+  const { room } = state;
+  const peerConnection = state.peerConnections[mid];
+  const peerEndOfCandidatesCounter = state.peerEndOfCandidatesCounter[mid] || {};
+  const { RTCIceCandidate } = window;
+  const { ICE_CANDIDATE, PEER_CONNECTION, STATS_MODULE: { HANDLE_ICE_GATHERING_STATS } } = MESSAGES;
+  const handleIceCandidateStats = new HandleIceCandidateStats();
+
+  if (!candidate && !message.id) {
+    logger.log.WARN([mid, TAGS.CANDIDATE_HANDLER, null, ICE_CANDIDATE.INVALID_CANDIDATE], message);
+    return null;
+  }
+
+  const nativeCandidate = new RTCIceCandidate({
+    sdpMLineIndex: message.label,
+    candidate,
+    sdpMid: message.id,
+  });
+  const candidateId = `can-${nativeCandidate.foundation}`;
+  const candidateType = nativeCandidate.candidate.split(' ')[7] || '';
+
+  logger.log.DEBUG([mid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.VALID_CANDIDATE], nativeCandidate);
+
+  peerEndOfCandidatesCounter.len = peerEndOfCandidatesCounter.len || 0;
+  peerEndOfCandidatesCounter.hasSet = false;
+  peerEndOfCandidatesCounter.len += 1;
+
+  Skylink.setSkylinkState(state, rid);
+
+  const candidateProcessingStateEventDetail = {
+    candidate: {
+      candidate: nativeCandidate.candidate,
+      sdpMid: nativeCandidate.sdpMid,
+      sdpMLineIndex: nativeCandidate.sdpMLineIndex,
+    },
+    error: null,
+  };
+
+  dispatchEvent(candidateProcessingState({
+    room,
+    state: CANDIDATE_PROCESSING_STATE$1.RECEIVED,
+    peerId: mid,
+    candidateId,
+    candidateType,
+    candidate: candidateProcessingStateEventDetail.candidate,
+    error: candidateProcessingStateEventDetail.error,
+  }));
+
+  if (!(peerConnection && peerConnection.signalingState !== PEER_CONNECTION_STATE$1.CLOSED)) {
+    logger.log.WARN([mid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, PEER_CONNECTION.NO_PEER_CONNECTION]);
+
+    candidateProcessingStateEventDetail.error = new Error(PEER_CONNECTION.NO_PEER_CONNECTION);
+    handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
+    dispatchEvent(candidateProcessingState({
+      room,
+      state: CANDIDATE_PROCESSING_STATE$1.DROPPED,
+      peerId: mid,
+      candidateId,
+      candidateType,
+      candidate: candidateProcessingStateEventDetail.candidate,
+      error: candidateProcessingStateEventDetail.error,
+    }));
+
+    PeerConnection.signalingEndOfCandidates(mid, state);
+    return null;
+  }
+
+  if (peerConnection.remoteDescription && peerConnection.remoteDescription.sdp && peerConnection.localDescription && peerConnection.localDescription.sdp) {
+    IceConnection.addIceCandidate(mid, candidateId, candidateType, nativeCandidate, state);
+  } else {
+    IceConnection.addIceCandidateToQueue(mid, candidateId, candidateType, nativeCandidate, state);
+  }
+
+  PeerConnection.signalingEndOfCandidates(mid, state);
+
+  let gatheredCandidates = state.gatheredCandidates[mid];
+  if (!gatheredCandidates) {
+    gatheredCandidates = {
+      sending: { host: [], srflx: [], relay: [] },
+      receiving: { host: [], srflx: [], relay: [] },
+    };
+  }
+
+  gatheredCandidates.receiving[candidateType].push({
+    sdpMid: nativeCandidate.sdpMid,
+    sdpMLineIndex: nativeCandidate.sdpMLineIndex,
+    candidate: nativeCandidate.candidate,
+  });
+
+  state.gatheredCandidates[mid] = gatheredCandidates;
+  Skylink.setSkylinkState(state, rid);
+
+  return null;
+};
+
+/**
+ * Function that handles the Signaling Server message from getPeers() method.
+ * @param {JSON} message
+ * @memberOf SignalingMessageHandler
+ * @fires GET_PEERS_STATE_CHANGE
+ */
+const getPeerListHandler = (message) => {
+  const { result, type } = message;
+  const peerList = result;
+  logger.log.INFO(['Server', null, type, 'Received list of peers'], peerList);
+  dispatchEvent(getPeersStateChange({
+    state: GET_PEERS_STATE.DISPATCHED,
+    privilegePeerId: null,
+    peerList,
+  }));
+};
+
+class HandleSessionStats extends SkylinkStats {
+  constructor() {
+    super();
+    this.model = {
+      client_id: null,
+      app_key: null,
+      timestamp: null,
+      room_id: null,
+      user_id: null,
+      state: null,
+      contents: null,
+    };
+  }
+
+  send(roomKey, message) {
+    const roomState = Skylink.getSkylinkState(roomKey);
+
+    this.model.room_id = roomKey;
+    this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;
+    this.model.client_id = roomState.clientId;
+    this.model.state = message.type;
+    this.model.contents = message;
+    this.model.app_key = Skylink.getInitOptions().appKey;
+    this.model.timestamp = (new Date()).toISOString();
+
+    this.postStats(this.endpoints.session, this.model);
+  }
+}
+
+/**
+ * Function that handles the "introduceError" socket message received.
+ * @param {JSON} message
+ * @memberOf SignalingMessageHandler
+ * @fires INTRODUCE_STATE_CHANGE
+ */
+const introduceErrorHandler = (message) => {
+  const state = Skylink.getSkylinkState();
+  const { room, user } = state;
+  logger.log.WARN(['Server', null, message.type, `Introduce failed. Reason: ${message.reason}`]);
+
+  const handleSessionStats = new HandleSessionStats();
+  handleSessionStats.send(room.id, message);
+  dispatchEvent(introduceStateChange({
+    state: INTRODUCE_STATE_CHANGE.ERROR,
+    privilegedPeerId: user.sid,
+    receivingPeerId: message.receivingPeerId,
+    sendingPeerId: message.sendingPeerId,
+    reason: message.reason,
+  }));
+};
+
+/**
+ * Checks if peer is connected.
+ * @param {SkylinkState} roomState
+ * @param {String} peerId
+ * @private
+ */
+const isPeerConnected = (roomState, peerId) => {
+  const roomStateObj = roomState;
+
+  if (!roomStateObj) return false;
+
+  if (!roomStateObj.peerConnections[peerId] && !roomStateObj.peerInformations[peerId]) {
+    logger.log.DEBUG([peerId, TAGS.PEER_CONNECTION, null, `${MESSAGES.ROOM.LEAVE_ROOM.DROPPING_HANGUP} - ${MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION}`]);
+    return false;
+  }
+
+  return true;
+};
+
+/**
+ * Closes a peer connection for a particular peerId.
+ * @param {String} roomKey
+ * @param {String} peerId
+ * @private
+ */
+const closePeerConnection$1 = (roomKey, peerId) => {
+  const roomState = Skylink.getSkylinkState(roomKey);
+  if (roomState.peerConnections[peerId].signalingState === PEER_CONNECTION_STATE$1.CLOSED) return;
+
+  roomState.peerConnections[peerId].close();
+};
+
+/**
+ * Clears peer information in SkylinkState.
+ * @param {String} roomKey
+ * @param {String} peerId
+ * @private
+ */
+const clearPeerInfo = (roomKey, peerId) => {
+  const updatedState = Skylink.getSkylinkState(roomKey);
+
+  // Otherwise stats module fails.
+  setTimeout(() => {
+    delete updatedState.peerConnections[peerId];
+    Skylink.setSkylinkState(updatedState, updatedState.room.id);
+    logger.log.INFO([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.SUCCESS]);
+  }, 500);
+
+  if (updatedState.bandwidthAdjuster && !updatedState.hasMCU) {
+    // eslint-disable-next-line no-new
+    new BandwidthAdjuster({ roomKey: updatedState.room.id, peerId });
+  }
+
+  delete updatedState.peerInformations[peerId];
+  delete updatedState.peerMedias[peerId];
+  delete updatedState.peerMessagesStamps[peerId];
+  delete updatedState.peerEndOfCandidatesCounter[peerId];
+  delete updatedState.peerCandidatesQueue[peerId];
+  delete updatedState.peerStats[peerId];
+  delete updatedState.gatheredCandidates[peerId];
+  delete updatedState.peerStreams[peerId];
+};
+
+/**
+ * Check if health timer exists.
+ * @param {String} roomKey
+ * @param {String} peerId
+ * @private
+ */
+const checksIfHealthTimerExists = (roomKey, peerId) => {
+  const roomState = Skylink.getSkylinkState(roomKey);
+  if (!roomState.peerConnections[peerId]) return;
+
+  closePeerConnection$1(roomKey, peerId);
+};
+
+/**
+ * Triggers peerLeft event and changes state for serverPeerLeft.
+ * @param {String} roomKey
+ * @param {String} peerId
+ * @private
+ */
+const triggerPeerLeftEventAndChangeState = (roomKey, peerId) => {
+  const roomState = Skylink.getSkylinkState(roomKey);
+
+  if (!isPeerConnected(roomState, peerId)) return;
+
+  const { room } = roomState;
+  const peerInfo = PeerData.getPeerInfo(peerId, room);
+
+  if (peerId === PEER_TYPE.MCU) {
+    const updatedState = roomState;
+    dispatchEvent(serverPeerLeft({
+      peerId,
+      serverPeerType: SERVER_PEER_TYPE.MCU,
+      room,
+    }));
+    updatedState.hasMCU = false;
+
+    Skylink.setSkylinkState(updatedState, room.id);
+    return;
+  }
+
+  dispatchEvent(peerLeft({
+    peerId,
+    peerInfo,
+    isSelf: false,
+    room,
+  }));
+};
+
+/**
+ * Closes datachannel for a particular room.
+ * @param {String} roomKey
+ * @param {String} peerId
+ * @private
+ */
+const tryCloseDataChannel = (roomKey, peerId) => {
+  const roomState = Skylink.getSkylinkState(roomKey);
+  PeerConnection.closeDataChannel(roomState, peerId);
+};
+
+/**
+ * Function that handles the bye Signaling Server message.
+ * @param {JSON} message
+ * @memberOf SignalingMessageHandler
+ * @private
+ */
+const byeHandler = (message) => {
+  const { mid, rid, publisherId } = message;
+  const roomKey = rid;
+  const roomState = Skylink.getSkylinkState(roomKey);
+  let peerId = mid;
+
+  if (roomState.hasMCU) {
+    peerId = publisherId;
+  }
+
+  logger.log.INFO([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.START]);
+
+  try {
+    triggerPeerLeftEventAndChangeState(roomKey, peerId);
+    checksIfHealthTimerExists(roomKey, peerId);
+    clearPeerInfo(roomKey, peerId);
+    tryCloseDataChannel(roomKey, peerId);
+  } catch (error) {
+    logger.log.DEBUG([peerId, TAGS.ROOM, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.ERROR], error);
+  }
+};
+
 /**
  * Function that handles the "stream" socket message received.
  * @param {JSON} message
@@ -24035,38 +23212,6 @@ const streamHandler = (message) => {
   const roomState = getStateByRid(rid);
   const { room, peerInformations } = roomState;
 
-  if (status === STREAM_STATUS.SCREENSHARE_REPLACE_START) {
-    peerInformations[mid].screenshare = true;
-    Skylink.setSkylinkState(roomState, room.id);
-
-    dispatchEvent(onIncomingScreenStream({
-      room,
-      peerId: mid,
-      isSelf: false,
-      peerInfo: PeerData.getPeerInfo(mid, room),
-      stream: null,
-      isReplace: true,
-      streamId,
-      isVideo: !!settings.audio,
-      isAudio: !!settings.video,
-    }));
-  }
-
-  if (status === STREAM_STATUS.USER_MEDIA_REPLACE_START) {
-    dispatchEvent(onIncomingStream({
-      room,
-      peerId: mid,
-      isSelf: false,
-      peerInfo: PeerData.getPeerInfo(mid, room),
-      stream: null,
-      streamId,
-      isReplace: true,
-      replacedStreamId: settings.replacedStreamId,
-      isVideo: !!settings.audio,
-      isAudio: !!settings.video,
-    }));
-  }
-
   if (status === STREAM_STATUS.ENDED) {
     if (settings.isScreensharing) {
       peerInformations[mid].screenshare = false;
@@ -24084,34 +23229,6 @@ const streamHandler = (message) => {
       isVideo: !!settings.audio,
       isAudio: !!settings.video,
     }));
-  }
-
-  // Handle stopped streams that are not present in sdp and therefore do not require renegotiation and therefore do not trigger onremovetrack
-  if (status === STREAM_STATUS.REPLACED_STREAM_ENDED) {
-    const remoteStreams = MediaStream.retrieveRemoteStreams(roomState, mid);
-
-    if (!remoteStreams) {
-      return null;
-    }
-
-    const remoteStreamsObj = Object.values(remoteStreams);
-    let stoppedStream = null;
-
-    for (let i = 0; i < remoteStreamsObj.length; i += 1) {
-      if (remoteStreams[i].id === streamId) {
-        stoppedStream = remoteStreamsObj[i];
-        break;
-      }
-    }
-
-    if (!stoppedStream) {
-      return null;
-    }
-
-    const tracks = stoppedStream.getTracks();
-    tracks.forEach((track) => {
-      callbacks$2.onremovetrack(mid, room, streamId, track, false);
-    });
   }
 
   return null;
@@ -24623,93 +23740,6 @@ const mediaInfoEventHandler = (message) => {
   }
 };
 
-const shouldDropMessage = (state, peerId) => {
-  const peerInfo = PeerData.getPeerInfo(peerId, state.room);
-
-  if (peerInfo.agent.SDKVersion && peerInfo.agent.SDKVersion === SDK_VERSION) {
-    logger.log.INFO([peerId, TAGS.SIG_SERVER, null, MESSAGES.SIGNALING.DROPPING_MUTE_EVENT]);
-    return true;
-  }
-
-  return false;
-};
-
-const muteEventHelpers = {
-  dispatchMuteEvents: dispatchMediaStateChangeEvents,
-  shouldDropMessage,
-};
-
-const muteVideoEventHandler = (message) => {
-  const {
-    type, mid, muted, rid, stamp, streamId,
-  } = message;
-  const targetMid = mid;
-  const updatedState = Skylink.getSkylinkState(rid);
-  const { room } = updatedState;
-
-  if (muteEventHelpers.shouldDropMessage(updatedState, targetMid)) {
-    return;
-  }
-
-  logger.log.INFO([targetMid, null, type, MESSAGES.MEDIA_STREAM.VIDEO_MUTED, muted, streamId], message);
-
-  if (!updatedState.peerInformations[targetMid]) {
-    logger.log.WARN([targetMid, TAGS.PEER_INFORMATION, type, `${MESSAGES.PEER_INFORMATIONS.NO_PEER_INFO} ${targetMid}`]);
-    return;
-  }
-
-  if (updatedState.peerMessagesStamps[targetMid]) {
-    if (stamp < updatedState.peerMessagesStamps[targetMid].videoMuted) {
-      logger.log.WARN([targetMid, TAGS.SIG_SERVER, type, MESSAGES.SIGNALING.OUTDATED_MSG], message);
-      return;
-    }
-    updatedState.peerMessagesStamps[targetMid].videoMuted = stamp;
-  }
-  if (!updatedState.peerInformations[targetMid].mediaStatus[streamId]) {
-    updatedState.peerInformations[targetMid].mediaStatus[streamId] = {};
-  }
-  updatedState.peerInformations[targetMid].mediaStatus[streamId].videoMuted = muted ? MEDIA_STATUS.MUTED : MEDIA_STATUS.ACTIVE;
-
-  Skylink.setSkylinkState(updatedState, room.id);
-
-  muteEventHelpers.dispatchMuteEvents(updatedState, streamId, targetMid);
-};
-
-const muteAudioEventHandler = (message) => {
-  const {
-    type, mid, rid, muted, stamp, streamId,
-  } = message;
-  const targetMid = mid;
-  const updatedState = Skylink.getSkylinkState(rid);
-  const { room } = updatedState;
-
-  if (muteEventHelpers.shouldDropMessage(updatedState, targetMid)) {
-    return;
-  }
-
-  logger.log.INFO([targetMid, TAGS.SIG_SERVER, type, MESSAGES.MEDIA_STREAM.AUDIO_MUTED, muted, streamId], message);
-
-  if (!updatedState.peerInformations[targetMid]) {
-    logger.log.WARN([targetMid, TAGS.PEER_INFORMATION, type, `${MESSAGES.PEER_INFORMATIONS.NO_PEER_INFO} ${targetMid}`]);
-    return;
-  }
-
-  if (updatedState.peerMessagesStamps[targetMid]) {
-    if (stamp < updatedState.peerMessagesStamps[targetMid].audioMuted) {
-      logger.log.WARN([targetMid, TAGS.SIG_SERVER, type, MESSAGES.SIGNALING.OUTDATED_MSG], message);
-      return;
-    }
-    updatedState.peerMessagesStamps[targetMid].audioMuted = stamp;
-  }
-  if (!updatedState.peerInformations[targetMid].mediaStatus[streamId]) {
-    updatedState.peerInformations[targetMid].mediaStatus[streamId] = {};
-  }
-  updatedState.peerInformations[targetMid].mediaStatus[streamId].audioMuted = muted ? MEDIA_STATUS.MUTED : MEDIA_STATUS.ACTIVE;
-  Skylink.setSkylinkState(updatedState, room.id);
-
-  muteEventHelpers.dispatchMuteEvents(updatedState, streamId, targetMid);
-};
-
 /**
  * Function that handles the "storedMessages" socket message received.
  * @param {JSON} message
@@ -24735,8 +23765,6 @@ const handlers = {
   recording: recordingHandler,
   redirect: redirectHandler,
   rtmp: rtmpHandler,
-  muteVideoEvent: muteVideoEventHandler,
-  muteAudioEvent: muteAudioEventHandler,
   setUserData: setUserDataHandler,
   mediaInfoEvent: mediaInfoEventHandler,
   storedMessages: storedMessagesHandler,
@@ -24817,14 +23845,6 @@ class SignalingMessageHandler {
 
   mediaInfoEventHandler(...args) {
     handlers.mediaInfoEvent(...args);
-  }
-
-  muteAudioEventHandler(...args) {
-    handlers.muteAudioEvent(...args);
-  }
-
-  muteVideoEventHandler(...args) {
-    handlers.muteVideoEvent(...args);
   }
 
   storedMessagesHandler(...args) {
@@ -25100,34 +24120,6 @@ const mediaInfoEventMessage = (roomState, peerId, mediaInfo) => ({
   transceiverMid: mediaInfo.transceiverMid,
 });
 
-const muteAudioEventMessage = (room, streamId) => {
-  const roomState = Skylink.getSkylinkState(room.id);
-  const { user, streamsMutedSettings } = roomState;
-
-  return {
-    type: SIG_MESSAGE_TYPE.MUTE_AUDIO_EVENT,
-    mid: user.sid,
-    rid: room.id,
-    muted: streamsMutedSettings[streamId].audioMuted,
-    stamp: (new Date()).getTime(),
-    streamId,
-  };
-};
-
-const muteVideoEventMessage = (room, streamId) => {
-  const roomState = Skylink.getSkylinkState(room.id);
-  const { user, streamsMutedSettings } = roomState;
-
-  return {
-    type: SIG_MESSAGE_TYPE.MUTE_VIDEO_EVENT,
-    mid: user.sid,
-    rid: room.id,
-    muted: streamsMutedSettings[streamId].videoMuted,
-    stamp: (new Date()).getTime(),
-    streamId,
-  };
-};
-
 const getStoredMessagesMessage = (roomState) => {
   const { user, room } = roomState;
   return {
@@ -25194,8 +24186,6 @@ const messageBuilders = {
   bye: byeMessage,
   roomLock: roomLockMessage,
   mediaInfoEvent: mediaInfoEventMessage,
-  muteAudioEvent: muteAudioEventMessage,
-  muteVideoEvent: muteVideoEventMessage,
   getStoredMessages: getStoredMessagesMessage,
   userMessages: getUserMessages,
 };
@@ -25261,14 +24251,6 @@ class SignalingMessageBuilder {
 
   getPeerMessagesForSignaling(...args) {
     return this.messageBuilders.signalingMessages(...args);
-  }
-
-  getMuteAudioMessage(...args) {
-    return this.messageBuilders.muteAudioEvent(...args);
-  }
-
-  getMuteVideoMessage(...args) {
-    return this.messageBuilders.muteVideoEvent(...args);
   }
 
   getRTMPMessage(...args) {
@@ -25530,20 +24512,6 @@ class SkylinkSignalingServer {
     this.sendMessage(rtmpMessage);
   }
 
-  muteAudioEvent(roomState, streamIds) {
-    const muteAudio = this.messageBuilder.getMuteAudioMessage(roomState, streamIds);
-    if (muteAudio) {
-      this.sendMessage(muteAudio);
-    }
-  }
-
-  muteVideoEvent(roomState, streamId) {
-    const muteVideo = this.messageBuilder.getMuteVideoMessage(roomState, streamId);
-    if (muteVideo) {
-      this.sendMessage(muteVideo);
-    }
-  }
-
   roomLock(roomState) {
     const roomLock = this.messageBuilder.getRoomLockMessage(roomState);
     if (roomLock) {
@@ -25615,585 +24583,1098 @@ class SkylinkSignalingServer {
   }
 }
 
-const sendMediaInfoMsg = (room, updatedMediaInfo) => {
-  const signaling = new SkylinkSignalingServer();
-  const state = Skylink.getSkylinkState(room.id);
-  const { user, hasMCU, peerConnections } = state;
-  const peerIds = hasMCU ? [PEER_TYPE.MCU] : Object.keys(peerConnections).filter(peerId => (peerId !== user.sid) && (peerId !== PEER_TYPE.MCU));
+/**
+ * Emits the peerLeft event when current peer left the room.
+ * @param {SkylinkState} state
+ * @param {String} peerId
+ * @private
+ */
+const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
+  const { room, peerConnections } = state;
+  const { ROOM: { LEAVE_ROOM } } = MESSAGES;
+  const { enableDataChannel } = Skylink.getInitOptions();
 
-  peerIds.forEach((target) => {
-    signaling.mediaInfoEvent(state, target, updatedMediaInfo);
-  });
-};
+  logger.log.INFO([peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.START]);
 
-const parseSDPForTransceiverMid = (room, peerId, sessionDescription) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerMedias } = state;
-  const { beSilentOnParseLogs } = Skylink.getInitOptions();
-  const mediaInfos = Object.values(peerMedias[peerId]);
-  const mediaMids = SessionDescription.getTransceiverMid(sessionDescription, beSilentOnParseLogs);
-  const audioMids = mediaMids.audio;
-  const videoMids = mediaMids.video;
+  if (peerId === PEER_TYPE.MCU) {
+    dispatchEvent(serverPeerLeft({
+      peerId,
+      serverPeerType: SERVER_PEER_TYPE.MCU,
+      room: Room.getRoomInfo(room.id),
+    }));
+  } else {
+    dispatchEvent(peerLeft({
+      peerId,
+      peerInfo: PeerData.getCurrentSessionInfo(room),
+      isSelf: false,
+      room: Room.getRoomInfo(room.id),
+    }));
+  }
 
-  for (let m = 0; m < mediaInfos.length; m += 1) {
-    const mediaInfo = mediaInfos[m];
-    // If mediaState is unavailable, there is no corresponding transceiverMid in the SDP and mediaInfo.transceiverMid will be 'null'. mediaInfo.transceiverMid cannot be 'null'.
-    mediaInfo.transceiverMid = mediaInfo.mediaState === MEDIA_STATE.UNAVAILABLE ? mediaInfo.transceiverMid : null;
-    for (let a = 0; a < audioMids.length; a += 1) {
-      if (audioMids[a].streamId === mediaInfo.streamId && (audioMids[a].direction === 'sendonly' || audioMids[a].direction === 'sendrecv')) {
-        helpers$6.updatePeerMediaInfo(room, peerId, false, mediaInfo.mediaId, MEDIA_INFO.TRANSCEIVER_MID, audioMids[a].transceiverMid);
-        break;
+  if (peerConnections[peerId] && peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE$1.CLOSED) {
+    PeerConnection.closePeerConnection(state, peerId);
+  }
+
+  if (enableDataChannel) {
+    addEventListener(EVENTS.DATA_CHANNEL_STATE, (evt) => {
+      const { detail } = evt;
+      if (detail.state === DATA_CHANNEL_STATE$1.CLOSED || detail.state === DATA_CHANNEL_STATE$1.CLOSING) {
+        logger.log.INFO([detail.peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.SUCCESS]);
+        resolve(detail.peerId);
       }
-    }
-
-    for (let v = 0; v < videoMids.length; v += 1) {
-      if (videoMids[v].streamId === mediaInfo.streamId && (videoMids[v].direction === 'sendonly' || videoMids[v].direction === 'sendrecv')) {
-        helpers$6.updatePeerMediaInfo(room, peerId, false, mediaInfo.mediaId, MEDIA_INFO.TRANSCEIVER_MID, videoMids[v].transceiverMid);
-        break;
-      }
-    }
-  }
-};
-
-const retrieveValueGivenTransceiverMid = (state, peerId, transceiverMid, key) => {
-  const { peerMedias } = state;
-  const mediaInfos = Object.values(peerMedias[peerId]);
-  for (let m = 0; m < mediaInfos.length; m += 1) {
-    if (mediaInfos[m].transceiverMid === transceiverMid) {
-      return mediaInfos[m][key];
-    }
-  }
-
-  return null;
-};
-
-const retrieveFormattedMediaInfo = (room, peerId) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerMedias } = state;
-  const mediaInfos = Object.values(peerMedias[peerId]);
-  const formattedMediaInfos = [];
-
-  for (let m = 0; m < mediaInfos.length; m += 1) {
-    const mediaInfo = mediaInfos[m];
-    const clonedMediaInfo = clone_1(mediaInfo);
-    delete clonedMediaInfo.trackId;
-    delete clonedMediaInfo.streamId;
-    formattedMediaInfos.push(clonedMediaInfo);
-  }
-
-  return formattedMediaInfos;
-};
-
-const resetPeerMedia = (room, peerId) => {
-  const updatedState = Skylink.getSkylinkState(room.id);
-  const peerMedia = updatedState.peerMedias[peerId];
-
-  if (peerMedia) {
-    updatedState.peerMedias[peerId] = {};
-  }
-
-  return updatedState;
-};
-
-// peerMedia will have a previous state if setPeerMediaInfo is called from renegotiation
-const peerMediaHasPreviousState = (clonedPeerMedia, mediaId) => !isEmptyObj(clonedPeerMedia) && clonedPeerMedia[mediaId];
-
-const populatePeerMediaInfo = (updatedState, clonedPeerMedia, mediaInfo) => {
-  const peerMedia = updatedState.peerMedias[mediaInfo.publisherId] || {};
-  peerMedia[mediaInfo.mediaId] = mediaInfo;
-
-  if (peerMediaHasPreviousState(clonedPeerMedia, mediaInfo.mediaId)) {
-    peerMedia[mediaInfo.mediaId].streamId = (mediaInfo.transceiverMid === clonedPeerMedia[mediaInfo.mediaId].transceiverMid) ? clonedPeerMedia[mediaInfo.mediaId].streamId : '';
-  }
-
-  return peerMedia;
-};
-
-const processOnRemoveTrack = (state, peerId, clonedMediaInfo) => {
-  // This method is required because react native android does not have a way for the remote to register onremovetrack event
-  // onremovetrack needs to be caught in the renegotiation when the remote calls stopStreams and sends an offer
-  // the removed track/stream will be set to unavailable
-  // Although react native ios has didRemoveReceiver callback, and onremovetrack can be artificially attached to the peerConnection to process
-  // a stopped stream, the type of stream is not identifiable i.e is screenshare or not.
-  // Therefore react native ios and android will implement the same workaround for now.
-  if (isAgent(BROWSER_AGENT.REACT_NATIVE) && clonedMediaInfo) {
-    const { room } = state;
-    const trackInfo = {
-      track: {
-        id: null,
-        kind: null,
-      },
-    };
-    const stream = {
-      id: null,
-    };
-    trackInfo.track.id = clonedMediaInfo.trackId;
-    trackInfo.track.kind = (clonedMediaInfo.mediaType === MEDIA_TYPE.AUDIO || clonedMediaInfo.mediaType === MEDIA_TYPE.AUDIO_MIC) ? TRACK_KIND.AUDIO : TRACK_KIND.VIDEO;
-    stream.id = clonedMediaInfo.streamId;
-    trackInfo.stream = stream;
-    if (!(trackInfo.track.id || trackInfo.track.kind || stream.id)) {
-      logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.BROWSER_AGENT.REACT_NATIVE.ERRORS.DROPPING_ONREMOVETRACK}`], trackInfo);
-      return;
-    }
-    callbacks$2.onremovetrack(peerId, room, clonedMediaInfo.mediaType === MEDIA_TYPE.VIDEO_SCREEN, trackInfo);
-  }
-};
-
-const helpers$6 = {
-  retrieveTransceiverMid,
-  retrieveMediaState,
-  retrieveMediaId,
-  buildPeerMediaInfo,
-  retrieveStreamIdOfTrack,
-  retrieveTracks,
-  updatePeerMediaInfo,
-  sendMediaInfoMsg,
-  parseSDPForTransceiverMid,
-  retrieveValueGivenTransceiverMid,
-  retrieveFormattedMediaInfo,
-  resetPeerMedia,
-  populatePeerMediaInfo,
-  processOnRemoveTrack,
-};
-
-class PeerMedia {
-  /**
-   * Method that updates local media info with user sid returned from inRoom message. There is no user.sid information prior to inRoom message.
-   * @param room
-   * @param sid
-   * @private
-   */
-  static updatePeerMediaWithUserSid(room, sid) {
-    const updatedState = Skylink.getSkylinkState(room.id);
-
-    updatedState.peerMedias[sid] = Object.assign({}, updatedState.peerMedias.null);
-    delete updatedState.peerMedias.null;
-    Skylink.setSkylinkState(updatedState, room.id);
-    Object.keys(updatedState.peerMedias[sid]).forEach((mediaId) => {
-      helpers$6.updatePeerMediaInfo(room, sid, false, mediaId, MEDIA_INFO.PUBLISHER_ID, sid);
     });
+
+    PeerConnection.closeDataChannel(state, peerId);
+  } else {
+    resolve(peerId);
   }
+});
 
-  /**
-   * Method that updates the stream id of the remote peer in the peer media info
-   * @param room
-   * @param peerId
-   * @param transceiverMid
-   * @param streamId
-   */
-  static updateStreamIdFromOntrack(room, peerId, transceiverMid, streamId) {
-    const state = Skylink.getSkylinkState(room.id);
-    const mediaId = helpers$6.retrieveValueGivenTransceiverMid(state, peerId, transceiverMid, MEDIA_INFO.MEDIA_ID);
-    helpers$6.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.STREAM_ID, streamId);
-  }
+/**
+ * Method that sends a bye message to the all the peers in order remove the peer information or disconnects the socket connection.
+ * @param state
+ * @returns {Promise<SkylinkState>}
+ * @private
+ */
+const sendByeOrDisconnectSocket = state => new Promise((resolve) => {
+  const updatedState = Skylink.getSkylinkState(state.room.id);
+  const { room, peerConnections } = updatedState;
+  const { ROOM: { LEAVE_ROOM } } = MESSAGES;
+  const skylinkSignalingServer = new SkylinkSignalingServer();
+  const isInMoreThanOneRoom = Object.keys(Skylink.getSkylinkState()).length > 1;
 
-  /**
-   * Method that checks if a transceiver mid corresponds to a screen stream
-   * @param state
-   * @param peerId
-   * @param transceiverMid
-   * @returns {boolean}
-   */
-  static isVideoScreenTrack(state, peerId, transceiverMid) {
-    const { peerMedias } = state;
-    const mediaInfos = Object.values(peerMedias[peerId]);
+  room.inRoom = false;
+  Skylink.setSkylinkState(updatedState, room.id);
 
-    for (let m = 0; m < mediaInfos.length; m += 1) {
-      if (mediaInfos[m].transceiverMid === transceiverMid) {
-        return mediaInfos[m].mediaType === MEDIA_TYPE.VIDEO_SCREEN;
-      }
-    }
+  if (isInMoreThanOneRoom) {
+    // broadcast bye to all peers in the room if there is more than one room
+    logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.SENDING_BYE]);
+    Object.keys(peerConnections).forEach((peerId) => {
+      skylinkSignalingServer.bye(updatedState, peerId);
+    });
+    resolve(updatedState);
+  } else {
+    // disconnect socket if it is the last room
+    skylinkSignalingServer.config = skylinkSignalingServer.resetSocketConfig(window.location.protocol);
 
-    return false;
-  }
+    const handleChannelClose = () => {
+      logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.DISCONNECT_SOCKET.SUCCESS]);
+      removeEventListener(EVENTS.CHANNEL_CLOSE, handleChannelClose);
+      resolve(updatedState);
+    };
 
-  /**
-   * Method that updates the peer media info state to unavailable.
-   * @param room
-   * @param peerId
-   * @param mediaId
-   */
-  static setMediaStateToUnavailable(room, peerId, mediaId) {
-    helpers$6.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.MEDIA_STATE, MEDIA_STATE.UNAVAILABLE);
-  }
+    addEventListener(EVENTS.CHANNEL_CLOSE, handleChannelClose);
 
-  /**
-   * Method that removes mediaInfo that has mediaState set to unavailable.
-   * @param {SkylinkRoom} room
-   * @param {String} peerId
-   * @param {String|null} mediaId
-   */
-  static deleteUnavailableMedia(room, peerId, mediaId = null) {
-    const updatedState = Skylink.getSkylinkState(room.id);
-
-    if (peerId === PEER_TYPE.MCU || !updatedState.peerMedias[peerId]) {
-      return;
-    }
-
-    let clonedMediaInfo;
-    if (!mediaId) {
-      const mediaInfos = updatedState.peerMedias[peerId];
-      Object.values(mediaInfos).forEach((mInfo) => {
-        if (mInfo.mediaState === MEDIA_STATE.UNAVAILABLE) {
-          clonedMediaInfo = clone_1(mInfo);
-          delete updatedState.peerMedias[peerId][mInfo.mediaId];
-        }
-      });
+    if (skylinkSignalingServer.socket.connected) {
+      skylinkSignalingServer.socket.disconnect();
     } else {
-      clonedMediaInfo = clone_1(updatedState.peerMedias[peerId][mediaId]);
-      delete updatedState.peerMedias[peerId][mediaId];
-    }
-
-    Skylink.setSkylinkState(updatedState, room.id);
-
-    helpers$6.processOnRemoveTrack(updatedState, peerId, clonedMediaInfo);
-
-    if (clonedMediaInfo) {
-      dispatchEvent(mediaInfoDeleted({
-        mediaInfo: clonedMediaInfo,
-      }));
+      resolve(updatedState);
     }
   }
+});
 
-  /**
-   * Method that updates the peer media info.
-   * @param room
-   * @param peerId
-   * @param mediaId
-   * @param key
-   * @param value
-   * @private
-   */
-  static updatePeerMediaInfo(room, peerId, mediaId, key, value) {
-    helpers$6.updatePeerMediaInfo(room, peerId, true, mediaId, key, value);
+/**
+ * Stops streams within a Skylink state.
+ * @private
+ * @param {SkylinkState} state
+ */
+const stopStreams = (state) => {
+  const { room, peerStreams, user } = state;
+
+  if (peerStreams[user.sid]) {
+    stopStreamHelpers.prepStopStreams(room.id, null, true);
   }
 
-  /**
-   * Method that updates the transceiver mid value of local media info after set local description.
-   * // TODO: remove as it is no longer called
-   * @param room
-   * @param peerId
-   * @private
-   */
-  static updateTransceiverMid(room, peerId) {
-    try {
-      const tracks = helpers$6.retrieveTracks(room);
-      tracks.forEach((track) => {
-        const transceiverMid = helpers$6.retrieveTransceiverMid(room, track);
-        const streamId = helpers$6.retrieveStreamIdOfTrack(room, track);
-        const mediaId = helpers$6.retrieveMediaId(track.kind, streamId);
-        helpers$6.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.TRANSCEIVER_MID, transceiverMid);
-      });
-    } catch (err) {
-      logger.log.ERROR([peerId, TAGS.PEER_MEDIA, null, MESSAGES.MEDIA_INFO.ERRORS.FAILED_UPDATING_TRANSCEIVER_MID], err);
-    }
+  new ScreenSharing(state).stop(true);
+};
+
+const clearRoomState = (roomKey) => {
+  Skylink.clearRoomStateFromSingletons(roomKey);
+  Skylink.removeSkylinkState(roomKey);
+};
+
+const clearBandwidthAdjuster = (roomKey) => {
+  const state = Skylink.getSkylinkState(roomKey);
+  if (state.bandwidthAdjuster && !state.hasMCU) {
+    // eslint-disable-next-line no-new
+    new BandwidthAdjuster({ roomKey });
   }
+};
 
-  /**
-   * Method that sets the remote peer media info from the offer.
-   * @param room
-   * @param targetMid
-   * @param mediaInfoList
-   */
-  static setPeerMediaInfo(room, targetMid, mediaInfoList = []) {
-    try {
-      const state = Skylink.getSkylinkState(room.id);
+/**
+ * Method that starts the peer left process.
+ * @param {SkylinkState} roomState
+ * @private
+ */
+const leaveRoom = roomState => new Promise((resolve, reject) => {
+  const {
+    peerConnections, peerInformations, room, hasMCU, user,
+  } = roomState;
+  const { ROOM: { LEAVE_ROOM } } = MESSAGES;
 
-      if (targetMid === PEER_TYPE.MCU && !isEmptyArray(mediaInfoList)) { // targetMid needs to be obtained from
-        // mediaInfoList
-        const targetPeerIds = [];
-        mediaInfoList.forEach((mediaInfo) => {
-          if (targetPeerIds.indexOf(mediaInfo.publisherId) === -1) {
-            targetPeerIds.push(mediaInfo.publisherId);
-          }
+  try {
+    // eslint-disable-next-line no-nested-ternary
+    const peerIds = hasMCU ? (peerConnections.MCU ? [PEER_TYPE.MCU] : []) : Array.from(new Set([...Object.keys(peerConnections), ...Object.keys(peerInformations)]));
+
+    if (isEmptyArray(peerIds)) {
+      logger.log.DEBUG([room.roomName, null, null, LEAVE_ROOM.NO_PEERS]);
+      stopStreams(roomState);
+      sendByeOrDisconnectSocket(roomState)
+        .then((removedState) => {
+          logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.REMOVE_STATE.SUCCESS]);
+          dispatchEvent(peerLeft({
+            peerId: user.sid,
+            peerInfo: PeerData.getCurrentSessionInfo(room),
+            isSelf: true,
+            room: Room.getRoomInfo(room.id),
+          }));
+          clearBandwidthAdjuster(removedState.room.id);
+          clearRoomState(removedState.room.id);
+          resolve(removedState.room.roomName);
         });
-        targetPeerIds.forEach(peerId => this.setPeerMediaInfo(room, peerId, mediaInfoList));
-      } else if (targetMid !== PEER_TYPE.MCU) {
-        const clonedPeerMedia = clone_1(state.peerMedias[targetMid]) || {};
-        const updatedState = helpers$6.resetPeerMedia(room, targetMid);
-        mediaInfoList.forEach((mediaInfo) => {
-          updatedState.peerMedias[mediaInfo.publisherId] = helpers$6.populatePeerMediaInfo(updatedState, clonedPeerMedia, mediaInfo);
-        });
-        Skylink.setSkylinkState(updatedState, room.id);
-      }
-    } catch (err) {
-      logger.log.ERROR([targetMid, TAGS.PEER_MEDIA, null, MESSAGES.MEDIA_INFO.ERRORS.FAILED_SETTING_PEER_MEDIA_INFO]);
-    }
-  }
+    } else {
+      const peerLeftPromises = [];
 
-  /**
-   * Method that returns the streamId from the peer media info.
-   * @param room
-   * @param peerId
-   * @param mediaId
-   * @param transceiverMid
-   * @returns {String} streamId
-   */
-  static retrieveStreamId(room, peerId, mediaId, transceiverMid) {
-    const state = Skylink.getSkylinkState(room.id);
-    const { peerMedias } = state;
-    const mediaInfo = peerMedias[peerId][mediaId];
-    const streamId = mediaInfo.transceiverMid === transceiverMid ? mediaInfo.streamId : null;
-
-    if (!streamId) {
-      logger.log.ERROR([peerId, TAGS.PEER_MEDIA, null, MESSAGES.MEDIA_INFO.ERRORS.NO_ASSOCIATED_STREAM_ID]);
-    }
-
-    return streamId;
-  }
-
-  /**
-   * Method that returns the mediaId
-   * @param trackKind
-   * @param streamId
-   * @returns {String} mediaId
-   */
-  static retrieveMediaId(trackKind, streamId) {
-    return helpers$6.retrieveMediaId(trackKind, streamId);
-  }
-
-  /**
-   * Method that returns the local media info format for offer and answer message.
-   * @param room
-   * @param peerId
-   * @param sessionDescription
-   * @returns {object} mediaInfo
-   * @private
-   */
-  static retrieveMediaInfoForOfferAnswer(room, sessionDescription) {
-    const state = Skylink.getSkylinkState(room.id);
-    const peerId = state.user.sid;
-
-    helpers$6.parseSDPForTransceiverMid(room, peerId, sessionDescription);
-    return helpers$6.retrieveFormattedMediaInfo(room, peerId);
-  }
-
-  /**
-   * Method that processes the peer media and adds it to the state after successfully obtaining the stream from getUserMedia. MediaInfoEvent is not dispatched.
-   * @param room
-   * @param peerId
-   * @param stream
-   * @param isScreensharing
-   * @param dispatchEvt - The flag if the update should dispatch mediaInfoEvent signaling message.
-   * @private
-   */
-  static processPeerMedia(room, peerId, stream, isScreensharing, dispatchEvt = false) {
-    const updatedState = Skylink.getSkylinkState(room.id);
-    const peerMedia = updatedState.peerMedias[peerId] || {};
-    const tracks = stream.getTracks();
-    let mediaId = null;
-
-    try {
-      tracks.forEach((track) => {
-        mediaId = helpers$6.retrieveMediaId(track.kind, stream.id);
-        // eslint-disable-next-line no-nested-ternary
-        peerMedia[mediaId] = helpers$6.buildPeerMediaInfo(room, peerId, track, stream.id, track.kind === TRACK_KIND.AUDIO ? MEDIA_TYPE.AUDIO_MIC : (isScreensharing ? MEDIA_TYPE.VIDEO_SCREEN : MEDIA_TYPE.VIDEO_CAMERA));
-        helpers$6.updatePeerMediaInfo(room, peerId, dispatchEvt, mediaId, null, null, peerMedia[mediaId]);
+      peerIds.forEach((peerId) => {
+        peerLeftPromises.push(executePeerLeftProcess(roomState, peerId));
       });
-    } catch (err) {
-      logger.log.ERROR([peerId, TAGS.MEDIA_INFO, MESSAGES.MEDIA_INFO.ERRORS.FAILED_PROCESSING_PEER_MEDIA], err);
+
+      Promise.all(peerLeftPromises)
+        .then(() => {
+          stopStreams(roomState);
+          return sendByeOrDisconnectSocket(roomState);
+        })
+        .then((removedState) => {
+          logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.REMOVE_STATE.SUCCESS]);
+          dispatchEvent(peerLeft({
+            peerId: user.sid,
+            peerInfo: PeerData.getCurrentSessionInfo(room),
+            isSelf: true,
+            room: Room.getRoomInfo(room.id),
+          }));
+          clearBandwidthAdjuster(removedState.room.id);
+          clearRoomState(removedState.room.id);
+          resolve(removedState.room.roomName);
+        });
     }
+  } catch (error) {
+    logger.log.ERROR([room.roomName, null, null, LEAVE_ROOM.ERROR], error);
+    reject(error);
+  }
+});
+
+/**
+ * Method that triggers self to leave all rooms.
+ * @param {Array} closedRooms - Array of rooms that have been left
+ * @param {Array} resolves - Array of resolves for each room that have been left
+ * @private
+ */
+const leaveAllRooms = (closedRooms = [], resolves = []) => new Promise((resolve, reject) => {
+  const { ROOM: { LEAVE_ROOM } } = MESSAGES;
+
+  try {
+    const states = Skylink.getSkylinkState();
+    const roomStates = Object.values(states);
+
+    if (roomStates[0]) { // Checks for existing roomStates and picks the first in the array
+      leaveRoom(roomStates[0])
+        .then((roomName) => {
+          closedRooms.push(roomName);
+          resolves.push(resolve);
+          leaveAllRooms(closedRooms, resolves);
+        });
+    } else {
+      logger.log.INFO([closedRooms, 'Room', null, LEAVE_ROOM.LEAVE_ALL_ROOMS.SUCCESS]);
+      resolves.forEach(res => res(closedRooms)); // resolves all promises
+    }
+  } catch (err) {
+    logger.log.ERROR([null, 'Room', null, LEAVE_ROOM.LEAVE_ALL_ROOMS.ERROR], err);
+    reject(err);
+  }
+});
+
+class HandleClientStats extends SkylinkStats {
+  constructor() {
+    super();
+    const { AdapterJS, navigator } = window;
+    this.model = {
+      client_id: null,
+      app_key: null,
+      timestamp: null,
+      username: null,
+      sdk_name: SDK_NAME.WEB,
+      sdk_version: null,
+      agent_name: AdapterJS.webrtcDetectedBrowser,
+      agent_version: AdapterJS.webrtcDetectedVersion,
+      agent_platform: navigator.platform,
+      agent_plugin_version: null,
+      device_version: null,
+      enumerated_devices: null,
+      device_muted: null,
+      network_type: navigator.connection ? navigator.connection.type : '-',
+      language: navigator.language,
+    };
+  }
+
+  send(roomKey) {
+    const roomState = Skylink.getSkylinkState(roomKey);
+
+    this.model.username = (roomState.user && roomState.user.uid) || null;
+    this.model.sdk_version = roomState.VERSION;
+    this.model.client_id = roomState.clientId;
+    this.model.app_key = Skylink.getInitOptions().appKey;
+    this.model.timestamp = (new Date()).toISOString();
+
+    this.postStats(this.endpoints.client, this.model);
   }
 }
 
-const isStreamInState = (state, stream) => {
-  const { streams } = state;
-
-  if (!streams.userMedia && !streams.screenshare) {
-    return false;
+/**
+ * @class
+ * @classdesc Class representing a Skylink State.\
+ * @private
+ */
+class SkylinkState {
+  /**
+   * @property {SkylinkApiResponse} skylinkApiResponse
+   */
+  constructor(initOptions) {
+    /**
+     * Stores the api response.
+     * @name apiResponse
+     * @type {SkylinkApiResponse}
+     * @since 2.0.0
+     * @private
+     */
+    this.apiResponse = {};
+    /**
+     * Stores the list of Peer DataChannel connections.
+     * @name dataChannels
+     * @type {Object}
+     * @property {String} peerId - The list of DataChannels associated with Peer ID.
+     * @property {RTCDataChannel} channelLabel - The DataChannel connection.
+     * The property name <code>"main"</code> is reserved for messaging Datachannel type.
+     * @since 0.2.0
+     * @private
+     */
+    this.dataChannels = {};
+    /**
+     * Stores the list of buffered ICE candidates that is received before
+     *   remote session description is received and set.
+     * @name peerCandidatesQueue
+     * @property {Array} <#peerId> The list of the Peer connection buffered ICE candidates received.
+     * @property {RTCIceCandidate} <#peerId>.<#index> The Peer connection buffered ICE candidate received.
+     * @type JSON
+     * @since 0.5.1
+     * @private
+     */
+    this.peerCandidatesQueue = {};
+    /**
+     * Stores the list of ICE candidates received before signaling end.
+     * @name peerEndOfCandidatesCounter
+     * @type JSON
+     * @since 0.6.16
+     * @private
+     */
+    this.peerEndOfCandidatesCounter = {};
+    /**
+     * Stores the list of Peer connection ICE candidates.
+     * @name gatheredCandidates
+     * @property {JSON} <#peerId> The list of the Peer connection ICE candidates.
+     * @property {JSON} <#peerId>.sending The list of the Peer connection ICE candidates sent.
+     * @property {JSON} <#peerId>.receiving The list of the Peer connection ICE candidates received.
+     * @type JSON
+     * @since 0.6.14
+     * @private
+     */
+    this.gatheredCandidates = {};
+    /**
+     * Stores the window number of Peer connection retries that would increase the wait-for-response timeout
+     *   for the Peer connection health timer.
+     * @name retryCounters
+     * @type JSON
+     * @since 0.5.10
+     * @private
+     */
+    this.retryCounters = {};
+    /**
+     * Stores the list of the Peer connections.
+     * @name peerConnections
+     * @property {RTCPeerConnection} <#peerId> The Peer connection.
+     * @type JSON
+     * @since 0.1.0
+     * @private
+     */
+    this.peerConnections = {};
+    /**
+     * Stores the list of the Peer connections stats.
+     * @name peerStats
+     * @property {JSON} <#peerId> The Peer connection stats.
+     * @type JSON
+     * @since 0.6.16
+     * @private
+     */
+    this.peerStats = {};
+    /**
+     * Stores the list of Peers session information.
+     * @name peerInformations
+     * @property {JSON} <#peerId> The Peer session information.
+     * @property {JSON|string} <#peerId>.userData The Peer custom data.
+     * @property {JSON} <#peerId>.settings The Peer streaming information.
+     * @property {JSON} <#peerId>.mediaStatus The Peer streaming media status.
+     * @property {JSON} <#peerId>.agent The Peer agent information.
+     * @type JSON
+     * @since 0.3.0
+     * @private
+     */
+    this.peerInformations = {};
+    /**
+     * Stores the Signaling user credentials from the API response required for connecting to the Signaling server.
+     * @name user
+     * @property {String} uid The API result "username".
+     * @property {String} token The API result "userCred".
+     * @property {String} timeStamp The API result "timeStamp".
+     * @property {String} sid The Signaling server receive user Peer ID.
+     * @type SkylinkUser
+     * @since 0.5.6
+     * @private
+     */
+    this.user = initOptions.user;
+    /**
+     * Stores the User connection priority weight received from signalling server inRoom message.
+     * In case of crossing offers, the offer that contains the lower weight will be dropped.
+     * @name peerPriorityWeight
+     * @type number
+     * @since 0.5.0
+     * @private
+     */
+    this.peerPriorityWeight = 0;
+    /**
+     * Stores the flag that indicates if "isPrivileged" is enabled.
+     * If enabled, the User has Privileged features which has the ability to retrieve the list of
+     *   Peers in the same App space with <code>getPeers()</code> method
+     *   and introduce Peers to each other with <code>introducePeer</code> method.
+     * @name isPrivileged
+     * @type boolean
+     * @default false
+     * @since 0.6.1
+     * @private
+     */
+    this.isPrivileged = initOptions.isPrivileged;
+    /**
+     * Stores the current socket connection information.
+     * @name socketSession
+     * @type {socketSession}
+     * @since 0.6.13
+     * @private
+     */
+    this.socketSession = {};
+    /**
+     * Stores the queued socket messages.
+     * This is to prevent too many sent over less than a second interval that might cause DROPPED messages
+     *   or jams to the Signaling connection.
+     * @name socketMessageQueue
+     * @type Array
+     * @since 0.5.8
+     * @private
+     */
+    this.socketMessageQueue = [];
+    /**
+     * Stores the flag that indicates if socket connection to the Signaling has opened.
+     * @name channelOpen
+     * @type boolean
+     * @since 0.5.2
+     * @private
+     */
+    this.channelOpen = false;
+    /**
+     * Stores the Signaling server url.
+     * @name signalingServer
+     * @type string
+     * @since 0.5.2
+     * @private
+     */
+    this.socketServer = initOptions.socketServer;
+    /**
+     * Stores the Signaling server protocol.
+     * @name signalingServerProtocol
+     * @type string
+     * @since 0.5.4
+     * @private
+     */
+    this.signalingServerProtocol = initOptions.forceSSL ? 'https:' : window.location.protocol;
+    /**
+     * Stores the value if ICE restart is supported.
+     * @name enableIceRestart
+     * @type boolean
+     * @since 0.6.16
+     * @private
+     */
+    this.enableIceRestart = false;
+    /**
+     * Stores the flag if MCU environment is enabled.
+     * @name hasMCU
+     * @type boolean
+     * @since 0.5.4
+     * @private
+     */
+    this.hasMCU = initOptions.hasMCU;
+    /**
+     * Stores the Room credentials information for <code>joinRoom()</code>.
+     * @name room
+     * @property {String} id The "rid" for <code>joinRoom()</code>.
+     * @property {String} token The "roomCred" for <code>joinRoom()</code>.
+     * @property {String} startDateTime The "start" for <code>joinRoom()</code>.
+     * @property {String} duration The "len" for <code>joinRoom()</code>.
+     * @property {String} connection The RTCPeerConnection constraints and configuration. This is not used in the SDK
+     *   except for the "mediaConstraints" property that sets the default <code>getUserMedia()</code> settings.
+     * @type SkylinkRoom
+     * @since 0.5.2
+     * @private
+     */
+    this.room = initOptions.room;
+    /**
+     * Stores the list of Peer messages timestamp.
+     * @name peerMessagesStamps
+     * @type JSON
+     * @since 0.6.15
+     * @private
+     */
+    this.peerMessagesStamps = {};
+    /**
+     * Stores all the Stream required muted settings.
+     * @name streamsMutedSettings
+     * @type JSON
+     * @since 0.6.15
+     * @private
+     */
+    this.streamsMutedSettings = {};
+    /**
+     * Stores all the Stream sending maximum bandwidth settings.
+     * @name streamsBandwidthSettings
+     * @type JSON
+     * @since 0.6.15
+     * @private
+     */
+    this.streamsBandwidthSettings = {
+      bAS: {},
+    };
+    /**
+     * Stores the list of recordings.
+     * @name recordings
+     * @type JSON
+     * @since 0.6.16
+     * @private
+     */
+    this.recordings = {};
+    /**
+     * Stores the current active recording session ID.
+     * There can only be 1 recording session at a time in a Room
+     * @name currentRecordingId
+     * @type JSON
+     * @since 0.6.16
+     * @private
+     */
+    this.currentRecordingId = false;
+    /**
+     * Stores the recording session timeout to ensure 4 seconds has been recorded.
+     * @name recordingStartInterval
+     * @type number
+     * @since 0.6.16
+     * @private
+     */
+    this.recordingStartInterval = null;
+    /**
+     * Stores the currently supported codecs.
+     * @name currentCodecSupport
+     * @type JSON
+     * @since 0.6.18
+     * @private
+     */
+    this.currentCodecSupport = null;
+    /**
+     * Stores the flag if voice activity detection should be enabled.
+     * @name voiceActivityDetection
+     * @type boolean
+     * @default true
+     * @since 0.6.18
+     * @private
+     */
+    this.voiceActivityDetection = true;
+    /**
+     * Stores the auto bandwidth settings.
+     * @name bandwidthAdjuster
+     * @type JSON
+     * @since 0.6.18
+     * @private
+     */
+    this.bandwidthAdjuster = null;
+    /**
+     * Stores the list of RTMP Sessions.
+     * @name rtmpSessions
+     * @type JSON
+     * @since 0.6.36
+     * @private
+     */
+    this.rtmpSessions = {};
+    /**
+     * Offer buffered in order to apply when received answer
+     * @name bufferedLocalOffer
+     * @type Object
+     * @private
+     * @since 1.0.0
+     */
+    this.bufferedLocalOffer = {};
+    /**
+     * Offers buffered in order to apply when answerAck has been received
+     * @name bufferedRemoteOffers
+     * @type Object
+     * @private
+     * @since 2.0.0
+     */
+    this.bufferedRemoteOffers = {};
+    /**
+     * Map of RTCRTPSenders that are added via addTrack
+     * @name currentRTCRTPSenders
+     * @type Object
+     * @private
+     * @since 1.0.0
+     */
+    this.currentRTCRTPSenders = {};
+    /**
+     * Stores the unique random number used for generating the "client_id".
+     * @name clientId
+     * @type string
+     * @private
+     * @since 0.6.31
+     */
+    this.clientId = initOptions.clientId;
+    /**
+     * Stores all the Stream media status.
+     * @name streamsMediaStatus
+     * @type Object
+     * @private
+     * @since 1.0.0
+     */
+    this.streamsMediaStatus = {};
+    /**
+     * Stores the media info of all peers.
+     * @name peerMedias
+     * @type Object
+     * @private
+     * @since 2.0.0
+     */
+    this.peerMedias = {};
+    /**
+     * Stores the flag if messages should be persisted. Value determined by the hasPersistentMessage value returned from the API.
+     * This feature is enabled in the Temasys Developer Console by toggling the Persistent Message feature at the key level.
+     * @name hasPersistentMessage
+     * @type Object
+     * @private
+     * @since 2.0.0
+     */
+    this.hasPersistentMessage = initOptions.hasPersistentMessage;
+    this.peerStreams = {};
+    this.streamsSettings = {};
   }
+}
 
-  const streamObjs = streams.userMedia ? Object.values(streams.userMedia) : [];
-  if (streamObjs.some(streamObj => streamObj.id === stream.id)) {
-    return true;
-  }
+const buildCachedApiResponse = (skylinkApiResponse) => {
+  const cachedResponse = clone_1(skylinkApiResponse);
+  delete cachedResponse.room;
+  delete cachedResponse.user;
+  return cachedResponse;
+};
 
-  return streams.screenshare && streams.screenshare.id === stream.id;
+const addNewStateAndCacheApiResponse = (response, options) => {
+  const apiServer = new SkylinkAPIServer();
+  const skylinkApiResponse = new SkylinkApiResponse(response);
+  const initOptions = apiServer.enforceUserInitOptions(skylinkApiResponse);
+  const skylinkState = new SkylinkState(initOptions);
+  skylinkState.user.userData = options.userData;
+  skylinkState.apiResponse = Object.freeze(buildCachedApiResponse(skylinkApiResponse));
+  Skylink.setSkylinkState(skylinkState, response.roomName);
+  return skylinkState;
 };
 
 /**
- * Function that processes the streams object in the state.
- * @param {MediaStream} stream - User MediaStream object
- * @param {GetUserMediaOptions} settings - Options used to get the peer-media stream
- * @param {SkylinkRoom.id} roomkey - Room's id
- * @param {boolean} [isScreensharing=false] isScreensharing
- * @param {boolean} [isAudioFallback=false] isAudioFallback
- * @memberOf MediaStreamHelpers
- * @fires MEDIA_ACCESS_SUCCESS
+ * @description Method that starts the Room Session.
+ * @param {joinRoomOptions} [options] The options available to join the room and configure the session.
+ * @param {MediaStream} [prefetchedStream] The prefetched media stream object obtained when the user calls getUserMedia before joinRoom.
+ * @return {Promise} Promise object with MediaStream.
+ * @memberOf Room
+ * @alias Room.joinRoom
  * @private
- * */
-const processStreamInState = (stream = null, settings = {}, roomkey, isScreensharing = false, isAudioFallback = false) => {
-  if (!stream) return;
-  const updatedState = Skylink.getSkylinkState(roomkey);
+ */
+const joinRoom = (options = {}, prefetchedStream) => new Promise((resolve, reject) => {
+  const { navigator } = window;
+  const apiServer = new SkylinkAPIServer();
+  const signalingServer = new SkylinkSignalingServer();
+  const initOptions = Skylink.getInitOptions();
+  const handleClientStats = new HandleClientStats();
+  const roomName = SkylinkAPIServer.getRoomNameFromParams(options) ? SkylinkAPIServer.getRoomNameFromParams(options) : initOptions.defaultRoom;
 
-  if (isStreamInState(updatedState, stream)) {
-    return;
-  }
+  dispatchEvent(readyStateChange({
+    readyState: READY_STATE_CHANGE$1.LOADING,
+    error: null,
+    room: { roomName },
+  }));
 
-  helpers$7.processNewStream(updatedState.room, stream, settings, isScreensharing);
-  PeerMedia.processPeerMedia(updatedState.room, updatedState.user.sid, stream, isScreensharing);
+  apiServer.createRoom(roomName).then((result) => {
+    const { response } = result;
+    response.roomName = roomName;
+    const skylinkState = addNewStateAndCacheApiResponse(response, options);
 
-  if (isAudioFallback) {
-    logger.log.DEBUG([updatedState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.FALLBACK_SUCCESS]);
-  }
+    apiServer.checkCodecSupport(skylinkState.room.id).then(() => {
+      handleClientStats.send(skylinkState.room.id);
+      return signalingServer.createSocket(response.room_key).then(() => {
+        const room = SkylinkAPIServer.getStateByKey(response.room_key);
+        const userMediaParams = Object.assign({}, options);
 
-  if (isScreensharing) {
-    logger.log.DEBUG([updatedState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.START_SCREEN_SUCCESS]);
-  }
+        userMediaParams.room = room;
+        if (prefetchedStream || (options.id && options.active)) { // check for prefetched stream as the only arg
+          MediaStream.usePrefetchedStream(response.room_key, prefetchedStream, options).then(() => {
+            signalingServer.joinRoom(room);
+            resolve(null);
+          }).catch((error) => {
+            reject(error);
+          });
+        } else if (options.audio || options.video) {
+          MediaStream.getUserMedia(skylinkState, userMediaParams).then((stream) => {
+            signalingServer.joinRoom(room);
+            resolve(stream);
+          }).catch((streamException) => {
+            reject(streamException);
+          });
+        } else {
+          // If no audio is requested for Safari, audio will not be heard on the Safari peer even if the remote peer has audio. Workaround to
+          // request media access but not add the track to the peer connection. Does not seem to apply to video.
+          if (isAgent(BROWSER_AGENT.SAFARI)) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+              .then(() => signalingServer.joinRoom(room));
+          } else {
+            signalingServer.joinRoom(room);
+          }
+          resolve(null);
+        }
+      });
+    }).catch((codecError) => {
+      reject(codecError);
+    });
+  }).catch((socketException) => {
+    reject(socketException);
+  });
+});
 
-  dispatchEvent(mediaAccessSuccess({
-    stream,
-    isScreensharing,
-    isAudioFallback,
-    streamId: stream.id,
-    isAudio: hasAudioTrack(stream),
-    isVideo: hasVideoTrack(stream),
+/**
+ * @description Method that locks or unlocks a room.
+ * @param {SkylinkState} roomState - The room state.
+ * @param {boolean} lockRoom - The flag if the room should be locked or unlocked.
+ * @private
+ */
+const lockOrUnlockRoom = (roomState, lockRoom = true) => {
+  const updatedState = roomState;
+  const { room, user } = updatedState;
+  const signalingServer = new SkylinkSignalingServer();
+
+  updatedState.room.isLocked = lockRoom;
+  Skylink.setSkylinkState(updatedState, room.id);
+
+  signalingServer.roomLock(updatedState);
+
+  dispatchEvent(roomLock({
+    isLocked: updatedState.room.isLocked,
+    peerInfo: PeerData.getCurrentSessionInfo(room),
+    peerId: user.sid,
+    isSelf: true,
   }));
 };
 
-/* eslint-disable no-nested-ternary */
+/**
+ * @description Method that locks a room.
+ * @param {SkylinkState} roomState - The room state.
+ * @private
+ */
+const lockRoom = roomState => lockOrUnlockRoom(roomState, true);
 
-const parseGumSettings = (settings, type) => {
-  const gumSettings = {
-    audio: false,
-    video: false,
-  };
+/**
+ * @description Method that unlocls a room.
+ * @param {SkylinkState} roomState - The room state.
+ * @private
+ */
+const unlockRoom = roomState => lockOrUnlockRoom(roomState, false);
 
-  if ((settings.audio && !type) || (settings.audio && type === TRACK_KIND.AUDIO)) {
-    if (settings.audio && isAObj(settings.audio)) {
-      gumSettings.audio = {};
-      gumSettings.audio.echoCancellation = true;
-
-      if (isABoolean(settings.audio.echoCancellation)) {
-        gumSettings.audio.echoCancellation = settings.audio.echoCancellation;
-      }
-
-      if (isAgent(BROWSER_AGENT.FIREFOX)) ; else if (settings.audio.deviceId && isAString(settings.audio.deviceId)) {
-        gumSettings.audio.deviceId = settings.audio.exactConstraints
-          ? { exact: settings.audio.deviceId } : { ideal: settings.audio.deviceId };
-      }
-    }
-  }
-
-  if ((settings.video && !type) || (settings.video && type === TRACK_KIND.VIDEO)) {
-    if (settings.video && isAObj(settings.video)) {
-      gumSettings.video = {};
-
-      if (settings.video.deviceId && isAString(settings.video.deviceId)) {
-        gumSettings.video.deviceId = settings.video.exactConstraints
-          ? { exact: settings.video.deviceId } : { ideal: settings.video.deviceId };
-      }
-
-      gumSettings.video.width = isAObj(settings.video.resolution.width)
-        ? settings.video.resolution.width : (settings.video.exactConstraints
-          ? { exact: settings.video.resolution.width } : { max: settings.video.resolution.width });
-
-      gumSettings.video.height = isAObj(settings.video.resolution.height)
-        ? settings.video.resolution.height : (settings.video.exactConstraints
-          ? { exact: settings.video.resolution.height } : { max: settings.video.resolution.height });
-
-      if ((settings.video.frameRate && isAObj(settings.video.frameRate))
-        || isANumber(settings.video.frameRate)) {
-        gumSettings.video.frameRate = isAObj(settings.video.frameRate)
-          ? settings.video.frameRate : (settings.video.exactConstraints
-            ? { exact: settings.video.frameRate } : { max: settings.video.frameRate });
-      }
-    } else if (settings.video) {
-      gumSettings.video = {
-        width: settings.video.exactConstraints ? { exact: settings.video.resolution.width }
-          : { max: settings.video.resolution.width },
-        height: settings.video.exactConstraints ? { exact: settings.video.resolution.height }
-          : { max: settings.video.resolution.height },
-      };
-    }
-  }
-
-  return gumSettings;
-};
-
-const parseSettings = (options, type = '') => {
-  const settings = { audio: false, video: false };
-
-  if ((options.audio && !type) || (options.audio && type === TRACK_KIND.AUDIO)) {
-    settings.audio = clone_1(DEFAULTS.MEDIA_OPTIONS.AUDIO);
-
-    if (isAObj(options.audio)) {
-      if (isABoolean(options.audio.stereo)) {
-        settings.audio.stereo = options.audio.stereo;
-      }
-
-      if (isABoolean(options.audio.echoCancellation)) {
-        settings.audio.echoCancellation = options.audio.echoCancellation;
-      }
-
-      if (isAgent(BROWSER_AGENT.FIREFOX)) ; else if (options.audio.deviceId && isAString(options.audio.deviceId)) {
-        settings.audio.deviceId = options.audio.deviceId;
-      }
-
-      if ((options.useExactConstraints && isABoolean(options.useExactConstraints))) {
-        settings.audio.exactConstraints = options.useExactConstraints;
-      }
-    }
-  }
-
-  if ((options.video && !type) || (options.video && type === TRACK_KIND.VIDEO)) {
-    settings.video = clone_1(DEFAULTS.MEDIA_OPTIONS.VIDEO);
-
-    if (isAObj(options.video)) {
-      if (options.video.deviceId && isAString(options.video.deviceId)) {
-        settings.video.deviceId = options.video.deviceId;
-      }
-
-      if (options.video.resolution && isAObj(options.video.resolution)) {
-        if ((options.video.resolution.width && isAString(options.video.resolution.width))
-          || isANumber(options.video.resolution.width)) {
-          settings.video.resolution.width = options.video.resolution.width;
-        }
-        if ((options.video.resolution.height && isAString(options.video.resolution.height))
-          || isANumber(options.video.resolution.height)) {
-          settings.video.resolution.height = options.video.resolution.height;
-        }
-      }
-
-      if ((options.video.frameRate && isAString(options.video.frameRate))
-        || isANumber(options.video.frameRate)) {
-        settings.video.frameRate = options.video.frameRate;
-      }
-
-      if ((options.useExactConstraints && isABoolean(options.useExactConstraints))) {
-        settings.video.exactConstraints = options.useExactConstraints;
-      }
-    }
-  }
-
-  return settings;
+/**
+ * @typedef roomInfo
+ * @property {String} roomName - The room name
+ * @property {Number} duration - The maximum allowed room duration
+ * @property {String} id - The room id
+ * @property {Boolean} inRoom - The flag if the peer is in the room
+ */
+/**
+ * @param roomKey
+ * @return {roomInfo}
+ * @private
+ */
+const getRoomInfo = (roomKey) => {
+  const state = Skylink.getSkylinkState(roomKey);
+  const { room } = state;
+  const roomInfo = Object.assign({}, room);
+  delete roomInfo.connection;
+  delete roomInfo.token;
+  delete roomInfo.startDateTime;
+  return roomInfo;
 };
 
 /**
- * Parse the options provided to make sure they are compatible
- * @param {GetUserMediaOptions} options
- * @param {String} type - The type of stream i.e. audio or video if options contain both audio and video options
- * @memberOf MediaStreamHelpers
+ * @classdesc Class that contains the methods for Room.
  * @private
- * @return {{settings: {audio: boolean, video: boolean}, mutedSettings: {shouldAudioMuted: Event | boolean | Boolean, shouldVideoMuted: Event | boolean | Boolean}, getUserMediaSettings: {audio: boolean, video: boolean}}}
  */
-const parseStreamSettings = (options, type = '') => {
-  const settings = parseSettings(options, type);
-  const mutedSettings = { shouldAudioMuted: options.audio && isABoolean(options.audio.mute) ? options.audio.mute : false, shouldVideoMuted: options.video && isABoolean(options.video.mute) ? options.video.mute : false };
-  const getUserMediaSettings = parseGumSettings(settings, type);
+class Room {
+  /** @lends Room */
+  static leaveRoom(args) {
+    return leaveRoom(args);
+  }
 
-  return {
-    settings,
-    mutedSettings,
-    getUserMediaSettings,
+  static leaveAllRooms() {
+    return leaveAllRooms();
+  }
+
+  static lockRoom(roomState) {
+    return lockRoom(roomState);
+  }
+
+  static unlockRoom(roomState) {
+    return unlockRoom(roomState);
+  }
+
+  static joinRoom(args) {
+    return joinRoom(args);
+  }
+
+  static getRoomInfo(args) {
+    return getRoomInfo(args);
+  }
+}
+
+/**
+ * @description Function that returns the current session peerInfo is peer isSelf.
+ * @private
+ * @param {SkylinkRoom} room
+ * @return {peerInfo}
+ * @memberOf PeerDataHelpers
+ */
+const getCurrentSessionInfo = (room) => {
+  const state = Skylink.getSkylinkState(room.id);
+  const initOptions = Skylink.getInitOptions();
+  const { AdapterJS, navigator } = window;
+  const { enableDataChannel } = initOptions;
+  const {
+    streamsMediaStatus,
+    peerPriorityWeight,
+    enableIceRestart,
+    peerStreams,
+    streamsBandwidthSettings,
+    streamsSettings,
+    user,
+  } = state;
+
+  const peerInfo = {
+    userData: '',
+    settings: {
+      audio: false,
+      video: false,
+    },
+    mediaStatus: {},
+    agent: {
+      name: AdapterJS.webrtcDetectedBrowser,
+      version: AdapterJS.webrtcDetectedVersion,
+      os: navigator.platform,
+      pluginVersion: null,
+      SMProtocolVersion: SM_PROTOCOL_VERSION,
+      DTProtocolVersion: DT_PROTOCOL_VERSION,
+      SDKVersion: SDK_VERSION,
+    },
+    room: Room.getRoomInfo(room.id),
+    config: {
+      enableDataChannel,
+      enableIceRestart,
+      priorityWeight: peerPriorityWeight,
+    },
+    sid: user.sid,
   };
+
+  if (peerStreams[user.sid]) {
+    const streamIds = Object.keys(peerStreams[user.sid]);
+    streamIds.forEach((id) => {
+      if (streamsSettings[id].settings.audio) {
+        peerInfo.settings.audio = {};
+        peerInfo.settings.audio[id] = clone_1(streamsSettings[id].settings.audio);
+      } else if (streamsSettings[id].settings.video) {
+        peerInfo.settings.video = {};
+        peerInfo.settings.video[id] = clone_1(streamsSettings[id].settings.video);
+      }
+    });
+  }
+
+  peerInfo.mediaStatus = streamsMediaStatus;
+  peerInfo.userData = user.userData || null;
+  peerInfo.settings.maxBandwidth = clone_1(streamsBandwidthSettings.bAS);
+  peerInfo.settings.data = enableDataChannel;
+
+  return clone_1(peerInfo);
 };
 
-/* eslint-disable no-nested-ternary */
+/**
+ * @description Function that returns the User / Peer current custom data.
+ * @private
+ * @param {Skylink} roomState
+ * @param {String} peerId
+ * @return {roomState.userData}
+ * @memberOf PeerDataHelpers
+ */
+const getUserData = (roomState, peerId) => {
+  if (peerId && roomState.peerInformations[peerId]) {
+    let peerUserData = roomState.peerInformations[peerId].userData;
+
+    if (!peerUserData) {
+      peerUserData = '';
+    }
+    return peerUserData;
+  }
+  return roomState.user.userData;
+};
+
+/**
+ * @description Function that overwrites the User current custom data.
+ * @private
+ * @param {SkylinkRoom} room
+ * @param {String | Object} userData
+ * @memberOf PeerDataHelpers
+ * @fires PEER_UPDATED
+ */
+const setUserData = (room, userData) => {
+  const roomState = Skylink.getSkylinkState(room.id);
+  const { PEER_INFORMATIONS: { UPDATE_USER_DATA } } = MESSAGES;
+  const updatedUserData = userData || '';
+
+  roomState.user.userData = updatedUserData;
+  Skylink.setSkylinkState(roomState, roomState.room.id);
+
+  new SkylinkSignalingServer().setUserData(roomState);
+
+  dispatchEvent(peerUpdated({
+    peerId: roomState.user.sid,
+    peerInfo: helpers$6.getCurrentSessionInfo(room),
+    isSelf: true,
+  }));
+
+  logger.log.INFO(UPDATE_USER_DATA, updatedUserData);
+};
+
+const hasPeerDataChannels$1 = dataChannels => !isEmptyObj(dataChannels);
+
+/**
+ * @description Function that gets the current list of connected Peers Datachannel connections in the Room.
+ * @private
+ * @param {SkylinkState} roomState
+ * @return {Object} listOfPeersDataChannels
+ * @memberOf PeerDataHelpers
+ */
+const getPeersDataChannels = (roomState) => {
+  const { dataChannels } = roomState;
+  const listOfPeersDataChannels = {};
+  const listOfPeers = Object.keys(dataChannels);
+
+  for (let i = 0; i < listOfPeers.length; i += 1) {
+    const peerId = listOfPeers[i];
+    listOfPeersDataChannels[peerId] = {};
+
+    if (hasPeerDataChannels$1(dataChannels)) {
+      const channelProp = Object.keys(dataChannels[peerId]);
+      for (let y = 0; y < channelProp.length; y += 1) {
+        const channel = dataChannels[peerId][channelProp[y]];
+        const {
+          channelName,
+          channelType,
+          transferId,
+          streamId,
+        } = channel;
+        let peerChannel = null;
+        peerChannel = PeerConnection.getDataChannelBuffer(channel);
+        peerChannel.channelProp = channelProp[y];
+        peerChannel.channelName = channelName;
+        peerChannel.channelType = channelType;
+        peerChannel.currentTransferId = transferId;
+        peerChannel.currentStreamId = streamId;
+        peerChannel.readyState = channel.channel
+          ? channel.channel.readyState : DATA_CHANNEL_STATE$1.CREATE_ERROR;
+
+        listOfPeersDataChannels[peerId][channelName] = peerChannel;
+      }
+    }
+  }
+
+  return listOfPeersDataChannels;
+};
+
+const hasPeers = peerInformations => !isEmptyObj(peerInformations);
+
+/**
+ * Function that gets a current custom Peer settings.
+ * @param {SkylinkState} state
+ * @param {String} peerId
+ * @private
+ * @return {Object}
+ * @memberOf PeerDataHelpers
+ */
+const getPeerCustomSettings = (state, peerId) => {
+  const usePeerId = state.hasMCU ? PEER_TYPE.MCU : peerId;
+  let customSettings = {};
+
+  if (state.peerConnections[usePeerId].connectionState !== PEER_CONNECTION_STATE$1.CLOSED) {
+    const peerInfo = PeerData.getPeerInfo(peerId, state.room);
+
+    customSettings = clone_1(peerInfo.settings);
+  } else {
+    logger.log.WARN([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION]);
+  }
+
+  return customSettings;
+};
+
+/**
+ * @description Function that gets the list of current custom Peer settings sent and set.
+ * @param {SkylinkState} roomState
+ * @return {Object} customSettingsList
+ * @memberOf PeerDataHelpers
+ */
+const getPeersCustomSettings = (roomState) => {
+  const { peerInformations } = roomState;
+  const customSettingsList = {};
+
+  if (hasPeers(peerInformations)) {
+    const peerIds = Object.keys(peerInformations);
+
+    for (let peerId = 0; peerId < peerIds.length; peerId += 1) {
+      if (peerIds[peerId] !== PEER_TYPE.MCU) {
+        customSettingsList[peerIds[peerId]] = getPeerCustomSettings(roomState, peerIds[peerId]);
+      }
+    }
+
+    return customSettingsList;
+  }
+
+  return customSettingsList;
+};
+
+/**
+ * @namespace PeerDataHelpers
+ * @description All helper and utility functions for <code>{@link PeerData}</code> class are listed here.
+ * @private
+ * @type {{getCurrentSessionInfo, getPeerInfo, getUserData, getUserInfo, setUserData, getPeersDataChannels, getPeersCustomSettings}}
+ */
+const helpers$6 = {
+  getPeerInfo,
+  getCurrentSessionInfo,
+  getUserInfo,
+  getUserData,
+  setUserData,
+  getPeersDataChannels,
+  getPeersCustomSettings,
+};
+
+/**
+ * @classdesc Class that represents PeerData methods
+ * @class
+ * @private
+ */
+class PeerData {
+  /**
+   * @description Function that returns the User / Peer current session information.
+   * @private
+   * @param {String} peerId
+   * @param {SkylinkRoom} room
+   * @return {peerInfo}
+   */
+  static getPeerInfo(peerId, room) {
+    return helpers$6.getPeerInfo(peerId, room);
+  }
+
+  /**
+   * @private
+   * @param {SkylinkRoom} room
+   * @return {peerInfo}
+   */
+  static getCurrentSessionInfo(room) {
+    return helpers$6.getCurrentSessionInfo(room);
+  }
+
+  /**
+   * @description Function that returns the User session information to be sent to Peers.
+   * @private
+   * @param {SkylinkRoom} room
+   * @return {Object}
+   */
+  static getUserInfo(room) {
+    return helpers$6.getUserInfo(room);
+  }
+
+  /**
+   * @description Function that returns the User / Peer current custom data.
+   * @private
+   * @param {Skylink} roomState
+   * @param {String} peerId
+   * @return {roomState.userData}
+   */
+  static getUserData(roomState, peerId) {
+    return helpers$6.getUserData(roomState, peerId);
+  }
+
+  /**
+   * @description Function that overwrites the User current custom data.
+   * @private
+   * @param {SkylinkRoom} room
+   * @param {String | Object} userData
+   */
+  static setUserData(room, userData) {
+    helpers$6.setUserData(room, userData);
+  }
+
+  /**
+   * @description  Function that gets the list of connected Peers Streams in the Room.
+   * @private
+   * @param {SkylinkState} roomState
+   * @param {boolean} [includeSelf=true] - The flag if self streams are included.
+   * @return {Object}
+   */
+  static getPeersStreams(roomState, includeSelf) {
+    return helpers$6.getPeersStreams(roomState, includeSelf);
+  }
+
+  /**
+   * @description Function that gets the current list of connected Peers Datachannel connections in the Room.
+   * @private
+   * @param {SkylinkState} roomState
+   * @return {Object} listOfPeersDataChannels
+   */
+  static getPeersDataChannels(roomState) {
+    return helpers$6.getPeersDataChannels(roomState);
+  }
+
+  /**
+   * @description Function that gets the list of current custom Peer settings sent and set.
+   * @param {SkylinkState} roomState
+   * @return {Object}
+   */
+  static getPeersCustomSettings(roomState) {
+    return helpers$6.getPeersCustomSettings(roomState);
+  }
+}
 
 const dispatchStreamMutedEvent = (room, stream, isScreensharing) => {
   const roomState = Skylink.getSkylinkState(room.id);
-  dispatchEvent(streamMuted({
+  PeerStream.dispatchStreamEvent(STREAM_MUTED, {
     isSelf: true,
     peerId: roomState.user.sid,
     peerInfo: PeerData.getUserInfo(room),
@@ -26201,7 +25682,7 @@ const dispatchStreamMutedEvent = (room, stream, isScreensharing) => {
     isScreensharing,
     isAudio: hasAudioTrack(stream),
     isVideo: hasVideoTrack(stream),
-  }));
+  });
 };
 
 const dispatchPeerUpdatedEvent$1 = (room) => {
@@ -26235,35 +25716,9 @@ const dispatchLocalMediaMutedEvent = (hasToggledVideo, hasToggledAudio, stream, 
   return true;
 };
 
-const retrieveOriginalActiveStreamId = (roomState, currentActiveStreamId, replacedStreamIds) => {
-  let originalActiveStreamId = currentActiveStreamId;
-  const { streams: { userMedia } } = roomState;
-  const pReplacedStreamIds = replacedStreamIds || Object.keys(userMedia).filter(streamId => userMedia[streamId].isReplaced);
-
-  if (pReplacedStreamIds.length === 0) {
-    return originalActiveStreamId;
-  }
-
-  if (pReplacedStreamIds.indexOf(originalActiveStreamId) > -1) {
-    pReplacedStreamIds.splice(pReplacedStreamIds.indexOf(originalActiveStreamId), 1);
-  }
-
-  if (pReplacedStreamIds.length > 1) {
-    for (let i = 0; i < pReplacedStreamIds.length; i += 1) {
-      if (userMedia[pReplacedStreamIds[i]].newStream && userMedia[pReplacedStreamIds[i]].newStream.id === originalActiveStreamId) {
-        originalActiveStreamId = pReplacedStreamIds[i];
-        retrieveOriginalActiveStreamId(roomState, originalActiveStreamId, pReplacedStreamIds);
-        break;
-      }
-    }
-  }
-
-  return pReplacedStreamIds[0];
-};
-
 const updateMediaInfo = (hasToggledVideo, hasToggledAudio, room, streamId) => {
   const roomState = Skylink.getSkylinkState(room.id);
-  const originalStreamId = retrieveOriginalActiveStreamId(roomState, streamId);
+  const originalStreamId = streamId;
   const { streamsMutedSettings } = roomState;
 
   if (hasToggledVideo) {
@@ -26303,18 +25758,16 @@ const muteFn = (stream, state) => {
 };
 
 const retrieveToggleState = (state, options, streamId) => {
-  const { streams, streamsMutedSettings } = state;
+  const { peerStreams, streamsMutedSettings, user } = state;
   let hasToggledAudio = false;
   let hasToggledVideo = false;
 
-  if (streams.screenshare && streams.screenshare.id === streamId && streamsMutedSettings[streamId].videoMuted !== options.videoMuted) {
-    hasToggledVideo = true;
-  } else if (streams.userMedia && streams.userMedia[streamId]) {
-    if (hasAudioTrack(streams.userMedia[streamId].stream) && streamsMutedSettings[streamId].audioMuted !== options.audioMuted) {
+  if (peerStreams[user.sid] && peerStreams[user.sid][streamId]) {
+    if (hasAudioTrack(peerStreams[user.sid][streamId]) && streamsMutedSettings[streamId].audioMuted !== options.audioMuted) {
       hasToggledAudio = true;
     }
 
-    if (hasVideoTrack(streams.userMedia[streamId].stream) && streamsMutedSettings[streamId].videoMuted !== options.videoMuted) {
+    if (hasVideoTrack(peerStreams[user.sid][streamId]) && streamsMutedSettings[streamId].videoMuted !== options.videoMuted) {
       hasToggledVideo = true;
     }
   }
@@ -26344,19 +25797,16 @@ const updateStreamsMutedSettings = (state, toggleState, streamId) => {
 const startMuteEvents = (roomKey, streamId, options) => {
   const roomState = Skylink.getSkylinkState(roomKey);
   const {
-    streams, room, peerConnections, peerInformations,
+    room, peerConnections, peerInformations, peerStreams, user,
   } = roomState;
   const toggleState = retrieveToggleState(roomState, options, streamId);
   const { hasToggledAudio, hasToggledVideo } = toggleState;
   let mutedStream = null;
-  let isScreensharing = false;
 
-  if (streams.userMedia && streams.userMedia[streamId]) {
-    mutedStream = streams.userMedia[streamId].stream;
-  } else if (streams.screenshare && streams.screenshare.id === streamId) {
-    mutedStream = streams.screenshare.stream;
-    isScreensharing = true;
+  if (peerStreams[user.sid] && peerStreams[user.sid][streamId]) {
+    mutedStream = peerStreams[user.sid][streamId];
   }
+  const isScreensharing = !!PeerMedia.retrieveScreenMediaInfo(room, user.sid, { streamId });
 
   if (!mutedStream) {
     return;
@@ -26367,8 +25817,6 @@ const startMuteEvents = (roomKey, streamId, options) => {
   dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, mutedStream, room.id, isScreensharing);
   dispatchPeerUpdatedEvent$1(room);
   dispatchStreamMutedEvent(room, mutedStream, isScreensharing);
-  // TODO: remove audioMuteEvent and videoMuteEvent
-  // sendSigMsgs(hasToggledVideo, hasToggledAudio, room, streamId);
 
   // wait for at least 1 connection before sending mediaInfoEvent otherwise sig message will be dropped at sendMediaInfoMsg if there are no
   // connections
@@ -26403,23 +25851,6 @@ const retrieveMutedSetting = (mediaMutedOption) => {
   }
 };
 
-const isValidStreamId = (streamId, state) => {
-  const { streams } = state;
-  let isValid = false;
-
-  Object.keys(streams.userMedia).forEach((gumStreamId) => {
-    if (gumStreamId === streamId) {
-      isValid = true;
-    }
-  });
-
-  if (streams.screenshare && streams.screenshare.id === streamId) {
-    isValid = true;
-  }
-
-  return isValid;
-};
-
 /**
  * @param {SkylinkState} roomState
  * @param {boolean} options
@@ -26433,7 +25864,7 @@ const isValidStreamId = (streamId, state) => {
  */
 const muteStreams = (roomState, options, streamId = null) => {
   const {
-    streams, room,
+    peerStreams, room, user,
   } = roomState;
 
   if (!isAObj(options)) {
@@ -26441,30 +25872,24 @@ const muteStreams = (roomState, options, streamId = null) => {
     return;
   }
 
-  if (!streams.userMedia && !streams.screenshare) {
+  if (!peerStreams[user.sid]) {
     logger.log.WARN(MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM);
     return;
   }
 
-  if (streamId && !isValidStreamId(streamId, roomState)) {
+  if (streamId && !peerStreams[user.sid][streamId]) {
     logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_MUTE_OPTIONS, options);
     return;
   }
 
   const fOptions = {
+    // eslint-disable-next-line no-nested-ternary
     audioMuted: isABoolean(options.audioMuted) ? options.audioMuted : (isANumber(options.audioMuted) ? retrieveMutedSetting(options.audioMuted) : true),
+    // eslint-disable-next-line no-nested-ternary
     videoMuted: isABoolean(options.videoMuted) ? options.videoMuted : (isANumber(options.videoMuted) ? retrieveMutedSetting(options.videoMuted) : true),
   };
 
-  let streamIdsThatCanBeMuted = [];
-  if (streamId && ((streams.userMedia[streamId] && !streams.userMedia[streamId].isReplaced) || (streams.screenshare.id === streamId && !streams.screenshare.isReplaced))) {
-    streamIdsThatCanBeMuted.push(streamId);
-  } else {
-    streamIdsThatCanBeMuted = Object.keys(streams.userMedia).filter(id => !streams.userMedia[id].isReplaced);
-    if (streams.screenshare && !streams.screenshare.isReplaced) {
-      streamIdsThatCanBeMuted.push(streams.screenshare.id);
-    }
-  }
+  const streamIdsThatCanBeMuted = Object.keys(peerStreams[user.sid]) || [];
 
   if (isEmptyArray(streamIdsThatCanBeMuted)) {
     logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAMS_MUTED, options);
@@ -26481,7 +25906,7 @@ const muteStreams = (roomState, options, streamId = null) => {
 
 /**
  * @description Helper function for {@link MediaStream.getUserMedia}
- * @param {GetUserMediaOptions} params - The camera Stream configuration options.
+ * @param {getUserMediaOptions} params - The camera Stream configuration options.
  * @memberOf MediaStreamHelpers
  * @return {Promise}
  */
@@ -26547,50 +25972,20 @@ const addTracksToPC = (state, peerId, stream, peerConnection) => {
   for (let track = 0; track < tracks.length; track += 1) {
     const sender = peerConnection.addTrack(tracks[track], stream);
     if (sender) {
-      helpers$5.processNewSender(updatedState, peerId, sender);
+      helpers$4.processNewSender(updatedState, peerId, sender);
     }
   }
 
   Skylink.setSkylinkState(updatedState, updatedState.room.id);
 };
 
-const addUserMediaStreams = (state, peerId, userMediaStreams, peerConnection) => {
-  const streamIds = Object.keys(userMediaStreams);
-  for (let x = 0; x < streamIds.length; x += 1) {
-    const { stream } = userMediaStreams[streamIds[x]];
-    if (!isStreamOnPC(peerConnection, stream)) {
-      addTracksToPC(state, peerId, stream, peerConnection);
+const addMediaStreams = (state, peerId, streams, peerConnection) => {
+  const mediaStreams = Object.values(streams);
+  for (let x = 0; x < mediaStreams.length; x += 1) {
+    if (!isStreamOnPC(peerConnection, mediaStreams[x])) {
+      addTracksToPC(state, peerId, mediaStreams[x], peerConnection);
     }
   }
-};
-
-const addScreenshareStream = (state, peerId, screenshareStream, peerConnection) => {
-  const { stream } = screenshareStream;
-  if (!isStreamOnPC(peerConnection, stream)) {
-    addTracksToPC(state, peerId, stream, peerConnection);
-  }
-};
-
-const hasSenderKind = (peerConnection, kind) => {
-  const senders = peerConnection.getSenders();
-
-  if (kind === TRACK_KIND.AUDIO) {
-    for (let s = 0; s < senders.length; s += 1) {
-      if (senders[s].track && senders[s].track.kind === TRACK_KIND.AUDIO) {
-        return true;
-      }
-    }
-  }
-
-  if (kind === TRACK_KIND.VIDEO) {
-    for (let s = 0; s < senders.length; s += 1) {
-      if (senders[s].track && senders[s].track.kind === TRACK_KIND.VIDEO) {
-        return true;
-      }
-    }
-  }
-
-  return false;
 };
 
 /**
@@ -26601,30 +25996,16 @@ const hasSenderKind = (peerConnection, kind) => {
  * @memberOf MediaStreamHelpers
  * @private
  */
-const addLocalMediaStreams = (targetMid, roomState, isOffer = false) => {
+const addLocalMediaStreams = (targetMid, roomState) => {
   // TODO: Full implementation (cross-browser) not done. Refer to stream-media.js for checks on AJS
   const state = Skylink.getSkylinkState(roomState.room.id);
-  const { peerConnections, streams } = state;
+  const {
+    peerConnections, user, peerStreams,
+  } = state;
   const peerConnection = peerConnections[targetMid];
 
-  if (streams.userMedia) {
-    addUserMediaStreams(state, targetMid, streams.userMedia, peerConnection, isOffer);
-  }
-
-  if (streams.screenshare) {
-    addScreenshareStream(state, targetMid, streams.screenshare, peerConnection);
-  }
-
-  // Required to add transceivers of each kind otherwise local peer will not receive any
-  // video or audio that is being sent by the remote peer.
-  if (isOffer && !hasSenderKind(peerConnection, TRACK_KIND.VIDEO)) {
-    peerConnection.addTransceiver(TRACK_KIND.VIDEO);
-    logger.log.DEBUG([null, TAGS.PEER_CONNECTION, null, `${MESSAGES.PEER_CONNECTION.ADD_TRANSCEIVER} - ${TRACK_KIND.VIDEO}`]);
-  }
-
-  if (isOffer && !hasSenderKind(peerConnection, TRACK_KIND.AUDIO)) {
-    peerConnection.addTransceiver(TRACK_KIND.AUDIO);
-    logger.log.DEBUG([null, TAGS.PEER_CONNECTION, null, `${MESSAGES.PEER_CONNECTION.ADD_TRANSCEIVER} - ${TRACK_KIND.AUDIO}`]);
+  if (peerStreams[user.sid] && !isEmptyObj(peerStreams[user.sid])) {
+    addMediaStreams(state, targetMid, peerStreams[user.sid], peerConnection);
   }
 };
 
@@ -26645,8 +26026,6 @@ const onRemoteTrackAdded = (stream, currentRoomState, targetMid, isScreensharing
   const { user, hasMCU, room } = currentRoomState;
   const dispatchOnIncomingStream = (detail) => { dispatchEvent(onIncomingStream(detail)); };
   const dispatchOnIncomingScreenStream = (detail) => {
-    // eslint-disable-next-line no-param-reassign
-    detail.isReplace = false;
     dispatchEvent(onIncomingScreenStream(detail));
   };
   const methods = { dispatchOnIncomingStream, dispatchOnIncomingScreenStream };
@@ -26731,69 +26110,27 @@ const onStreamAccessError = (error, reject, resolve, roomKey, audioSettings, vid
   reject(error);
 };
 
-const getTrackSender = (state, peerId, trackId, mediaType) => {
-  const { peerConnections } = state;
-  const senders = peerConnections[peerId].getSenders();
-  let trackSender = null;
-
-  if (!trackId) {
-    return trackSender;
-  }
-  senders.forEach((sender) => {
-    if (sender.track && (sender.track.id === trackId) && (sender.track.kind === mediaType)) {
-      trackSender = sender;
-    }
-  });
-
-  return trackSender;
-};
-
-/**
- * Function that replaces a track screensharing track.
- * @param {MediaStream} oldStream - The stream to be replaced with newStream
- * @param {MediaStream} newStream - The new stream
- * @param {String} peerId - The PeerId
- * @param {SkylinkState} state
- * @private
- */
-const replaceTrack = (oldStream, newStream, peerId, state) => {
-  const oldVideoTrack = oldStream.getVideoTracks()[0];
-  const oldAudioTrack = oldStream.getAudioTracks()[0];
-  const videoSender = getTrackSender(state, peerId, oldVideoTrack ? oldVideoTrack.id : null, 'video');
-  const audioSender = getTrackSender(state, peerId, oldAudioTrack ? oldAudioTrack.id : null, 'audio');
-  const newVideoTrack = newStream.getVideoTracks()[0];
-  const newAudioTrack = newStream.getAudioTracks()[0];
-
-  try {
-    if (oldVideoTrack && newVideoTrack && videoSender) {
-      videoSender.replaceTrack(newVideoTrack);
-    }
-
-    if (oldAudioTrack && newAudioTrack && audioSender) {
-      audioSender.replaceTrack(newAudioTrack);
-    }
-  } catch (error) {
-    logger.log.ERROR([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.ERRORS.REPLACE_TRACK], error);
-  }
-};
-
-const dispatchEvents = (roomState, stream) => {
+const dispatchEvents$1 = (roomState, stream, prefetchedStream) => {
   const { user, room } = roomState;
   const isSelf = true;
   const peerId = user.sid;
   const peerInfo = PeerData.getCurrentSessionInfo(room);
 
-  dispatchEvent(onIncomingStream({
-    room,
-    stream,
-    streamId: stream.id,
-    isSelf,
-    peerId,
-    peerInfo,
-    isScreensharing: false,
-    isVideo: hasVideoTrack(stream),
-    isAudio: hasAudioTrack(stream),
-  }));
+  if (prefetchedStream) {
+    // if mediaOptions passed, getUserMedia already triggers onIncomingStream in onStreamAccessSuccess
+    // if prefetchedStream is used, dispatch onIncomingStream locally
+    PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
+      room: Room.getRoomInfo(room.id),
+      stream,
+      streamId: stream.id,
+      isSelf,
+      peerId,
+      peerInfo,
+      isScreensharing: false,
+      isVideo: hasVideoTrack(stream),
+      isAudio: hasAudioTrack(stream),
+    });
+  }
 
   dispatchEvent(peerUpdated({
     isSelf,
@@ -26802,27 +26139,27 @@ const dispatchEvents = (roomState, stream) => {
   }));
 };
 
-const dispatchEventsToLocalEnd = (roomState, streams) => {
+const dispatchEventsToLocalEnd = (roomState, streams, prefetchedStream) => {
   for (let i = 0; i < streams.length; i += 1) {
     if (streams[i]) {
       if (Array.isArray(streams[i])) {
         for (let x = 0; x < streams[i].length; x += 1) {
           if (streams[i][x]) {
-            dispatchEvents(roomState, streams[i][x]);
+            dispatchEvents$1(roomState, streams[i][x], prefetchedStream);
           }
         }
       } else {
-        dispatchEvents(roomState, streams[i]);
+        dispatchEvents$1(roomState, streams[i], prefetchedStream);
       }
     }
   }
 };
 
-const restartFn = (roomState, streams, resolve, reject) => {
+const restartFn = (roomState, streams, prefetchedStream, resolve, reject) => {
   const { peerConnections, hasMCU } = roomState;
 
   try {
-    dispatchEventsToLocalEnd(roomState, streams);
+    dispatchEventsToLocalEnd(roomState, streams, prefetchedStream);
 
     if (Object.keys(peerConnections).length > 0 || hasMCU) {
       const refreshPeerConnectionPromise = PeerConnection.refreshPeerConnection(Object.keys(peerConnections), roomState, false, {});
@@ -26846,7 +26183,7 @@ const processMediaOptions = (roomState, stream, resolve, reject) => {
   const getUserMediaPromise = MediaStream.getUserMedia(roomState, stream);
 
   return getUserMediaPromise.then((userMediaStreams) => {
-    restartFn(roomState, userMediaStreams, resolve, reject);
+    restartFn(roomState, userMediaStreams, false, resolve, reject);
   }).catch((error) => {
     reject(error);
   });
@@ -26856,7 +26193,7 @@ const processMediaStream = (roomState, stream, resolve, reject) => {
   const usePrefetchedStreamPromise = MediaStream.usePrefetchedStream(roomState.room.id, stream);
 
   return usePrefetchedStreamPromise.then((prefetchedStreams) => {
-    restartFn(roomState, prefetchedStreams, resolve, reject);
+    restartFn(roomState, prefetchedStreams, true, resolve, reject);
   }).catch((error) => {
     reject(error);
   });
@@ -26871,7 +26208,7 @@ const processMediaStreamArray = (roomState, streams, resolve, reject) => {
 
   return Promise.all(usePrefetchedStreamsPromises)
     .then((results) => {
-      restartFn(roomState, results, resolve, reject);
+      restartFn(roomState, results, true, resolve, reject);
     })
     .catch((error) => {
       reject(error);
@@ -27001,33 +26338,49 @@ const getStreamSources = () => {
   });
 };
 
-/**
- * Function that returns all active user streams including screenshare stream if present.
- * @param {SkylinkState} roomState
- * @return {streamList} streamList
- * @memberOf MediaStreamHelpers
- */
-const getStreams = (roomState) => {
-  const { streams: { userMedia, screenshare } } = roomState;
-  const streamList = {
-    userMedia: null,
-    screenshare: null,
+const buildPeerStreamList = (state, peerId, peerStreams) => {
+  const peerStreamList = {};
+  peerStreamList.streams = {
+    video: null,
+    audio: null,
+    screenShare: null,
   };
+  Object.keys(peerStreams[peerId]).forEach((streamId) => {
+    if (hasAudioTrack(peerStreams[peerId][streamId])) {
+      peerStreamList.streams.audio = peerStreamList.streams.audio || {};
+      peerStreamList.streams.audio[streamId] = peerStreams[peerId][streamId];
+    } else if (hasVideoTrack(peerStreams[peerId][streamId]) && PeerMedia.retrieveScreenMediaInfo(state.room, peerId, { streamId })) {
+      peerStreamList.streams.screenShare = peerStreamList.streams.screenShare || {};
+      peerStreamList.streams.screenShare[streamId] = peerStreams[peerId][streamId];
+    } else {
+      peerStreamList.streams.video = peerStreamList.streams.video || {};
+      peerStreamList.streams.video[streamId] = peerStreams[peerId][streamId];
+    }
+  });
+  return peerStreamList;
+};
 
-  if (!userMedia && !screenshare) {
-    return streamList;
-  }
+/**
+ * @description Function that gets the list of connected Peers Streams in the Room.
+ * @param {SkylinkState} roomState
+ * @param {boolean} [includeSelf=true] - The flag if self streams are included.
+ * @return {Object}
+ * @memberOf PeerDataHelpers
+ */
+const getStreams = (roomState, includeSelf = true) => {
+  const state = Skylink.getSkylinkState(roomState.room.id);
+  const { peerStreams, user } = state;
+  const streamList = {};
+  const peerIds = Object.keys(peerStreams);
 
-  if (userMedia) {
-    const streamIds = Object.keys(userMedia);
-    streamList.userMedia = {};
-    streamIds.forEach((streamId) => {
-      streamList.userMedia[streamId] = userMedia[streamId].stream;
-    });
-  }
-
-  if (screenshare) {
-    streamList.screenshare = screenshare.stream;
+  for (let i = 0; i < peerIds.length; i += 1) {
+    const peerId = peerIds[i];
+    if (includeSelf && peerId === user.sid) {
+      streamList[peerId] = buildPeerStreamList(state, peerId, peerStreams);
+      streamList[peerId].isSelf = true;
+    } else if (peerId !== user.sid) {
+      streamList[peerId] = buildPeerStreamList(state, peerId, peerStreams);
+    }
   }
 
   return streamList;
@@ -27045,28 +26398,6 @@ const updateStreamsMediaStatus = (roomKey, settings, stream) => {
   streamsMediaStatus[stream.id].videoMuted = video ? (shouldAudioMuted ? MEDIA_STATUS.MUTED : MEDIA_STATUS.ACTIVE) : MEDIA_STATUS.UNAVAILABLE;
 
   Skylink.setSkylinkState(updatedState, room.id);
-};
-
-const updateRemoteStreams = (room, peerId, stream) => {
-  const updatedState = Skylink.getSkylinkState(room.id);
-
-  updatedState.remoteStreams[peerId] = updatedState.remoteStreams[peerId] || {};
-  updatedState.remoteStreams[peerId][stream.id] = stream;
-
-  Skylink.setSkylinkState(updatedState, room.id);
-};
-
-const retrieveVideoStreams = (room) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { streams } = state;
-  const videoStreams = [];
-  Object.values(streams.userMedia).forEach((streamObj) => {
-    if (streamObj.stream.getVideoTracks().length > 0) {
-      videoStreams.push(streamObj.stream);
-    }
-  });
-
-  return videoStreams;
 };
 
 const splitAudioAndVideoStream = (stream) => {
@@ -27090,34 +26421,6 @@ const splitAudioAndVideoStream = (stream) => {
   return streams;
 };
 
-const buildStreamObject = (room, user, stream, settings) => ({
-  id: stream.id,
-  stream,
-  isReplaced: false,
-  settings: settings.settings,
-  constraints: settings.getUserMediaSettings,
-});
-
-const addStreamToState = (room, stream, settings, isScreensharing) => {
-  const updatedState = Skylink.getSkylinkState(room.id);
-  const streamKey = isScreensharing ? 'screenshare' : 'userMedia';
-
-  if (isScreensharing) {
-    updatedState.streams[streamKey] = buildStreamObject(updatedState.room, updatedState.user, stream, settings);
-  } else {
-    updatedState.streams[streamKey] = updatedState.streams[streamKey] ? updatedState.streams[streamKey] : {};
-    updatedState.streams[streamKey][stream.id] = buildStreamObject(updatedState.room, updatedState.user, stream, settings);
-  }
-
-  Skylink.setSkylinkState(updatedState, room.id);
-};
-
-const processNewStream = (room, stream, settings, isScreensharing) => {
-  addStreamToState(room, stream, settings, isScreensharing);
-  helpers$7.updateStreamsMutedSettings(room.id, settings, stream);
-  helpers$7.updateStreamsMediaStatus(room.id, settings, stream);
-};
-
 const updateStreamsMutedSettings$1 = (roomKey, settings, stream) => {
   const updatedState = Skylink.getSkylinkState(roomKey);
   const { room, streamsMutedSettings } = updatedState;
@@ -27130,44 +26433,94 @@ const updateStreamsMutedSettings$1 = (roomKey, settings, stream) => {
   Skylink.setSkylinkState(updatedState, room.id);
 };
 
-const onStreamAccessSuccess = (roomKey, stream, audioSettings, videoSettings, isAudioFallback) => {
-  const isScreensharing = false;
-  const streams = helpers$7.splitAudioAndVideoStream(stream);
+const onStreamAccessSuccess = (roomKey, ogStream, audioSettings, videoSettings, isAudioFallback, isScreensharing = false) => {
+  const streams = isScreensharing ? [ogStream] : helpers$7.splitAudioAndVideoStream(ogStream);
+  const state = Skylink.getSkylinkState(roomKey);
+  const { room, user } = state;
 
-  streams.forEach((st) => {
-    if (!st) return;
-    helpers$7.processStreamInState(st, hasAudioTrack(st) ? audioSettings : videoSettings, roomKey, isScreensharing, isAudioFallback);
+  streams.forEach((stream) => {
+    if (!stream) return;
+    PeerStream.addStream(user.sid, stream, roomKey);
+    MediaStream.buildStreamSettings(room, stream, hasAudioTrack(stream) ? audioSettings : videoSettings);
+    helpers$7.updateStreamsMutedSettings(room.id, hasAudioTrack(stream) ? audioSettings : videoSettings, stream);
+    helpers$7.updateStreamsMediaStatus(room.id, hasAudioTrack(stream) ? audioSettings : videoSettings, stream);
+    PeerMedia.processPeerMedia(room, user.sid, stream, isScreensharing);
+
+    if (isAudioFallback) {
+      logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.FALLBACK_SUCCESS]);
+    }
+
+    if (isScreensharing) {
+      logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.START_SCREEN_SUCCESS]);
+      PeerStream.dispatchStreamEvent(ON_INCOMING_SCREEN_STREAM, {
+        stream,
+        peerId: user.sid,
+        room: Room.getRoomInfo(room.id),
+        isSelf: true,
+        peerInfo: PeerData.getCurrentSessionInfo(room),
+        streamId: stream.id,
+        isVideo: stream.getVideoTracks().length > 0,
+        isAudio: stream.getAudioTracks().length > 0,
+      });
+    } else if (user.sid) {
+      // used.sid is null before inRoom message from sig
+      PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
+        stream,
+        peerId: user.sid,
+        room: Room.getRoomInfo(room.id),
+        isSelf: true,
+        peerInfo: PeerData.getCurrentSessionInfo(room),
+        streamId: stream.id,
+        isVideo: stream.getVideoTracks().length > 0,
+        isAudio: stream.getAudioTracks().length > 0,
+      });
+    }
+
+    dispatchEvent(mediaAccessSuccess({
+      stream,
+      isScreensharing,
+      isAudioFallback,
+      streamId: stream.id,
+      isAudio: hasAudioTrack(stream),
+      isVideo: hasVideoTrack(stream),
+    }));
   });
 
   return streams;
+};
+
+const buildStreamSettings = (room, stream, settings) => {
+  const updatedState = Skylink.getSkylinkState(room.id);
+  updatedState.streamsSettings[stream.id] = {
+    settings: settings.settings,
+    constraints: settings.getUserMediaSettings,
+  };
+
+  Skylink.setSkylinkState(updatedState, room.id);
 };
 
 /**
  * @namespace MediaStreamHelpers
  * @description All helper and utility functions for <code>{@link MediaStream}</code> class are listed here.
  * @private
- * @type {{parseMediaOptions, processStreamInState, parseStreamSettings, prepMediaAccessRequest, addLocalMediaStreams, onRemoteTrackAdded, onStreamAccessError, buildPeerStreamsInfo, replaceTrack, muteStreams, getStreamSources, sendStream, getStreams, updateStreamsMediaStatus, updateRemoteStreams, retrieveVideoStreams, splitAudioAndVideoStream, processNewStream, updateStreamsMutedSettings, onStreamAccessSuccess}}
+ * @type {{parseMediaOptions, parseStreamSettings, prepMediaAccessRequest, addLocalMediaStreams, onRemoteTrackAdded, onStreamAccessError, buildPeerStreamsInfo, muteStreams, getStreamSources, sendStream, getStreams, updateStreamsMediaStatus, splitAudioAndVideoStream, updateStreamsMutedSettings, onStreamAccessSuccess, buildStreamSettings}}
  */
 const helpers$7 = {
   parseMediaOptions,
-  processStreamInState,
   parseStreamSettings,
   prepMediaAccessRequest,
   addLocalMediaStreams,
   onRemoteTrackAdded,
   onStreamAccessError,
-  replaceTrack,
   muteStreams,
   sendStream,
   getStreamSources,
   getStreams,
   updateStreamsMediaStatus,
-  updateRemoteStreams,
-  retrieveVideoStreams,
   splitAudioAndVideoStream,
-  processNewStream,
   updateStreamsMutedSettings: updateStreamsMutedSettings$1,
   onStreamAccessSuccess,
+  buildStreamSettings,
 };
 
 /**
@@ -27384,27 +26737,6 @@ const statelessGetUserMedia = options => new Promise((resolve, reject) => {
 const rejectPromise = errorMsg => new Promise((resolve, reject) => {
   reject(new Error(errorMsg));
 });
-
-/**
- * Function that updates the replaced state of the streams
- * @param {MediaStream} replacedStream
- * @param {MediaStream} newStream
- * @param {SkylinkState} state
- * @param {boolean} isReplaced
- * @memberOf UtilHelpers
- */
-const updateReplacedStreamInState = (replacedStream, newStream, state, isReplaced) => {
-  const { streams, room } = state;
-  const streamObjs = Object.values(streams.userMedia);
-  for (let i = 0; i < streamObjs.length; i += 1) {
-    if (streamObjs[i].id === replacedStream.id) {
-      streamObjs[i].isReplaced = isReplaced;
-      streamObjs[i].newStream = newStream;
-    }
-  }
-
-  Skylink.setSkylinkState(state, room.id);
-};
 
 /**
  * Function that checks if the peerId exists on the peerConnection
@@ -28781,102 +28113,6 @@ class PeerConnectionStatistics {
   }
 }
 
-const addScreenStreamToState = (state, stream) => {
-  const { room, user } = state;
-  const settings = helpers$7.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
-  const isScreensharing = true;
-  const isAudioFallback = false;
-  helpers$7.processStreamInState(stream, settings, room.id, isScreensharing, isAudioFallback);
-
-  dispatchEvent(onIncomingScreenStream({
-    stream,
-    peerId: user.sid,
-    room: Room.getRoomInfo(room.id),
-    isSelf: true,
-    peerInfo: PeerData.getCurrentSessionInfo(room),
-    streamId: stream.id,
-    isVideo: stream.getVideoTracks().length > 0,
-    isAudio: stream.getAudioTracks().length > 0,
-  }));
-};
-
-const removeScreenStreamFromState = (state) => {
-  const { room, streams } = state;
-  streams.screenshare = null;
-  Skylink.setSkylinkState(state, room.id);
-};
-
-const setScreenStateToUnavailable = (state, stream) => {
-  const { user, room } = state;
-  const mediaId = PeerMedia.retrieveMediaId(TRACK_KIND.VIDEO, stream.id);
-  PeerMedia.setMediaStateToUnavailable(room, user.sid, mediaId);
-};
-
-var handleScreenStreamStates = {
-  addScreenStreamToState,
-  removeScreenStreamFromState,
-  setScreenStateToUnavailable,
-};
-
-const retrievePeersScreenStreamId = (state) => {
-  const { peerMedias, user } = state;
-  const peersScreenStreamId = {};
-
-  const peerIds = Object.keys(peerMedias).filter(peerId => peerId !== user.sid);
-  for (let i = 0; i < peerIds.length; i += 1) {
-    const peerId = peerIds[i];
-    Object.values(peerMedias[peerId]).forEach((mInfo) => {
-      if (mInfo.mediaType === MEDIA_TYPE.VIDEO_SCREEN) {
-        peersScreenStreamId[peerId] = mInfo.streamId;
-      }
-    });
-  }
-
-  return peersScreenStreamId;
-};
-
-const retrievePeerScreenStream = (state) => {
-  const { remoteStreams } = state;
-  const peersScreenStreamId = retrievePeersScreenStreamId(state);
-
-  if (isEmptyObj(peersScreenStreamId)) {
-    return null;
-  }
-
-  const peersScreenStream = {};
-
-  Object.keys(peersScreenStreamId).forEach((peerId) => {
-    const peerRemoteStreams = Object.values(remoteStreams[peerId]);
-    // eslint-disable-next-line prefer-destructuring
-    peersScreenStream[peerId] = peerRemoteStreams.filter(stream => stream.id === peersScreenStreamId[peerId].id);
-  });
-
-  return peersScreenStream;
-};
-
-const stopScreenStream = (room, screenStream, peerId, fromLeaveRoom = false) => {
-  const isScreensharing = true;
-  stopStreamHelpers.prepStopStreams(room.id, screenStream.id, fromLeaveRoom, isScreensharing)
-    .then(() => logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SCREEN_SUCCESS}`]))
-    .catch(error => logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN}`], error));
-};
-
-const addScreenStreamCallbacks = (state, stream) => {
-  const tracks = stream.getTracks();
-  tracks.forEach((track) => {
-    // eslint-disable-next-line no-param-reassign
-    track.onended = () => stopScreenStream(state.room, stream, state.user.sid);
-  });
-};
-
-const helpers$9 = {
-  handleScreenStreamStates,
-  addScreenStreamCallbacks,
-  retrievePeersScreenStreamId,
-  retrievePeerScreenStream,
-  stopScreenStream,
-};
-
 /**
  * @classdesc Class that represents a PeerConnection
  * @class
@@ -28893,7 +28129,7 @@ class PeerConnection {
    * @param {boolean} hasScreenshare - Is screenshare enabled
    */
   static addPeer(params) {
-    helpers$5.addPeer(params);
+    helpers$4.addPeer(params);
   }
 
   /**
@@ -28901,7 +28137,7 @@ class PeerConnection {
    * @param args
    */
   static createOffer(...args) {
-    return helpers$5.createOffer(...args);
+    return helpers$4.createOffer(...args);
   }
 
   /**
@@ -28909,7 +28145,7 @@ class PeerConnection {
    * @param args
    */
   static createAnswer(...args) {
-    return helpers$5.createAnswer(...args);
+    return helpers$4.createAnswer(...args);
   }
 
   /**
@@ -28917,7 +28153,7 @@ class PeerConnection {
    * @param args
    */
   static createDataChannel(...args) {
-    return helpers$5.createDataChannel(...args);
+    return helpers$4.createDataChannel(...args);
   }
 
   /**
@@ -28925,7 +28161,7 @@ class PeerConnection {
    * @param args
    */
   static sendP2PMessage(...args) {
-    return helpers$5.sendP2PMessage(...args);
+    return helpers$4.sendP2PMessage(...args);
   }
 
   /**
@@ -28933,7 +28169,7 @@ class PeerConnection {
    * @param args
    */
   static getPeersInRoom(...args) {
-    return helpers$5.getPeersInRoom(...args);
+    return helpers$4.getPeersInRoom(...args);
   }
 
   /**
@@ -28955,7 +28191,7 @@ class PeerConnection {
    * @param args
    */
   static signalingEndOfCandidates(...args) {
-    return helpers$5.signalingEndOfCandidates(...args);
+    return helpers$4.signalingEndOfCandidates(...args);
   }
 
   /**
@@ -28966,7 +28202,7 @@ class PeerConnection {
    * @return {Promise<statistics>}
    */
   static getConnectionStatus(roomState, peerId) {
-    return helpers$5.getConnectionStatus(roomState, peerId);
+    return helpers$4.getConnectionStatus(roomState, peerId);
   }
 
   /**
@@ -28976,41 +28212,113 @@ class PeerConnection {
    * @return {{bufferedAmountLow: number, bufferedAmountLowThreshold: number}}
    */
   static getDataChannelBuffer(channel) {
-    return helpers$5.getDataChannelBuffer(channel);
+    return helpers$4.getDataChannelBuffer(channel);
   }
 
   static refreshDataChannel(roomState, peerId) {
-    return helpers$5.refreshDataChannel(roomState, peerId);
+    return helpers$4.refreshDataChannel(roomState, peerId);
   }
 
   static closeDataChannel(roomState, peerId) {
-    return helpers$5.closeDataChannel(roomState, peerId);
+    return helpers$4.closeDataChannel(roomState, peerId);
   }
 
   static refreshConnection(roomState, targetPeerId, iceRestart, options, callback) {
-    return helpers$5.refreshConnection(roomState, targetPeerId, iceRestart, options, callback);
+    return helpers$4.refreshConnection(roomState, targetPeerId, iceRestart, options, callback);
   }
 
   static refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions) {
-    return helpers$5.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
-  }
-
-  static getPeerScreenshare(roomState) {
-    return helpers$9.retrievePeerScreenStream(roomState);
+    return helpers$4.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
   }
 
   static buildPeerInformations(...args) {
-    return helpers$5.buildPeerInformations(...args);
+    return helpers$4.buildPeerInformations(...args);
   }
 
   static closePeerConnection(roomState, peerId) {
-    return helpers$5.closePeerConnection(roomState, peerId);
+    return helpers$4.closePeerConnection(roomState, peerId);
   }
 
   static updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream) {
-    return helpers$5.updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream);
+    return helpers$4.updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream);
   }
 }
+
+const onScreenStreamAccessSuccess = (state, stream) => {
+  const { room, user } = state;
+  const settings = helpers$7.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
+  PeerStream.addStream(user.sid, stream, room.id);
+  PeerMedia.processPeerMedia(room, user.sid, stream, true);
+  MediaStream.buildStreamSettings(room, stream, settings);
+
+  helpers$7.updateStreamsMutedSettings(room.id, settings, stream);
+  helpers$7.updateStreamsMediaStatus(room.id, settings, stream);
+  PeerStream.dispatchStreamEvent(ON_INCOMING_SCREEN_STREAM, {
+    stream,
+    peerId: user.sid,
+    room: Room.getRoomInfo(room.id),
+    isSelf: true,
+    peerInfo: PeerData.getCurrentSessionInfo(room),
+    streamId: stream.id,
+    isVideo: stream.getVideoTracks().length > 0,
+    isAudio: stream.getAudioTracks().length > 0,
+  });
+};
+
+const setScreenStateToUnavailable = (state, stream) => {
+  const { user, room } = state;
+  const mediaId = PeerMedia.retrieveMediaId(TRACK_KIND.VIDEO, stream.id);
+  PeerMedia.setMediaStateToUnavailable(room, user.sid, mediaId);
+};
+
+var handleScreenStreamStates = {
+  onScreenStreamAccessSuccess,
+  setScreenStateToUnavailable,
+};
+
+const retrievePeersScreenStreamId = (state) => {
+  const { peerMedias, user } = state;
+  const peersScreenStreamId = {};
+
+  const peerIds = Object.keys(peerMedias).filter(peerId => peerId !== user.sid);
+  for (let i = 0; i < peerIds.length; i += 1) {
+    const peerId = peerIds[i];
+    Object.values(peerMedias[peerId]).forEach((mInfo) => {
+      if (mInfo.mediaType === MEDIA_TYPE.VIDEO_SCREEN) {
+        peersScreenStreamId[peerId] = mInfo.streamId;
+      }
+    });
+  }
+
+  return peersScreenStreamId;
+};
+
+const stopScreenStream = (room, screenStream, peerId, fromLeaveRoom = false) => {
+  const isScreensharing = true;
+  stopStreamHelpers.prepStopStreams(room.id, screenStream.id, fromLeaveRoom, isScreensharing)
+    .then(() => logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SCREEN_SUCCESS}`]))
+    .catch(error => logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN}`], error));
+};
+
+const addScreenStreamCallbacks = (state, stream) => {
+  const tracks = stream.getTracks();
+  tracks.forEach((track) => {
+    // eslint-disable-next-line no-param-reassign
+    track.onended = () => stopScreenStream(state.room, stream, state.user.sid);
+  });
+};
+
+const onScreenStreamAccessSuccess$1 = (roomKey, stream, audioSettings, videoSettings, isAudioFallback, isScreensharing) => {
+  helpers$7.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, isScreensharing);
+};
+
+const helpers$9 = {
+  handleScreenStreamStates,
+  addScreenStreamCallbacks,
+  retrievePeersScreenStreamId,
+  stopScreenStream,
+  onScreenStreamAccessSuccess: onScreenStreamAccessSuccess$1,
+};
 
 const screensharingInstance = {};
 
@@ -29030,7 +28338,6 @@ class ScreenSharing {
     this.roomState = roomState;
     this.stream = null;
     this.signaling = new SkylinkSignalingServer();
-    this.isReplace = null;
     this.streamId = null;
 
     screensharingInstance[room.id] = this;
@@ -29048,31 +28355,16 @@ class ScreenSharing {
     return false;
   }
 
-  // eslint-disable-next-line class-methods-use-this
-  hasMoreThanOneVideoStream() {
-    return helpers$7.retrieveVideoStreams(this.roomState.room).length > 1;
-  }
-
-  hasUserMediaStream() {
-    const { streams } = this.roomState;
-
-    return streams.userMedia;
-  }
-
-  // TODO: Implement replace logic
   /**
    * Function that starts the screenshare.
-   * @param {boolean} isReplace
    * @param {String} streamId
    * @return {MediaStream}
    */
-  async start(isReplace, streamId = null) {
-    this.isReplace = false;
+  async start(streamId = null) {
     this.streamId = streamId;
 
     try {
       this.checkForExistingScreenStreams();
-      this.checksForReplaceScreen();
 
       this.stream = await this.startScreenCapture();
       if (!this.stream) {
@@ -29080,16 +28372,11 @@ class ScreenSharing {
         return null;
       }
 
-      helpers$9.handleScreenStreamStates.addScreenStreamToState(this.roomState, this.stream, this.isReplace);
+      helpers$9.onScreenStreamAccessSuccess(this.roomState.room.id, this.stream, null, helpers$7.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE), false, true);
       helpers$9.addScreenStreamCallbacks(this.roomState, this.stream);
-
-      if (this.isReplace) {
-        this.replaceUserMediaStream();
-      } else {
-        this.addScreenshareStream();
-      }
+      this.addScreenshareStream();
     } catch (error) {
-      logger.log.ERROR([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.REPLACE_SCREEN], error);
+      logger.log.ERROR([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.START_SCREEN], error);
     }
 
     return this.stream;
@@ -29108,8 +28395,6 @@ class ScreenSharing {
 
     try {
       helpers$9.stopScreenStream(this.roomState.room, this.stream, this.roomState.user.sid, fromLeaveRoom);
-
-      this.isReplace = null;
       this.streamId = null;
       this.stream = null;
     } catch (error) {
@@ -29141,46 +28426,12 @@ class ScreenSharing {
       });
   }
 
-  checksForReplaceScreen() {
-    if (!this.isReplace) return;
-
-    if (!this.hasUserMediaStream()) {
-      throw new Error(MESSAGES.MEDIA_STREAM.ERRORS.NO_USER_MEDIA_STREAMS);
-    }
-
-    if (this.hasMoreThanOneVideoStream() && !this.streamId) {
-      throw new Error(MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM_ID);
-    }
-
-    if (this.streamId && !isAString(this.streamId)) {
-      throw new Error(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_STREAM_ID_TYPE);
-    }
-
-    if (this.streamId && !this.streamExists()) {
-      throw new Error(`${MESSAGES.MEDIA_STREAM.ERRORS.INVALID_STREAM_ID} - ${this.streamId}`);
-    }
-  }
-
   checkForExistingScreenStreams() {
     const peersScreenStream = helpers$9.retrievePeersScreenStreamId(this.roomState);
 
     if (!isEmptyObj(peersScreenStream)) {
       logger.log.WARN([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.PEER_SCREEN_ACTIVE]);
     }
-  }
-
-  replaceUserMediaStream() {
-    const { peerConnections, streams } = this.roomState;
-    const peerIds = Object.keys(peerConnections);
-    const oldStream = this.streamId ? streams.userMedia[this.streamId].stream : helpers$7.retrieveVideoStreams(this.roomState.room)[0];
-    const newStream = this.stream;
-
-    this.streamId = oldStream.id;
-    updateReplacedStreamInState(oldStream, newStream, this.roomState, true);
-
-    peerIds.forEach((peerId) => {
-      helpers$7.replaceTrack(oldStream, newStream, peerId, this.roomState);
-    });
   }
 
   addScreenshareStream() {
@@ -29195,10 +28446,6 @@ class ScreenSharing {
   // eslint-disable-next-line class-methods-use-this
   deleteScreensharingInstance(room) {
     delete screensharingInstance[room.id];
-  }
-
-  isReplaceScreenStream() {
-    return this.isReplace;
   }
 }
 
@@ -29931,31 +29178,6 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @typedef {Object.<String, Object>} peersStreamsInfo
-   * @property {Object.<String, Object>} #peerId - Peer streams info keyed by peer id.
-   * @property {Boolean} #peerId.isSelf - The flag if the peer is local or remote.
-   * @property {MediaStream} #peerId.#streamId - streams keyed by stream id.
-  /**
-   * @description Method that returns the list of connected peers streams in the room both user media streams and screen share streams.
-   * @param {String} roomName - The room name.
-   * @param {Boolean} [includeSelf=true] - The flag if self streams are included.
-   * @return {JSON.<String, peersStreamsInfo>} - The list of peer stream objects keyed by peer id.
-   * @example
-   * Example 1: Get the list of current peers streams in the same room
-   *
-   * const streams = skylink.getPeersStreams("Room_1");
-   * @alias Skylink#getPeersStreams
-   * @since 0.6.16
-   */
-  getPeersStreams(roomName, includeSelf = true) {
-    const roomState = getRoomStateByName(roomName);
-    if (roomState) {
-      return PeerData.getPeersStreams(roomState, includeSelf);
-    }
-    return null;
-  }
-
-  /**
    * @typedef {Object} dataChannelInfo
    * @property {String} channelName - The data channel id.
    * @property {String} channelProp - The data channel property.
@@ -30170,43 +29392,15 @@ class SkylinkPublicInterface {
    * @description Method that returns starts screenshare and returns the stream.
    * @param {String} roomName - The room name.
    * @return {MediaStream|null} - The screen share stream.
-   * @example
-   * Example 1: Replace selected stream with screen share stream
-   *
-   * let shareScreenReplace = () => {
-   *    // Retrieve all userMedia streams
-   *    const streamList = skylink.getStreams(roomName);
-   *    skylink.shareScreen(roomName, true, Object.keys(streamList.userMedia)[0]).then((screenStream) => {
-   *      window.attachMediaStream(localVideoElement, screenStream);
-   *    });
-   * }
    * @alias Skylink#shareScreen
    * @since 2.0.0
    */
   shareScreen(roomName) {
-    // TODO: replace stream is not functional yet so set to null for now
-    const replaceUserMediaStream = false;
     const streamId = null;
     const roomState = getRoomStateByName(roomName);
     if (roomState) {
       const screenSharing = new ScreenSharing(roomState);
-      return screenSharing.start(replaceUserMediaStream, streamId);
-    }
-
-    return null;
-  }
-
-  /**
-   * @description Method that returns the screenshare stream id of peers.
-   * @param {String} roomName - The room name.
-   * @return {Object.<String, MediaStream>|null} screenshareStream - The peer screen share stream keyed by peer id if there is one.
-   * @alias Skylink#getPeersScreenshare
-   * @since 2.0.0
-   */
-  getPeersScreenshare(roomName) {
-    const roomState = getRoomStateByName(roomName);
-    if (roomState) {
-      return PeerConnection.getPeerScreenshare(roomState);
+      return screenSharing.start(streamId);
     }
 
     return null;
@@ -30312,7 +29506,7 @@ class SkylinkPublicInterface {
     if (isAString(roomName)) {
       const roomState = getRoomStateByName(roomName);
       if (roomState) {
-        return MediaStream.getUserMediaLayer(roomState, options);
+        return MediaStream.processUserMediaOptions(roomState, options);
       }
     } else if (isAObj(roomName)) {
       return statelessGetUserMedia(roomName);
@@ -30814,21 +30008,33 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @typedef {Object} streamList
-   * @property {Object.<string, MediaStream>|null} userMedia - The user media streams keyed by stream id.
-   * @property {MediaStream|null} screenshare - The screenshare stream.
+   * @typedef {Object.<String, Object>} streamsList
+   * @property {Object.<String, Object>} #peerId - Peer streams info keyed by peer id.
+   * @property {Boolean} #peerId.isSelf - The flag if the peer is local or remote.
+   * @property {Object} #peerId.streams - The peer streams.
+   * @property {Object} #peerId.streams.audio - The peer audio streams keyed by streamId.
+   * @property {MediaStream} #peerId.streams.audio#streamId - streams keyed by stream id.
+   * @property {Object} #peerId.streams.video - The peer video streams keyed by streamId.
+   * @property {MediaStream} #peerId.streams.video#streamId - streams keyed by stream id.
+   * @property {Object} #peerId.streams.screenShare - The peer screen share streams keyed by streamId.
+   * @property {MediaStream} #peerId.streams.screenShare#streamId - streams keyed by stream id.
    */
   /**
-   * @description Method that returns all active user streams including screenshare stream if present.
+   * @description Method that returns the list of connected peers streams in the room both user media streams and screen share streams.
    * @param {String} roomName - The room name.
-   * @return {streamList|null}
+   * @param {Boolean} [includeSelf=true] - The flag if self streams are included.
+   * @return {JSON.<String, streamsList>} - The list of peer stream objects keyed by peer id.
+   * @example
+   * Example 1: Get the list of current peers streams in the same room
+   *
+   * const streams = skylink.getStreams("Room_1");
    * @alias Skylink#getStreams
-   * @since 2.0.0
+   * @since 0.6.16
    */
-  getStreams(roomName) {
+  getStreams(roomName, includeSelf = true) {
     const roomState = getRoomStateByName(roomName);
     if (roomState) {
-      return MediaStream.getStreams(roomState);
+      return MediaStream.getStreams(roomState, includeSelf);
     }
 
     return null;

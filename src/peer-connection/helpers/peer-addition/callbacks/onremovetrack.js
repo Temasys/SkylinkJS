@@ -1,12 +1,13 @@
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import { onIncomingStream, peerUpdated, streamEnded } from '../../../../skylink-events';
+import { peerUpdated } from '../../../../skylink-events';
 import PeerData from '../../../../peer-data';
-import { getStateByKey, hasVideoTrack, isAgent } from '../../../../utils/helpers';
+import { getStateByKey, isAgent } from '../../../../utils/helpers';
 import { TRACK_KIND, TAGS, BROWSER_AGENT } from '../../../../constants';
 import logger from '../../../../logger';
 import MESSAGES from '../../../../messages';
 import Skylink from '../../../../index';
-import Room from '../../../../room';
+import PeerStream from '../../../../peer-stream';
+import { STREAM_ENDED } from '../../../../skylink-events/constants';
 
 const dispatchPeerUpdated = (state, peerId) => {
   dispatchEvent(peerUpdated({
@@ -25,7 +26,7 @@ const updateMediaStatus = (state, peerId, streamId) => {
 };
 
 const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent, stream) => {
-  dispatchEvent(streamEnded({
+  PeerStream.dispatchStreamEvent(STREAM_ENDED, {
     room: state.room,
     peerId,
     peerInfo: PeerData.getPeerInfo(peerId, state.room),
@@ -34,25 +35,6 @@ const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent,
     streamId: stream.id,
     isVideo: rtcTrackEvent.track.kind === TRACK_KIND.VIDEO,
     isAudio: rtcTrackEvent.track.kind === TRACK_KIND.AUDIO,
-  }));
-};
-
-const dispatchIncomingCameraStream = (state) => {
-  const { streams, room, user } = state;
-  const userMediaStreams = streams.userMedia ? Object.values(streams.userMedia) : [];
-  userMediaStreams.forEach((streamObj) => {
-    if (hasVideoTrack(streamObj.stream)) {
-      dispatchEvent(onIncomingStream({
-        stream: streamObj.stream,
-        streamId: streamObj.id,
-        peerId: user.sid,
-        room: Room.getRoomInfo(room.id),
-        isSelf: true,
-        peerInfo: PeerData.getCurrentSessionInfo(room),
-        isVideo: true,
-        isAudio: false,
-      }));
-    }
   });
 };
 
@@ -88,12 +70,6 @@ const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
 
   updateMediaStatus(state, peerId, stream.id);
   dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent, stream);
-
-  if (isScreensharing) {
-    // Dispatch to ensure that the client has a way of retrieving the camera stream. Camera stream was not added to pc and therefore ontrack will not trigger on remote.
-    dispatchIncomingCameraStream(state);
-  }
-
   dispatchPeerUpdated(state, peerId);
 };
 

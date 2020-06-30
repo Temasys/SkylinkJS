@@ -86,15 +86,6 @@ class PeerData {
   static getPeersCustomSettings(roomState) {
     return helpers.getPeersCustomSettings(roomState);
   }
-
-  /**
-   * Iterates through all connected peers to find the greatest peerPriorityWeight and sets the current users peerPriorityWeight to max.
-   * @param {SkylinkState} roomState
-   * @return {*|void}
-   */
-  static setGreatestPeerPriorityWeight(roomState) {
-    return helpers.setGreatestPeerPriorityWeight(roomState);
-  }
 }
 
 export default PeerData;

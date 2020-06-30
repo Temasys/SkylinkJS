@@ -123,27 +123,6 @@ class PeerMedia {
   }
 
   /**
-   * Method that updates the transceiver mid value of local media info after set local description.
-   * // TODO: remove as it is no longer called
-   * @param room
-   * @param peerId
-   * @private
-   */
-  static updateTransceiverMid(room, peerId) {
-    try {
-      const tracks = helpers.retrieveTracks(room);
-      tracks.forEach((track) => {
-        const transceiverMid = helpers.retrieveTransceiverMid(room, track);
-        const streamId = helpers.retrieveStreamIdOfTrack(room, track);
-        const mediaId = helpers.retrieveMediaId(track.kind, streamId);
-        helpers.updatePeerMediaInfo(room, peerId, false, mediaId, MEDIA_INFO.TRANSCEIVER_MID, transceiverMid);
-      });
-    } catch (err) {
-      logger.log.ERROR([peerId, TAGS.PEER_MEDIA, null, MESSAGES.MEDIA_INFO.ERRORS.FAILED_UPDATING_TRANSCEIVER_MID], err);
-    }
-  }
-
-  /**
    * Method that sets the remote peer media info from the offer.
    * @param room
    * @param targetMid
@@ -161,7 +140,15 @@ class PeerMedia {
             targetPeerIds.push(mediaInfo.publisherId);
           }
         });
-        targetPeerIds.forEach(peerId => this.setPeerMediaInfo(room, peerId, mediaInfoList));
+        targetPeerIds.forEach((peerId) => {
+          // eslint-disable-next-line array-callback-return,consistent-return
+          const targetMediaInfoList = mediaInfoList.filter((mediaInfo) => {
+            if (mediaInfo.publisherId === peerId) {
+              return mediaInfo;
+            }
+          });
+          this.setPeerMediaInfo(room, peerId, targetMediaInfoList);
+        });
       } else if (targetMid !== PEER_TYPE.MCU) {
         const clonedPeerMedia = clone(state.peerMedias[targetMid]) || {};
         const updatedState = helpers.resetPeerMedia(room, targetMid);
@@ -247,6 +234,28 @@ class PeerMedia {
     } catch (err) {
       logger.log.ERROR([peerId, TAGS.MEDIA_INFO, MESSAGES.MEDIA_INFO.ERRORS.FAILED_PROCESSING_PEER_MEDIA], err);
     }
+  }
+
+  static retrieveScreenMediaInfo(room, peerId, options) {
+    const state = Skylink.getSkylinkState(room.id);
+    const { peerMedias } = state;
+    const mediaInfos = Object.values(peerMedias[peerId]);
+    for (let i = 0; i < mediaInfos.length; i += 1) {
+      if (options.streamId && mediaInfos[i].streamId === options.streamId) {
+        return mediaInfos[i].mediaType === MEDIA_TYPE.VIDEO_SCREEN ? mediaInfos[i] : false;
+      }
+
+      if (options.transceiverMid && mediaInfos[i].transceiverMid === options.transceiverMid) {
+        return mediaInfos[i].mediaType === MEDIA_TYPE.VIDEO_SCREEN;
+      }
+
+      if (!options) {
+        return mediaInfos[i].mediaType === MEDIA_TYPE.VIDEO_SCREEN;
+      }
+    }
+
+    logger.log.ERROR([peerId, TAGS.PEER_MEDIA, null, MESSAGES.MEDIA_INFO.ERRORS.STREAM_ID_NOT_MATCHED]);
+    return false;
   }
 }
 

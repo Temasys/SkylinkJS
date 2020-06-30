@@ -39,7 +39,8 @@ class SkylinkAPIServer {
   // eslint-disable-next-line class-methods-use-this
   init(options = defaultOptions) {
     if (options) {
-      if (options.socketServer) { // set socketServerPath to override socketServerPath value returned from api that only works with default sig
+      if (options.socketServer && !options.socketServerPath) { // set socketServerPath to override socketServerPath value returned from api that only works with
+        // default sig
         // server url
         // eslint-disable-next-line no-param-reassign
         options.socketServerPath = '';

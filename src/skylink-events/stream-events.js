@@ -17,8 +17,6 @@ import SkylinkEvent from '../utils/skylinkEvent';
  * @param {String} detail.streamId - The stream id.
  * @param {boolean} detail.isSelf -The flag if Peer is User.
  * @param {peerInfo} detail.peerInfo - The Peer session information.
- * @param {String} detail.isReplace - The The flag if the incoming stream has replaced an existing stream.
- * @param {String} detail.replacedStreamId - The streamId of the replaced stream.
  * @param {boolean} detail.isVideo - The flag if the incoming stream has a video track.
  * @param {boolean} detail.isAudio - The flag if the incoming stream has an audio track.
  * */
@@ -34,8 +32,6 @@ export const onIncomingStream = (detail = {}) => new SkylinkEvent(ON_INCOMING_ST
  * @param {String} detail.streamId - The Stream id.
  * @param {Boolean} detail.isSelf - The flag if Peer is User.
  * @param {peerInfo} detail.peerInfo - The Peer session information.
- * @param {Boolean} detail.isReplace - The flag if the incoming screenshare stream results from {@link Skylink#shareScreen|shareScreen} called
- * with <code>replaceUserMediaStream=true</code>.
  * @param {boolean} detail.isVideo - The flag if the incoming screen stream has a video track.
  * @param {boolean} detail.isAudio - The flag if the incoming screen stream has an audio track.
  * */

@@ -52,10 +52,10 @@ Demo.Methods.toggleInRoomSettings = function(peerId, inRoom) {
 
     // reset joinRoomOptions to handle duplicate tab
     $('#join_room_p2p_key').prop('checked', true);
-    $('#join_room_audio').prop('checked', true);
-    $('#join_room_audio_muted').prop('checked', false);
-    $('#join_room_video').prop('checked', true);
-    $('#join_room_video_muted').prop('checked', false);
+    // $('#join_room_audio').prop('checked', true);
+    // $('#join_room_audio_muted').prop('checked', false);
+    // $('#join_room_video').prop('checked', true);
+    // $('#join_room_video_muted').prop('checked', false);
   } else {
     $('#join_room_btn').removeClass('disabled');
     $('#presence_list_body').empty();
@@ -140,17 +140,29 @@ Demo.Methods.updateStreams = function() {
 };
 
 Demo.Methods.getMediaStatus = function(type) {
-  if (!Demo.Streams || !Demo.Streams.userMedia) {
+  if (!Demo.Streams && !Demo.Streams[_peerId]) {
     return { audioMuted: -1, videoMuted: -1 };
   }
 
   if (type === 'audio') {
-    const audioSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams.userMedia).filter((sId) => { return Demo.Streams.userMedia[sId].getAudioTracks().length > 0 })]
-    return audioSId ? audioSId: { audioMuted: -1, videoMuted: -1 };
+    let audioSId = '';
+    if (Demo.Streams[_peerId].streams.audio) {
+      audioSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams[_peerId].streams.audio)[0]]
+    }
+
+    return audioSId ? audioSId : { audioMuted: -1, videoMuted: -1 };
   }
 
   if (type === 'video') {
-    const videoSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams.userMedia).filter((sId) => { return Demo.Streams.userMedia[sId].getVideoTracks().length > 0 })]
+    let videoSId = '';
+    if (Demo.Streams[_peerId].streams.video) {
+      videoSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams[_peerId].streams.video)[0]]
+    }
+
+    if (!videoSId && Demo.Streams[_peerId].screenShare) {
+      videoSId = Demo.Skylink.getPeerInfo(config.defaultRoom).mediaStatus[Object.keys(Demo.Streams[_peerId].stream.screenShare)[0]];
+    }
+
     return videoSId ? videoSId: { audioMuted: -1, videoMuted: -1 };
   }
 };
@@ -227,6 +239,17 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
     newListEntry += '</td></tr>';
     $('#presence_list').append(newListEntry);
     $('#user' + peerId + ' .0').css('color', 'green');
+
+    // LOGGING
+    setTimeout(() => {
+      console.log("***** START *****")
+      console.log("getPeersCustomSettings", Demo.Skylink.getPeersCustomSettings(config.defaultRoom));
+      console.log("getPeerInfo", Demo.Skylink.getPeerInfo(config.defaultRoom, peerId));
+      console.log("getPeersDataChannels", Demo.Skylink.getPeersDataChannels(config.defaultRoom));
+      console.log("getStreams", Demo.Skylink.getStreams(config.defaultRoom));
+      console.log("getUserData", Demo.Skylink.getUserData(config.defaultRoom));
+      console.log("***** END *****")
+    }, 5000);
   }
 
   // create the peer video element
@@ -317,8 +340,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_UPDATED, (evt)
   let audioStreamId = null;
   let videoStreamId = null;
 
-  if (Demo.Streams && Demo.Streams.screenshare) {
-    streamIds = streamIds.filter((id) => id !== Demo.Streams.screenshare.id)
+  if (Demo.Streams && Demo.Streams[_peerId] && Demo.Streams[_peerId].streams.screenShare) {
+    streamIds = streamIds.filter((id) => id !== Object.keys(Demo.Streams[_peerId].streams.screenShare)[0]);
   }
 
   if (streamIds[0] && streamIds[1]) {
@@ -392,9 +415,6 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM,
     }
   } else {
     $('#user' + peerId + ' .name').html(peerInfo.userData);
-    setTimeout(() => {
-      console.log(Demo.Skylink.getPeersCustomSettings(config.defaultRoom));
-    }, 5000);
   }
 
   if (Demo.ShowStats[peerId]) {
@@ -915,7 +935,7 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#stop_stream_btn').click(function() {
-    if (Demo.Streams && Demo.Streams.userMedia) {
+    if (Demo.Streams && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
       Demo.Skylink.stopStreams(config.defaultRoom)
       .then(() => console.log("stopStreams resolved"))
       .catch((err) => console.error("stopStreams rejected", err));

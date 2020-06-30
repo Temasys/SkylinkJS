@@ -2,60 +2,33 @@ import logger from '../../../logger';
 import { TAGS } from '../../../constants';
 import MESSAGES from '../../../messages';
 import stopStreamHelpers from './index';
+import PeerMedia from '../../../peer-media';
 
-const hasStreamBeenReplaced = (state, stoppedStream) => {
-  const { streams } = state;
-
-  if (!streams.userMedia) {
-    return false;
-  }
-
-  const streamObjs = Object.values(streams.userMedia);
-
-  return streamObjs.some(streamObj => streamObj.isReplaced && (streamObj.id === stoppedStream.id));
-};
-
-const filterUserMediaStreams = (state) => {
-  const { streams } = state;
-  const filteredStreams = {
-    replacedStreams: [],
-    addedStreams: [],
-  };
-  const streamIds = Object.keys(streams.userMedia);
-  streamIds.forEach((userMediaStreamId) => {
-    if (hasStreamBeenReplaced(state, streams.userMedia[userMediaStreamId].stream)) {
-      filteredStreams.replacedStreams.push(streams.userMedia[userMediaStreamId].stream);
-    } else {
-      filteredStreams.addedStreams.push(streams.userMedia[userMediaStreamId].stream);
+const retrieveUserMediaStreams = (state) => {
+  const { peerStreams, user, room } = state;
+  const streamIds = Object.keys(peerStreams[user.sid]);
+  const streams = streamIds.map((id) => {
+    if (!PeerMedia.retrieveScreenMediaInfo(room, user.sid, { streamId: id })) {
+      return peerStreams[user.sid][id];
     }
+    return null;
   });
 
-  return filteredStreams;
+  return streams.filter(i => i !== null);
 };
 
 // eslint-disable-next-line consistent-return
 const prepStopUserMediaStreams = (state, streamId, fromLeaveRoom) => new Promise((resolve, reject) => {
-  const { user } = state;
-  const filteredStreams = filterUserMediaStreams(state);
+  const { user, peerStreams } = state;
+  const mediaStreams = retrieveUserMediaStreams(state);
   const isScreensharing = false;
 
   try {
     if (!streamId) {
-      stopStreamHelpers.stopAddedStreams(state, filteredStreams.addedStreams, isScreensharing, fromLeaveRoom);
-
-      // TODO:
-      // added streams must be stopped first and renegotiation started before replaced streams are stopped
-      // add event listener to listen for handshake offer to trigger stopReplacedStreams
-
-      stopStreamHelpers.stopReplacedStreams(state, filteredStreams.replacedStreams, isScreensharing, fromLeaveRoom);
+      stopStreamHelpers.stopAddedStreams(state, mediaStreams, isScreensharing, fromLeaveRoom);
     } else {
-      const { stream } = state.streams.userMedia[streamId];
-      if (hasStreamBeenReplaced(state, stream)) {
-        // TODO
-        stopStreamHelpers.stopReplacedStream(state, stream, fromLeaveRoom);
-      } else {
-        stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
-      }
+      const stream = peerStreams[user.sid][streamId];
+      stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
     }
 
     return stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
@@ -64,5 +37,6 @@ const prepStopUserMediaStreams = (state, streamId, fromLeaveRoom) => new Promise
     reject(MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA);
   }
 });
+
 
 export default prepStopUserMediaStreams;
