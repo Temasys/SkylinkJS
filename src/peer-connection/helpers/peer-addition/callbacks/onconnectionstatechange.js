@@ -23,7 +23,7 @@ const onconnectionstatechange = (peerConnection, targetMid, state) => {
     peerId: targetMid,
   }));
 
-  if (peerConnection.connectionState === PEER_CONNECTION_STATE.FAILED && !hasMCU) {
+  if (peerConnection.connectionState === PEER_CONNECTION_STATE.FAILED && peerConnection.iceConnectionState === ICE_CONNECTION_STATE.FAILED && !hasMCU) {
     const roomInfo = clone(Room.getRoomInfo(room.id));
     Room.leaveRoom(state)
       .then(() => {
