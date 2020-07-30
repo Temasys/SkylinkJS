@@ -9,6 +9,7 @@ import {
 } from '../../../../constants';
 import MESSAGES from '../../../../messages';
 import BandwidthAdjuster from '../../../../peer-connection/helpers/bandwidthAdjuster';
+import { isEmptyObj } from '../../../../utils/helpers';
 
 /**
  * Checks if peer is connected.
@@ -53,8 +54,11 @@ export const clearPeerInfo = (roomKey, peerId) => {
 
   // Otherwise stats module fails.
   setTimeout(() => {
-    delete updatedState.peerConnections[peerId];
-    Skylink.setSkylinkState(updatedState, updatedState.room.id);
+    const state = Skylink.getSkylinkState(roomKey);
+    if (!isEmptyObj(state)) {
+      delete state.peerConnections[peerId];
+      Skylink.setSkylinkState(state, state.room.id);
+    }
     logger.log.INFO([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.SUCCESS]);
   }, 500);
 

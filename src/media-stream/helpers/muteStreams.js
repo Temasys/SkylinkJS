@@ -240,9 +240,8 @@ const muteStreams = (roomState, options, streamId = null) => {
 
   const streamIdsToMute = Object.values(streamIdsThatCanBeMuted).filter(sId => (retrieveToggleState(roomState, fOptions, sId).hasToggledAudio || retrieveToggleState(roomState, fOptions, sId).hasToggledVideo));
 
-  streamIdsToMute.forEach((streamIdToMute, i) => {
-    setTimeout(() => startMuteEvents(room.id, streamIdToMute, fOptions), i === 0 ? 0 : 1050);
-    // TODO: Implement peerUpdatedEvent timeout here?
+  streamIdsToMute.forEach((streamIdToMute) => {
+    startMuteEvents(room.id, streamIdToMute, fOptions);
   });
 };
 
