@@ -9,11 +9,11 @@ import mediaInfoEventHelpers from './helpers/mediaInfoEventHelpers';
 
 const audioStateChangeHandler = (targetMid, message) => {
   const {
-    type, rid, mediaId, mediaState, transceiverMid,
+    type, rid, mediaId, mediaState,
   } = message;
   const updatedState = Skylink.getSkylinkState(rid);
   const { room } = updatedState;
-  const streamId = PeerMedia.retrieveStreamId(room, targetMid, mediaId, transceiverMid);
+  const streamId = PeerMedia.retrieveStreamId(room, targetMid, mediaId);
   const stamp = (new Date()).toISOString();
 
   logger.log.INFO([targetMid, TAGS.SIG_SERVER, type, MESSAGES.MEDIA_INFO.AUDIO_STATE_CHANGE, mediaState, streamId], message);

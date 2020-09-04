@@ -9,7 +9,6 @@ const mediaInfoEventMessage = (roomState, peerId, mediaInfo) => ({
   mediaId: mediaInfo.mediaId,
   mediaType: mediaInfo.mediaType,
   mediaState: mediaInfo.mediaState,
-  transceiverMid: mediaInfo.transceiverMid,
 });
 
 export default mediaInfoEventMessage;
