@@ -22,7 +22,10 @@ const onerror = (params, error) => {
     channelType,
     roomState,
   } = params;
-  if (error.error.errorDetail !== 'NONE') {
+  if (error.error.errorDetail === 'NONE' || error.error.code === 0) {
+    // "Transport channel close" error triggered on calling dataChannel.close()
+    logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, 'Datachannel state ->'], error.error.message);
+  } else {
     const state = Skylink.getSkylinkState(roomState.room.id);
     const { room } = state;
     const handleDataChannelStats = new HandleDataChannelStats();
@@ -37,9 +40,6 @@ const onerror = (params, error) => {
       bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
       error,
     }));
-  } else {
-    // "Transport channel close" error triggered on calling dataChannel.close()
-    logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, 'Datachannel state ->'], error.error.message);
   }
 };
 

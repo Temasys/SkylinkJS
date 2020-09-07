@@ -345,6 +345,7 @@ class SkylinkState {
     this.hasPersistentMessage = initOptions.hasPersistentMessage;
     this.peerStreams = {};
     this.streamsSettings = {};
+    this.enableStatsGathering = initOptions.enableStatsGathering;
   }
 }
 export default SkylinkState;

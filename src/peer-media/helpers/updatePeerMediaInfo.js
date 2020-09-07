@@ -23,6 +23,7 @@ const doUpdate = (room, peerId, dispatchEvent, mediaId, key = false, value = fal
 const dispatchMediaInfoMsg = (room, peerId, dispatchEvent, mediaId) => {
   const updatedState = Skylink.getSkylinkState(room.id);
   if (updatedState.user.sid === peerId && dispatchEvent) {
+    // Note: mediaInfoMsg currently only dispatched during mute/unmute events - transceiverMid not sent
     helpers.sendMediaInfoMsg(room, updatedState.peerMedias[peerId][mediaId]);
   }
 };

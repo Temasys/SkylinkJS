@@ -13,7 +13,7 @@ import { ON_INCOMING_SCREEN_STREAM, ON_INCOMING_STREAM } from '../../skylink-eve
 import Room from '../../room';
 import PeerData from '../../peer-data';
 
-const onStreamAccessSuccess = (roomKey, ogStream, audioSettings, videoSettings, isAudioFallback, isScreensharing = false) => {
+const onStreamAccessSuccess = (roomKey, ogStream, audioSettings, videoSettings, isAudioFallback, isScreensharing = false, isPrefetchedStream) => {
   const streams = isScreensharing ? [ogStream] : helpers.splitAudioAndVideoStream(ogStream);
   const state = Skylink.getSkylinkState(roomKey);
   const { room, user } = state;
@@ -56,14 +56,16 @@ const onStreamAccessSuccess = (roomKey, ogStream, audioSettings, videoSettings, 
       });
     }
 
-    dispatchEvent(mediaAccessSuccess({
-      stream,
-      isScreensharing,
-      isAudioFallback,
-      streamId: stream.id,
-      isAudio: hasAudioTrack(stream),
-      isVideo: hasVideoTrack(stream),
-    }));
+    if (!isPrefetchedStream) {
+      dispatchEvent(mediaAccessSuccess({
+        stream,
+        isScreensharing,
+        isAudioFallback,
+        streamId: stream.id,
+        isAudio: hasAudioTrack(stream),
+        isVideo: hasVideoTrack(stream),
+      }));
+    }
   });
 
   return streams;

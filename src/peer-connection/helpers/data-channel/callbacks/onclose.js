@@ -50,7 +50,8 @@ const onclose = (params) => {
 
     if (peerConnections[peerId] && peerConnections[peerId].remoteDescription
       && peerConnections[peerId].remoteDescription.sdp && (peerConnections[peerId].remoteDescription.sdp.indexOf(
-      'm=application',
+      // eslint-disable-next-line comma-dangle
+      'm=application'
     ) === -1 || peerConnections[peerId].remoteDescription.sdp.indexOf('m=application 0') > 0)) {
       return;
     }

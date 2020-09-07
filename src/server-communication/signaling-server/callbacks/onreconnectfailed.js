@@ -30,6 +30,7 @@ const onReconnectFailed = (resolve, reject, roomKey) => {
   const signaling = new SkylinkSignalingServer();
 
   // try next port or transport
+  // TODO: ESS-1979
   if (shouldReconnect(state) && socketSession.socketSession.attempts === DEFAULTS.SOCKET.RECONNECTION_ATTEMPTS.WEBSOCKET && socketSession.socketSession.finalAttempts < DEFAULTS.SOCKET.RECONNECTION_FINAL_ATTEMPTS && !socketSession.socketTimeout) {
     signaling.socket.connect();
     signaling.updateAttempts(roomKey, 'attempts', socketSession.socketSession.attempts === DEFAULTS.SOCKET.RECONNECTION_ATTEMPTS.WEBSOCKET ? 0 : socketSession.socketSession.attempts += 1);
