@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      models/api-response.js - Documentation
+      features/screen-sharing/index.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        models/api-response.js
+        features/screen-sharing/index.js
       </h1>
     
 
@@ -93,115 +93,152 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>/* eslint-disable camelcase */
-import logger from '../logger/index';
-import SkylinkRoom from './skylink-room';
-import SkylinkUser from './skylink-user';
-import { isAString } from '../utils/helpers';
+    <pre class="prettyprint source linenums"><code>import PeerConnection from '../../peer-connection';
+import SkylinkSignalingServer from '../../server-communication/signaling-server';
+import mediaStreamHelpers from '../../media-stream/helpers/index';
+import logger from '../../logger';
+import MESSAGES from '../../messages';
+import { isEmptyObj } from '../../utils/helpers';
+import { DEFAULTS } from '../../defaults';
+import screenshareHelpers from './helpers/index';
+import { TAGS } from '../../constants';
 
-const apiResponseInstance = {};
+const screensharingInstance = {};
 
 /**
- * @classdesc Class representing a Skylink API response.
- * @class SkylinkApiResponse
+ * @classdesc Class used for handling Screensharing.
+ * @class
  * @private
- * @param {RawApiResponse} rawApiResponse - API response received from the API Server
- * @param {String} roomKey - Room id for retrieving ApiResponse instance
  */
-class SkylinkApiResponse {
-  constructor(rawApiResponse, roomKey) {
-    if (isAString(roomKey) &amp;&amp; apiResponseInstance[roomKey]) {
-      return apiResponseInstance[roomKey];
+class ScreenSharing {
+  constructor(roomState) {
+    const { room } = roomState;
+
+    if (screensharingInstance[room.id]) {
+      return screensharingInstance[room.id];
     }
 
-    const {
-      offer_constraints,
-      pc_constraints,
-      cid,
-      apiOwner,
-      ipSigserver,
-      isPrivileged,
-      autoIntroduce,
-      httpPortList,
-      httpsPortList,
-      hasMCU,
-      ipSigserverPath,
-      hasPersistentMessage,
-      room_key,
-    } = rawApiResponse;
+    this.roomState = roomState;
+    this.stream = null;
+    this.signaling = new SkylinkSignalingServer();
+    this.streamId = null;
+    this.settings = null;
 
-    if (!offer_constraints &amp;&amp; !pc_constraints) {
-      logger.log.ERROR(['API', null, 'init', 'pc_constraints or offer_constraints are null']);
+    screensharingInstance[room.id] = this;
+  }
+
+  streamExists() {
+    const streamList = mediaStreamHelpers.getStreams(this.roomState, this.roomState.room.name);
+    const streamIds = Object.keys(streamList.userMedia);
+
+    for (let i = 0; i &lt; streamIds.length; i += 1) {
+      if (streamIds[i] === this.streamId) {
+        return true;
+      }
     }
-    logger.log.DEBUG(['API', null, 'init', 'Parsed Peer Connection constraints:'], JSON.parse(pc_constraints));
-    logger.log.DEBUG(['API', null, 'init', 'Parsed Offer constraints'], JSON.parse(offer_constraints));
+    return false;
+  }
 
-    /**
-     * This is the cid received from API
-     * @type {String}
-     */
-    this.key = cid;
-    /**
-     * The owner of the App Key
-     * @type {String}
-     */
-    this.appKeyOwner = apiOwner;
-    /**
-     * If the App Key has privileged option enabled
-     * @type {boolean}
-     */
-    this.isPrivileged = isPrivileged;
-    /**
-     * If the App Key has autoIntroduce option enabled
-     * @type {boolean}
-     */
-    this.autoIntroduce = autoIntroduce;
-    /**
-     * The instance of SkylinkRoom
-     * @type {SkylinkRoom}
-     */
-    this.room = new SkylinkRoom(rawApiResponse);
-    /**
-     * The instance of SkylinkUser
-     * @type {SkylinkUser}
-     */
-    this.user = new SkylinkUser(rawApiResponse);
-    /**
-     * If the key has MCU enabled
-     * @type Boolean
-     */
-    this.hasMCU = hasMCU;
-    /**
-     * The endpoint of the signaling server
-     * @type {String}
-     */
-    this.socketServer = ipSigserver;
-    /**
-     * The socket server version path of the signaling server
-     * @type {String}
-     */
-    this.socketServerPath = ipSigserverPath;
-    /**
-     * The socket server ports
-     * @type {String}
-     */
-    this.socketPorts = {
-      'http:': Array.isArray(httpPortList) &amp;&amp; httpPortList.length > 0 ? httpPortList : [80, 3000],
-      'https:': Array.isArray(httpsPortList) &amp;&amp; httpsPortList.length > 0 ? httpsPortList : [443, 3443],
-    };
+  /**
+   * Function that starts the screenshare.
+   * @param {String} streamId
+   * @param {Object} options
+   * @return {MediaStream}
+   */
+  async start(streamId = null, options) {
+    this.streamId = streamId;
+    this.settings = mediaStreamHelpers.parseStreamSettings(options || DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
 
-    this.hasPersistentMessage = hasPersistentMessage;
+    try {
+      this.checkForExistingScreenStreams();
 
-    apiResponseInstance[room_key] = this;
+      this.stream = await this.startScreenCapture(options);
+      if (!this.stream) {
+        this.deleteScreensharingInstance(this.roomState.room);
+        return null;
+      }
+
+      screenshareHelpers.onScreenStreamAccessSuccess(this.roomState.room.id, this.stream, null, this.settings, false, true);
+      screenshareHelpers.addScreenStreamCallbacks(this.roomState, this.stream);
+      this.addScreenshareStream();
+    } catch (error) {
+      logger.log.ERROR([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.START_SCREEN], error);
+    }
+
+    return this.stream;
+  }
+
+  /**
+   * Function that stops the screenshare.
+   * @param {Boolean} fromLeaveRoom
+   * @return {MediaStream}
+   */
+  stop(fromLeaveRoom = false) {
+    if (!this.stream) {
+      logger.log.DEBUG([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN} - ${MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM}`]);
+      return null;
+    }
+
+    try {
+      screenshareHelpers.stopScreenStream(this.roomState.room, this.stream, this.roomState.user.sid, fromLeaveRoom);
+      this.streamId = null;
+      this.stream = null;
+    } catch (error) {
+      logger.log.ERROR([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN}`], error);
+    }
+    return null;
+  }
+
+  // eslint-disable-next-line
+  startScreenCapture() {
+    const { navigator } = window;
+    const displayMediaOptions = this.settings.getUserMediaSettings;
+    if (navigator.mediaDevices.getDisplayMedia) {
+      return navigator.mediaDevices.getDisplayMedia(displayMediaOptions)
+        .then(stream => stream)
+        .catch((error) => {
+          if (error.name === 'NotAllowedError') {
+            logger.log.WARN(error);
+          } else {
+            logger.log.ERROR(error);
+          }
+          return null;
+        });
+    }
+
+    displayMediaOptions.video.mediaSource = 'screen';
+    return navigator.mediaDevices.getUserMedia(displayMediaOptions)
+      .then(stream => stream)
+      .catch((error) => {
+        logger.log.ERROR(error);
+        return null;
+      });
+  }
+
+  checkForExistingScreenStreams() {
+    const peersScreenStream = screenshareHelpers.retrievePeersScreenStreamId(this.roomState);
+
+    if (!isEmptyObj(peersScreenStream)) {
+      logger.log.WARN([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.PEER_SCREEN_ACTIVE]);
+    }
+  }
+
+  addScreenshareStream() {
+    const { peerConnections } = this.roomState;
+
+    if (!isEmptyObj(peerConnections)) {
+      PeerConnection.refreshConnection(this.roomState)
+        .catch(error => logger.log.ERROR([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.START_SCREEN], error));
+    }
   }
 
   // eslint-disable-next-line class-methods-use-this
-  deleteApiResponseInstance(roomKey) {
-    delete apiResponseInstance[roomKey];
+  deleteScreensharingInstance(room) {
+    delete screensharingInstance[room.id];
   }
 }
 
-export default SkylinkApiResponse;
+export default ScreenSharing;
 </code></pre>
   </article>
 </section>

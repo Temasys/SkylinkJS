@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      media-stream/helpers/sendStream.js - Documentation
+      media-stream/index.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        media-stream/helpers/sendStream.js
+        media-stream/index.js
       </h1>
     
 
@@ -93,181 +93,160 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import {
-  isAObj, isAFunction, hasVideoTrack, hasAudioTrack,
-} from '../../utils/helpers';
-import logger from '../../logger';
-import { dispatchEvent } from '../../utils/skylinkEventManager';
-import PeerData from '../../peer-data';
-import { peerUpdated } from '../../skylink-events';
-import PeerConnection from '../../peer-connection/index';
-import MediaStream from '../index';
-import MESSAGES from '../../messages';
-import PeerStream from '../../peer-stream';
-import { ON_INCOMING_STREAM } from '../../skylink-events/constants';
-import Room from '../../room';
-
-const dispatchEvents = (roomState, stream, prefetchedStream) => {
-  const { user, room } = roomState;
-  const isSelf = true;
-  const peerId = user.sid;
-  const peerInfo = PeerData.getCurrentSessionInfo(room);
-
-  if (prefetchedStream) {
-    // if mediaOptions passed, getUserMedia already triggers onIncomingStream in onStreamAccessSuccess
-    // if prefetchedStream is used, dispatch onIncomingStream locally
-    PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
-      room: Room.getRoomInfo(room.id),
-      stream,
-      streamId: stream.id,
-      isSelf,
-      peerId,
-      peerInfo,
-      isScreensharing: false,
-      isVideo: hasVideoTrack(stream),
-      isAudio: hasAudioTrack(stream),
-    });
-  }
-
-  dispatchEvent(peerUpdated({
-    isSelf,
-    peerId,
-    peerInfo,
-  }));
-};
-
-const dispatchEventsToLocalEnd = (roomState, streams, prefetchedStream) => {
-  for (let i = 0; i &lt; streams.length; i += 1) {
-    if (streams[i]) {
-      if (Array.isArray(streams[i])) {
-        for (let x = 0; x &lt; streams[i].length; x += 1) {
-          if (streams[i][x]) {
-            dispatchEvents(roomState, streams[i][x], prefetchedStream);
-          }
-        }
-      } else {
-        dispatchEvents(roomState, streams[i], prefetchedStream);
-      }
-    }
-  }
-};
-
-const restartFn = (roomState, streams, prefetchedStream, resolve, reject) => {
-  const { peerConnections, hasMCU } = roomState;
-
-  try {
-    dispatchEventsToLocalEnd(roomState, streams, prefetchedStream);
-
-    if (Object.keys(peerConnections).length > 0 || hasMCU) {
-      const refreshPeerConnectionPromise = PeerConnection.refreshPeerConnection(Object.keys(peerConnections), roomState, false, {});
-
-      refreshPeerConnectionPromise.then(() => {
-        resolve(streams);
-      }).catch((error) => {
-        logger.log.ERROR(MESSAGES.PEER_CONNECTION.REFRESH_CONNECTION.FAILED);
-        reject(error);
-      });
-    } else {
-      logger.log.WARN(MESSAGES.ROOM.ERRORS.NO_PEERS);
-      resolve(streams);
-    }
-  } catch (error) {
-    logger.log.ERROR(error);
-  }
-};
-
-const processMediaOptions = (roomState, stream, resolve, reject) => {
-  const getUserMediaPromise = MediaStream.getUserMedia(roomState, stream);
-
-  return getUserMediaPromise.then((userMediaStreams) => {
-    restartFn(roomState, userMediaStreams, false, resolve, reject);
-  }).catch((error) => {
-    reject(error);
-  });
-};
-
-const processMediaStream = (roomState, stream, resolve, reject) => {
-  const usePrefetchedStreamPromise = MediaStream.usePrefetchedStream(roomState.room.id, stream);
-
-  return usePrefetchedStreamPromise.then((prefetchedStreams) => {
-    restartFn(roomState, prefetchedStreams, true, resolve, reject);
-  }).catch((error) => {
-    reject(error);
-  });
-};
-
-const processMediaStreamArray = (roomState, streams, resolve, reject) => {
-  const usePrefetchedStreamsPromises = [];
-
-  streams.forEach((stream) => {
-    usePrefetchedStreamsPromises.push(MediaStream.usePrefetchedStream(roomState.room.id, stream));
-  });
-
-  return Promise.all(usePrefetchedStreamsPromises)
-    .then((results) => {
-      restartFn(roomState, results, true, resolve, reject);
-    })
-    .catch((error) => {
-      reject(error);
-    });
-};
+    <pre class="prettyprint source linenums"><code>import Skylink from '../index';
+import helpers from './helpers/index';
+import stopStreamHelpers from './helpers/stopStream/index';
+import logger from '../logger';
+import MESSAGES from '../messages';
+import { isAObj } from '../utils/helpers';
+import { TAGS, TRACK_KIND } from '../constants';
 
 /**
- * Function that sends a MediaStream if provided or gets and sends an new getUserMedia stream.
- * @param {SkylinkState} roomState
- * @param {MediaStream|Object} options
- * @memberOf MediaStreamHelpers
- * @fires ON_INCOMING_STREAM
- * @fires PEER_UPDATED
+ * @private
+ * @classdesc Class used for handling RTCMediaStream. Helper methods are listed inside &lt;code>{@link MediaStreamHelpers}&lt;/code>.
+ * @class
  */
-// eslint-disable-next-line consistent-return
-const sendStream = (roomState, options = null) => new Promise((resolve, reject) => {
-  if (!roomState) {
-    return reject(new Error(MESSAGES.ROOM_STATE.NO_ROOM_NAME));
+class MediaStream {
+  /**
+   * @description Function that retrieves camera Stream.
+   * @param {SkylinkState} state
+   * @param {getUserMediaOptions} mediaOptions - The camera Stream configuration options.
+   * @return {Promise}
+   */
+  static getUserMedia(state, mediaOptions = {}) {
+    const { room } = state;
+    const updatedRoomState = helpers.parseMediaOptions(mediaOptions, state);
+    const { audio, video } = mediaOptions;
+    const useExactConstraints = !!mediaOptions.useExactConstraints;
+    Skylink.setSkylinkState(updatedRoomState, room.id);
+
+    return helpers.prepMediaAccessRequest({
+      useExactConstraints,
+      audio,
+      video,
+      roomKey: room.id,
+    });
   }
 
-  const { room } = roomState;
-  const isNotObjOrNull = (!isAObj(options) || options === null);
+  /**
+   * @description Function that filters user input from getUserMedia public method
+   * @param {SkylinkState} roomState
+   * @param {getUserMediaOptions} options
+   */
+  static processUserMediaOptions(roomState, options = null) {
+    return new Promise((resolve, reject) => {
+      let mediaOptions = {
+        audio: true,
+        video: true,
+      };
 
-  if (!room.inRoom) {
-    logger.log.WARN(MESSAGES.ROOM.ERRORS.NOT_IN_ROOM);
-    return reject(new Error(`${MESSAGES.ROOM.ERRORS.NOT_IN_ROOM}`));
-  }
-
-  if (isNotObjOrNull) {
-    return reject(new Error(`${MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS} ${options}`));
-  }
-
-  let isTypeStream = false;
-
-  try {
-    if (Array.isArray(options)) {
-      let isArrayOfTypeStream = true;
-      options.forEach((item) => {
-        if (!isAFunction(item.getAudioTracks) || !isAFunction(item.getVideoTracks)) {
-          isArrayOfTypeStream = false;
-        }
-      });
-
-      if (!isArrayOfTypeStream) {
-        return reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_MEDIA_STREAM_ARRAY));
+      if (!options) {
+        logger.log.WARN([roomState.user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.NO_OPTIONS} - ${MESSAGES.MEDIA_STREAM.DEFAULT_OPTIONS}`], mediaOptions);
       }
 
-      return processMediaStreamArray(roomState, options, resolve, reject);
-    }
+      if (!isAObj(options)) {
+        logger.log.ERROR([roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS], options);
+        reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS), null);
+      }
 
-    isTypeStream = options ? (isAFunction(options.getAudioTracks) || isAFunction(options.getVideoTracks)) : false;
-    if (isTypeStream) {
-      return processMediaStream(roomState, options, resolve, reject);
-    }
+      mediaOptions = options;
 
-    return processMediaOptions(roomState, options, resolve, reject);
-  } catch (error) {
-    logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.SEND_STREAM, error);
+      const getUserMediaPromise = MediaStream.getUserMedia(roomState, mediaOptions);
+      getUserMediaPromise.then((stream) => {
+        resolve(stream);
+      }).catch((error) => {
+        reject(error);
+      });
+    });
   }
-});
 
-export default sendStream;
+  /**
+   * Function that stops the getUserMedia() streams.
+   * @param {SkylinkState} roomState
+   * @param {String} streamId - The id of the stream to stop if there is more than one getUserMedia stream.
+   */
+  static stopStreams(roomState, streamId) {
+    return stopStreamHelpers.prepStopStreams(roomState.room.id, streamId);
+  }
+
+  /**
+   * Function that sets User's Stream to send to Peer connection.
+   * @param {String} targetMid - The mid of the target peer
+   * @param {SkylinkState} roomState - Skylink State of current room
+   */
+  static addLocalMediaStreams(targetMid, roomState) {
+    helpers.addLocalMediaStreams(targetMid, roomState);
+  }
+
+  /**
+   * Function that handles the &lt;code>RTCPeerConnection.ontrack&lt;/code> event on remote stream added.
+   * @param {MediaStream} stream - {@link https://developer.mozilla.org/en-US/docs/Web/API/MediaStream}
+   * @param {SkylinkState} currentRoomState - Current room state
+   * @param {String} targetMid - The mid of the target peer
+   * @param {boolean} [isScreensharing=false] - The flag if stream is a screenshare stream.
+   */
+  static onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio) {
+    helpers.onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio);
+  }
+
+  /**
+   * Function that mutes the stream.
+   * @param {SkylinkState} roomState
+   * @param {Object} options
+   * @param {boolean} options.audioMuted
+   * @param {boolean} options.videoMuted
+   * @param {String} streamId
+   */
+  static muteStreams(roomState, options, streamId) {
+    return helpers.muteStreams(roomState, options, streamId);
+  }
+
+  /**
+   * Function that sends the MediaStream object if present or mediaStream settings.
+   * @param {SkylinkState} roomState
+   * @param {MediaStream|Object} options
+   */
+  static sendStream(roomState, options) {
+    return helpers.sendStream(roomState, options);
+  }
+
+  static getStreamSources() {
+    return helpers.getStreamSources();
+  }
+
+  /**
+   * Function that returns all active streams including screenshare stream if present.
+   * @param {SkylinkState} roomState
+   * @param {boolean} includeSelf
+   * @return {streamList} streamList
+   */
+  static getStreams(roomState, includeSelf) {
+    return helpers.getStreams(roomState, includeSelf);
+  }
+
+  static usePrefetchedStream(roomKey, stream, options = null) {
+    return new Promise((resolve) => {
+      if (!stream &amp;&amp; (options.id &amp;&amp; options.active)) {
+        // eslint-disable-next-line no-param-reassign
+        stream = options;
+      }
+
+      const streamOptions = { audio: stream.getAudioTracks().length !== 0, video: stream.getVideoTracks().length !== 0 };
+      const audioSettings = helpers.parseStreamSettings(streamOptions, TRACK_KIND.AUDIO);
+      const videoSettings = helpers.parseStreamSettings(streamOptions, TRACK_KIND.VIDEO);
+      const isAudioFallback = false;
+      const streams = helpers.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, false, true);
+
+      resolve(streams);
+    });
+  }
+
+  static buildStreamSettings(room, stream, settings) {
+    return helpers.buildStreamSettings(room, stream, settings);
+  }
+}
+
+export default MediaStream;
 </code></pre>
   </article>
 </section>

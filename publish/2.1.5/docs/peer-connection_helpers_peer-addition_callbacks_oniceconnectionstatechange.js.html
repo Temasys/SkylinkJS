@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      media-stream/index.js - Documentation
+      peer-connection/helpers/peer-addition/callbacks/oniceconnectionstatechange.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        media-stream/index.js
+        peer-connection/helpers/peer-addition/callbacks/oniceconnectionstatechange.js
       </h1>
     
 
@@ -93,160 +93,117 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import Skylink from '../index';
-import helpers from './helpers/index';
-import stopStreamHelpers from './helpers/stopStream/index';
-import logger from '../logger';
-import MESSAGES from '../messages';
-import { isAObj } from '../utils/helpers';
-import { TAGS, TRACK_KIND } from '../constants';
+    <pre class="prettyprint source linenums"><code>import HandleIceConnectionStats from '../../../../skylink-stats/handleIceConnectionStats';
+import logger from '../../../../logger';
+import messages from '../../../../messages';
+import { dispatchEvent } from '../../../../utils/skylinkEventManager';
+import { iceConnectionState, peerConnectionState } from '../../../../skylink-events';
+import * as constants from '../../../../constants';
+import Skylink from '../../../../index';
+import PeerConnection from '../../../index';
+import HandleBandwidthStats from '../../../../skylink-stats/handleBandwidthStats';
+import BandwidthAdjuster from '../../bandwidthAdjuster';
+import { isAgent, isEmptyObj } from '../../../../utils/helpers';
+
+const isIceConnectionStateCompleted = (pcIceConnectionState) => {
+  const { ICE_CONNECTION_STATE } = constants;
+  return [ICE_CONNECTION_STATE.COMPLETED,
+    ICE_CONNECTION_STATE.CONNECTED].indexOf(pcIceConnectionState) > -1;
+};
 
 /**
- * @private
- * @classdesc Class used for handling RTCMediaStream. Helper methods are listed inside &lt;code>{@link MediaStreamHelpers}&lt;/code>.
- * @class
+ * @param {RTCPeerConnection} peerConnection
+ * @param {String} targetMid - The Peer Id
+ * @param {SkylinkState} currentRoomState
+ * @fires ICE_CONNECTION_STATE
+ * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
  */
-class MediaStream {
-  /**
-   * @description Function that retrieves camera Stream.
-   * @param {SkylinkState} state
-   * @param {getUserMediaOptions} mediaOptions - The camera Stream configuration options.
-   * @return {Promise}
-   */
-  static getUserMedia(state, mediaOptions = {}) {
-    const { room } = state;
-    const updatedRoomState = helpers.parseMediaOptions(mediaOptions, state);
-    const { audio, video } = mediaOptions;
-    const useExactConstraints = !!mediaOptions.useExactConstraints;
-    Skylink.setSkylinkState(updatedRoomState, room.id);
+const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState) => {
+  const { ROOM_STATE, ICE_CONNECTION, PEER_CONNECTION } = messages;
+  const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
+  const state = Skylink.getSkylinkState(currentRoomState.room.id);
+  const { peerStreams, user, enableStatsGathering } = state;
+  let statsInterval = null;
+  const pcIceConnectionState = peerConnection.iceConnectionState;
 
-    return helpers.prepMediaAccessRequest({
-      useExactConstraints,
-      audio,
-      video,
-      roomKey: room.id,
+  if (isAgent(BROWSER_AGENT.REACT_NATIVE) &amp;&amp; !state &amp;&amp; pcIceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
+    return;
+  }
+
+  if (!state) {
+    logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ROOM_STATE.NOT_FOUND]);
+    return;
+  }
+
+  const {
+    hasMCU, bandwidthAdjuster, peerStats, streamsBandwidthSettings,
+  } = state;
+
+  if (pcIceConnectionState === ICE_CONNECTION_STATE.FAILED) { // peer connection 'failed' state is dispatched in onconnectionstatechange
+    if (isAgent(BROWSER_AGENT.FIREFOX) &amp;&amp; !peerStreams[user.sid]) {
+      // no audio and video requested will throw ice connection state failed although ice candidates are exchanged
+      return;
+    }
+  }
+
+  logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ICE_CONNECTION.STATE_CHANGE], pcIceConnectionState);
+  const handleIceConnectionStats = new HandleIceConnectionStats();
+  handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
+  dispatchEvent(iceConnectionState({
+    state: pcIceConnectionState,
+    peerId: targetMid,
+  }));
+
+  if (!statsInterval &amp;&amp; isIceConnectionStateCompleted(pcIceConnectionState) &amp;&amp; !peerStats[targetMid] &amp;&amp; enableStatsGathering) {
+    statsInterval = true;
+    peerStats[targetMid] = {};
+
+    logger.log.DEBUG([targetMid, 'RTCStatsReport', null, 'Retrieving first report to tabulate results']);
+
+    // Do an initial getConnectionStatus() to backfill the first retrieval in order to do (currentTotalStats - lastTotalStats).
+    PeerConnection.getConnectionStatus(state, targetMid).then(() => {
+      statsInterval = setInterval(() => {
+        const currentState = Skylink.getSkylinkState(state.room.id);
+        if (!currentState || !currentState.room.inRoom) {
+          return;
+        }
+        if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
+          if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED) { // polyfill for
+            // Safari and FF peerConnection state 'closed' when ice failure
+            logger.log.DEBUG([targetMid, 'RTCPeerConnectionState', null, PEER_CONNECTION.STATE_CHANGE], peerConnection.connectionState);
+            dispatchEvent(peerConnectionState({
+              state: PEER_CONNECTION_STATE.CLOSED,
+              peerId: targetMid,
+            }));
+          }
+
+          if (peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
+            logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ICE_CONNECTION.STATE_CHANGE], peerConnection.iceConnectionState);
+            handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
+            dispatchEvent(iceConnectionState({
+              state: ICE_CONNECTION_STATE.CLOSED,
+              peerId: targetMid,
+            }));
+          }
+
+          clearInterval(statsInterval);
+        } else {
+          new HandleBandwidthStats().send(state.room.id, peerConnection, targetMid);
+        }
+      }, 20000);
     });
   }
 
-  /**
-   * @description Function that filters user input from getUserMedia public method
-   * @param {SkylinkState} roomState
-   * @param {getUserMediaOptions} options
-   */
-  static processUserMediaOptions(roomState, options = null) {
-    return new Promise((resolve, reject) => {
-      let mediaOptions = {
-        audio: true,
-        video: true,
-      };
-
-      if (!options) {
-        logger.log.WARN([roomState.user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.NO_OPTIONS} - ${MESSAGES.MEDIA_STREAM.DEFAULT_OPTIONS}`], mediaOptions);
-      }
-
-      if (!isAObj(options)) {
-        logger.log.ERROR([roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS], options);
-        reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS), null);
-      }
-
-      mediaOptions = options;
-
-      const getUserMediaPromise = MediaStream.getUserMedia(roomState, mediaOptions);
-      getUserMediaPromise.then((stream) => {
-        resolve(stream);
-      }).catch((error) => {
-        reject(error);
-      });
-    });
+  if (!hasMCU &amp;&amp; isIceConnectionStateCompleted(pcIceConnectionState) &amp;&amp; !!bandwidthAdjuster &amp;&amp; isEmptyObj(streamsBandwidthSettings.bAS)) {
+    new BandwidthAdjuster({
+      targetMid,
+      state,
+      peerConnection,
+    }).setAdjustmentInterval();
   }
+};
 
-  /**
-   * Function that stops the getUserMedia() streams.
-   * @param {SkylinkState} roomState
-   * @param {String} streamId - The id of the stream to stop if there is more than one getUserMedia stream.
-   */
-  static stopStreams(roomState, streamId) {
-    return stopStreamHelpers.prepStopStreams(roomState.room.id, streamId);
-  }
-
-  /**
-   * Function that sets User's Stream to send to Peer connection.
-   * @param {String} targetMid - The mid of the target peer
-   * @param {SkylinkState} roomState - Skylink State of current room
-   */
-  static addLocalMediaStreams(targetMid, roomState) {
-    helpers.addLocalMediaStreams(targetMid, roomState);
-  }
-
-  /**
-   * Function that handles the &lt;code>RTCPeerConnection.ontrack&lt;/code> event on remote stream added.
-   * @param {MediaStream} stream - {@link https://developer.mozilla.org/en-US/docs/Web/API/MediaStream}
-   * @param {SkylinkState} currentRoomState - Current room state
-   * @param {String} targetMid - The mid of the target peer
-   * @param {boolean} [isScreensharing=false] - The flag if stream is a screenshare stream.
-   */
-  static onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio) {
-    helpers.onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio);
-  }
-
-  /**
-   * Function that mutes the stream.
-   * @param {SkylinkState} roomState
-   * @param {Object} options
-   * @param {boolean} options.audioMuted
-   * @param {boolean} options.videoMuted
-   * @param {String} streamId
-   */
-  static muteStreams(roomState, options, streamId) {
-    return helpers.muteStreams(roomState, options, streamId);
-  }
-
-  /**
-   * Function that sends the MediaStream object if present or mediaStream settings.
-   * @param {SkylinkState} roomState
-   * @param {MediaStream|Object} options
-   */
-  static sendStream(roomState, options) {
-    return helpers.sendStream(roomState, options);
-  }
-
-  static getStreamSources() {
-    return helpers.getStreamSources();
-  }
-
-  /**
-   * Function that returns all active streams including screenshare stream if present.
-   * @param {SkylinkState} roomState
-   * @param {boolean} includeSelf
-   * @return {streamList} streamList
-   */
-  static getStreams(roomState, includeSelf) {
-    return helpers.getStreams(roomState, includeSelf);
-  }
-
-  static usePrefetchedStream(roomKey, stream, options = null) {
-    return new Promise((resolve) => {
-      if (!stream &amp;&amp; (options.id &amp;&amp; options.active)) {
-        // eslint-disable-next-line no-param-reassign
-        stream = options;
-      }
-
-      const streamOptions = { audio: stream.getAudioTracks().length !== 0, video: stream.getVideoTracks().length !== 0 };
-      const audioSettings = helpers.parseStreamSettings(streamOptions, TRACK_KIND.AUDIO);
-      const videoSettings = helpers.parseStreamSettings(streamOptions, TRACK_KIND.VIDEO);
-      const isAudioFallback = false;
-      const streams = helpers.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, resolve);
-
-      resolve(streams);
-    });
-  }
-
-  static buildStreamSettings(room, stream, settings) {
-    return helpers.buildStreamSettings(room, stream, settings);
-  }
-}
-
-export default MediaStream;
+export default oniceconnectionstatechange;
 </code></pre>
   </article>
 </section>
