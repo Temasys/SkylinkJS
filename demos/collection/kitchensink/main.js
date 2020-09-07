@@ -35,6 +35,10 @@ $('#display_user_info').val(displayName);
 const joinRoomOptions = {
   audio: true,
   video: true,
+  bandwidth: {
+    video: 450,
+    audio: 20,
+  },
   userData: displayName,
 };
 
@@ -935,7 +939,7 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#stop_stream_btn').click(function() {
-    if (Demo.Streams && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
+    if (Demo.Streams && Demo.Streams[_peerId] && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
       Demo.Skylink.stopStreams(config.defaultRoom)
       .then(() => console.log("stopStreams resolved"))
       .catch((err) => console.error("stopStreams rejected", err));
@@ -967,7 +971,7 @@ $(document).ready(function() {
       video: true,
     };
 
-    if (Demo.Streams && Demo.Streams.userMedia) {
+    if (Demo.Streams && Demo.Streams[_peerId] && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
       Demo.Skylink.stopStreams(config.defaultRoom)
       .then(() => startSendStream(mediaOptions))
       .catch((err) => console.error("stopStreams rejected", err));
@@ -982,7 +986,7 @@ $(document).ready(function() {
       video: true,
     };
 
-    if (Demo.Streams && Demo.Streams.userMedia) {
+    if (Demo.Streams && Demo.Streams[_peerId] && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
       Demo.Skylink.stopStreams(config.defaultRoom)
       .then(() => startSendStream(mediaOptions))
       .catch((err) => console.error("stopStreams rejected", err));
@@ -997,7 +1001,7 @@ $(document).ready(function() {
       video: false,
     };
 
-    if (Demo.Streams && Demo.Streams.userMedia) {
+    if (Demo.Streams && Demo.Streams[_peerId] && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
       Demo.Skylink.stopStreams(config.defaultRoom)
       .then(() => startSendStream(mediaOptions))
       .catch((err) => console.error("stopStreams rejected", err));

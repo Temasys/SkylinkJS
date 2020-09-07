@@ -606,16 +606,17 @@ class SkylinkPublicInterface {
   /**
    * @description Method that returns starts screenshare and returns the stream.
    * @param {String} roomName - The room name.
+   * @param {Object} options - Screen share options.
    * @return {MediaStream|null} - The screen share stream.
    * @alias Skylink#shareScreen
    * @since 2.0.0
    */
-  shareScreen(roomName) {
+  shareScreen(roomName, options) {
     const streamId = null;
     const roomState = getRoomStateByName(roomName);
     if (roomState) {
       const screenSharing = new ScreenSharing(roomState);
-      return screenSharing.start(streamId);
+      return screenSharing.start(streamId, options);
     }
 
     return null;

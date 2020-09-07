@@ -33,6 +33,7 @@ class SkylinkApiResponse {
       ipSigserverPath,
       hasPersistentMessage,
       room_key,
+      enable_stats_config,
     } = rawApiResponse;
 
     if (!offer_constraints && !pc_constraints) {
@@ -96,6 +97,8 @@ class SkylinkApiResponse {
     };
 
     this.hasPersistentMessage = hasPersistentMessage;
+
+    this.enableStatsGathering = enable_stats_config;
 
     apiResponseInstance[room_key] = this;
   }
