@@ -273,6 +273,9 @@
 
 /**
  * @typedef {Object} getUserMediaOptions - The camera Stream configuration options.
+ * <blockquote class="info">
+ *   Note that Safari currently does not apply constraints if provided.
+ *   </blockquote>
  * @property {boolean} [useExactConstraints=false]
  *   Note that by enabling this flag, exact values will be requested when retrieving camera Stream,
  *   but it does not prevent constraints related errors. By default when not enabled,
@@ -294,7 +297,7 @@
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.
  * @property {boolean} [audio.echoCancellation=true]
- *   For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
+ *   The echo cancellation functionality may not work and may produce a terrible
  *   feedback. It is recommended to use headphones or other microphone devices rather than the device
  *   in-built microphones. The flag to enable echo cancellation for audio track.
  * @property {boolean|JSON} [video=false] The video configuration options.
@@ -327,24 +330,58 @@
  *   Note that this may result in constraints related errors depending on the browser/hardware supports.
  * @property {String} [video.deviceId]
  *   Note this is currently not supported in Firefox browsers.
- *    The video track source ID of the device to use.
+ *   The video track source ID of the device to use.
  *   The list of available video source ID can be retrieved by the <a href="https://developer.
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.
  * @property {String|JSON} [video.facingMode] The video camera facing mode.
  *   The list of available video source ID can be retrieved by the <a href="https://developer.mozilla.org
  *   /en-US/docs/Web/API/MediaTrackConstraints/facingMode">MediaTrackConstraints <code>facingMode</code> API</a>.
- * @property {Function} [callback] The callback function fired when request has completed.
- *   Function parameters signature is <code>function (error, success)</code>
- *   Function request completion is determined by the <a href="#event_mediaAccessSuccess">
- *   <code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter
- *   payload value as <code>false</code> for request success.
- * @property {Error|String} callback.error The error result in request.
- *   Defined as <code>null</code> when there are no errors in request
- *   Object signature is the <code>getUserMedia()</code> error when retrieving camera Stream.
- * @property {MediaStream} callback.success The success result in request.
- *   Defined as <code>null</code> when there are errors in request
- *   Object signature is the camera Stream object.
+ */
+
+/**
+ * @typedef {Object} getDisplayMediaOptions - The screen Stream configuration options.
+ *  * <blockquote class="info">
+ *   Note that Safari currently does not apply constraints if provided.
+ *   </blockquote>
+ *  * @property {boolean} [useExactConstraints=false]
+ *   Note that by enabling this flag, exact values will be requested when retrieving screen Stream,
+ *   but it does not prevent constraints related errors. By default when not enabled,
+ *   expected mandatory maximum values (or optional values for source ID) will requested to prevent constraints related
+ *   errors where the expected maximum value will not be requested due to the lack of support.
+ *   The flag if <code>shareScreen()</code> should request for screen Stream to match exact requested values of
+ *   <code>video.deviceId</code>, <code>video.resolution</code>
+ *   and <code>video.frameRate</code> when provided.
+ * @property {boolean|JSON} [video=true] The video configuration options.
+ * @property {JSON} [video.resolution] The video resolution.
+ *   By default, <a href="#attr_VIDEO_RESOLUTION"><code>VGA</code></a> resolution option
+ *   is selected when not provided.
+ *   [Rel: Skylink.VIDEO_RESOLUTION]
+ * @property {number|JSON} [video.resolution.width] The video resolution width.
+ * - When provided as a number, it is the video resolution width.
+ * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.width</code> settings.
+ *   Parameters are <code>"ideal"</code> for ideal resolution width, <code>"exact"</code> for exact video resolution width,
+ *   <code>"min"</code> for min video resolution width and <code>"max"</code> for max video resolution width.
+ *   Note that this may result in constraints related errors depending on the browser/hardware supports.
+ * @property {number|JSON} [video.resolution.height] The video resolution height.
+ * - When provided as a number, it is the video resolution height.
+ * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.height</code> settings.
+ *   Parameters are <code>"ideal"</code> for ideal video resolution height, <code>"exact"</code> for exact video resolution height,
+ *   <code>"min"</code> for min video resolution height and <code>"max"</code> for max video resolution height.
+ *   Note that this may result in constraints related errors depending on the browser/hardware supports.
+ * @property {number|JSON} [video.frameRate] The video <a href="https://en.wikipedia.org/wiki/Frame_rate">
+ *   frameRate</a> per second (fps).
+ * - When provided as a number, it is the video framerate.
+ * - When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.frameRate</code> settings.
+ *   Parameters are <code>"ideal"</code> for ideal video framerate, <code>"exact"</code> for exact video framerate,
+ *   <code>"min"</code> for min video framerate and <code>"max"</code> for max video framerate.
+ *   Note that this may result in constraints related errors depending on the browser/hardware supports.
+ * @property {String} [video.deviceId]
+ *   Note this is currently not supported in Firefox browsers.
+ *    The video track source ID of the device to use.
+ *   The list of available video source ID can be retrieved by the <a href="https://developer.
+ * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
+ *   API</a>.
  */
 
 /**
