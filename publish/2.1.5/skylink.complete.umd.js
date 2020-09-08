@@ -3,7 +3,7 @@
   factory();
 }(function () { 'use strict';
 
-  /* SkylinkJS v2.1.5 Mon Sep 07 2020 09:54:35 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.1.5 Tue Sep 08 2020 08:09:29 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -6153,7 +6153,8 @@
      *   skylink.leaveRoom() // call leaveRoom to ensure that previous peer information will be removed
      *   .then(() => skylink.joinRoom(joinRoomOptions))
      *   .then((streams) => {
-     *     window.attachMediaStream(el, stream);
+     *     window.attachMediaStream(audioEl, streams[0]);
+     *     window.attachMediaStream(videoEl, streams[1]);
      *   })
      * });
      */
@@ -8654,6 +8655,7 @@
           PEER_SCREEN_ACTIVE: 'Peer has existing screen share',
           FALLBACK: 'Error retrieving fallback audio stream',
           INVALID_GUM_OPTIONS: 'Invalid user media options',
+          INVALID_GDM_OPTIONS: 'Invalid display media options',
           GET_USER_MEDIA: 'Error retrieving stream from \'getUserMedia\' method',
           INVALID_MUTE_OPTIONS: 'Invalid muteStreams options provided',
           NO_STREAMS_MUTED: 'No streams to mute',
@@ -28329,7 +28331,7 @@
        */
       async start(streamId = null, options) {
         this.streamId = streamId;
-        this.settings = helpers$7.parseStreamSettings(options || DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
+        this.settings = this.isValidOptions(options) ? helpers$7.parseStreamSettings(options) : helpers$7.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
 
         try {
           this.checkForExistingScreenStreams();
@@ -28395,6 +28397,19 @@
             logger.log.ERROR(error);
             return null;
           });
+      }
+
+      // eslint-disable-next-line class-methods-use-this
+      isValidOptions(options) {
+        if (options && isAObj(options) && options.video) {
+          return true;
+        }
+
+        if (options) {
+          logger.log.WARN([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GDM_OPTIONS], options);
+        }
+
+        return false;
       }
 
       checkForExistingScreenStreams() {
@@ -29362,7 +29377,7 @@
       /**
        * @description Method that returns starts screenshare and returns the stream.
        * @param {String} roomName - The room name.
-       * @param {Object} options - Screen share options.
+       * @param {getDisplayMediaOptions} options - Screen share options.
        * @return {MediaStream|null} - The screen share stream.
        * @alias Skylink#shareScreen
        * @since 2.0.0
