@@ -935,7 +935,7 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#stop_stream_btn').click(function() {
-    if (Demo.Streams && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
+    if (Demo.Streams && Demo.Streams[_peerId] && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
       Demo.Skylink.stopStreams(config.defaultRoom)
       .then(() => console.log("stopStreams resolved"))
       .catch((err) => console.error("stopStreams rejected", err));
@@ -947,8 +947,7 @@ $(document).ready(function() {
   };
 
   $("#add_stream_btn").click(function() {
-    // const options = Object.assign({}, joinRoomOptions);
-    // delete options.userData;
+
     const options = {
       audio: true,
       video: {
@@ -967,7 +966,7 @@ $(document).ready(function() {
       video: true,
     };
 
-    if (Demo.Streams && Demo.Streams.userMedia) {
+    if (Demo.Streams && Demo.Streams[_peerId] && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
       Demo.Skylink.stopStreams(config.defaultRoom)
       .then(() => startSendStream(mediaOptions))
       .catch((err) => console.error("stopStreams rejected", err));
@@ -977,14 +976,16 @@ $(document).ready(function() {
   });
   //---------------------------------------------------
   $("#start_video_btn").click(function() {
-    const mediaOptions = {
-      audio: false,
-      video: true,
-    };
+      const mediaOptions = {
+        audio: false,
+        video: true,
+      };
 
-    if (Demo.Streams && Demo.Streams.userMedia) {
+    if (Demo.Streams && Demo.Streams[_peerId] && (Demo.Streams[_peerId].streams.video)) {
+      const clonedVideoStream = Object.values(Demo.Streams[_peerId].streams.video)[0].clone();
+      console.log("Cloned mediaStream", clonedVideoStream);
       Demo.Skylink.stopStreams(config.defaultRoom)
-      .then(() => startSendStream(mediaOptions))
+      .then(() => startSendStream(clonedVideoStream))
       .catch((err) => console.error("stopStreams rejected", err));
     } else {
       startSendStream(mediaOptions);
@@ -997,7 +998,7 @@ $(document).ready(function() {
       video: false,
     };
 
-    if (Demo.Streams && Demo.Streams.userMedia) {
+    if (Demo.Streams && Demo.Streams[_peerId] && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
       Demo.Skylink.stopStreams(config.defaultRoom)
       .then(() => startSendStream(mediaOptions))
       .catch((err) => console.error("stopStreams rejected", err));
@@ -1046,7 +1047,7 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#restart_btn').click(function() {
-    Demo.Skylink.refreshConnection(config.defaultRoom, null, true, { bandwidth: SkylinkConstants.VIDEO_QUALITY.SQ});
+    Demo.Skylink.refreshConnection(config.defaultRoom, null, true);
   });
   // //---------------------------------------------------
   $('#join_room_btn').click(function () {
@@ -1061,7 +1062,7 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#share_screen_btn').click(function () {
-    Demo.Skylink.shareScreen(config.defaultRoom, true).then((stream) => {
+    Demo.Skylink.shareScreen(config.defaultRoom).then((stream) => {
       console.log('Screen share started: ', stream);
     });
   });

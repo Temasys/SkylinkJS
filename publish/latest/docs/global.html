@@ -3436,6 +3436,482 @@ buffered amount threshold.</p>
   
 
   <span class='name-container'>
+    <a class="link-icon" href="#getDisplayMediaOptions">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="getDisplayMediaOptions">
+      <span class="type-signature"></span>getDisplayMediaOptions<span class="type-signature"> :Object</span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>The screen Stream configuration options.</p>
+<ul>
+<li>
+<blockquote class="info">
+</li>
+</ul>
+<p>Note that Safari currently does not apply constraints if provided.</p>
+  </blockquote>
+ * @property {boolean} [useExactConstraints=false]
+  Note that by enabling this flag, exact values will be requested when retrieving screen Stream,
+  but it does not prevent constraints related errors. By default when not enabled,
+  expected mandatory maximum values (or optional values for source ID) will requested to prevent constraints related
+  errors where the expected maximum value will not be requested due to the lack of support.
+  The flag if <code>shareScreen()</code> should request for screen Stream to match exact requested values of
+  <code>video.deviceId</code>, <code>video.resolution</code>
+  and <code>video.frameRate</code> when provided.
+  </div>
+
+
+
+
+
+
+
+
+
+
+  <h5 class="subsection-title">Properties:</h5>
+
+  
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+        <th>Default</th>
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>video</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      boolean
+    </span>
+
+    |
+
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+          <td class="default">
+            
+              true
+            
+          </td>
+        
+
+        <td class="description last">
+          <p>The video configuration options.</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>resolution</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The video resolution.
+By default, <a href="#attr_VIDEO_RESOLUTION"><code>VGA</code></a> resolution option
+is selected when not provided.
+[Rel: Skylink.VIDEO_RESOLUTION]</p>
+          
+            <h6>Properties</h6>
+            
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+        <th>Attributes</th>
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>width</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    |
+
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The video resolution width.</p>
+<ul>
+<li>When provided as a number, it is the video resolution width.</li>
+<li>When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.width</code> settings.
+Parameters are <code>&quot;ideal&quot;</code> for ideal resolution width, <code>&quot;exact&quot;</code> for exact video resolution width,
+<code>&quot;min&quot;</code> for min video resolution width and <code>&quot;max&quot;</code> for max video resolution width.
+Note that this may result in constraints related errors depending on the browser/hardware supports.</li>
+</ul>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>height</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    |
+
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The video resolution height.</p>
+<ul>
+<li>When provided as a number, it is the video resolution height.</li>
+<li>When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.height</code> settings.
+Parameters are <code>&quot;ideal&quot;</code> for ideal video resolution height, <code>&quot;exact&quot;</code> for exact video resolution height,
+<code>&quot;min&quot;</code> for min video resolution height and <code>&quot;max&quot;</code> for max video resolution height.
+Note that this may result in constraints related errors depending on the browser/hardware supports.</li>
+</ul>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>frameRate</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    |
+
+    <span class="param-type">
+      JSON
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>The video <a href="https://en.wikipedia.org/wiki/Frame_rate">
+frameRate</a> per second (fps).</p>
+<ul>
+<li>When provided as a number, it is the video framerate.</li>
+<li>When provided as a JSON, it is the <code>navigator.mediaDevices.getUserMedia()</code> <code>.frameRate</code> settings.
+Parameters are <code>&quot;ideal&quot;</code> for ideal video framerate, <code>&quot;exact&quot;</code> for exact video framerate,
+<code>&quot;min&quot;</code> for min video framerate and <code>&quot;max&quot;</code> for max video framerate.
+Note that this may result in constraints related errors depending on the browser/hardware supports.</li>
+</ul>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>deviceId</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      String
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+          <td class="attributes">
+            
+              &lt;optional><br>
+            
+
+            
+          </td>
+        
+
+        
+
+        <td class="description last">
+          <p>Note this is currently not supported in Firefox browsers.
+The video track source ID of the device to use.
+The list of available video source ID can be retrieved by the <a href="https://developer.
+mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
+API</a>.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line342">line 342</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+        
+          
+
+
+  
+
+  <span class='name-container'>
     <a class="link-icon" href="#getUserMediaOptions">
       <svg height="20" width="20" style="fill: black;">
         <use xlink:href="#linkIcon"></use>
@@ -3452,6 +3928,9 @@ buffered amount threshold.</p>
 
   <div class="description">
     <p>The camera Stream configuration options.</p>
+<blockquote class="info">
+  Note that Safari currently does not apply constraints if provided.
+  </blockquote>
   </div>
 
 
@@ -3741,7 +4220,7 @@ API</a>.</p>
         
 
         <td class="description last">
-          <p>For Chrome/Opera/IE/Safari/Bowser, the echo cancellation functionality may not work and may produce a terrible
+          <p>The echo cancellation functionality may not work and may produce a terrible
 feedback. It is recommended to use headphones or other microphone devices rather than the device
 in-built microphones. The flag to enable echo cancellation for audio track.</p>
           </td>
@@ -4190,145 +4669,6 @@ API</a>.</p>
           <p>The video camera facing mode.
 The list of available video source ID can be retrieved by the <a href="https://developer.mozilla.org
   /en-US/docs/Web/API/MediaTrackConstraints/facingMode">MediaTrackConstraints <code>facingMode</code> API</a>.</p>
-          </td>
-    </tr>
-
-  
-  </tbody>
-</table>
-
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>callback</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      function
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-          <td class="attributes">
-            
-              &lt;optional><br>
-            
-
-            
-          </td>
-        
-
-        
-          <td class="default">
-            
-          </td>
-        
-
-        <td class="description last">
-          <p>The callback function fired when request has completed.
-Function parameters signature is <code>function (error, success)</code>
-Function request completion is determined by the <a href="#event_mediaAccessSuccess">
-<code>mediaAccessSuccess</code> event</a> triggering <code>isScreensharing</code> parameter
-payload value as <code>false</code> for request success.</p>
-          
-            <h6>Properties</h6>
-            
-
-<table class="props">
-  <thead>
-    <tr>
-      
-        <th>Name</th>
-      
-
-      <th>Type</th>
-
-      
-
-      
-
-      <th class="last">Description</th>
-    </tr>
-  </thead>
-
-  <tbody>
-    
-
-    <tr>
-      
-        <td class="name"><code>error</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      Error
-    </span>
-
-    |
-
-    <span class="param-type">
-      String
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-
-        
-
-        <td class="description last">
-          <p>The error result in request.
-Defined as <code>null</code> when there are no errors in request
-Object signature is the <code>getUserMedia()</code> error when retrieving camera Stream.</p>
-          </td>
-    </tr>
-
-  
-
-    <tr>
-      
-        <td class="name"><code>success</code></td>
-      
-
-      <td class="type">
-        
-          
-    <span class="param-type">
-      <a href="global.html#MediaStream">MediaStream</a>
-    </span>
-
-    
-
-
-        
-      </td>
-
-        
-
-        
-
-        <td class="description last">
-          <p>The success result in request.
-Defined as <code>null</code> when there are errors in request
-Object signature is the camera Stream object.</p>
           </td>
     </tr>
 
@@ -6758,7 +7098,7 @@ should only consist of the upload bandwidth.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line593">line 593</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line630">line 630</a>
         </li>
       </ul>
     </dd>
@@ -7116,7 +7456,7 @@ should only consist of the upload bandwidth.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line581">line 581</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line618">line 618</a>
         </li>
       </ul>
     </dd>
@@ -7207,7 +7547,7 @@ should only consist of the upload bandwidth.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line607">line 607</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line644">line 644</a>
         </li>
       </ul>
     </dd>
@@ -7381,7 +7721,7 @@ should only consist of the upload bandwidth.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line601">line 601</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line638">line 638</a>
         </li>
       </ul>
     </dd>
@@ -8011,7 +8351,7 @@ However for the case where the MCU is connected, User will always be the offerer
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line350">line 350</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line387">line 387</a>
         </li>
       </ul>
     </dd>
@@ -8570,7 +8910,7 @@ Defined only when <code>state</code> is <code>ERROR</code>.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line978">line 978</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line979">line 979</a>
         </li>
       </ul>
     </dd>
@@ -8744,7 +9084,7 @@ Defined only when <code>state</code> is <code>ERROR</code>.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line575">line 575</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line612">line 612</a>
         </li>
       </ul>
     </dd>
@@ -9242,7 +9582,7 @@ for the last available transports and port.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line565">line 565</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line602">line 602</a>
         </li>
       </ul>
     </dd>
@@ -13373,7 +13713,7 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line376">line 376</a>
+          <a href="typedefs.js.html">typedefs.js</a>, <a href="typedefs.js.html#line413">line 413</a>
         </li>
       </ul>
     </dd>
@@ -13802,7 +14142,7 @@ Defined only when <code>state</code> payload is <code>RETRIEVE_ERROR</code>.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1225">line 1225</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1226">line 1226</a>
         </li>
       </ul>
     </dd>
@@ -14254,7 +14594,7 @@ Object signature matches <code>audio.input</code> format.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1135">line 1135</a>
+          <a href="public_index.js.html">public/index.js</a>, <a href="public_index.js.html#line1136">line 1136</a>
         </li>
       </ul>
     </dd>

@@ -11,7 +11,7 @@ const parseMedia = (state, output, type, value, peerConnection, peerId, directio
   } else if (trackKind === TRACK_KIND.VIDEO) {
     parsers.parseVideo(state, output, type, value, peerId, direction);
   } else {
-    logger.log.DEBUG([this.peerId, TAGS.STATS_MODULE, null, messages.STATS_MODULE.INVALID_TRACK_KIND], value);
+    logger.log.DEBUG([peerId, TAGS.STATS_MODULE, null, messages.STATS_MODULE.INVALID_TRACK_KIND], value);
   }
 };
 

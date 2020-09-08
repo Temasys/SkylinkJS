@@ -11,9 +11,6 @@ const parseMediaOptions = (options, roomState) => {
   const state = Skylink.getSkylinkState(roomState.room.id);
   const mediaOptions = options || {};
 
-  state.streamsBandwidthSettings = {
-    bAS: {},
-  };
   state.voiceActivityDetection = typeof mediaOptions.voiceActivityDetection === 'boolean' ? mediaOptions.voiceActivityDetection : true;
 
   if (mediaOptions.bandwidth) {

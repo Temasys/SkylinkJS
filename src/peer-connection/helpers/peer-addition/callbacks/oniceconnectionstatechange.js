@@ -27,7 +27,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   const { ROOM_STATE, ICE_CONNECTION, PEER_CONNECTION } = messages;
   const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
   const state = Skylink.getSkylinkState(currentRoomState.room.id);
-  const { peerStreams, user } = state;
+  const { peerStreams, user, enableStatsGathering } = state;
   let statsInterval = null;
   const pcIceConnectionState = peerConnection.iceConnectionState;
 
@@ -59,7 +59,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
     peerId: targetMid,
   }));
 
-  if (!statsInterval && isIceConnectionStateCompleted(pcIceConnectionState) && !peerStats[targetMid]) {
+  if (!statsInterval && isIceConnectionStateCompleted(pcIceConnectionState) && !peerStats[targetMid] && enableStatsGathering) {
     statsInterval = true;
     peerStats[targetMid] = {};
 

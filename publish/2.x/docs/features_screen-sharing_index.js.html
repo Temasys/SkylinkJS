@@ -98,7 +98,7 @@ import SkylinkSignalingServer from '../../server-communication/signaling-server'
 import mediaStreamHelpers from '../../media-stream/helpers/index';
 import logger from '../../logger';
 import MESSAGES from '../../messages';
-import { isEmptyObj } from '../../utils/helpers';
+import { isAObj, isEmptyObj } from '../../utils/helpers';
 import { DEFAULTS } from '../../defaults';
 import screenshareHelpers from './helpers/index';
 import { TAGS } from '../../constants';
@@ -122,6 +122,7 @@ class ScreenSharing {
     this.stream = null;
     this.signaling = new SkylinkSignalingServer();
     this.streamId = null;
+    this.settings = null;
 
     screensharingInstance[room.id] = this;
   }
@@ -141,21 +142,23 @@ class ScreenSharing {
   /**
    * Function that starts the screenshare.
    * @param {String} streamId
+   * @param {Object} options
    * @return {MediaStream}
    */
-  async start(streamId = null) {
+  async start(streamId = null, options) {
     this.streamId = streamId;
+    this.settings = this.isValidOptions(options) ? mediaStreamHelpers.parseStreamSettings(options) : mediaStreamHelpers.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
 
     try {
       this.checkForExistingScreenStreams();
 
-      this.stream = await this.startScreenCapture();
+      this.stream = await this.startScreenCapture(options);
       if (!this.stream) {
         this.deleteScreensharingInstance(this.roomState.room);
         return null;
       }
 
-      screenshareHelpers.onScreenStreamAccessSuccess(this.roomState.room.id, this.stream, null, mediaStreamHelpers.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE), false, true);
+      screenshareHelpers.onScreenStreamAccessSuccess(this.roomState.room.id, this.stream, null, this.settings, false, true);
       screenshareHelpers.addScreenStreamCallbacks(this.roomState, this.stream);
       this.addScreenshareStream();
     } catch (error) {
@@ -189,8 +192,9 @@ class ScreenSharing {
   // eslint-disable-next-line
   startScreenCapture() {
     const { navigator } = window;
+    const displayMediaOptions = this.settings.getUserMediaSettings;
     if (navigator.mediaDevices.getDisplayMedia) {
-      return navigator.mediaDevices.getDisplayMedia(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE)
+      return navigator.mediaDevices.getDisplayMedia(displayMediaOptions)
         .then(stream => stream)
         .catch((error) => {
           if (error.name === 'NotAllowedError') {
@@ -201,12 +205,27 @@ class ScreenSharing {
           return null;
         });
     }
-    return navigator.mediaDevices.getUserMedia({ video: { mediaSource: 'screen' } })
+
+    displayMediaOptions.video.mediaSource = 'screen';
+    return navigator.mediaDevices.getUserMedia(displayMediaOptions)
       .then(stream => stream)
       .catch((error) => {
         logger.log.ERROR(error);
         return null;
       });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  isValidOptions(options) {
+    if (options &amp;&amp; isAObj(options) &amp;&amp; options.video) {
+      return true;
+    }
+
+    if (options) {
+      logger.log.WARN([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GDM_OPTIONS], options);
+    }
+
+    return false;
   }
 
   checkForExistingScreenStreams() {

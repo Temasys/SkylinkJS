@@ -22,13 +22,8 @@ class SkylinkStats {
     const beSilentOnLogs = Skylink.getInitOptions().beSilentOnStatsLogs;
 
     try {
-      const initOptions = Skylink.getInitOptions();
-      const { enableStatsGathering } = initOptions;
-
-      if (enableStatsGathering) {
-        const postData = this.processData(data);
-        this.postStatObj(endpoint, beSilentOnLogs, postData);
-      }
+      const postData = this.processData(data);
+      this.postStatObj(endpoint, beSilentOnLogs, postData);
     } catch (err) {
       logger.log.WARN(STATS_MODULE.ERRORS.POST_FAILED, err);
     }

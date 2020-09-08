@@ -51,7 +51,7 @@ const setSDPBitrate = (targetMid, sessionDescription, roomKey) => {
   let bASAudioBw;
   let bASVideoBw;
   let bASDataBw;
-  const peerCustomSettings = PeerData.getPeersCustomSettings(state)[targetMid];
+  const peerCustomSettings = PeerData.getPeersCustomSettings(state);
 
   // Apply local peer bandwidth settings if configured
   if (state.streamsBandwidthSettings.bAS) {

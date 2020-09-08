@@ -37,7 +37,7 @@ const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
   } else {
     dispatchEvent(peerLeft({
       peerId,
-      peerInfo: PeerData.getCurrentSessionInfo(room),
+      peerInfo: PeerData.getPeerInfo(peerId, room),
       isSelf: false,
       room: Room.getRoomInfo(room.id),
     }));

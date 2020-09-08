@@ -33,7 +33,8 @@ export const channelOpen = detail => new SkylinkEvent(CHANNEL_OPEN, { detail });
  *   skylink.leaveRoom() // call leaveRoom to ensure that previous peer information will be removed
  *   .then(() => skylink.joinRoom(joinRoomOptions))
  *   .then((streams) => {
- *     window.attachMediaStream(el, stream);
+ *     window.attachMediaStream(audioEl, streams[0]);
+ *     window.attachMediaStream(videoEl, streams[1]);
  *   })
  * });
  */

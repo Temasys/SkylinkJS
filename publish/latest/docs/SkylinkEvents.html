@@ -159,12 +159,10 @@
  <strong>PEER HANDSHAKE EVENTS</strong> </br>
  <ul>
    <li><a href="SkylinkEvents.html#.event:HANDSHAKE_PROGRESS"><code>HANDSHAKE_PROGRESS</code></a></li>
-   <li><code>INTRODUCE_STATE_CHANGE</code></li>
  </ul>
  <strong>ROOM EVENTS</strong> </br>
  <ul>
    <li><a href="SkylinkEvents.html#.event:ROOM_LOCK"><code>ROOM_LOCK</code></a></li>
-   <li><a href="SkylinkEvents.html#.event:ROOM_REJOIN"><code>ROOM_REJOIN</code></a></li>
  </ul>
  <strong>SOCKET EVENTS</strong> </br>
  <ul>
@@ -1573,7 +1571,7 @@ SkylinkEventManager.removeEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STRE
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line42">line 42</a>
+          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line43">line 43</a>
         </li>
       </ul>
     </dd>
@@ -1811,7 +1809,7 @@ Event triggered when socket connection encountered exception.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line50">line 50</a>
+          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line51">line 51</a>
         </li>
       </ul>
     </dd>
@@ -2042,7 +2040,7 @@ Event triggered when receiving socket message from the Signaling server.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line61">line 61</a>
+          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line62">line 62</a>
         </li>
       </ul>
     </dd>
@@ -2485,7 +2483,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_REOPEN, evt
   skylink.leaveRoom() // call leaveRoom to ensure that previous peer information will be removed
   .then(() => skylink.joinRoom(joinRoomOptions))
   .then((streams) => {
-    window.attachMediaStream(el, stream);
+    window.attachMediaStream(audioEl, streams[0]);
+    window.attachMediaStream(videoEl, streams[1]);
   })
 });</code></pre>
 
@@ -2726,7 +2725,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_REOPEN, evt
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line71">line 71</a>
+          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line72">line 72</a>
         </li>
       </ul>
     </dd>
@@ -11954,7 +11953,7 @@ corresponding event.</p>
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line81">line 81</a>
+          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line82">line 82</a>
         </li>
       </ul>
     </dd>
@@ -13508,7 +13507,7 @@ in the <code> <a href="SkylinkEvents.html#.event:PEER_JOINED"><code>PEER JOINED<
     <dd class="tag-source">
       <ul class="dummy">
         <li>
-          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line92">line 92</a>
+          <a href="skylink-events_socket-events.js.html">skylink-events/socket-events.js</a>, <a href="skylink-events_socket-events.js.html#line93">line 93</a>
         </li>
       </ul>
     </dd>

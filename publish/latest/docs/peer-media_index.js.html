@@ -262,14 +262,13 @@ class PeerMedia {
    * @param room
    * @param peerId
    * @param mediaId
-   * @param transceiverMid
    * @returns {String} streamId
    */
-  static retrieveStreamId(room, peerId, mediaId, transceiverMid) {
+  static retrieveStreamId(room, peerId, mediaId) {
     const state = Skylink.getSkylinkState(room.id);
     const { peerMedias } = state;
     const mediaInfo = peerMedias[peerId][mediaId];
-    const streamId = mediaInfo.transceiverMid === transceiverMid ? mediaInfo.streamId : null;
+    const { streamId } = mediaInfo;
 
     if (!streamId) {
       logger.log.ERROR([peerId, TAGS.PEER_MEDIA, null, MESSAGES.MEDIA_INFO.ERRORS.NO_ASSOCIATED_STREAM_ID]);
@@ -331,6 +330,13 @@ class PeerMedia {
     }
   }
 
+  /**
+   * Method that checks if a given stream is a screen share stream
+   * @param room
+   * @param peerId
+   * @param options
+   * @return {boolean|any}
+   */
   static retrieveScreenMediaInfo(room, peerId, options) {
     const state = Skylink.getSkylinkState(room.id);
     const { peerMedias } = state;
