@@ -606,7 +606,7 @@ class SkylinkPublicInterface {
   /**
    * @description Method that returns starts screenshare and returns the stream.
    * @param {String} roomName - The room name.
-   * @param {Object} options - Screen share options.
+   * @param {getDisplayMediaOptions} options - Screen share options.
    * @return {MediaStream|null} - The screen share stream.
    * @alias Skylink#shareScreen
    * @since 2.0.0

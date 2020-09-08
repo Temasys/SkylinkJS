@@ -3,7 +3,7 @@ import SkylinkSignalingServer from '../../server-communication/signaling-server'
 import mediaStreamHelpers from '../../media-stream/helpers/index';
 import logger from '../../logger';
 import MESSAGES from '../../messages';
-import { isEmptyObj } from '../../utils/helpers';
+import { isAObj, isEmptyObj } from '../../utils/helpers';
 import { DEFAULTS } from '../../defaults';
 import screenshareHelpers from './helpers/index';
 import { TAGS } from '../../constants';
@@ -52,7 +52,7 @@ class ScreenSharing {
    */
   async start(streamId = null, options) {
     this.streamId = streamId;
-    this.settings = mediaStreamHelpers.parseStreamSettings(options || DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
+    this.settings = this.isValidOptions(options) ? mediaStreamHelpers.parseStreamSettings(options) : mediaStreamHelpers.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
 
     try {
       this.checkForExistingScreenStreams();
@@ -118,6 +118,19 @@ class ScreenSharing {
         logger.log.ERROR(error);
         return null;
       });
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  isValidOptions(options) {
+    if (options && isAObj(options) && options.video) {
+      return true;
+    }
+
+    if (options) {
+      logger.log.WARN([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GDM_OPTIONS], options);
+    }
+
+    return false;
   }
 
   checkForExistingScreenStreams() {
