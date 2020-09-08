@@ -250,6 +250,7 @@ const MESSAGES = {
       PEER_SCREEN_ACTIVE: 'Peer has existing screen share',
       FALLBACK: 'Error retrieving fallback audio stream',
       INVALID_GUM_OPTIONS: 'Invalid user media options',
+      INVALID_GDM_OPTIONS: 'Invalid display media options',
       GET_USER_MEDIA: 'Error retrieving stream from \'getUserMedia\' method',
       INVALID_MUTE_OPTIONS: 'Invalid muteStreams options provided',
       NO_STREAMS_MUTED: 'No streams to mute',
