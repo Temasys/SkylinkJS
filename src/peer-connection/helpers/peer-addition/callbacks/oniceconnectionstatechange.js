@@ -70,6 +70,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
       statsInterval = setInterval(() => {
         const currentState = Skylink.getSkylinkState(state.room.id);
         if (!currentState || !currentState.room.inRoom) {
+          clearInterval(statsInterval);
           return;
         }
         if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {

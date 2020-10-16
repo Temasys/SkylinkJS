@@ -5,7 +5,7 @@ const config = {
       client: '/client',
       session: '/session',
       auth: '/auth',
-      signaling: '/signaling',
+      signaling: 'client/signaling',
       iceConnection: '/client/iceconnection',
       iceCandidate: '/client/icecandidate',
       iceGathering: '/client/icegathering',

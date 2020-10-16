@@ -1,7 +1,7 @@
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { peerUpdated } from '../../../../skylink-events';
 import PeerData from '../../../../peer-data';
-import { getStateByKey, isAgent } from '../../../../utils/helpers';
+import { getStateByKey, isAgent, isEmptyObj } from '../../../../utils/helpers';
 import { TRACK_KIND, TAGS, BROWSER_AGENT } from '../../../../constants';
 import logger from '../../../../logger';
 import MESSAGES from '../../../../messages';
@@ -17,10 +17,15 @@ const dispatchPeerUpdated = (state, peerId) => {
   }));
 };
 
-const updateMediaStatus = (state, peerId, streamId) => {
+const updatePeerStreamsAndMediaStatus = (state, peerId, streamId) => {
   const updatedState = state;
 
   delete updatedState.peerInformations[peerId].mediaStatus[streamId];
+  delete updatedState.peerStreams[peerId][streamId];
+
+  if (isEmptyObj(updatedState.peerStreams[peerId])) {
+    delete updatedState.peerStreams[peerId];
+  }
 
   Skylink.setSkylinkState(updatedState, updatedState.room.id);
 };
@@ -68,7 +73,7 @@ const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
     return;
   }
 
-  updateMediaStatus(state, peerId, stream.id);
+  updatePeerStreamsAndMediaStatus(state, peerId, stream.id);
   dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent, stream);
   dispatchPeerUpdated(state, peerId);
 };

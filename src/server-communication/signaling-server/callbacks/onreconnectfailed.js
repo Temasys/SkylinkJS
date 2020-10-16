@@ -35,19 +35,24 @@ const onReconnectFailed = (resolve, reject, roomKey) => {
     signaling.socket.connect();
     signaling.updateAttempts(roomKey, 'attempts', socketSession.socketSession.attempts === DEFAULTS.SOCKET.RECONNECTION_ATTEMPTS.WEBSOCKET ? 0 : socketSession.socketSession.attempts += 1);
     signaling.updateAttempts(roomKey, 'finalAttempts', socketSession.socketSession.finalAttempts += 1);
-  } else if (!shouldReconnect(state)) {
-    logger.log.WARN([null, 'Socket', null, `${MESSAGES.SOCKET.ABORT_RECONNECT} - ${MESSAGES.PEER_CONNECTION.FAILED_STATE}`]);
   } else {
-    new HandleSignalingStats().send(roomKey, STATES.SIGNALING.RECONNECT_FAILED, MESSAGES.INIT.ERRORS.SOCKET_ERROR_ABORT);
+    let errorMsg = MESSAGES.INIT.ERRORS.SOCKET_ERROR_ABORT;
+
+    if (!shouldReconnect(state)) {
+      errorMsg = `${errorMsg} - ${MESSAGES.PEER_CONNECTION.FAILED_STATE}`;
+      logger.log.WARN([null, 'Socket', null, `${MESSAGES.SOCKET.ABORT_RECONNECT} - ${MESSAGES.PEER_CONNECTION.FAILED_STATE}`]);
+    }
+
+    new HandleSignalingStats().send(roomKey, STATES.SIGNALING.RECONNECT_FAILED, errorMsg);
 
     dispatchEvent(socketError({
       session: clone(socketSession),
       errorCode: SOCKET_ERROR.RECONNECTION_ABORTED,
       type: socketSession.fallbackType,
-      error: new Error(MESSAGES.INIT.ERRORS.SOCKET_ERROR_ABORT),
+      error: new Error(errorMsg),
     }));
 
-    reject(new Error(MESSAGES.INIT.ERRORS.SOCKET_ERROR_ABORT));
+    reject(new Error(errorMsg));
   }
 };
 

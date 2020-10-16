@@ -21,13 +21,18 @@ Demo.isMCU = false;
 window.Demo = Demo;
 const APPKEYS = {
   p2p: 'c7ae7e8a-2e24-43a5-85c6-d4dafbdfecb6',
-  mcu: '6198a7fa-b8b0-4b0a-8079-4642198c8601',
+  mcu: config.MCUKey || '6198a7fa-b8b0-4b0a-8079-4642198c8601', // config.MCUKey for prod/staging
 };
 let selectedPeers = [];
 let _peerId = null;
 let selectedAppKey = null;
 
 const { $, document } = window;
+
+if (window.location.href.indexOf("appKey=") > -1) {
+  $('#join_room_p2p_key').prop('disabled', true);
+  $('#join_room_mcu_key').prop('disabled', true);
+}
 
 //----- join room options
 const displayName = `name_user_${  Math.floor((Math.random() * 1000) + 1)}`;
@@ -37,6 +42,16 @@ const joinRoomOptions = {
   video: true,
   userData: displayName,
 };
+
+if (config.bandwidth.video) {
+  joinRoomOptions.bandwidth = joinRoomOptions.bandwidth || {};
+  joinRoomOptions.bandwidth.video = parseInt(config.bandwidth.video);
+}
+
+if (config.bandwidth.audio) {
+  joinRoomOptions.bandwidth = joinRoomOptions.bandwidth || {};
+  joinRoomOptions.bandwidth.audio = parseInt(config.bandwidth.audio);
+}
 
 //----- set logging -----
 SkylinkLogger.setLevel(SkylinkLogger.logLevels.DEBUG, true);
@@ -549,9 +564,32 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STORED_MESSAGES, (e
 });
 
 // //---------------------------------------------------
-// // RECONNECT
+// // SOCKET EVENTS
 // //---------------------------------------------------
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.SESSION_DISCONNECT, (evt) => {
+  Demo.Methods.logToConsoleDOM('SOCKET_SESSION_DISCONNECTED', 'error');
+});
+
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_ERROR, (evt) => {
+  const eventDetail = evt.detail;
+  const { error } = eventDetail;
+  Demo.Methods.logToConsoleDOM(`CHANNEL_ERROR - ${error}`, 'error');
+});
+
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.SOCKET_ERROR, (evt) => {
+  const eventDetail = evt.detail;
+  const { error, errorCode } = eventDetail;
+  Demo.Methods.logToConsoleDOM(`CHANNEL_ERROR - ${errorCode} - ${error}`, 'error');
+});
+
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_RETRY, (evt) => {
+  const eventDetail = evt.detail;
+  const { currentAttempt } = eventDetail;
+  Demo.Methods.logToConsoleDOM(`CHANNEL_RETRY - ${currentAttempt}`, 'error');
+});
+
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_REOPEN, (evt) => {
+  Demo.Methods.logToConsoleDOM(`CHANNEL_REOPEN - leaving and rejoining`, 'info');
   Demo.Skylink.leaveRoom(config.defaultRoom)
   .then(() => {
     Demo.Peers = 0;
@@ -619,6 +657,12 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ICE_CONNECTION_STAT
   }
   $(`#user${peerId} .${5}`).css('color', color);
 
+  if (state === SkylinkConstants.ICE_CONNECTION_STATE.FAILED || state === SkylinkConstants.ICE_CONNECTION_STATE.DISCONNECTED || state === SkylinkConstants.ICE_CONNECTION_STATE.CLOSED) {
+    Demo.Methods.logToConsoleDOM(`ICE_CONNECTION_STATE - ${state}`, 'error');
+  } else {
+    Demo.Methods.logToConsoleDOM(`ICE_CONNECTION_STATE - ${state}`, 'info');
+  }
+
   if (state === SkylinkConstants.ICE_CONNECTION_STATE.CHECKING) {
     setTimeout(() => {
       if ($(`#user${peerId} .${5}`).css('color') === 'orange') {
@@ -643,6 +687,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CANDIDATE_GENERATIO
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_CONNECTION_STATE, (evt) => {
   const { peerId, state } = evt.detail;
   let color = 'red';
+
   switch (state) {
     case SkylinkConstants.PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER:
     case SkylinkConstants.PEER_CONNECTION_STATE.HAVE_REMOTE_OFFER:
@@ -657,7 +702,14 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_CONNECTION_STA
       color = 'green';
       break;
   }
+
   $(`#user${peerId} .${6}`).css('color', color);
+
+  if (state === SkylinkConstants.PEER_CONNECTION_STATE.FAILED || state === SkylinkConstants.PEER_CONNECTION_STATE.DISCONNECTED || state === SkylinkConstants.PEER_CONNECTION_STATE.CLOSED) {
+    Demo.Methods.logToConsoleDOM(`PEER_CONNECTION_STATE - ${state}`, 'error');
+  } else {
+    Demo.Methods.logToConsoleDOM(`PEER_CONNECTION_STATE - ${state}`, 'info');
+  }
 });
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.DATA_CHANNEL_STATE, (evt) => {
@@ -988,7 +1040,9 @@ $(document).ready(function() {
       .then(() => startSendStream(clonedVideoStream))
       .catch((err) => console.error("stopStreams rejected", err));
     } else {
-      startSendStream(mediaOptions);
+      console.log("sending as prefetched stream");
+      Demo.Skylink.getUserMedia(mediaOptions)
+      .then((streams) => startSendStream(streams[1]));
     }
   });
   //---------------------------------------------------

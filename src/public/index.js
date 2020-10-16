@@ -4,6 +4,7 @@ import {
 } from '../utils/helpers';
 import { dispatchEvent } from '../utils/skylinkEventManager';
 import { streamEnded } from '../skylink-events';
+import { SDK_VERSION } from '../constants';
 import PeerConnection from '../peer-connection/index';
 import PeerData from '../peer-data/index';
 import PeerPrivileged from '../peer-privileged/index';
@@ -1362,6 +1363,15 @@ class SkylinkPublicInterface {
     const roomState = getRoomStateByName(roomName);
     const asyncMessaging = new AsyncMessaging(roomState);
     return asyncMessaging.getMessagePersistence();
+  }
+
+  /**
+   * @description Method that retrieves the sdk version.
+   * @alias Skylink#getSdkVersion
+   * @since 2.1.6
+   */
+  getSdkVersion() {
+    return SDK_VERSION;
   }
 }
 

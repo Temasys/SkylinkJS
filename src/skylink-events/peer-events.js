@@ -45,6 +45,7 @@ export const peerJoined = (detail = {}) => new SkylinkEvent(PEER_JOINED, { detai
  * @param {String} detail.peerId - The Peer ID.
  * @param {peerInfo} detail.peerInfo - The Peer session information. Object signature matches the <code>peerInfo</code> parameter payload received in the<code>peerJoined</code> event.
  * @param {boolean} detail.isSelf - The flag if Peer is User.
+ * @param {roomInfo} detail.room - The room.
  */
 export const peerLeft = (detail = {}) => new SkylinkEvent(PEER_LEFT, { detail });
 
