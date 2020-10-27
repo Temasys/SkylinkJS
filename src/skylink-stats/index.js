@@ -32,6 +32,7 @@ class SkylinkStats {
   processData(data) {
     if (Array.isArray(data)) {
       return {
+        client_id: data[0].client_id,
         data,
       };
     }
