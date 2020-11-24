@@ -6,7 +6,7 @@ You'll need a Temasys Account, and an App key to use this. [Register here to get
 #### Supported Browsers
 | Features                      | Chrome                   | Firefox                  | Safari                   | Edge (Chromium) | 
 |-------------------------------|--------------------------|--------------------------|--------------------------|-----------------|
-| Platforms:                    | Win, Mac, Linux, Android | Win, Mac, Linux, Android | Mac                      | Win, Mac        |
+| Platforms:                    | Win, Mac, Linux, Android | Win, Mac, Linux, Android | Mac, iOS                 | Win, Mac        |
 | Minimum Recommended Versions: | 72                       | 66                       | 13                       | 80              |
 | Screensharing                 | Yes                      | Yes                      | Yes                      | Yes             |
 | Video Call                    | Yes                      | Yes                      | Yes                      | Yes             |
