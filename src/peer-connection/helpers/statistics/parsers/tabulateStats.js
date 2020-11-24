@@ -9,9 +9,13 @@
  */
 const tabulateStats = (prevStats = null, stats, prop) => {
   const nTime = stats.timestamp;
-  const oTime = prevStats ? prevStats.timestamp || 0 : 0;
+  const oTime = prevStats ? prevStats.timestamp || (new Date(stats.timestamp).getTime() - 20000) : (new Date(stats.timestamp).getTime() - 20000);
   const nVal = parseFloat(stats[prop] || '0', 10);
-  const oVal = parseFloat(prevStats ? prevStats[prop] || '0' : '0', 10);
+  let oVal = parseFloat(prevStats ? prevStats[prop] || '0' : '0', 10);
+
+  if (nVal < oVal) {
+    oVal = 0;
+  }
 
   if ((new Date(nTime).getTime()) === (new Date(oTime).getTime())) {
     return nVal;

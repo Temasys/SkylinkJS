@@ -112,10 +112,11 @@ import messages from '../../../../messages';
 const parseReceiving = (output, value, prevStats) => {
   const parsedStats = output.video.receiving;
 
+  parsedStats.bytes = parsedStats.bytes || 0;
   if (value.bytesReceived) {
     const bytesReceived = parseInt(value.bytesReceived || '0', 10);
     parsedStats.totalBytes = bytesReceived;
-    parsedStats.bytes = parsers.tabulateStats(prevStats, value, 'bytesReceived');
+    parsedStats.bytes += parsers.tabulateStats(prevStats, value, 'bytesReceived');
   }
 
   if (value.packetsReceived) {
@@ -167,10 +168,11 @@ const parseReceiving = (output, value, prevStats) => {
 const parseSending = (output, value, prevStats) => {
   const parsedStats = output.video.sending;
 
+  parsedStats.bytes = parsedStats.bytes || 0;
   if (value.bytesSent) {
     const bytesSent = parseInt(value.bytesSent || '0', 10);
     parsedStats.totalBytes = bytesSent;
-    parsedStats.bytes = parsers.tabulateStats(prevStats, value, 'bytesSent');
+    parsedStats.bytes += parsers.tabulateStats(prevStats, value, 'bytesSent');
   }
 
   if (value.packetsSent) {
