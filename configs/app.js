@@ -5,7 +5,7 @@ const config = {
       client: '/client',
       session: '/session',
       auth: '/auth',
-      signaling: 'client/signaling',
+      signaling: '/client/signaling',
       iceConnection: '/client/iceconnection',
       iceCandidate: '/client/icecandidate',
       iceGathering: '/client/icegathering',
@@ -13,6 +13,7 @@ const config = {
       bandwidth: '/client/bandwidth',
       recording: '/client/recording',
       dataChannel: '/client/datachannel',
+      userMedia: '/client/usermedia',
     },
   },
 };

@@ -1,7 +1,7 @@
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { peerUpdated } from '../../../../skylink-events';
 import PeerData from '../../../../peer-data';
-import { getStateByKey, isAgent, isEmptyObj } from '../../../../utils/helpers';
+import { getStateByKey, isAgent } from '../../../../utils/helpers';
 import { TRACK_KIND, TAGS, BROWSER_AGENT } from '../../../../constants';
 import logger from '../../../../logger';
 import MESSAGES from '../../../../messages';
@@ -21,11 +21,7 @@ const updatePeerStreamsAndMediaStatus = (state, peerId, streamId) => {
   const updatedState = state;
 
   delete updatedState.peerInformations[peerId].mediaStatus[streamId];
-  delete updatedState.peerStreams[peerId][streamId];
-
-  if (isEmptyObj(updatedState.peerStreams[peerId])) {
-    delete updatedState.peerStreams[peerId];
-  }
+  PeerStream.deleteStream(peerId, updatedState.room, streamId);
 
   Skylink.setSkylinkState(updatedState, updatedState.room.id);
 };

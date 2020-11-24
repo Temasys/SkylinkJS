@@ -15,7 +15,7 @@ const stopAddedStream = (state, stream, isScreensharing = false, fromLeaveRoom =
     if (!fromLeaveRoom) {
       stopStreamHelpers.removeTracks(room, stream);
       PeerMedia.setMediaStateToUnavailable(room, user.sid, PeerMedia.retrieveMediaId(stream.getTracks()[0].kind, stream.id));
-      PeerStream.deleteStream(room, stream);
+      PeerStream.deleteStream(user.sid, room, stream.id);
       stopStreamHelpers.listenForEventAndDeleteMediaInfo(room, stream);
       stopStreamHelpers.dispatchEvents(room, stream, isScreensharing);
 

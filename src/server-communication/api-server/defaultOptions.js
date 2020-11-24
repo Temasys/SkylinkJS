@@ -74,6 +74,7 @@ const defaultOptions = {
   },
   beSilentOnStatsLogs: false,
   beSilentOnParseLogs: false,
+  statsInterval: 20, // sec
 };
 
 /**

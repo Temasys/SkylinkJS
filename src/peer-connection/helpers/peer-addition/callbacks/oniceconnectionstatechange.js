@@ -28,6 +28,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
   const state = Skylink.getSkylinkState(currentRoomState.room.id);
   const { peerStreams, user, enableStatsGathering } = state;
+  const initOptions = Skylink.getInitOptions();
   let statsInterval = null;
   const pcIceConnectionState = peerConnection.iceConnectionState;
 
@@ -96,7 +97,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
         } else {
           new HandleBandwidthStats().send(state.room.id, peerConnection, targetMid);
         }
-      }, 20000);
+      }, initOptions.statsInterval * 1000);
     });
   }
 

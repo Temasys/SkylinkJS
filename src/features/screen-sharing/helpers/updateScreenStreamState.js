@@ -7,6 +7,7 @@ import Room from '../../../room';
 import PeerStream from '../../../peer-stream';
 import { ON_INCOMING_SCREEN_STREAM } from '../../../skylink-events/constants';
 import MediaStream from '../../../media-stream';
+import HandleUserMediaStats from '../../../skylink-stats/handleUserMediaStats';
 
 const onScreenStreamAccessSuccess = (state, stream) => {
   const { room, user } = state;
@@ -14,6 +15,9 @@ const onScreenStreamAccessSuccess = (state, stream) => {
   PeerStream.addStream(user.sid, stream, room.id);
   PeerMedia.processPeerMedia(room, user.sid, stream, true);
   MediaStream.buildStreamSettings(room, stream, settings);
+  if (user.sid !== null) { // do not send stats when inRoom has not been received
+    new HandleUserMediaStats().send(room.id);
+  }
 
   helpers.updateStreamsMutedSettings(room.id, settings, stream);
   helpers.updateStreamsMediaStatus(room.id, settings, stream);
