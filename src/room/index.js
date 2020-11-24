@@ -9,8 +9,8 @@ import getRoomInfo from './getRoomInfo';
  */
 class Room {
   /** @lends Room */
-  static leaveRoom(args) {
-    return leaveRoom(args);
+  static leaveRoom(...args) {
+    return leaveRoom(...args);
   }
 
   static leaveAllRooms() {
@@ -25,8 +25,8 @@ class Room {
     return unlockRoom(roomState);
   }
 
-  static joinRoom(args) {
-    return joinRoom(args);
+  static joinRoom(...args) {
+    return joinRoom(...args);
   }
 
   static getRoomInfo(args) {

@@ -59,9 +59,16 @@ class SkylinkPublicInterface {
    * Example 2: Retrieving a pre-fetched stream before calling joinRoom
    *
    * // REF: {@link Skylink#getUserMedia|getUserMedia}
-   * const prefetchedStream = skylink.getUserMedia();
+   * const prefetchedStreams = skylink.getUserMedia();
    *
-   * skylink.joinRoom(prefetchedStream)
+   * const joinRoomOptions = {
+   *    roomName: "Room_1",
+   *    userData: {
+   *        username: "GuestUser_1"
+   *    },
+   * };
+   *
+   * skylink.joinRoom(joinRoomOptions, prefetchedStreams)
    *    .catch((error) => {
    *    // handle error
    *    });
@@ -680,33 +687,6 @@ class SkylinkPublicInterface {
    *     video: true,
    * }).then((streams) => // do something)
    * .catch((error) => // handle error);
-   * @example
-   * Example 6: Get media sources before joinRoom - only available on Chrome browsers
-   *
-   * const audioInputDevices = [];
-   * const videoInputDevices = [];
-   *
-   * navigator.mediaDevices.enumerateDevices().then((devices) => {
-   *   devices.forEach((device) => {
-   *     if (device.kind === "audioinput") {
-   *       audioInputDevices.push(device);
-   *     }
-   *
-   *     if (device.kind === "videoinput") {
-   *       videoInputDevices.push(device);
-   *     }
-   *   })
-   * }).catch((error) => // handle error);
-   *
-   * skylink.getUserMedia(roomName, {
-   *   audio: {
-   *     deviceId: audioInputDevices[0].deviceId,
-   *   },
-   *   video: {
-   *     deviceId: videoInputDevices[0].deviceId,
-   *   }
-   * }).then((streams) => // do something)
-   * .catch((error) => // handle error);
    * @fires <b>If retrieval of fallback audio stream is successful:</b> <br/> - {@link SkylinkEvents.event:MEDIA_ACCESS_SUCCESS|MEDIA ACCESS SUCCESS} event with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallback=false</code> if initial retrieval is successful.
    * @fires <b>If initial retrieval is unsuccessful:</b> <br/> Fallback to retrieve audio only stream is triggered (configured in {@link initOptions} <code>audioFallback</code>) <br/>&emsp; - {@link SkylinkEvents.event:MEDIA_ACCESS_SUCCESS|MEDIA ACCESS SUCCESS} event{@link SkylinkEvents.event:MEDIA_ACCESS_FALLBACK|MEDIA ACCESS FALLBACK} event with parameter payload <code>state=FALLBACKING</code>, <code>isScreensharing=false</code> and <code>isAudioFallback=true</code> and <code>options.video=true</code> and <code>options.audio=true</code>. <br/> No fallback to retrieve audio only stream <br/> - {@link SkylinkEvents.event:MEDIA_ACCESS_ERROR|MEDIA ACCESS ERROR} event with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallbackError=false</code>.
    * @fires <b>If retrieval of fallback audio stream is successful:</b> <br/> - {@link SkylinkEvents.event:MEDIA_ACCESS_SUCCESS|MEDIA ACCESS SUCCESS} event with parameter payload <code>isScreensharing=false</code> and <code>isAudioFallback=true</code>.
@@ -1153,6 +1133,26 @@ class SkylinkPublicInterface {
    * @description Method that returns the camera and microphone sources.
    * @return {Promise.<streamSources>} outputSources
    * @alias Skylink#getStreamSources
+   * @example
+   * Example 1: Get media sources before joinRoom - only available on Chrome browsers
+   *
+   * const audioInputDevices = [];
+   * const videoInputDevices = [];
+   *
+   * skylink.getStreamSources.then((sources) => {
+   *   audioInputDevices = sources.audio.input;
+   *   videoInputDevices = sources.video.input;
+   * }).catch((error) => // handle error);
+   *
+   * skylink.getUserMedia(roomName, {
+   *   audio: {
+   *     deviceId: audioInputDevices[0].deviceId,
+   *   },
+   *   video: {
+   *     deviceId: videoInputDevices[0].deviceId,
+   *   }
+   * }).then((streams) => // do something)
+   * .catch((error) => // handle error);
    */
   getStreamSources() {
     return MediaStream.getStreamSources();
@@ -1160,10 +1160,12 @@ class SkylinkPublicInterface {
 
   /**
    * @description Method that sends a new <code>userMedia</code> stream to all connected peers in a room.
-   * <p>Resolves with an array of <code>MediaStreams</code>. First item in array is <code>MediaStream</code> of kind audio and second item is
-   * <code>MediaStream</code> of kind video.</p>
+   * <p>If options are passed as argument into the method, it resolves with an array of <code>MediaStreams</code>. First item in array is
+   * <code>MediaStream</code> of kind audio and second item is <code>MediaStream</code> of kind video. Otherwise it resolves with the array or
+   * <code>MediaStream</code></p>
    * @param {String} roomName - The room name.
-   * @param {JSON|MediaStream} options - The {@link Skylink#getUserMedia|getUserMedia} <code>options</code> parameter settings. The MediaStream to send to the remote peer.
+   * @param {JSON|MediaStream|Array.<MediaStream>} options - The {@link Skylink#getUserMedia|getUserMedia} <code>options</code> parameter
+   * settings. The MediaStream to send to the remote peer or array of MediaStreams.
    * - When provided as a <code>MediaStream</code> object, this configures the <code>options.audio</code> and
    *   <code>options.video</code> based on the tracks available in the <code>MediaStream</code> object.
    *   Object signature matches the <code>options</code> parameter in the

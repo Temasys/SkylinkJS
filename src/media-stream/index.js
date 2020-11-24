@@ -3,7 +3,7 @@ import helpers from './helpers/index';
 import stopStreamHelpers from './helpers/stopStream/index';
 import logger from '../logger';
 import MESSAGES from '../messages';
-import { isAObj } from '../utils/helpers';
+import { isAObj, isEmptyArray } from '../utils/helpers';
 import { TAGS, TRACK_KIND } from '../constants';
 
 /**
@@ -129,20 +129,58 @@ class MediaStream {
     return helpers.getStreams(roomState, includeSelf);
   }
 
-  static usePrefetchedStream(roomKey, stream, options = null) {
+  static usePrefetchedStream(roomKey, prefetchedStream) {
     return new Promise((resolve) => {
-      if (!stream && (options.id && options.active)) {
-        // eslint-disable-next-line no-param-reassign
-        stream = options;
-      }
-
-      const streamOptions = { audio: stream.getAudioTracks().length !== 0, video: stream.getVideoTracks().length !== 0 };
+      const streamOptions = { audio: prefetchedStream.getAudioTracks().length !== 0, video: prefetchedStream.getVideoTracks().length !== 0 };
       const audioSettings = helpers.parseStreamSettings(streamOptions, TRACK_KIND.AUDIO);
       const videoSettings = helpers.parseStreamSettings(streamOptions, TRACK_KIND.VIDEO);
       const isAudioFallback = false;
-      const streams = helpers.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, false, true);
+      const stream = helpers.onStreamAccessSuccess(roomKey, prefetchedStream, audioSettings, videoSettings, isAudioFallback, false, true);
 
-      resolve(streams);
+      resolve(stream);
+    });
+  }
+
+  static processPrefetchedStreams(roomKey, prefetchedStreams, options = null) {
+    return new Promise((resolve, reject) => {
+      const streams = [];
+      if (prefetchedStreams && options.id) {
+        reject(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_PREFETCHED_STREAMS);
+        return;
+      }
+
+      if (!prefetchedStreams) {
+        if (options.id && options.active) { // mediaStream as first argument
+          streams.push(options);
+        } else if (Array.isArray(options)) { // array of mediaStreams as first argument
+          options.forEach((mediaStream) => {
+            if (mediaStream && mediaStream.id && mediaStream.active) {
+              streams.push(mediaStream);
+            }
+          });
+        }
+      } else if (Array.isArray(prefetchedStreams)) { // array of mediaStreams as prefetchedStreams param
+        prefetchedStreams.forEach((mediaStream) => {
+          if (mediaStream && mediaStream.id && mediaStream.active) {
+            streams.push(mediaStream);
+          }
+        });
+      } else {
+        streams.push(prefetchedStreams); // mediaStream as prefetchedStreams param
+      }
+
+      if (isEmptyArray(streams)) {
+        reject(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_PREFETCHED_STREAMS);
+        return;
+      }
+
+      const usePrefetchedStreamPromises = [];
+      streams.forEach((stream) => {
+        usePrefetchedStreamPromises.push(MediaStream.usePrefetchedStream(roomKey, stream));
+      });
+
+      Promise.all(usePrefetchedStreamPromises)
+        .then(result => resolve(result));
     });
   }
 

@@ -257,6 +257,7 @@ const MESSAGES = {
       SEND_STREAM: 'Error sending stream',
       INVALID_MEDIA_STREAM_ARRAY: 'Array is not of type MediaStream',
       ACTIVE_STREAMS: 'There are currently active streams being sent to remote peers. Please stop streams.',
+      INVALID_PREFETCHED_STREAMS: 'Invalid prefetched streams provided',
     },
   },
   STATS_MODULE: {
