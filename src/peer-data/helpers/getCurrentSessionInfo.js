@@ -54,10 +54,10 @@ const getCurrentSessionInfo = (room) => {
     const streamIds = Object.keys(peerStreams[user.sid]);
     streamIds.forEach((id) => {
       if (streamsSettings[id].settings.audio) {
-        peerInfo.settings.audio = {};
+        peerInfo.settings.audio = peerInfo.settings.audio || {};
         peerInfo.settings.audio[id] = clone(streamsSettings[id].settings.audio);
       } else if (streamsSettings[id].settings.video) {
-        peerInfo.settings.video = {};
+        peerInfo.settings.video = peerInfo.settings.video || {};
         peerInfo.settings.video[id] = clone(streamsSettings[id].settings.video);
       }
     });
