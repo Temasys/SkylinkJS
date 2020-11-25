@@ -9,6 +9,7 @@ import updateMediaInfoMediaState from './updateMediaInfoMediaState';
 import dispatchEvents from './dispatchEvents';
 import prepStopScreenStream from './prepStopScreenStream';
 import initRefreshConnectionAndResolve from './initRefreshConnectionAndResolve';
+import updateMediaStatusMutedSettings from './updateMediaStatusMutedSettings';
 
 const stopStreamHelpers = {
   prepStopStreams,
@@ -22,6 +23,7 @@ const stopStreamHelpers = {
   dispatchEvents,
   prepStopScreenStream,
   initRefreshConnectionAndResolve,
+  updateMediaStatusMutedSettings,
 };
 
 export default stopStreamHelpers;

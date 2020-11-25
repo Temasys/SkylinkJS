@@ -55,6 +55,9 @@ class SkylinkStats {
       statsResponse.json()
         .then((result) => {
           logger.log.INFO([null, TAGS.STATS, null, `${endpoint}`], result);
+        })
+        .catch((err) => {
+          logger.log.INFO([null, TAGS.STATS, null, `${endpoint}`], err);
         });
     }
   }

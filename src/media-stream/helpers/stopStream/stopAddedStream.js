@@ -18,6 +18,7 @@ const stopAddedStream = (state, stream, isScreensharing = false, fromLeaveRoom =
       PeerStream.deleteStream(user.sid, room, stream.id);
       stopStreamHelpers.listenForEventAndDeleteMediaInfo(room, stream);
       stopStreamHelpers.dispatchEvents(room, stream, isScreensharing);
+      stopStreamHelpers.updateMediaStatusMutedSettings(room, stream);
 
       if (isScreensharing) {
         new ScreenSharing(state).deleteScreensharingInstance(room);
