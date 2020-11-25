@@ -1,5 +1,4 @@
 const config = {
-  apiBase: 'https://api.temasys.io',
   stats: {
     endPoints: {
       client: '/client',
@@ -18,6 +17,6 @@ const config = {
   },
 };
 
-config.stats.statsBase = `${config.apiBase}/rest/stats`;
+config.stats.statsBase = '/rest/stats';
 
 export default config;
