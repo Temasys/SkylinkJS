@@ -43,12 +43,12 @@ const joinRoomOptions = {
   userData: displayName,
 };
 
-if (config.bandwidth.video) {
+if (config.bandwidth && config.bandwidth.video) {
   joinRoomOptions.bandwidth = joinRoomOptions.bandwidth || {};
   joinRoomOptions.bandwidth.video = parseInt(config.bandwidth.video);
 }
 
-if (config.bandwidth.audio) {
+if (config.bandwidth && config.bandwidth.audio) {
   joinRoomOptions.bandwidth = joinRoomOptions.bandwidth || {};
   joinRoomOptions.bandwidth.audio = parseInt(config.bandwidth.audio);
 }
