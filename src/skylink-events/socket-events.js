@@ -20,23 +20,15 @@ import SkylinkEvent from '../utils/skylinkEvent'
  */
 export const channelOpen = detail => new SkylinkEvent(CHANNEL_OPEN, { detail });
 
+// Ref: ESS-2024
 /**
  * @event SkylinkEvents.CHANNEL_REOPEN
- * @description Event triggered when socket connection to Signaling server has re-opened.
+ * @description [DEPRECATED] Event triggered when socket connection to Signaling server has re-opened.
+ *  <blockquote class="info">
+ *   This event has been replaced with {@link SkylinkEvents.event:SESSION_DISCONNECT|SESSION_DISCONNECT}. Implementation of reconnecting back to a
+ *   room remains the same.</blockquote>
  * @param {Object} detail - Event's payload.
  * @param {socketSession} detail.session The socket connection session information.
- * @example
- * Example 1: Listen on channelReopen to handle successful socket reconnection if socket was disconnected
- * (channelClose event emitted).
- * SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_REOPEN, evt => {
- *   const { detail } = evt;
- *   skylink.leaveRoom() // call leaveRoom to ensure that previous peer information will be removed
- *   .then(() => skylink.joinRoom(joinRoomOptions))
- *   .then((streams) => {
- *     window.attachMediaStream(audioEl, streams[0]);
- *     window.attachMediaStream(videoEl, streams[1]);
- *   })
- * });
  */
 export const channelReopen = detail => new SkylinkEvent(CHANNEL_REOPEN, { detail });
 
@@ -69,6 +61,7 @@ export const channelError = detail => new SkylinkEvent(CHANNEL_ERROR, { detail }
  */
 export const channelMessage = detail => new SkylinkEvent(CHANNEL_MESSAGE, { detail });
 
+// Ref: ESS-2024
 /**
  * @description Event triggered when attempting to establish socket connection to Signaling server when failed.
  * @event SkylinkEvents.CHANNEL_RETRY

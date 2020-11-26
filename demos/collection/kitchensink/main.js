@@ -567,7 +567,16 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STORED_MESSAGES, (e
 // // SOCKET EVENTS
 // //---------------------------------------------------
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.SESSION_DISCONNECT, (evt) => {
-  Demo.Methods.logToConsoleDOM('SOCKET_SESSION_DISCONNECTED', 'error');
+  Demo.Methods.logToConsoleDOM(`SOCKET_SESSION_DISCONNECTED - ${evt.detail.reason}`, 'error');
+  Demo.Skylink.leaveRoom(config.defaultRoom)
+  .then(() => {
+    Demo.Peers = 0;
+    Demo.PeerIds = [];
+    Demo.Skylink.joinRoom(joinRoomOptions)
+  })
+  .catch((err) =>{
+    Demo.Methods.logToConsoleDOM(`Failed to reconnect`, 'error');
+  })
 });
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_ERROR, (evt) => {
@@ -589,13 +598,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_RETRY, (evt
 });
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_REOPEN, (evt) => {
-  Demo.Methods.logToConsoleDOM(`CHANNEL_REOPEN - leaving and rejoining`, 'info');
-  Demo.Skylink.leaveRoom(config.defaultRoom)
-  .then(() => {
-    Demo.Peers = 0;
-    Demo.PeerIds = [];
-    Demo.Skylink.joinRoom(joinRoomOptions)
-  })
+  Demo.Methods.logToConsoleDOM(`CHANNEL_REOPEN`, 'info');
 });
 
 // //---------------------------------------------------

@@ -19,12 +19,14 @@ const handleSocketClose = (roomKey, reason) => {
 
   dispatchEvent(channelClose({
     socketSession: clone(socketSession),
+    reason,
   }));
 
   if (room.inRoom && user && user.sid) {
     dispatchEvent(sessionDisconnect({
       peerId: user.sid,
       peerInfo: PeerData.getCurrentSessionInfo(room),
+      reason,
     }));
   }
 };

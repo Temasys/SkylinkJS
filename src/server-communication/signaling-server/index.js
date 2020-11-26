@@ -111,15 +111,19 @@ class SkylinkSignalingServer {
   }
 
   tryCreateSocket(roomKey, resolve, reject) {
-    const roomState = Skylink.getSkylinkState(roomKey);
-    const { socketSession } = roomState;
+    try {
+      const roomState = Skylink.getSkylinkState(roomKey);
+      const { socketSession } = roomState;
 
-    this.socket = createSocket({
-      config: socketSession,
-      roomKey,
-    });
+      this.socket = createSocket({
+        config: socketSession,
+        roomKey,
+      });
 
-    setSocketCallbacks(roomKey, this, resolve, reject);
+      setSocketCallbacks(roomKey, this, resolve);
+    } catch (error) {
+      reject(error);
+    }
   }
 
   // eslint-disable-next-line class-methods-use-this
