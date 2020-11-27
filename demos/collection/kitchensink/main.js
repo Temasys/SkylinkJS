@@ -1,6 +1,6 @@
 /* eslint-disable import/extensions */
 import Skylink, { SkylinkLogger, SkylinkEventManager, SkylinkConstants } from '../../../build/skylink.complete.js';
-import config from '../config.js';
+import { config, APPKEYS } from '../config.js';
 
 /********************************************************
   API Settings
@@ -19,10 +19,6 @@ Demo.isMCU = false;
 
 
 window.Demo = Demo;
-const APPKEYS = {
-  p2p: 'c7ae7e8a-2e24-43a5-85c6-d4dafbdfecb6',
-  mcu: config.MCUKey || '6198a7fa-b8b0-4b0a-8079-4642198c8601', // config.MCUKey for prod/staging
-};
 let selectedPeers = [];
 let _peerId = null;
 let selectedAppKey = null;
@@ -1200,8 +1196,10 @@ $(document).ready(function() {
     console.log(appKey);
     if (appKey === 'mcu') {
       Demo.isMCU = true;
+      appKey = 'MCU';
     } else {
       Demo.isMCU = false;
+      appKey = 'P2P';
     }
     selectedAppKey = APPKEYS[appKey];
     $('#display_app_id').html(selectedAppKey);
