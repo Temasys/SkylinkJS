@@ -250,17 +250,6 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
     newListEntry += '</td></tr>';
     $('#presence_list').append(newListEntry);
     $('#user' + peerId + ' .0').css('color', 'green');
-
-    // LOGGING
-    setTimeout(() => {
-      console.log("***** START *****")
-      console.log("getPeersCustomSettings", Demo.Skylink.getPeersCustomSettings(config.defaultRoom));
-      console.log("getPeerInfo", Demo.Skylink.getPeerInfo(config.defaultRoom, peerId));
-      console.log("getPeersDataChannels", Demo.Skylink.getPeersDataChannels(config.defaultRoom));
-      console.log("getStreams", Demo.Skylink.getStreams(config.defaultRoom));
-      console.log("getUserData", Demo.Skylink.getUserData(config.defaultRoom));
-      console.log("***** END *****")
-    }, 5000);
   }
 
   // create the peer video element
@@ -482,7 +471,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STREAM_ENDED, (evt)
       screenElm.parentNode.removeChild(screenElm);
     }
 
-  Demo.Methods.updateStreams();
+  setTimeout(Demo.Methods.updateStreams, 1000);
 });
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STREAM_MUTED, (evt) => {
@@ -498,10 +487,6 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ROOM_LOCK, (evt) =>
   const { isLocked } = eventDetail;
   $('#display_room_status').html((isLocked) ? 'Locked' : 'Not Locked');
   Demo.Methods.logToConsoleDOM(`Room is ${(isLocked ? 'locked' : 'unlocked')}`);
-});
-
-SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ROOM_REJOIN, (evt) => {
-  Demo.Skylink.joinRoom(joinRoomOptions)
 });
 
 // //---------------------------------------------------
@@ -564,15 +549,28 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STORED_MESSAGES, (e
 // //---------------------------------------------------
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.SESSION_DISCONNECT, (evt) => {
   Demo.Methods.logToConsoleDOM(`SOCKET_SESSION_DISCONNECTED - ${evt.detail.reason}`, 'error');
-  Demo.Skylink.leaveRoom(config.defaultRoom)
-  .then(() => {
-    Demo.Peers = 0;
-    Demo.PeerIds = [];
-    Demo.Skylink.joinRoom(joinRoomOptions)
-  })
-  .catch((err) =>{
-    Demo.Methods.logToConsoleDOM(`Failed to reconnect`, 'error');
-  })
+  let onlineInterval = null;
+  const reconnect = () => {
+    if (window.navigator.onLine) {
+      clearInterval(onlineInterval);
+      Demo.Methods.logToConsoleDOM(`Online now. Attempting to join room.`, 'info');
+      Demo.Skylink.leaveRoom(config.defaultRoom)
+      .then(() => {
+        Demo.Peers = 0;
+        Demo.PeerIds = [];
+        Demo.Skylink.joinRoom(joinRoomOptions)
+      })
+      .catch((err) =>{
+        Demo.Methods.logToConsoleDOM(`Failed to reconnect`, 'error');
+      })
+    } else {
+      Demo.Methods.logToConsoleDOM(`Still offline...`, 'error');
+    }
+  }
+
+  if (!onlineInterval) {
+    onlineInterval = setInterval(reconnect, 1000);
+  }
 });
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_ERROR, (evt) => {
@@ -1032,11 +1030,9 @@ $(document).ready(function() {
         video: true,
       };
 
-    if (Demo.Streams && Demo.Streams[_peerId] && (Demo.Streams[_peerId].streams.video)) {
-      const clonedVideoStream = Object.values(Demo.Streams[_peerId].streams.video)[0].clone();
-      console.log("Cloned mediaStream", clonedVideoStream);
+    if (Demo.Streams && Demo.Streams[_peerId] && (Demo.Streams[_peerId].streams.audio || Demo.Streams[_peerId].streams.video)) {
       Demo.Skylink.stopStreams(config.defaultRoom)
-      .then(() => startSendStream(clonedVideoStream))
+      .then(() => startSendStream(mediaOptions))
       .catch((err) => console.error("stopStreams rejected", err));
     } else {
       console.log("sending as prefetched stream");
