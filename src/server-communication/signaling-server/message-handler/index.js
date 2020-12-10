@@ -79,6 +79,10 @@ class SignalingMessageHandler {
   storedMessagesHandler(...args) {
     handlers.storedMessages(...args);
   }
+
+  roomLockHandler(...args) {
+    handlers.roomLock(...args);
+  }
 }
 
 export default SignalingMessageHandler;

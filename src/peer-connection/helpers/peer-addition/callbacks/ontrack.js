@@ -6,6 +6,7 @@ import { TRACK_KIND } from '../../../../constants';
 import PeerMedia from '../../../../peer-media';
 import PeerConnection from '../../../index';
 import PeerStream from '../../../../peer-stream';
+import HandleUserMediaStats from '../../../../skylink-stats/handleUserMediaStats';
 
 const matchPeerIdWithTransceiverMid = (state, transceiver) => {
   const { peerMedias, user } = state;
@@ -64,6 +65,7 @@ const ontrack = (RTCPeerConnection, targetMid, currentRoomState, rtcTrackEvent) 
   PeerMedia.updateStreamIdFromOntrack(state.room, peerId, transceiver.mid, stream.id);
   PeerConnection.updatePeerInformationsMediaStatus(state.room, peerId, transceiver, stream);
   PeerStream.addStream(peerId, stream, room.id);
+  new HandleUserMediaStats().send(room.id);
   MediaStream.onRemoteTrackAdded(stream, currentRoomState, peerId, isScreensharing, track.kind === TRACK_KIND.VIDEO, track.kind === TRACK_KIND.AUDIO);
 
   return null;

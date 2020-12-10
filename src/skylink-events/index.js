@@ -126,11 +126,9 @@ import {
  *  <strong>SOCKET EVENTS</strong> </br>
  *  <ul>
  *    <li>{@link SkylinkEvents.event:CHANNEL_OPEN|CHANNEL_OPEN}</li>
- *    <li>{@link SkylinkEvents.event:CHANNEL_REOPEN|CHANNEL_REOPEN}</li>
  *    <li>{@link SkylinkEvents.event:CHANNEL_CLOSE|CHANNEL_CLOSE}</li>
  *    <li>{@link SkylinkEvents.event:CHANNEL_ERROR|CHANNEL_ERROR}</li>
  *    <li>{@link SkylinkEvents.event:CHANNEL_MESSAGE|CHANNEL_MESSAGE}</li>
- *    <li>{@link SkylinkEvents.event:CHANNEL_RETRY|CHANNEL_RETRY}</li>
  *    <li>{@link SkylinkEvents.event:CHANNEL_OPEN|CHANNEL_OPEN}</li>
  *    <li>{@link SkylinkEvents.event:SOCKET_ERROR|SOCKET_ERROR}</li>
  *    <li>{@link SkylinkEvents.event:SYSTEM_ACTION|SYSTEM_ACTION}</li>

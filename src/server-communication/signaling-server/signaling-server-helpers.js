@@ -19,8 +19,8 @@ export const closeSocket = (...args) => {
   helpers.closeSocket(...args);
 };
 
-export const setSocketCallbacks = (roomKey, signaling, resolve, reject) => {
-  helpers.setSocketCallbacks(roomKey, signaling, resolve, reject);
+export const setSocketCallbacks = (roomKey, signaling, resolve) => {
+  helpers.setSocketCallbacks(roomKey, signaling, resolve);
 };
 
 export const shouldBufferMessage = message => helpers.shouldBufferMessage(message);

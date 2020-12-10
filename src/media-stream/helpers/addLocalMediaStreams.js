@@ -32,7 +32,7 @@ const isStreamOnPC = (peerConnection, stream) => {
 const addTracksToPC = (state, peerId, stream, peerConnection) => {
   const updatedState = state;
   const tracks = stream.getTracks();
-  for (let track = 0; track < tracks.length; track += 1) {
+  for (let track = 0; track < tracks.length; track += 1) { // there should only be 1 track
     const sender = peerConnection.addTrack(tracks[track], stream);
     if (sender) {
       helpers.processNewSender(updatedState, peerId, sender);
@@ -66,6 +66,7 @@ const addLocalMediaStreams = (targetMid, roomState) => {
     peerConnections, user, peerStreams,
   } = state;
   const peerConnection = peerConnections[targetMid];
+
 
   if (peerStreams[user.sid] && !isEmptyObj(peerStreams[user.sid])) {
     addMediaStreams(state, targetMid, peerStreams[user.sid], peerConnection);

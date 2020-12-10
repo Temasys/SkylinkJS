@@ -28,6 +28,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
   const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
   const state = Skylink.getSkylinkState(currentRoomState.room.id);
   const { peerStreams, user, enableStatsGathering } = state;
+  const initOptions = Skylink.getInitOptions();
   let statsInterval = null;
   const pcIceConnectionState = peerConnection.iceConnectionState;
 
@@ -70,6 +71,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
       statsInterval = setInterval(() => {
         const currentState = Skylink.getSkylinkState(state.room.id);
         if (!currentState || !currentState.room.inRoom) {
+          clearInterval(statsInterval);
           return;
         }
         if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
@@ -95,7 +97,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
         } else {
           new HandleBandwidthStats().send(state.room.id, peerConnection, targetMid);
         }
-      }, 20000);
+      }, initOptions.statsInterval * 1000);
     });
   }
 

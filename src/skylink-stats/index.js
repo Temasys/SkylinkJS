@@ -41,8 +41,9 @@ class SkylinkStats {
   }
 
   async postStatObj(endpoint, beSilentOnLogs, data) {
+    const { roomServer } = Skylink.getInitOptions();
     const { fetch } = window;
-    const statsResponse = await fetch(`${appConfig.stats.statsBase}${endpoint}`, {
+    const statsResponse = await fetch(`https:${roomServer}${appConfig.stats.statsBase}${endpoint}`, {
       method: 'POST',
       mode: 'cors',
       headers: {
@@ -55,6 +56,9 @@ class SkylinkStats {
       statsResponse.json()
         .then((result) => {
           logger.log.INFO([null, TAGS.STATS, null, `${endpoint}`], result);
+        })
+        .catch((err) => {
+          logger.log.INFO([null, TAGS.STATS, null, `${endpoint}`], err);
         });
     }
   }

@@ -28,9 +28,20 @@ const getCodecsSupport = roomKey => new Promise((resolve, reject) => {
 
   try {
     const pc = new RTCPeerConnection(null);
-    pc.addTransceiver(TRACK_KIND.VIDEO);
-    pc.addTransceiver(TRACK_KIND.AUDIO);
-    pc.createOffer()
+    let offerConstraints = {};
+    if (pc.addTransceiver) {
+      pc.addTransceiver(TRACK_KIND.VIDEO);
+      pc.addTransceiver(TRACK_KIND.AUDIO);
+    } else {
+      offerConstraints = {
+        mandatory: {
+          OfferToReceiveVideo: true,
+          OfferToReceiveAudio: true,
+        },
+      };
+    }
+
+    pc.createOffer(offerConstraints)
       .then((offer) => {
         updatedState.currentCodecSupport = SessionDescription.getSDPCodecsSupport(null, offer, beSilentOnParseLogs);
         resolve(updatedState.currentCodecSupport);

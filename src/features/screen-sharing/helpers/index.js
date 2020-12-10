@@ -1,4 +1,3 @@
-import handleScreenStreamStates from './updateScreenStreamState';
 import { MEDIA_TYPE, TAGS } from '../../../constants';
 import stopStreamHelpers from '../../../media-stream/helpers/stopStream';
 import logger from '../../../logger';
@@ -42,7 +41,6 @@ const onScreenStreamAccessSuccess = (roomKey, stream, audioSettings, videoSettin
 };
 
 const helpers = {
-  handleScreenStreamStates,
   addScreenStreamCallbacks,
   retrievePeersScreenStreamId,
   stopScreenStream,

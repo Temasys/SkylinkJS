@@ -17,10 +17,11 @@ const dispatchPeerUpdated = (state, peerId) => {
   }));
 };
 
-const updateMediaStatus = (state, peerId, streamId) => {
+const updatePeerStreamsAndMediaStatus = (state, peerId, streamId) => {
   const updatedState = state;
 
   delete updatedState.peerInformations[peerId].mediaStatus[streamId];
+  PeerStream.deleteStream(peerId, updatedState.room, streamId);
 
   Skylink.setSkylinkState(updatedState, updatedState.room.id);
 };
@@ -68,7 +69,7 @@ const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
     return;
   }
 
-  updateMediaStatus(state, peerId, stream.id);
+  updatePeerStreamsAndMediaStatus(state, peerId, stream.id);
   dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent, stream);
   dispatchPeerUpdated(state, peerId);
 };

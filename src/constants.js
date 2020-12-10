@@ -563,8 +563,16 @@ export const TURN_TRANSPORT = {
  *   session description is set.
  *   See {@link SkylinkConstants.HANDSHAKE_PROGRESS|HANDSHAKE_PROGRESS} for a more
  *   detailed exchanging of session description states.
- * @property {String} CLOSED            Value <code>"closed"</code>
+ * @property {String} CLOSED Value <code>"closed"</code>
  *   The value of the state when Peer connection is closed and no session description can be exchanged and set.
+ * @property {String} CONNECTING  Value <code>"connecting"</code>
+ *   The value of the state when Peer connection is trying to establish a connection and negotiation has started.
+ * @property {String} CONNECTED Value <code>"connected"</code>
+ *   The value of the state when Peer connection is connected after successful negotiation.
+ * @property {String} FAILED  Value <code>"failed"</code>
+ *   The value of the state when Peer connection has failed. A renegotiation is required to re-establish the connection.
+ * @property {String} DISCONNECTED  Value <code>"disconnected"</code>
+ *   The value of the state when Peer connection is disconnected. State may change to <code>"connected"</code> or <code>"failed"</code>.
  * @constant
  * @type Object
  * @readOnly
@@ -1874,7 +1882,8 @@ export const MEDIA_INFO = {
  * @memberOf SkylinkConstants
  * @since 2.0
  */
-export const SDK_VERSION = '2.x.x';
+// eslint-disable-next-line no-undef
+export const SDK_VERSION = __sdkVersion__;
 
 /**
  * The SDK type.

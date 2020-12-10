@@ -16,6 +16,7 @@ import rtmp from './rtmpHandler';
 import setUserData from './setUserDataHandler';
 import mediaInfoEvent from './mediaInfoEventHandler';
 import storedMessages from './storedMessagesHandler';
+import roomLock from './roomLockHandler';
 
 const handlers = {
   userMessageHandler,
@@ -36,6 +37,7 @@ const handlers = {
   setUserData,
   mediaInfoEvent,
   storedMessages,
+  roomLock,
 };
 
 export default handlers;

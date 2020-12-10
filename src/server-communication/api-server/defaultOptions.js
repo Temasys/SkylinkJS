@@ -22,7 +22,7 @@ const defaultOptions = {
    * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
    * </a> for more information.</small>
    */
-  defaultRoom: new Date().valueOf(),
+  defaultRoom: null,
   appKey: null,
   roomServer: '//api.temasys.io',
   enableDataChannel: true,
@@ -74,6 +74,7 @@ const defaultOptions = {
   },
   beSilentOnStatsLogs: false,
   beSilentOnParseLogs: false,
+  statsInterval: 20, // sec
 };
 
 /**

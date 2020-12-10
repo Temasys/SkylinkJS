@@ -3,6 +3,7 @@ import Skylink from '../index';
 import PeerConnection from '../peer-connection';
 import logger from '../logger';
 import MESSAGES from '../messages';
+import { isEmptyObj } from '../utils/helpers';
 
 const formatValue = (stats, mediaType, directionType, itemKey) => {
   const value = stats[mediaType][directionType === 'send' ? 'sending' : 'receiving'][itemKey];
@@ -99,26 +100,29 @@ class HandleBandwidthStats extends SkylinkStats {
   buildTrackInfo(roomKey) {
     const state = Skylink.getSkylinkState(roomKey);
     const { peerStreams, user, streamsSettings } = state;
-    const streamObjs = Object.values(peerStreams[user.sid]);
 
-    streamObjs.forEach((streamObj) => {
-      if (streamObj) {
-        const stream = streamObj;
-        const { settings } = streamsSettings[streamObj.id];
-        const audioTracks = stream.getAudioTracks();
-        const videoTracks = stream.getVideoTracks();
+    if (peerStreams[user.sid]) {
+      const streamObjs = Object.values(peerStreams[user.sid]);
 
-        audioTracks.forEach((audioTrack) => {
-          const audioTrackInfo = buildAudioTrackInfo(stream, audioTrack);
-          this.model.audio_send.tracks.push(audioTrackInfo);
-        });
+      streamObjs.forEach((streamObj) => {
+        if (streamObj) {
+          const stream = streamObj;
+          const { settings } = streamsSettings[streamObj.id];
+          const audioTracks = stream.getAudioTracks();
+          const videoTracks = stream.getVideoTracks();
 
-        videoTracks.forEach((videoTrack) => {
-          const videoTrackInfo = buildVideoTrackInfo(stream, videoTrack, settings);
-          this.model.video_send.tracks.push(videoTrackInfo);
-        });
-      }
-    });
+          audioTracks.forEach((audioTrack) => {
+            const audioTrackInfo = buildAudioTrackInfo(stream, audioTrack);
+            this.model.audio_send.tracks.push(audioTrackInfo);
+          });
+
+          videoTracks.forEach((videoTrack) => {
+            const videoTrackInfo = buildVideoTrackInfo(stream, videoTrack, settings);
+            this.model.video_send.tracks.push(videoTrackInfo);
+          });
+        }
+      });
+    }
   }
 
   send(roomKey, peerConnection, peerId) {
@@ -130,7 +134,7 @@ class HandleBandwidthStats extends SkylinkStats {
       return;
     }
 
-    if (!roomState.peerStreams[roomState.user.sid]) {
+    if (isEmptyObj(roomState.peerStreams)) {
       return;
     }
 

@@ -10,6 +10,7 @@ import {
 import MESSAGES from '../../../../messages';
 import BandwidthAdjuster from '../../../../peer-connection/helpers/bandwidthAdjuster';
 import { isEmptyObj } from '../../../../utils/helpers';
+import HandleUserMediaStats from '../../../../skylink-stats/handleUserMediaStats';
 
 /**
  * Checks if peer is connected.
@@ -58,6 +59,12 @@ export const clearPeerInfo = (roomKey, peerId) => {
     if (!isEmptyObj(state)) {
       delete state.peerConnections[peerId];
       Skylink.setSkylinkState(state, state.room.id);
+    }
+
+    if (!updatedState.hasMCU) {
+      // catch media changes when remote peer leaves between the interval
+      // not needed for MCU as it will be caught in onremovetrack
+      new HandleUserMediaStats().send(roomKey);
     }
     logger.log.INFO([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.SUCCESS]);
   }, 500);

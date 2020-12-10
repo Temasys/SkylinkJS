@@ -12,6 +12,7 @@ import MediaStream from '../index';
 import { ON_INCOMING_SCREEN_STREAM, ON_INCOMING_STREAM } from '../../skylink-events/constants';
 import Room from '../../room';
 import PeerData from '../../peer-data';
+import HandleUserMediaStats from '../../skylink-stats/handleUserMediaStats';
 
 const onStreamAccessSuccess = (roomKey, ogStream, audioSettings, videoSettings, isAudioFallback, isScreensharing = false, isPrefetchedStream) => {
   const streams = isScreensharing ? [ogStream] : helpers.splitAudioAndVideoStream(ogStream);
@@ -25,6 +26,9 @@ const onStreamAccessSuccess = (roomKey, ogStream, audioSettings, videoSettings, 
     helpers.updateStreamsMutedSettings(room.id, hasAudioTrack(stream) ? audioSettings : videoSettings, stream);
     helpers.updateStreamsMediaStatus(room.id, hasAudioTrack(stream) ? audioSettings : videoSettings, stream);
     PeerMedia.processPeerMedia(room, user.sid, stream, isScreensharing);
+    if (user.sid !== null) { // do not send stats when inRoom has not been received
+      new HandleUserMediaStats().send(room.id);
+    }
 
     if (isAudioFallback) {
       logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.FALLBACK_SUCCESS]);
