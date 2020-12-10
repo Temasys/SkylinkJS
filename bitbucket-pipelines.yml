@@ -8,7 +8,7 @@ pipelines:
            - npm install
            - npm run build
   branches:
-    staging-2-0:
+    staging-2-0, pre-prod-2-0:
     - step:
           name: Build and Test
           script:
