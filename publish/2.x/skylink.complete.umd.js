@@ -3,7 +3,7 @@
   factory();
 }(function () { 'use strict';
 
-  /* SkylinkJS v2.2.0 Thu Dec 10 2020 06:44:53 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.2.0 Fri Jan 08 2021 04:11:52 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -28464,6 +28464,13 @@
       async start(streamId = null, options) {
         this.streamId = streamId;
         this.settings = this.isValidOptions(options) ? helpers$7.parseStreamSettings(options) : helpers$7.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
+        if (!options || !(options.video && options.video.resolution)) {
+          // defaults for video were set so delete video width and height constraints if not provided in options
+          delete this.settings.getUserMediaSettings.video.width;
+          delete this.settings.settings.video.width;
+          delete this.settings.getUserMediaSettings.video.height;
+          delete this.settings.settings.video.height;
+        }
 
         try {
           this.checkForExistingScreenStreams();
