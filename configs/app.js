@@ -1,11 +1,10 @@
 const config = {
-  apiBase: 'https://api.temasys.io',
   stats: {
     endPoints: {
       client: '/client',
       session: '/session',
       auth: '/auth',
-      signaling: '/signaling',
+      signaling: '/client/signaling',
       iceConnection: '/client/iceconnection',
       iceCandidate: '/client/icecandidate',
       iceGathering: '/client/icegathering',
@@ -13,10 +12,11 @@ const config = {
       bandwidth: '/client/bandwidth',
       recording: '/client/recording',
       dataChannel: '/client/datachannel',
+      userMedia: '/client/usermedia',
     },
   },
 };
 
-config.stats.statsBase = `${config.apiBase}/rest/stats`;
+config.stats.statsBase = '/rest/stats';
 
 export default config;

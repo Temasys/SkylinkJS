@@ -73,7 +73,7 @@ const processMediaStreamArray = (roomState, streams, resolve, reject) => {
 
   return Promise.all(usePrefetchedStreamsPromises)
     .then((results) => {
-      restartFn(roomState, results, true, resolve, reject);
+      restartFn(roomState, results, resolve, reject);
     })
     .catch((error) => {
       reject(error);

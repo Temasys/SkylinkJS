@@ -3,6 +3,7 @@ import { SkylinkSignalingServer } from '../server-communication/index';
 import { dispatchEvent } from '../utils/skylinkEventManager';
 import { roomLock } from '../skylink-events';
 import PeerData from '../peer-data';
+import Room from './index';
 
 /**
  * @description Method that locks or unlocks a room.
@@ -25,6 +26,7 @@ export const lockOrUnlockRoom = (roomState, lockRoom = true) => {
     peerInfo: PeerData.getCurrentSessionInfo(room),
     peerId: user.sid,
     isSelf: true,
+    room: Room.getRoomInfo(room.id),
   }));
 };
 

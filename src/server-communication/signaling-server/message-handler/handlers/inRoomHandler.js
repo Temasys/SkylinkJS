@@ -11,6 +11,7 @@ import { ON_INCOMING_STREAM } from '../../../../skylink-events/constants';
 import logger from '../../../../logger';
 import { TAGS } from '../../../../constants';
 import MESSAGES from '../../../../messages';
+import HandleUserMediaStats from '../../../../skylink-stats/handleUserMediaStats';
 
 const dispatchIncomingStream = (room, sid) => {
   const state = Skylink.getSkylinkState(room.id);
@@ -30,6 +31,22 @@ const dispatchIncomingStream = (room, sid) => {
       isAudio: stream.getAudioTracks().length > 0,
     });
   });
+};
+
+const startUserMediaStatsInterval = (roomKey, peerId) => {
+  const initOptions = Skylink.getInitOptions();
+  new HandleUserMediaStats().send(roomKey); // send first stat
+
+  const interval = setInterval(() => {
+    const currentState = Skylink.getSkylinkState(roomKey);
+    const userId = currentState ? currentState.user.sid : null;
+
+    if (!currentState || userId !== peerId) { // user has left the room  or there is a new socket connection, so stop sending stats
+      clearInterval(interval);
+    } else {
+      new HandleUserMediaStats().send(currentState.room.id);
+    }
+  }, initOptions.statsInterval * 1000);
 };
 
 /**
@@ -68,6 +85,7 @@ const inRoomHandler = (message) => {
   }));
 
   dispatchIncomingStream(roomState.room, sid);
+  startUserMediaStatsInterval(roomState.room.id, sid);
   signaling.enterRoom(roomState);
 };
 

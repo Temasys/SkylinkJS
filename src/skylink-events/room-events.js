@@ -14,6 +14,8 @@ import SkylinkEvent from '../utils/skylinkEvent';
  * @param {String} detail.peerId The Peer ID.
  * @param {peerInfo} detail.peerInfo The Peer session information. Object signature matches the <code>peerInfo</code> parameter payload received in the <code> {@link SkylinkEvents.event:PEER_JOINED|PEER JOINED}</code> event.
  * @param {Boolean} detail.isSelf The flag if User changed the Room locked status.
+ * @param {roomInfo} detail.room The room.
+ *
  */
 export const roomLock = (detail = {}) => new SkylinkEvent(ROOM_LOCK, { detail });
 

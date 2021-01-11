@@ -49,9 +49,18 @@ const processMediaStateChange = (room, mediaType, targetMid, message) => {
       case MEDIA_TYPE.VIDEO_SCREEN:
       case MEDIA_TYPE.VIDEO_CAMERA:
       case MEDIA_TYPE.VIDEO_OTHER:
-      case MEDIA_TYPE.VIDEO: videoStateChangeHandler(targetMid, message); break;
+      case MEDIA_TYPE.VIDEO:
+        setTimeout(() => {
+          videoStateChangeHandler(targetMid, message);
+        }, 100); // setTimeout to handle joinRoom with audio/video and muted true. Safari browser may not have processed ontrack before the
+        // mediaInfoEvent is received resulting in the streamId being undefined
+        break;
       case MEDIA_TYPE.AUDIO_MIC:
-      case MEDIA_TYPE.AUDIO: audioStateChangeHandler(targetMid, message); break;
+      case MEDIA_TYPE.AUDIO:
+        setTimeout(() => {
+          audioStateChangeHandler(targetMid, message);
+        }, 100);
+        break;
       default: logger.log.ERROR([targetMid, TAGS.SIG_SERVER, `${MESSAGES.MEDIA_INFO.WARN.INVALID_MEDIA_TYPE} ${mediaType}`], message);
     }
   }

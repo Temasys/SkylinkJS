@@ -80,17 +80,24 @@ import { isANumber } from '../../../../utils/helpers';
 const parseReceiving = (output, value, prevStats) => {
   const parsedStats = output.audio.receiving;
 
-  const packetsReceived = parseInt(value.packetsReceived || '0', 10);
-  parsedStats.totalPackets = packetsReceived;
-  parsedStats.packets = parsers.tabulateStats(prevStats, value, 'packetsReceived');
+  parsedStats.bytes = parsedStats.bytes || 0;
+  if (value.bytesReceived) {
+    const bytesReceived = parseInt(value.bytesReceived || '0', 10);
+    parsedStats.totalBytes = bytesReceived;
+    parsedStats.bytes += parsers.tabulateStats(prevStats, value, 'bytesReceived');
+  }
 
-  const bytesReceived = parseInt(value.bytesReceived || '0', 10);
-  parsedStats.totalBytes = bytesReceived;
-  parsedStats.bytes = parsers.tabulateStats(prevStats, value, 'bytesReceived');
+  if (value.packetsReceived) {
+    const packetsReceived = parseInt(value.packetsReceived || '0', 10);
+    parsedStats.totalPackets = packetsReceived;
+    parsedStats.packets = parsers.tabulateStats(prevStats, value, 'packetsReceived');
+  }
 
-  const packetsLost = parseInt(value.packetsLost || '0', 10);
-  parsedStats.totalPacketsLost = packetsLost;
-  parsedStats.packetsLost = parsers.tabulateStats(prevStats, value, 'packetsLost');
+  if (Number.isInteger(value.packetsLost)) {
+    const packetsLost = parseInt(value.packetsLost || '0', 10);
+    parsedStats.totalPacketsLost = packetsLost;
+    parsedStats.packetsLost = parsers.tabulateStats(prevStats, value, 'packetsLost');
+  }
 
   parsedStats.jitter = parseInt(value.jitter || '0', 10);
   parsedStats.ssrc = value.ssrc;
@@ -99,7 +106,7 @@ const parseReceiving = (output, value, prevStats) => {
   const audioReceiver = output.raw[trackId];
 
   if (audioReceiver) {
-    parsedStats.audioLevel = parseFloat(audioReceiver.audioLevel).toFixed(5);
+    parsedStats.audioLevel = audioReceiver.audioLevel ? parseFloat(audioReceiver.audioLevel).toFixed(5) : '0';
     parsedStats.totalSamplesReceived = parseInt(audioReceiver.totalSamplesReceived || '0', 10);
     parsedStats.totalSamplesDuration = parseInt(audioReceiver.totalSamplesDuration || '0', 10);
 
@@ -118,10 +125,12 @@ const parseReceiving = (output, value, prevStats) => {
 const parseSending = (output, value, prevStats) => {
   const parsedStats = output.audio.sending;
 
+  parsedStats.bytes = parsedStats.bytes || 0;
   if (value.bytesSent) {
+    parsedStats.bytes = parsedStats.bytes ? parsedStats.bytes : 0;
     const bytesSent = parseInt(value.bytesSent || '0', 10);
     parsedStats.totalBytes = bytesSent;
-    parsedStats.bytes = parsers.tabulateStats(prevStats, value, 'bytesSent');
+    parsedStats.bytes += parsers.tabulateStats(prevStats, value, 'bytesSent');
   }
 
   if (value.packetsSent) {
@@ -165,7 +174,7 @@ const parseSending = (output, value, prevStats) => {
   const audioSource = output.raw[mediaSourceId];
 
   if (audioSource) {
-    parsedStats.audioLevel = parseFloat(audioSource.audioLevel).toFixed(5);
+    parsedStats.audioLevel = audioSource.audioLevel ? parseFloat(audioSource.audioLevel).toFixed(5) : '0';
     parsedStats.totalSamplesDuration = parseInt(audioSource.totalSamplesDuration || '0', 10);
   }
 };

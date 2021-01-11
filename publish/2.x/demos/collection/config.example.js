@@ -3,6 +3,12 @@
  Save your api settings like appKey, defaultRoom and room and save it
  in a file called [config.js]
  *********************************************************************/
+
+let APPKEYS = {
+  P2P: 'XXX-XXX-XXX-XXX-XXX',
+  MCU: 'XXX-XXX-XXX-XXX-XXX'
+};
+
 function getParameterByName(name, url) {
   if (!url) url = window.location.href;
   name = name.replace(/[\[\]]/g, "\\$&");
@@ -18,7 +24,7 @@ if (!getParameterByName('room')) {
 }
 
 const config = {
-  appKey: getParameterByName('appKey') || 'XXX-XXX-XXX-XXX-XXX',
+  appKey: getParameterByName('appKey') || APPKEYS.P2P,
   defaultRoom: getParameterByName('room'),
   enableIceTrickle: !getParameterByName('enableIceTrickle'),
   audioFallback: !!getParameterByName('audioFallback'),
@@ -44,4 +50,4 @@ if (secret) {
   };
 }
 
-export default config;
+export { config, APPKEYS };

@@ -34,13 +34,6 @@ const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
       serverPeerType: SERVER_PEER_TYPE.MCU,
       room: Room.getRoomInfo(room.id),
     }));
-  } else {
-    dispatchEvent(peerLeft({
-      peerId,
-      peerInfo: PeerData.getPeerInfo(peerId, room),
-      isSelf: false,
-      room: Room.getRoomInfo(room.id),
-    }));
   }
 
   if (peerConnections[peerId] && peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE.CLOSED) {
@@ -48,13 +41,16 @@ const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
   }
 
   if (enableDataChannel) {
-    addEventListener(SkylinkConstants.EVENTS.DATA_CHANNEL_STATE, (evt) => {
+    const handleDataChannelClose = (evt) => {
       const { detail } = evt;
       if (detail.state === DATA_CHANNEL_STATE.CLOSED || detail.state === DATA_CHANNEL_STATE.CLOSING) {
         logger.log.INFO([detail.peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.SUCCESS]);
+        removeEventListener(SkylinkConstants.EVENTS.DATA_CHANNEL_STATE, handleDataChannelClose);
         resolve(detail.peerId);
       }
-    });
+    };
+
+    addEventListener(SkylinkConstants.EVENTS.DATA_CHANNEL_STATE, handleDataChannelClose);
 
     PeerConnection.closeDataChannel(state, peerId);
   } else {

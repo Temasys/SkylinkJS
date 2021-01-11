@@ -4,17 +4,16 @@ import {
 
 const SOCKET_DEFAULTS = {
   RECONNECTION_ATTEMPTS: {
-    WEBSOCKET: 5,
+    WEBSOCKET: 10,
     POLLING: 4,
   },
   RECONNECTION_DELAY_MAX: 5000,
   RECONNECTION_DELAY: 1000,
-  RECONNECTION_FINAL_ATTEMPTS: 10,
 };
 
 const SOCKET_CONFIG = options => ({
   forceNew: true,
-  reconnection: true,
+  reconnection: false, // Ref: ESS-2024
   timeout: options.socketTimeout,
   path: options.socketServerPath,
   reconnectionAttempts: SOCKET_DEFAULTS.RECONNECTION_ATTEMPTS.WEBSOCKET,

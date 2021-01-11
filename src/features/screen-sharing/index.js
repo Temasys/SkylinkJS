@@ -53,6 +53,13 @@ class ScreenSharing {
   async start(streamId = null, options) {
     this.streamId = streamId;
     this.settings = this.isValidOptions(options) ? mediaStreamHelpers.parseStreamSettings(options) : mediaStreamHelpers.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
+    if (!options || !(options.video && options.video.resolution)) {
+      // defaults for video were set so delete video width and height constraints if not provided in options
+      delete this.settings.getUserMediaSettings.video.width;
+      delete this.settings.settings.video.width;
+      delete this.settings.getUserMediaSettings.video.height;
+      delete this.settings.settings.video.height;
+    }
 
     try {
       this.checkForExistingScreenStreams();

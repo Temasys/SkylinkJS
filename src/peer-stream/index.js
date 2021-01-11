@@ -7,6 +7,7 @@ import { isEmptyObj } from '../utils/helpers';
 import {
   ON_INCOMING_SCREEN_STREAM, ON_INCOMING_STREAM, STREAM_ENDED, STREAM_MUTED,
 } from '../skylink-events/constants';
+import HandleUserMediaStats from '../skylink-stats/handleUserMediaStats';
 
 class PeerStream {
   static updatePeerStreamWithUserSid(room, sid) {
@@ -34,17 +35,19 @@ class PeerStream {
     Skylink.setSkylinkState(updatedState, roomkey);
   }
 
-  static deleteStream(room, stream) {
+  static deleteStream(peerId, room, streamId) {
     const updatedState = Skylink.getSkylinkState(room.id);
-    const { user } = updatedState;
-    const streamIdToRemove = stream.id;
-    delete updatedState.peerStreams[user.sid][streamIdToRemove];
+    const streamIdToRemove = streamId;
+    delete updatedState.peerStreams[peerId][streamIdToRemove];
 
-    if (isEmptyObj(updatedState.peerStreams[user.sid])) {
-      delete updatedState.peerStreams[user.sid];
+    if (isEmptyObj(updatedState.peerStreams[peerId])) {
+      delete updatedState.peerStreams[peerId];
     }
 
     Skylink.setSkylinkState(updatedState, updatedState.room.id);
+
+    // catch changes in stopped media that happened between the interval
+    new HandleUserMediaStats().send(room.id);
   }
 
   static dispatchStreamEvent(eventName, detail) {

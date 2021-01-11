@@ -101,7 +101,8 @@
  * @property {boolean} [enableStatsGathering=true] Configure the anonymous performance and connectivity statistic collection function.
  *   Temasys collects encrypted, anonymous performance and connectivity statistics to allow us to improve performance for our customers and identify regional or ISP specific connectivity issues.
  *   This data does not contain any personal information or session content.
- *   To enable the configuration of this option, you need to "Collect Quality Statistics" option on the Temasys console Website under App key settings section.
+ *   To enable the configuration of this option, you need to enable the "Collect Quality Statistics" option on the Temasys console Website under
+ *   App key settings section.
  * @property {boolean} [enableDataChannel=true] The flag if Datachannel connections should be enabled.
  * @property {boolean} [enableTURNServer=true] The flag if TURN ICE servers should
  *   be used when constructing Peer connections to allow TURN connections when required and enabled for the App Key.
@@ -179,6 +180,7 @@
  *   If not defined, it will use the default protocol specified.
  * @property {boolean} [beSilentOnStatsLogs=false] The flag if all logs triggered by the statistics module should be silent.
  * @property {boolean} [beSilentOnParseLogs=false] The flag if media and codec parsing logs should be silent.
+ * @property {String} [statsInterval=20] The frequency of posting stats logs in seconds.
  */
 
 /**
