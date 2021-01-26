@@ -1,5 +1,5 @@
 # SKYLINK WEB SDK 2.2.0
-> Temasys SkylinkJS Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.
+> Temasys SkylinkJS Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing.
 
 You'll need a Temasys Account, and an App key to use this. [Register here to get your App key](https://console.temasys.io).
 
@@ -21,7 +21,7 @@ You'll need a Temasys Account, and an App key to use this. [Register here to get
 - [API Docs](http://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
 - [Temasys Console  - Get your App key](https://console.temasys.io)
-- [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/demos)
+- [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/demos/collection/README.md)
 
 
 #### MCU Behaviour

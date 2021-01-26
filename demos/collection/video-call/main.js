@@ -1,6 +1,6 @@
 /* eslint-disable import/extensions */
 import Skylink, { SkylinkLogger, SkylinkEventManager, SkylinkConstants } from '../../../build/skylink.complete.js';
-import config from '../config.js';
+import { config } from '../config.js';
 
 /********************************************************
  API Settings
