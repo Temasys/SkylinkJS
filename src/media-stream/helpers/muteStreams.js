@@ -220,7 +220,7 @@ const muteStreams = (roomState, options, streamId = null) => {
   }
 
   if (streamId && !peerStreams[user.sid][streamId]) {
-    logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_MUTE_OPTIONS, options);
+    logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_STREAM_ID, streamId);
     return;
   }
 
