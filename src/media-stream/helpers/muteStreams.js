@@ -231,7 +231,7 @@ const muteStreams = (roomState, options, streamId = null) => {
     videoMuted: isABoolean(options.videoMuted) ? options.videoMuted : (isANumber(options.videoMuted) ? retrieveMutedSetting(options.videoMuted) : true),
   };
 
-  const streamIdsThatCanBeMuted = Object.keys(peerStreams[user.sid]) || [];
+  const streamIdsThatCanBeMuted = streamId ? [streamId] : (peerStreams[user.sid] && Object.keys(peerStreams[user.sid])) || [];
 
   if (isEmptyArray(streamIdsThatCanBeMuted)) {
     logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAMS_MUTED, options);
