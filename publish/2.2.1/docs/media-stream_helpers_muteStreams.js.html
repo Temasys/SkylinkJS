@@ -315,7 +315,7 @@ const muteStreams = (roomState, options, streamId = null) => {
   }
 
   if (streamId &amp;&amp; !peerStreams[user.sid][streamId]) {
-    logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_MUTE_OPTIONS, options);
+    logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_STREAM_ID, streamId);
     return;
   }
 
@@ -326,7 +326,7 @@ const muteStreams = (roomState, options, streamId = null) => {
     videoMuted: isABoolean(options.videoMuted) ? options.videoMuted : (isANumber(options.videoMuted) ? retrieveMutedSetting(options.videoMuted) : true),
   };
 
-  const streamIdsThatCanBeMuted = Object.keys(peerStreams[user.sid]) || [];
+  const streamIdsThatCanBeMuted = streamId ? [streamId] : (peerStreams[user.sid] &amp;&amp; Object.keys(peerStreams[user.sid])) || [];
 
   if (isEmptyArray(streamIdsThatCanBeMuted)) {
     logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAMS_MUTED, options);

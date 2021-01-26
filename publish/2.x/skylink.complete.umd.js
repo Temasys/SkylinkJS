@@ -3,7 +3,7 @@
   factory();
 }(function () { 'use strict';
 
-  /* SkylinkJS v2.2.0 Fri Jan 08 2021 04:11:52 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.2.1 Tue Jan 26 2021 07:40:52 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -8198,7 +8198,7 @@
      * @since 2.0
      */
     // eslint-disable-next-line no-undef
-    const SDK_VERSION = "2.2.0";
+    const SDK_VERSION = "2.2.1";
 
     /**
      * The SDK type.
@@ -26011,7 +26011,7 @@
       }
 
       if (streamId && !peerStreams[user.sid][streamId]) {
-        logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_MUTE_OPTIONS, options);
+        logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_STREAM_ID, streamId);
         return;
       }
 
@@ -26022,7 +26022,7 @@
         videoMuted: isABoolean(options.videoMuted) ? options.videoMuted : (isANumber(options.videoMuted) ? retrieveMutedSetting(options.videoMuted) : true),
       };
 
-      const streamIdsThatCanBeMuted = Object.keys(peerStreams[user.sid]) || [];
+      const streamIdsThatCanBeMuted = streamId ? [streamId] : (peerStreams[user.sid] && Object.keys(peerStreams[user.sid])) || [];
 
       if (isEmptyArray(streamIdsThatCanBeMuted)) {
         logger.log.ERROR(MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAMS_MUTED, options);
