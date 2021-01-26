@@ -17,7 +17,7 @@ You'll need a Temasys Account, and an App key to use this. [Register here to get
 
 
 #### Read more
-- [Getting started](https://temasys.io/getting-started-with-webrtc-and-skylinkjs/)
+- [Getting started](https://github.com/Temasys/GettingStarted/tree/main/Web)
 - [API Docs](http://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
 - [Temasys Console  - Get your App key](https://console.temasys.io)
