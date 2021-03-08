@@ -317,8 +317,7 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @description Method that retrieves peer connection bandwidth and ICE connection stats.
-   * @description Method that retrieves peer connection bandwidth and ICE connection stats.
+   * @description Method that retrieves peer connection bandwidth stats and ICE connection status.
    * @param {String} roomName - The room name.
    * @param {String|Array} [peerId] The target peer id to retrieve connection stats from.
    * - When provided as an Array, it will retrieve all connection stats from all the peer ids provided.
@@ -345,7 +344,7 @@ class SkylinkPublicInterface {
    *  .catch((error) => {
    *    // handle error
    *  }
-   * @alias Skylink#getConnectionStats
+   * @alias Skylink#getConnectionStatus
    */
   getConnectionStatus(roomName, peerId) {
     const roomState = getRoomStateByName(roomName);
