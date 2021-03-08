@@ -27,11 +27,14 @@ const onerror = (params, error) => {
     logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, 'Datachannel state ->'], error.error.message);
   } else {
     const state = Skylink.getSkylinkState(roomState.room.id);
-    const { room } = state;
+    if (!state) {
+      logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, `No roomState for room ${roomState.room.id}`]);
+    }
+
     const handleDataChannelStats = new HandleDataChannelStats();
 
     logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Datachannel has an exception ->'], error);
-    handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE.ERROR, peerId, dataChannel, channelProp, error);
+    handleDataChannelStats.send(state ? state.room.id : roomState.room.id, DATA_CHANNEL_STATE.ERROR, peerId, dataChannel, channelProp, error);
     dispatchEvent(onDataChannelStateChanged({
       state: DATA_CHANNEL_STATE.ERROR,
       peerId,
