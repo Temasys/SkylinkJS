@@ -256,6 +256,7 @@ const MESSAGES = {
       NO_STREAMS_MUTED: 'No streams to mute',
       SEND_STREAM: 'Error sending stream',
       INVALID_MEDIA_STREAM_ARRAY: 'Array is not of type MediaStream',
+      INACTIVE_MEDIA_STREAM: 'One or more media streams is inactive',
       ACTIVE_STREAMS: 'There are currently active streams being sent to remote peers. Please stop streams.',
       INVALID_PREFETCHED_STREAMS: 'Invalid prefetched streams provided',
     },
