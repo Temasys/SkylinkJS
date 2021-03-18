@@ -8,8 +8,6 @@ import { peerLeft, serverPeerLeft } from '../skylink-events';
 import { dispatchEvent, addEventListener, removeEventListener } from '../utils/skylinkEventManager';
 import logger from '../logger/index';
 import PeerConnection from '../peer-connection/index';
-import stopStreamHelpers from '../media-stream/helpers/stopStream/index';
-import ScreenSharing from '../features/screen-sharing';
 import MESSAGES from '../messages';
 import { isEmptyArray } from '../utils/helpers';
 import Room from './index';
@@ -101,21 +99,6 @@ const sendByeOrDisconnectSocket = state => new Promise((resolve) => {
   }
 });
 
-/**
- * Stops streams within a Skylink state.
- * @private
- * @param {SkylinkState} state
- */
-const stopStreams = (state) => {
-  const { room, peerStreams, user } = state;
-
-  if (peerStreams[user.sid]) {
-    stopStreamHelpers.prepStopStreams(room.id, null, true);
-  }
-
-  new ScreenSharing(state).stop(true);
-};
-
 const clearRoomState = (roomKey) => {
   Skylink.clearRoomStateFromSingletons(roomKey);
   Skylink.removeSkylinkState(roomKey);
@@ -146,7 +129,6 @@ export const leaveRoom = roomState => new Promise((resolve, reject) => {
 
     if (isEmptyArray(peerIds)) {
       logger.log.DEBUG([room.roomName, null, null, LEAVE_ROOM.NO_PEERS]);
-      stopStreams(roomState);
       sendByeOrDisconnectSocket(roomState)
         .then((removedState) => {
           logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.REMOVE_STATE.SUCCESS]);
@@ -168,10 +150,7 @@ export const leaveRoom = roomState => new Promise((resolve, reject) => {
       });
 
       Promise.all(peerLeftPromises)
-        .then(() => {
-          stopStreams(roomState);
-          return sendByeOrDisconnectSocket(roomState);
-        })
+        .then(() => sendByeOrDisconnectSocket(roomState))
         .then((removedState) => {
           logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.REMOVE_STATE.SUCCESS]);
           dispatchEvent(peerLeft({

@@ -18,20 +18,20 @@ const retrieveUserMediaStreams = (state) => {
 };
 
 // eslint-disable-next-line consistent-return
-const prepStopUserMediaStreams = (state, streamId, fromLeaveRoom) => new Promise((resolve, reject) => {
+const prepStopUserMediaStreams = (state, streamId) => new Promise((resolve, reject) => {
   const { user, peerStreams } = state;
   const mediaStreams = retrieveUserMediaStreams(state);
   const isScreensharing = false;
 
   try {
     if (!streamId) {
-      stopStreamHelpers.stopAddedStreams(state, mediaStreams, isScreensharing, fromLeaveRoom);
+      stopStreamHelpers.stopAddedStreams(state, mediaStreams, isScreensharing);
     } else {
       const stream = peerStreams[user.sid][streamId];
-      stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
+      stopStreamHelpers.stopAddedStream(state, stream, isScreensharing);
     }
 
-    return stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
+    return stopStreamHelpers.initRefreshConnectionAndResolve(state.room, resolve, reject);
   } catch (error) {
     logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA], error);
     reject(MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA);

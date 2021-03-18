@@ -82,17 +82,16 @@ class ScreenSharing {
 
   /**
    * Function that stops the screenshare.
-   * @param {Boolean} fromLeaveRoom
    * @return {MediaStream}
    */
-  stop(fromLeaveRoom = false) {
+  stop() {
     if (!this.stream) {
       logger.log.DEBUG([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN} - ${MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM}`]);
       return null;
     }
 
     try {
-      screenshareHelpers.stopScreenStream(this.roomState.room, this.stream, this.roomState.user.sid, fromLeaveRoom);
+      screenshareHelpers.stopScreenStream(this.roomState.room, this.stream, this.roomState.user.sid);
       this.streamId = null;
       this.stream = null;
     } catch (error) {
