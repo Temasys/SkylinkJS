@@ -6,17 +6,18 @@ import { STATES } from '../../../constants';
 const onDisconnect = (roomKey, reason) => {
   const state = Skylink.getSkylinkState(roomKey) || Object.values(Skylink.getSkylinkState())[0]; // to handle leaveAllRooms method
   const isChannelOpen = state.channelOpen;
-  const { room } = state;
+  const { room, user } = state;
   let error = null;
+  const peerId = user.sid || null;
 
   if (reason !== 'io client disconnect') {
     error = reason;
   }
 
-  new HandleSignalingStats().send(room.id, STATES.SIGNALING.DISCONNECT, error);
+  new HandleSignalingStats().send(room.id, STATES.SIGNALING.DISCONNECT, peerId, error);
 
   if (isChannelOpen || (!isChannelOpen && roomKey !== room.roomName)) { // to handle leaveAllRooms method
-    handleSocketClose(room.id, reason);
+    handleSocketClose(room.id, peerId, reason);
   }
 };
 

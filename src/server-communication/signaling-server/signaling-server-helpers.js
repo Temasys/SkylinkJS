@@ -11,8 +11,8 @@ export const sendChannelMessage = (socket, message) => {
   socket.send(JSON.stringify(message));
 };
 
-export const handleSocketClose = (roomKey, reason) => {
-  helpers.handleSocketClose(roomKey, reason);
+export const handleSocketClose = (roomKey, peerId, reason) => {
+  helpers.handleSocketClose(roomKey, peerId, reason);
 };
 
 export const closeSocket = (...args) => {

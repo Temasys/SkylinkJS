@@ -18,12 +18,12 @@ class HandleSignalingStats extends SkylinkStats {
     };
   }
 
-  send(roomKey, state, error) {
+  send(roomKey, state, peerId, error) {
     const roomState = Skylink.getSkylinkState(roomKey);
     const { socketSession } = roomState;
 
     this.model.room_id = roomKey;
-    this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;
+    this.model.user_id = peerId || null;
     this.model.client_id = roomState.clientId;
     this.model.state = state;
     this.model.signaling_url = roomState.socketSession.socketServer;
