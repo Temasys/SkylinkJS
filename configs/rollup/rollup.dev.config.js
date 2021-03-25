@@ -5,7 +5,7 @@ import commonJS from 'rollup-plugin-commonjs';
 import { terser } from 'rollup-plugin-terser';
 import externalGlobals from 'rollup-plugin-external-globals';
 import del from 'rollup-plugin-delete';
-import replace from '@rollup/plugin-replace';
+import json from '@rollup/plugin-json';
 import paths from '../paths';
 import pkg from '../../package.json';
 import CONSTANTS from './constants';
@@ -59,9 +59,7 @@ const config = {
     warn(warning);
   },
   plugins: [
-    replace({
-      __sdkVersion__: JSON.stringify(pkg.version),
-    }),
+    json({ compact: true }),
     resolve({
       only: ['webrtc-adapter', 'clone', 'crypto-js', 'sdp', 'rtcpeerconnection-shim'],
     }),

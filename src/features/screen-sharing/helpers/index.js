@@ -21,9 +21,9 @@ const retrievePeersScreenStreamId = (state) => {
   return peersScreenStreamId;
 };
 
-const stopScreenStream = (room, screenStream, peerId, fromLeaveRoom = false) => {
+const stopScreenStream = (room, screenStream, peerId) => {
   const isScreensharing = true;
-  stopStreamHelpers.prepStopStreams(room.id, screenStream.id, fromLeaveRoom, isScreensharing)
+  stopStreamHelpers.prepStopStreams(room.id, screenStream.id, isScreensharing)
     .then(() => logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SCREEN_SUCCESS}`]))
     .catch(error => logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN}`], error));
 };

@@ -1,8 +1,8 @@
 import stopStreamHelpers from './index';
 
-const stopAddedStreams = (state, streams, isScreensharing, fromLeaveRoom) => {
+const stopAddedStreams = (state, streams, isScreensharing) => {
   streams.forEach((stream) => {
-    stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
+    stopStreamHelpers.stopAddedStream(state, stream, isScreensharing);
   });
 };
 

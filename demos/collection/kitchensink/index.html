@@ -298,7 +298,7 @@
                   <td><h4>Call actions:</h4></td>
                   <td>
                     <div >
-                      <button id="send_stream_btn" type="button" title="Send stream" class="btn btn-primary">
+                      <button id="start_stream_btn" type="button" title="Send stream" class="btn btn-primary">
                         <span class="glyphicon glyphicon-play"></span>
                         Stop Stream & Start Audio & Video
                       </button>
@@ -315,14 +315,23 @@
                         <span class="glyphicon glyphicon-stop"></span>
                         Stop Stream
                       </button>
-                      <button id="add_stream_btn" type="button" title="Add stream" class="btn btn-primary">
-                        <span class="glyphicon glyphicon-play"></span>
-                        Start Audio & Video
-                      </button>
                       <!--<button id="send_video_btn" type="button" title="Send video" class="btn btn-primary">
                   <span class="glyphicon glyphicon-play"></span>
                   Send Video
                 </button>-->
+                      <hr/>
+                      <button id="get_media_stream_btn" type="button" title="Add stream" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-play"></span>
+                        Get and cache Audio and Video Stream
+                      </button>
+                      <button id="send_media_stream_btn" type="button" title="Add stream" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-play"></span>
+                        Send cached Audio / Video Stream
+                      </button>
+                      <button id="clear_media_stream_btn" type="button" title="Add stream" class="btn btn-primary">
+                        <span class="glyphicon glyphicon-play"></span>
+                        Clear cached Audio / Video Stream
+                      </button>
                       <hr/>
                       <button id="leave_room_btn" type="button" title="Leave room" class="btn btn-danger">
                         <span class="glyphicon glyphicon-log-out"></span>

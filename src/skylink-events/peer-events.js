@@ -67,6 +67,7 @@ export const serverPeerJoined = (detail = {}) => new SkylinkEvent(SERVER_PEER_JO
 /**
  * @event SkylinkEvents.SERVER_PEER_LEFT
  * @description Event triggered when a server Peer leaves the room.
+ * - Handling an MCU disconnect using the <code>serverPeerLeft</code> event - {@link Reconnection}
  * @param {Object} detail - Event's payload
  * @param {String} detail.peerId - The Peer ID
  * @param {roomInfo} detail.room - The room.
@@ -102,20 +103,11 @@ export const peerConnectionState = (detail = {}) => new SkylinkEvent(PEER_CONNEC
 /**
  * @event SkylinkEvents.SESSION_DISCONNECT
  * @description Event triggered when Room session has ended abruptly due to network disconnections.
+ * - Handling a socket disconnect using the <code>sessionDisconnect</code> event - {@link Reconnection}
  * @param {Object} detail - Event's payload.
  * @param {String} detail.peerId - The User's Room session Peer ID
  * @param {peerInfo} detail.peerInfo - The User's Room session information. Object signature matches the <code>peerInfo</code> parameter payload received in the<code> {@link SkylinkEvents.event:PEER_JOINED|PEER JOINED}</code> event.
  * @param {peerInfo} detail.reason - Reason for the disconnect
- * @example
- * Example 1: Listen on sessionDisconnect to reconnect
- * SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.SESSION_DISCONNECT, evt => {
- *   skylink.leaveRoom() // call leaveRoom to ensure that previous peer information will be removed
- *   .then(() => skylink.joinRoom(joinRoomOptions))
- *   .then((streams) => {
- *     window.attachMediaStream(audioEl, streams[0]);
- *     window.attachMediaStream(videoEl, streams[1]);
- *   })
- * });
  */
 export const sessionDisconnect = (detail = {}) => new SkylinkEvent(SESSION_DISCONNECT, { detail });
 

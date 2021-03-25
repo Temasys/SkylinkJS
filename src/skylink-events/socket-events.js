@@ -17,6 +17,7 @@ import SkylinkEvent from '../utils/skylinkEvent'
  * @description Event triggered when socket connection to Signaling server has opened.
  * @param {Object} detail - Event's payload.
  * @param {socketSession} detail.session The socket connection session information.
+ * @param {string} detail.peerId The Peer ID.
  */
 export const channelOpen = detail => new SkylinkEvent(CHANNEL_OPEN, { detail });
 
@@ -37,6 +38,7 @@ export const channelReopen = detail => new SkylinkEvent(CHANNEL_REOPEN, { detail
  * @event SkylinkEvents.CHANNEL_CLOSE
  * @param {Object} detail - Event's payload.
  * @param {socketSession} detail.session The socket connection session information.
+ * @param {string} detail.peerId The Peer ID.
  */
 export const channelClose = detail => new SkylinkEvent(CHANNEL_CLOSE, { detail });
 
@@ -48,6 +50,7 @@ export const channelClose = detail => new SkylinkEvent(CHANNEL_CLOSE, { detail }
  * @param {Object} detail - Event's payload.
  * @param {Error|String} detail.error The error object.
  * @param {socketSession} detail.session The socket connection session information.
+ * @param {string} detail.peerId The Peer ID.
  */
 export const channelError = detail => new SkylinkEvent(CHANNEL_ERROR, { detail });
 
@@ -63,7 +66,7 @@ export const channelMessage = detail => new SkylinkEvent(CHANNEL_MESSAGE, { deta
 
 // Ref: ESS-2024
 /**
- * @description Event triggered when attempting to establish socket connection to Signaling server when failed.
+ * @description [DEPRECATED] Event triggered when attempting to establish socket connection to Signaling server when failed.
  * @event SkylinkEvents.CHANNEL_RETRY
  * @param {Object} detail - Event's payload.
  * @param {SkylinkConstants.SOCKET_FALLBACK} detail.fallbackType The current fallback state.

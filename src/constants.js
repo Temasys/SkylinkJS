@@ -1,4 +1,5 @@
 import * as SkylinkEventsConstants from './skylink-events/constants';
+import pkg from '../package.json';
 
 /**
  * @namespace SkylinkConstants
@@ -1883,7 +1884,7 @@ export const MEDIA_INFO = {
  * @since 2.0
  */
 // eslint-disable-next-line no-undef
-export const SDK_VERSION = __sdkVersion__;
+export const SDK_VERSION = pkg.version;
 
 /**
  * The SDK type.
