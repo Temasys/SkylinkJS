@@ -1,4 +1,4 @@
-/* SkylinkJS v2.2.1 Tue Jan 26 2021 08:18:05 GMT+0000 (Coordinated Universal Time) */
+/* SkylinkJS v2.2.2 Thu Mar 25 2021 02:10:19 GMT+0000 (Coordinated Universal Time) */
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -6069,6 +6069,7 @@ const serverPeerJoined = (detail = {}) => new SkylinkEvent(SERVER_PEER_JOINED, {
 /**
  * @event SkylinkEvents.SERVER_PEER_LEFT
  * @description Event triggered when a server Peer leaves the room.
+ * - Handling an MCU disconnect using the <code>serverPeerLeft</code> event - {@link Reconnection}
  * @param {Object} detail - Event's payload
  * @param {String} detail.peerId - The Peer ID
  * @param {roomInfo} detail.room - The room.
@@ -6104,20 +6105,11 @@ const peerConnectionState = (detail = {}) => new SkylinkEvent(PEER_CONNECTION_ST
 /**
  * @event SkylinkEvents.SESSION_DISCONNECT
  * @description Event triggered when Room session has ended abruptly due to network disconnections.
+ * - Handling a socket disconnect using the <code>sessionDisconnect</code> event - {@link Reconnection}
  * @param {Object} detail - Event's payload.
  * @param {String} detail.peerId - The User's Room session Peer ID
  * @param {peerInfo} detail.peerInfo - The User's Room session information. Object signature matches the <code>peerInfo</code> parameter payload received in the<code> {@link SkylinkEvents.event:PEER_JOINED|PEER JOINED}</code> event.
  * @param {peerInfo} detail.reason - Reason for the disconnect
- * @example
- * Example 1: Listen on sessionDisconnect to reconnect
- * SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.SESSION_DISCONNECT, evt => {
- *   skylink.leaveRoom() // call leaveRoom to ensure that previous peer information will be removed
- *   .then(() => skylink.joinRoom(joinRoomOptions))
- *   .then((streams) => {
- *     window.attachMediaStream(audioEl, streams[0]);
- *     window.attachMediaStream(videoEl, streams[1]);
- *   })
- * });
  */
 const sessionDisconnect = (detail = {}) => new SkylinkEvent(SESSION_DISCONNECT, { detail });
 
@@ -6141,6 +6133,7 @@ const getConnectionStatusStateChange = (detail = {}) => new SkylinkEvent(GET_CON
  * @description Event triggered when socket connection to Signaling server has opened.
  * @param {Object} detail - Event's payload.
  * @param {socketSession} detail.session The socket connection session information.
+ * @param {string} detail.peerId The Peer ID.
  */
 const channelOpen = detail => new SkylinkEvent(CHANNEL_OPEN, { detail });
 
@@ -6149,6 +6142,7 @@ const channelOpen = detail => new SkylinkEvent(CHANNEL_OPEN, { detail });
  * @event SkylinkEvents.CHANNEL_CLOSE
  * @param {Object} detail - Event's payload.
  * @param {socketSession} detail.session The socket connection session information.
+ * @param {string} detail.peerId The Peer ID.
  */
 const channelClose = detail => new SkylinkEvent(CHANNEL_CLOSE, { detail });
 
@@ -6160,6 +6154,7 @@ const channelClose = detail => new SkylinkEvent(CHANNEL_CLOSE, { detail });
  * @param {Object} detail - Event's payload.
  * @param {Error|String} detail.error The error object.
  * @param {socketSession} detail.session The socket connection session information.
+ * @param {string} detail.peerId The Peer ID.
  */
 const channelError = detail => new SkylinkEvent(CHANNEL_ERROR, { detail });
 
@@ -6304,6 +6299,8 @@ const mediaInfoDeleted = (detail = {}) => new SkylinkEvent(MEDIA_INFO_DELETED, {
  * @private
  */
 const loggedOnConsole = (detail = {}) => new SkylinkEvent(LOGGED_ON_CONSOLE, { detail });
+
+var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.2.2";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"~2.2.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.2.2","@babel/preset-env":"7.2.3","@babel/register":"7.0.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.0.5",eslint:"^5.2.0","eslint-config-airbnb":"^17.0.0","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.13.0","eslint-plugin-jsx-a11y":"^6.1.1",finalhandler:"^1.1.1",husky:"^1.0.0-rc.13",jsdoc:"^3.6.4",jsdom:"^13.0.0","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.4",rollup:"^1.2.2","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.3.0","rollup-plugin-delete":"^1.1.0","rollup-plugin-external-globals":"^0.2.1","rollup-plugin-gzip":"^2.2.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.0.1","rollup-plugin-terser":"^5.3.0","serve-static":"^1.13.2","whatwg-fetch":"^3.0.0"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
 
 /**
  * @namespace SkylinkConstants
@@ -8188,7 +8185,7 @@ const MEDIA_INFO = {
  * @since 2.0
  */
 // eslint-disable-next-line no-undef
-const SDK_VERSION = "2.2.1";
+const SDK_VERSION = pkg.version;
 
 /**
  * The SDK type.
@@ -8644,6 +8641,7 @@ const MESSAGES = {
       NO_STREAMS_MUTED: 'No streams to mute',
       SEND_STREAM: 'Error sending stream',
       INVALID_MEDIA_STREAM_ARRAY: 'Array is not of type MediaStream',
+      INACTIVE_MEDIA_STREAM: 'One or more media streams is inactive',
       ACTIVE_STREAMS: 'There are currently active streams being sent to remote peers. Please stop streams.',
       INVALID_PREFETCHED_STREAMS: 'Invalid prefetched streams provided',
     },
@@ -10577,7 +10575,7 @@ const processSignalingMessage = (messageHandler, message) => {
   }
 };
 
-const handleSocketClose = (roomKey, reason) => {
+const handleSocketClose = (roomKey, peerId, reason) => {
   const state = Skylink.getSkylinkState(roomKey) || Object.values(Skylink.getSkylinkState())[0]; // to handle leaveAllRooms method
 
   const {
@@ -10592,11 +10590,12 @@ const handleSocketClose = (roomKey, reason) => {
   dispatchEvent(channelClose({
     socketSession: clone_1(socketSession),
     reason,
+    peerId,
   }));
 
   if (room.inRoom && user && user.sid) {
     dispatchEvent(sessionDisconnect({
-      peerId: user.sid,
+      peerId,
       peerInfo: PeerData.getCurrentSessionInfo(room),
       reason,
     }));
@@ -10620,12 +10619,12 @@ class HandleSignalingStats extends SkylinkStats {
     };
   }
 
-  send(roomKey, state, error) {
+  send(roomKey, state, peerId, error) {
     const roomState = Skylink.getSkylinkState(roomKey);
     const { socketSession } = roomState;
 
     this.model.room_id = roomKey;
-    this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;
+    this.model.user_id = peerId || null;
     this.model.client_id = roomState.clientId;
     this.model.state = state;
     this.model.signaling_url = roomState.socketSession.socketServer;
@@ -10640,11 +10639,12 @@ class HandleSignalingStats extends SkylinkStats {
   }
 }
 
-const onConnection = (resolve, roomKey) => {
+const onConnection = (signaling, resolve, roomKey) => {
   const state = Skylink.getSkylinkState(roomKey);
-  const { socketSession } = state;
+  const { socketSession, user } = state;
+  const peerId = signaling.socket.id || user.sid || null;
 
-  new HandleSignalingStats().send(roomKey, STATES.SIGNALING.CONNECT, null);
+  new HandleSignalingStats().send(roomKey, STATES.SIGNALING.CONNECT, peerId, null);
 
   if (!state.channelOpen) {
     state.channelOpen = true;
@@ -10653,6 +10653,7 @@ const onConnection = (resolve, roomKey) => {
 
   dispatchEvent(channelOpen({
     socketSession: clone_1(socketSession),
+    peerId,
   }));
 
   resolve();
@@ -10661,31 +10662,34 @@ const onConnection = (resolve, roomKey) => {
 const onDisconnect = (roomKey, reason) => {
   const state = Skylink.getSkylinkState(roomKey) || Object.values(Skylink.getSkylinkState())[0]; // to handle leaveAllRooms method
   const isChannelOpen = state.channelOpen;
-  const { room } = state;
+  const { room, user } = state;
   let error = null;
+  const peerId = user.sid || null;
 
   if (reason !== 'io client disconnect') {
     error = reason;
   }
 
-  new HandleSignalingStats().send(room.id, STATES.SIGNALING.DISCONNECT, error);
+  new HandleSignalingStats().send(room.id, STATES.SIGNALING.DISCONNECT, peerId, error);
 
   if (isChannelOpen || (!isChannelOpen && roomKey !== room.roomName)) { // to handle leaveAllRooms method
-    handleSocketClose$1(room.id, reason);
+    handleSocketClose$1(room.id, peerId, reason);
   }
 };
 
-const onError = (roomKey, error) => {
+const onError = (signaling, roomKey, error) => {
   const state = Skylink.getSkylinkState(roomKey);
-  const { socketSession } = state;
+  const { socketSession, user } = state;
+  const peerId = signaling.socket.id || user.sid || null;
 
-  new HandleSignalingStats().send(roomKey, STATES.SIGNALING.ERROR, error);
+  new HandleSignalingStats().send(roomKey, STATES.SIGNALING.ERROR, peerId, error);
 
   logger.log.ERROR([null, 'Socket', null, 'Exception occurred ->'], error);
 
   dispatchEvent(channelError({
     error,
     socketSession: clone_1(socketSession),
+    peerId,
   }));
 };
 
@@ -10696,10 +10700,10 @@ const callbacks = {
 };
 
 const setSocketCallbacks = (roomKey, signaling, resolve) => {
-  signaling.socket.on(SOCKET_EVENTS.CONNECT, callbacks.onConnection.bind(signaling, resolve, roomKey));
+  signaling.socket.on(SOCKET_EVENTS.CONNECT, () => callbacks.onConnection(signaling, resolve, roomKey));
   signaling.socket.on(SOCKET_EVENTS.MESSAGE, signaling.onMessage.bind(signaling));
-  signaling.socket.on(SOCKET_EVENTS.DISCONNECT, callbacks.onDisconnect.bind(signaling, roomKey));
-  signaling.socket.on(SOCKET_EVENTS.ERROR, callbacks.onError.bind(signaling, roomKey));
+  signaling.socket.on(SOCKET_EVENTS.DISCONNECT, reason => callbacks.onDisconnect(roomKey, reason));
+  signaling.socket.on(SOCKET_EVENTS.ERROR, error => callbacks.onError(signaling, roomKey, error));
 };
 
 const isNegotiationTypeMsg = (message) => {
@@ -10784,8 +10788,8 @@ const sendChannelMessage = (socket, message) => {
   socket.send(JSON.stringify(message));
 };
 
-const handleSocketClose$1 = (roomKey, reason) => {
-  handleSocketClose(roomKey, reason);
+const handleSocketClose$1 = (roomKey, peerId, reason) => {
+  handleSocketClose(roomKey, peerId, reason);
 };
 
 const setSocketCallbacks$1 = (roomKey, signaling, resolve) => {
@@ -18637,7 +18641,7 @@ const populatePeerMediaInfo = (updatedState, clonedPeerMedia, mediaInfo) => {
 };
 
 // eslint-disable-next-line consistent-return
-const prepStopStreams = (roomId, streamId, fromLeaveRoom = false, isScreensharing = false) => new Promise((resolve, reject) => {
+const prepStopStreams = (roomId, streamId, isScreensharing = false) => new Promise((resolve, reject) => {
   const state = Skylink.getSkylinkState(roomId);
   const { user, peerStreams } = state;
   if (!state) {
@@ -18649,11 +18653,11 @@ const prepStopStreams = (roomId, streamId, fromLeaveRoom = false, isScreensharin
   }
 
   if (isScreensharing) {
-    stopStreamHelpers.prepStopScreenStream(state.room, streamId, fromLeaveRoom)
+    stopStreamHelpers.prepStopScreenStream(state.room, streamId)
       .then(() => resolve())
       .catch(rej => reject(rej));
   } else {
-    stopStreamHelpers.prepStopUserMediaStreams(state, streamId, fromLeaveRoom)
+    stopStreamHelpers.prepStopUserMediaStreams(state, streamId)
       .then(() => resolve())
       .catch(rej => reject(rej));
   }
@@ -18673,20 +18677,20 @@ const retrieveUserMediaStreams = (state) => {
 };
 
 // eslint-disable-next-line consistent-return
-const prepStopUserMediaStreams = (state, streamId, fromLeaveRoom) => new Promise((resolve, reject) => {
+const prepStopUserMediaStreams = (state, streamId) => new Promise((resolve, reject) => {
   const { user, peerStreams } = state;
   const mediaStreams = retrieveUserMediaStreams(state);
   const isScreensharing = false;
 
   try {
     if (!streamId) {
-      stopStreamHelpers.stopAddedStreams(state, mediaStreams, isScreensharing, fromLeaveRoom);
+      stopStreamHelpers.stopAddedStreams(state, mediaStreams, isScreensharing);
     } else {
       const stream = peerStreams[user.sid][streamId];
-      stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
+      stopStreamHelpers.stopAddedStream(state, stream, isScreensharing);
     }
 
-    return stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
+    return stopStreamHelpers.initRefreshConnectionAndResolve(state.room, resolve, reject);
   } catch (error) {
     logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA], error);
     reject(MESSAGES.MEDIA_STREAM.ERRORS.STOP_USER_MEDIA);
@@ -18864,23 +18868,20 @@ class PeerStream {
   }
 }
 
-const stopAddedStream = (state, stream, isScreensharing = false, fromLeaveRoom = false) => {
+const stopAddedStream = (state, stream, isScreensharing = false) => {
   const { room, user } = state;
 
   try {
     stopStreamHelpers.tryStopStream(stream, user.sid);
+    stopStreamHelpers.removeTracks(room, stream);
+    PeerMedia.setMediaStateToUnavailable(room, user.sid, PeerMedia.retrieveMediaId(stream.getTracks()[0].kind, stream.id));
+    PeerStream.deleteStream(user.sid, room, stream.id);
+    stopStreamHelpers.listenForEventAndDeleteMediaInfo(room, stream);
+    stopStreamHelpers.dispatchEvents(room, stream, isScreensharing);
+    stopStreamHelpers.updateMediaStatusMutedSettings(room, stream);
 
-    if (!fromLeaveRoom) {
-      stopStreamHelpers.removeTracks(room, stream);
-      PeerMedia.setMediaStateToUnavailable(room, user.sid, PeerMedia.retrieveMediaId(stream.getTracks()[0].kind, stream.id));
-      PeerStream.deleteStream(user.sid, room, stream.id);
-      stopStreamHelpers.listenForEventAndDeleteMediaInfo(room, stream);
-      stopStreamHelpers.dispatchEvents(room, stream, isScreensharing);
-      stopStreamHelpers.updateMediaStatusMutedSettings(room, stream);
-
-      if (isScreensharing) {
-        new ScreenSharing(state).deleteScreensharingInstance(room);
-      }
+    if (isScreensharing) {
+      new ScreenSharing(state).deleteScreensharingInstance(room);
     }
 
     logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SUCCESS} - stream id: ${stream.id} ${(isScreensharing ? '(screenshare)' : '')}`]);
@@ -19018,9 +19019,9 @@ const listenForEventAndDeleteMediaInfo = (room, stream) => {
   addEventListener(EVENTS.MEDIA_INFO_DELETED, executeMediaDeletedCallback);
 };
 
-const stopAddedStreams = (state, streams, isScreensharing, fromLeaveRoom) => {
+const stopAddedStreams = (state, streams, isScreensharing) => {
   streams.forEach((stream) => {
-    stopStreamHelpers.stopAddedStream(state, stream, isScreensharing, fromLeaveRoom);
+    stopStreamHelpers.stopAddedStream(state, stream, isScreensharing);
   });
 };
 
@@ -19073,15 +19074,15 @@ const dispatchEvents = (room, stream, isScreensharing = false) => {
   }));
 };
 
-const prepStopScreenStream = (room, streamId, fromLeaveRoom = false) => new Promise((resolve, reject) => {
+const prepStopScreenStream = (room, streamId) => new Promise((resolve, reject) => {
   const state = Skylink.getSkylinkState(room.id);
   const { user, peerStreams } = state;
   const screenStream = peerStreams[user.sid][streamId];
   const isScreensharing = true;
 
   try {
-    stopStreamHelpers.stopAddedStream(state, screenStream, isScreensharing, fromLeaveRoom);
-    stopStreamHelpers.initRefreshConnectionAndResolve(state.room, fromLeaveRoom, resolve, reject);
+    stopStreamHelpers.stopAddedStream(state, screenStream, isScreensharing);
+    stopStreamHelpers.initRefreshConnectionAndResolve(state.room, resolve, reject);
   } catch (error) {
     logger.log.DEBUG([user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN], error);
     reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN));
@@ -19099,29 +19100,27 @@ const dispatchPeerUpdatedEvent = (roomState) => {
 };
 
 // eslint-disable-next-line consistent-return
-const initRefreshConnectionAndResolve = (room, fromLeaveRoom, resolve, reject) => {
+const initRefreshConnectionAndResolve = (room, resolve, reject) => {
   const state = Skylink.getSkylinkState(room.id);
   const { peerConnections } = state;
 
   try {
-    if (!fromLeaveRoom) {
-      if (!isEmptyArray(Object.keys(peerConnections))) {
-        // eslint-disable-next-line consistent-return
-        const executeAnswerAckCallback = (evt) => {
-          const { detail } = evt;
-          if (detail.state === HANDSHAKE_PROGRESS$1.ANSWER_ACK) {
-            return (resolve());
-          }
-        };
+    if (!isEmptyArray(Object.keys(peerConnections))) {
+      // eslint-disable-next-line consistent-return
+      const executeAnswerAckCallback = (evt) => {
+        const { detail } = evt;
+        if (detail.state === HANDSHAKE_PROGRESS$1.ANSWER_ACK) {
+          return (resolve());
+        }
+      };
 
-        addEventListener(EVENTS.HANDSHAKE_PROGRESS, executeAnswerAckCallback);
+      addEventListener(EVENTS.HANDSHAKE_PROGRESS, executeAnswerAckCallback);
 
-        PeerConnection.refreshConnection(state);
-      } else {
-        dispatchPeerUpdatedEvent(state);
-        PeerMedia.deleteUnavailableMedia(state.room, state.user.sid);
-        return resolve();
-      }
+      PeerConnection.refreshConnection(state);
+    } else {
+      dispatchPeerUpdatedEvent(state);
+      PeerMedia.deleteUnavailableMedia(state.room, state.user.sid);
+      return resolve();
     }
   } catch (err) {
     reject(err);
@@ -20090,11 +20089,14 @@ const onerror = (params, error) => {
     logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, 'Datachannel state ->'], error.error.message);
   } else {
     const state = Skylink.getSkylinkState(roomState.room.id);
-    const { room } = state;
+    if (!state) {
+      logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, `No roomState for room ${roomState.room.id}`]);
+    }
+
     const handleDataChannelStats = new HandleDataChannelStats();
 
     logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Datachannel has an exception ->'], error);
-    handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE$1.ERROR, peerId, dataChannel, channelProp, error);
+    handleDataChannelStats.send(state ? state.room.id : roomState.room.id, DATA_CHANNEL_STATE$1.ERROR, peerId, dataChannel, channelProp, error);
     dispatchEvent(onDataChannelStateChanged({
       state: DATA_CHANNEL_STATE$1.ERROR,
       peerId,
@@ -23189,6 +23191,8 @@ const clearPeerInfo = (roomKey, peerId) => {
   delete updatedState.peerStats[peerId];
   delete updatedState.gatheredCandidates[peerId];
   delete updatedState.peerStreams[peerId];
+  delete updatedState.currentRTCRTPSenders[peerId];
+  delete updatedState.bufferedLocalOffer[peerId];
 };
 
 /**
@@ -24785,21 +24789,6 @@ const sendByeOrDisconnectSocket = state => new Promise((resolve) => {
   }
 });
 
-/**
- * Stops streams within a Skylink state.
- * @private
- * @param {SkylinkState} state
- */
-const stopStreams = (state) => {
-  const { room, peerStreams, user } = state;
-
-  if (peerStreams[user.sid]) {
-    stopStreamHelpers.prepStopStreams(room.id, null, true);
-  }
-
-  new ScreenSharing(state).stop(true);
-};
-
 const clearRoomState = (roomKey) => {
   Skylink.clearRoomStateFromSingletons(roomKey);
   Skylink.removeSkylinkState(roomKey);
@@ -24830,7 +24819,6 @@ const leaveRoom = roomState => new Promise((resolve, reject) => {
 
     if (isEmptyArray(peerIds)) {
       logger.log.DEBUG([room.roomName, null, null, LEAVE_ROOM.NO_PEERS]);
-      stopStreams(roomState);
       sendByeOrDisconnectSocket(roomState)
         .then((removedState) => {
           logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.REMOVE_STATE.SUCCESS]);
@@ -24852,10 +24840,7 @@ const leaveRoom = roomState => new Promise((resolve, reject) => {
       });
 
       Promise.all(peerLeftPromises)
-        .then(() => {
-          stopStreams(roomState);
-          return sendByeOrDisconnectSocket(roomState);
-        })
+        .then(() => sendByeOrDisconnectSocket(roomState))
         .then((removedState) => {
           logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.REMOVE_STATE.SUCCESS]);
           dispatchEvent(peerLeft({
@@ -26336,6 +26321,7 @@ const sendStream = (roomState, options = null) => new Promise((resolve, reject) 
 
   try {
     if (Array.isArray(options)) {
+      // check that it is an array of type MediaStream
       let isArrayOfTypeStream = true;
       options.forEach((item) => {
         if (!isAFunction(item.getAudioTracks) || !isAFunction(item.getVideoTracks)) {
@@ -26345,6 +26331,18 @@ const sendStream = (roomState, options = null) => new Promise((resolve, reject) 
 
       if (!isArrayOfTypeStream) {
         return reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_MEDIA_STREAM_ARRAY));
+      }
+
+      // check that the MediaStream is active
+      let isArrayOfActiveStreams = true;
+      options.forEach((stream) => {
+        if (!stream.active) {
+          isArrayOfActiveStreams = false;
+        }
+      });
+
+      if (!isArrayOfActiveStreams) {
+        return reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.INACTIVE_MEDIA_STREAM));
       }
 
       return processMediaStreamArray(roomState, options, resolve, reject);
@@ -28383,9 +28381,9 @@ const retrievePeersScreenStreamId = (state) => {
   return peersScreenStreamId;
 };
 
-const stopScreenStream = (room, screenStream, peerId, fromLeaveRoom = false) => {
+const stopScreenStream = (room, screenStream, peerId) => {
   const isScreensharing = true;
-  stopStreamHelpers.prepStopStreams(room.id, screenStream.id, fromLeaveRoom, isScreensharing)
+  stopStreamHelpers.prepStopStreams(room.id, screenStream.id, isScreensharing)
     .then(() => logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SCREEN_SUCCESS}`]))
     .catch(error => logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN}`], error));
 };
@@ -28483,17 +28481,16 @@ class ScreenSharing {
 
   /**
    * Function that stops the screenshare.
-   * @param {Boolean} fromLeaveRoom
    * @return {MediaStream}
    */
-  stop(fromLeaveRoom = false) {
+  stop() {
     if (!this.stream) {
       logger.log.DEBUG([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.ERRORS.STOP_SCREEN} - ${MESSAGES.MEDIA_STREAM.ERRORS.NO_STREAM}`]);
       return null;
     }
 
     try {
-      helpers$9.stopScreenStream(this.roomState.room, this.stream, this.roomState.user.sid, fromLeaveRoom);
+      helpers$9.stopScreenStream(this.roomState.room, this.stream, this.roomState.user.sid);
       this.streamId = null;
       this.stream = null;
     } catch (error) {
@@ -29216,8 +29213,7 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @description Method that retrieves peer connection bandwidth and ICE connection stats.
-   * @description Method that retrieves peer connection bandwidth and ICE connection stats.
+   * @description Method that retrieves peer connection bandwidth stats and ICE connection status.
    * @param {String} roomName - The room name.
    * @param {String|Array} [peerId] The target peer id to retrieve connection stats from.
    * - When provided as an Array, it will retrieve all connection stats from all the peer ids provided.
@@ -29244,7 +29240,7 @@ class SkylinkPublicInterface {
    *  .catch((error) => {
    *    // handle error
    *  }
-   * @alias Skylink#getConnectionStats
+   * @alias Skylink#getConnectionStatus
    */
   getConnectionStatus(roomName, peerId) {
     const roomState = getRoomStateByName(roomName);
@@ -30059,9 +30055,6 @@ class SkylinkPublicInterface {
 
   /**
    * @description Method that sends a new <code>userMedia</code> stream to all connected peers in a room.
-   * <p>If options are passed as argument into the method, it resolves with an array of <code>MediaStreams</code>. First item in array is
-   * <code>MediaStream</code> of kind audio and second item is <code>MediaStream</code> of kind video. Otherwise it resolves with the array or
-   * <code>MediaStream</code></p>
    * @param {String} roomName - The room name.
    * @param {JSON|MediaStream|Array.<MediaStream>} options - The {@link Skylink#getUserMedia|getUserMedia} <code>options</code> parameter
    * settings. The MediaStream to send to the remote peer or array of MediaStreams.
@@ -30069,6 +30062,14 @@ class SkylinkPublicInterface {
    *   <code>options.video</code> based on the tracks available in the <code>MediaStream</code> object.
    *   Object signature matches the <code>options</code> parameter in the
    *   <code>{@link Skylink#getUserMedia|getUserMedia}</code> method</a>.
+   * <blockquote class="info">
+   *   Note that the <code>MediaStream</code> object should be obtained by using the {@link Skylink#getUserMedia|getUserMedia} method and NOT
+   *   <code>navigator.mediaDevices.getUserMedia</code>. Using the latter may result in unintended side effects such as the {@link SkylinkEvents.event:ON_INCOMING_STREAM|ON INCOMING STREAM}
+   *   event not triggering as expected.
+   * </blockquote>
+   * - If options are passed as argument into the method, it resolves with an array of <code>MediaStreams</code>. First item in array is
+   * <code>MediaStream</code> of kind audio and second item is <code>MediaStream</code> of kind video. Otherwise it resolves with the array or
+   * <code>MediaStream</code>.
    * @return {Promise.<MediaStreams>}
    * @example
    * Example 1: Send new MediaStream with audio and video
