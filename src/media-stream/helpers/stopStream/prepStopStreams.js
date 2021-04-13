@@ -3,7 +3,7 @@ import stopStreamHelpers from './index';
 import MESSAGES from '../../../messages';
 
 // eslint-disable-next-line consistent-return
-const prepStopStreams = (roomId, streamId, isScreensharing = false) => new Promise((resolve, reject) => {
+const prepStopStreams = (roomId, streamId, fromLeaveRoom = false, isScreensharing = false) => new Promise((resolve, reject) => {
   const state = Skylink.getSkylinkState(roomId);
   const { user, peerStreams } = state;
   if (!state) {
@@ -15,11 +15,11 @@ const prepStopStreams = (roomId, streamId, isScreensharing = false) => new Promi
   }
 
   if (isScreensharing) {
-    stopStreamHelpers.prepStopScreenStream(state.room, streamId)
+    stopStreamHelpers.prepStopScreenStream(state.room, streamId, fromLeaveRoom)
       .then(() => resolve())
       .catch(rej => reject(rej));
   } else {
-    stopStreamHelpers.prepStopUserMediaStreams(state, streamId)
+    stopStreamHelpers.prepStopUserMediaStreams(state, streamId, fromLeaveRoom)
       .then(() => resolve())
       .catch(rej => reject(rej));
   }
