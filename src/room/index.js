@@ -9,12 +9,12 @@ import getRoomInfo from './getRoomInfo';
  */
 class Room {
   /** @lends Room */
-  static leaveRoom(...args) {
-    return leaveRoom(...args);
+  static leaveRoom(roomState, stopStreams) {
+    return leaveRoom(roomState, stopStreams);
   }
 
-  static leaveAllRooms() {
-    return leaveAllRooms();
+  static leaveAllRooms(stopStreams) {
+    return leaveAllRooms(stopStreams);
   }
 
   static lockRoom(roomState) {

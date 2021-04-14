@@ -16,12 +16,15 @@ Demo.ShowStats = {};
 Demo.Streams = null;
 Demo._Skylink = Skylink;
 Demo.isMCU = false;
+Demo.videoStream = null;
+Demo.audioStream = null;
 
 
 window.Demo = Demo;
 let selectedPeers = [];
 let _peerId = null;
 let selectedAppKey = null;
+let stopStreamsOnLeaveRoom = true;
 
 const { $, document } = window;
 
@@ -83,6 +86,7 @@ Demo.Methods.toggleInRoomSettings = function(peerId, inRoom) {
     if (Demo.isMCU) {
       $('#join_room_mcu_key').prop('checked', true);
     }
+    $('#stop_stream_false').prop('checked', false);
   }
 };
 
@@ -181,7 +185,7 @@ Demo.Methods.getMediaStatus = function(type) {
 Demo.Methods.logToConsoleDOM = (message, level) => {
   const $loggerListParentDOM = $('ul#console_log');
   const $logListItem = $('<li />').addClass('list-group-item');
-  const $logText = $('<span />').addClass('log-message-text').text(message);
+  const $logText = $('<span />').addClass('log-message-text').text(`[${Demo.Methods.generateTimestamp()}] ${message}`);
 
   if (level) {
     const $levelBadge = $('<span />').addClass(`log-level-badge badge ${level} `).text(level.toUpperCase());
@@ -409,7 +413,11 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM,
     if (isAudioStream) {
       $('#isAudioMuted').css('color',
         (peerInfo.mediaStatus[stream.id].audioMuted === 1) ? 'green' : 'red');
+      Demo.audioStream = stream;
+      Demo.Methods.logToConsoleDOM(`Audio stream is cached`, 'Media Stream');
     } else {
+      Demo.videoStream = stream;
+      Demo.Methods.logToConsoleDOM(`Video stream is cached`, 'Media Stream');
       $('#isVideoMuted').css('color',
         (isVideoStream && peerInfo.mediaStatus[stream.id].videoMuted === 1) ? 'green' : 'red');
     }
@@ -953,6 +961,10 @@ $(document).ready(function() {
     }
   });
   // //---------------------------------------------------
+  $('#stop_stream_false').click(function(e) {
+    stopStreamsOnLeaveRoom = !e.currentTarget.checked;
+  });
+  // //---------------------------------------------------
   $('#get_stored_messages_button').click(function() {
     Demo.Skylink.getStoredMessages(config.defaultRoom);
   });
@@ -995,21 +1007,50 @@ $(document).ready(function() {
     Demo.Skylink.sendStream(config.defaultRoom, mediaOptions);
   };
 
-  $("#add_stream_btn").click(function() {
+  $("#get_media_stream_btn").click(function() {
+    const mediaOptions = {
+      audio: { stereo: true },
+      video: true,
+    };
 
-    const options = {
-      audio: true,
-      video: {
-        resolution: SkylinkConstants.VIDEO_RESOLUTION.QQVGA,
-      }
-    }
-    Demo.Skylink.sendStream(config.defaultRoom, options)
+    Demo.Skylink.getUserMedia(mediaOptions)
     .then((streams) => {
-      console.log("added streams", streams);
+
+      Demo.audioStream = streams[0];
+      Demo.videoStream = streams[1];
+      Demo.Methods.logToConsoleDOM(`Get media streams successful`, 'Media Stream');
+    })
+    .catch((err) => {
+      Demo.Methods.logToConsoleDOM(`Error getting media streams`, 'error');
+      console.log("Error getting media streams", err);
     })
   })
 
-  $("#send_stream_btn").click(function() {
+  $("#send_media_stream_btn").click(function() {
+    const mediaStreams = [];
+    if (Demo.videoStream) {
+      mediaStreams.push(Demo.videoStream);
+    }
+
+    if (Demo.audioStream) {
+      mediaStreams.push(Demo.audioStream);
+    }
+
+    if (mediaStreams.length > 0) {
+      Demo.Skylink.sendStream(config.defaultRoom, mediaStreams)
+      .then((streams) => console.log("Streams sent", streams));
+    } else {
+      Demo.Methods.logToConsoleDOM(`No streams to send`, 'info');
+    }
+  })
+
+  $("#clear_media_stream_btn").click(function() {
+    Demo.audioStream = null;
+    Demo.videoStream = null;
+    Demo.Methods.logToConsoleDOM(`Cached media streams cleared`, 'Media Stream');
+  })
+
+  $("#start_stream_btn").click(function() {
     const mediaOptions = {
       audio: { stereo: true },
       video: true,
@@ -1086,7 +1127,7 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#leave_room_btn').click(function() {
-    Demo.Skylink.leaveRoom(config.defaultRoom)
+    Demo.Skylink.leaveRoom(config.defaultRoom, stopStreamsOnLeaveRoom)
     .then(() => {
       Demo.Methods.toggleInRoomSettings('', false);
       $('#join_room_container').css("display", "block");
@@ -1150,14 +1191,14 @@ $(document).ready(function() {
   $('#start_recording_btn').click(function() {
     Demo.Skylink.startRecording(config.defaultRoom)
     .then((recordingId) => {
-      Demo.Methods.logToConsoleDOM(`[${Demo.Methods.generateTimestamp()}] Recording started: ${recordingId}`, 'Recording');
+      Demo.Methods.logToConsoleDOM(`Recording started: ${recordingId}`, 'Recording');
     })
   });
   // //---------------------------------------------------
   $('#stop_recording_btn').click(function() {
     Demo.Skylink.stopRecording(config.defaultRoom)
     .then((recordingId) => {
-      Demo.Methods.logToConsoleDOM(`[${Demo.Methods.generateTimestamp()}] Recording stopped: ${recordingId}`, 'Recording');
+      Demo.Methods.logToConsoleDOM(`Recording stopped: ${recordingId}`, 'Recording');
       });
     $('#peer_video_list').on('click', '.toggle-connstats', function() {
       $(this).parent().find('.connstats').slideToggle();
@@ -1179,7 +1220,7 @@ $(document).ready(function() {
   $('#get_logs_btn').click(function() {
     console.log(SkylinkLogger.getLogs());
     SkylinkLogger.clearLogs();
-    Demo.Methods.logToConsoleDOM('Check console log for output', 'System');
+    Demo.Methods.logToConsoleDOM(`Check console log for output`, 'System');
   });
 
   window.setSelectedSecret = dom => {

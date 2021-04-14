@@ -82,6 +82,8 @@ export const clearPeerInfo = (roomKey, peerId) => {
   delete updatedState.peerStats[peerId];
   delete updatedState.gatheredCandidates[peerId];
   delete updatedState.peerStreams[peerId];
+  delete updatedState.currentRTCRTPSenders[peerId];
+  delete updatedState.bufferedLocalOffer[peerId];
 };
 
 /**

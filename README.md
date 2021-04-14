@@ -1,4 +1,4 @@
-# SKYLINK WEB SDK 2.2.1
+# SKYLINK WEB SDK 2.2.2
 > Temasys SkylinkJS Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing.
 
 You'll need a Temasys Account, and an App key to use this. [Register here to get your App key](https://console.temasys.io).
@@ -15,14 +15,12 @@ You'll need a Temasys Account, and an App key to use this. [Register here to get
 
 - (+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.
 
-
 #### Read more
 - [Getting started](https://github.com/Temasys/GettingStarted/tree/main/Web)
 - [API Docs](http://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html)
 - [Versions](http://github.com/Temasys/SkylinkJS/releases)
 - [Temasys Console  - Get your App key](https://console.temasys.io)
 - [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/demos/collection/README.md)
-
 
 #### MCU Behaviour
 - There are certain considerations to note when using an MCU key. Read more [here](https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/MCU_BEHAVIOUR.md)
@@ -34,8 +32,9 @@ You'll need a Temasys Account, and an App key to use this. [Register here to get
 
 #### Current versions and stability
 - We recommend that you always use the latest versions of the Temasys SkylinkJS Web SDK as WebRTC is still evolving and we adapt to changes very frequently.
+- It is advised to not attach any event handlers to the WebRTC APIs as doing so may override the handlers set in SkylinkJS and result in unexpected behaviour.
 
-[Latest version: 2.2.1](https://github.com/Temasys/SkylinkJS/releases/tag/2.2.1)
+[Latest version: 2.2.2](https://github.com/Temasys/SkylinkJS/releases/tag/2.2.2)
 
 
 ## How to build your own Temasys SkylinkJS Web SDK

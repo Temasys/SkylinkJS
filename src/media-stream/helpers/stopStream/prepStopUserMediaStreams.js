@@ -38,5 +38,4 @@ const prepStopUserMediaStreams = (state, streamId, fromLeaveRoom) => new Promise
   }
 });
 
-
 export default prepStopUserMediaStreams;

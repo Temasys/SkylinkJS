@@ -317,8 +317,7 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @description Method that retrieves peer connection bandwidth and ICE connection stats.
-   * @description Method that retrieves peer connection bandwidth and ICE connection stats.
+   * @description Method that retrieves peer connection bandwidth stats and ICE connection status.
    * @param {String} roomName - The room name.
    * @param {String|Array} [peerId] The target peer id to retrieve connection stats from.
    * - When provided as an Array, it will retrieve all connection stats from all the peer ids provided.
@@ -345,7 +344,7 @@ class SkylinkPublicInterface {
    *  .catch((error) => {
    *    // handle error
    *  }
-   * @alias Skylink#getConnectionStats
+   * @alias Skylink#getConnectionStatus
    */
   getConnectionStatus(roomName, peerId) {
     const roomState = getRoomStateByName(roomName);
@@ -790,6 +789,7 @@ class SkylinkPublicInterface {
   /**
    * @description Method that stops the room session.
    * @param {String} roomName  - The room name to leave.
+   * @param {Boolean} [stopStreams=true] - The flag if streams should be stopped. Defaults to true.
    * @return {Promise.<String>}
    * @example
    * Example 1:
@@ -809,10 +809,10 @@ class SkylinkPublicInterface {
    * @alias Skylink#leaveRoom
    * @since 0.5.5
    */
-  leaveRoom(roomName) {
+  leaveRoom(roomName, stopStreams = true) {
     const roomState = getRoomStateByName(roomName);
     if (roomState) {
-      return Room.leaveRoom(roomState);
+      return Room.leaveRoom(roomState, stopStreams);
     }
 
     return null;
@@ -820,12 +820,13 @@ class SkylinkPublicInterface {
 
   /**
    * @description Method that stops all room sessions.
+   * @param {Boolean} stopStreams - The flag if streams should be stopped. Defaults to true.
    * @return {Promise.<Array.<String>>}
    * @alias Skylink#leaveAllRooms
    * @since 2.0.0
    */
-  leaveAllRooms() {
-    return Room.leaveAllRooms();
+  leaveAllRooms(stopStreams = true) {
+    return Room.leaveAllRooms(stopStreams);
   }
 
   /**
@@ -1160,9 +1161,6 @@ class SkylinkPublicInterface {
 
   /**
    * @description Method that sends a new <code>userMedia</code> stream to all connected peers in a room.
-   * <p>If options are passed as argument into the method, it resolves with an array of <code>MediaStreams</code>. First item in array is
-   * <code>MediaStream</code> of kind audio and second item is <code>MediaStream</code> of kind video. Otherwise it resolves with the array or
-   * <code>MediaStream</code></p>
    * @param {String} roomName - The room name.
    * @param {JSON|MediaStream|Array.<MediaStream>} options - The {@link Skylink#getUserMedia|getUserMedia} <code>options</code> parameter
    * settings. The MediaStream to send to the remote peer or array of MediaStreams.
@@ -1170,6 +1168,14 @@ class SkylinkPublicInterface {
    *   <code>options.video</code> based on the tracks available in the <code>MediaStream</code> object.
    *   Object signature matches the <code>options</code> parameter in the
    *   <code>{@link Skylink#getUserMedia|getUserMedia}</code> method</a>.
+   * <blockquote class="info">
+   *   Note that the <code>MediaStream</code> object should be obtained by using the {@link Skylink#getUserMedia|getUserMedia} method and NOT
+   *   <code>navigator.mediaDevices.getUserMedia</code>. Using the latter may result in unintended side effects such as the {@link SkylinkEvents.event:ON_INCOMING_STREAM|ON INCOMING STREAM}
+   *   event not triggering as expected.
+   * </blockquote>
+   * - If options are passed as argument into the method, it resolves with an array of <code>MediaStreams</code>. First item in array is
+   * <code>MediaStream</code> of kind audio and second item is <code>MediaStream</code> of kind video. Otherwise it resolves with the array or
+   * <code>MediaStream</code>.
    * @return {Promise.<MediaStreams>}
    * @example
    * Example 1: Send new MediaStream with audio and video

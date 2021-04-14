@@ -5,11 +5,12 @@ import { dispatchEvent } from '../../../utils/skylinkEventManager';
 import { channelOpen } from '../../../skylink-events';
 import { STATES } from '../../../constants';
 
-const onConnection = (resolve, roomKey) => {
+const onConnection = (signaling, resolve, roomKey) => {
   const state = Skylink.getSkylinkState(roomKey);
-  const { socketSession } = state;
+  const { socketSession, user } = state;
+  const peerId = signaling.socket.id || user.sid || null;
 
-  new HandleSignalingStats().send(roomKey, STATES.SIGNALING.CONNECT, null);
+  new HandleSignalingStats().send(roomKey, STATES.SIGNALING.CONNECT, peerId, null);
 
   if (!state.channelOpen) {
     state.channelOpen = true;
@@ -18,6 +19,7 @@ const onConnection = (resolve, roomKey) => {
 
   dispatchEvent(channelOpen({
     socketSession: clone(socketSession),
+    peerId,
   }));
 
   resolve();

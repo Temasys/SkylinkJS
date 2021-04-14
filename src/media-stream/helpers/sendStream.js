@@ -110,6 +110,7 @@ const sendStream = (roomState, options = null) => new Promise((resolve, reject) 
 
   try {
     if (Array.isArray(options)) {
+      // check that it is an array of type MediaStream
       let isArrayOfTypeStream = true;
       options.forEach((item) => {
         if (!isAFunction(item.getAudioTracks) || !isAFunction(item.getVideoTracks)) {
@@ -119,6 +120,18 @@ const sendStream = (roomState, options = null) => new Promise((resolve, reject) 
 
       if (!isArrayOfTypeStream) {
         return reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.INVALID_MEDIA_STREAM_ARRAY));
+      }
+
+      // check that the MediaStream is active
+      let isArrayOfActiveStreams = true;
+      options.forEach((stream) => {
+        if (!stream.active) {
+          isArrayOfActiveStreams = false;
+        }
+      });
+
+      if (!isArrayOfActiveStreams) {
+        return reject(new Error(MESSAGES.MEDIA_STREAM.ERRORS.INACTIVE_MEDIA_STREAM));
       }
 
       return processMediaStreamArray(roomState, options, resolve, reject);
