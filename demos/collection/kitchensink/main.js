@@ -24,6 +24,7 @@ window.Demo = Demo;
 let selectedPeers = [];
 let _peerId = null;
 let selectedAppKey = null;
+let stopStreamsOnLeaveRoom = true;
 
 const { $, document } = window;
 
@@ -85,6 +86,7 @@ Demo.Methods.toggleInRoomSettings = function(peerId, inRoom) {
     if (Demo.isMCU) {
       $('#join_room_mcu_key').prop('checked', true);
     }
+    $('#stop_stream_false').prop('checked', false);
   }
 };
 
@@ -959,6 +961,10 @@ $(document).ready(function() {
     }
   });
   // //---------------------------------------------------
+  $('#stop_stream_false').click(function(e) {
+    stopStreamsOnLeaveRoom = !e.currentTarget.checked;
+  });
+  // //---------------------------------------------------
   $('#get_stored_messages_button').click(function() {
     Demo.Skylink.getStoredMessages(config.defaultRoom);
   });
@@ -1121,7 +1127,7 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#leave_room_btn').click(function() {
-    Demo.Skylink.leaveRoom(config.defaultRoom)
+    Demo.Skylink.leaveRoom(config.defaultRoom, stopStreamsOnLeaveRoom)
     .then(() => {
       Demo.Methods.toggleInRoomSettings('', false);
       $('#join_room_container').css("display", "block");

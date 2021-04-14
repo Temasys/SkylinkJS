@@ -789,6 +789,7 @@ class SkylinkPublicInterface {
   /**
    * @description Method that stops the room session.
    * @param {String} roomName  - The room name to leave.
+   * @param {Boolean} [stopStreams=true] - The flag if streams should be stopped. Defaults to true.
    * @return {Promise.<String>}
    * @example
    * Example 1:
@@ -808,10 +809,10 @@ class SkylinkPublicInterface {
    * @alias Skylink#leaveRoom
    * @since 0.5.5
    */
-  leaveRoom(roomName) {
+  leaveRoom(roomName, stopStreams = true) {
     const roomState = getRoomStateByName(roomName);
     if (roomState) {
-      return Room.leaveRoom(roomState);
+      return Room.leaveRoom(roomState, stopStreams);
     }
 
     return null;
@@ -819,12 +820,13 @@ class SkylinkPublicInterface {
 
   /**
    * @description Method that stops all room sessions.
+   * @param {Boolean} stopStreams - The flag if streams should be stopped. Defaults to true.
    * @return {Promise.<Array.<String>>}
    * @alias Skylink#leaveAllRooms
    * @since 2.0.0
    */
-  leaveAllRooms() {
-    return Room.leaveAllRooms();
+  leaveAllRooms(stopStreams = true) {
+    return Room.leaveAllRooms(stopStreams);
   }
 
   /**
