@@ -6,20 +6,23 @@ import ScreenSharing from '../../../features/screen-sharing';
 import PeerStream from '../../../peer-stream';
 import PeerMedia from '../../../peer-media';
 
-const stopAddedStream = (state, stream, isScreensharing = false) => {
+const stopAddedStream = (state, stream, isScreensharing = false, fromLeaveRoom = false) => {
   const { room, user } = state;
 
   try {
     stopStreamHelpers.tryStopStream(stream, user.sid);
-    stopStreamHelpers.removeTracks(room, stream);
-    PeerMedia.setMediaStateToUnavailable(room, user.sid, PeerMedia.retrieveMediaId(stream.getTracks()[0].kind, stream.id));
-    PeerStream.deleteStream(user.sid, room, stream.id);
-    stopStreamHelpers.listenForEventAndDeleteMediaInfo(room, stream);
-    stopStreamHelpers.dispatchEvents(room, stream, isScreensharing);
-    stopStreamHelpers.updateMediaStatusMutedSettings(room, stream);
 
-    if (isScreensharing) {
-      new ScreenSharing(state).deleteScreensharingInstance(room);
+    if (!fromLeaveRoom) {
+      stopStreamHelpers.removeTracks(room, stream);
+      PeerMedia.setMediaStateToUnavailable(room, user.sid, PeerMedia.retrieveMediaId(stream.getTracks()[0].kind, stream.id));
+      PeerStream.deleteStream(user.sid, room, stream.id);
+      stopStreamHelpers.listenForEventAndDeleteMediaInfo(room, stream);
+      stopStreamHelpers.dispatchEvents(room, stream, isScreensharing);
+      stopStreamHelpers.updateMediaStatusMutedSettings(room, stream);
+
+      if (isScreensharing) {
+        new ScreenSharing(state).deleteScreensharingInstance(room);
+      }
     }
 
     logger.log.INFO([user.sid, TAGS.MEDIA_STREAM, null, `${MESSAGES.MEDIA_STREAM.STOP_SUCCESS} - stream id: ${stream.id} ${(isScreensharing ? '(screenshare)' : '')}`]);

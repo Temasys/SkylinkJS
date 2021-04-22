@@ -66,7 +66,7 @@ export const channelMessage = detail => new SkylinkEvent(CHANNEL_MESSAGE, { deta
 
 // Ref: ESS-2024
 /**
- * @description Event triggered when attempting to establish socket connection to Signaling server when failed.
+ * @description [DEPRECATED] Event triggered when attempting to establish socket connection to Signaling server when failed.
  * @event SkylinkEvents.CHANNEL_RETRY
  * @param {Object} detail - Event's payload.
  * @param {SkylinkConstants.SOCKET_FALLBACK} detail.fallbackType The current fallback state.

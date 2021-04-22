@@ -8,6 +8,8 @@ import { peerLeft, serverPeerLeft } from '../skylink-events';
 import { dispatchEvent, addEventListener, removeEventListener } from '../utils/skylinkEventManager';
 import logger from '../logger/index';
 import PeerConnection from '../peer-connection/index';
+import stopStreamHelpers from '../media-stream/helpers/stopStream/index';
+import ScreenSharing from '../features/screen-sharing';
 import MESSAGES from '../messages';
 import { isEmptyArray } from '../utils/helpers';
 import Room from './index';
@@ -99,6 +101,21 @@ const sendByeOrDisconnectSocket = state => new Promise((resolve) => {
   }
 });
 
+/**
+ * Stops streams within a Skylink state.
+ * @private
+ * @param {SkylinkState} state
+ */
+const stopStreams = (state) => {
+  const { room, peerStreams, user } = state;
+
+  if (peerStreams[user.sid]) {
+    stopStreamHelpers.prepStopStreams(room.id, null, true);
+  }
+
+  new ScreenSharing(state).stop(true);
+};
+
 const clearRoomState = (roomKey) => {
   Skylink.clearRoomStateFromSingletons(roomKey);
   Skylink.removeSkylinkState(roomKey);
@@ -115,9 +132,10 @@ const clearBandwidthAdjuster = (roomKey) => {
 /**
  * Method that starts the peer left process.
  * @param {SkylinkState} roomState
+ * @param {Boolean} stopStreamsB - stop streams boolean value
  * @private
  */
-export const leaveRoom = roomState => new Promise((resolve, reject) => {
+export const leaveRoom = (roomState, stopStreamsB = true) => new Promise((resolve, reject) => {
   const {
     peerConnections, peerInformations, room, hasMCU, user,
   } = roomState;
@@ -129,6 +147,9 @@ export const leaveRoom = roomState => new Promise((resolve, reject) => {
 
     if (isEmptyArray(peerIds)) {
       logger.log.DEBUG([room.roomName, null, null, LEAVE_ROOM.NO_PEERS]);
+      if (stopStreamsB) {
+        stopStreams(roomState);
+      }
       sendByeOrDisconnectSocket(roomState)
         .then((removedState) => {
           logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.REMOVE_STATE.SUCCESS]);
@@ -150,7 +171,12 @@ export const leaveRoom = roomState => new Promise((resolve, reject) => {
       });
 
       Promise.all(peerLeftPromises)
-        .then(() => sendByeOrDisconnectSocket(roomState))
+        .then(() => {
+          if (stopStreamsB) {
+            stopStreams(roomState);
+          }
+          return sendByeOrDisconnectSocket(roomState);
+        })
         .then((removedState) => {
           logger.log.INFO([room.roomName, null, null, LEAVE_ROOM.REMOVE_STATE.SUCCESS]);
           dispatchEvent(peerLeft({
@@ -172,11 +198,12 @@ export const leaveRoom = roomState => new Promise((resolve, reject) => {
 
 /**
  * Method that triggers self to leave all rooms.
+ * @param {Boolean} stopStreamsB - stop streams boolean value
  * @param {Array} closedRooms - Array of rooms that have been left
  * @param {Array} resolves - Array of resolves for each room that have been left
  * @private
  */
-export const leaveAllRooms = (closedRooms = [], resolves = []) => new Promise((resolve, reject) => {
+export const leaveAllRooms = (stopStreamsB = true, closedRooms = [], resolves = []) => new Promise((resolve, reject) => {
   const { ROOM: { LEAVE_ROOM } } = MESSAGES;
 
   try {
@@ -184,11 +211,11 @@ export const leaveAllRooms = (closedRooms = [], resolves = []) => new Promise((r
     const roomStates = Object.values(states);
 
     if (roomStates[0]) { // Checks for existing roomStates and picks the first in the array
-      leaveRoom(roomStates[0])
+      leaveRoom(roomStates[0], stopStreamsB)
         .then((roomName) => {
           closedRooms.push(roomName);
           resolves.push(resolve);
-          leaveAllRooms(closedRooms, resolves);
+          leaveAllRooms(stopStreamsB, closedRooms, resolves);
         });
     } else {
       logger.log.INFO([closedRooms, 'Room', null, LEAVE_ROOM.LEAVE_ALL_ROOMS.SUCCESS]);
