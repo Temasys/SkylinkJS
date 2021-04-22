@@ -12,6 +12,7 @@ import logger from '../../../../logger';
 import { TAGS } from '../../../../constants';
 import MESSAGES from '../../../../messages';
 import HandleUserMediaStats from '../../../../skylink-stats/handleUserMediaStats';
+import HandleClientSessionStats from '../../../../skylink-stats/handleClientSessionStats';
 
 const dispatchIncomingStream = (room, sid) => {
   const state = Skylink.getSkylinkState(room.id);
@@ -83,6 +84,8 @@ const inRoomHandler = (message) => {
     isSelf: true,
     room: roomState.room,
   }));
+
+  new HandleClientSessionStats().send(rid, message);
 
   dispatchIncomingStream(roomState.room, sid);
   startUserMediaStatsInterval(roomState.room.id, sid);
