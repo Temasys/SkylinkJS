@@ -5,7 +5,7 @@ import SkylinkStates from '../../../../skylink-states';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { systemAction } from '../../../../skylink-events';
 import Skylink from '../../../../index';
-import HandleClientSessionStats from '../../../../skylink-stats/handleClientSessionStats';
+import HandleSessionStats from '../../../../skylink-stats/handleSessionStats';
 
 /**
  * Handles the "redirect" message from the Signaling server.
@@ -25,7 +25,7 @@ export const redirectHandler = (message) => {
 
   Skylink.removeSkylinkState(Skylink.getSkylinkState(rid));
 
-  new HandleClientSessionStats().send(rid, message);
+  new HandleSessionStats().send(rid, message);
 
   dispatchEvent(systemAction({
     action,

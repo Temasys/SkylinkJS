@@ -1,7 +1,7 @@
 
 import Skylink from '../../../../index';
 import logger from '../../../../logger';
-import HandleClientSessionStats from '../../../../skylink-stats/handleClientSessionStats';
+import HandleSessionStats from '../../../../skylink-stats/handleSessionStats';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { introduceStateChange } from '../../../../skylink-events';
 import { INTRODUCE_STATE_CHANGE } from '../../../../skylink-events/constants';
@@ -18,7 +18,7 @@ const introduceErrorHandler = (message) => {
   const { room, user } = state;
   logger.log.WARN(['Server', null, message.type, `Introduce failed. Reason: ${message.reason}`]);
 
-  const handleSessionStats = new HandleClientSessionStats();
+  const handleSessionStats = new HandleSessionStats();
   handleSessionStats.send(room.id, message);
   dispatchEvent(introduceStateChange({
     state: INTRODUCE_STATE_CHANGE.ERROR,

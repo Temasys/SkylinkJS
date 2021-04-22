@@ -1,7 +1,7 @@
 import SkylinkStats from './index';
 import Skylink from '../index';
 
-class HandleClientSessionStats extends SkylinkStats {
+class HandleSessionStats extends SkylinkStats {
   constructor() {
     super();
     this.model = {
@@ -30,4 +30,4 @@ class HandleClientSessionStats extends SkylinkStats {
   }
 }
 
-export default HandleClientSessionStats;
+export default HandleSessionStats;
