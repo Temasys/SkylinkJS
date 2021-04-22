@@ -271,14 +271,6 @@ class SkylinkState {
      */
     this.voiceActivityDetection = true;
     /**
-     * Stores the auto bandwidth settings.
-     * @name bandwidthAdjuster
-     * @type JSON
-     * @since 0.6.18
-     * @private
-     */
-    this.bandwidthAdjuster = null;
-    /**
      * Stores the list of RTMP Sessions.
      * @name rtmpSessions
      * @type JSON

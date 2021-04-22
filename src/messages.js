@@ -22,6 +22,7 @@ const MESSAGES = {
     ERRORS: {
       CODEC_SUPPORT: 'No audio/video codecs available to start connection',
     },
+    AUTO_BANDWIDTH_DEPRECATED: 'autoBandwidthAdjustment option in joinRoom method has been deprecated',
   },
   ROOM: {
     ERRORS: {

@@ -152,20 +152,18 @@ class PeerConnectionStatistics {
   /**
    * Fetch webRTC stats of a RTCPeerConnection
    * @param beSilentOnLogs
-   * @param isAutoBwStats
    * @return {Promise<statistics>}
    * @fires GET_CONNECTION_STATUS_STATE_CHANGE
    */
   // eslint-disable-next-line consistent-return
-  getStatistics(beSilentOnLogs = false, isAutoBwStats = false) {
+  getStatistics(beSilentOnLogs = false) {
     const { STATS_MODULE } = messages;
     return new Promise((resolve, reject) => {
-      if (!this.roomState.peerStats[this.peerId] && !isAutoBwStats) {
+      if (!this.roomState.peerStats[this.peerId]) {
         logger.log.WARN(STATS_MODULE.NOT_INITIATED);
         resolve(null);
       } else {
         this.beSilentOnLogs = beSilentOnLogs;
-        this.isAutoBwStats = isAutoBwStats;
 
         try {
           // obtain stats from SDP that are not available in stats report or not complete
