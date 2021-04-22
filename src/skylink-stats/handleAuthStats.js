@@ -17,7 +17,7 @@ class HandleAuthStats extends SkylinkStats {
     };
   }
 
-  send(roomName, state, response, error) {
+  send(roomName, state, response, apiResponse = {}, error) {
     this.model.room_id = roomName;
     // eslint-disable-next-line no-nested-ternary
     this.model.http_status = error ? (-1) : (response && response.status ? response.status : null);
@@ -27,6 +27,7 @@ class HandleAuthStats extends SkylinkStats {
     this.model.app_key = Skylink.getInitOptions().appKey;
     this.model.state = state;
     this.model.timestamp = (new Date()).toISOString();
+    this.model.api_result = apiResponse;
 
     this.postStats(this.endpoints.auth, this.model);
   }
