@@ -1,6 +1,9 @@
 import { getConnectionPortsAndProtocolByBrowser } from '../../compatibility/index';
-import { TURN_TRANSPORT } from '../../constants';
+import { TAGS, TURN_TRANSPORT } from '../../constants';
 import Skylink from '../../index';
+import logger from '../../logger';
+import MESSAGES from '../../messages';
+import { isEmptyArray } from '../../utils/helpers';
 
 const defaultIceServerPorts = {
   udp: [3478, 19302, 19303, 19304],
@@ -61,13 +64,15 @@ const getConnectionPortsByTurnTransport = (params) => {
 const getIceServerPorts = () => defaultIceServerPorts;
 
 /**
+ * @param {String} roomKey - The room id
  * @param {RTCIceServer[]} servers - The list of IceServers passed | {@link https://developer.mozilla.org/en-US/docs/Web/API/RTCIceServer}
  * @memberOf IceConnectionHelpers
  * @private
  * @return {filteredIceServers}
  */
-const setIceServers = (servers) => {
+const setIceServers = (roomKey, servers) => {
   const initOptions = Skylink.getInitOptions();
+  const state = Skylink.getSkylinkState(roomKey);
   const serverConfig = {
     iceServerName: null,
     iceServerPorts: getIceServerPorts(),
@@ -140,7 +145,7 @@ const setIceServers = (servers) => {
     serverConfig.iceServerPorts.tcp = [];
   }
 
-  if (serverConfig.iceServerProtocol === CONSTANTS.STUN && !enableSTUNServer) {
+  if (serverConfig.iceServerProtocol === CONSTANTS.STUN && !enableSTUNServer && !state.hasMCU) {
     serverConfig.iceServers = [];
   } else {
     serverConfig.iceServerPorts.tcp.forEach((tcpPort) => {
@@ -158,12 +163,15 @@ const setIceServers = (servers) => {
     if (!usePublicSTUN) {
       serverConfig.iceServers.splice(0, 1);
     }
-
-    return {
-      iceServers: serverConfig.iceServers,
-    };
   }
-  return null;
+
+  if (isEmptyArray(serverConfig.iceServers) && initOptions.forceTURN && !state.hasMCU) {
+    logger.log.WARN([null, TAGS.PEER_CONNECTION, null, MESSAGES.ICE_CONNECTION.TURN_NOT_ENABLED]);
+  }
+
+  return {
+    iceServers: serverConfig.iceServers,
+  };
 };
 
 export default setIceServers;

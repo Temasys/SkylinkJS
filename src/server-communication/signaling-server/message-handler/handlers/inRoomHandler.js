@@ -67,7 +67,7 @@ const inRoomHandler = (message) => {
   const roomState = Skylink.getSkylinkState(rid);
   const signaling = new SkylinkSignalingServer();
 
-  roomState.room.connection.peerConfig = IceConnection.setIceServers(iceServers);
+  roomState.room.connection.peerConfig = IceConnection.setIceServers(rid, iceServers);
   roomState.room.inRoom = true;
   roomState.user.sid = sid;
   logger.log.INFO([null, TAGS.SIG_SERVER, null, `${MESSAGES.PEER_INFORMATIONS.SET_PEER_PRIORITY_WEIGHT}: `], tieBreaker);
