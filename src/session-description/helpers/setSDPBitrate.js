@@ -28,13 +28,13 @@ const parseFn = (targetMid, sdpLines, sdpType, mediaType, bw) => {
   }
 
   if (!(typeof bw === 'number' && bw > 0)) {
-    logger.log.WARN([targetMid, 'RTCSessionDesription', sdpType, `Not limiting ${mediaType} bandwidth`]);
+    logger.log.INFO([targetMid, 'RTCSessionDesription', sdpType, `Not limiting ${mediaType} bandwidth`]);
     return;
   }
 
   if (mLineIndex === -1 || cLineIndex === -1) {
     // Missing c-line means no media of specified type is being sent
-    logger.log.WARN([targetMid, 'RTCSessionDesription', sdpType, `Not limiting ${mediaType} bandwidth as ${mediaType} is not being sent`]);
+    logger.log.INFO([targetMid, 'RTCSessionDesription', sdpType, `Not limiting ${mediaType} bandwidth as ${mediaType} is not being sent`]);
     return;
   }
 
