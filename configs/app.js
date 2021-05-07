@@ -2,7 +2,7 @@ const config = {
   stats: {
     endPoints: {
       client: '/client',
-      session: '/client/session',
+      session: '/session',
       auth: '/auth',
       signaling: '/client/signaling',
       iceConnection: '/client/iceconnection',
