@@ -1,6 +1,6 @@
 /* eslint-disable prefer-destructuring */
 import Skylink from '../../../index';
-import { SOCKET_FALLBACK, SOCKET_TYPE } from '../../../constants';
+import { SOCKET_FALLBACK, SOCKET_TYPE, CONFIG_NAME } from '../../../constants';
 import retrieveConfig, { DEFAULTS } from '../../../defaults/index';
 import { isAString, isAObj } from '../../../utils/helpers';
 import SkylinkApiResponse from '../../../models/api-response';
@@ -36,7 +36,7 @@ const createSocket = (params) => {
   const { config } = params;
   const { socketServer, socketTimeout, socketServerPath } = initOptions;
   const { socketPorts } = new SkylinkApiResponse(null, params.roomKey);
-  const socketConfig = retrieveConfig('SOCKET', { socketTimeout, socketServerPath });
+  const socketConfig = retrieveConfig(CONFIG_NAME.SOCKET, { socketTimeout, socketServerPath });
 
   let ports = [];
 

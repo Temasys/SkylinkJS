@@ -1,6 +1,7 @@
 import SkylinkStats from './index';
 import Skylink from '../index';
 import retrieveConfig from '../defaults';
+import { CONFIG_NAME } from '../constants';
 
 class HandleIceGatheringStats extends SkylinkStats {
   constructor() {
@@ -30,8 +31,8 @@ class HandleIceGatheringStats extends SkylinkStats {
     this.model.peer_id = peerId;
     this.model.state = state;
     this.model.is_remote = isRemote;
-    this.model.bundlePolicy = retrieveConfig('PEER_CONNECTION').bundlePolicy;
-    this.model.rtcpMuxPolicy = retrieveConfig('PEER_CONNECTION').rtcpMuxPolicy;
+    this.model.bundlePolicy = retrieveConfig(CONFIG_NAME.PEER_CONNECTION, { rid: roomkey }).bundlePolicy;
+    this.model.rtcpMuxPolicy = retrieveConfig(CONFIG_NAME.PEER_CONNECTION, { rid: roomkey }).rtcpMuxPolicy;
 
     this.addToStatsBuffer('iceGathering', this.model, this.endpoints.iceGathering);
     this.manageStatsBuffer();

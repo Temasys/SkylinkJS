@@ -5,6 +5,7 @@ import setSDPBitrate from './setSDPBitrate';
 import getSDPICECandidates from './getSDPICECandidates';
 import getSDPSelectedCodec from './getSDPSelectedCodec';
 import getTransceiverMid from './getTransceiverMid';
+import removeSDPFilteredCandidates from './removeSDPFilteredCandidates';
 
 const helpers = {
   getSDPCommonSupports,
@@ -14,6 +15,7 @@ const helpers = {
   getSDPICECandidates,
   getSDPSelectedCodec,
   getTransceiverMid,
+  removeSDPFilteredCandidates,
 };
 
 export default helpers;
