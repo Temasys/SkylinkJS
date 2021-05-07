@@ -19,9 +19,11 @@ import Room from '../../room';
  */
 const onIceCandidate = (targetMid, candidate, currentRoom) => {
   const state = Skylink.getSkylinkState(currentRoom.id);
+  const initOptions = Skylink.getInitOptions();
   const peerConnection = state.peerConnections[targetMid];
   const signalingServer = new SignalingServer();
   let gatheredCandidates = state.gatheredCandidates[targetMid];
+  const { filterCandidatesType } = initOptions;
   const { CANDIDATE_GENERATION_STATE, TAGS } = constants;
 
   if (!peerConnection) {
@@ -31,7 +33,7 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
 
   if (candidate.candidate) {
     if (!peerConnection.gathering) {
-      logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, messages.ICE_CONNECTION.ICE_GATHERING_STARTED], candidate);
+      logger.log.INFO([targetMid, TAGS.CANDIDATE_HANDLER, null, messages.ICE_CONNECTION.ICE_GATHERING_STARTED], candidate);
       peerConnection.gathering = true;
       peerConnection.gathered = false;
       dispatchEvent(candidateGenerationState({
@@ -50,6 +52,16 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
       && peerConnection.localDescription.sdp.indexOf(`\r\na=mid:${candidate.sdpMid}\r\n`) > -1)) {
       logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CONNECTION.DROP_EOC], candidate);
       return null;
+    }
+
+    // Enforcing forceTURN by filtering out host and srflx candidates
+    if (filterCandidatesType[candidateType]) {
+      if (!(state.hasMCU && initOptions.forceTURN)) {
+        logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.FILTERED_CANDIDATE], candidate);
+        return null;
+      }
+
+      logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, candidateType, messages.ICE_CANDIDATE.FILTERING_FLAG_NOT_HONOURED], candidate);
     }
 
     if (!gatheredCandidates) {

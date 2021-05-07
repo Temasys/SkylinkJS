@@ -40,6 +40,7 @@ const joinRoomOptions = {
   audio: true,
   video: true,
   userData: displayName,
+  autoBandwidthAdjustment: true
 };
 
 if (config.bandwidth && config.bandwidth.video) {

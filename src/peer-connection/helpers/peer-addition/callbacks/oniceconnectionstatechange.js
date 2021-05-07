@@ -7,8 +7,7 @@ import * as constants from '../../../../constants';
 import Skylink from '../../../../index';
 import PeerConnection from '../../../index';
 import HandleBandwidthStats from '../../../../skylink-stats/handleBandwidthStats';
-import BandwidthAdjuster from '../../bandwidthAdjuster';
-import { isAgent, isEmptyObj } from '../../../../utils/helpers';
+import { isAgent } from '../../../../utils/helpers';
 
 const isIceConnectionStateCompleted = (pcIceConnectionState) => {
   const { ICE_CONNECTION_STATE } = constants;
@@ -41,9 +40,7 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
     return;
   }
 
-  const {
-    hasMCU, bandwidthAdjuster, peerStats, streamsBandwidthSettings,
-  } = state;
+  const { peerStats } = state;
 
   if (pcIceConnectionState === ICE_CONNECTION_STATE.FAILED) { // peer connection 'failed' state is dispatched in onconnectionstatechange
     if (isAgent(BROWSER_AGENT.FIREFOX) && !peerStreams[user.sid]) {
@@ -99,14 +96,6 @@ const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState)
         }
       }, initOptions.statsInterval * 1000);
     });
-  }
-
-  if (!hasMCU && isIceConnectionStateCompleted(pcIceConnectionState) && !!bandwidthAdjuster && isEmptyObj(streamsBandwidthSettings.bAS)) {
-    new BandwidthAdjuster({
-      targetMid,
-      state,
-      peerConnection,
-    }).setAdjustmentInterval();
   }
 };
 

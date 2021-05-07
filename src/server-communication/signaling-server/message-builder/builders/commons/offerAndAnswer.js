@@ -1,8 +1,6 @@
 import Skylink from '../../../../../index';
 import PeerData from '../../../../../peer-data/index';
 import logger from '../../../../../logger';
-import handleNegotiationStats from '../../../../../skylink-stats/handleNegotiationStats';
-import messages from '../../../../../messages';
 import { HANDSHAKE_PROGRESS } from '../../../../../constants';
 import PeerMedia from '../../../../../peer-media/index';
 
@@ -12,7 +10,6 @@ const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, res
   const {
     peerConnections, bufferedLocalOffer, peerPriorityWeight, room,
   } = state;
-  const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = messages;
   const peerConnection = peerConnections[targetMid];
   const sd = {
     type: sessionDescription.type,
@@ -24,8 +21,6 @@ const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, res
   logger.log.INFO([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local session description updated ->'], sd.sdp);
 
   if (sessionDescription.type === HANDSHAKE_PROGRESS.OFFER) {
-    handleNegotiationStats.send(room.id, HANDLE_NEGOTIATION_STATS.OFFER.offer, targetMid, sessionDescription, false);
-
     logger.log.INFO([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local offer saved.']);
     bufferedLocalOffer[targetMid] = sessionDescription;
 
@@ -55,8 +50,6 @@ const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, res
 
     resolve(offer);
   } else {
-    handleNegotiationStats.send(room.id, HANDLE_NEGOTIATION_STATS.ANSWER.answer, targetMid, sessionDescription, false);
-
     const answer = {
       type: sd.type,
       sdp: sd.sdp,
