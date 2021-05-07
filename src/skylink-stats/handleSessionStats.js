@@ -11,7 +11,7 @@ class HandleSessionStats extends SkylinkStats {
       room_id: null,
       user_id: null,
       state: null,
-      contents: null,
+      message: null,
     };
   }
 
@@ -22,7 +22,7 @@ class HandleSessionStats extends SkylinkStats {
     this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;
     this.model.client_id = roomState.clientId;
     this.model.state = message.type;
-    this.model.contents = message;
+    this.model.message = JSON.stringify(message);
     this.model.app_key = Skylink.getInitOptions().appKey;
     this.model.timestamp = (new Date()).toISOString();
 
