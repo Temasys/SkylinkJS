@@ -3,7 +3,7 @@
   factory();
 }(function () { 'use strict';
 
-  /* SkylinkJS v2.2.3 Fri May 07 2021 11:01:01 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.2.3 Fri May 14 2021 04:04:19 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -22703,6 +22703,7 @@
         updatedState.bufferedRemoteOffers[targetMid] = updatedState.bufferedRemoteOffers[targetMid] ? updatedState.bufferedRemoteOffers[targetMid] : [];
         updatedState.bufferedRemoteOffers[targetMid].push(message);
         Skylink.setSkylinkState(updatedState, room.id);
+        return false;
       }
 
       if (error) {
