@@ -268,6 +268,7 @@ const canProceed = (state, message) => {
     updatedState.bufferedRemoteOffers[targetMid] = updatedState.bufferedRemoteOffers[targetMid] ? updatedState.bufferedRemoteOffers[targetMid] : [];
     updatedState.bufferedRemoteOffers[targetMid].push(message);
     Skylink.setSkylinkState(updatedState, room.id);
+    return false;
   }
 
   if (error) {
