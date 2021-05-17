@@ -1,4 +1,6 @@
 import Skylink from '../../index';
+import logger from '../../logger';
+import MESSAGES from '../../messages';
 
 /**
  * @param {getUserMediaOptions} options
@@ -28,23 +30,7 @@ const parseMediaOptions = (options, roomState) => {
   }
 
   if (mediaOptions.autoBandwidthAdjustment) {
-    state.bandwidthAdjuster = {
-      interval: 10,
-      limitAtPercentage: 100,
-      useUploadBwOnly: false,
-    };
-
-    if (typeof mediaOptions.autoBandwidthAdjustment === 'object') {
-      if (typeof mediaOptions.autoBandwidthAdjustment.interval === 'number' && mediaOptions.autoBandwidthAdjustment.interval >= 10) {
-        state.bandwidthAdjuster.interval = mediaOptions.autoBandwidthAdjustment.interval;
-      }
-      if (typeof mediaOptions.autoBandwidthAdjustment.limitAtPercentage === 'number' && (mediaOptions.autoBandwidthAdjustment.limitAtPercentage >= 0 && mediaOptions.autoBandwidthAdjustment.limitAtPercentage <= 100)) {
-        state.bandwidthAdjuster.limitAtPercentage = mediaOptions.autoBandwidthAdjustment.limitAtPercentage;
-      }
-      if (typeof mediaOptions.autoBandwidthAdjustment.useUploadBwOnly === 'boolean') {
-        state.bandwidthAdjuster.useUploadBwOnly = mediaOptions.autoBandwidthAdjustment.useUploadBwOnly;
-      }
-    }
+    logger.log.WARN(MESSAGES.JOIN_ROOM.AUTO_BANDWIDTH_DEPRECATED);
   }
   return state;
 };

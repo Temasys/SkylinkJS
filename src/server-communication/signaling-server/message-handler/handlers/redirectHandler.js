@@ -5,6 +5,7 @@ import SkylinkStates from '../../../../skylink-states';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { systemAction } from '../../../../skylink-events';
 import Skylink from '../../../../index';
+import HandleSessionStats from '../../../../skylink-stats/handleSessionStats';
 
 /**
  * Handles the "redirect" message from the Signaling server.
@@ -12,25 +13,25 @@ import Skylink from '../../../../index';
  * @private
  */
 export const redirectHandler = (message) => {
-  logger.log.INFO(['Server', null, message.type, 'System action warning:'], message);
+  const {
+    action, info, reason, rid, type,
+  } = message;
 
-  if (Object.keys((new SkylinkStates()).getAllStates()).length > 1 && message.action === SYSTEM_ACTION.REJECT) {
+  logger.log.INFO(['Server', null, type, 'System action warning:'], message);
+
+  if (Object.keys((new SkylinkStates()).getAllStates()).length > 1 && action === SYSTEM_ACTION.REJECT) {
     disconnect();
   }
 
-  if (message.reason === 'toClose') {
-    // eslint-disable-next-line no-param-reassign
-    message.reason = 'toclose';
-  }
+  Skylink.removeSkylinkState(Skylink.getSkylinkState(rid));
 
-  Skylink.removeSkylinkState(Skylink.getSkylinkState(message.rid));
-  // removeRoomStateByState(new SkylinkStates().getState(message.rid));
+  new HandleSessionStats().send(rid, message);
 
   dispatchEvent(systemAction({
-    action: message.action,
-    info: message.info,
-    reason: message.reason,
-    rid: message.rid,
+    action,
+    info,
+    reason,
+    rid,
   }));
 };
 

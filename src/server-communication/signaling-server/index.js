@@ -17,6 +17,7 @@ import Skylink from '../../index';
 import MESSAGES from '../../messages';
 import { TAGS, SOCKET_ERROR, HANDSHAKE_PROGRESS } from '../../constants';
 import Room from '../../room';
+import HandleSessionStats from '../../skylink-stats/handleSessionStats';
 
 const SOCKET_TYPE = {
   POLLING: 'Polling',
@@ -152,6 +153,12 @@ class SkylinkSignalingServer {
     }));
   }
 
+  // eslint-disable-next-line class-methods-use-this
+  logClientSessionStats(roomKey, message) {
+    const handleSessionStats = new HandleSessionStats();
+    handleSessionStats.send(roomKey, message);
+  }
+
   /**
    *
    * @param args
@@ -180,11 +187,13 @@ class SkylinkSignalingServer {
     const enter = this.messageBuilder.getEnterRoomMessage(...args);
     this.sendMessage(enter);
     this.dispatchHandshakeProgress(...args, 'ENTER');
+    this.logClientSessionStats(args[0].room.id, enter);
   }
 
   joinRoom(...args) {
     const join = this.messageBuilder.getJoinRoomMessage(...args);
     this.sendMessage(join);
+    this.logClientSessionStats(args[0].room.id, join);
   }
 
   offer(...args) {

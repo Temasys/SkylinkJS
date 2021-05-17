@@ -65,13 +65,12 @@ class PeerConnection {
    * @param {SkylinkRoom.id} roomKey
    * @param {String} peerId
    * @param {boolean} beSilentOnLogs
-   * @param {boolean} isAutoBwStats - The flag if retrieveStatistics is called from BandwidthAdjuster
    * @static
    * @return {Promise}
    */
-  static retrieveStatistics(roomKey, peerId, beSilentOnLogs, isAutoBwStats) {
+  static retrieveStatistics(roomKey, peerId, beSilentOnLogs) {
     const peerConnectionStatistics = new PeerConnectionStatistics(roomKey, peerId);
-    return peerConnectionStatistics.getStatistics(beSilentOnLogs, isAutoBwStats);
+    return peerConnectionStatistics.getStatistics(beSilentOnLogs);
   }
 
   /**

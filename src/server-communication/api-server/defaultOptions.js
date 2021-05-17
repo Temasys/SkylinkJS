@@ -36,6 +36,11 @@ const defaultOptions = {
   forceTURN: false,
   forceSSL: true,
   usePublicSTUN: false,
+  filterCandidatesType: {
+    host: false,
+    srflx: false,
+    relay: false,
+  },
   mcuUseRenegoRestart: true,
   useEdgeWebRTC: false,
   enableSimultaneousTransfers: true,

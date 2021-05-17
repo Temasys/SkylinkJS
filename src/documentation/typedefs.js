@@ -214,7 +214,7 @@
  *   constant <code>VIDEO_QUALITY</code> for recommended values.
  * <blockquote class="info">Note that this is currently not supported
  *   with Firefox browsers versions 48 and below as noted in an existing
- *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>. This option will override the <code>autoBandwidthAdjustment</code> option below.</blockquote>
+ *   <a href="https://bugzilla.mozilla.org/show_bug.cgi?id=976521#c21">bugzilla ticket here</a>.</blockquote>
  * @property {number} [bandwidth.audio] The maximum audio streaming bandwidth sent to Peers in kbps.
  *   Recommended values are <code>50</code> to <code>200</code>. <code>50</code> is sufficient enough for
  *   an audio call. The higher you go if you want clearer audio and to be able to hear music streaming.
@@ -225,18 +225,8 @@
  * @property {number} [bandwidth.data] The maximum data streaming bandwidth sent to Peers.
  *   This affects the P2P messaging in {@link Skylink#sendP2PMessage},
  *   and data transfers in {@link Skylink#sendBlobData} and {@link Skylink#sendURLData}.
- * @property {boolean|JSON} [autoBandwidthAdjustment=false] The flag if Peer connections uploading and downloading bandwidth should be automatically adjusted
- *   each time based on a specified interval.
- * <blockquote class="info">
- *   This feature is also only available for non-MCU enabled Peer connections. Note this will cause the peer connection to restart. If <code>bandwidth</code> option is set above, autoBandwidthAdjustment will not be honoured.
- *   </blockquote>
- * @property {number} [autoBandwidthAdjustment.interval=10] The interval each time to adjust bandwidth
- *   connections in seconds.
- *   Note that the minimum value is <code>10</code>.
- * @property {number} [autoBandwidthAdjustment.limitAtPercentage=100] The percentage of the average bandwidth to adjust to.
- *   E.g. <code>avgBandwidth * (limitPercentage / 100)</code>.
- * @property {boolean} [autoBandwidthAdjustment.useUploadBwOnly=false] The flag if average bandwidth computation
- *   should only consist of the upload bandwidth.
+ * @deprecated autoBandwidthAdjustment {boolean|JSON} - The flag if Peer connections uploading and downloading bandwidth should be automatically
+ * adjusted each time based on a specified interval.
  */
 
 /**

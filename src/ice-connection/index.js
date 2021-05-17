@@ -9,11 +9,12 @@ class IceConnection {
   /**
    * @description Function that filters and configures the ICE servers received from Signaling
    * based on the <code>init()</code> configuration and returns the updated list of ICE servers to be used when constructing Peer connection.
+   * @param {String} roomKey - The room id
    * @param {RTCIceServer[]} iceServers - The list of IceServers passed | {@link https://developer.mozilla.org/en-US/docs/Web/API/RTCIceServer}
    * @return {filteredIceServers}
    */
-  static setIceServers(iceServers) {
-    return helpers.setIceServers(iceServers);
+  static setIceServers(roomKey, iceServers) {
+    return helpers.setIceServers(roomKey, iceServers);
   }
 
   /**

@@ -8,7 +8,6 @@ import {
   PEER_TYPE, PEER_CONNECTION_STATE, SERVER_PEER_TYPE, TAGS,
 } from '../../../../constants';
 import MESSAGES from '../../../../messages';
-import BandwidthAdjuster from '../../../../peer-connection/helpers/bandwidthAdjuster';
 import { isEmptyObj } from '../../../../utils/helpers';
 import HandleUserMediaStats from '../../../../skylink-stats/handleUserMediaStats';
 
@@ -68,11 +67,6 @@ export const clearPeerInfo = (roomKey, peerId) => {
     }
     logger.log.INFO([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.SUCCESS]);
   }, 500);
-
-  if (updatedState.bandwidthAdjuster && !updatedState.hasMCU) {
-    // eslint-disable-next-line no-new
-    new BandwidthAdjuster({ roomKey: updatedState.room.id, peerId });
-  }
 
   delete updatedState.peerInformations[peerId];
   delete updatedState.peerMedias[peerId];

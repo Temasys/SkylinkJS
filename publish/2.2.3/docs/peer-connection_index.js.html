@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-connection/helpers/statistics/index.js - Documentation
+      peer-connection/index.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        peer-connection/helpers/statistics/index.js
+        peer-connection/index.js
       </h1>
     
 
@@ -93,283 +93,140 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import Skylink from '../../../index';
-import SessionDescription from '../../../session-description';
-import logger from '../../../logger';
-import messages from '../../../messages';
-import {
-  GET_CONNECTION_STATUS_STATE, DATA_CHANNEL_TYPE, TAGS, BROWSER_AGENT,
-} from '../../../constants';
-import { dispatchEvent } from '../../../utils/skylinkEventManager';
-import { getConnectionStatusStateChange } from '../../../skylink-events/peer-events';
-import parsers from './parsers/index';
-import { isEmptyObj, isAgent } from '../../../utils/helpers';
+    <pre class="prettyprint source linenums"><code>import PeerConnectionStatistics from './helpers/statistics';
+import helpers from './helpers/index';
 
 /**
- * @classdesc This class is used to fetch the statistics for a RTCPeerConnection
+ * @classdesc Class that represents a PeerConnection
  * @class
  * @private
  */
-class PeerConnectionStatistics {
-  constructor(roomKey, peerId) {
-    /**
-     * The current skylink state of the room
-     * @type {SkylinkState}
-     */
-    this.roomState = Skylink.getSkylinkState(roomKey);
-    /**
-     * Current RTCPeerConnection based on the peerId
-     * @type {RTCPeerConnection}
-     */
-    this.peerConnection = this.roomState.peerConnections[peerId] || null;
-    this.dataChannel = this.roomState.dataChannels[peerId] || null;
-    this.peerId = peerId;
-    this.roomKey = roomKey;
-    this.output = {
-      peerId,
-      raw: {},
-      connection: {},
-      audio: {
-        sending: {},
-        receiving: {},
-      },
-      video: {
-        sending: {},
-        receiving: {},
-      },
-      selectedCandidatePair: {
-        id: null,
-        local: {},
-        remote: {},
-        consentRequests: {},
-        responses: {},
-        requests: {},
-      },
-      certificate: {},
-    };
-    this.beSilentOnLogs = Skylink.getInitOptions().beSilentOnStatsLogs;
-    this.beSilentOnParseLogs = Skylink.getInitOptions().beSilentOnParseLogs;
-    this.bandwidth = null;
-  }
-
+class PeerConnection {
   /**
-   * Helper function for getting RTC Connection Statistics
-   * @returns {Promise&lt;statistics>}
+   * @static
+   * @param {object} params - options required to create a PeerConnection
+   * @param {SkylinkRoom} params.currentRoom - The currrent state
+   * @param {String} params.targetMid - Peer's id
+   * @param {Object} params.peerBrowser - Peer's user agent object
+   * @param {RTCCertificate} params.cert - Represents a certificate that an RTCPeerConnection uses to authenticate.
+   * @param {boolean} hasScreenshare - Is screenshare enabled
    */
-  getConnectionStatus() {
-    return this.getStatistics(false, false);
-  }
-
-  getStatsSuccess(promiseResolve, promiseReject, stats) {
-    if (!stats &amp;&amp; isAgent(BROWSER_AGENT.REACT_NATIVE)) {
-      // get stats in react native will resolve with 'null'
-      promiseResolve(this.output);
-      return;
-    }
-    const { peerStats, room } = this.roomState;
-    // TODO: Need to do full implementation of success function
-    if (typeof stats.forEach === 'function') {
-      stats.forEach((item, prop) => {
-        this.output.raw[prop] = item;
-      });
-    } else {
-      this.output.raw = stats;
-    }
-
-    try {
-      if (isEmptyObj(peerStats)) {
-        logger.log.DEBUG([this.peerId, TAGS.STATS_MODULE, null, messages.STATS_MODULE.STATS_DISCARDED]);
-        return;
-      }
-
-      const rawEntries = Object.entries(this.output.raw);
-      rawEntries.forEach((entry) => {
-        const key = entry[0];
-        const value = entry[1];
-        const { type } = value;
-        switch (type) {
-          case 'remote-inbound-rtp': // sender stats
-          case 'outbound-rtp':
-          case 'inbound-rtp':
-            if (type === 'inbound-rtp') {
-              parsers.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, 'receiving');
-            } else {
-              parsers.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, 'sending');
-            }
-            break;
-          case 'certificate':
-            parsers.parseCertificates(this.output, value);
-            break;
-          case 'local-candidate':
-          case 'remote-candidate':
-            parsers.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId);
-            break;
-          case 'media-source':
-            parsers.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId);
-            break;
-          default:
-            // do nothing
-        }
-
-        peerStats[this.peerId][key] = this.output.raw[key];
-
-        Skylink.setSkylinkState(this.roomState, room.id);
-      });
-    } catch (err) {
-      this.getStatsFailure(promiseReject, messages.STATS_MODULE.ERRORS.PARSE_FAILED, err);
-    }
-
-    if (!this.beSilentOnLogs) {
-      dispatchEvent(getConnectionStatusStateChange({
-        state: GET_CONNECTION_STATUS_STATE.RETRIEVE_SUCCESS,
-        peerId: this.peerId,
-        stats: this.output,
-      }));
-    }
-
-    promiseResolve(this.output);
-  }
-
-  getStatsFailure(promiseReject, errorMsg, error) {
-    const errMsg = errorMsg || messages.STATS_MODULE.RETRIEVE_STATS_FAILED;
-
-    if (!this.beSilentOnLogs) {
-      logger.log.ERROR([this.peerId, TAGS.STATS_MODULE, null, errMsg], error);
-      dispatchEvent(getConnectionStatusStateChange({
-        state: GET_CONNECTION_STATUS_STATE.RETRIEVE_ERROR,
-        peerId: this.peerId,
-        error,
-      }));
-    }
-    promiseReject(error);
+  static addPeer(params) {
+    helpers.addPeer(params);
   }
 
   /**
-   * Fetch webRTC stats of a RTCPeerConnection
-   * @param beSilentOnLogs
-   * @param isAutoBwStats
+   * @static
+   * @param args
+   */
+  static createOffer(...args) {
+    return helpers.createOffer(...args);
+  }
+
+  /**
+   * @static
+   * @param args
+   */
+  static createAnswer(...args) {
+    return helpers.createAnswer(...args);
+  }
+
+  /**
+   * @static
+   * @param args
+   */
+  static createDataChannel(...args) {
+    return helpers.createDataChannel(...args);
+  }
+
+  /**
+   * @static
+   * @param args
+   */
+  static sendP2PMessage(...args) {
+    return helpers.sendP2PMessage(...args);
+  }
+
+  /**
+   * @static
+   * @param args
+   */
+  static getPeersInRoom(...args) {
+    return helpers.getPeersInRoom(...args);
+  }
+
+  /**
+   * Get webRTC statistics via the getStats() method of RTCPeerConnection inside a Room
+   * @param {SkylinkRoom.id} roomKey
+   * @param {String} peerId
+   * @param {boolean} beSilentOnLogs
+   * @static
+   * @return {Promise}
+   */
+  static retrieveStatistics(roomKey, peerId, beSilentOnLogs) {
+    const peerConnectionStatistics = new PeerConnectionStatistics(roomKey, peerId);
+    return peerConnectionStatistics.getStatistics(beSilentOnLogs);
+  }
+
+  /**
+   * @static
+   * @param args
+   */
+  static signalingEndOfCandidates(...args) {
+    return helpers.signalingEndOfCandidates(...args);
+  }
+
+  /**
+   * Get RTCPeerConnection status
+   * @param {SkylinkState} roomState
+   * @param {String|Array} peerId
+   * @static
    * @return {Promise&lt;statistics>}
-   * @fires GET_CONNECTION_STATUS_STATE_CHANGE
    */
-  // eslint-disable-next-line consistent-return
-  getStatistics(beSilentOnLogs = false, isAutoBwStats = false) {
-    const { STATS_MODULE } = messages;
-    return new Promise((resolve, reject) => {
-      if (!this.roomState.peerStats[this.peerId] &amp;&amp; !isAutoBwStats) {
-        logger.log.WARN(STATS_MODULE.NOT_INITIATED);
-        resolve(null);
-      } else {
-        this.beSilentOnLogs = beSilentOnLogs;
-        this.isAutoBwStats = isAutoBwStats;
-
-        try {
-          // obtain stats from SDP that are not available in stats report or not complete
-          this.gatherRTCPeerConnectionDetails();
-          this.gatherSDPIceCandidates();
-          this.gatherSDPCodecs();
-          this.gatherRTCDataChannelDetails();
-        } catch (err) {
-          logger.log.WARN([this.peerId, TAGS.STATS_MODULE, null, messages.STATS_MODULE.ERRORS.PARSE_FAILED], err);
-        }
-
-        if (typeof this.peerConnection.getStats !== 'function') {
-          this.getStatsFailure(reject, messages.PEER_CONNECTION.STATS_API_UNAVAILABLE);
-        }
-
-        if (!this.beSilentOnLogs) {
-          dispatchEvent(getConnectionStatusStateChange({
-            state: GET_CONNECTION_STATUS_STATE.RETRIEVING,
-            peerId: this.peerId,
-          }));
-        }
-
-        this.peerConnection.getStats()
-          .then((stats) => { this.getStatsSuccess(resolve, reject, stats); })
-          .catch((error) => {
-            if (error.message === messages.STATS_MODULE.ERRORS.STATS_IS_NULL) {
-              logger.log.WARN([this.peerId, TAGS.STATS_MODULE, null, messages.STATS_MODULE.ERRORS.RETRIEVE_STATS_FAILED], error.message);
-              return;
-            }
-            this.getStatsFailure(reject, null, error);
-          });
-      }
-    });
+  static getConnectionStatus(roomState, peerId) {
+    return helpers.getConnectionStatus(roomState, peerId);
   }
 
   /**
-   * Formats output object with RTCPeerConnection details
-   * @private
+   * Get RTCDataChannel buffer thresholds
+   * @param {RTCDataChannel.channel} channel
+   * @static
+   * @return {{bufferedAmountLow: number, bufferedAmountLowThreshold: number}}
    */
-  gatherRTCPeerConnectionDetails() {
-    const { peerConnection } = this;
-    this.output.connection.iceConnectionState = peerConnection.iceConnectionState;
-    this.output.connection.iceGatheringState = peerConnection.iceGatheringState;
-    this.output.connection.signalingState = peerConnection.signalingState;
-
-    this.output.connection.remoteDescription = {
-      type: (peerConnection.remoteDescription &amp;&amp; peerConnection.remoteDescription.type) || '',
-      sdp: (peerConnection.remoteDescription &amp;&amp; peerConnection.remoteDescription.sdp) || '',
-    };
-
-    this.output.connection.localDescription = {
-      type: (peerConnection.localDescription &amp;&amp; peerConnection.localDescription.type) || '',
-      sdp: (peerConnection.localDescription &amp;&amp; peerConnection.localDescription.sdp) || '',
-    };
-
-    this.output.connection.constraints = this.peerConnection.constraints ? this.peerConnection.constraints : null;
-    this.output.connection.sdpConstraints = this.peerConnection.sdpConstraints ? this.peerConnection.sdpConstraints : null;
+  static getDataChannelBuffer(channel) {
+    return helpers.getDataChannelBuffer(channel);
   }
 
-  /**
-   * Formats output object with Ice Candidate details
-   * @private
-   */
-  gatherSDPIceCandidates() {
-    const { peerConnection, beSilentOnParseLogs } = this;
-    this.output.connection.candidates = {
-      sending: SessionDescription.getSDPICECandidates(this.peerId, peerConnection.localDescription, beSilentOnParseLogs),
-      receiving: SessionDescription.getSDPICECandidates(this.peerId, peerConnection.remoteDescription, beSilentOnParseLogs),
-    };
+  static refreshDataChannel(roomState, peerId) {
+    return helpers.refreshDataChannel(roomState, peerId);
   }
 
-  /**
-   * Formats output object with SDP codecs
-   * @private
-   */
-  gatherSDPCodecs() {
-    const { peerConnection, beSilentOnParseLogs } = this;
-    this.output.audio.sending.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.remoteDescription, 'audio', beSilentOnParseLogs);
-    this.output.video.sending.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.remoteDescription, 'video', beSilentOnParseLogs);
-    this.output.audio.receiving.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.localDescription, 'audio', beSilentOnParseLogs);
-    this.output.video.receiving.codec = SessionDescription.getSDPSelectedCodec(this.peerId, peerConnection.localDescription, 'video', beSilentOnParseLogs);
+  static closeDataChannel(roomState, peerId) {
+    return helpers.closeDataChannel(roomState, peerId);
   }
 
-  /**
-   * Formats output object with RTCDataChannel details
-   * @private
-   */
-  gatherRTCDataChannelDetails() {
-    const { dataChannel } = this;
-    if (dataChannel) {
-      const dcKeys = Object.keys(dataChannel);
+  static refreshConnection(roomState, targetPeerId, iceRestart, options, callback) {
+    return helpers.refreshConnection(roomState, targetPeerId, iceRestart, options, callback);
+  }
 
-      this.output.connection.dataChannels = {};
+  static refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions) {
+    return helpers.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
+  }
 
-      dcKeys.forEach((prop) => {
-        const channel = dataChannel[prop];
-        this.output.connection.dataChannels[channel.channel.label] = {
-          label: channel.channel.label,
-          readyState: channel.channel.readyState,
-          channelType: DATA_CHANNEL_TYPE[prop === 'main' ? 'MESSAGING' : 'DATA'],
-          currentTransferId: channel.transferId || null,
-          currentStreamId: channel.streamId || null,
-        };
-      });
-    }
+  static buildPeerInformations(...args) {
+    return helpers.buildPeerInformations(...args);
+  }
+
+  static closePeerConnection(roomState, peerId) {
+    return helpers.closePeerConnection(roomState, peerId);
+  }
+
+  static updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream) {
+    return helpers.updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream);
   }
 }
 
-export default PeerConnectionStatistics;
+export default PeerConnection;
 </code></pre>
   </article>
 </section>

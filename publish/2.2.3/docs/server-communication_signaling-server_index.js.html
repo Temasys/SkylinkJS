@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-connection/index.js - Documentation
+      server-communication/signaling-server/index.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        peer-connection/index.js
+        server-communication/signaling-server/index.js
       </h1>
     
 
@@ -93,141 +93,345 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import PeerConnectionStatistics from './helpers/statistics';
-import helpers from './helpers/index';
+    <pre class="prettyprint source linenums"><code>import clone from 'clone';
+import {
+  createSocket,
+  sendChannelMessage,
+  processSignalingMessage,
+  setSocketCallbacks,
+  shouldBufferMessage,
+} from './signaling-server-helpers';
+import logger from '../../logger';
+import SignalingMessageHandler from './message-handler/index';
+import SignalingMessageBuilder from './message-builder/index';
+import {
+  socketError, channelMessage, handshakeProgress,
+} from '../../skylink-events';
+import { dispatchEvent } from '../../utils/skylinkEventManager';
+import Skylink from '../../index';
+import MESSAGES from '../../messages';
+import { TAGS, SOCKET_ERROR, HANDSHAKE_PROGRESS } from '../../constants';
+import Room from '../../room';
+import HandleSessionStats from '../../skylink-stats/handleSessionStats';
+
+const SOCKET_TYPE = {
+  POLLING: 'Polling',
+  WEBSOCKET: 'WebSocket',
+  XHR_POLLING: 'xhr-polling',
+  JSONP_POLLING: 'jsonp-polling',
+};
+
+let instance = null;
 
 /**
- * @classdesc Class that represents a PeerConnection
  * @class
+ * @classdesc Singleton class that represents a signaling server
  * @private
  */
-class PeerConnection {
-  /**
-   * @static
-   * @param {object} params - options required to create a PeerConnection
-   * @param {SkylinkRoom} params.currentRoom - The currrent state
-   * @param {String} params.targetMid - Peer's id
-   * @param {Object} params.peerBrowser - Peer's user agent object
-   * @param {RTCCertificate} params.cert - Represents a certificate that an RTCPeerConnection uses to authenticate.
-   * @param {boolean} hasScreenshare - Is screenshare enabled
-   */
-  static addPeer(params) {
-    helpers.addPeer(params);
+class SkylinkSignalingServer {
+  constructor() {
+    if (!instance) {
+      instance = this;
+    }
+    /**
+     * Stores the WebSocket object
+     * @type {WebSocket}
+     */
+    this.socket = null;
+    /**
+     * Stores the number of socket reconnect attempts
+     * @type {number}
+     */
+    this.attempts = 0;
+    /**
+     * Current timestamp
+     * @type {number}
+     */
+    this.timestamp = new Date().valueOf();
+    /**
+     * Handler for incoming messages on the socket
+     * @type {SignalingMessageHandler}
+     */
+    this.messageHandler = new SignalingMessageHandler();
+    /**
+     * Handler for outbound messages via the socket
+     * @type {SignalingMessageBuilder}
+     */
+    this.messageBuilder = new SignalingMessageBuilder();
+    /**
+     * Config needed for create a socket and establishing a socket connection with the Signaling Server
+     * @type {{protocol: Window.location.protocol, socketType: string, signalingServerProtocol: Window.location.protocol, socketSession: {finalAttempts: number, attempts: number}, fallbackType: null, signalingServerPort: null}}
+     */
+    this.config = null;
+    return instance;
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  resetSocketConfig(protocol) {
+    return {
+      protocol,
+      socketType: !window.WebSocket ? SOCKET_TYPE.POLLING : SOCKET_TYPE.WEBSOCKET,
+      signalingServerProtocol: protocol,
+      socketSession: {
+        finalAttempts: 0,
+        attempts: 0,
+      },
+      fallbackType: null,
+      signalingServerPort: null,
+      socketTimeout: false,
+    };
   }
 
   /**
-   * @static
-   * @param args
-   */
-  static createOffer(...args) {
-    return helpers.createOffer(...args);
-  }
-
-  /**
-   * @static
-   * @param args
-   */
-  static createAnswer(...args) {
-    return helpers.createAnswer(...args);
-  }
-
-  /**
-   * @static
-   * @param args
-   */
-  static createDataChannel(...args) {
-    return helpers.createDataChannel(...args);
-  }
-
-  /**
-   * @static
-   * @param args
-   */
-  static sendP2PMessage(...args) {
-    return helpers.sendP2PMessage(...args);
-  }
-
-  /**
-   * @static
-   * @param args
-   */
-  static getPeersInRoom(...args) {
-    return helpers.getPeersInRoom(...args);
-  }
-
-  /**
-   * Get webRTC statistics via the getStats() method of RTCPeerConnection inside a Room
+   * Method that creates a socket - Returns the same instance of socket if already created.
    * @param {SkylinkRoom.id} roomKey
-   * @param {String} peerId
-   * @param {boolean} beSilentOnLogs
-   * @param {boolean} isAutoBwStats - The flag if retrieveStatistics is called from BandwidthAdjuster
-   * @static
+   * @fires SOCKET_ERROR
    * @return {Promise}
    */
-  static retrieveStatistics(roomKey, peerId, beSilentOnLogs, isAutoBwStats) {
-    const peerConnectionStatistics = new PeerConnectionStatistics(roomKey, peerId);
-    return peerConnectionStatistics.getStatistics(beSilentOnLogs, isAutoBwStats);
+  createSocket(roomKey) {
+    const roomState = Skylink.getSkylinkState(roomKey);
+    roomState.socketSession = this.resetSocketConfig(roomState.signalingServerProtocol);
+    Skylink.setSkylinkState(roomState, roomKey);
+
+    return new Promise((resolve, reject) => {
+      try {
+        if (this.socket !== null &amp;&amp; this.socket instanceof window.io.Socket &amp;&amp; this.socket.connected) {
+          resolve();
+        } else {
+          this.tryCreateSocket(roomKey, resolve, reject);
+        }
+      } catch (ex) {
+        this.handleCreateSocketFailure(roomKey, resolve, reject, ex);
+      }
+    });
+  }
+
+  tryCreateSocket(roomKey, resolve, reject) {
+    try {
+      const roomState = Skylink.getSkylinkState(roomKey);
+      const { socketSession } = roomState;
+
+      this.socket = createSocket({
+        config: socketSession,
+        roomKey,
+      });
+
+      setSocketCallbacks(roomKey, this, resolve);
+    } catch (error) {
+      reject(error);
+    }
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  handleCreateSocketFailure(roomKey, resolve, reject, error) {
+    const roomState = Skylink.getSkylinkState(roomKey);
+    const { socketSession } = roomState;
+    logger.log.ERROR(MESSAGES.INIT.SOCKET_CREATE_FAILED, error);
+
+    dispatchEvent(socketError({
+      session: clone(socketSession),
+      errorCode: SOCKET_ERROR.CONNECTION_FAILED,
+      type: socketSession.fallbackType,
+      error,
+    }));
+
+    reject(error);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  dispatchHandshakeProgress(roomState, state) {
+    dispatchEvent(handshakeProgress({
+      peerId: roomState.user.sid,
+      state: HANDSHAKE_PROGRESS[state],
+      error: null,
+      room: Room.getRoomInfo(roomState.room.id),
+    }));
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  logClientSessionStats(roomKey, message) {
+    const handleSessionStats = new HandleSessionStats();
+    handleSessionStats.send(roomKey, message);
   }
 
   /**
-   * @static
+   *
    * @param args
    */
-  static signalingEndOfCandidates(...args) {
-    return helpers.signalingEndOfCandidates(...args);
+  answer(...args) {
+    return this.messageBuilder.getAnswerMessage(...args).then((answer) => {
+      const state = args[0];
+      this.sendMessage(answer);
+      this.dispatchHandshakeProgress(state, 'ANSWER');
+      return answer;
+    });
+  }
+
+  answerAck(...args) {
+    const answerAck = this.messageBuilder.getAnswerAckMessage(...args);
+    const roomState = args[0];
+    this.sendMessage(answerAck);
+    this.dispatchHandshakeProgress(roomState, 'ANSWER_ACK');
   }
 
   /**
-   * Get RTCPeerConnection status
+   *
+   * @param args
+   */
+  enterRoom(...args) {
+    const enter = this.messageBuilder.getEnterRoomMessage(...args);
+    this.sendMessage(enter);
+    this.dispatchHandshakeProgress(...args, 'ENTER');
+    this.logClientSessionStats(args[0].room.id, enter);
+  }
+
+  joinRoom(...args) {
+    const join = this.messageBuilder.getJoinRoomMessage(...args);
+    this.sendMessage(join);
+    this.logClientSessionStats(args[0].room.id, join);
+  }
+
+  offer(...args) {
+    const room = args[0];
+    const peerId = args[1];
+    const state = Skylink.getSkylinkState(room.id);
+    if (state.peerConnections[peerId].negotiating) {
+      logger.log.DEBUG([peerId, TAGS.SIG_SERVER, null, `${MESSAGES.SIGNALING.ABORTING_OFFER}`]);
+      return;
+    }
+
+    this.messageBuilder.getOfferMessage(...args).then((offer) => {
+      this.sendMessage(offer);
+      this.dispatchHandshakeProgress(state, 'OFFER');
+    });
+  }
+
+  welcome(...args) {
+    const welcome = this.messageBuilder.getWelcomeMessage(...args);
+    this.sendMessage(welcome);
+  }
+
+  // eslint-disable-next-line class-methods-use-this
+  noop() {
+    return null;
+  }
+
+  sendCandidate(...args) {
+    const candidate = this.messageBuilder.getCandidateMessage(...args);
+    if (candidate) {
+      this.sendMessage(candidate);
+    }
+  }
+
+  /**
    * @param {SkylinkState} roomState
-   * @param {String|Array} peerId
-   * @static
-   * @return {Promise&lt;statistics>}
    */
-  static getConnectionStatus(roomState, peerId) {
-    return helpers.getConnectionStatus(roomState, peerId);
+  setUserData(roomState) {
+    const userData = this.messageBuilder.getSetUserDataMessage(roomState);
+    if (userData) {
+      this.sendMessage(userData);
+    }
   }
 
   /**
-   * Get RTCDataChannel buffer thresholds
-   * @param {RTCDataChannel.channel} channel
-   * @static
-   * @return {{bufferedAmountLow: number, bufferedAmountLowThreshold: number}}
+   * @param {boolean} showAll
    */
-  static getDataChannelBuffer(channel) {
-    return helpers.getDataChannelBuffer(channel);
+  getPeerList(showAll) {
+    const peers = this.messageBuilder.getPeerListMessage(showAll);
+    if (peers) {
+      this.sendMessage(peers);
+    }
   }
 
-  static refreshDataChannel(roomState, peerId) {
-    return helpers.refreshDataChannel(roomState, peerId);
+  stream(...args) {
+    const stream = this.messageBuilder.getStreamMessage(...args);
+    if (stream) {
+      this.sendMessage(stream);
+    }
   }
 
-  static closeDataChannel(roomState, peerId) {
-    return helpers.closeDataChannel(roomState, peerId);
+  recording(...args) {
+    const recordingMessage = this.messageBuilder.getRecordingMessage(...args);
+    this.sendMessage(recordingMessage);
   }
 
-  static refreshConnection(roomState, targetPeerId, iceRestart, options, callback) {
-    return helpers.refreshConnection(roomState, targetPeerId, iceRestart, options, callback);
+  rtmp(...args) {
+    const rtmpMessage = this.messageBuilder.getRTMPMessage(...args);
+    this.sendMessage(rtmpMessage);
   }
 
-  static refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions) {
-    return helpers.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
+  roomLock(roomState) {
+    const roomLock = this.messageBuilder.getRoomLockMessage(roomState);
+    if (roomLock) {
+      this.sendMessage(roomLock);
+    }
   }
 
-  static buildPeerInformations(...args) {
-    return helpers.buildPeerInformations(...args);
+  bye(...args) {
+    const byeMessage = this.messageBuilder.getByeMessage(...args);
+    this.sendMessage(byeMessage);
   }
 
-  static closePeerConnection(roomState, peerId) {
-    return helpers.closePeerConnection(roomState, peerId);
+  mediaInfoEvent(roomState, peerId, mediaInfo) {
+    const mInfo = this.messageBuilder.getMediaInfoEventMessage(roomState, peerId, mediaInfo);
+    if (mInfo) {
+      this.sendMessage(mInfo);
+    }
   }
 
-  static updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream) {
-    return helpers.updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream);
+  getStoredMessages(roomState) {
+    const history = this.messageBuilder.getGetStoredMessagesMessage(roomState);
+    if (history) {
+      this.sendMessage(history);
+    }
+  }
+
+  onMessage(message) {
+    const roomState = Skylink.getSkylinkState(JSON.parse(message).rid);
+    if (!roomState) {
+      return; // FIXME: to handle multi room when the last peer has left one room and that roomState has been removed but the socket channel is still open as the peer is still in the other room
+    }
+    const { socketSession } = roomState;
+    dispatchEvent(channelMessage({
+      message,
+      socketSession: clone(socketSession),
+    }));
+    processSignalingMessage(this.messageHandler, JSON.parse(message));
+  }
+
+  sendMessage(message) {
+    if (!shouldBufferMessage(message)) {
+      logger.log.INFO(['SIG SERVER', null, message.type, 'sent']);
+      sendChannelMessage(this.socket, message);
+    }
+  }
+
+  sendUserMessage(roomState, config, message) {
+    const peerMessages = this.messageBuilder.getUserMessages(roomState, config, message);
+    if (Array.isArray(peerMessages) &amp;&amp; peerMessages.length) {
+      peerMessages.map((peerMessage) => {
+        this.sendMessage(peerMessage);
+        return null;
+      });
+    }
+  }
+
+  updateAttempts(roomKey, key, attempts) {
+    this.attempts = attempts;
+
+    const state = Skylink.getSkylinkState(roomKey);
+    const { socketSession } = state;
+    socketSession.socketSession[key] = attempts;
+
+    Skylink.setSkylinkState(state, roomKey);
+  }
+
+  getAttempts() {
+    return this.attempts;
   }
 }
 
-export default PeerConnection;
+export default SkylinkSignalingServer;
 </code></pre>
   </article>
 </section>

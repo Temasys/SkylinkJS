@@ -165,8 +165,9 @@ const mungeSDP = (targetMid, sessionDescription, roomKey) => {
   const mungedSessionDescription = sessionDescription;
   // TODO: Below SDP methods needs to be implemented in the SessionDescription Class.
   mungedSessionDescription.sdp = SessionDescription.setSDPBitrate(targetMid, mungedSessionDescription, roomKey);
+  mungedSessionDescription.sdp = SessionDescription.removeSDPFilteredCandidates(targetMid, mungedSessionDescription, roomKey);
 
-  // logger.log.INFO([targetMid, 'RTCSessionDescription', type, `Updated remote ${type} ->`], sessionDescriptionToSet.sdp);
+  logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, mungedSessionDescription.type, `Updated remote ${mungedSessionDescription.type} ->`], mungedSessionDescription);
   return mungedSessionDescription;
 };
 
@@ -221,8 +222,8 @@ const setRemoteDescription = (room, targetMid, remoteDescription) => {
   const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
 
   peerConnection.processingRemoteSDP = true;
-  handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, remoteDescription, true);
   const mungedSessionDescription = mungeSDP(targetMid, remoteDescription, room.id);
+  handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, mungedSessionDescription, true);
   return peerConnection.setRemoteDescription(mungedSessionDescription)
     .then(() => peerConnection);
 };
@@ -362,6 +363,7 @@ const canProceed = (state, message) => {
     updatedState.bufferedRemoteOffers[targetMid] = updatedState.bufferedRemoteOffers[targetMid] ? updatedState.bufferedRemoteOffers[targetMid] : [];
     updatedState.bufferedRemoteOffers[targetMid].push(message);
     Skylink.setSkylinkState(updatedState, room.id);
+    return false;
   }
 
   if (error) {
