@@ -98,7 +98,7 @@ class SkylinkAPIServer {
             room,
           }));
           response.json().then((apiResponse) => {
-            new HandleAuthStats().send(apiResponse.room_key, AUTH_STATE.SUCCESS, response);
+            new HandleAuthStats().send(apiResponse.room_key, AUTH_STATE.SUCCESS, response, apiResponse);
             resolve({
               endpoint,
               response: apiResponse,
@@ -115,7 +115,7 @@ class SkylinkAPIServer {
             room,
           }));
           response.json().then((error) => {
-            new HandleAuthStats().send(room, AUTH_STATE.ERROR, response, error.info);
+            new HandleAuthStats().send(room, AUTH_STATE.ERROR, response, null, error.info);
             reject(error);
           });
         }

@@ -107,6 +107,7 @@ import logger from '../../../../logger';
 import { TAGS } from '../../../../constants';
 import MESSAGES from '../../../../messages';
 import HandleUserMediaStats from '../../../../skylink-stats/handleUserMediaStats';
+import HandleSessionStats from '../../../../skylink-stats/handleSessionStats';
 
 const dispatchIncomingStream = (room, sid) => {
   const state = Skylink.getSkylinkState(room.id);
@@ -162,7 +163,7 @@ const inRoomHandler = (message) => {
   const roomState = Skylink.getSkylinkState(rid);
   const signaling = new SkylinkSignalingServer();
 
-  roomState.room.connection.peerConfig = IceConnection.setIceServers(iceServers);
+  roomState.room.connection.peerConfig = IceConnection.setIceServers(rid, iceServers);
   roomState.room.inRoom = true;
   roomState.user.sid = sid;
   logger.log.INFO([null, TAGS.SIG_SERVER, null, `${MESSAGES.PEER_INFORMATIONS.SET_PEER_PRIORITY_WEIGHT}: `], tieBreaker);
@@ -178,6 +179,8 @@ const inRoomHandler = (message) => {
     isSelf: true,
     room: roomState.room,
   }));
+
+  new HandleSessionStats().send(rid, message);
 
   dispatchIncomingStream(roomState.room, sid);
   startUserMediaStatsInterval(roomState.room.id, sid);

@@ -13,7 +13,6 @@ import ScreenSharing from '../features/screen-sharing';
 import MESSAGES from '../messages';
 import { isEmptyArray } from '../utils/helpers';
 import Room from './index';
-import BandwidthAdjuster from '../peer-connection/helpers/bandwidthAdjuster';
 
 /**
  * Emits the peerLeft event when current peer left the room.
@@ -121,14 +120,6 @@ const clearRoomState = (roomKey) => {
   Skylink.removeSkylinkState(roomKey);
 };
 
-const clearBandwidthAdjuster = (roomKey) => {
-  const state = Skylink.getSkylinkState(roomKey);
-  if (state.bandwidthAdjuster && !state.hasMCU) {
-    // eslint-disable-next-line no-new
-    new BandwidthAdjuster({ roomKey });
-  }
-};
-
 /**
  * Method that starts the peer left process.
  * @param {SkylinkState} roomState
@@ -159,7 +150,6 @@ export const leaveRoom = (roomState, stopStreamsB = true) => new Promise((resolv
             isSelf: true,
             room: Room.getRoomInfo(room.id),
           }));
-          clearBandwidthAdjuster(removedState.room.id);
           clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);
         });
@@ -185,7 +175,6 @@ export const leaveRoom = (roomState, stopStreamsB = true) => new Promise((resolv
             isSelf: true,
             room: Room.getRoomInfo(room.id),
           }));
-          clearBandwidthAdjuster(removedState.room.id);
           clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);
         });

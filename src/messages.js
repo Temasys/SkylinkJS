@@ -22,6 +22,7 @@ const MESSAGES = {
     ERRORS: {
       CODEC_SUPPORT: 'No audio/video codecs available to start connection',
     },
+    AUTO_BANDWIDTH_DEPRECATED: 'autoBandwidthAdjustment option in joinRoom method has been deprecated',
   },
   ROOM: {
     ERRORS: {
@@ -102,13 +103,15 @@ const MESSAGES = {
     ICE_GATHERING_COMPLETED: 'ICE gathering has completed',
     DROP_EOC: 'Dropping of sending ICE candidate end-of-candidates signal or unused ICE candidates ->',
     STATE_CHANGE: 'Ice connection state changed ->',
+    TURN_NOT_ENABLED: 'TURN is not enabled but forceTURN init options is enforced',
   },
   ICE_CANDIDATE: {
     DROPPING_CANDIDATE: 'Dropping ICE candidate',
     INVALID_CANDIDATE: 'Received invalid ICE candidate message ->',
     VALID_CANDIDATE: 'Received ICE candidate ->',
     FILTERED_CANDIDATE: 'Dropping received ICE candidate as it matches ICE candidate filtering flag ->',
-    FILTERING_FLAG_NOT_HONOURED: 'Not dropping received ICE candidate as TURN connections are enforced as MCU is present (and act as a TURN itself) so filtering of ICE candidate flags are not honoured ->',
+    FILTERING_FLAG_NOT_HONOURED: 'Not dropping received ICE candidate even though TURN connections are enforced as MCU is present (and act as a'
+      + ' TURN itself) so filtering of ICE candidate flags are not honoured ->',
     CANDIDATE_ADDED: 'Added ICE candidate successfully',
     ADDING_CANDIDATE: 'Adding ICE Candidate',
     FAILED_ADDING_CANDIDATE: 'Failed adding ICE candidate ->',
@@ -146,6 +149,7 @@ const MESSAGES = {
       OFFER_TIEBREAKER: 'Dropping the received offer: self weight is greater than incoming offer weight -->',
       NO_LOCAL_BUFFERED_OFFER: 'FATAL: No buffered local offer found - Unable to setLocalDescription',
       ADDING_REMOTE_OFFER_TO_BUFFER: 'Adding remote offer received to buffer as current negotiation has not completed',
+      STOP_RENEGOTIATION_FORCE_TURN: 'Stopping renegotiation as TURN is not enabled but forceTURN in init options is enforced',
     },
   },
   SIGNALING: {
@@ -361,6 +365,7 @@ const MESSAGES = {
   },
   UTILS: {
     INVALID_BROWSER_AGENT: 'Invalid browser agent',
+    CONFIG_NOT_FOUND: 'Config not found',
   },
   LOGGER: {
     EVENT_DISPATCHED: 'Event dispatched',

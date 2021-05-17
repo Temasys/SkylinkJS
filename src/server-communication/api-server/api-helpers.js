@@ -90,6 +90,9 @@ export const parseAndMutateOptions = (options) => {
   if (updatedOptions.forceTURN === true) {
     updatedOptions.enableTURNServer = true;
     updatedOptions.enableSTUNServer = false;
+    updatedOptions.filterCandidatesType.host = true;
+    updatedOptions.filterCandidatesType.srflx = true;
+    updatedOptions.filterCandidatesType.relay = false;
   }
 
   return updatedOptions;

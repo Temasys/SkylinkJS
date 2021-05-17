@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      server-communication/signaling-server/message-handler/handlers/introduceErrorHandler.js - Documentation
+      server-communication/api-server/defaultOptions.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        server-communication/signaling-server/message-handler/handlers/introduceErrorHandler.js
+        server-communication/api-server/defaultOptions.js
       </h1>
     
 
@@ -93,37 +93,94 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>
-import Skylink from '../../../../index';
-import logger from '../../../../logger';
-import HandleSessionStats from '../../../../skylink-stats/handleSessionStats';
-import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import { introduceStateChange } from '../../../../skylink-events';
-import { INTRODUCE_STATE_CHANGE } from '../../../../skylink-events/constants';
+    <pre class="prettyprint source linenums"><code>import {
+  TURN_TRANSPORT,
+  AUDIO_CODEC,
+  VIDEO_CODEC,
+} from '../../constants';
 
 /**
- * Function that handles the "introduceError" socket message received.
- * @param {JSON} message
- * @memberOf SignalingMessageHandler
- * @fires INTRODUCE_STATE_CHANGE
+ * @namespace initOptions
+ * @private
+ * @module skylink/defaultOptions
  */
-const introduceErrorHandler = (message) => {
-  const state = Skylink.getSkylinkState();
-  const { room, user } = state;
-  logger.log.WARN(['Server', null, message.type, `Introduce failed. Reason: ${message.reason}`]);
-
-  const handleSessionStats = new HandleSessionStats();
-  handleSessionStats.send(room.id, message);
-  dispatchEvent(introduceStateChange({
-    state: INTRODUCE_STATE_CHANGE.ERROR,
-    privilegedPeerId: user.sid,
-    receivingPeerId: message.receivingPeerId,
-    sendingPeerId: message.sendingPeerId,
-    reason: message.reason,
-  }));
+const defaultOptions = {
+  /*
+   * @param {String} options.appKey The App Key.
+   * &lt;small>By default, &lt;code>init()&lt;/code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
+   * authentication. For credentials based authentication, see the &lt;code>options.credentials&lt;/code> configuration
+   * below. You can know more about the &lt;a href="http://support.temasys.io/support/solutions/articles/
+   * 12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here&lt;/a>
+   * for more details on the various authentication methods.&lt;/small>
+   * &lt;small>If you are using the Persistent Room feature for scheduled meetings, you will require to
+   * use the credential based authentication. See the &lt;a href="http://support.temasys.io/support
+   * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
+   * &lt;/a> for more information.&lt;/small>
+   */
+  defaultRoom: null,
+  appKey: null,
+  roomServer: '//api.temasys.io',
+  enableDataChannel: true,
+  enableSTUNServer: true,
+  enableTURNServer: true,
+  socketServerPath: null,
+  enableStatsGathering: true,
+  audioFallback: true,
+  socketTimeout: 7000,
+  forceTURNSSL: false,
+  forceTURN: false,
+  forceSSL: true,
+  usePublicSTUN: false,
+  filterCandidatesType: {
+    host: false,
+    srflx: false,
+    relay: false,
+  },
+  mcuUseRenegoRestart: true,
+  useEdgeWebRTC: false,
+  enableSimultaneousTransfers: true,
+  TURNServerTransport: TURN_TRANSPORT.ANY,
+  credentials: null,
+  iceServer: null,
+  socketServer: null,
+  audioCodec: AUDIO_CODEC.AUTO,
+  videoCodec: VIDEO_CODEC.AUTO,
+  codecParams: { // TODO: review if codec setting is needed
+    audio: {
+      opus: {
+        stereo: null,
+        'sprop-stereo': null,
+        usedtx: null,
+        useinbandfec: null,
+        maxplaybackrate: null,
+        minptime: null,
+      },
+    },
+    video: {
+      h264: {
+        profileLevelId: null,
+        levelAsymmetryAllowed: null,
+        packetizationMode: null,
+      },
+      vp8: {
+        maxFs: null,
+        maxFr: null,
+      },
+      vp9: {
+        maxFs: null,
+        maxFr: null,
+      },
+    },
+  },
+  beSilentOnStatsLogs: false,
+  beSilentOnParseLogs: false,
+  statsInterval: 20, // sec
 };
 
-export default introduceErrorHandler;
+/**
+ * Default values for options available to initialise SkylinkJS.
+ */
+export default defaultOptions;
 </code></pre>
   </article>
 </section>

@@ -28,6 +28,10 @@ class SessionDescription {
   static getTransceiverMid(...args) {
     return helpers.getTransceiverMid(...args);
   }
+
+  static removeSDPFilteredCandidates(...args) {
+    return helpers.removeSDPFilteredCandidates(...args);
+  }
 }
 
 export default SessionDescription;

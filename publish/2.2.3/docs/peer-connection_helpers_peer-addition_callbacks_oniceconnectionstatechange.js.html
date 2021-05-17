@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      ice-connection/index.js - Documentation
+      peer-connection/helpers/peer-addition/callbacks/oniceconnectionstatechange.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        ice-connection/index.js
+        peer-connection/helpers/peer-addition/callbacks/oniceconnectionstatechange.js
       </h1>
     
 
@@ -93,65 +93,108 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import helpers from './helpers/index';
+    <pre class="prettyprint source linenums"><code>import HandleIceConnectionStats from '../../../../skylink-stats/handleIceConnectionStats';
+import logger from '../../../../logger';
+import messages from '../../../../messages';
+import { dispatchEvent } from '../../../../utils/skylinkEventManager';
+import { iceConnectionState, peerConnectionState } from '../../../../skylink-events';
+import * as constants from '../../../../constants';
+import Skylink from '../../../../index';
+import PeerConnection from '../../../index';
+import HandleBandwidthStats from '../../../../skylink-stats/handleBandwidthStats';
+import { isAgent } from '../../../../utils/helpers';
+
+const isIceConnectionStateCompleted = (pcIceConnectionState) => {
+  const { ICE_CONNECTION_STATE } = constants;
+  return [ICE_CONNECTION_STATE.COMPLETED,
+    ICE_CONNECTION_STATE.CONNECTED].indexOf(pcIceConnectionState) > -1;
+};
 
 /**
- * @classdesc Class representing an IceConnection. Helper methods are listed inside &lt;code>{@link IceConnectionHelpers}&lt;/code>.
- * @private
- * @class
+ * @param {RTCPeerConnection} peerConnection
+ * @param {String} targetMid - The Peer Id
+ * @param {SkylinkState} currentRoomState
+ * @fires ICE_CONNECTION_STATE
+ * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
  */
-class IceConnection {
-  /**
-   * @description Function that filters and configures the ICE servers received from Signaling
-   * based on the &lt;code>init()&lt;/code> configuration and returns the updated list of ICE servers to be used when constructing Peer connection.
-   * @param {RTCIceServer[]} iceServers - The list of IceServers passed | {@link https://developer.mozilla.org/en-US/docs/Web/API/RTCIceServer}
-   * @return {filteredIceServers}
-   */
-  static setIceServers(iceServers) {
-    return helpers.setIceServers(iceServers);
+const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState) => {
+  const { ROOM_STATE, ICE_CONNECTION, PEER_CONNECTION } = messages;
+  const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
+  const state = Skylink.getSkylinkState(currentRoomState.room.id);
+  const { peerStreams, user, enableStatsGathering } = state;
+  const initOptions = Skylink.getInitOptions();
+  let statsInterval = null;
+  const pcIceConnectionState = peerConnection.iceConnectionState;
+
+  if (isAgent(BROWSER_AGENT.REACT_NATIVE) &amp;&amp; !state &amp;&amp; pcIceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
+    return;
   }
 
-  /**
-   * @description Function that adds all the Peer connection buffered ICE candidates received.
-   * This should be called only after the remote session description is received and set.
-   * @param {String} targetMid - The mid of the target peer
-   * @param {SkylinkRoom} room - Current Room
-   */
-  static addIceCandidateFromQueue(targetMid, room) {
-    return helpers.addIceCandidateFromQueue(targetMid, room);
+  if (!state) {
+    logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ROOM_STATE.NOT_FOUND]);
+    return;
   }
 
-  static addIceCandidateToQueue(targetMid, candidateId, candidateType, nativeCandidate, state) {
-    return helpers.addIceCandidateToQueue(targetMid, candidateId, candidateType, nativeCandidate, state);
+  const { peerStats } = state;
+
+  if (pcIceConnectionState === ICE_CONNECTION_STATE.FAILED) { // peer connection 'failed' state is dispatched in onconnectionstatechange
+    if (isAgent(BROWSER_AGENT.FIREFOX) &amp;&amp; !peerStreams[user.sid]) {
+      // no audio and video requested will throw ice connection state failed although ice candidates are exchanged
+      return;
+    }
   }
 
-  /**
-   * Function that adds the ICE candidate to Peer connection.
-   * @param {String} targetMid - The mid of the target peer
-   * @param {String} candidateId - The id of the ICE Candidate
-   * @param {String} candidateType - Type of the ICE Candidate
-   * @param {RTCIceCandidate} nativeCandidate - An RTCIceCandidate Object | {@link https://developer.mozilla.org/en-US/docs/Web/API/RTCIceCandidate}
-   * @param {SkylinkState} roomState - Skylink State
-   * @fires CANDIDATE_PROCESSING_STATE
-   */
-  static addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState) {
-    return helpers.addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState);
-  }
+  logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ICE_CONNECTION.STATE_CHANGE], pcIceConnectionState);
+  const handleIceConnectionStats = new HandleIceConnectionStats();
+  handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
+  dispatchEvent(iceConnectionState({
+    state: pcIceConnectionState,
+    peerId: targetMid,
+  }));
 
-  /**
-   *
-   * @param targetMid - The mid of the target peer
-   * @param {RTCPeerConnectionIceEvent} rtcIceConnectionEvent - {@link https://developer.mozilla.org/en-US/docs/Web/API/RTCPeerConnectionIceEvent}
-   * @param {SkylinkRoom} room - Current room
-   * @fires CANDIDATE_GENERATION_STATE
-   * @return {null}
-   */
-  static onIceCandidate(targetMid, rtcIceConnectionEvent, room) {
-    return helpers.onIceCandidate(targetMid, rtcIceConnectionEvent, room);
-  }
-}
+  if (!statsInterval &amp;&amp; isIceConnectionStateCompleted(pcIceConnectionState) &amp;&amp; !peerStats[targetMid] &amp;&amp; enableStatsGathering) {
+    statsInterval = true;
+    peerStats[targetMid] = {};
 
-export default IceConnection;
+    logger.log.DEBUG([targetMid, 'RTCStatsReport', null, 'Retrieving first report to tabulate results']);
+
+    // Do an initial getConnectionStatus() to backfill the first retrieval in order to do (currentTotalStats - lastTotalStats).
+    PeerConnection.getConnectionStatus(state, targetMid).then(() => {
+      statsInterval = setInterval(() => {
+        const currentState = Skylink.getSkylinkState(state.room.id);
+        if (!currentState || !currentState.room.inRoom) {
+          clearInterval(statsInterval);
+          return;
+        }
+        if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
+          if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED) { // polyfill for
+            // Safari and FF peerConnection state 'closed' when ice failure
+            logger.log.DEBUG([targetMid, 'RTCPeerConnectionState', null, PEER_CONNECTION.STATE_CHANGE], peerConnection.connectionState);
+            dispatchEvent(peerConnectionState({
+              state: PEER_CONNECTION_STATE.CLOSED,
+              peerId: targetMid,
+            }));
+          }
+
+          if (peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
+            logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ICE_CONNECTION.STATE_CHANGE], peerConnection.iceConnectionState);
+            handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
+            dispatchEvent(iceConnectionState({
+              state: ICE_CONNECTION_STATE.CLOSED,
+              peerId: targetMid,
+            }));
+          }
+
+          clearInterval(statsInterval);
+        } else {
+          new HandleBandwidthStats().send(state.room.id, peerConnection, targetMid);
+        }
+      }, initOptions.statsInterval * 1000);
+    });
+  }
+};
+
+export default oniceconnectionstatechange;
 </code></pre>
   </article>
 </section>

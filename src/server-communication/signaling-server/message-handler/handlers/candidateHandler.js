@@ -24,6 +24,7 @@ const candidateHandler = (message) => {
   const peerEndOfCandidatesCounter = state.peerEndOfCandidatesCounter[mid] || {};
   const { RTCIceCandidate } = window;
   const { ICE_CANDIDATE, PEER_CONNECTION, STATS_MODULE: { HANDLE_ICE_GATHERING_STATS } } = messages;
+  const initOptions = Skylink.getInitOptions();
   const handleIceCandidateStats = new HandleIceCandidateStats();
 
   if (!candidate && !message.id) {
@@ -83,6 +84,29 @@ const candidateHandler = (message) => {
 
     PeerConnection.signalingEndOfCandidates(mid, state);
     return null;
+  }
+
+  if (initOptions.filterCandidatesType[candidateType]) {
+    if (!(state.hasMCU && initOptions.forceTURN)) {
+      logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FILTERED_CANDIDATE], nativeCandidate);
+
+      candidateProcessingStateEventDetail.error = new Error(ICE_CANDIDATE.FILTERED_CANDIDATE);
+      handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.DROPPED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
+      dispatchEvent(candidateProcessingState({
+        room,
+        state: constants.CANDIDATE_PROCESSING_STATE.DROPPED,
+        peerId: mid,
+        candidateId,
+        candidateType,
+        candidate: candidateProcessingStateEventDetail.candidate,
+        error: candidateProcessingStateEventDetail.error,
+      }));
+
+      PeerConnection.signalingEndOfCandidates(mid, state);
+      return null;
+    }
+
+    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FILTERING_FLAG_NOT_HONOURED], nativeCandidate);
   }
 
   if (peerConnection.remoteDescription && peerConnection.remoteDescription.sdp && peerConnection.localDescription && peerConnection.localDescription.sdp) {

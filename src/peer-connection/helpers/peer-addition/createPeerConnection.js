@@ -1,5 +1,5 @@
 import {
-  HANDSHAKE_PROGRESS, PEER_TYPE, BROWSER_AGENT, TAGS,
+  HANDSHAKE_PROGRESS, PEER_TYPE, BROWSER_AGENT, TAGS, CONFIG_NAME,
 } from '../../../constants';
 import Skylink from '../../../index';
 import logger from '../../../logger';
@@ -87,7 +87,7 @@ const createPeerConnection = (params) => {
   } = params;
   const state = Skylink.getSkylinkState(currentRoom.id);
   const { room } = state;
-  const constraints = Object.assign({ iceServers: room.connection.peerConfig.iceServers }, retrieveConfig('PEER_CONNECTION'));
+  const constraints = Object.assign({ iceServers: room.connection.peerConfig.iceServers }, retrieveConfig(CONFIG_NAME.PEER_CONNECTION, { rid: currentRoom.id }));
 
   if (cert) {
     constraints.certificates = [cert];
