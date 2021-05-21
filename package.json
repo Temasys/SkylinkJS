@@ -70,7 +70,7 @@
     "rollup-plugin-gzip": "^2.2.0",
     "rollup-plugin-local-resolve": "^1.0.7",
     "rollup-plugin-node-resolve": "^4.0.0",
-    "rollup-plugin-serve": "^1.0.1",
+    "rollup-plugin-serve": "^1.0.2",
     "rollup-plugin-terser": "^5.3.0",
     "serve-static": "^1.13.2",
     "whatwg-fetch": "^3.0.0"
