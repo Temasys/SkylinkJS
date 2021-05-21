@@ -57,7 +57,7 @@
     "eslint-plugin-jsx-a11y": "^6.1.1",
     "finalhandler": "^1.1.1",
     "husky": "^1.0.0-rc.13",
-    "jsdoc": "^3.6.4",
+    "jsdoc": "^3.6.7",
     "jsdom": "^13.0.0",
     "jsdom-global": "3.0.2",
     "localstorage-polyfill": "^1.0.1",
