@@ -29,7 +29,7 @@ const validateDependencies = () => {
     dependencies.fulfilled = false;
     dependencies.readyStateChangeErrorCode = READY_STATE_CHANGE_ERROR.NO_XMLHTTPREQUEST_SUPPORT;
   }
-  if (!((isAgent(BROWSER_AGENT.FIREFOX) && AdapterJS.webrtcDetectedType === 'moz') || isAgent(BROWSER_AGENT.SAFARI) || (isAgent(BROWSER_AGENT.CHROME) && AdapterJS.webrtcDetectedType === 'webkit') || isAgent(BROWSER_AGENT.REACT_NATIVE))) {
+  if (!((isAgent(BROWSER_AGENT.FIREFOX) && AdapterJS.webrtcDetectedType === 'moz') || isAgent(BROWSER_AGENT.SAFARI) || (isAgent(BROWSER_AGENT.CHROME) && AdapterJS.webrtcDetectedType === 'webkit') || (isAgent(BROWSER_AGENT.CHROME) && AdapterJS.webrtcDetectedType === 'AppleWebKit') || isAgent(BROWSER_AGENT.REACT_NATIVE))) {
     logger.log.WARN([header, null, null, MESSAGES.INIT.INCOMPATIBLE_BROWSER]);
   }
   if (!dependencies.fulfilled) {

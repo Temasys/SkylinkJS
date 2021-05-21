@@ -138,11 +138,22 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
   } else if (navigator.userAgent.indexOf('CriOS') > 0) {
     hasMatch = navigator.userAgent.match(/CriOS\/([0-9]+)\./) || [];
 
-    window.webrtcDetectedVersion   = parseInt(hasMatch[1] || '0', 10);
-    window.webrtcMinimumVersion    = 0;
-    window.webrtcDetectedType      = null;
-    window.webrtcDetectedBrowser   = 'chrome';
-    window.webrtcDetectedDCSupport = null;
+    const iOSVersion = navigator.userAgent.match(/CPU OS ([0-9]+)_([0-9]+)/g);
+    // iOS Version 14 and above supports webrtc
+    const isCompatible = iOSVersion[0].split(' ')[2].split('_')[0] > 13;
+    if (isCompatible) {
+      window.webrtcDetectedVersion   = parseInt(hasMatch[1] || '0', 10);
+      window.webrtcMinimumVersion    = 53;
+      window.webrtcDetectedType      = 'AppleWebKit';
+      window.webrtcDetectedBrowser   = 'chrome';
+      window.webrtcDetectedDCSupport = null;
+    } else {
+      window.webrtcDetectedVersion   = parseInt(hasMatch[1] || '0', 10);
+      window.webrtcMinimumVersion    = 0;
+      window.webrtcDetectedType      = null;
+      window.webrtcDetectedBrowser   = 'chrome';
+      window.webrtcDetectedDCSupport = null;
+    }
 
     // Detect Firefox on iOS (does not support WebRTC yet)
   } else if (navigator.userAgent.indexOf('FxiOS') > 0) {
@@ -268,7 +279,6 @@ AdapterJS.addExtensions = function() {
         element.src = URL.createObjectURL(stream);
       } else {
         console.error('Error attaching stream to element.');
-        // logging('Error attaching stream to element.');
       }
       return element;
     };
@@ -283,14 +293,25 @@ AdapterJS.addExtensions = function() {
     };
 
   } else if (AdapterJS.webrtcDetectedType === 'AppleWebKit') {
-    attachMediaStream = function(element, stream) {
-      element.srcObject = stream;
-      return element;
-    };
-    reattachMediaStream = function(to, from) {
-      to.srcObject = from.srcObject;
-      return to;
-    };
+    if (AdapterJS.webrtcDetectedBrowser === 'chrome') {
+      attachMediaStream = function(element, stream) {
+        if (AdapterJS.webrtcDetectedVersion >= 43) {
+          element.srcObject = stream;
+        } else {
+          console.error('Error attaching stream to element.');
+        }
+        return element;
+      };
+    } else {
+      attachMediaStream = function(element, stream) {
+        element.srcObject = stream;
+        return element;
+      };
+      reattachMediaStream = function(to, from) {
+        to.srcObject = from.srcObject;
+        return to;
+      };
+    }
   }
 
 // Propagate attachMediaStream and gUM in window and AdapterJS
