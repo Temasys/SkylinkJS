@@ -29,17 +29,47 @@ const config = {
       banner,
     },
     {
-      file: `${BUILD_PATH}/${BUILD_JS.esm.minFileName}`,
-      format: BUILD_JS.esm.format,
-      exports: 'named',
-      globals,
-      banner,
-    },
-    {
       file: `${BUILD_PATH}/${BUILD_JS.umd.fileName}`,
       format: BUILD_JS.umd.format,
       exports: 'named',
       name: 'Skylink',
+      globals,
+      banner,
+    }
+  ],
+  onwarn: (warning, warn) => {
+    // skip certain warnings
+    if (warning.code === 'CIRCULAR_DEPENDENCY') return;
+    // Use default for everything else
+    warn(warning);
+  },
+  plugins: [
+    json({ compact: true }),
+    resolve({
+      only: ['webrtc-adapter', 'clone', 'crypto-js', 'sdp', 'rtcpeerconnection-shim'],
+    }),
+    commonJS({
+      namedExports: {
+        [WRTC_AJS_DEST_PATH]: ['AdapterJS'],
+      },
+    }),
+    externalGlobals(globals),
+    localResolve(),
+    del({
+      targets: `${BUILD_PATH}`,
+      verbose: true,
+    }),
+  ],
+  external,
+};
+
+const configMin = {
+  input: paths.appIndexJs,
+  output: [
+    {
+      file: `${BUILD_PATH}/${BUILD_JS.esm.minFileName}`,
+      format: BUILD_JS.esm.format,
+      exports: 'named',
       globals,
       banner,
     },
@@ -69,8 +99,8 @@ const config = {
       },
     }),
     terser({
-      include: [/^.+\.min\.umd\.js$/, /^.+\.min\.js$/],
-      exclude: ['some*'],
+      // include: [/^.+\.min\.umd\.js$/, /^.+\.min\.js$/],
+      // exclude: ['some*'],
       compress: {
         arguments: true,
       },
@@ -80,12 +110,8 @@ const config = {
     }),
     externalGlobals(globals),
     localResolve(),
-    del({
-      targets: `${BUILD_PATH}`,
-      verbose: true,
-    }),
   ],
   external,
 };
 
-export default [config];
+export default [config, configMin];
