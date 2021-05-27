@@ -17,8 +17,8 @@ You'll need a Temasys Account, and an App key to use this. [Register here to get
 
 #### Read more
 - [Getting started](https://temasys.io/getting-started-with-webrtc-and-skylinkjs/)
-- [API Docs](http://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html)
-- [Versions](http://github.com/Temasys/SkylinkJS/releases)
+- [API Docs](https://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html)
+- [Versions](https://github.com/Temasys/SkylinkJS/releases)
 - [Temasys Console  - Get your App key](https://console.temasys.io)
 - [View Code Examples](https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/demos/collection/README.md)
 
@@ -27,7 +27,7 @@ You'll need a Temasys Account, and an App key to use this. [Register here to get
 
 
 #### Need help or want something changed?
-- You can raise tickets on [our support portal](http://support.temasys.io) or on [our Github Page](https://console.temasys.io/support).
+- You can raise tickets at our [knowledge center](https://temasys.io/knowledge-center/) or on our [Github Page](https://github.com/Temasys/SkylinkJS/issues).
 
 
 #### Current versions and stability
@@ -38,7 +38,7 @@ You'll need a Temasys Account, and an App key to use this. [Register here to get
 
 
 ## How to build your own Temasys SkylinkJS Web SDK
-Using [Git](http://git-scm.com/download) command line tools, execute the following:
+Using [Git](https://git-scm.com/download) command line tools, execute the following:
 ```
 # 1. Clone or download this repository via git terminal.
 
@@ -63,4 +63,4 @@ __What's included in the repository?__
 
 
 ## License
-[APACHE 2.0](http://www.apache.org/licenses/LICENSE-2.0.html)
+[APACHE 2.0](https://www.apache.org/licenses/LICENSE-2.0.html)
