@@ -18,6 +18,7 @@ Demo._Skylink = Skylink;
 Demo.isMCU = false;
 Demo.videoStream = null;
 Demo.audioStream = null;
+Demo.transferIds = [];
 
 
 window.Demo = Demo;
@@ -37,8 +38,8 @@ if (window.location.href.indexOf("appKey=") > -1) {
 const displayName = `name_user_${  Math.floor((Math.random() * 1000) + 1)}`;
 $('#display_user_info').val(displayName);
 const joinRoomOptions = {
-  audio: true,
-  video: true,
+  audio: false,
+  video: false,
   userData: displayName,
   autoBandwidthAdjustment: true
 };
@@ -604,6 +605,87 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.CHANNEL_REOPEN, (ev
   Demo.Methods.logToConsoleDOM(`CHANNEL_REOPEN`, 'info');
 });
 
+
+// //---------------------------------------------------
+// // DATA TRANSFER EVENTS
+// //---------------------------------------------------
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.DATA_TRANSFER_STATE, (evt) => {
+  Demo.Methods.logToConsoleDOM(`DATA_TRANSFER_STATE`, 'info');
+  const { state, transferInfo, peerId, transferId } = evt.detail;
+
+  let transferStatus;
+  let isUpload;
+  let transfers;
+  let item;
+  switch (state) {
+    case SkylinkConstants.DATA_TRANSFER_STATE.UPLOAD_REQUEST:
+      var result = confirm('Incoming transfer request!\n\nFile: ' + transferInfo.name +
+        '\n\nSize: ' + transferInfo.size + '\n\nAccept?');
+        Demo.Skylink.respondBlobRequest(config.defaultRoom, peerId, transferId, result)
+        .then((result) => console.log("respondBlobRequest", result))
+        .catch((err) => console.log("respondBlobRequest", err))
+      break;
+    case SkylinkConstants.DATA_TRANSFER_STATE.UPLOAD_STARTED:
+      Demo.transferIds[peerId] = transferId;
+      isUpload = true;
+      transfers = document.getElementById('transfers');
+      item = document.createElement('tr');
+      item.innerHTML = '<td>' + transferId + '</td><td class="text-center">' +
+        ((isUpload) ? '&#8657;' : '&#8659;') + '</td>' +
+        '<td class="text-center">' + peerId + '</td><td class="text-center">' + transferInfo.name +
+        '</td><td class="text-center"><span id="' + peerId + '_' + transferId + '"></span>' +
+        ((!isUpload) ? '<a id="' + transferId + '" href="#" download="' +
+          transferInfo.name + '" style="display:none">Download</a>' : '') + '</td>';
+      transfers.appendChild(item);
+      break;
+      case SkylinkConstants.DATA_TRANSFER_STATE.DOWNLOAD_STARTED:
+        Demo.transferIds[peerId] = transferId;
+        isUpload = false;
+        transfers = document.getElementById('transfers');
+          item = document.createElement('tr');
+        item.innerHTML = '<td>' + transferId + '</td><td class="text-center">' +
+          ((isUpload) ? '&#8657;' : '&#8659;') + '</td>' +
+          '<td class="text-center">' + peerId + '</td><td class="text-center">' + transferInfo.name +
+          '</td><td class="text-center"><span id="' + peerId + '_' + transferId + '"></span>' +
+          ((!isUpload) ? '<a id="' + transferId + '" href="#" download="' +
+            transferInfo.name + '" style="display:none">Download</a>' : '') + '</td>';
+        transfers.appendChild(item);
+      break;
+      case SkylinkConstants.DATA_TRANSFER_STATE.CANCEL:
+        console.log("CANCEL DATA TRANSFER");
+        delete Demo.transferIds[peerId];
+      break;
+      case SkylinkConstants.DATA_TRANSFER_STATE.ERROR:
+      break;
+      case SkylinkConstants.DATA_TRANSFER_STATE.UPLOADING:
+      break;
+      case SkylinkConstants.DATA_TRANSFER_STATE.DOWNLOADING:
+      break;
+      case SkylinkConstants.DATA_TRANSFER_STATE.UPLOAD_COMPLETED:
+        transferStatus = document.getElementById(peerId + '_' + transferId);
+        transferStatus.innerHTML = 'Completed';
+        transferStatus.href = URL.createObjectURL(transferInfo.data);
+        delete Demo.transferIds[peerId];
+      break;
+      case SkylinkConstants.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED:
+        transferStatus = document.getElementById(peerId + '_' + transferId);
+        transferStatus.innerHTML = 'Completed';
+
+        transferStatus = document.getElementById(transferId);
+        transferStatus.href = URL.createObjectURL(transferInfo.data);
+        transferStatus.style.display = 'block';
+      break;
+      case SkylinkConstants.DATA_TRANSFER_STATE.USER_REJECTED:
+      break;
+      case SkylinkConstants.DATA_TRANSFER_STATE.USER_UPLOAD_REQUEST:
+      break;
+      case SkylinkConstants.DATA_TRANSFER_STATE.START_ERROR:
+      break;
+  }
+
+});
+
+
 // //---------------------------------------------------
 // // STATE EVENTS
 // //---------------------------------------------------
@@ -952,6 +1034,18 @@ $(document).ready(function() {
       }
     }
     $('#chat_input').val('');
+  });
+  // //---------------------------------------------------
+  $('#send_file_button').click(function(e) {
+    Demo.Skylink.sendBlobData(config.defaultRoom, $('#file_input').prop('files')[0], null)
+    .then((res) => console.log("sendBlobData success", res))
+    .catch((err) => console.error("sendBlobData error", err));
+    // setTimeout(() => {
+    //   const transferPeers = Object.keys(Demo.transferIds);
+    //   Demo.Skylink.cancelBlobTransfer(config.defaultRoom, transferPeers[0], Demo.transferIds[transferPeers[0]])
+    //   .then((res) => console.log("cancelBlobTransfer", res))
+    //   .catch((err) => console.error("cancelBlobTransfer", err));
+    // }, 3000)
   });
   // //---------------------------------------------------
   $('#set_persistent_message').click(function(e) {

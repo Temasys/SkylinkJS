@@ -27,7 +27,7 @@ class PeerConnectionStatistics {
      * @type {RTCPeerConnection}
      */
     this.peerConnection = this.roomState.peerConnections[peerId] || null;
-    this.dataChannel = this.roomState.dataChannels[peerId] || null;
+    this.dataChannel = this.roomState.peerDataChannels[peerId] || null;
     this.peerId = peerId;
     this.roomKey = roomKey;
     this.output = {
@@ -256,11 +256,11 @@ class PeerConnectionStatistics {
     if (dataChannel) {
       const dcKeys = Object.keys(dataChannel);
 
-      this.output.connection.dataChannels = {};
+      this.output.connection.peerDataChannels = {};
 
       dcKeys.forEach((prop) => {
         const channel = dataChannel[prop];
-        this.output.connection.dataChannels[channel.channel.label] = {
+        this.output.connection.peerDataChannels[channel.channel.label] = {
           label: channel.channel.label,
           readyState: channel.channel.readyState,
           channelType: DATA_CHANNEL_TYPE[prop === 'main' ? 'MESSAGING' : 'DATA'],

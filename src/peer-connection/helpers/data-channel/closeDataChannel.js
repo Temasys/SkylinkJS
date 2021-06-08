@@ -8,8 +8,8 @@ import { dispatchEvent } from '../../../utils/skylinkEventManager';
 import Skylink from '../../../index';
 
 const closeFn = (roomState, peerId, channelNameProp) => {
-  const { dataChannels } = roomState;
-  const targetDataChannel = dataChannels[peerId][channelNameProp];
+  const { peerDataChannels } = roomState;
+  const targetDataChannel = peerDataChannels[peerId][channelNameProp];
   const { channelName, channelType } = targetDataChannel.channelName;
 
   if (targetDataChannel.readyState !== DATA_CHANNEL_STATE.CLOSED) {
@@ -30,36 +30,36 @@ const closeFn = (roomState, peerId, channelNameProp) => {
 
     targetDataChannel.channel.close();
 
-    delete dataChannels[peerId][channelNameProp];
+    delete peerDataChannels[peerId][channelNameProp];
   }
 };
 
 const closeAllDataChannels = (roomState, peerId) => {
-  const { dataChannels } = roomState;
-  const channelNameProp = Object.keys(dataChannels[peerId]);
+  const { peerDataChannels } = roomState;
+  const channelNameProp = Object.keys(peerDataChannels[peerId]);
   for (let i = 0; i < channelNameProp.length; i += 1) {
-    if (Object.hasOwnProperty.call(dataChannels[peerId], channelNameProp[i])) {
+    if (Object.hasOwnProperty.call(peerDataChannels[peerId], channelNameProp[i])) {
       closeFn(roomState, peerId, channelNameProp[i]);
     }
   }
 
-  delete dataChannels[peerId];
+  delete peerDataChannels[peerId];
 };
 
 /**
  * Function that closes the datachannel.
- * @param {SkylinkState} roomState
+ * @param {string} roomKey - The room id.
  * @param {String} peerId - The Peer Id.
  * @param {String} [channelProp=main] - The channel property.
  * @memberOf PeerConnection.PeerConnectionHelpers
  * @fires DATA_CHANNEL_STATE
  */
-const closeDataChannel = (roomState, peerId, channelProp = 'main') => {
+const closeDataChannel = (roomKey, peerId, channelProp = 'main') => {
   try {
-    const updatedState = Skylink.getSkylinkState(roomState.room.id);
-    const { dataChannels, room } = updatedState;
+    const updatedState = Skylink.getSkylinkState(roomKey);
+    const { peerDataChannels, room } = updatedState;
 
-    if (!dataChannels[peerId] || !dataChannels[peerId][channelProp]) {
+    if (!peerDataChannels[peerId] || !peerDataChannels[peerId][channelProp]) {
       logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp || null,
         MESSAGES.DATA_CHANNEL.ERRORS.NO_SESSIONS]);
       return;

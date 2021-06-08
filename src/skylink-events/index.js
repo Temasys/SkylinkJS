@@ -104,6 +104,10 @@ import {
  *    <li>{@link SkylinkEvents.event:ENCRYPT_SECRETS_UPDATED|ENCRYPT_SECRETS_UPDATED}</li>
  *    <li>{@link SkylinkEvents.event:PERSISTENT_MESSAGE_STATE|PERSISTENT_MESSAGE_STATE}</li>
  *  </ul>
+ *  <strong>DATA TRANSFER EVENTS</strong> </br>
+ *  <ul>
+ *    <li>{@link SkylinkEvents.event:ON_INCOMING_DATA|ON_INCOMING_DATA}</li>
+ *  </ul>
  *  <strong>CANDIDATE EVENTS</strong> </br>
  *  <ul>
  *    <li>{@link SkylinkEvents.event:CANDIDATE_PROCESSING_STATE|CANDIDATE_PROCESSING_STATE}</li>

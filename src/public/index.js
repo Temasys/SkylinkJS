@@ -16,6 +16,7 @@ import RTMP from '../features/rtmp/index';
 import AsyncMessaging from '../features/messaging/async-messaging';
 import EncryptedMessaging from '../features/messaging/encrypted-messaging';
 import Messaging from '../features/messaging';
+import DataTransfer from '../features/data-transfer';
 
 /**
  * @classdesc This class lists all the public methods of Skylink.
@@ -1380,6 +1381,21 @@ class SkylinkPublicInterface {
    */
   getSdkVersion() {
     return SDK_VERSION;
+  }
+
+  sendBlobData(roomName, data, peerId, timeout) {
+    const roomState = getRoomStateByName(roomName);
+    return DataTransfer.sendBlobData(roomState, data, peerId, timeout);
+  }
+
+  respondBlobRequest(roomName, peerId, transferId, accept) {
+    const roomState = getRoomStateByName(roomName);
+    return DataTransfer.acceptDataTransfer(roomState, peerId, transferId, accept);
+  }
+
+  cancelBlobTransfer(roomName, peerId, transferId) {
+    const roomState = getRoomStateByName(roomName);
+    return DataTransfer.cancelBlobTransfer(roomState, peerId, transferId);
   }
 }
 

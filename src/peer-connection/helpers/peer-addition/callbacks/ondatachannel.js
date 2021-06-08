@@ -1,6 +1,6 @@
 import logger from '../../../../logger';
 import Skylink from '../../../../index';
-import PeerConnection from '../../index';
+import PeerConnection from '../../../index';
 
 /* eslint-disable no-param-reassign */
 /**

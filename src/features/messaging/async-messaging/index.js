@@ -40,10 +40,10 @@ class AsyncMessaging {
 
   setMessagePersistence(isPersistent) {
     if (!isABoolean(isPersistent)) {
-      throw SkylinkError.throwError(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.FAILED_SETTING_PERSISTENCE, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.INVALID_TYPE);
+      throw SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.FAILED_SETTING_PERSISTENCE, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.INVALID_TYPE);
     } else if (!this.hasPersistentMessage) {
       this.isPersistent = isPersistent;
-      throw SkylinkError.throwError(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED);
+      throw SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED);
     }
 
     this.isPersistent = isPersistent;
@@ -75,7 +75,7 @@ class AsyncMessaging {
           encryptedMessaging.sendMessage(roomName, message, targetPeerId, this.isPersistent);
         }
       } catch (error) {
-        SkylinkError.throwError(MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
+        SkylinkError.throwError(targetPeerId, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
       }
     }
   }
@@ -124,7 +124,7 @@ class AsyncMessaging {
         messages.push(asyncHelpers.parseDecryptedMessageData(messageData[i], targetMid));
       }
     } catch (error) {
-      throw SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.FAILED_DECRYPTING_MESSAGE, error.message);
+      throw SkylinkError.throwError(targetMid, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.FAILED_DECRYPTING_MESSAGE, error.message);
     }
 
     dispatchEvent(storedMessages({

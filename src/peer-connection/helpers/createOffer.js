@@ -54,7 +54,7 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
     enableIceRestart,
     peerInformations,
     voiceActivityDetection,
-    dataChannels,
+    peerDataChannels,
   } = state;
   const peerConnection = peerConnections[targetMid];
 
@@ -73,7 +73,7 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
   }
 
   if (enableDataChannel && peerInformations[targetMid].config.enableDataChannel) {
-    if (!(dataChannels[targetMid] && dataChannels[targetMid].main)) {
+    if (!(peerDataChannels[targetMid] && peerDataChannels[targetMid].main)) {
       PeerConnection.createDataChannel({
         peerId: targetMid,
         roomState: state,

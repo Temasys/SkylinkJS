@@ -85,8 +85,8 @@ export const dataStreamState = detail => new SkylinkEvent(DATA_STREAM_STATE, { d
 export const dataTransferState = detail => new SkylinkEvent(DATA_TRANSFER_STATE, { detail });
 
 /**
+ * @event SkylinkEvents.ON_INCOMING_DATA
  * @description Event triggered when receiving completed data transfer from Peer.
- * @event SkylinkEvents.onIncomingData
  * @param {Object} detail - Event's payload.
  * @param {Blob|String} detail.data The data.
  * @param {String} detail.transferId The data transfer ID.

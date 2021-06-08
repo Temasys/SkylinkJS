@@ -571,17 +571,17 @@
  * @property {Number} statistics.connection.candidates.receiving.relay.#index.sdpMLineIndex The Peer connection remote
  *   <code>"relay"</code> (TURN) ICE candidate media description index (starting from <code>0</code>)
  *   based on the remote session description.
- * @property {JSON} statistics.connection.dataChannels The Peer connection list of Datachannel connections.
- * @property {JSON} statistics.connection.dataChannels.#channelName The Peer connection Datachannel connection statistics.
- * @property {String} statistics.connection.dataChannels.#channelName.label The Peer connection Datachannel connection ID.
- * @property {String} statistics.connection.dataChannels.#channelName.readyState The Peer connection Datachannel connection readyState.
+ * @property {JSON} statistics.connection.peerDataChannels The Peer connection list of Datachannel connections.
+ * @property {JSON} statistics.connection.peerDataChannels.#channelName The Peer connection Datachannel connection statistics.
+ * @property {String} statistics.connection.peerDataChannels.#channelName.label The Peer connection Datachannel connection ID.
+ * @property {String} statistics.connection.peerDataChannels.#channelName.readyState The Peer connection Datachannel connection readyState.
  *   [Rel: Skylink.DATA_CHANNEL_STATE]
- * @property {String} statistics.connection.dataChannels.#channelName.type The Peer connection Datachannel connection type.
+ * @property {String} statistics.connection.peerDataChannels.#channelName.type The Peer connection Datachannel connection type.
  *   [Rel: Skylink.DATA_CHANNEL_TYPE]
- * @property {String} statistics.connection.dataChannels.#channelName.currentTransferId The Peer connection
+ * @property {String} statistics.connection.peerDataChannels.#channelName.currentTransferId The Peer connection
  *   Datachannel connection current progressing transfer session ID.
  *   Defined as <code>null</code> when there is currently no transfer session progressing on the Datachannel connection.
- * @property {String} statistics.connection.dataChannels.#channelName.currentStreamId The Peer connection
+ * @property {String} statistics.connection.peerDataChannels.#channelName.currentStreamId The Peer connection
  *   Datachannel connection current data streaming session ID.
  *   Defined as <code>null</code> when there is currently no data streaming session on the Datachannel connection.
  * @property {JSON} statistics.connection.constraints The constraints passed in when constructing the Peer connection object.

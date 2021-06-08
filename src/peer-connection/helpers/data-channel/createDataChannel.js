@@ -2,7 +2,7 @@ import Skylink from '../../../index';
 import logger from '../../../logger';
 import { DATA_CHANNEL_TYPE, PEER_CONNECTION_STATE, DATA_CHANNEL_STATE } from '../../../constants';
 import callbacks from './callbacks/index';
-import { onDataChannelStateChanged } from '../../../skylink-events/datachannel-events';
+import { onDataChannelStateChanged } from '../../../skylink-events';
 import PeerConnection from '../..';
 import { dispatchEvent } from '../../../utils/skylinkEventManager';
 import HandleDataChannelStats from '../../../skylink-stats/handleDataChannelStats';
@@ -23,7 +23,7 @@ const createDataChannel = (params) => {
     roomState,
   } = params;
   const state = Skylink.getSkylinkState(roomState.room.id);
-  const { user, peerConnections, dataChannels } = state;
+  const { user, peerConnections, peerDataChannels } = state;
   const peerConnection = peerConnections[peerId];
   let channelName = `-_${peerId}`;
   let channelType = createAsMessagingChannel === true ? DATA_CHANNEL_TYPE.MESSAGING : DATA_CHANNEL_TYPE.DATA;
@@ -47,12 +47,12 @@ const createDataChannel = (params) => {
     dataChannel = null;
   }
 
-  if (!dataChannels[peerId]) {
+  if (!peerDataChannels[peerId]) {
     channelProp = 'main';
     channelType = DATA_CHANNEL_TYPE.MESSAGING;
-    dataChannels[peerId] = {};
+    peerDataChannels[peerId] = {};
     logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, 'initializing main DataChannel']);
-  } else if (dataChannels[peerId].main && dataChannels[peerId].main.channel.label === channelName) {
+  } else if (peerDataChannels[peerId].main && peerDataChannels[peerId].main.channel.label === channelName) {
     channelProp = 'main';
     channelType = DATA_CHANNEL_TYPE.MESSAGING;
   }
@@ -99,7 +99,7 @@ const createDataChannel = (params) => {
   dataChannel.onclose = callbacks.onclose.bind(dataChannel, callbackExtraParams);
 
   const channel = channelType === DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
-  state.dataChannels[peerId][channel] = {
+  state.peerDataChannels[peerId][channel] = {
     channelName,
     channelType,
     transferId: null,
