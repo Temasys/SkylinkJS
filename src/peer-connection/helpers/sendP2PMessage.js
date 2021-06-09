@@ -1,12 +1,12 @@
-import Skylink from '../../../index';
-import logger from '../../../logger';
-import sendMessageToDataChannel from './sendMessageToDataChannel';
-import { DC_PROTOCOL_TYPE, PEER_TYPE } from '../../../constants';
-import { onIncomingMessage } from '../../../skylink-events';
-import { dispatchEvent } from '../../../utils/skylinkEventManager';
-import PeerData from '../../../peer-data';
-import { getRoomStateByName } from '../../../utils/helpers';
-import Room from '../../../room';
+import Skylink from '../../index';
+import logger from '../../logger';
+import { DATA_CHANNEL_MESSAGE_TYPE, DC_PROTOCOL_TYPE, PEER_TYPE } from '../../constants';
+import { onIncomingMessage } from '../../skylink-events';
+import { dispatchEvent } from '../../utils/skylinkEventManager';
+import PeerData from '../../peer-data';
+import { getRoomStateByName } from '../../utils/helpers';
+import Room from '../../room';
+import DataChannel from './data-channel';
 
 /**
  * @param message
@@ -19,13 +19,13 @@ import Room from '../../../room';
 const sendP2PMessageForRoom = (roomState, message, targetPeerId) => {
   const initOptions = Skylink.getInitOptions();
   const {
-    dataChannels,
+    peerDataChannels,
     room,
     user,
     hasMCU,
   } = roomState;
 
-  let listOfPeers = Object.keys(dataChannels);
+  let listOfPeers = Object.keys(peerDataChannels);
   let isPrivate = false;
 
   if (Array.isArray(targetPeerId) && targetPeerId.length) {
@@ -50,7 +50,7 @@ const sendP2PMessageForRoom = (roomState, message, targetPeerId) => {
   for (let i = 0; i < listOfPeers.length; i += 1) {
     const peerId = listOfPeers[i];
 
-    if (!dataChannels[peerId] && !hasMCU) {
+    if (!peerDataChannels[peerId] && !hasMCU) {
       logger.log.ERROR([peerId, 'RTCDataChannel', null, 'Dropping of sending message to Peer as DataChannel connection does not exist.']);
       listOfPeers.splice(i, 1);
       i -= 1;
@@ -60,13 +60,13 @@ const sendP2PMessageForRoom = (roomState, message, targetPeerId) => {
     } else if (!hasMCU) {
       logger.log.DEBUG([peerId, 'RTCDataChannel', null, `Sending ${isPrivate ? 'private' : ''} P2P message to Peer.`]);
 
-      sendMessageToDataChannel(roomState, peerId, {
+      DataChannel.sendMessageToDataChannel(room.id, peerId, {
         type: DC_PROTOCOL_TYPE.MESSAGE,
         isPrivate,
         sender: user.sid,
         target: targetPeerId ? peerId : null,
         data: message,
-      }, 'main');
+      }, 'main', DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL);
     }
   }
 
@@ -76,18 +76,18 @@ const sendP2PMessageForRoom = (roomState, message, targetPeerId) => {
 
   if (hasMCU) {
     logger.log.DEBUG([PEER_TYPE.MCU, 'RTCDataChannel', null, `Broadcasting ${isPrivate ? 'private' : ''} P2P message to Peers.`]);
-    sendMessageToDataChannel(roomState, PEER_TYPE.MCU, {
+    DataChannel.sendMessageToDataChannel(room.id, PEER_TYPE.MCU, {
       type: DC_PROTOCOL_TYPE.MESSAGE,
       isPrivate,
       sender: user.sid,
       target: listOfPeers,
       data: message,
-    }, 'main');
+    }, 'main', DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL);
   }
 
   if (targetPeerId || !hasMCU) {
     dispatchEvent(onIncomingMessage({
-      room: Room.getRoomInfo(roomState.room.id),
+      room: Room.getRoomInfo(room.id),
       message: {
         targetPeerId: targetPeerId || null,
         content: message,

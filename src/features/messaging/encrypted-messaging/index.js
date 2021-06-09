@@ -47,7 +47,7 @@ class EncryptedMessaging {
       this.encryptSecrets = encryptHelpers.setEncryptSecret(this.encryptSecrets, secret, secretId);
       this.dispatchEncryptSecretEvent();
     } catch (error) {
-      SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_ENCRYPT_SECRET, error.message);
+      SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_ENCRYPT_SECRET, error.message);
     }
   }
 
@@ -62,7 +62,7 @@ class EncryptedMessaging {
       this.selectedSecretId = updatedData.selectedSecretId;
       this.dispatchEncryptSecretEvent();
     } catch (error) {
-      SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.DELETE_ENCRYPT_SECRETS, error.message);
+      SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.DELETE_ENCRYPT_SECRETS, error.message);
     }
   }
 
@@ -71,7 +71,7 @@ class EncryptedMessaging {
       this.selectedSecretId = encryptHelpers.setSelectedSecretId(this.encryptSecrets, secretId);
       this.dispatchEncryptSecretEvent();
     } catch (error) {
-      SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_SELECTED_SECRET, error.message);
+      SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_SELECTED_SECRET, error.message);
     }
   }
 
@@ -129,7 +129,7 @@ class EncryptedMessaging {
         const encryptedMessage = encryptHelpers.encryptMessage(message, this.encryptSecrets[this.selectedSecretId]);
         messagingHelpers.sendMessageToSig(roomState, config, message, encryptedMessage, targetPeerId);
       } catch (error) {
-        SkylinkError.throwError(MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
+        SkylinkError.throwError(targetPeerId, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
       }
     }
   }

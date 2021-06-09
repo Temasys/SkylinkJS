@@ -571,17 +571,17 @@
  * @property {Number} statistics.connection.candidates.receiving.relay.#index.sdpMLineIndex The Peer connection remote
  *   <code>"relay"</code> (TURN) ICE candidate media description index (starting from <code>0</code>)
  *   based on the remote session description.
- * @property {JSON} statistics.connection.dataChannels The Peer connection list of Datachannel connections.
- * @property {JSON} statistics.connection.dataChannels.#channelName The Peer connection Datachannel connection statistics.
- * @property {String} statistics.connection.dataChannels.#channelName.label The Peer connection Datachannel connection ID.
- * @property {String} statistics.connection.dataChannels.#channelName.readyState The Peer connection Datachannel connection readyState.
+ * @property {JSON} statistics.connection.peerDataChannels The Peer connection list of Datachannel connections.
+ * @property {JSON} statistics.connection.peerDataChannels.#channelName The Peer connection Datachannel connection statistics.
+ * @property {String} statistics.connection.peerDataChannels.#channelName.label The Peer connection Datachannel connection ID.
+ * @property {String} statistics.connection.peerDataChannels.#channelName.readyState The Peer connection Datachannel connection readyState.
  *   [Rel: Skylink.DATA_CHANNEL_STATE]
- * @property {String} statistics.connection.dataChannels.#channelName.type The Peer connection Datachannel connection type.
+ * @property {String} statistics.connection.peerDataChannels.#channelName.type The Peer connection Datachannel connection type.
  *   [Rel: Skylink.DATA_CHANNEL_TYPE]
- * @property {String} statistics.connection.dataChannels.#channelName.currentTransferId The Peer connection
+ * @property {String} statistics.connection.peerDataChannels.#channelName.currentTransferId The Peer connection
  *   Datachannel connection current progressing transfer session ID.
  *   Defined as <code>null</code> when there is currently no transfer session progressing on the Datachannel connection.
- * @property {String} statistics.connection.dataChannels.#channelName.currentStreamId The Peer connection
+ * @property {String} statistics.connection.peerDataChannels.#channelName.currentStreamId The Peer connection
  *   Datachannel connection current data streaming session ID.
  *   Defined as <code>null</code> when there is currently no data streaming session on the Datachannel connection.
  * @property {JSON} statistics.connection.constraints The constraints passed in when constructing the Peer connection object.
@@ -635,4 +635,26 @@
 
 /**
  * @typedef {Object} MediaStream - <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaStream">MediaStream interface</a>
+ */
+
+/**
+ * @typedef {Object} transferInfo
+ * @property {String|Blob} data - The data object.
+ *   Defined only when <code>state</code> payload is <code>UPLOAD_STARTED</code> or
+ *   <code>DOWNLOAD_COMPLETED</code>.
+ * @property {String} name - The data transfer name.
+ * @property {Number} size - The data transfer data object size.
+ * @property {SkylinkConstants.DATA_TRANSFER_SESSION_TYPE} dataType - The data transfer session type.
+ * @property {SkylinkConstants.DATA_TRANSFER_DATA_TYPE} chunkType - The data transfer type of data chunk being used to send to Peer for transfers.
+ *   The initial data chunks value may change depending on the currently received data chunk type or the
+ *   agent supported sending type of data chunks.
+ * @property {String} mimeType - The data transfer data object MIME type.
+ *   Defined only when {@link Skylink#sendBlobData} data object sent MIME type information is defined.
+ * @property {Number} chunkSize - The data transfer data chunk size.
+ * @property {Number} percentage - The data transfer percentage of completion progress.
+ * @property {Number} timeout - The duration for which to wait for a response from the remote peer before terminating the transfer
+ * @property {Boolean} isPrivate - The flag if message is targeted or not, basing
+ *   off the <code>targetPeerId</code> parameter being defined in
+ *   {@link Skylink#sendBlobData}.
+ * @property {SkylinkConstants.DATA_TRANSFER_DIRECTION} direction - The data transfer direction.
  */

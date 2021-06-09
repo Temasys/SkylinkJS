@@ -165,9 +165,9 @@ const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remot
   }
 
   // if remote peer does not have data channel
-  if (state.dataChannels[targetMid] && (peerConnection.remoteDescription.sdp.indexOf('m=application') === -1 || peerConnection.remoteDescription.sdp.indexOf('m=application 0') > 0)) {
+  if (state.peerDataChannels[targetMid] && (peerConnection.remoteDescription.sdp.indexOf('m=application') === -1 || peerConnection.remoteDescription.sdp.indexOf('m=application 0') > 0)) {
     logger.log.WARN([targetMid, TAGS.PEER_CONNECTION, null, `${DATA_CHANNEL.CLOSING} - ${DATA_CHANNEL.NO_REMOTE_DATA_CHANNEL}`]);
-    PeerConnection.closeDataChannel(state, targetMid);
+    PeerConnection.closeDataChannel(room.id, targetMid);
   }
 
   handleSetOfferAndAnswerSuccess(state, targetMid, remoteDescription, true);
@@ -204,7 +204,7 @@ const updateState = (state, message) => {
   const targetMid = mid;
 
   if (userInfo && typeof userInfo === 'object') {
-    updatedUserInfo.settings.data = !!(updatedState.dataChannels[targetMid] && updatedState.dataChannels[targetMid].main && updatedState.dataChannels[targetMid].main.channel && updatedState.dataChannels[targetMid].main.channel.readyState === DATA_CHANNEL_STATE.OPEN);
+    updatedUserInfo.settings.data = !!(updatedState.peerDataChannels[targetMid] && updatedState.peerDataChannels[targetMid].main && updatedState.peerDataChannels[targetMid].main.channel && updatedState.peerDataChannels[targetMid].main.channel.readyState === DATA_CHANNEL_STATE.OPEN);
     updatedState.peerInformations[targetMid].settings = updatedUserInfo.settings || {};
     updatedState.peerInformations[targetMid].mediaStatus = updatedUserInfo.mediaStatus || {};
     updatedState.peerInformations[targetMid].userData = updatedUserInfo.userData;

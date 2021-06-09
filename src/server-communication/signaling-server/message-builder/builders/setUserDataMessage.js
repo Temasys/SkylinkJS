@@ -8,6 +8,7 @@ import { isAString } from '../../../../utils/helpers';
  * @property {SkylinkRoom.id} rid
  * @property {SkylinkUser.userData} userData
  * @property {Number} state
+ * @private
  */
 /**
  * @param {SkylinkState} roomState

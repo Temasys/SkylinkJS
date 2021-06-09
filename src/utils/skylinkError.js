@@ -1,9 +1,8 @@
 import logger from '../logger';
-import { TAGS } from '../constants';
 
 class SkylinkError {
-  static throwError(errorLog = '', message = '') {
-    logger.log.ERROR([null, TAGS.SKYLINK_ERROR, null, `${errorLog}${(message ? ` - ${message}` : '')}`]);
+  static throwError(peerId, tag, errorLog = '', message = '', data) {
+    logger.log.ERROR([peerId, tag, null, `${errorLog}${(message ? ` - ${message}` : '')}`], data);
     throw new Error(`${errorLog}${(message ? ` - ${message}` : '')}`);
   }
 }

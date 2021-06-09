@@ -13,7 +13,7 @@ const onmessage = (params, event) => {
     roomState,
   } = params;
 
-  processDataChannelData(roomState, event.data, peerId, channelName, channelType);
+  processDataChannelData(roomState.room.id, event.data, peerId, channelName, channelType);
 };
 
 export default onmessage;
