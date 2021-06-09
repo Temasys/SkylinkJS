@@ -38,8 +38,6 @@ if (window.location.href.indexOf("appKey=") > -1) {
 const displayName = `name_user_${  Math.floor((Math.random() * 1000) + 1)}`;
 $('#display_user_info').val(displayName);
 const joinRoomOptions = {
-  audio: false,
-  video: false,
   userData: displayName,
   autoBandwidthAdjustment: true
 };
