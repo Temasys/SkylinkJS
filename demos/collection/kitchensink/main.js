@@ -1038,15 +1038,16 @@ $(document).ready(function() {
   // //---------------------------------------------------
   $('#send_file_button').click(function(e) {
     Demo.Skylink.sendBlobData(config.defaultRoom, $('#file_input').prop('files')[0], null)
-    .then((res) => console.log("sendBlobData success", res))
-    .catch((err) => console.error("sendBlobData error", err));
-    // setTimeout(() => {
-    //   const transferPeers = Object.keys(Demo.transferIds);
-    //   Demo.Skylink.cancelBlobTransfer(config.defaultRoom, transferPeers[0], Demo.transferIds[transferPeers[0]])
-    //   .then((res) => console.log("cancelBlobTransfer", res))
-    //   .catch((err) => console.error("cancelBlobTransfer", err));
-    // }, 3000)
+    .then((res) => console.log("sendBlobData", res))
+    .catch((err) => console.error("sendBlobData", err));
   });
+  // //---------------------------------------------------
+  $('#cancel_transfer_button').click(function(e) {
+    const transferPeers = Object.keys(Demo.transferIds);
+    Demo.Skylink.cancelBlobTransfer(config.defaultRoom, transferPeers[0], Demo.transferIds[transferPeers[0]])
+    .then((res) => console.log("cancelBlobTransfer", res))
+    .catch((err) => console.error("cancelBlobTransfer", err));
+  })
   // //---------------------------------------------------
   $('#set_persistent_message').click(function(e) {
     if (e.currentTarget.checked) {

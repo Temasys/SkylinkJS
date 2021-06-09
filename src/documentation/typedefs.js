@@ -636,3 +636,25 @@
 /**
  * @typedef {Object} MediaStream - <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaStream">MediaStream interface</a>
  */
+
+/**
+ * @typedef {Object} transferInfo
+ * @property {String|Blob} data - The data object.
+ *   Defined only when <code>state</code> payload is <code>UPLOAD_STARTED</code> or
+ *   <code>DOWNLOAD_COMPLETED</code>.
+ * @property {String} name - The data transfer name.
+ * @property {Number} size - The data transfer data object size.
+ * @property {SkylinkConstants.DATA_TRANSFER_SESSION_TYPE} dataType - The data transfer session type.
+ * @property {SkylinkConstants.DATA_TRANSFER_DATA_TYPE} chunkType - The data transfer type of data chunk being used to send to Peer for transfers.
+ *   The initial data chunks value may change depending on the currently received data chunk type or the
+ *   agent supported sending type of data chunks.
+ * @property {String} mimeType - The data transfer data object MIME type.
+ *   Defined only when {@link Skylink#sendBlobData} data object sent MIME type information is defined.
+ * @property {Number} chunkSize - The data transfer data chunk size.
+ * @property {Number} percentage - The data transfer percentage of completion progress.
+ * @property {Number} timeout - The duration for which to wait for a response from the remote peer before terminating the transfer
+ * @property {Boolean} isPrivate - The flag if message is targeted or not, basing
+ *   off the <code>targetPeerId</code> parameter being defined in
+ *   {@link Skylink#sendBlobData}.
+ * @property {SkylinkConstants.DATA_TRANSFER_DIRECTION} direction - The data transfer direction.
+ */

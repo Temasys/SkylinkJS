@@ -21,30 +21,6 @@ const dataChunkHandler = (roomKey, peerId, chunk, chunkType, chunkSize, channelP
 
   // TODO: implement data stream
 
-  // const streamId = peerDataChannels[peerId][channelProp].streamId;
-
-  // if (streamId && self._dataStreams[streamId] && ((typeof chunk === 'string' &&
-  //   self._dataStreams[streamId].sessionChunkType === 'string') || (chunk instanceof Blob &&
-  //   self._dataStreams[streamId].sessionChunkType === 'binary'))) {
-  //   senderPeerId = self._dataStreams[streamId].senderPeerId || peerId;
-  //   self._trigger('dataStreamState', self.DATA_STREAM_STATE.RECEIVED, streamId, senderPeerId, {
-  //     chunk: chunk,
-  //     chunkSize: chunkSize,
-  //     chunkType: chunkType,
-  //     isPrivate: self._dataStreams[streamId].sessionChunkType.isPrivate,
-  //     isStringStream: self._dataStreams[streamId].sessionChunkType === 'string',
-  //     senderPeerId: senderPeerId
-  //   }, null);
-  //   self._trigger('incomingDataStream', chunk, transferId, senderPeerId, {
-  //     chunkSize: chunkSize,
-  //     chunkType: chunkType,
-  //     isPrivate: self._dataStreams[streamId].sessionChunkType.isPrivate,
-  //     isStringStream: self._dataStreams[streamId].sessionChunkType === 'string',
-  //     senderPeerId: senderPeerId
-  //   }, false);
-  //   return;
-  // }
-
   if (channelProp === 'main') {
     // eslint-disable-next-line prefer-destructuring
     transferId = peerDataChannels[peerId].main.transferId;

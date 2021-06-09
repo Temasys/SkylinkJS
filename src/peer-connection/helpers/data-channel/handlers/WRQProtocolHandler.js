@@ -37,15 +37,6 @@ const WRQProtocolHandler = (roomKey, peerId, data, channelProp) => {
     cancelled: false,
   };
 
-  // if (dataTransfers[transferId].sessionType === 'data'
-  //     && dataTransfers[transferId].sessionChunkType === 'string') {
-  //   dataTransfers[transferId].dataType = DATA_TRANSFER_SESSION_TYPE.DATA_URL;
-  //   dataTransfers[transferId].chunkType = DATA_TRANSFER_DATA_TYPE.STRING;
-  // } else if (dataTransfers[transferId].sessionType === 'blob'
-  //     && dataTransfers[transferId].sessionChunkType === 'binary') {
-  //   dataTransfers[transferId].chunkType = _binaryChunkType;
-  // }
-
   peerDataChannels[peerId][channelProp].transferId = transferId;
   dataTransfers[transferId].sessions[peerId] = {
     timer: null,

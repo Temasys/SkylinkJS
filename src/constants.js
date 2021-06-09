@@ -8,10 +8,15 @@ import pkg from '../package.json';
  *  <li>{@link SkylinkConstants.BUNDLE_POLICY|BUNDLE_POLICY} </li>
  *  <li>{@link SkylinkConstants.CANDIDATE_GENERATION_STATE|CANDIDATE_GENERATION_STATE} </li>
  *  <li>{@link SkylinkConstants.CANDIDATE_PROCESSING_STATE|CANDIDATE_PROCESSING_STATE} </li>
+ *  <li>{@link SkylinkConstants.CHUNK_FILE_SIZE|CHUNK_FILE_SIZE} </li>
  *  <li>{@link SkylinkConstants.DATA_CHANNEL_STATE|DATA_CHANNEL_STATE} </li>
  *  <li>{@link SkylinkConstants.DATA_CHANNEL_TYPE|DATA_CHANNEL_TYPE} </li>
  *  <li>{@link SkylinkConstants.DATA_CHANNEL_MESSAGE_ERROR|DATA_CHANNEL_MESSAGE_ERROR} </li>
- *   *  {@link SkylinkConstants.DATA_TRANSFER_STATE|DATA_TRANSFER_STATE} </br>
+ *  <li>{@link SkylinkConstants.DATA_TRANSFER_STATE|DATA_TRANSFER_STATE} </li>
+ *  <li>{@link SkylinkConstants.DATA_TRANSFER_DATA_TYPE|DATA_TRANSFER_DATA_TYPE} </li>
+ *  <li>{@link SkylinkConstants.DT_PROTOCOL_VERSION|DT_PROTOCOL_VERSION}  </li>
+ *  <li>{@link SkylinkConstants.DATA_TRANSFER_DIRECTION|DATA_TRANSFER_DIRECTION}  </li>
+ *  <li>{@link SkylinkConstants.DATA_TRANSFER_SESSION_TYPE|DATA_TRANSFER_SESSION_TYPE}  </li>
  *  <li>{@link SkylinkEvents|EVENTS} </li>
  *  <li>{@link SkylinkConstants.GET_CONNECTION_STATUS_STATE|GET_CONNECTION_STATUS_STATE} </li>
  *  <li>{@link SkylinkConstants.GET_PEERS_STATE|GET_PEERS_STATE} </li>
@@ -45,15 +50,9 @@ import pkg from '../package.json';
 
 /**
  *  // Not implemented yet
- *  {@link SkylinkConstants.DATA_TRANSFER_DATA_TYPE|DATA_TRANSFER_DATA_TYPE} </br>
- *  {@link SkylinkConstants.DT_PROTOCOL_VERSION|DT_PROTOCOL_VERSION} </br>
- *  {@link SkylinkConstants.DATA_TRANSFER_TYPE|DATA_TRANSFER_TYPE} </br>
- *  {@link SkylinkConstants.DATA_TRANSFER_SESSION_TYPE|DATA_TRANSFER_SESSION_TYPE} </br>
-
  *  {@link SkylinkConstants.DATA_STREAM_STATE|DATA_STREAM_STATE} </br>
  *  {@link SkylinkConstants.INTRODUCE_STATE|INTRODUCE_STATE} </br>
  *  {@link SkylinkConstants.REGIONAL_SERVER|REGIONAL_SERVER} </br>
- *  {@link SkylinkConstants.CHUNK_FILE_SIZE|CHUNK_FILE_SIZE} </br>
  *  {@link SkylinkConstants.MOZ_CHUNK_FILE_SIZE|MOZ_CHUNK_FILE_SIZE} </br>
  *  {@link SkylinkConstants.BINARY_FILE_SIZE|BINARY_FILE_SIZE} </br>
  *  {@link SkylinkConstants.MOZ_BINARY_FILE_SIZE|MOZ_BINARY_FILE_SIZE} </br>
@@ -217,8 +216,7 @@ export const DATA_CHANNEL_MESSAGE_ERROR = {
  * @type Object
  * @readOnly
  * @memberOf SkylinkConstants
- * @since 0.1.0
- * @ignore
+ * @since 2.0.0
  */
 export const DATA_TRANSFER_DATA_TYPE = {
   BINARY_STRING: 'binaryString',
@@ -235,10 +233,9 @@ export const DATA_TRANSFER_DATA_TYPE = {
  * The value of the current version of the data transfer protocol.
  * @typedef DT_PROTOCOL_VERSION
  * @type string
- * @private
  * @readOnly
  * @memberOf SkylinkConstants
- * @since 0.5.10
+ * @since 2.0.0
  */
 export const DT_PROTOCOL_VERSION = '0.1.3';
 
@@ -274,7 +271,6 @@ export const DATA_TRANSFER_DIRECTION = {
  * @readOnly
  * @memberOf SkylinkConstants
  * @since 0.1.0
- * @ignore
  */
 export const DATA_TRANSFER_SESSION_TYPE = {
   BLOB: 'blob',

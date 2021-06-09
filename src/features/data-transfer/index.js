@@ -151,10 +151,9 @@ class DataTransfer {
       const channelProp = 'main';
 
       if (dataTransferHelpers.canDataTransferProceed(room.id, DATA_TRANSFER_STATE.CANCEL, peerId, transferId, channelProp, null, reject)) {
-        // Currently all messages and transfer are conducted using main channel
-        // if (peerDataChannels[peerId][transferId]) {
-        //   channelProp = transferId;
-        // }\\
+        dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, false);
+
+        resolve({ peerId, transferId });
 
         DataChannel.sendMessageToDataChannel(room.id, peerId, {
           type: DC_PROTOCOL_TYPE.CANCEL,
@@ -174,8 +173,6 @@ class DataTransfer {
             transferType: dataTransfers[transferId].direction,
           },
         }));
-
-        dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, false);
       }
     });
   }

@@ -14,6 +14,8 @@ const CANCELProtocolHandler = (roomKey, peerId, data, channelProp) => {
   logger.log.ERROR([peerId, TAGS.DATA_CHANNEL, channelProp || null,
     MESSAGES.DATA_CHANNEL.ERRORS.CANCEL_TRANSFER], data);
 
+  dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, false);
+
   dispatchEvent(dataTransferState({
     state: DATA_TRANSFER_STATE.CANCEL,
     transferId,
@@ -24,8 +26,6 @@ const CANCELProtocolHandler = (roomKey, peerId, data, channelProp) => {
       transferType: dataTransfers[transferId] ? dataTransfers[transferId].direction : null,
     },
   }));
-
-  dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, false);
 };
 
 export default CANCELProtocolHandler;

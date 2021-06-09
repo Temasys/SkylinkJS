@@ -107,6 +107,7 @@ import {
  *  <strong>DATA TRANSFER EVENTS</strong> </br>
  *  <ul>
  *    <li>{@link SkylinkEvents.event:ON_INCOMING_DATA|ON_INCOMING_DATA}</li>
+ *    <li>{@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA_TRANSFER_STATE}</li>
  *  </ul>
  *  <strong>CANDIDATE EVENTS</strong> </br>
  *  <ul>
