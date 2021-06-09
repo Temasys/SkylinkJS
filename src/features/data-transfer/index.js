@@ -26,17 +26,20 @@ const resolvePromise = promise => promise.then(success => (success), error => (e
  * @private
  */
 class DataTransfer {
-  static sendBlobData(roomState, data, targetPeerId = null, timeout = null, sendChunksAsBinary = false) {
+  static sendBlobData(roomState, data, targetPeerId = null, timeout = null) {
     const updatedState = roomState;
-    const { user, peerInformations, room } = roomState;
+    const {
+      user, peerInformations, room, hasMCU,
+    } = roomState;
     const transferId = `${user.sid}_${new Date().getTime()}`;
     const initOptions = Skylink.getInitOptions();
     const { enableDataChannel } = initOptions;
     const channelProperty = 'main';
 
     // TODO: implement sendChunkAsBinary
-    // eslint-disable-next-line no-unused-vars
-    const x = sendChunksAsBinary;
+    if (hasMCU) {
+      return Promise.reject(new Error(`${MESSAGES.DATA_CHANNEL.UNABLE_TO_SEND_BLOB} - ${MESSAGES.DATA_CHANNEL.ERRORS.MCU_NOT_SUPPORTED}`));
+    }
 
     // const sessionChunkType = SESSION_CHUNK_TYPE.STRING;
     let listOfPeers = Object.keys(peerInformations); // will not include MCU peer if MCU is on
