@@ -5,7 +5,7 @@ const buildPeerInformations = (userInfo, state) => {
   const peerId = peerInfo.sid;
 
   peerInfo.room = state.room.roomName;
-  peerInfo.settings.data = !!(state.dataChannels[peerId] && state.dataChannels[peerId].main && state.dataChannels[peerId].main.channel && state.dataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE.OPEN);
+  peerInfo.settings.data = !!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId].main && state.peerDataChannels[peerId].main.channel && state.peerDataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE.OPEN);
 
   return peerInfo;
 };

@@ -4,7 +4,7 @@ import PeerConnection from '../../index';
 import logger from '../../../logger';
 import { PEER_CONNECTION_STATE, HANDSHAKE_PROGRESS, DATA_CHANNEL_TYPE } from '../../../constants';
 
-const hasPeerDataChannels = dataChannels => !isEmptyObj(dataChannels);
+const hasPeerDataChannels = peerDataChannels => !isEmptyObj(peerDataChannels);
 
 /**
  * Function that refreshes the main messaging Datachannel.
@@ -13,11 +13,11 @@ const hasPeerDataChannels = dataChannels => !isEmptyObj(dataChannels);
  * @memberOf PeerConnection
  */
 const refreshDataChannel = (state, peerId) => {
-  const { dataChannels, peerConnections } = state;
+  const { room, peerDataChannels, peerConnections } = state;
 
-  if (hasPeerDataChannels(dataChannels) && Object.hasOwnProperty.call(dataChannels, peerId)) {
-    if (Object.hasOwnProperty.call(dataChannels[peerId], 'main')) {
-      const mainDataChannel = dataChannels[peerId].main;
+  if (hasPeerDataChannels(peerDataChannels) && Object.hasOwnProperty.call(peerDataChannels, peerId)) {
+    if (Object.hasOwnProperty.call(peerDataChannels[peerId], 'main')) {
+      const mainDataChannel = peerDataChannels[peerId].main;
       const { channelName, channelType } = mainDataChannel;
       const bufferThreshold = mainDataChannel.channel.bufferedAmountLowThreshold || 0;
 
@@ -25,7 +25,7 @@ const refreshDataChannel = (state, peerId) => {
         setTimeout(() => {
           if (Object.hasOwnProperty.call(peerConnections, peerId)) {
             if (peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE.CLOSED && peerConnections[peerId].localDescription.type === HANDSHAKE_PROGRESS.OFFER) {
-              PeerConnection.closeDataChannel(state, peerId);
+              PeerConnection.closeDataChannel(room.id, peerId);
               logger.log.DEBUG([peerId, 'RTCDataChannel', 'main', MESSAGES.DATA_CHANNEL.reviving_dataChannel]);
               PeerConnection.createDataChannel({
                 roomState: state,

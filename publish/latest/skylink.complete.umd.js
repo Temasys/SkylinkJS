@@ -3,7 +3,7 @@
   factory();
 }(function () { 'use strict';
 
-  /* SkylinkJS v2.2.5 Thu May 27 2021 03:22:07 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.3.0 Wed Jun 09 2021 10:18:37 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -6045,6 +6045,51 @@
     const roomLock = (detail = {}) => new SkylinkEvent(ROOM_LOCK, { detail });
 
     /**
+     * @description Event triggered when a data transfer state has changed.
+     * @event SkylinkEvents.DATA_TRANSFER_STATE
+     * @param {Object} detail - Event's payload.
+     * @param {SkylinkConstants.DATA_TRANSFER_STATE} detail.state The current data transfer state.
+     * @param {String} detail.transferId The data transfer ID.
+     *   Note that this is defined as <code>null</code> when the transfers fails to start.
+     * @param {String} detail.peerId The Peer ID.
+     * @param {transferInfo} detail.transferInfo The data transfer information.
+     * @param {Object} detail.error The error object.
+     * @param {Error|String} detail.error.message The error message.
+     * @param {SkylinkConstants.DATA_TRANSFER_DIRECTION} detail.error.transferType The data transfer direction from where the error occurred.
+     */
+    const dataTransferState = detail => new SkylinkEvent(DATA_TRANSFER_STATE, { detail });
+
+    /**
+     * @event SkylinkEvents.ON_INCOMING_DATA
+     * @description Event triggered when receiving completed data transfer from Peer.
+     * @param {Object} detail - Event's payload.
+     * @param {Blob|String} detail.data The data.
+     * @param {String} detail.transferId The data transfer ID.
+     * @param {String} detail.peerId The Peer ID.
+     * @param {transferInfo} detail.transferInfo The data transfer information.
+     *   Object signature matches the <code>transferInfo</code> parameter payload received in the
+     *   {@link SkylinkEvents.event:dataTransferState|DATA TRANSFER STATE}
+     *   except without the <code>data</code> property.
+     * @param {Boolean} detail.isSelf The flag if Peer is User.
+     */
+    const onIncomingData = detail => new SkylinkEvent(ON_INCOMING_DATA, { detail });
+
+    /**
+     * @description Event triggered when receiving upload data transfer from Peer.
+     * @event SkylinkEvents.onIncomingDataRequest
+     * @param {Object} detail - Event's payload.
+     * @param {String} detail.transferId The transfer ID.
+     * @param {String} detail.peerId The Peer ID.
+     * @param {String} detail.transferInfo The data transfer information.
+     *   Object signature matches the <code>transferInfo</code> parameter payload received in the
+     *   {@link SkylinkEvents.event:dataTransferState|DATA STREAM STATE}
+     *   except without the <code>data</code> property.
+     * @param {Boolean} detail.isSelf The flag if Peer is User.
+     * @ignore
+     */
+    const onIncomingDataRequest = detail => new SkylinkEvent(ON_INCOMING_DATA_REQUEST, { detail });
+
+    /**
      * @event SkylinkEvents.PEER_UPDATED
      * @description Event triggered when a Peer session information has been updated.
      * @param {Object} detail - Event's payload.
@@ -6331,7 +6376,7 @@
      */
     const loggedOnConsole = (detail = {}) => new SkylinkEvent(LOGGED_ON_CONSOLE, { detail });
 
-    var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.2.5";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.2.2","@babel/preset-env":"7.2.3","@babel/register":"7.0.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.0.5",eslint:"^5.2.0","eslint-config-airbnb":"^17.0.0","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.13.0","eslint-plugin-jsx-a11y":"^6.1.1",finalhandler:"^1.1.1",husky:"^1.0.0-rc.13",jsdoc:"^3.6.7",jsdom:"^13.0.0","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.4",rollup:"^1.2.2","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.3.0","rollup-plugin-delete":"^1.1.0","rollup-plugin-external-globals":"^0.2.1","rollup-plugin-gzip":"^2.2.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.0.2","rollup-plugin-terser":"^7.0.2","serve-static":"^1.13.2","whatwg-fetch":"^3.0.0"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
+    var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.3.0";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.2.2","@babel/preset-env":"7.2.3","@babel/register":"7.0.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.0.5",eslint:"^5.2.0","eslint-config-airbnb":"^17.0.0","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.13.0","eslint-plugin-jsx-a11y":"^6.1.1",finalhandler:"^1.1.1",husky:"^1.0.0-rc.13",jsdoc:"^3.6.7",jsdom:"^13.0.0","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.4",rollup:"^1.2.2","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.3.0","rollup-plugin-delete":"^1.1.0","rollup-plugin-external-globals":"^0.2.1","rollup-plugin-gzip":"^2.2.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.0.2","rollup-plugin-terser":"^7.0.2","serve-static":"^1.13.2","whatwg-fetch":"^3.0.0"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
 
     /**
      * @namespace SkylinkConstants
@@ -6340,9 +6385,15 @@
      *  <li>{@link SkylinkConstants.BUNDLE_POLICY|BUNDLE_POLICY} </li>
      *  <li>{@link SkylinkConstants.CANDIDATE_GENERATION_STATE|CANDIDATE_GENERATION_STATE} </li>
      *  <li>{@link SkylinkConstants.CANDIDATE_PROCESSING_STATE|CANDIDATE_PROCESSING_STATE} </li>
+     *  <li>{@link SkylinkConstants.CHUNK_FILE_SIZE|CHUNK_FILE_SIZE} </li>
      *  <li>{@link SkylinkConstants.DATA_CHANNEL_STATE|DATA_CHANNEL_STATE} </li>
      *  <li>{@link SkylinkConstants.DATA_CHANNEL_TYPE|DATA_CHANNEL_TYPE} </li>
      *  <li>{@link SkylinkConstants.DATA_CHANNEL_MESSAGE_ERROR|DATA_CHANNEL_MESSAGE_ERROR} </li>
+     *  <li>{@link SkylinkConstants.DATA_TRANSFER_STATE|DATA_TRANSFER_STATE} </li>
+     *  <li>{@link SkylinkConstants.DATA_TRANSFER_DATA_TYPE|DATA_TRANSFER_DATA_TYPE} </li>
+     *  <li>{@link SkylinkConstants.DT_PROTOCOL_VERSION|DT_PROTOCOL_VERSION}  </li>
+     *  <li>{@link SkylinkConstants.DATA_TRANSFER_DIRECTION|DATA_TRANSFER_DIRECTION}  </li>
+     *  <li>{@link SkylinkConstants.DATA_TRANSFER_SESSION_TYPE|DATA_TRANSFER_SESSION_TYPE}  </li>
      *  <li>{@link SkylinkEvents|EVENTS} </li>
      *  <li>{@link SkylinkConstants.GET_CONNECTION_STATUS_STATE|GET_CONNECTION_STATUS_STATE} </li>
      *  <li>{@link SkylinkConstants.GET_PEERS_STATE|GET_PEERS_STATE} </li>
@@ -6376,15 +6427,9 @@
 
     /**
      *  // Not implemented yet
-     *  {@link SkylinkConstants.DATA_TRANSFER_DATA_TYPE|DATA_TRANSFER_DATA_TYPE} </br>
-     *  {@link SkylinkConstants.DT_PROTOCOL_VERSION|DT_PROTOCOL_VERSION} </br>
-     *  {@link SkylinkConstants.DATA_TRANSFER_TYPE|DATA_TRANSFER_TYPE} </br>
-     *  {@link SkylinkConstants.DATA_TRANSFER_SESSION_TYPE|DATA_TRANSFER_SESSION_TYPE} </br>
-     *  {@link SkylinkConstants.DATA_TRANSFER_STATE|DATA_TRANSFER_STATE} </br>
      *  {@link SkylinkConstants.DATA_STREAM_STATE|DATA_STREAM_STATE} </br>
      *  {@link SkylinkConstants.INTRODUCE_STATE|INTRODUCE_STATE} </br>
      *  {@link SkylinkConstants.REGIONAL_SERVER|REGIONAL_SERVER} </br>
-     *  {@link SkylinkConstants.CHUNK_FILE_SIZE|CHUNK_FILE_SIZE} </br>
      *  {@link SkylinkConstants.MOZ_CHUNK_FILE_SIZE|MOZ_CHUNK_FILE_SIZE} </br>
      *  {@link SkylinkConstants.BINARY_FILE_SIZE|BINARY_FILE_SIZE} </br>
      *  {@link SkylinkConstants.MOZ_BINARY_FILE_SIZE|MOZ_BINARY_FILE_SIZE} </br>
@@ -6483,6 +6528,25 @@
     };
 
     /**
+     * The list of Datachannel types.
+     * @typedef DATA_CHANNEL_MESSAGE_TYPE
+     * @property {String} PROTOCOL Value <code>"protocol"</code>
+     *   The value of the Datachannel message type that is used only for sending protocol messages i.e. MESSAGE, WRQ, ACK.
+     * @property {String} CHUNK Value <code>"chunk"</code>
+     *   The value of the Datachannel message type that is used for sending chunk data across the data channel.
+     * @constant
+     * @type object
+     * @private
+     * @readOnly
+     * @since 2.2.6
+     * @memberOf SkylinkConstants
+     */
+    const DATA_CHANNEL_MESSAGE_TYPE = {
+      PROTOCOL: 'protocol',
+      CHUNK: 'chunk',
+    };
+
+    /**
      * The list of Datachannel sending message error types.
      * @typedef DATA_CHANNEL_MESSAGE_ERROR
      * @property {String} MESSAGE  Value <code>"message"</code>
@@ -6529,8 +6593,7 @@
      * @type Object
      * @readOnly
      * @memberOf SkylinkConstants
-     * @since 0.1.0
-     * @ignore
+     * @since 2.0.0
      */
     const DATA_TRANSFER_DATA_TYPE = {
       BINARY_STRING: 'binaryString',
@@ -6547,16 +6610,15 @@
      * The value of the current version of the data transfer protocol.
      * @typedef DT_PROTOCOL_VERSION
      * @type string
-     * @private
      * @readOnly
      * @memberOf SkylinkConstants
-     * @since 0.5.10
+     * @since 2.0.0
      */
     const DT_PROTOCOL_VERSION = '0.1.3';
 
     /**
      * The list of data transfers directions.
-     * @typedef DATA_TRANSFER_TYPE
+     * @typedef DATA_TRANSFER_DIRECTION
      * @property {String} UPLOAD Value <code>"upload"</code>
      *   The value of the data transfer direction when User is uploading data to Peer.
      * @property {String} DOWNLOAD Value <code>"download"</code>
@@ -6565,10 +6627,9 @@
      * @type Object
      * @readOnly
      * @memberOf SkylinkConstants
-     * @since 0.1.0
-     * @ignore
+     * @since 2.2.5
      */
-    const DATA_TRANSFER_TYPE = {
+    const DATA_TRANSFER_DIRECTION = {
       UPLOAD: 'upload',
       DOWNLOAD: 'download',
     };
@@ -6578,20 +6639,36 @@
      * @typedef DATA_TRANSFER_SESSION_TYPE
      * @property {String} BLOB     Value <code>"blob"</code>
      *   The value of the session type for
-     *   {@link Skylink#sendURLData|sendURLData} data transfer.
-     * @property {String} DATA_URL Value <code>"dataURL"</code>
-     *   The value of the session type for
      *   {@link Skylink#sendBlobData|sendBlobData} data transfer.
+     * @property {String} DATA_URL Value <code>"dataURL"</code>
+     *   {@link Skylink#sendURLData|sendURLData} data transfer.
+     *   The value of the session type for
      * @constant
      * @type Object
      * @readOnly
      * @memberOf SkylinkConstants
      * @since 0.1.0
-     * @ignore
      */
     const DATA_TRANSFER_SESSION_TYPE = {
       BLOB: 'blob',
-      DATA_URL: 'dataURL',
+      DATA: 'data',
+    };
+
+    /**
+     * The chunk type.
+     * @typedef SESSION_CHUNK_TYPE
+     * @property {String} STRING
+     * @property {String} BINARY
+     * @constant
+     * @type Object
+     * @readOnly
+     * @memberOf SkylinkConstants
+     * @since 2.2.5
+     * @private
+     */
+    const SESSION_CHUNK_TYPE = {
+      STRING: 'string',
+      BINARY: 'binary',
     };
 
     /**
@@ -6636,7 +6713,6 @@
      * @readOnly
      * @memberOf SkylinkConstants
      * @since 0.4.0
-     * @ignore
      */
     const DATA_TRANSFER_STATE$1 = {
       UPLOAD_REQUEST: 'request',
@@ -6651,7 +6727,24 @@
       DOWNLOAD_COMPLETED: 'downloadCompleted',
       USER_REJECTED: 'userRejected',
       USER_UPLOAD_REQUEST: 'userRequest',
-      START_ERROR: 'startError',
+    };
+
+    /**
+     * The ACK Protocol number to reject or accept a transfer
+     * @typedef ACK_PROTOCOL_NUMBER
+     * @property {number} REJECT Value <code>-1</code>. The value of the ACK PROTOCOL to return that will stop the transfer.
+     * @property {number} ACCEPT Value <code>0</code>. The value of the ACL PROTOCOL to return that will start the transfer.
+     * @constant
+     * @type Object
+     * @readOnly
+     * @memberOf SkylinkConstants
+     * @since 2.2.6
+     * @private
+     */
+    const ACK_PROTOCOL_NUMBER = {
+      REJECT: -1,
+      ACCEPT: 0,
+      CANCEL: 0,
     };
 
     /**
@@ -7788,7 +7881,6 @@
      * @readOnly
      * @memberOf SkylinkConstants
      * @since 0.5.2
-     * @ignore
      */
     const CHUNK_FILE_SIZE = 49152;
 
@@ -8361,12 +8453,15 @@
     var constants = /*#__PURE__*/Object.freeze({
       DATA_CHANNEL_STATE: DATA_CHANNEL_STATE$1,
       DATA_CHANNEL_TYPE: DATA_CHANNEL_TYPE,
+      DATA_CHANNEL_MESSAGE_TYPE: DATA_CHANNEL_MESSAGE_TYPE,
       DATA_CHANNEL_MESSAGE_ERROR: DATA_CHANNEL_MESSAGE_ERROR,
       DATA_TRANSFER_DATA_TYPE: DATA_TRANSFER_DATA_TYPE,
       DT_PROTOCOL_VERSION: DT_PROTOCOL_VERSION,
-      DATA_TRANSFER_TYPE: DATA_TRANSFER_TYPE,
+      DATA_TRANSFER_DIRECTION: DATA_TRANSFER_DIRECTION,
       DATA_TRANSFER_SESSION_TYPE: DATA_TRANSFER_SESSION_TYPE,
+      SESSION_CHUNK_TYPE: SESSION_CHUNK_TYPE,
       DATA_TRANSFER_STATE: DATA_TRANSFER_STATE$1,
+      ACK_PROTOCOL_NUMBER: ACK_PROTOCOL_NUMBER,
       AUTH_STATE: AUTH_STATE,
       DATA_STREAM_STATE: DATA_STREAM_STATE$1,
       CANDIDATE_GENERATION_STATE: CANDIDATE_GENERATION_STATE$1,
@@ -8501,6 +8596,7 @@
         NOT_INITIALISED: 'Peer Connection not initialised',
         CREATE_NEW: 'Creating new Peer Connection',
         NO_PEER_CONNECTION: 'No Peer Connection detected',
+        PEER_CONNECTION_CLOSED: 'Peer Connection is closed',
         PEER_ID_NOT_FOUND: 'Peer Id not found',
         STATE_CHANGE: 'Peer connection state changed ->',
         STATS_API_UNAVAILABLE: 'getStats() API is not available',
@@ -8510,6 +8606,7 @@
         ERRORS: {
           REMOVE_TRACK: 'Error removing track from peer connection',
           NOT_FOUND: 'Peer Connection not found',
+          NOT_STABLE: 'Peer Connetion is not stable',
         },
         REFRESH_CONNECTION: {
           START: 'Refreshing peer connections',
@@ -8555,15 +8652,53 @@
         parsing_media_ssrc: 'Parsing session description media SSRCs ->',
       },
       DATA_CHANNEL: {
+        NO_DATA_CHANNEL_CONNECTION: 'No Data Channel connection',
+        DATA_CHANNEL_NOT_OPEN: 'Data Channel connection is not open',
+        DATA_CHANNEL_DISABLED: 'Data Channel is disabled',
+        CLOSING: 'Closing Data Channel',
+        NO_REMOTE_DATA_CHANNEL: 'Remote peer does not have Data Channel',
+        RECEIVED_CHUNK: 'Received binary string data chunk',
         reviving_dataChannel: 'Reviving Datachannel connection',
         refresh_error: 'Not a valid Datachannel connection',
-        CLOSING: 'Closing DataChannel',
         closed: 'Datachannel has closed',
         onclose_error: 'Error in data-channel onclose callback',
-        NO_REMOTE_DATA_CHANNEL: 'Remote peer does not have data channel',
+        DATA_TRANSFER_UPLOAD_TERMINATED: 'Data upload terminated',
+        DATA_TRANSFER_DOWNLOAD_TERMINATED: 'Data download terminated',
+        DATA_TRANSFER_CANCEL_TERMINATED: 'Cancel data transfer terminated',
+        IGNORE_TIMEOUT: 'Ignoring data transfer timeout',
+        CLEAR_TIMEOUT: 'Clearing data transfer timeout',
+        SET_TIMEOUT: 'Setting data transfer timeout',
+        DATA_TRANSFER_COMPLETED: 'Data transfer completed',
+        UNABLE_TO_SEND_BLOB: 'Unable to send Blob data',
+        DATA_TRANSFER_ERROR: 'Data transfer error',
+        CANCEL_DATA_TRANSFER: 'Peer cancelled data transfer',
+        RECEIVED_P2P_MESSAGE: 'Received P2P message',
+        DATA_TRANSFER_STATE: 'Data transfer state',
+        CHUNKING_BLOB: 'Chunking Blob data',
         ERRORS: {
-          FAILED_CLOSING: 'Failed closing DataChannels --> ',
-          NO_SESSIONS: 'Peer Connection does not have DataChannel sessions',
+          PEER_ID_INVALID_TYPE: 'Peer ID is not type array string or string',
+          TIMEOUT_INVALID_TYPE: 'Timeout is not type number',
+          REMOTE_REJECTED_TRANSFER: 'Remote peer rejected data transfer request',
+          USER_REJECTED_TRANSFER: 'User rejected data transfer request',
+          REMOTE_CANCELLED_TRANSFER: 'Remote peer cancelled data transfer',
+          USER_CANCELLED_TRANSFER: 'User cancelled data transfer',
+          NOT_BLOB: 'Data is not type Blob',
+          INVALID_DATA: 'Invalid data',
+          FAILED_CLOSING: 'Failed closing Data Channels',
+          NO_SESSIONS: 'Peer Connection does not have Data Channel sessions',
+          DROP_SENDING_MESSAGE: 'Drop sending message',
+          FAILED_SENDING_MESSAGE: 'Failed sending message',
+          FAILED_PARSING_PROTOCOL: 'Failed parsing protocol data',
+          DISCARDING_DATA_CHUNK: 'Discarding data chunk',
+          CHUNK_ADDED: 'Data chunk has been added',
+          CANCEL_TRANSFER: 'Received cancel data transfer from peer',
+          RECEIVED_ERROR: 'Received error from peer',
+          DATA_TRANSFER_TIMEOUT: 'Data transfer connection timed out',
+          NO_DATA_TRANSFER_SESSION: 'No data transfer sessions',
+          NO_TRANSFER_ID: 'No Transfer ID',
+          NO_PEER_ID: 'No Peer ID',
+          DATA_TRANSFER_IN_PROGRESS: 'Data Channel has a transfer in progress',
+          MCU_NOT_SUPPORTED: 'MCU does not support sendBlobData',
         },
       },
       NEGOTIATION_PROGRESS: {
@@ -9678,7 +9813,7 @@
       }
 
       peerInfo.room = room.roomName;
-      peerInfo.settings.data = !!(state.dataChannels[peerId] && state.dataChannels[peerId].main && state.dataChannels[peerId].main.channel && state.dataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
+      peerInfo.settings.data = !!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId].main && state.peerDataChannels[peerId].main.channel && state.peerDataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
 
       return peerInfo;
     };
@@ -17469,8 +17604,8 @@
     };
 
     class SkylinkError {
-      static throwError(errorLog = '', message = '') {
-        logger.log.ERROR([null, TAGS.SKYLINK_ERROR, null, `${errorLog}${(message ? ` - ${message}` : '')}`]);
+      static throwError(peerId, tag, errorLog = '', message = '', data) {
+        logger.log.ERROR([peerId, tag, null, `${errorLog}${(message ? ` - ${message}` : '')}`], data);
         throw new Error(`${errorLog}${(message ? ` - ${message}` : '')}`);
       }
     }
@@ -17480,7 +17615,7 @@
         const config = helpers.getMessageConfig(roomState, targetPeerId);
         helpers.sendMessageToSig(roomState, config, message, null, targetPeerId);
       } catch (error) {
-        SkylinkError.throwError(MESSAGES.MESSAGING.ERRORS.FAILED_SENDING_MESSAGE);
+        SkylinkError.throwError(targetPeerId, MESSAGES.MESSAGING.ERRORS.FAILED_SENDING_MESSAGE);
       }
     };
 
@@ -17590,7 +17725,7 @@
           this.encryptSecrets = helpers$1.setEncryptSecret(this.encryptSecrets, secret, secretId);
           this.dispatchEncryptSecretEvent();
         } catch (error) {
-          SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_ENCRYPT_SECRET, error.message);
+          SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_ENCRYPT_SECRET, error.message);
         }
       }
 
@@ -17605,7 +17740,7 @@
           this.selectedSecretId = updatedData.selectedSecretId;
           this.dispatchEncryptSecretEvent();
         } catch (error) {
-          SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.DELETE_ENCRYPT_SECRETS, error.message);
+          SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.DELETE_ENCRYPT_SECRETS, error.message);
         }
       }
 
@@ -17614,7 +17749,7 @@
           this.selectedSecretId = helpers$1.setSelectedSecretId(this.encryptSecrets, secretId);
           this.dispatchEncryptSecretEvent();
         } catch (error) {
-          SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_SELECTED_SECRET, error.message);
+          SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_SELECTED_SECRET, error.message);
         }
       }
 
@@ -17672,7 +17807,7 @@
             const encryptedMessage = helpers$1.encryptMessage(message, this.encryptSecrets[this.selectedSecretId]);
             helpers.sendMessageToSig(roomState, config, message, encryptedMessage, targetPeerId);
           } catch (error) {
-            SkylinkError.throwError(MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
+            SkylinkError.throwError(targetPeerId, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
           }
         }
       }
@@ -17728,10 +17863,10 @@
 
       setMessagePersistence(isPersistent) {
         if (!isABoolean(isPersistent)) {
-          throw SkylinkError.throwError(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.FAILED_SETTING_PERSISTENCE, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.INVALID_TYPE);
+          throw SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.FAILED_SETTING_PERSISTENCE, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.INVALID_TYPE);
         } else if (!this.hasPersistentMessage) {
           this.isPersistent = isPersistent;
-          throw SkylinkError.throwError(MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED);
+          throw SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED);
         }
 
         this.isPersistent = isPersistent;
@@ -17763,7 +17898,7 @@
               encryptedMessaging.sendMessage(roomName, message, targetPeerId, this.isPersistent);
             }
           } catch (error) {
-            SkylinkError.throwError(MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
+            SkylinkError.throwError(targetPeerId, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
           }
         }
       }
@@ -17812,7 +17947,7 @@
             messages.push(helpers$2.parseDecryptedMessageData(messageData[i], targetMid));
           }
         } catch (error) {
-          throw SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.FAILED_DECRYPTING_MESSAGE, error.message);
+          throw SkylinkError.throwError(targetMid, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.FAILED_DECRYPTING_MESSAGE, error.message);
         }
 
         dispatchEvent(storedMessages({
@@ -17874,7 +18009,7 @@
             const encryptedMessaging = new EncryptedMessaging(roomState);
             messageData = encryptedMessaging.decryptMessage(data, secretId);
           } catch (error) {
-            SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.FAILED_DECRYPTING_MESSAGE, error.message);
+            SkylinkError.throwError(targetMid, TAGS.ENCRYPTED_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.FAILED_DECRYPTING_MESSAGE, error.message);
           }
         }
 
@@ -18709,6 +18844,390 @@
       return peerMedia;
     };
 
+    /* eslint-disable no-param-reassign */
+    /**
+     * @param {RTCPeerConnection} peerConnection
+     * @param {String} targetMid
+     * @param {SkylinkState} currentRoomState
+     * @param {Event} event
+     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
+     */
+    const ondatachannel = (peerConnection, targetMid, currentRoomState, event) => {
+      const dataChannel = event.channel || event;
+      const initOptions = Skylink.getInitOptions();
+      const state = Skylink.getSkylinkState(currentRoomState.room.id);
+      const { peerInformations } = state;
+      const { enableDataChannel } = initOptions;
+
+      logger.log.DEBUG([targetMid, 'RTCDataChannel', dataChannel.label, 'Received datachannel ->'], dataChannel);
+      if (enableDataChannel && peerInformations[targetMid].config.enableDataChannel) {
+        // if peer does not have main channel, the first item is main
+        if (!peerConnection.hasMainChannel) {
+          peerConnection.hasMainChannel = true;
+        }
+        PeerConnection.createDataChannel({ peerId: targetMid, dataChannel, roomState: currentRoomState });
+      } else {
+        logger.log.WARN([targetMid, 'RTCDataChannel', dataChannel.label, 'Not adding datachannel as enable datachannel is set to false']);
+      }
+    };
+
+    /**
+     *
+     * @param {RTCPeerConnection} peerConnection
+     * @param {String} targetMid
+     * @param {SkylinkState} roomState - The current state.
+     * @param {Event} rtcIceConnectionEvent
+     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
+     */
+    const onicecandidate = (peerConnection, targetMid, roomState, rtcIceConnectionEvent) => {
+      IceConnection.onIceCandidate(targetMid, rtcIceConnectionEvent.candidate || rtcIceConnectionEvent, roomState.room);
+    };
+
+    class HandleIceConnectionStats extends SkylinkStats {
+      constructor() {
+        super();
+        this.model = {
+          client_id: null,
+          app_key: null,
+          timestamp: null,
+          room_id: null,
+          user_id: null,
+          peer_id: null,
+          state: null,
+          local_candidate: {},
+          remote_candidate: {},
+        };
+      }
+
+      send(roomKey, state, peerId) {
+        try {
+          const roomState = Skylink.getSkylinkState(roomKey);
+
+          if (!roomState) return;
+
+          this.model.room_id = roomKey;
+          this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;
+          this.model.peer_id = peerId;
+          this.model.client_id = roomState.clientId;
+          this.model.state = state;
+          this.model.app_key = Skylink.getInitOptions().appKey;
+          this.model.timestamp = (new Date()).toISOString();
+
+          PeerConnection.retrieveStatistics(roomKey, peerId, Skylink.getInitOptions().beSilentOnStatsLogs).then((stats) => {
+            if (stats) {
+              // Parse the selected ICE candidate pair for both local and remote candidate.
+              ['local', 'remote'].forEach((dirType) => {
+                const candidate = stats.selectedCandidatePair[dirType];
+                if (candidate) {
+                  const modelCandidate = this.model[`${dirType}_candidate`];
+                  modelCandidate.ip_address = candidate.ipAddress || null;
+                  modelCandidate.port_number = candidate.portNumber || null;
+                  modelCandidate.candidate_type = candidate.candidateType || null;
+                  modelCandidate.protocol = candidate.transport || null;
+                  modelCandidate.priority = candidate.priority || null;
+
+                  // This is only available for the local ICE candidate.
+                  if (dirType === 'local') {
+                    this.model.local_candidate.network_type = candidate.networkType || null;
+                  }
+                }
+              });
+            }
+
+            this.postStats(this.endpoints.iceConnection, this.model);
+          }).catch((ex) => {
+            logger.log.DEBUG(MESSAGES.STATS_MODULE.HANDLE_ICE_CONNECTION_STATS.RETRIEVE_FAILED, ex);
+          });
+        } catch (error) {
+          logger.log.DEBUG(MESSAGES.STATS_MODULE.HANDLE_ICE_CONNECTION_STATS.SEND_FAILED, error);
+        }
+      }
+    }
+
+    const formatValue = (stats, mediaType, directionType, itemKey) => {
+      const value = stats[mediaType][directionType === 'send' ? 'sending' : 'receiving'][itemKey];
+      if (['number', 'string', 'boolean'].indexOf(typeof value) > -1) {
+        return value;
+      }
+      return null;
+    };
+
+    const buildAudioTrackInfo = (stream, track) => ({
+      stream_id: stream.id,
+      id: track.id,
+      label: track.label,
+      muted: !track.enabled,
+    });
+
+    const buildVideoTrackInfo = (stream, track, settings) => ({
+      stream_id: stream.id,
+      id: track.id,
+      label: track.label,
+      height: settings.video.resolution.height,
+      width: settings.video.resolution.width,
+      muted: !track.enabled,
+    });
+
+    class HandleBandwidthStats extends SkylinkStats {
+      constructor() {
+        super();
+        this.model = {
+          client_id: null,
+          app_key: null,
+          timestamp: null,
+          room_id: null,
+          user_id: null,
+          peer_id: null,
+          audio_send: { tracks: [] },
+          audio_recv: {},
+          video_send: { tracks: [] },
+          video_recv: {},
+          error: null,
+        };
+        this.stats = null;
+      }
+
+      gatherSendAudioPacketsStats() {
+        this.model.audio_send.bytes = formatValue(this.stats, 'audio', 'send', 'bytes');
+        this.model.audio_send.packets = formatValue(this.stats, 'audio', 'send', 'packets');
+        this.model.audio_send.echo_return_loss = formatValue(this.stats, 'audio', 'send', 'echoReturnLoss');
+        this.model.audio_send.echo_return_loss_enhancement = formatValue(this.stats, 'audio', 'send', 'echoReturnLossEnhancement');
+        this.model.audio_send.round_trip_time = formatValue(this.stats, 'audio', 'send', 'roundTripTime');
+        this.model.audio_send.audio_level = formatValue(this.stats, 'audio', 'send', 'audioLevel');
+        this.model.audio_send.jitter = formatValue(this.stats, 'audio', 'send', 'jitter');
+      }
+
+      gatherReceiveAudioPacketsStats() {
+        this.model.audio_recv.bytes = formatValue(this.stats, 'audio', 'recv', 'bytes');
+        this.model.audio_recv.packets = formatValue(this.stats, 'audio', 'recv', 'packets');
+        this.model.audio_recv.packets_lost = formatValue(this.stats, 'audio', 'recv', 'packetsLost');
+        this.model.audio_recv.jitter = formatValue(this.stats, 'audio', 'recv', 'jitter');
+        this.model.audio_recv.audio_level = formatValue(this.stats, 'audio', 'recv', 'audioLevel');
+      }
+
+      gatherSendVideoPacketsStats() {
+        this.model.video_send.bytes = formatValue(this.stats, 'video', 'send', 'bytes');
+        this.model.video_send.packets = formatValue(this.stats, 'video', 'send', 'packets');
+        this.model.video_send.nack_count = formatValue(this.stats, 'video', 'send', 'nacks');
+        this.model.video_send.firs_count = formatValue(this.stats, 'video', 'send', 'firs');
+        this.model.video_send.plis_count = formatValue(this.stats, 'video', 'send', 'plis');
+        this.model.video_send.frames_encoded = formatValue(this.stats, 'video', 'send', 'framesEncoded');
+        this.model.video_send.frame_width = formatValue(this.stats, 'video', 'send', 'frameWidth');
+        this.model.video_send.frame_height = formatValue(this.stats, 'video', 'send', 'frameHeight');
+        this.model.video_send.round_trip_time = formatValue(this.stats, 'video', 'send', 'roundTripTime');
+        this.model.video_send.qp_sum = formatValue(this.stats, 'video', 'send', 'qpSum');
+        this.model.video_send.jitter = formatValue(this.stats, 'video', 'send', 'jitter');
+        this.model.video_send.frames = formatValue(this.stats, 'video', 'send', 'frames');
+        this.model.video_send.hugeFrames = formatValue(this.stats, 'video', 'send', 'hugeFramesSent');
+        this.model.video_send.framesPerSecond = formatValue(this.stats, 'video', 'send', 'framesPerSecond');
+      }
+
+      gatherReceiveVideoPacketsStats() {
+        this.model.video_recv.bytes = formatValue(this.stats, 'video', 'recv', 'bytes');
+        this.model.video_recv.packets = formatValue(this.stats, 'video', 'recv', 'packets');
+        this.model.video_recv.packets_lost = formatValue(this.stats, 'video', 'recv', 'packetsLost');
+        this.model.video_recv.nack_count = formatValue(this.stats, 'video', 'recv', 'nacks');
+        this.model.video_recv.firs_count = formatValue(this.stats, 'video', 'recv', 'firs');
+        this.model.video_recv.plis_count = formatValue(this.stats, 'video', 'recv', 'plis');
+        this.model.video_recv.frames_decoded = formatValue(this.stats, 'video', 'recv', 'framesDecoded');
+        this.model.video_recv.qp_sum = formatValue(this.stats, 'video', 'recv', 'qpSum');
+        this.model.video_recv.frames_decoded = formatValue(this.stats, 'video', 'recv', 'framesDecoded');
+        this.model.video_recv.frames_dropped = formatValue(this.stats, 'video', 'recv', 'framesDropped');
+        this.model.video_recv.decoderImplementation = formatValue(this.stats, 'video', 'recv', 'decoderImplementation');
+      }
+
+      buildTrackInfo(roomKey) {
+        const state = Skylink.getSkylinkState(roomKey);
+        const { peerStreams, user, streamsSettings } = state;
+
+        if (peerStreams[user.sid]) {
+          const streamObjs = Object.values(peerStreams[user.sid]);
+
+          streamObjs.forEach((streamObj) => {
+            if (streamObj) {
+              const stream = streamObj;
+              const { settings } = streamsSettings[streamObj.id];
+              const audioTracks = stream.getAudioTracks();
+              const videoTracks = stream.getVideoTracks();
+
+              audioTracks.forEach((audioTrack) => {
+                const audioTrackInfo = buildAudioTrackInfo(stream, audioTrack);
+                this.model.audio_send.tracks.push(audioTrackInfo);
+              });
+
+              videoTracks.forEach((videoTrack) => {
+                const videoTrackInfo = buildVideoTrackInfo(stream, videoTrack, settings);
+                this.model.video_send.tracks.push(videoTrackInfo);
+              });
+            }
+          });
+        }
+      }
+
+      send(roomKey, peerConnection, peerId) {
+        const { STATS_MODULE } = MESSAGES;
+        const roomState = Skylink.getSkylinkState(roomKey);
+
+        if (!roomState) {
+          logger.log.DEBUG([peerId, 'Statistics', 'Bandwidth_Stats', STATS_MODULE.HANDLE_BANDWIDTH_STATS.NO_STATE]);
+          return;
+        }
+
+        if (isEmptyObj(roomState.peerStreams)) {
+          return;
+        }
+
+        this.model.client_id = roomState.clientId;
+        this.model.app_key = Skylink.getInitOptions().appKey;
+        this.model.timestamp = (new Date()).toISOString();
+        this.model.room_id = roomKey;
+        this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;
+        this.model.peer_id = peerId;
+
+        PeerConnection.retrieveStatistics(roomKey, peerId, Skylink.getInitOptions().beSilentOnStatsLogs).then((stats) => {
+          if (stats) {
+            this.stats = stats;
+            this.gatherSendAudioPacketsStats();
+            this.gatherReceiveAudioPacketsStats();
+            this.gatherSendVideoPacketsStats();
+            this.gatherReceiveVideoPacketsStats();
+            this.buildTrackInfo(roomKey);
+            this.postStats(this.endpoints.bandwidth, this.model);
+          }
+        }).catch((error) => {
+          this.model.error = error ? error.message : null;
+          logger.log.DEBUG(STATS_MODULE.HANDLE_BANDWIDTH_STATS.RETRIEVE_FAILED, error);
+        });
+      }
+    }
+
+    const isIceConnectionStateCompleted = (pcIceConnectionState) => {
+      const { ICE_CONNECTION_STATE } = constants;
+      return [ICE_CONNECTION_STATE.COMPLETED,
+        ICE_CONNECTION_STATE.CONNECTED].indexOf(pcIceConnectionState) > -1;
+    };
+
+    /**
+     * @param {RTCPeerConnection} peerConnection
+     * @param {String} targetMid - The Peer Id
+     * @param {SkylinkState} currentRoomState
+     * @fires ICE_CONNECTION_STATE
+     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
+     */
+    const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState) => {
+      const { ROOM_STATE, ICE_CONNECTION, PEER_CONNECTION } = MESSAGES;
+      const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
+      const state = Skylink.getSkylinkState(currentRoomState.room.id);
+      const { peerStreams, user, enableStatsGathering } = state;
+      const initOptions = Skylink.getInitOptions();
+      let statsInterval = null;
+      const pcIceConnectionState = peerConnection.iceConnectionState;
+
+      if (isAgent(BROWSER_AGENT.REACT_NATIVE) && !state && pcIceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
+        return;
+      }
+
+      if (!state) {
+        logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ROOM_STATE.NOT_FOUND]);
+        return;
+      }
+
+      const { peerStats } = state;
+
+      if (pcIceConnectionState === ICE_CONNECTION_STATE.FAILED) { // peer connection 'failed' state is dispatched in onconnectionstatechange
+        if (isAgent(BROWSER_AGENT.FIREFOX) && !peerStreams[user.sid]) {
+          // no audio and video requested will throw ice connection state failed although ice candidates are exchanged
+          return;
+        }
+      }
+
+      logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ICE_CONNECTION.STATE_CHANGE], pcIceConnectionState);
+      const handleIceConnectionStats = new HandleIceConnectionStats();
+      handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
+      dispatchEvent(iceConnectionState({
+        state: pcIceConnectionState,
+        peerId: targetMid,
+      }));
+
+      if (!statsInterval && isIceConnectionStateCompleted(pcIceConnectionState) && !peerStats[targetMid] && enableStatsGathering) {
+        statsInterval = true;
+        peerStats[targetMid] = {};
+
+        logger.log.DEBUG([targetMid, 'RTCStatsReport', null, 'Retrieving first report to tabulate results']);
+
+        // Do an initial getConnectionStatus() to backfill the first retrieval in order to do (currentTotalStats - lastTotalStats).
+        PeerConnection.getConnectionStatus(state, targetMid).then(() => {
+          statsInterval = setInterval(() => {
+            const currentState = Skylink.getSkylinkState(state.room.id);
+            if (!currentState || !currentState.room.inRoom) {
+              clearInterval(statsInterval);
+              return;
+            }
+            if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
+              if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED) { // polyfill for
+                // Safari and FF peerConnection state 'closed' when ice failure
+                logger.log.DEBUG([targetMid, 'RTCPeerConnectionState', null, PEER_CONNECTION.STATE_CHANGE], peerConnection.connectionState);
+                dispatchEvent(peerConnectionState({
+                  state: PEER_CONNECTION_STATE.CLOSED,
+                  peerId: targetMid,
+                }));
+              }
+
+              if (peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
+                logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ICE_CONNECTION.STATE_CHANGE], peerConnection.iceConnectionState);
+                handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
+                dispatchEvent(iceConnectionState({
+                  state: ICE_CONNECTION_STATE.CLOSED,
+                  peerId: targetMid,
+                }));
+              }
+
+              clearInterval(statsInterval);
+            } else {
+              new HandleBandwidthStats().send(state.room.id, peerConnection, targetMid);
+            }
+          }, initOptions.statsInterval * 1000);
+        });
+      }
+    };
+
+    /**
+     * @param {RTCPeerConnection} peerConnection
+     * @param {String} targetMid - The Peer Id
+     * @param {SkylinkState} roomState - The current state
+     * @fires CANDIDATE_GENERATION_STATE
+     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
+     */
+    const onicegatheringstatechange = (peerConnection, targetMid, roomState) => {
+      const { ICE_CONNECTION } = MESSAGES;
+      const { iceGatheringState } = peerConnection;
+
+      logger.log.INFO([targetMid, 'RTCIceGatheringState', null, ICE_CONNECTION.STATE_CHANGE], iceGatheringState);
+      dispatchEvent(candidateGenerationState({
+        state: iceGatheringState,
+        room: Room.getRoomInfo(roomState.room.id),
+        peerId: targetMid,
+      }));
+    };
+
+    /**
+     *
+     * @param {RTCPeerConnection} peerConnection
+     * @param {String} targetMid - The Peer Id
+     * @fires PEER_CONNECTION_STATE
+     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
+     */
+    // eslint-disable-next-line no-unused-vars
+    const onsignalingstatechange = (peerConnection, targetMid) => {
+      const { PEER_CONNECTION } = MESSAGES;
+
+      logger.log.DEBUG([targetMid, 'RTCPeerConnectionSignalingState', null, PEER_CONNECTION.STATE_CHANGE], peerConnection.signalingState);
+      dispatchEvent(peerConnectionState({
+        state: peerConnection.signalingState,
+        peerId: targetMid,
+      }));
+    };
+
     // eslint-disable-next-line consistent-return
     const prepStopStreams = (roomId, streamId, fromLeaveRoom = false, isScreensharing = false) => new Promise((resolve, reject) => {
       const state = Skylink.getSkylinkState(roomId);
@@ -19409,6 +19928,134 @@
       }
     }
 
+    const matchPeerIdWithTransceiverMid = (state, transceiver) => {
+      const { peerMedias, user } = state;
+      const peerIds = Object.keys(peerMedias);
+
+      for (let i = 0; i < peerIds.length; i += 1) {
+        if (peerIds[i] !== user.sid) {
+          const mediaInfos = Object.values(peerMedias[peerIds[i]]);
+          for (let m = 0; m < mediaInfos.length; m += 1) {
+            if (mediaInfos[m].transceiverMid === transceiver.mid) {
+              return peerIds[i];
+            }
+          }
+        }
+      }
+
+      return null;
+    };
+
+    /**
+     * Function that handles the <code>RTCPeerConnection.addTrack</code> remote MediaTrack received.
+     * @param {RTCPeerConnection} RTCPeerConnection
+     * @param {String} targetMid
+     * @param {SkylinkState} currentRoomState
+     * @param {RTCTrackEvent} rtcTrackEvent
+     * @returns {null}
+     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
+     */
+    const ontrack = (RTCPeerConnection, targetMid, currentRoomState, rtcTrackEvent) => {
+      const state = Skylink.getSkylinkState(currentRoomState.room.id);
+      const {
+        peerConnections, room, hasMCU,
+      } = state;
+      const stream = rtcTrackEvent.streams[0];
+      const { transceiver, track } = rtcTrackEvent;
+      let peerId = targetMid;
+
+      if (!stream) {
+        logger.log.WARN('ontrack stream is null');
+        return null;
+      }
+
+      if (transceiver.mid === null) {
+        logger.log.WARN('Transceiver mid is null', transceiver);
+      }
+
+      if (!peerConnections[peerId]) return null;
+
+      if (hasMCU) {
+        peerId = matchPeerIdWithTransceiverMid(state, transceiver);
+      }
+
+      const isScreensharing = PeerMedia.retrieveScreenMediaInfo(state.room, peerId, { transceiverMid: transceiver.mid });
+      const callbackExtraParams = [peerId, room, isScreensharing];
+      stream.onremovetrack = callbacks$2.onremovetrack.bind(undefined, ...callbackExtraParams);
+      PeerMedia.updateStreamIdFromOntrack(state.room, peerId, transceiver.mid, stream.id);
+      PeerConnection.updatePeerInformationsMediaStatus(state.room, peerId, transceiver, stream);
+      PeerStream.addStream(peerId, stream, room.id);
+      new HandleUserMediaStats().send(room.id);
+      MediaStream.onRemoteTrackAdded(stream, currentRoomState, peerId, isScreensharing, track.kind === TRACK_KIND.VIDEO, track.kind === TRACK_KIND.AUDIO);
+
+      return null;
+    };
+
+    const dispatchPeerUpdated = (state, peerId) => {
+      dispatchEvent(peerUpdated({
+        peerId,
+        peerInfo: PeerData.getPeerInfo(peerId, state.room),
+        isSelf: false,
+      }));
+    };
+
+    const updatePeerStreamsAndMediaStatus = (state, peerId, streamId) => {
+      const updatedState = state;
+
+      delete updatedState.peerInformations[peerId].mediaStatus[streamId];
+      PeerStream.deleteStream(peerId, updatedState.room, streamId);
+
+      Skylink.setSkylinkState(updatedState, updatedState.room.id);
+    };
+
+    const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent, stream) => {
+      PeerStream.dispatchStreamEvent(STREAM_ENDED, {
+        room: state.room,
+        peerId,
+        peerInfo: PeerData.getPeerInfo(peerId, state.room),
+        isSelf: false,
+        isScreensharing,
+        streamId: stream.id,
+        isVideo: rtcTrackEvent.track.kind === TRACK_KIND.VIDEO,
+        isAudio: rtcTrackEvent.track.kind === TRACK_KIND.AUDIO,
+      });
+    };
+
+    /**
+     * @param {String} peerId
+     * @param {String} room
+     * @param {boolean} isScreensharing
+     * @param {MediaStreamTrackEvent} rtcTrackEvent
+     * @fires STREAM_ENDED
+     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
+     */
+    const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
+      const state = getStateByKey(room.id);
+      const { peerInformations } = state;
+      const { MEDIA_STREAM, PEER_INFORMATIONS } = MESSAGES;
+      const stream = isAgent(BROWSER_AGENT.REACT_NATIVE) ? rtcTrackEvent.stream : rtcTrackEvent.target;
+
+
+      logger.log.INFO([peerId, TAGS.MEDIA_STREAM, null, MEDIA_STREAM.REMOTE_TRACK_REMOVED], {
+        peerId, isSelf: false, isScreensharing, track: rtcTrackEvent.track,
+      });
+
+      if (!peerInformations[peerId]) {
+        // peerInformations[peerId] will be undefined if onremovetrack is called from byeHandler
+        logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MEDIA_STREAM.ERRORS.DROPPING_ONREMOVETRACK}` - `${PEER_INFORMATIONS.NO_PEER_INFO} ${peerId}`]);
+        return;
+      }
+
+      if (!stream) {
+        logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MEDIA_STREAM.ERRORS.DROPPING_ONREMOVETRACK}` - `${MEDIA_STREAM.NO_STREAM}`]);
+        return;
+      }
+
+      updatePeerStreamsAndMediaStatus(state, peerId, stream.id);
+      dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent, stream);
+      dispatchPeerUpdated(state, peerId);
+    };
+
     const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, restartOfferMsg) => {
       // TODO: Full implementation to be done from _setLocalAndSendMessage under peer-handshake.js
       const state = Skylink.getSkylinkState(roomState.room.id);
@@ -19563,7 +20210,7 @@
         enableIceRestart,
         peerInformations,
         voiceActivityDetection,
-        dataChannels,
+        peerDataChannels,
       } = state;
       const peerConnection = peerConnections[targetMid];
 
@@ -19582,7 +20229,7 @@
       }
 
       if (enableDataChannel && peerInformations[targetMid].config.enableDataChannel) {
-        if (!(dataChannels[targetMid] && dataChannels[targetMid].main)) {
+        if (!(peerDataChannels[targetMid] && peerDataChannels[targetMid].main)) {
           PeerConnection.createDataChannel({
             peerId: targetMid,
             roomState: state,
@@ -19826,94 +20473,19 @@
     };
 
     /**
-     * Function that sends data over the DataChannel connection.
-     * @private
-     * @memberOf PeerConnection
-     * @since 2.0.0
-     * @fires DATA_CHANNEL_STATE
-     */
-    const sendMessageToDataChannel = (roomState, peerId, data, channelProperty, doNotConvert) => {
-      const state = Skylink.getSkylinkState(roomState.room.id);
-      const peerConnection = state.peerConnections[peerId];
-      const dataChannel = state.dataChannels[peerId];
-      let channelProp = channelProperty;
-
-      if (!channelProp || channelProp === peerId) {
-        channelProp = 'main';
-      }
-
-      // TODO: What happens when we want to send binary data over or ArrayBuffers?
-      if (!(typeof data === 'object' && data) && !(data && typeof data === 'string')) {
-        logger.log.WARN([peerId, 'RTCDataChannel', channelProp, 'Dropping invalid data ->'], data);
-        return null;
-      }
-
-      if (!(peerConnection && peerConnection.signalingState !== PEER_CONNECTION_STATE$1.CLOSED)) {
-        logger.log.WARN([peerId, 'RTCDataChannel', channelProp, 'Dropping for sending message as Peer connection does not exists or is closed ->'], data);
-        return null;
-      }
-
-      if (!(dataChannel && dataChannel[channelProp])) {
-        logger.log.WARN([peerId, 'RTCDataChannel', channelProp, 'Dropping for sending message as Datachannel connection does not exists ->'], data);
-        return null;
-      }
-
-      /* eslint-disable prefer-destructuring */
-      const channelName = dataChannel[channelProp].channelName;
-      const channelType = dataChannel[channelProp].channelType;
-      const readyState = dataChannel[channelProp].channel.readyState;
-      const messageType = typeof data === 'object' && data.type === DC_PROTOCOL_TYPE.MESSAGE ? DATA_CHANNEL_MESSAGE_ERROR.MESSAGE : DATA_CHANNEL_MESSAGE_ERROR.TRANSFER;
-
-      if (readyState !== DATA_CHANNEL_STATE$1.OPEN) {
-        const notOpenError = new Error(`Failed sending message as Datachannel connection state is not opened. Current readyState is ${readyState}`);
-        logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, notOpenError], data);
-        dispatchEvent(onDataChannelStateChanged({
-          peerId,
-          channelName,
-          channelType,
-          messageType,
-          error: notOpenError,
-          state: DATA_CHANNEL_STATE$1.SEND_MESSAGE_ERROR,
-          bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel[channelProp].channel),
-        }));
-        throw notOpenError;
-      }
-
-      try {
-        if (!doNotConvert && typeof data === 'object') {
-          logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, `Sending ${data.type} protocol message ->`], data);
-          dataChannel[channelProp].channel.send(JSON.stringify(data));
-        } else {
-          logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, 'Sending data with size ->'], data.size || data.length || data.byteLength);
-          dataChannel[channelProp].channel.send(data);
-        }
-      } catch (error) {
-        logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Failed sending data)'], { error, data });
-        dispatchEvent(onDataChannelStateChanged({
-          peerId,
-          channelName,
-          channelType,
-          messageType,
-          error,
-          state: DATA_CHANNEL_STATE$1.SEND_MESSAGE_ERROR,
-          bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel[channelProp].channel),
-        }));
-        throw error;
-      }
-      return null;
-    };
-
-    /**
      * Function that handles the "MESSAGE" data transfer protocol.
      * @private
      * @lends PeerConnection
      * @param {SkylinkState} roomState
+     * @param {string} peerId
+     * @param {object} data
+     * @param {string} channelProp
      * @since 2.0.0
      * @fires ON_INCOMING_MESSAGE
      */
-    const messageProtocolHandler = (roomState, peerId, data, channelProp) => {
+    const MESSAGEProtocolHandler = (roomState, peerId, data, channelProp) => {
       const senderPeerId = data.sender || peerId;
-      logger.log.INFO([senderPeerId, 'RTCDataChannel', channelProp, 'Received P2P message from peer:'], data);
+      logger.log.INFO([senderPeerId, TAGS.DATA_CHANNEL, channelProp, MESSAGES.DATA_CHANNEL.RECEIVED_P2P_MESSAGE], data);
       dispatchEvent(onIncomingMessage({
         room: roomState.room,
         message: {
@@ -19929,6 +20501,795 @@
       }));
     };
 
+    const chunkBlobData = (blob, chunkSize) => {
+      const chunksArray = [];
+      const blobByteSize = blob.size;
+      let startCount = 0;
+      let endCount = 0;
+
+      logger.log.DEBUG([null, TAGS.DATA_CHANNEL, null, MESSAGES.DATA_CHANNEL.CHUNKING_BLOB]);
+
+      if (blobByteSize > chunkSize) {
+        // File Size greater than Chunk size
+        while ((blobByteSize - 1) > endCount) {
+          endCount = startCount + chunkSize;
+          chunksArray.push(blob.slice(startCount, endCount));
+          startCount += chunkSize;
+        }
+        if ((blobByteSize - (startCount + 1)) > 0) {
+          chunksArray.push(blob.slice(startCount, blobByteSize - 1));
+        }
+      } else {
+        // File Size below Chunk size
+        chunksArray.push(blob);
+      }
+      return chunksArray;
+    };
+
+    const getTransferInfo = (roomKey, transferId, peerId) => {
+      const updatedState = Skylink.getSkylinkState(roomKey);
+      const { room, dataTransfers } = updatedState;
+
+      if (dataTransfers[transferId]) {
+        const {
+          name, chunkSize, chunkType, dataType, mimeType, direction, timeout, isPrivate, percentage, originalSize, size,
+        } = dataTransfers[transferId];
+
+        const transferInfo = {
+          name,
+          size,
+          chunkSize,
+          chunkType,
+          dataType,
+          mimeType,
+          direction,
+          timeout,
+          isPrivate,
+          percentage,
+          originalSize,
+          data: null,
+        };
+
+        if (direction === DATA_TRANSFER_DIRECTION.DOWNLOAD && dataTransfers[transferId].sessions[peerId]) {
+          // multiple methods to determine if receivedSize === size of sent data, not specific to the type of data i.e blob or Base64 string
+          if (dataTransfers[transferId].sessions[peerId].receivedSize === transferInfo.size) {
+            transferInfo.percentage = 100;
+          } else {
+            transferInfo.percentage = parseFloat(((dataTransfers[transferId].sessions[peerId].receivedSize / dataTransfers[transferId].size) * 100).toFixed(2));
+          }
+        } else if (direction === DATA_TRANSFER_DIRECTION.UPLOAD && dataTransfers[transferId].sessions[peerId]) {
+          if (dataTransfers[transferId].chunks.length === dataTransfers[transferId].sessions[peerId].ackN) {
+            transferInfo.percentage = 100;
+          } else {
+            transferInfo.percentage = parseFloat(((dataTransfers[transferId].sessions[peerId].ackN / dataTransfers[transferId].chunks.length) * 100).toFixed(2));
+          }
+        }
+
+        if (transferInfo.percentage === 100) {
+          transferInfo.data = dataTransferHelpers.getTransferData(room.id, transferId);
+        }
+
+        updatedState.dataTransfers[transferId].percentage = transferInfo.percentage;
+        Skylink.setSkylinkState(updatedState, room.id);
+
+        return transferInfo;
+      }
+      // log?
+      return null;
+    };
+
+    const blobToBase64 = data => new Promise((resolve) => {
+      const { FileReader } = window;
+      const fileReader = new FileReader();
+      fileReader.readAsDataURL(data);
+      fileReader.onload = () => {
+        // Load Blob as dataurl base64 string
+        const base64BinaryString = fileReader.result.split(',')[1];
+        return resolve(base64BinaryString);
+      };
+    });
+
+    const getTransferData = (roomKey, transferId) => {
+      const state = Skylink.getSkylinkState(roomKey);
+      const { dataTransfers } = state;
+
+      if (!dataTransfers[transferId]) {
+        return null;
+      }
+
+      if (dataTransfers[transferId].dataType === DATA_TRANSFER_SESSION_TYPE.BLOB) {
+        const mimeType = {
+          name: dataTransfers[transferId].name,
+        };
+
+        if (dataTransfers[transferId].mimeType) {
+          mimeType.type = dataTransfers[transferId].mimeType;
+        }
+
+        // eslint-disable-next-line no-undef
+        return new Blob(dataTransfers[transferId].chunks, mimeType);
+      }
+
+      return dataTransfers[transferId].chunks.join('');
+    };
+
+    const base64ToBlob = (chunk) => {
+      // eslint-disable-next-line no-undef
+      const byteString = atob(chunk);
+      // write the bytes of the string to an ArrayBuffer
+      const ab = new ArrayBuffer(byteString.length);
+      const ia = new Uint8Array(ab);
+      for (let j = 0; j < byteString.length; j += 1) {
+        ia[j] = byteString.charCodeAt(j);
+      }
+      // write the ArrayBuffer to a blob, and you're done
+      // eslint-disable-next-line no-undef
+      return new Blob([ab]);
+    };
+
+    const canSendMessage = (state, peerId, data, channelProperty, type) => {
+      const peerConnection = state.peerConnections[peerId];
+      const dataChannel = state.peerDataChannels[peerId];
+      const channelProp = channelProperty;
+      const { channelName, channelType, channel } = dataChannel[channelProp];
+      const messageType = DATA_CHANNEL_TYPE.MESSAGING;
+
+      if (type === DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL && !(typeof data === 'object' && data)) {
+        logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp, `${MESSAGES.DATA_CHANNEL.ERRORS.DROP_SENDING_MESSAGE} - ${MESSAGES.DATA_CHANNEL.ERRORS.INVALID_DATA}`], data);
+        return false;
+      }
+
+      if (type === DATA_CHANNEL_MESSAGE_TYPE.CHUNK && !(typeof data === 'string' && data)) {
+        logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp, `${MESSAGES.DATA_CHANNEL.ERRORS.DROP_SENDING_MESSAGE} - ${MESSAGES.DATA_CHANNEL.ERRORS.INVALID_DATA}`], data);
+        return false;
+      }
+
+      if (!peerConnection) {
+        logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp, `${MESSAGES.DATA_CHANNEL.ERRORS.DROP_SENDING_MESSAGE} - ${MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION}`], data);
+        return false;
+      }
+
+      if (peerConnection && peerConnection.signalingState === PEER_CONNECTION_STATE$1.CLOSED) {
+        logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp, `${MESSAGES.DATA_CHANNEL.ERRORS.DROP_SENDING_MESSAGE} - ${MESSAGES.PEER_CONNECTION.PEER_CONNECTION_CLOSED}`], data);
+        return false;
+      }
+
+      if (!(dataChannel && dataChannel[channelProp])) {
+        logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp, `${MESSAGES.DATA_CHANNEL.ERRORS.DROP_SENDING_MESSAGE} - ${MESSAGES.DATA_CHANNEL.NO_DATA_CHANNEL_CONNECTION}`], data);
+        return false;
+      }
+
+      if (channel.readyState !== DATA_CHANNEL_STATE$1.OPEN) {
+        dispatchEvent(onDataChannelStateChanged({
+          peerId,
+          channelName,
+          channelType,
+          messageType,
+          error: `${MESSAGES.DATA_CHANNEL.ERRORS.FAILED_SENDING_MESSAGE} - ${MESSAGES.DATA_CHANNEL.DATA_CHANNEL_NOT_OPEN}`,
+          state: DATA_CHANNEL_STATE$1.SEND_MESSAGE_ERROR,
+          // bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel[channelProp].channel),
+        }));
+
+        SkylinkError.throwError(peerId, TAGS.DATA_CHANNEL, `${MESSAGES.DATA_CHANNEL.ERRORS.FAILED_SENDING_MESSAGE} - ${MESSAGES.DATA_CHANNEL.DATA_CHANNEL_NOT_OPEN}`, `Current readyState is ${channel.readyState}`, data);
+      }
+
+      return true;
+    };
+
+    /**
+     * Function that sends data of type message over the DataChannel connection.
+     * @param {string} roomKey - The room id
+     * @param {string} peerId - The peer id
+     * @param {object} data - The protocol message
+     * @param {string} channelProperty - The channel property
+     * @param {string} type - The type of message - protocol or chunk
+     * @private
+     * @memberOf PeerConnection
+     * @since 2.0.0
+     * @fires DATA_CHANNEL_STATE
+     */
+    const sendMessageToDataChannel = (roomKey, peerId, data, channelProperty, type) => {
+      const state = Skylink.getSkylinkState(roomKey);
+      const dataChannel = state.peerDataChannels[peerId];
+      const channelProp = channelProperty;
+      const { channelName, channelType } = dataChannel[channelProp];
+      const messageType = DATA_CHANNEL_TYPE.MESSAGING;
+
+      if (canSendMessage(state, peerId, data, channelProperty, type)) {
+        try {
+          const dataToSend = isAString(data) ? data : JSON.stringify(data);
+          if (type === DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL) {
+            logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, channelProp, `Sending ${data.type} protocol message ->`], data);
+          }
+          dataChannel[channelProp].channel.send(dataToSend);
+        } catch (error) {
+          dispatchEvent(onDataChannelStateChanged({
+            peerId,
+            channelName,
+            channelType,
+            messageType,
+            error,
+            state: DATA_CHANNEL_STATE$1.SEND_MESSAGE_ERROR,
+          }));
+          SkylinkError.throwError(peerId, TAGS.DATA_CHANNEL, MESSAGES.DATA_CHANNEL.ERRORS.FAILED_SENDING_MESSAGE, null, { error, data });
+        }
+      }
+
+
+      return null;
+    };
+
+    const sendACKProtocol = (roomKey, peerId, sender, ackN, channelProp) => {
+      sendMessageToDataChannel(roomKey, peerId, {
+        type: DC_PROTOCOL_TYPE.ACK,
+        sender,
+        ackN,
+      }, channelProp, DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL);
+    };
+
+    // eslint-disable-next-line consistent-return
+    const manageDataTransferTimeout = (roomKey, transferId, peerId, restartTimeout) => {
+      const updatedState = Skylink.getSkylinkState(roomKey);
+      const {
+        room, user, dataTransfers, peerDataChannels,
+      } = updatedState;
+
+
+      if (!(dataTransfers[transferId] && dataTransfers[transferId].sessions[peerId])) {
+        return logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId, `${MESSAGES.DATA_CHANNEL.IGNORE_TIMEOUT} - ${MESSAGES.DATA_CHANNEL.ERRORS.NO_DATA_TRANSFER_SESSION}`]);
+      }
+
+      logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId, MESSAGES.DATA_CHANNEL.CLEAR_TIMEOUT]);
+
+      if (dataTransfers[transferId].sessions[peerId].timer) {
+        clearTimeout(dataTransfers[transferId].sessions[peerId].timer);
+      }
+
+      dataTransfers[transferId].sessions[peerId].timer = null;
+
+      if (restartTimeout) {
+        logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId, MESSAGES.DATA_CHANNEL.SET_TIMEOUT]);
+
+        // eslint-disable-next-line consistent-return
+        updatedState.dataTransfers[transferId].sessions[peerId].timer = setTimeout(() => {
+          if (!(dataTransfers[transferId] && dataTransfers[transferId].sessions[peerId])) {
+            return logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId, `${MESSAGES.DATA_CHANNEL.IGNORE_TIMEOUT} - ${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_COMPLETED}`]);
+          }
+
+          if (!(user && user.sid)) {
+            return logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId, `${MESSAGES.DATA_CHANNEL.IGNORE_TIMEOUT} - ${MESSAGES.ROOM.ERRORS.NOT_IN_ROOM}`]);
+          }
+
+          if (!peerDataChannels[peerId]) {
+            return logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId, `${MESSAGES.DATA_CHANNEL.IGNORE_TIMEOUT} - ${MESSAGES.DATA_CHANNEL.NO_DATA_CHANNEL_CONNECTION}`]);
+          }
+
+          logger.log.ERROR([peerId, TAGS.DATA_CHANNEL, transferId, MESSAGES.DATA_CHANNEL.ERRORS.DATA_TRANSFER_TIMEOUT]);
+
+          const timeoutMessage = `${MESSAGES.DATA_CHANNEL.ERRORS.DATA_TRANSFER_TIMEOUT} - Longer than ${dataTransfers[transferId].timeout}`;
+
+          const channelProperty = 'main';
+          DataChannel.sendMessageToDataChannel(room.id, peerId, {
+            type: DC_PROTOCOL_TYPE.ERROR,
+            content: timeoutMessage,
+            sender: user.sid,
+            name: dataTransfers[transferId].name,
+          }, channelProperty, DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL);
+
+          dispatchEvent(dataTransferState({
+            state: DATA_TRANSFER_STATE$1.ERROR,
+            transferId,
+            peerId,
+            transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+            error: {
+              message: new Error(timeoutMessage),
+              transferType: dataTransfers[transferId].direction,
+            },
+          }));
+        }, dataTransfers[transferId].timeout * 1000);
+      }
+    };
+
+    const canDataTransferProceed = (roomKey, direction, peerId, transferId, channelProp, accept, reject) => {
+      const state = Skylink.getSkylinkState(roomKey);
+      const {
+        user, peerConnections, peerInformations, dataTransfers, peerDataChannels, room,
+      } = state;
+
+      try {
+        switch (direction) {
+          case DATA_TRANSFER_DIRECTION.UPLOAD:
+            // When Peer connection does not exist
+            if (!peerConnections[peerId]) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_UPLOAD_TERMINATED} - ${MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION}`);
+            }
+
+            // When Peer session does not exist
+            if (!peerInformations[peerId]) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_UPLOAD_TERMINATED} - ${MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION}`);
+            }
+
+            // When Peer connection is not STABLE
+            if (peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE$1.STABLE) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_UPLOAD_TERMINATED} - ${MESSAGES.PEER_CONNECTION.ERRORS.NOT_STABLE}`);
+            }
+
+            if (!dataTransfers[transferId]) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_UPLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.NO_DATA_TRANSFER_SESSION}`);
+            }
+
+            if (!(peerDataChannels[peerId] && peerDataChannels[peerId].main)) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_UPLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.NO_DATA_CHANNEL_CONNECTION}`);
+            }
+
+            if (peerDataChannels[peerId].main.channel.readyState !== DATA_CHANNEL_STATE$1.OPEN) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_UPLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.DATA_CHANNEL_NOT_OPEN}`);
+            }
+
+            if (peerDataChannels[peerId].main.transferId && channelProp === 'main') {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_UPLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.DATA_TRANSFER_IN_PROGRESS}`);
+            }
+
+            return true;
+          case DATA_TRANSFER_DIRECTION.DOWNLOAD:
+            if (!accept) {
+              // send ACK message
+              dataTransferHelpers.sendACKProtocol(room.id, peerId, user.sid, ACK_PROTOCOL_NUMBER.REJECT, channelProp);
+
+              logger.log.ERROR([peerId, TAGS.DATA_CHANNEL, channelProp, `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_DOWNLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.USER_REJECTED_TRANSFER}`]);
+
+              dispatchEvent(dataTransferState({
+                state: DATA_TRANSFER_STATE$1.USER_REJECTED,
+                transferId,
+                peerId,
+                transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+                error: {
+                  message: new Error(MESSAGES.DATA_CHANNEL.ERRORS.REJECTED_TRANSFER),
+                  transferType: direction,
+                },
+              }));
+
+              return false;
+            }
+
+            if (!isAString(transferId)) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_DOWNLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.NO_TRANSFER_ID}`);
+            }
+
+            if (!isAString(peerId)) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_DOWNLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.NO_PEER_ID}`);
+            }
+
+            if (!peerDataChannels[peerId]) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_DOWNLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.NO_SESSIONS}`);
+            }
+
+            if (!dataTransfers[transferId]) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_DOWNLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.NO_DATA_TRANSFER_SESSION}`);
+            }
+
+            return true;
+          case DATA_TRANSFER_STATE$1.CANCEL:
+            if (!isAString(transferId)) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_CANCEL_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.NO_TRANSFER_ID}`);
+            }
+
+            if (!isAString(peerId)) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_CANCEL_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.NO_PEER_ID}`);
+            }
+
+            if (!peerDataChannels[peerId]) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_CANCEL_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.NO_SESSIONS}`);
+            }
+
+            if (!dataTransfers[transferId]) {
+              throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_CANCEL_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.NO_DATA_TRANSFER_SESSION}`);
+            }
+
+            return true;
+          default:
+            // should not come here
+            return false;
+        }
+      } catch (error) {
+        logger.log.ERROR([peerId, TAGS.DATA_CHANNEL, channelProp, MESSAGES.DATA_CHANNEL.DATA_TRANSFER_ERROR], error);
+
+        dispatchEvent(dataTransferState({
+          state: DATA_TRANSFER_STATE$1.ERROR,
+          transferId,
+          peerId,
+          transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+          error: {
+            message: error,
+            transferType: direction,
+          },
+        }));
+
+        return reject(error);
+      }
+    };
+
+    const listenOnDataTransferState = (roomKey, direction, peerId, transferId, resolve, reject) => {
+      logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId, 'Registering data transfer state listeners']);
+      const resolveOrRejectAndRemoveEventListener = (evt) => {
+        const { state, error } = evt.detail;
+        const updatedState = Skylink.getSkylinkState(roomKey);
+
+        logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId,
+          `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_STATE} - ${state}`]);
+
+        if (evt.detail.peerId === peerId) {
+          if ((direction === DATA_TRANSFER_DIRECTION.UPLOAD && state === DATA_TRANSFER_STATE$1.UPLOAD_COMPLETED) || (direction === DATA_TRANSFER_DIRECTION.DOWNLOAD && state === DATA_TRANSFER_STATE$1.DOWNLOAD_COMPLETED)) {
+            removeEventListener(EVENTS.DATA_TRANSFER_STATE, resolveOrRejectAndRemoveEventListener);
+            resolve({ [peerId]: { success: dataTransferHelpers.getTransferInfo(roomKey, transferId, peerId), transferType: DATA_TRANSFER_DIRECTION.UPLOAD } });
+
+            updatedState.peerDataChannels[peerId].main.transferId = null;
+          } else if (state === DATA_TRANSFER_STATE$1.ERROR || state === DATA_TRANSFER_STATE$1.CANCEL || state === DATA_TRANSFER_STATE$1.REJECTED || state === DATA_TRANSFER_STATE$1.REJECTED) {
+            removeEventListener(EVENTS.DATA_TRANSFER_STATE, resolveOrRejectAndRemoveEventListener);
+            reject({ [peerId]: { error: error.message, transferType: DATA_TRANSFER_DIRECTION.UPLOAD } });
+
+            if (state === DATA_TRANSFER_STATE$1.CANCEL) {
+              updatedState.dataTransfers[transferId].cancelled = true;
+            }
+            updatedState.peerDataChannels[peerId].main.transferId = null;
+          }
+
+          Skylink.setSkylinkState(updatedState, roomKey);
+        }
+      };
+
+      addEventListener(EVENTS.DATA_TRANSFER_STATE, resolveOrRejectAndRemoveEventListener);
+    };
+
+    const sendWRQMessage = (roomKey, transferId, peerId, channelProp) => {
+      const state = Skylink.getSkylinkState(roomKey);
+      const { dataTransfers, user, room } = state;
+      const { size, chunkSize, sessionChunkType } = dataTransfers[transferId];
+      const { AdapterJS } = window;
+
+      // TODO: implement for binary data
+
+      DataChannel.sendMessageToDataChannel(room.id, peerId, {
+        type: DC_PROTOCOL_TYPE.WRQ,
+        transferId,
+        name: dataTransfers[transferId].name,
+        size,
+        originalSize: dataTransfers[transferId].originalSize,
+        dataType: dataTransfers[transferId].sessionType,
+        mimeType: dataTransfers[transferId].mimeType,
+        chunkType: sessionChunkType,
+        chunkSize,
+        timeout: dataTransfers[transferId].timeout,
+        isPrivate: dataTransfers[transferId].isPrivate,
+        sender: user.sid,
+        agent: AdapterJS.webrtcDetectedBrowser,
+        version: AdapterJS.webrtcDetectedVersion,
+        target: peerId,
+      }, channelProp, DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL);
+
+      dispatchEvent(onIncomingDataRequest({
+        transferId,
+        peerId: user.sid,
+        transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+        isSelf: true,
+      }));
+
+      logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId,
+        `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_STATE} - ${DATA_TRANSFER_STATE$1.USER_UPLOAD_REQUEST}`]);
+
+      dispatchEvent(dataTransferState({
+        state: DATA_TRANSFER_STATE$1.USER_UPLOAD_REQUEST,
+        transferId,
+        peerId,
+        transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+      }));
+    };
+
+    /**
+     * @namespace DataTransferHelpers
+     * @description All helper and utility functions for <code>{@link DataTransfer}</code> class are listed here.
+     * @private
+     * @memberOf DataTransfer
+     * @type {{chunkBlobData, getTransferInfo, blobToBase64, getTransferData, base64ToBlob, manageDataTransferTimeout, canDataTransferProceed, listenOnDataTransferState, sendWRQMessage}}
+     */
+    var dataTransferHelpers = {
+      chunkBlobData,
+      getTransferInfo,
+      blobToBase64,
+      getTransferData,
+      base64ToBlob,
+      sendACKProtocol,
+      manageDataTransferTimeout,
+      canDataTransferProceed,
+      listenOnDataTransferState,
+      sendWRQMessage,
+    };
+
+    const WRQProtocolHandler = (roomKey, peerId, data, channelProp) => {
+      const state = Skylink.getSkylinkState(roomKey);
+      const { room, dataTransfers, peerDataChannels } = state;
+
+      let transferId = channelProp === 'main' ? data.transferId || null : channelProp;
+
+      // TODO: implement binary transfer & data streaming
+
+      if (!transferId) {
+        transferId = `transfer_${peerId}_${(new Date()).getTime()}`;
+      }
+
+      dataTransfers[transferId] = {
+        name: data.name || transferId,
+        size: data.size || 0,
+        chunkSize: data.chunkSize,
+        originalSize: data.originalSize || 0,
+        timeout: data.timeout || 60,
+        isPrivate: !!data.isPrivate,
+        senderPeerId: data.sender || peerId,
+        dataType: DATA_TRANSFER_SESSION_TYPE.BLOB,
+        mimeType: data.mimeType || null,
+        chunkType: DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+        direction: DATA_TRANSFER_DIRECTION.DOWNLOAD,
+        chunks: [],
+        sessions: {},
+        sessionType: data.dataType || 'blob',
+        sessionChunkType: data.chunkType || 'string',
+        cancelled: false,
+      };
+
+      peerDataChannels[peerId][channelProp].transferId = transferId;
+      dataTransfers[transferId].sessions[peerId] = {
+        timer: null,
+        ackN: 0,
+        receivedSize: 0,
+      };
+
+      dispatchEvent(onIncomingDataRequest({
+        transferId,
+        peerId,
+        transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+        isSelf: false,
+      }));
+
+      dispatchEvent(dataTransferState({
+        state: DATA_TRANSFER_STATE$1.UPLOAD_REQUEST,
+        transferId,
+        peerId,
+        transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+      }));
+    };
+
+    const uploadData = (roomKey, peerId, transferId, channelProp, ackN, chunk) => {
+      const state = Skylink.getSkylinkState(roomKey);
+      const { room, dataTransfers } = state;
+      // sendChunkToDatachannel
+      DataChannel.sendMessageToDataChannel(room.id, peerId, chunk, channelProp, DATA_CHANNEL_MESSAGE_TYPE.CHUNK);
+
+      if (ackN < dataTransfers[transferId].chunks.length) {
+        dispatchEvent(dataTransferState({
+          state: DATA_TRANSFER_STATE$1.UPLOADING,
+          transferId,
+          peerId,
+          transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+        }));
+      }
+
+      dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, true);
+    };
+
+    const ACKProtocolHandler = (roomKey, peerId, data, channelProp) => {
+      const updatedState = Skylink.getSkylinkState(roomKey);
+      const { room, dataTransfers, peerDataChannels } = updatedState;
+      let transferId = channelProp;
+
+      if (channelProp === 'main') {
+        // eslint-disable-next-line prefer-destructuring
+        transferId = peerDataChannels[peerId].main.transferId;
+      }
+
+      dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, false);
+
+      if (data.ackN > -1) {
+        if (data.ackN === 0) {
+          logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId,
+            `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_STATE} - ${DATA_TRANSFER_STATE$1.UPLOAD_STARTED}`]);
+
+          dispatchEvent(dataTransferState({
+            state: DATA_TRANSFER_STATE$1.UPLOAD_STARTED,
+            transferId,
+            peerId,
+            transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+          }));
+        } else if (dataTransfers[transferId] && data.ackN === dataTransfers[transferId].chunks.length) {
+          updatedState.dataTransfers[transferId].sessions[peerId].ackN = data.ackN;
+
+          dispatchEvent(dataTransferState({
+            state: DATA_TRANSFER_STATE$1.UPLOAD_COMPLETED,
+            transferId,
+            peerId,
+            transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+          }));
+
+          dispatchEvent(onIncomingData({
+            data: dataTransferHelpers.getTransferData(room.id, transferId),
+            transferId,
+            peerId,
+            transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+            isSelf: true,
+          }));
+
+          return;
+        }
+
+        if (dataTransfers[transferId] && !dataTransfers[transferId].cancelled) {
+        // chunk number greater than zero but less than completion
+          dataTransfers[transferId].sessions[peerId].ackN = data.ackN;
+          dataTransferHelpers.blobToBase64(dataTransfers[transferId].chunks[data.ackN])
+            .then(base64BinaryString => uploadData(room.id, peerId, transferId, channelProp, data.ackN, base64BinaryString));
+        }
+      } else {
+        dispatchEvent(dataTransferState({
+          state: DATA_TRANSFER_STATE$1.REJECTED,
+          transferId,
+          peerId,
+          transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+          error: {
+            message: new Error(MESSAGES.DATA_CHANNEL.ERRORS.REMOTE_REJECTED_TRANSFER),
+            transferType: DATA_TRANSFER_DIRECTION.UPLOAD,
+          },
+        }));
+      }
+    };
+
+    const dataChunkHandler = (roomKey, peerId, chunk, chunkType, chunkSize, channelProp) => {
+      const updatedState = Skylink.getSkylinkState(roomKey);
+      const {
+        room, dataTransfers, peerDataChannels, user,
+      } = updatedState;
+      let transferId = channelProp;
+      let senderPeerId = peerId;
+
+      if (!(peerDataChannels[peerId] && peerDataChannels[peerId][channelProp])) {
+        return;
+      }
+
+      // TODO: implement data stream
+
+      if (channelProp === 'main') {
+        // eslint-disable-next-line prefer-destructuring
+        transferId = peerDataChannels[peerId].main.transferId;
+      }
+
+      if (dataTransfers[transferId].senderPeerId) {
+        // eslint-disable-next-line prefer-destructuring
+        senderPeerId = dataTransfers[transferId].senderPeerId;
+      }
+
+      dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, false);
+
+      updatedState.dataTransfers[transferId].chunkType = chunkType;
+      updatedState.dataTransfers[transferId].sessions[peerId].receivedSize += chunkSize;
+      updatedState.dataTransfers[transferId].chunks[dataTransfers[transferId].sessions[peerId].ackN] = chunk;
+      Skylink.setSkylinkState(updatedState, room.id);
+
+      if (dataTransfers[transferId].sessions[peerId].receivedSize >= dataTransfers[transferId].size) {
+        logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, channelProp, 'Data transfer has been completed. Computed size ->'], dataTransfers[transferId].sessions[peerId].receivedSize);
+
+        // Send last ACK to Peer to indicate completion of data transfers
+        dataTransferHelpers.sendACKProtocol(room.id, peerId, user.sid, dataTransfers[transferId].sessions[peerId].ackN + 1, channelProp);
+
+        dispatchEvent(onIncomingData({
+          data: dataTransferHelpers.getTransferData(room.id, transferId),
+          transferId,
+          peerId,
+          transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, senderPeerId),
+          isSelf: true,
+        }));
+
+        dispatchEvent(dataTransferState({
+          state: DATA_TRANSFER_STATE$1.DOWNLOAD_COMPLETED,
+          transferId,
+          peerId: senderPeerId,
+          transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, senderPeerId),
+        }));
+      } else if (!dataTransfers[transferId].cancelled) {
+        updatedState.dataTransfers[transferId].sessions[peerId].ackN += 1;
+        Skylink.setSkylinkState(updatedState, room.id);
+
+        dataTransferHelpers.sendACKProtocol(room.id, peerId, user.sid, dataTransfers[transferId].sessions[peerId].ackN, channelProp);
+
+        dispatchEvent(dataTransferState({
+          state: DATA_TRANSFER_STATE$1.DOWNLOADING,
+          transferId,
+          peerId: senderPeerId,
+          transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, senderPeerId),
+        }));
+
+        dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, true);
+      }
+    };
+
+    const CANCELProtocolHandler = (roomKey, peerId, data, channelProp) => {
+      const updatedState = Skylink.getSkylinkState(roomKey);
+      const { room, peerDataChannels, dataTransfers } = updatedState;
+      const transferId = channelProp === 'main' ? peerDataChannels[peerId].main.transferId : channelProp; // obtain transferId of the active transfer
+
+      logger.log.ERROR([peerId, TAGS.DATA_CHANNEL, channelProp || null,
+        MESSAGES.DATA_CHANNEL.ERRORS.CANCEL_TRANSFER], data);
+
+      dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, false);
+
+      dispatchEvent(dataTransferState({
+        state: DATA_TRANSFER_STATE$1.CANCEL,
+        transferId,
+        peerId,
+        transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+        error: {
+          message: data.content,
+          transferType: dataTransfers[transferId] ? dataTransfers[transferId].direction : null,
+        },
+      }));
+    };
+
+    const ERRORProtocolHandler = (roomKey, peerId, data, channelProp) => {
+      const updatedState = Skylink.getSkylinkState(roomKey);
+      const { room, peerDataChannels, dataTransfers } = updatedState;
+      let transferId = channelProp;
+
+      if (channelProp === 'main') {
+        // eslint-disable-next-line prefer-destructuring
+        transferId = peerDataChannels[peerId].main.transferId;
+      }
+
+      dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, false);
+
+      logger.log.ERROR([peerId, TAGS.DATA_CHANNEL, transferId, MESSAGES.DATA_CHANNEL.ERRORS.RECEIVED_ERROR], data);
+
+      dispatchEvent(dataTransferState({
+        state: DATA_TRANSFER_STATE$1.ERROR,
+        transferId,
+        peerId,
+        transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+        error: {
+          message: new Error(data.content),
+          transferType: dataTransfers[transferId].direction,
+        },
+      }));
+    };
+
+    const dataChannelHandlers = {
+      MESSAGEProtocolHandler,
+      WRQProtocolHandler,
+      ACKProtocolHandler,
+      dataChunkHandler,
+      CANCELProtocolHandler,
+      ERRORProtocolHandler,
+    };
+
+    // eslint-disable-next-line consistent-return
+    const isProtocol = (data, peerId, channelName, channelType, channelProp) => {
+      try {
+        return JSON.parse(data);
+      } catch (error) {
+        if (data.indexOf('{') > -1 && data.indexOf('}') > 0) {
+          dispatchEvent(onDataChannelStateChanged({
+            peerId,
+            channelName,
+            channelType,
+            error,
+            state: DATA_CHANNEL_STATE$1.ERROR,
+            // bufferAmount: PeerConnection.getDataChannelBuffer(state.peerDataChannels[peerId][channelProp].channel),
+          }));
+
+          SkylinkError.throwError(peerId, TAGS.DATA_CHANNEL, MESSAGES.DATA_CHANNEL.ERRORS.FAILED_PARSING_PROTOCOL, channelProp, {
+            error,
+            data,
+          });
+
+          return false;
+        }
+      }
+    };
+
     /**
      * Function that handles the data received from Datachannel and
      * routes to the relevant data transfer protocol handler.
@@ -19937,135 +21298,87 @@
      * @since 2.0.0
      * @fires DATA_CHANNEL_STATE
      */
-    const processDataChannelData = (roomState, rawData, peerId, channelName, channelType) => {
-      const state = Skylink.getSkylinkState(roomState.room.id);
+    const processDataChannelData = (roomKey, rawData, peerId, channelName, channelType) => {
+      const state = Skylink.getSkylinkState(roomKey);
+      const { room, dataTransfers } = state;
       let transferId = null;
-      let streamId = null;
+      // let streamId = null;
       // eslint-disable-next-line no-unused-vars
-      let isStreamChunk = false;
+      // let isStreamChunk = false;
       const channelProp = channelType === DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
 
       // Safe access of _dataChannel object in case dataChannel has been closed unexpectedly | ESS-983
       /* eslint-disable prefer-destructuring */
       /* eslint-disable no-prototype-builtins */
-      const objPeerDataChannel = state.dataChannels[peerId] || {};
+      const objPeerDataChannel = state.peerDataChannels[peerId] || {};
       if (objPeerDataChannel.hasOwnProperty(channelProp) && typeof objPeerDataChannel[channelProp] === 'object') {
         transferId = objPeerDataChannel[channelProp].transferId;
-        streamId = objPeerDataChannel[channelProp].streamId;
+        // streamId = objPeerDataChannel[channelProp].streamId;
       } else {
-        return null; // dataChannel not avaialble propbably having being closed abruptly | ESS-983
+        // TODO: log data channel not open?
+        return null; // dataChannel not available probably having being closed abruptly | ESS-983
       }
 
-      if (streamId && state.dataStreams && state.dataStreams[streamId]) {
-        isStreamChunk = state.dataStreams[streamId].sessionChunkType === 'string' ? typeof rawData === 'string' : typeof rawData === 'object';
-      }
+      // if (streamId && state.dataStreams && state.dataStreams[streamId]) {
+      //   isStreamChunk = state.dataStreams[streamId].sessionChunkType === 'string' ? typeof rawData === 'string' : typeof rawData === 'object';
+      // }
 
       if (!state.peerConnections[peerId]) {
-        logger.log.WARN([peerId, 'RTCDataChannel', channelProp, 'Dropping data received from Peer as connection is not present ->'], rawData);
+        logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp, 'Dropping data received from Peer as connection is not present ->'], rawData);
         return null;
       }
 
-      if (!(state.dataChannels[peerId] && state.dataChannels[peerId][channelProp])) {
-        logger.log.WARN([peerId, 'RTCDataChannel', channelProp, 'Dropping data received from Peer as Datachannel connection is not present ->'], rawData);
+      if (!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId][channelProp])) {
+        logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp, 'Dropping data received from Peer as Datachannel connection is not present ->'], rawData);
         return null;
       }
 
       // Expect as string
       if (typeof rawData === 'string') {
-        try {
-          const protocolData = JSON.parse(rawData);
-          isStreamChunk = false;
+        const protocol = isProtocol(rawData, channelProp);
 
-          logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, `Received protocol ${protocolData.type} message ->`], protocolData);
+        // rawData as protocol message
+        if (protocol) {
+          logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, channelProp, `Received protocol ${protocol.type} message ->`], protocol);
 
-          // Ignore ACK, ERROR and CANCEL if there is no data transfer session in-progress
-          if ([DC_PROTOCOL_TYPE.ACK, DC_PROTOCOL_TYPE.ERROR, DC_PROTOCOL_TYPE.CANCEL].indexOf(protocolData.type) > -1
-            && !(transferId && state.dataTransfers[transferId] && state.dataTransfers[transferId].sessions[peerId])) {
-            logger.log.WARN([peerId, 'RTCDataChannel', channelProp, 'Discarded protocol message as data transfer session is not present ->'], protocolData);
-            return null;
-          }
-
-          // TODO: Complete other DataChannel handlers in the below switch case
-          switch (protocolData.type) {
+          // TODO: implement ios bidirectional data check
+          switch (protocol.type) {
             case DC_PROTOCOL_TYPE.WRQ:
-              // Discard iOS bidirectional upload when Datachannel is in-progress for data transfers
-              if (transferId && state.dataTransfers[transferId] && state.dataTransfers[transferId].sessions[peerId]) {
-                logger.log.WARN([peerId, 'RTCDataChannel', channelProp, 'Rejecting bidirectional data transfer request as it is currently not supported in the SDK ->'], protocolData);
-                sendMessageToDataChannel(roomState, peerId, {
-                  type: DC_PROTOCOL_TYPE.ACK,
-                  ackN: -1,
-                  sender: state.user.sid,
-                }, channelProp);
-                break;
-              }
-              // self._WRQProtocolHandler(peerId, protocolData, channelProp);
+              dataChannelHandlers.WRQProtocolHandler(room.id, peerId, protocol, channelProp);
               break;
-            // case self._DC_PROTOCOL_TYPE.ACK:
-            //   self._ACKProtocolHandler(peerId, protocolData, channelProp);
-            //   break;
-            // case self._DC_PROTOCOL_TYPE.ERROR:
-            //   self._ERRORProtocolHandler(peerId, protocolData, channelProp);
-            //   break;
-            // case self._DC_PROTOCOL_TYPE.CANCEL:
-            //   self._CANCELProtocolHandler(peerId, protocolData, channelProp);
-            //   break;
+            case DC_PROTOCOL_TYPE.ACK:
+              dataChannelHandlers.ACKProtocolHandler(room.id, peerId, protocol, channelProp);
+              break;
+            case DC_PROTOCOL_TYPE.ERROR:
+              dataChannelHandlers.ERRORProtocolHandler(room.id, peerId, protocol, channelProp);
+              break;
+            case DC_PROTOCOL_TYPE.CANCEL:
+              dataChannelHandlers.CANCELProtocolHandler(room.id, peerId, protocol, channelProp);
+              break;
             case DC_PROTOCOL_TYPE.MESSAGE:
-              messageProtocolHandler(state, peerId, protocolData, channelProp);
+              dataChannelHandlers.MESSAGEProtocolHandler(state, peerId, protocol, channelProp);
               break;
             default:
-              logger.log.WARN([peerId, 'RTCDataChannel', channelProp, `Discarded unknown ${protocolData.type} message ->`], protocolData);
+              logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp, `Discarded unknown ${protocol.type} message ->`], protocol);
           }
-        } catch (error) {
-          // if (rawData.indexOf('{') > -1 && rawData.indexOf('}') > 0) {
-          //   logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Failed parsing protocol step data error ->'], {
-          //     data: rawData,
-          //     error,
-          //   });
-          //
 
-          dispatchEvent(onDataChannelStateChanged({
-            peerId,
-            channelName,
-            channelType,
-            error,
-            state: DATA_CHANNEL_STATE$1.ERROR,
-            bufferAmount: PeerConnection.getDataChannelBuffer(state.dataChannels[peerId][channelProp].channel),
-          }));
-          //   throw error;
-          // }
-          //
-          // if (!isStreamChunk && !(transferId && state.dataTransfers[transferId] && state.dataTransfers[transferId].sessions[peerId])) {
-          //   logger.log.WARN([peerId, 'RTCDataChannel', channelProp, 'Discarded data chunk without session ->'], rawData);
-          //   return null;
-          // }
-          //
-          // if (!isStreamChunk && transferId) {
-          //   if (state.dataTransfers[transferId].chunks[state.dataTransfers[transferId].sessions[peerId].ackN]) {
-          //     logger.log.WARN([peerId, 'RTCDataChannel', transferId, 'Dropping data chunk ' + (!isStreamChunk ? '@' +
-          //       state.dataTransfers[transferId].sessions[peerId].ackN : '') + ' as it has already been added ->'], rawData);
-          //     return null;
-          //   }
-          // }
-          //
-          // if (!isStreamChunk ? self._dataTransfers[transferId].dataType === self.DATA_TRANSFER_SESSION_TYPE.DATA_URL : true) {
-          //   log.debug([peerId, 'RTCDataChannel', channelProp, 'Received string data chunk ' + (!isStreamChunk ? '@' +
-          //     self._dataTransfers[transferId].sessions[peerId].ackN : '') + ' with size ->'], rawData.length || rawData.size);
-          //
-          //   self._DATAProtocolHandler(peerId, rawData, self.DATA_TRANSFER_DATA_TYPE.STRING,
-          //     rawData.length || rawData.size || 0, channelProp);
-          //
-          // } else {
-          //   var removeSpaceData = rawData.replace(/\s|\r|\n/g, '');
-          //
-          //   log.debug([peerId, 'RTCDataChannel', channelProp, 'Received binary string data chunk @' +
-          //     self._dataTransfers[transferId].sessions[peerId].ackN + ' with size ->'],
-          //     removeSpaceData.length || removeSpaceData.size);
-          //
-          //   self._DATAProtocolHandler(peerId, self._base64ToBlob(removeSpaceData), self.DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
-          //     removeSpaceData.length || removeSpaceData.size || 0, channelProp);
-          // }
+          // rawData as chunk
+        } else {
+          const chunk = rawData;
+          if (!(transferId && dataTransfers[transferId] && dataTransfers[transferId].sessions[peerId])) {
+            return logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp, `${MESSAGES.DATA_CHANNEL.ERRORS.DISCARDING_DATA_CHUNK - MESSAGES.DATA_CHANNEL.ERRORS.NO_DATA_TRANSFER_SESSION}`], chunk);
+          }
+
+          if (transferId && dataTransfers[transferId].chunks[dataTransfers[transferId].sessions[peerId].ackN]) {
+            return logger.log.WARN([peerId, TAGS.DATA_CHANNEL, transferId, `${MESSAGES.DATA_CHANNEL.ERRORS.DISCARDING_DATA_CHUNK} - ${MESSAGES.DATA_CHANNEL.ERRORS.CHUNK_ADDED} @${dataTransfers[transferId].sessions[peerId].ackN}`], chunk);
+          }
+
+          const removedSpacesChunk = chunk.replace(/\s|\r|\n/g, '');
+          logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId, `${MESSAGES.DATA_CHANNEL.RECEIVED_CHUNK} @${dataTransfers[transferId].sessions[peerId].ackN}, Size:`], removedSpacesChunk.length || removedSpacesChunk.size || '-');
+          return dataChannelHandlers.dataChunkHandler(room.id, peerId, dataTransferHelpers.base64ToBlob(removedSpacesChunk), DATA_TRANSFER_DATA_TYPE.BINARY_STRING, removedSpacesChunk.length || removedSpacesChunk.size || 0, channelProp);
         }
       }
+
       return null;
     };
 
@@ -20082,7 +21395,7 @@
         roomState,
       } = params;
 
-      processDataChannelData(roomState, event.data, peerId, channelName, channelType);
+      processDataChannelData(roomState.room.id, event.data, peerId, channelName, channelType);
     };
 
     class HandleDataChannelStats extends SkylinkStats {
@@ -20339,7 +21652,7 @@
         roomState,
       } = params;
       const state = Skylink.getSkylinkState(roomState.room.id);
-      const { user, peerConnections, dataChannels } = state;
+      const { user, peerConnections, peerDataChannels } = state;
       const peerConnection = peerConnections[peerId];
       let channelName = `-_${peerId}`;
       let channelType = createAsMessagingChannel === true ? DATA_CHANNEL_TYPE.MESSAGING : DATA_CHANNEL_TYPE.DATA;
@@ -20363,12 +21676,12 @@
         dataChannel = null;
       }
 
-      if (!dataChannels[peerId]) {
+      if (!peerDataChannels[peerId]) {
         channelProp = 'main';
         channelType = DATA_CHANNEL_TYPE.MESSAGING;
-        dataChannels[peerId] = {};
+        peerDataChannels[peerId] = {};
         logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, 'initializing main DataChannel']);
-      } else if (dataChannels[peerId].main && dataChannels[peerId].main.channel.label === channelName) {
+      } else if (peerDataChannels[peerId].main && peerDataChannels[peerId].main.channel.label === channelName) {
         channelProp = 'main';
         channelType = DATA_CHANNEL_TYPE.MESSAGING;
       }
@@ -20415,7 +21728,7 @@
       dataChannel.onclose = callbacks$1.onclose.bind(dataChannel, callbackExtraParams);
 
       const channel = channelType === DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
-      state.dataChannels[peerId][channel] = {
+      state.peerDataChannels[peerId][channel] = {
         channelName,
         channelType,
         transferId: null,
@@ -20428,6 +21741,135 @@
       return null;
     };
 
+    const hasPeerDataChannels = peerDataChannels => !isEmptyObj(peerDataChannels);
+
+    /**
+     * Function that refreshes the main messaging Datachannel.
+     * @param {SkylinkState} state
+     * @param {String} peerId
+     * @memberOf PeerConnection
+     */
+    const refreshDataChannel = (state, peerId) => {
+      const { room, peerDataChannels, peerConnections } = state;
+
+      if (hasPeerDataChannels(peerDataChannels) && Object.hasOwnProperty.call(peerDataChannels, peerId)) {
+        if (Object.hasOwnProperty.call(peerDataChannels[peerId], 'main')) {
+          const mainDataChannel = peerDataChannels[peerId].main;
+          const { channelName, channelType } = mainDataChannel;
+          const bufferThreshold = mainDataChannel.channel.bufferedAmountLowThreshold || 0;
+
+          if (channelType === DATA_CHANNEL_TYPE.MESSAGING) {
+            setTimeout(() => {
+              if (Object.hasOwnProperty.call(peerConnections, peerId)) {
+                if (peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE$1.CLOSED && peerConnections[peerId].localDescription.type === HANDSHAKE_PROGRESS$1.OFFER) {
+                  PeerConnection.closeDataChannel(room.id, peerId);
+                  logger.log.DEBUG([peerId, 'RTCDataChannel', 'main', MESSAGES.DATA_CHANNEL.reviving_dataChannel]);
+                  PeerConnection.createDataChannel({
+                    roomState: state,
+                    peerId,
+                    dataChannel: channelName,
+                    bufferThreshold,
+                    createAsMessagingChannel: true,
+                  });
+                }
+              }
+            }, 100);
+          }
+        }
+      } else {
+        logger.log.DEBUG([peerId, 'RTCDataChannel', MESSAGES.DATA_CHANNEL.refresh_error]);
+      }
+    };
+
+    const closeFn = (roomState, peerId, channelNameProp) => {
+      const { peerDataChannels } = roomState;
+      const targetDataChannel = peerDataChannels[peerId][channelNameProp];
+      const { channelName, channelType } = targetDataChannel.channelName;
+
+      if (targetDataChannel.readyState !== DATA_CHANNEL_STATE$1.CLOSED) {
+        const { room } = roomState;
+        const handleDataChannelStats = new HandleDataChannelStats();
+        logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, channelNameProp, MESSAGES.DATA_CHANNEL.CLOSING]);
+
+        handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE$1.CLOSING, peerId, targetDataChannel.channel, channelNameProp);
+
+        dispatchEvent(onDataChannelStateChanged({
+          room,
+          peerId,
+          state: DATA_CHANNEL_STATE$1.CLOSING,
+          channelName,
+          channelType,
+          bufferAmount: PeerConnection.getDataChannelBuffer(targetDataChannel.channel),
+        }));
+
+        targetDataChannel.channel.close();
+
+        delete peerDataChannels[peerId][channelNameProp];
+      }
+    };
+
+    const closeAllDataChannels = (roomState, peerId) => {
+      const { peerDataChannels } = roomState;
+      const channelNameProp = Object.keys(peerDataChannels[peerId]);
+      for (let i = 0; i < channelNameProp.length; i += 1) {
+        if (Object.hasOwnProperty.call(peerDataChannels[peerId], channelNameProp[i])) {
+          closeFn(roomState, peerId, channelNameProp[i]);
+        }
+      }
+
+      delete peerDataChannels[peerId];
+    };
+
+    /**
+     * Function that closes the datachannel.
+     * @param {string} roomKey - The room id.
+     * @param {String} peerId - The Peer Id.
+     * @param {String} [channelProp=main] - The channel property.
+     * @memberOf PeerConnection.PeerConnectionHelpers
+     * @fires DATA_CHANNEL_STATE
+     */
+    const closeDataChannel = (roomKey, peerId, channelProp = 'main') => {
+      try {
+        const updatedState = Skylink.getSkylinkState(roomKey);
+        const { peerDataChannels, room } = updatedState;
+
+        if (!peerDataChannels[peerId] || !peerDataChannels[peerId][channelProp]) {
+          logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp || null,
+            MESSAGES.DATA_CHANNEL.ERRORS.NO_SESSIONS]);
+          return;
+        }
+
+        if (channelProp === 'main') {
+          closeAllDataChannels(updatedState, peerId);
+          return;
+        }
+
+        closeFn(updatedState, peerId, channelProp);
+        Skylink.setSkylinkState(updatedState, room.id);
+      } catch (error) {
+        logger.log.ERROR([peerId, TAGS.DATA_CHANNEL, channelProp || null,
+          MESSAGES.DATA_CHANNEL.ERRORS.FAILED_CLOSING], error);
+      }
+    };
+
+    class DataChannel {
+      static createDataChannel(params) {
+        createDataChannel(params);
+      }
+
+      static closeDataChannel(roomKey, peerId, channelProp) {
+        closeDataChannel(roomKey, peerId, channelProp);
+      }
+
+      static refreshDataChannel(state, peerId) {
+        refreshDataChannel(state, peerId);
+      }
+
+      static sendMessageToDataChannel(roomKey, peerId, data, channelProperty, type) {
+        sendMessageToDataChannel(roomKey, peerId, data, channelProperty, type);
+      }
+    }
+
     /**
      * @param message
      * @param {String} targetPeerId
@@ -20439,13 +21881,13 @@
     const sendP2PMessageForRoom = (roomState, message, targetPeerId) => {
       const initOptions = Skylink.getInitOptions();
       const {
-        dataChannels,
+        peerDataChannels,
         room,
         user,
         hasMCU,
       } = roomState;
 
-      let listOfPeers = Object.keys(dataChannels);
+      let listOfPeers = Object.keys(peerDataChannels);
       let isPrivate = false;
 
       if (Array.isArray(targetPeerId) && targetPeerId.length) {
@@ -20470,7 +21912,7 @@
       for (let i = 0; i < listOfPeers.length; i += 1) {
         const peerId = listOfPeers[i];
 
-        if (!dataChannels[peerId] && !hasMCU) {
+        if (!peerDataChannels[peerId] && !hasMCU) {
           logger.log.ERROR([peerId, 'RTCDataChannel', null, 'Dropping of sending message to Peer as DataChannel connection does not exist.']);
           listOfPeers.splice(i, 1);
           i -= 1;
@@ -20480,13 +21922,13 @@
         } else if (!hasMCU) {
           logger.log.DEBUG([peerId, 'RTCDataChannel', null, `Sending ${isPrivate ? 'private' : ''} P2P message to Peer.`]);
 
-          sendMessageToDataChannel(roomState, peerId, {
+          DataChannel.sendMessageToDataChannel(room.id, peerId, {
             type: DC_PROTOCOL_TYPE.MESSAGE,
             isPrivate,
             sender: user.sid,
             target: targetPeerId ? peerId : null,
             data: message,
-          }, 'main');
+          }, 'main', DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL);
         }
       }
 
@@ -20496,18 +21938,18 @@
 
       if (hasMCU) {
         logger.log.DEBUG([PEER_TYPE.MCU, 'RTCDataChannel', null, `Broadcasting ${isPrivate ? 'private' : ''} P2P message to Peers.`]);
-        sendMessageToDataChannel(roomState, PEER_TYPE.MCU, {
+        DataChannel.sendMessageToDataChannel(room.id, PEER_TYPE.MCU, {
           type: DC_PROTOCOL_TYPE.MESSAGE,
           isPrivate,
           sender: user.sid,
           target: listOfPeers,
           data: message,
-        }, 'main');
+        }, 'main', DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL);
       }
 
       if (targetPeerId || !hasMCU) {
         dispatchEvent(onIncomingMessage({
-          room: Room.getRoomInfo(roomState.room.id),
+          room: Room.getRoomInfo(room.id),
           message: {
             targetPeerId: targetPeerId || null,
             content: message,
@@ -20625,128 +22067,6 @@
         }
       }
       return null;
-    };
-
-    /**
-     * Get RTCDataChannel buffer thresholds
-     * @param {RTCDataChannel.channel} channel
-     * @returns {{bufferedAmountLow: number, bufferedAmountLowThreshold: number}}
-     * @memberOf PeerConnection.PeerConnectionHelpers
-     */
-    const getDataChannelBuffer = channel => ({
-      bufferedAmountLow: parseInt(channel.bufferedAmountLow, 10) || 0,
-      bufferedAmountLowThreshold: parseInt(channel.bufferedAmountLowThreshold, 10) || 0,
-    });
-
-    const hasPeerDataChannels = dataChannels => !isEmptyObj(dataChannels);
-
-    /**
-     * Function that refreshes the main messaging Datachannel.
-     * @param {SkylinkState} state
-     * @param {String} peerId
-     * @memberOf PeerConnection
-     */
-    const refreshDataChannel = (state, peerId) => {
-      const { dataChannels, peerConnections } = state;
-
-      if (hasPeerDataChannels(dataChannels) && Object.hasOwnProperty.call(dataChannels, peerId)) {
-        if (Object.hasOwnProperty.call(dataChannels[peerId], 'main')) {
-          const mainDataChannel = dataChannels[peerId].main;
-          const { channelName, channelType } = mainDataChannel;
-          const bufferThreshold = mainDataChannel.channel.bufferedAmountLowThreshold || 0;
-
-          if (channelType === DATA_CHANNEL_TYPE.MESSAGING) {
-            setTimeout(() => {
-              if (Object.hasOwnProperty.call(peerConnections, peerId)) {
-                if (peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE$1.CLOSED && peerConnections[peerId].localDescription.type === HANDSHAKE_PROGRESS$1.OFFER) {
-                  PeerConnection.closeDataChannel(state, peerId);
-                  logger.log.DEBUG([peerId, 'RTCDataChannel', 'main', MESSAGES.DATA_CHANNEL.reviving_dataChannel]);
-                  PeerConnection.createDataChannel({
-                    roomState: state,
-                    peerId,
-                    dataChannel: channelName,
-                    bufferThreshold,
-                    createAsMessagingChannel: true,
-                  });
-                }
-              }
-            }, 100);
-          }
-        }
-      } else {
-        logger.log.DEBUG([peerId, 'RTCDataChannel', MESSAGES.DATA_CHANNEL.refresh_error]);
-      }
-    };
-
-    const closeFn = (roomState, peerId, channelNameProp) => {
-      const { dataChannels } = roomState;
-      const targetDataChannel = dataChannels[peerId][channelNameProp];
-      const { channelName, channelType } = targetDataChannel.channelName;
-
-      if (targetDataChannel.readyState !== DATA_CHANNEL_STATE$1.CLOSED) {
-        const { room } = roomState;
-        const handleDataChannelStats = new HandleDataChannelStats();
-        logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, channelNameProp, MESSAGES.DATA_CHANNEL.CLOSING]);
-
-        handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE$1.CLOSING, peerId, targetDataChannel.channel, channelNameProp);
-
-        dispatchEvent(onDataChannelStateChanged({
-          room,
-          peerId,
-          state: DATA_CHANNEL_STATE$1.CLOSING,
-          channelName,
-          channelType,
-          bufferAmount: PeerConnection.getDataChannelBuffer(targetDataChannel.channel),
-        }));
-
-        targetDataChannel.channel.close();
-
-        delete dataChannels[peerId][channelNameProp];
-      }
-    };
-
-    const closeAllDataChannels = (roomState, peerId) => {
-      const { dataChannels } = roomState;
-      const channelNameProp = Object.keys(dataChannels[peerId]);
-      for (let i = 0; i < channelNameProp.length; i += 1) {
-        if (Object.hasOwnProperty.call(dataChannels[peerId], channelNameProp[i])) {
-          closeFn(roomState, peerId, channelNameProp[i]);
-        }
-      }
-
-      delete dataChannels[peerId];
-    };
-
-    /**
-     * Function that closes the datachannel.
-     * @param {SkylinkState} roomState
-     * @param {String} peerId - The Peer Id.
-     * @param {String} [channelProp=main] - The channel property.
-     * @memberOf PeerConnection.PeerConnectionHelpers
-     * @fires DATA_CHANNEL_STATE
-     */
-    const closeDataChannel = (roomState, peerId, channelProp = 'main') => {
-      try {
-        const updatedState = Skylink.getSkylinkState(roomState.room.id);
-        const { dataChannels, room } = updatedState;
-
-        if (!dataChannels[peerId] || !dataChannels[peerId][channelProp]) {
-          logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp || null,
-            MESSAGES.DATA_CHANNEL.ERRORS.NO_SESSIONS]);
-          return;
-        }
-
-        if (channelProp === 'main') {
-          closeAllDataChannels(updatedState, peerId);
-          return;
-        }
-
-        closeFn(updatedState, peerId, channelProp);
-        Skylink.setSkylinkState(updatedState, room.id);
-      } catch (error) {
-        logger.log.ERROR([peerId, TAGS.DATA_CHANNEL, channelProp || null,
-          MESSAGES.DATA_CHANNEL.ERRORS.FAILED_CLOSING], error);
-      }
     };
 
     /**
@@ -21059,7 +22379,7 @@
       const peerId = peerInfo.sid;
 
       peerInfo.room = state.room.roomName;
-      peerInfo.settings.data = !!(state.dataChannels[peerId] && state.dataChannels[peerId].main && state.dataChannels[peerId].main.channel && state.dataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
+      peerInfo.settings.data = !!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId].main && state.peerDataChannels[peerId].main.channel && state.peerDataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
 
       return peerInfo;
     };
@@ -21173,19 +22493,15 @@
      * @description All helper and utility functions for <code>{@link PeerConnection}</code> class are listed here.
      * @private
      * @memberOf PeerConnection
-     * @type {{createOffer, createAnswer, addPeer, createDataChannel, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, getDataChannelBuffer, refreshDataChannel, closeDataChannel, refreshConnection, refreshPeerConnection, restartPeerConnection, buildPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus, processNewSender  }}
+     * @type {{createOffer, createAnswer, addPeer, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, refreshConnection, refreshPeerConnection, restartPeerConnection, buildPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus, processNewSender }}
      */
     const helpers$4 = {
       createOffer,
       createAnswer,
       addPeer,
-      createDataChannel,
       sendP2PMessage,
       getPeersInRoom,
       signalingEndOfCandidates,
-      getDataChannelBuffer,
-      refreshDataChannel,
-      closeDataChannel,
       refreshConnection,
       refreshPeerConnection,
       restartPeerConnection,
@@ -21194,518 +22510,6 @@
       closePeerConnection,
       updatePeerInformationsMediaStatus,
       processNewSender,
-    };
-
-    /* eslint-disable no-param-reassign */
-    /**
-     * @param {RTCPeerConnection} peerConnection
-     * @param {String} targetMid
-     * @param {SkylinkState} currentRoomState
-     * @param {Event} event
-     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
-     */
-    const ondatachannel = (peerConnection, targetMid, currentRoomState, event) => {
-      const dataChannel = event.channel || event;
-      const initOptions = Skylink.getInitOptions();
-      const state = Skylink.getSkylinkState(currentRoomState.room.id);
-      const { peerInformations } = state;
-      const { enableDataChannel } = initOptions;
-
-      logger.log.DEBUG([targetMid, 'RTCDataChannel', dataChannel.label, 'Received datachannel ->'], dataChannel);
-      if (enableDataChannel && peerInformations[targetMid].config.enableDataChannel) {
-        // if peer does not have main channel, the first item is main
-        if (!peerConnection.hasMainChannel) {
-          peerConnection.hasMainChannel = true;
-        }
-        helpers$4.createDataChannel({ peerId: targetMid, dataChannel, roomState: currentRoomState });
-      } else {
-        logger.log.WARN([targetMid, 'RTCDataChannel', dataChannel.label, 'Not adding datachannel as enable datachannel is set to false']);
-      }
-    };
-
-    /**
-     *
-     * @param {RTCPeerConnection} peerConnection
-     * @param {String} targetMid
-     * @param {SkylinkState} roomState - The current state.
-     * @param {Event} rtcIceConnectionEvent
-     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
-     */
-    const onicecandidate = (peerConnection, targetMid, roomState, rtcIceConnectionEvent) => {
-      IceConnection.onIceCandidate(targetMid, rtcIceConnectionEvent.candidate || rtcIceConnectionEvent, roomState.room);
-    };
-
-    class HandleIceConnectionStats extends SkylinkStats {
-      constructor() {
-        super();
-        this.model = {
-          client_id: null,
-          app_key: null,
-          timestamp: null,
-          room_id: null,
-          user_id: null,
-          peer_id: null,
-          state: null,
-          local_candidate: {},
-          remote_candidate: {},
-        };
-      }
-
-      send(roomKey, state, peerId) {
-        try {
-          const roomState = Skylink.getSkylinkState(roomKey);
-
-          if (!roomState) return;
-
-          this.model.room_id = roomKey;
-          this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;
-          this.model.peer_id = peerId;
-          this.model.client_id = roomState.clientId;
-          this.model.state = state;
-          this.model.app_key = Skylink.getInitOptions().appKey;
-          this.model.timestamp = (new Date()).toISOString();
-
-          PeerConnection.retrieveStatistics(roomKey, peerId, Skylink.getInitOptions().beSilentOnStatsLogs).then((stats) => {
-            if (stats) {
-              // Parse the selected ICE candidate pair for both local and remote candidate.
-              ['local', 'remote'].forEach((dirType) => {
-                const candidate = stats.selectedCandidatePair[dirType];
-                if (candidate) {
-                  const modelCandidate = this.model[`${dirType}_candidate`];
-                  modelCandidate.ip_address = candidate.ipAddress || null;
-                  modelCandidate.port_number = candidate.portNumber || null;
-                  modelCandidate.candidate_type = candidate.candidateType || null;
-                  modelCandidate.protocol = candidate.transport || null;
-                  modelCandidate.priority = candidate.priority || null;
-
-                  // This is only available for the local ICE candidate.
-                  if (dirType === 'local') {
-                    this.model.local_candidate.network_type = candidate.networkType || null;
-                  }
-                }
-              });
-            }
-
-            this.postStats(this.endpoints.iceConnection, this.model);
-          }).catch((ex) => {
-            logger.log.DEBUG(MESSAGES.STATS_MODULE.HANDLE_ICE_CONNECTION_STATS.RETRIEVE_FAILED, ex);
-          });
-        } catch (error) {
-          logger.log.DEBUG(MESSAGES.STATS_MODULE.HANDLE_ICE_CONNECTION_STATS.SEND_FAILED, error);
-        }
-      }
-    }
-
-    const formatValue = (stats, mediaType, directionType, itemKey) => {
-      const value = stats[mediaType][directionType === 'send' ? 'sending' : 'receiving'][itemKey];
-      if (['number', 'string', 'boolean'].indexOf(typeof value) > -1) {
-        return value;
-      }
-      return null;
-    };
-
-    const buildAudioTrackInfo = (stream, track) => ({
-      stream_id: stream.id,
-      id: track.id,
-      label: track.label,
-      muted: !track.enabled,
-    });
-
-    const buildVideoTrackInfo = (stream, track, settings) => ({
-      stream_id: stream.id,
-      id: track.id,
-      label: track.label,
-      height: settings.video.resolution.height,
-      width: settings.video.resolution.width,
-      muted: !track.enabled,
-    });
-
-    class HandleBandwidthStats extends SkylinkStats {
-      constructor() {
-        super();
-        this.model = {
-          client_id: null,
-          app_key: null,
-          timestamp: null,
-          room_id: null,
-          user_id: null,
-          peer_id: null,
-          audio_send: { tracks: [] },
-          audio_recv: {},
-          video_send: { tracks: [] },
-          video_recv: {},
-          error: null,
-        };
-        this.stats = null;
-      }
-
-      gatherSendAudioPacketsStats() {
-        this.model.audio_send.bytes = formatValue(this.stats, 'audio', 'send', 'bytes');
-        this.model.audio_send.packets = formatValue(this.stats, 'audio', 'send', 'packets');
-        this.model.audio_send.echo_return_loss = formatValue(this.stats, 'audio', 'send', 'echoReturnLoss');
-        this.model.audio_send.echo_return_loss_enhancement = formatValue(this.stats, 'audio', 'send', 'echoReturnLossEnhancement');
-        this.model.audio_send.round_trip_time = formatValue(this.stats, 'audio', 'send', 'roundTripTime');
-        this.model.audio_send.audio_level = formatValue(this.stats, 'audio', 'send', 'audioLevel');
-        this.model.audio_send.jitter = formatValue(this.stats, 'audio', 'send', 'jitter');
-      }
-
-      gatherReceiveAudioPacketsStats() {
-        this.model.audio_recv.bytes = formatValue(this.stats, 'audio', 'recv', 'bytes');
-        this.model.audio_recv.packets = formatValue(this.stats, 'audio', 'recv', 'packets');
-        this.model.audio_recv.packets_lost = formatValue(this.stats, 'audio', 'recv', 'packetsLost');
-        this.model.audio_recv.jitter = formatValue(this.stats, 'audio', 'recv', 'jitter');
-        this.model.audio_recv.audio_level = formatValue(this.stats, 'audio', 'recv', 'audioLevel');
-      }
-
-      gatherSendVideoPacketsStats() {
-        this.model.video_send.bytes = formatValue(this.stats, 'video', 'send', 'bytes');
-        this.model.video_send.packets = formatValue(this.stats, 'video', 'send', 'packets');
-        this.model.video_send.nack_count = formatValue(this.stats, 'video', 'send', 'nacks');
-        this.model.video_send.firs_count = formatValue(this.stats, 'video', 'send', 'firs');
-        this.model.video_send.plis_count = formatValue(this.stats, 'video', 'send', 'plis');
-        this.model.video_send.frames_encoded = formatValue(this.stats, 'video', 'send', 'framesEncoded');
-        this.model.video_send.frame_width = formatValue(this.stats, 'video', 'send', 'frameWidth');
-        this.model.video_send.frame_height = formatValue(this.stats, 'video', 'send', 'frameHeight');
-        this.model.video_send.round_trip_time = formatValue(this.stats, 'video', 'send', 'roundTripTime');
-        this.model.video_send.qp_sum = formatValue(this.stats, 'video', 'send', 'qpSum');
-        this.model.video_send.jitter = formatValue(this.stats, 'video', 'send', 'jitter');
-        this.model.video_send.frames = formatValue(this.stats, 'video', 'send', 'frames');
-        this.model.video_send.hugeFrames = formatValue(this.stats, 'video', 'send', 'hugeFramesSent');
-        this.model.video_send.framesPerSecond = formatValue(this.stats, 'video', 'send', 'framesPerSecond');
-      }
-
-      gatherReceiveVideoPacketsStats() {
-        this.model.video_recv.bytes = formatValue(this.stats, 'video', 'recv', 'bytes');
-        this.model.video_recv.packets = formatValue(this.stats, 'video', 'recv', 'packets');
-        this.model.video_recv.packets_lost = formatValue(this.stats, 'video', 'recv', 'packetsLost');
-        this.model.video_recv.nack_count = formatValue(this.stats, 'video', 'recv', 'nacks');
-        this.model.video_recv.firs_count = formatValue(this.stats, 'video', 'recv', 'firs');
-        this.model.video_recv.plis_count = formatValue(this.stats, 'video', 'recv', 'plis');
-        this.model.video_recv.frames_decoded = formatValue(this.stats, 'video', 'recv', 'framesDecoded');
-        this.model.video_recv.qp_sum = formatValue(this.stats, 'video', 'recv', 'qpSum');
-        this.model.video_recv.frames_decoded = formatValue(this.stats, 'video', 'recv', 'framesDecoded');
-        this.model.video_recv.frames_dropped = formatValue(this.stats, 'video', 'recv', 'framesDropped');
-        this.model.video_recv.decoderImplementation = formatValue(this.stats, 'video', 'recv', 'decoderImplementation');
-      }
-
-      buildTrackInfo(roomKey) {
-        const state = Skylink.getSkylinkState(roomKey);
-        const { peerStreams, user, streamsSettings } = state;
-
-        if (peerStreams[user.sid]) {
-          const streamObjs = Object.values(peerStreams[user.sid]);
-
-          streamObjs.forEach((streamObj) => {
-            if (streamObj) {
-              const stream = streamObj;
-              const { settings } = streamsSettings[streamObj.id];
-              const audioTracks = stream.getAudioTracks();
-              const videoTracks = stream.getVideoTracks();
-
-              audioTracks.forEach((audioTrack) => {
-                const audioTrackInfo = buildAudioTrackInfo(stream, audioTrack);
-                this.model.audio_send.tracks.push(audioTrackInfo);
-              });
-
-              videoTracks.forEach((videoTrack) => {
-                const videoTrackInfo = buildVideoTrackInfo(stream, videoTrack, settings);
-                this.model.video_send.tracks.push(videoTrackInfo);
-              });
-            }
-          });
-        }
-      }
-
-      send(roomKey, peerConnection, peerId) {
-        const { STATS_MODULE } = MESSAGES;
-        const roomState = Skylink.getSkylinkState(roomKey);
-
-        if (!roomState) {
-          logger.log.DEBUG([peerId, 'Statistics', 'Bandwidth_Stats', STATS_MODULE.HANDLE_BANDWIDTH_STATS.NO_STATE]);
-          return;
-        }
-
-        if (isEmptyObj(roomState.peerStreams)) {
-          return;
-        }
-
-        this.model.client_id = roomState.clientId;
-        this.model.app_key = Skylink.getInitOptions().appKey;
-        this.model.timestamp = (new Date()).toISOString();
-        this.model.room_id = roomKey;
-        this.model.user_id = (roomState && roomState.user && roomState.user.sid) || null;
-        this.model.peer_id = peerId;
-
-        PeerConnection.retrieveStatistics(roomKey, peerId, Skylink.getInitOptions().beSilentOnStatsLogs).then((stats) => {
-          if (stats) {
-            this.stats = stats;
-            this.gatherSendAudioPacketsStats();
-            this.gatherReceiveAudioPacketsStats();
-            this.gatherSendVideoPacketsStats();
-            this.gatherReceiveVideoPacketsStats();
-            this.buildTrackInfo(roomKey);
-            this.postStats(this.endpoints.bandwidth, this.model);
-          }
-        }).catch((error) => {
-          this.model.error = error ? error.message : null;
-          logger.log.DEBUG(STATS_MODULE.HANDLE_BANDWIDTH_STATS.RETRIEVE_FAILED, error);
-        });
-      }
-    }
-
-    const isIceConnectionStateCompleted = (pcIceConnectionState) => {
-      const { ICE_CONNECTION_STATE } = constants;
-      return [ICE_CONNECTION_STATE.COMPLETED,
-        ICE_CONNECTION_STATE.CONNECTED].indexOf(pcIceConnectionState) > -1;
-    };
-
-    /**
-     * @param {RTCPeerConnection} peerConnection
-     * @param {String} targetMid - The Peer Id
-     * @param {SkylinkState} currentRoomState
-     * @fires ICE_CONNECTION_STATE
-     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
-     */
-    const oniceconnectionstatechange = (peerConnection, targetMid, currentRoomState) => {
-      const { ROOM_STATE, ICE_CONNECTION, PEER_CONNECTION } = MESSAGES;
-      const { ICE_CONNECTION_STATE, PEER_CONNECTION_STATE, BROWSER_AGENT } = constants;
-      const state = Skylink.getSkylinkState(currentRoomState.room.id);
-      const { peerStreams, user, enableStatsGathering } = state;
-      const initOptions = Skylink.getInitOptions();
-      let statsInterval = null;
-      const pcIceConnectionState = peerConnection.iceConnectionState;
-
-      if (isAgent(BROWSER_AGENT.REACT_NATIVE) && !state && pcIceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
-        return;
-      }
-
-      if (!state) {
-        logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ROOM_STATE.NOT_FOUND]);
-        return;
-      }
-
-      const { peerStats } = state;
-
-      if (pcIceConnectionState === ICE_CONNECTION_STATE.FAILED) { // peer connection 'failed' state is dispatched in onconnectionstatechange
-        if (isAgent(BROWSER_AGENT.FIREFOX) && !peerStreams[user.sid]) {
-          // no audio and video requested will throw ice connection state failed although ice candidates are exchanged
-          return;
-        }
-      }
-
-      logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ICE_CONNECTION.STATE_CHANGE], pcIceConnectionState);
-      const handleIceConnectionStats = new HandleIceConnectionStats();
-      handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
-      dispatchEvent(iceConnectionState({
-        state: pcIceConnectionState,
-        peerId: targetMid,
-      }));
-
-      if (!statsInterval && isIceConnectionStateCompleted(pcIceConnectionState) && !peerStats[targetMid] && enableStatsGathering) {
-        statsInterval = true;
-        peerStats[targetMid] = {};
-
-        logger.log.DEBUG([targetMid, 'RTCStatsReport', null, 'Retrieving first report to tabulate results']);
-
-        // Do an initial getConnectionStatus() to backfill the first retrieval in order to do (currentTotalStats - lastTotalStats).
-        PeerConnection.getConnectionStatus(state, targetMid).then(() => {
-          statsInterval = setInterval(() => {
-            const currentState = Skylink.getSkylinkState(state.room.id);
-            if (!currentState || !currentState.room.inRoom) {
-              clearInterval(statsInterval);
-              return;
-            }
-            if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED || peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
-              if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED) { // polyfill for
-                // Safari and FF peerConnection state 'closed' when ice failure
-                logger.log.DEBUG([targetMid, 'RTCPeerConnectionState', null, PEER_CONNECTION.STATE_CHANGE], peerConnection.connectionState);
-                dispatchEvent(peerConnectionState({
-                  state: PEER_CONNECTION_STATE.CLOSED,
-                  peerId: targetMid,
-                }));
-              }
-
-              if (peerConnection.iceConnectionState === ICE_CONNECTION_STATE.CLOSED) {
-                logger.log.DEBUG([targetMid, 'RTCIceConnectionState', null, ICE_CONNECTION.STATE_CHANGE], peerConnection.iceConnectionState);
-                handleIceConnectionStats.send(currentRoomState.room.id, peerConnection.iceConnectionState, targetMid);
-                dispatchEvent(iceConnectionState({
-                  state: ICE_CONNECTION_STATE.CLOSED,
-                  peerId: targetMid,
-                }));
-              }
-
-              clearInterval(statsInterval);
-            } else {
-              new HandleBandwidthStats().send(state.room.id, peerConnection, targetMid);
-            }
-          }, initOptions.statsInterval * 1000);
-        });
-      }
-    };
-
-    /**
-     * @param {RTCPeerConnection} peerConnection
-     * @param {String} targetMid - The Peer Id
-     * @param {SkylinkState} roomState - The current state
-     * @fires CANDIDATE_GENERATION_STATE
-     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
-     */
-    const onicegatheringstatechange = (peerConnection, targetMid, roomState) => {
-      const { ICE_CONNECTION } = MESSAGES;
-      const { iceGatheringState } = peerConnection;
-
-      logger.log.INFO([targetMid, 'RTCIceGatheringState', null, ICE_CONNECTION.STATE_CHANGE], iceGatheringState);
-      dispatchEvent(candidateGenerationState({
-        state: iceGatheringState,
-        room: Room.getRoomInfo(roomState.room.id),
-        peerId: targetMid,
-      }));
-    };
-
-    /**
-     *
-     * @param {RTCPeerConnection} peerConnection
-     * @param {String} targetMid - The Peer Id
-     * @fires PEER_CONNECTION_STATE
-     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
-     */
-    // eslint-disable-next-line no-unused-vars
-    const onsignalingstatechange = (peerConnection, targetMid) => {
-      const { PEER_CONNECTION } = MESSAGES;
-
-      logger.log.DEBUG([targetMid, 'RTCPeerConnectionSignalingState', null, PEER_CONNECTION.STATE_CHANGE], peerConnection.signalingState);
-      dispatchEvent(peerConnectionState({
-        state: peerConnection.signalingState,
-        peerId: targetMid,
-      }));
-    };
-
-    const matchPeerIdWithTransceiverMid = (state, transceiver) => {
-      const { peerMedias, user } = state;
-      const peerIds = Object.keys(peerMedias);
-
-      for (let i = 0; i < peerIds.length; i += 1) {
-        if (peerIds[i] !== user.sid) {
-          const mediaInfos = Object.values(peerMedias[peerIds[i]]);
-          for (let m = 0; m < mediaInfos.length; m += 1) {
-            if (mediaInfos[m].transceiverMid === transceiver.mid) {
-              return peerIds[i];
-            }
-          }
-        }
-      }
-
-      return null;
-    };
-
-    /**
-     * Function that handles the <code>RTCPeerConnection.addTrack</code> remote MediaTrack received.
-     * @param {RTCPeerConnection} RTCPeerConnection
-     * @param {String} targetMid
-     * @param {SkylinkState} currentRoomState
-     * @param {RTCTrackEvent} rtcTrackEvent
-     * @returns {null}
-     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
-     */
-    const ontrack = (RTCPeerConnection, targetMid, currentRoomState, rtcTrackEvent) => {
-      const state = Skylink.getSkylinkState(currentRoomState.room.id);
-      const {
-        peerConnections, room, hasMCU,
-      } = state;
-      const stream = rtcTrackEvent.streams[0];
-      const { transceiver, track } = rtcTrackEvent;
-      let peerId = targetMid;
-
-      if (!stream) {
-        logger.log.WARN('ontrack stream is null');
-        return null;
-      }
-
-      if (transceiver.mid === null) {
-        logger.log.WARN('Transceiver mid is null', transceiver);
-      }
-
-      if (!peerConnections[peerId]) return null;
-
-      if (hasMCU) {
-        peerId = matchPeerIdWithTransceiverMid(state, transceiver);
-      }
-
-      const isScreensharing = PeerMedia.retrieveScreenMediaInfo(state.room, peerId, { transceiverMid: transceiver.mid });
-      const callbackExtraParams = [peerId, room, isScreensharing];
-      stream.onremovetrack = callbacks$2.onremovetrack.bind(undefined, ...callbackExtraParams);
-      PeerMedia.updateStreamIdFromOntrack(state.room, peerId, transceiver.mid, stream.id);
-      PeerConnection.updatePeerInformationsMediaStatus(state.room, peerId, transceiver, stream);
-      PeerStream.addStream(peerId, stream, room.id);
-      new HandleUserMediaStats().send(room.id);
-      MediaStream.onRemoteTrackAdded(stream, currentRoomState, peerId, isScreensharing, track.kind === TRACK_KIND.VIDEO, track.kind === TRACK_KIND.AUDIO);
-
-      return null;
-    };
-
-    const dispatchPeerUpdated = (state, peerId) => {
-      dispatchEvent(peerUpdated({
-        peerId,
-        peerInfo: PeerData.getPeerInfo(peerId, state.room),
-        isSelf: false,
-      }));
-    };
-
-    const updatePeerStreamsAndMediaStatus = (state, peerId, streamId) => {
-      const updatedState = state;
-
-      delete updatedState.peerInformations[peerId].mediaStatus[streamId];
-      PeerStream.deleteStream(peerId, updatedState.room, streamId);
-
-      Skylink.setSkylinkState(updatedState, updatedState.room.id);
-    };
-
-    const dispatchStreamEndedEvent = (state, peerId, isScreensharing, rtcTrackEvent, stream) => {
-      PeerStream.dispatchStreamEvent(STREAM_ENDED, {
-        room: state.room,
-        peerId,
-        peerInfo: PeerData.getPeerInfo(peerId, state.room),
-        isSelf: false,
-        isScreensharing,
-        streamId: stream.id,
-        isVideo: rtcTrackEvent.track.kind === TRACK_KIND.VIDEO,
-        isAudio: rtcTrackEvent.track.kind === TRACK_KIND.AUDIO,
-      });
-    };
-
-    /**
-     * @param {String} peerId
-     * @param {String} room
-     * @param {boolean} isScreensharing
-     * @param {MediaStreamTrackEvent} rtcTrackEvent
-     * @fires STREAM_ENDED
-     * @memberOf PeerConnection.PeerConnectionHelpers.CreatePeerConnectionCallbacks
-     */
-    const onremovetrack = (peerId, room, isScreensharing, rtcTrackEvent) => {
-      const state = getStateByKey(room.id);
-      const { peerInformations } = state;
-      const { MEDIA_STREAM, PEER_INFORMATIONS } = MESSAGES;
-      const stream = isAgent(BROWSER_AGENT.REACT_NATIVE) ? rtcTrackEvent.stream : rtcTrackEvent.target;
-
-
-      logger.log.INFO([peerId, TAGS.MEDIA_STREAM, null, MEDIA_STREAM.REMOTE_TRACK_REMOVED], {
-        peerId, isSelf: false, isScreensharing, track: rtcTrackEvent.track,
-      });
-
-      if (!peerInformations[peerId]) {
-        // peerInformations[peerId] will be undefined if onremovetrack is called from byeHandler
-        logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MEDIA_STREAM.ERRORS.DROPPING_ONREMOVETRACK}` - `${PEER_INFORMATIONS.NO_PEER_INFO} ${peerId}`]);
-        return;
-      }
-
-      if (!stream) {
-        logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MEDIA_STREAM.ERRORS.DROPPING_ONREMOVETRACK}` - `${MEDIA_STREAM.NO_STREAM}`]);
-        return;
-      }
-
-      updatePeerStreamsAndMediaStatus(state, peerId, stream.id);
-      dispatchStreamEndedEvent(state, peerId, isScreensharing, rtcTrackEvent, stream);
-      dispatchPeerUpdated(state, peerId);
     };
 
     /**
@@ -22621,9 +23425,9 @@
       }
 
       // if remote peer does not have data channel
-      if (state.dataChannels[targetMid] && (peerConnection.remoteDescription.sdp.indexOf('m=application') === -1 || peerConnection.remoteDescription.sdp.indexOf('m=application 0') > 0)) {
+      if (state.peerDataChannels[targetMid] && (peerConnection.remoteDescription.sdp.indexOf('m=application') === -1 || peerConnection.remoteDescription.sdp.indexOf('m=application 0') > 0)) {
         logger.log.WARN([targetMid, TAGS.PEER_CONNECTION, null, `${DATA_CHANNEL.CLOSING} - ${DATA_CHANNEL.NO_REMOTE_DATA_CHANNEL}`]);
-        PeerConnection.closeDataChannel(state, targetMid);
+        PeerConnection.closeDataChannel(room.id, targetMid);
       }
 
       handleSetOfferAndAnswerSuccess(state, targetMid, remoteDescription, true);
@@ -22660,7 +23464,7 @@
       const targetMid = mid;
 
       if (userInfo && typeof userInfo === 'object') {
-        updatedUserInfo.settings.data = !!(updatedState.dataChannels[targetMid] && updatedState.dataChannels[targetMid].main && updatedState.dataChannels[targetMid].main.channel && updatedState.dataChannels[targetMid].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
+        updatedUserInfo.settings.data = !!(updatedState.peerDataChannels[targetMid] && updatedState.peerDataChannels[targetMid].main && updatedState.peerDataChannels[targetMid].main.channel && updatedState.peerDataChannels[targetMid].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
         updatedState.peerInformations[targetMid].settings = updatedUserInfo.settings || {};
         updatedState.peerInformations[targetMid].mediaStatus = updatedUserInfo.mediaStatus || {};
         updatedState.peerInformations[targetMid].userData = updatedUserInfo.userData;
@@ -23230,8 +24034,7 @@
      * @private
      */
     const tryCloseDataChannel = (roomKey, peerId) => {
-      const roomState = Skylink.getSkylinkState(roomKey);
-      PeerConnection.closeDataChannel(roomState, peerId);
+      PeerConnection.closeDataChannel(roomKey, peerId);
     };
 
     /**
@@ -24072,6 +24875,7 @@
      * @property {SkylinkRoom.id} rid
      * @property {SkylinkUser.userData} userData
      * @property {Number} state
+     * @private
      */
     /**
      * @param {SkylinkState} roomState
@@ -24728,7 +25532,7 @@
 
         addEventListener(EVENTS.DATA_CHANNEL_STATE, handleDataChannelClose);
 
-        PeerConnection.closeDataChannel(state, peerId);
+        PeerConnection.closeDataChannel(room.id, peerId);
       } else {
         resolve(peerId);
       }
@@ -24949,7 +25753,7 @@
         this.apiResponse = {};
         /**
          * Stores the list of Peer DataChannel connections.
-         * @name dataChannels
+         * @name peerDataChannels
          * @type {Object}
          * @property {String} peerId - The list of DataChannels associated with Peer ID.
          * @property {RTCDataChannel} channelLabel - The DataChannel connection.
@@ -24957,7 +25761,7 @@
          * @since 0.2.0
          * @private
          */
-        this.dataChannels = {};
+        this.peerDataChannels = {};
         /**
          * Stores the list of buffered ICE candidates that is received before
          *   remote session description is received and set.
@@ -25269,6 +26073,7 @@
         this.peerStreams = {};
         this.streamsSettings = {};
         this.enableStatsGathering = initOptions.enableStatsGathering;
+        this.dataTransfers = {};
       }
     }
 
@@ -25575,7 +26380,7 @@
       logger.log.INFO(UPDATE_USER_DATA, updatedUserData);
     };
 
-    const hasPeerDataChannels$1 = dataChannels => !isEmptyObj(dataChannels);
+    const hasPeerDataChannels$1 = peerDataChannels => !isEmptyObj(peerDataChannels);
 
     /**
      * @description Function that gets the current list of connected Peers Datachannel connections in the Room.
@@ -25585,18 +26390,18 @@
      * @memberOf PeerDataHelpers
      */
     const getPeersDataChannels = (roomState) => {
-      const { dataChannels } = roomState;
+      const { peerDataChannels } = roomState;
       const listOfPeersDataChannels = {};
-      const listOfPeers = Object.keys(dataChannels);
+      const listOfPeers = Object.keys(peerDataChannels);
 
       for (let i = 0; i < listOfPeers.length; i += 1) {
         const peerId = listOfPeers[i];
         listOfPeersDataChannels[peerId] = {};
 
-        if (hasPeerDataChannels$1(dataChannels)) {
-          const channelProp = Object.keys(dataChannels[peerId]);
+        if (hasPeerDataChannels$1(peerDataChannels)) {
+          const channelProp = Object.keys(peerDataChannels[peerId]);
           for (let y = 0; y < channelProp.length; y += 1) {
-            const channel = dataChannels[peerId][channelProp[y]];
+            const channel = peerDataChannels[peerId][channelProp[y]];
             const {
               channelName,
               channelType,
@@ -28014,7 +28819,7 @@
          * @type {RTCPeerConnection}
          */
         this.peerConnection = this.roomState.peerConnections[peerId] || null;
-        this.dataChannel = this.roomState.dataChannels[peerId] || null;
+        this.dataChannel = this.roomState.peerDataChannels[peerId] || null;
         this.peerId = peerId;
         this.roomKey = roomKey;
         this.output = {
@@ -28243,11 +29048,11 @@
         if (dataChannel) {
           const dcKeys = Object.keys(dataChannel);
 
-          this.output.connection.dataChannels = {};
+          this.output.connection.peerDataChannels = {};
 
           dcKeys.forEach((prop) => {
             const channel = dataChannel[prop];
-            this.output.connection.dataChannels[channel.channel.label] = {
+            this.output.connection.peerDataChannels[channel.channel.label] = {
               label: channel.channel.label,
               readyState: channel.channel.readyState,
               channelType: DATA_CHANNEL_TYPE[prop === 'main' ? 'MESSAGING' : 'DATA'],
@@ -28299,7 +29104,7 @@
        * @param args
        */
       static createDataChannel(...args) {
-        return helpers$4.createDataChannel(...args);
+        return DataChannel.createDataChannel(...args);
       }
 
       /**
@@ -28356,16 +29161,18 @@
        * @static
        * @return {{bufferedAmountLow: number, bufferedAmountLowThreshold: number}}
        */
+      // eslint-disable-next-line no-unused-vars
       static getDataChannelBuffer(channel) {
-        return helpers$4.getDataChannelBuffer(channel);
+        // TODO: what does this mean? what is it for?
+        return null;
       }
 
       static refreshDataChannel(roomState, peerId) {
-        return helpers$4.refreshDataChannel(roomState, peerId);
+        return DataChannel.refreshDataChannel(roomState, peerId);
       }
 
-      static closeDataChannel(roomState, peerId) {
-        return helpers$4.closeDataChannel(roomState, peerId);
+      static closeDataChannel(roomKey, peerId) {
+        return DataChannel.closeDataChannel(roomKey, peerId);
       }
 
       static refreshConnection(roomState, targetPeerId, iceRestart, options, callback) {
@@ -28932,6 +29739,188 @@
             }
           } catch (error) {
             this.logErrorAndReject(error, reject);
+          }
+        });
+      }
+    }
+
+    const resolvePromise = promise => promise.then(success => (success), error => (error));
+
+    /**
+     * @classdesc Class that manages the data transfer features
+     * @class
+     * @private
+     */
+    class DataTransfer {
+      static sendBlobData(roomState, data, targetPeerId = null, timeout = null) {
+        const updatedState = roomState;
+        const {
+          user, peerInformations, room, hasMCU,
+        } = roomState;
+        const transferId = `${user.sid}_${new Date().getTime()}`;
+        const initOptions = Skylink.getInitOptions();
+        const { enableDataChannel } = initOptions;
+        const channelProperty = 'main';
+
+        // TODO: implement sendChunkAsBinary
+        if (hasMCU) {
+          return Promise.reject(new Error(`${MESSAGES.DATA_CHANNEL.UNABLE_TO_SEND_BLOB} - ${MESSAGES.DATA_CHANNEL.ERRORS.MCU_NOT_SUPPORTED}`));
+        }
+
+        // const sessionChunkType = SESSION_CHUNK_TYPE.STRING;
+        let listOfPeers = Object.keys(peerInformations); // will not include MCU peer if MCU is on
+        // const sessionType = DATA_TRANSFER_SESSION_TYPE.BLOB;
+
+        // Validate data as blob object
+        // eslint-disable-next-line no-undef
+        if (!(data && isAObj(data) && data instanceof Blob)) {
+          return Promise.reject(new Error(`${MESSAGES.DATA_CHANNEL.UNABLE_TO_SEND_BLOB} - ${MESSAGES.DATA_CHANNEL.ERRORS.NOT_BLOB}`));
+        }
+
+        if (data.size < 1) {
+          return Promise.reject(new Error(`${MESSAGES.DATA_CHANNEL.UNABLE_TO_SEND_BLOB} - ${MESSAGES.DATA_CHANNEL.ERRORS.INVALID_DATA}`));
+        }
+
+        if (!enableDataChannel) {
+          return Promise.reject(new Error(`${MESSAGES.DATA_CHANNEL.UNABLE_TO_SEND_BLOB} - ${MESSAGES.DATA_CHANNEL.ERRORS.DATA_CHANNEL_DISABLED}`));
+        }
+
+        if (listOfPeers.length === 0) {
+          return Promise.reject(new Error(`${MESSAGES.DATA_CHANNEL.UNABLE_TO_SEND_BLOB} - ${MESSAGES.ROOM.ERRORS.NO_PEERS}`));
+        }
+
+        // sendBlobData(.., .., targetPeerId)
+        if (Array.isArray(targetPeerId)) {
+          listOfPeers = targetPeerId;
+        } else if (targetPeerId && isAString(targetPeerId)) {
+          listOfPeers = [targetPeerId];
+        } else if (targetPeerId && isANumber(targetPeerId)) {
+          // eslint-disable-next-line no-param-reassign
+          timeout = targetPeerId;
+        } else if (targetPeerId) {
+          // reject for incorrect targetPeerId type
+          return Promise.reject(new Error(`${MESSAGES.DATA_CHANNEL.UNABLE_TO_SEND_BLOB} - ${MESSAGES.DATA_CHANNEL.ERRORS.PEER_ID_INVALID_TYPE}`));
+        }
+
+        if (timeout && !isANumber(timeout)) {
+          // reject for incorrect timeout type
+          return Promise.reject(new Error(`${MESSAGES.DATA_CHANNEL.UNABLE_TO_SEND_BLOB} - ${MESSAGES.DATA_CHANNEL.ERRORS.TIMEOUT_INVALID_TYPE}`));
+        }
+
+        const transferInfo = {
+          name: data.name || transferId,
+          size: 4 * Math.ceil(data.size / 3), // Conversion to Base64 increases size by 33% - compare against receivedSize to determine completion of data transfer in chunks on the remote peer
+          chunkSize: CHUNK_FILE_SIZE,
+          chunkType: DATA_TRANSFER_DATA_TYPE.BINARY_STRING,
+          dataType: DATA_TRANSFER_SESSION_TYPE.BLOB,
+          mimeType: data.type || null,
+          direction: DATA_TRANSFER_DIRECTION.UPLOAD,
+          timeout: timeout || 60,
+          isPrivate: false,
+          percentage: 0,
+          originalSize: data.size,
+          cancelled: false,
+        };
+
+        const chunks = dataTransferHelpers.chunkBlobData(data, transferInfo.chunkSize);
+
+        // update state
+        updatedState.dataTransfers[transferId] = clone_1(transferInfo);
+        updatedState.dataTransfers[transferId].sessions = {};
+        updatedState.dataTransfers[transferId].chunks = chunks;
+        updatedState.dataTransfers[transferId].enforceBSPeers = [];
+        updatedState.dataTransfers[transferId].enforcedBSInfo = {};
+        updatedState.dataTransfers[transferId].sessionType = transferInfo.dataType;
+        updatedState.dataTransfers[transferId].sessionChunkType = transferInfo.chunkType;
+        updatedState.dataTransfers[transferId].senderPeerId = user.sid;
+
+        Skylink.setSkylinkState(updatedState, room.id);
+
+        const peerDataTransferPromises = [];
+        listOfPeers.forEach((peerId) => {
+          peerDataTransferPromises.push(resolvePromise(this.transferDataToPeer(room.id, peerId, transferId, channelProperty)));
+        });
+
+        return Promise.all(peerDataTransferPromises);
+      }
+
+      static acceptDataTransfer(roomState, peerId, transferId, accept) {
+        return new Promise((resolve, reject) => {
+          const { room, user } = roomState;
+          const channelProp = 'main';
+
+          // add listener for data channel transfer complete before resolving or rejecting?
+          dataTransferHelpers.listenOnDataTransferState(room.id, DATA_TRANSFER_DIRECTION.DOWNLOAD, peerId, transferId, resolve, reject);
+
+          if (dataTransferHelpers.canDataTransferProceed(room.id, DATA_TRANSFER_DIRECTION.DOWNLOAD, peerId, transferId, channelProp, accept, reject)) {
+            // check: when will transferId be the channel prop?
+            // if (self._dataChannels[peerId][transferId]) {
+            //   channelProp = transferId;
+            // }
+
+            // Send ACK protocol to start data transfer
+            dataTransferHelpers.sendACKProtocol(room.id, peerId, user.sid, ACK_PROTOCOL_NUMBER.ACCEPT, channelProp);
+
+            logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId,
+              `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_STATE} - ${DATA_TRANSFER_STATE$1.DOWNLOAD_STARTED}`]);
+
+            dispatchEvent(dataTransferState({
+              state: DATA_TRANSFER_STATE$1.DOWNLOAD_STARTED,
+              transferId,
+              peerId,
+              transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+            }));
+          }
+        });
+      }
+
+      static cancelBlobTransfer(roomState, peerId, transferId) {
+        return new Promise((resolve, reject) => {
+          const { room, user, dataTransfers } = roomState;
+          const channelProp = 'main';
+
+          if (dataTransferHelpers.canDataTransferProceed(room.id, DATA_TRANSFER_STATE$1.CANCEL, peerId, transferId, channelProp, null, reject)) {
+            dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, false);
+
+            resolve({ peerId, transferId });
+
+            DataChannel.sendMessageToDataChannel(room.id, peerId, {
+              type: DC_PROTOCOL_TYPE.CANCEL,
+              sender: user.sid,
+              content: MESSAGES.DATA_CHANNEL.ERRORS.REMOTE_CANCELLED_TRANSFER,
+              name: dataTransfers[transferId].name,
+              ackN: ACK_PROTOCOL_NUMBER.CANCEL,
+            }, channelProp, DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL);
+
+            dispatchEvent(dataTransferState({
+              state: DATA_TRANSFER_STATE$1.CANCEL,
+              transferId,
+              peerId,
+              transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
+              error: {
+                message: MESSAGES.DATA_CHANNEL.ERRORS.USER_CANCELLED_TRANSFER,
+                transferType: dataTransfers[transferId].direction,
+              },
+            }));
+          }
+        });
+      }
+
+      static transferDataToPeer(roomKey, peerId, transferId, channelProp) {
+        // eslint-disable-next-line consistent-return
+        return new Promise((resolve, reject) => {
+          const updatedState = Skylink.getSkylinkState(roomKey);
+          if (dataTransferHelpers.canDataTransferProceed(roomKey, DATA_TRANSFER_DIRECTION.UPLOAD, peerId, transferId, channelProp, null, reject)) {
+            updatedState.dataTransfers[transferId].sessions[peerId] = {
+              timer: null,
+              ackN: 0,
+            };
+
+            updatedState.peerDataChannels[peerId].main.transferId = transferId;
+            Skylink.setSkylinkState(updatedState, updatedState.room.id);
+
+            dataTransferHelpers.sendWRQMessage(updatedState.room.id, transferId, peerId, channelProp);
+            return dataTransferHelpers.listenOnDataTransferState(roomKey, DATA_TRANSFER_DIRECTION.UPLOAD, peerId, transferId, resolve, reject);
           }
         });
       }
@@ -30302,6 +31291,100 @@
        */
       getSdkVersion() {
         return SDK_VERSION;
+      }
+
+      /**
+       * @typedef {Object.<String, Object>} dataTransferResult
+       * @property {Object} #peerId - Data transfer success or error result keyed by peer id.
+       * @property {transferInfo} [#peerId.success] - The success return object. Will not be present in the return object if the transfer fails.
+       * @property {Error|String} [#peerId.error] - The error return object. Will not be present in the return object if the transfer succeeds.
+       * @property {String} #peerId.transferType - The transfer type.
+       */
+      /**
+       * @description Method that sends a Blob to all connected peers in the room.
+       * @param {String} roomName - The room name
+       * @param {Blob} data - The Blob object
+       * @param {String|Array} [peerId] - The peer ID or array of peer IDs. When not provided, it will start uploading data transfers with all peers in
+       * the room
+       * @param {Number} [timeout = 60] - The duration for which to wait for a response from the remote peer before terminating the transfer
+       * @return {Promise<dataTransferResult>} - Always resolves with success or error object.
+       * @example
+       * Example 1: Send a file
+       *
+       * // Add listener to incomingStream event
+       * SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.DATA_TRANSFER_STATE, (evt) => {
+       *   const { state } = evt.detail;
+       *
+       *   switch (state) {
+       *     case SkylinkConstants.DATA_TRANSFER_STATE.UPLOAD_REQUEST:
+       *     // Alert peer that a file transfer is requested
+       *     // Record user response and call <code>respondBlobRequest</code>
+       *     skylink.respondBlobRequest(config.defaultRoom, peerId, transferId, result)
+       *      .then((result) => // handle success or error)
+       *      .catch((err) => // handle error)
+       *     break;
+       *     case SkylinkConstants.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED:
+       *     // Surface download link to user
+       *     break;
+       *   }
+       * })
+       *
+       * skylink.sendBlobData(roomName, data)
+       *  .then((result) => {
+       *        // always resolves with success or error object
+       *    })
+       *   .catch((error) => // handle error);
+       * }
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>USER_UPLOAD_REQUEST</code> on the local peer.
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>UPLOAD_REQUEST</code> on the remote peer.
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>UPLOAD_STARTED</code> when remote peer accepts data transfer.
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>REJECTED</code> when remote peer rejects data transfer.
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>UPLOADING</code> when data is in the process of being transferred.
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>UPLOAD_COMPLETED</code> when data transfer has completed.
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>ERROR</code> when data transfer timeout limit is reached.
+       * @alias Skylink#sendBlobData
+       * @since 2.0.0
+       */
+      sendBlobData(roomName, data, peerId, timeout) {
+        const roomState = getRoomStateByName(roomName);
+        return DataTransfer.sendBlobData(roomState, data, peerId, timeout);
+      }
+
+      /**
+       * @description Method that responds to a <code>sendBlobData</code> request.
+       * @param {String} roomName - The room name.
+       * @param {String} peerId - The Peer Id.
+       * @param {String }transferId - The transfer Id.
+       * @param {Boolean} accept - The flag if the data transfer is accepted by the user.
+       * @return {Promise<dataTransferResult>} - Always resolves with success or error object.
+       *
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>DOWNLOAD_STARTED</code> when user accepts the data transfer request.
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>USER_REJECTED</code> when user rejects the data transfer request.
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>DOWNLOADING</code> when data is in the process of being transferred.
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>DOWNLOAD_COMPLETED</code> when data transfer has completed.
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>ERROR</code> when data transfer timeout limit is reached.
+       * @alias Skylink#respondBlobRequest
+       * @since 2.0.0
+       */
+      respondBlobRequest(roomName, peerId, transferId, accept) {
+        const roomState = getRoomStateByName(roomName);
+        return DataTransfer.acceptDataTransfer(roomState, peerId, transferId, accept);
+      }
+
+      /**
+       * @description Method that cancels a data transfer
+       * @param {String} roomName - The room name.
+       * @param {String} peerId - The Peer Id.
+       * @param {String} transferId - The Transfer Id to cancel.
+       * @return {Promise<{peerId, transferId}|Error>}
+       *
+       * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>CANCEL</code>.
+       * @alias Skylink#cancelBlobTransfer
+       * @since 2.0.0
+       */
+      cancelBlobTransfer(roomName, peerId, transferId) {
+        const roomState = getRoomStateByName(roomName);
+        return DataTransfer.cancelBlobTransfer(roomState, peerId, transferId);
       }
     }
 
