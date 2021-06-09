@@ -2,7 +2,7 @@ import { isEmptyObj } from '../../utils/helpers';
 import { SkylinkConstants } from '../../index';
 import PeerConnection from '../../peer-connection';
 
-const hasPeerDataChannels = dataChannels => !isEmptyObj(dataChannels);
+const hasPeerDataChannels = peerDataChannels => !isEmptyObj(peerDataChannels);
 
 /**
  * @description Function that gets the current list of connected Peers Datachannel connections in the Room.
@@ -12,18 +12,18 @@ const hasPeerDataChannels = dataChannels => !isEmptyObj(dataChannels);
  * @memberOf PeerDataHelpers
  */
 const getPeersDataChannels = (roomState) => {
-  const { dataChannels } = roomState;
+  const { peerDataChannels } = roomState;
   const listOfPeersDataChannels = {};
-  const listOfPeers = Object.keys(dataChannels);
+  const listOfPeers = Object.keys(peerDataChannels);
 
   for (let i = 0; i < listOfPeers.length; i += 1) {
     const peerId = listOfPeers[i];
     listOfPeersDataChannels[peerId] = {};
 
-    if (hasPeerDataChannels(dataChannels)) {
-      const channelProp = Object.keys(dataChannels[peerId]);
+    if (hasPeerDataChannels(peerDataChannels)) {
+      const channelProp = Object.keys(peerDataChannels[peerId]);
       for (let y = 0; y < channelProp.length; y += 1) {
-        const channel = dataChannels[peerId][channelProp[y]];
+        const channel = peerDataChannels[peerId][channelProp[y]];
         const {
           channelName,
           channelType,

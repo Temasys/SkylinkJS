@@ -8,6 +8,7 @@ import AsyncMessaging from './async-messaging';
 import messagingHelpers from './helpers';
 import Skylink from '../../index';
 import SkylinkError from '../../utils/skylinkError';
+import { TAGS } from '../../constants';
 
 /**
  * @classdesc Class that manages the messaging feature
@@ -54,7 +55,7 @@ class Messaging {
         const encryptedMessaging = new EncryptedMessaging(roomState);
         messageData = encryptedMessaging.decryptMessage(data, secretId);
       } catch (error) {
-        SkylinkError.throwError(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.FAILED_DECRYPTING_MESSAGE, error.message);
+        SkylinkError.throwError(targetMid, TAGS.ENCRYPTED_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.FAILED_DECRYPTING_MESSAGE, error.message);
       }
     }
 
