@@ -172,6 +172,7 @@ const MESSAGES = {
       NO_TRANSFER_ID: 'No Transfer ID',
       NO_PEER_ID: 'No Peer ID',
       DATA_TRANSFER_IN_PROGRESS: 'Data Channel has a transfer in progress',
+      MCU_NOT_SUPPORTED: 'MCU does not support sendBlobData',
     },
   },
   NEGOTIATION_PROGRESS: {
