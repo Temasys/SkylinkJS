@@ -135,8 +135,7 @@ const triggerPeerLeftEventAndChangeState = (roomKey, peerId) => {
  * @private
  */
 const tryCloseDataChannel = (roomKey, peerId) => {
-  const roomState = Skylink.getSkylinkState(roomKey);
-  PeerConnection.closeDataChannel(roomState, peerId);
+  PeerConnection.closeDataChannel(roomKey, peerId);
 };
 
 /**

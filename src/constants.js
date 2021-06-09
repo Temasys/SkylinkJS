@@ -8,9 +8,15 @@ import pkg from '../package.json';
  *  <li>{@link SkylinkConstants.BUNDLE_POLICY|BUNDLE_POLICY} </li>
  *  <li>{@link SkylinkConstants.CANDIDATE_GENERATION_STATE|CANDIDATE_GENERATION_STATE} </li>
  *  <li>{@link SkylinkConstants.CANDIDATE_PROCESSING_STATE|CANDIDATE_PROCESSING_STATE} </li>
+ *  <li>{@link SkylinkConstants.CHUNK_FILE_SIZE|CHUNK_FILE_SIZE} </li>
  *  <li>{@link SkylinkConstants.DATA_CHANNEL_STATE|DATA_CHANNEL_STATE} </li>
  *  <li>{@link SkylinkConstants.DATA_CHANNEL_TYPE|DATA_CHANNEL_TYPE} </li>
  *  <li>{@link SkylinkConstants.DATA_CHANNEL_MESSAGE_ERROR|DATA_CHANNEL_MESSAGE_ERROR} </li>
+ *  <li>{@link SkylinkConstants.DATA_TRANSFER_STATE|DATA_TRANSFER_STATE} </li>
+ *  <li>{@link SkylinkConstants.DATA_TRANSFER_DATA_TYPE|DATA_TRANSFER_DATA_TYPE} </li>
+ *  <li>{@link SkylinkConstants.DT_PROTOCOL_VERSION|DT_PROTOCOL_VERSION}  </li>
+ *  <li>{@link SkylinkConstants.DATA_TRANSFER_DIRECTION|DATA_TRANSFER_DIRECTION}  </li>
+ *  <li>{@link SkylinkConstants.DATA_TRANSFER_SESSION_TYPE|DATA_TRANSFER_SESSION_TYPE}  </li>
  *  <li>{@link SkylinkEvents|EVENTS} </li>
  *  <li>{@link SkylinkConstants.GET_CONNECTION_STATUS_STATE|GET_CONNECTION_STATUS_STATE} </li>
  *  <li>{@link SkylinkConstants.GET_PEERS_STATE|GET_PEERS_STATE} </li>
@@ -44,15 +50,9 @@ import pkg from '../package.json';
 
 /**
  *  // Not implemented yet
- *  {@link SkylinkConstants.DATA_TRANSFER_DATA_TYPE|DATA_TRANSFER_DATA_TYPE} </br>
- *  {@link SkylinkConstants.DT_PROTOCOL_VERSION|DT_PROTOCOL_VERSION} </br>
- *  {@link SkylinkConstants.DATA_TRANSFER_TYPE|DATA_TRANSFER_TYPE} </br>
- *  {@link SkylinkConstants.DATA_TRANSFER_SESSION_TYPE|DATA_TRANSFER_SESSION_TYPE} </br>
- *  {@link SkylinkConstants.DATA_TRANSFER_STATE|DATA_TRANSFER_STATE} </br>
  *  {@link SkylinkConstants.DATA_STREAM_STATE|DATA_STREAM_STATE} </br>
  *  {@link SkylinkConstants.INTRODUCE_STATE|INTRODUCE_STATE} </br>
  *  {@link SkylinkConstants.REGIONAL_SERVER|REGIONAL_SERVER} </br>
- *  {@link SkylinkConstants.CHUNK_FILE_SIZE|CHUNK_FILE_SIZE} </br>
  *  {@link SkylinkConstants.MOZ_CHUNK_FILE_SIZE|MOZ_CHUNK_FILE_SIZE} </br>
  *  {@link SkylinkConstants.BINARY_FILE_SIZE|BINARY_FILE_SIZE} </br>
  *  {@link SkylinkConstants.MOZ_BINARY_FILE_SIZE|MOZ_BINARY_FILE_SIZE} </br>
@@ -151,6 +151,25 @@ export const DATA_CHANNEL_TYPE = {
 };
 
 /**
+ * The list of Datachannel types.
+ * @typedef DATA_CHANNEL_MESSAGE_TYPE
+ * @property {String} PROTOCOL Value <code>"protocol"</code>
+ *   The value of the Datachannel message type that is used only for sending protocol messages i.e. MESSAGE, WRQ, ACK.
+ * @property {String} CHUNK Value <code>"chunk"</code>
+ *   The value of the Datachannel message type that is used for sending chunk data across the data channel.
+ * @constant
+ * @type object
+ * @private
+ * @readOnly
+ * @since 2.2.6
+ * @memberOf SkylinkConstants
+ */
+export const DATA_CHANNEL_MESSAGE_TYPE = {
+  PROTOCOL: 'protocol',
+  CHUNK: 'chunk',
+};
+
+/**
  * The list of Datachannel sending message error types.
  * @typedef DATA_CHANNEL_MESSAGE_ERROR
  * @property {String} MESSAGE  Value <code>"message"</code>
@@ -197,8 +216,7 @@ export const DATA_CHANNEL_MESSAGE_ERROR = {
  * @type Object
  * @readOnly
  * @memberOf SkylinkConstants
- * @since 0.1.0
- * @ignore
+ * @since 2.0.0
  */
 export const DATA_TRANSFER_DATA_TYPE = {
   BINARY_STRING: 'binaryString',
@@ -215,16 +233,15 @@ export const DATA_TRANSFER_DATA_TYPE = {
  * The value of the current version of the data transfer protocol.
  * @typedef DT_PROTOCOL_VERSION
  * @type string
- * @private
  * @readOnly
  * @memberOf SkylinkConstants
- * @since 0.5.10
+ * @since 2.0.0
  */
 export const DT_PROTOCOL_VERSION = '0.1.3';
 
 /**
  * The list of data transfers directions.
- * @typedef DATA_TRANSFER_TYPE
+ * @typedef DATA_TRANSFER_DIRECTION
  * @property {String} UPLOAD Value <code>"upload"</code>
  *   The value of the data transfer direction when User is uploading data to Peer.
  * @property {String} DOWNLOAD Value <code>"download"</code>
@@ -233,10 +250,9 @@ export const DT_PROTOCOL_VERSION = '0.1.3';
  * @type Object
  * @readOnly
  * @memberOf SkylinkConstants
- * @since 0.1.0
- * @ignore
+ * @since 2.2.5
  */
-export const DATA_TRANSFER_TYPE = {
+export const DATA_TRANSFER_DIRECTION = {
   UPLOAD: 'upload',
   DOWNLOAD: 'download',
 };
@@ -246,20 +262,36 @@ export const DATA_TRANSFER_TYPE = {
  * @typedef DATA_TRANSFER_SESSION_TYPE
  * @property {String} BLOB     Value <code>"blob"</code>
  *   The value of the session type for
- *   {@link Skylink#sendURLData|sendURLData} data transfer.
- * @property {String} DATA_URL Value <code>"dataURL"</code>
- *   The value of the session type for
  *   {@link Skylink#sendBlobData|sendBlobData} data transfer.
+ * @property {String} DATA_URL Value <code>"dataURL"</code>
+ *   {@link Skylink#sendURLData|sendURLData} data transfer.
+ *   The value of the session type for
  * @constant
  * @type Object
  * @readOnly
  * @memberOf SkylinkConstants
  * @since 0.1.0
- * @ignore
  */
 export const DATA_TRANSFER_SESSION_TYPE = {
   BLOB: 'blob',
-  DATA_URL: 'dataURL',
+  DATA: 'data',
+};
+
+/**
+ * The chunk type.
+ * @typedef SESSION_CHUNK_TYPE
+ * @property {String} STRING
+ * @property {String} BINARY
+ * @constant
+ * @type Object
+ * @readOnly
+ * @memberOf SkylinkConstants
+ * @since 2.2.5
+ * @private
+ */
+export const SESSION_CHUNK_TYPE = {
+  STRING: 'string',
+  BINARY: 'binary',
 };
 
 /**
@@ -304,7 +336,6 @@ export const DATA_TRANSFER_SESSION_TYPE = {
  * @readOnly
  * @memberOf SkylinkConstants
  * @since 0.4.0
- * @ignore
  */
 export const DATA_TRANSFER_STATE = {
   UPLOAD_REQUEST: 'request',
@@ -319,7 +350,24 @@ export const DATA_TRANSFER_STATE = {
   DOWNLOAD_COMPLETED: 'downloadCompleted',
   USER_REJECTED: 'userRejected',
   USER_UPLOAD_REQUEST: 'userRequest',
-  START_ERROR: 'startError',
+};
+
+/**
+ * The ACK Protocol number to reject or accept a transfer
+ * @typedef ACK_PROTOCOL_NUMBER
+ * @property {number} REJECT Value <code>-1</code>. The value of the ACK PROTOCOL to return that will stop the transfer.
+ * @property {number} ACCEPT Value <code>0</code>. The value of the ACL PROTOCOL to return that will start the transfer.
+ * @constant
+ * @type Object
+ * @readOnly
+ * @memberOf SkylinkConstants
+ * @since 2.2.6
+ * @private
+ */
+export const ACK_PROTOCOL_NUMBER = {
+  REJECT: -1,
+  ACCEPT: 0,
+  CANCEL: 0,
 };
 
 /**
@@ -1456,7 +1504,6 @@ export const RECORDING_STATE = {
  * @readOnly
  * @memberOf SkylinkConstants
  * @since 0.5.2
- * @ignore
  */
 export const CHUNK_FILE_SIZE = 49152;
 

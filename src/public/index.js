@@ -16,6 +16,7 @@ import RTMP from '../features/rtmp/index';
 import AsyncMessaging from '../features/messaging/async-messaging';
 import EncryptedMessaging from '../features/messaging/encrypted-messaging';
 import Messaging from '../features/messaging';
+import DataTransfer from '../features/data-transfer';
 
 /**
  * @classdesc This class lists all the public methods of Skylink.
@@ -1380,6 +1381,100 @@ class SkylinkPublicInterface {
    */
   getSdkVersion() {
     return SDK_VERSION;
+  }
+
+  /**
+   * @typedef {Object.<String, Object>} dataTransferResult
+   * @property {Object} #peerId - Data transfer success or error result keyed by peer id.
+   * @property {transferInfo} [#peerId.success] - The success return object. Will not be present in the return object if the transfer fails.
+   * @property {Error|String} [#peerId.error] - The error return object. Will not be present in the return object if the transfer succeeds.
+   * @property {String} #peerId.transferType - The transfer type.
+   */
+  /**
+   * @description Method that sends a Blob to all connected peers in the room.
+   * @param {String} roomName - The room name
+   * @param {Blob} data - The Blob object
+   * @param {String|Array} [peerId] - The peer ID or array of peer IDs. When not provided, it will start uploading data transfers with all peers in
+   * the room
+   * @param {Number} [timeout = 60] - The duration for which to wait for a response from the remote peer before terminating the transfer
+   * @return {Promise<dataTransferResult>} - Always resolves with success or error object.
+   * @example
+   * Example 1: Send a file
+   *
+   * // Add listener to incomingStream event
+   * SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.DATA_TRANSFER_STATE, (evt) => {
+   *   const { state } = evt.detail;
+   *
+   *   switch (state) {
+   *     case SkylinkConstants.DATA_TRANSFER_STATE.UPLOAD_REQUEST:
+   *     // Alert peer that a file transfer is requested
+   *     // Record user response and call <code>respondBlobRequest</code>
+   *     skylink.respondBlobRequest(config.defaultRoom, peerId, transferId, result)
+   *      .then((result) => // handle success or error)
+   *      .catch((err) => // handle error)
+   *     break;
+   *     case SkylinkConstants.DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED:
+   *     // Surface download link to user
+   *     break;
+   *   }
+   * })
+   *
+   * skylink.sendBlobData(roomName, data)
+   *  .then((result) => {
+   *        // always resolves with success or error object
+   *    })
+   *   .catch((error) => // handle error);
+   * }
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>USER_UPLOAD_REQUEST</code> on the local peer.
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>UPLOAD_REQUEST</code> on the remote peer.
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>UPLOAD_STARTED</code> when remote peer accepts data transfer.
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>REJECTED</code> when remote peer rejects data transfer.
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>UPLOADING</code> when data is in the process of being transferred.
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>UPLOAD_COMPLETED</code> when data transfer has completed.
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>ERROR</code> when data transfer timeout limit is reached.
+   * @alias Skylink#sendBlobData
+   * @since 2.0.0
+   */
+  sendBlobData(roomName, data, peerId, timeout) {
+    const roomState = getRoomStateByName(roomName);
+    return DataTransfer.sendBlobData(roomState, data, peerId, timeout);
+  }
+
+  /**
+   * @description Method that responds to a <code>sendBlobData</code> request.
+   * @param {String} roomName - The room name.
+   * @param {String} peerId - The Peer Id.
+   * @param {String }transferId - The transfer Id.
+   * @param {Boolean} accept - The flag if the data transfer is accepted by the user.
+   * @return {Promise<dataTransferResult>} - Always resolves with success or error object.
+   *
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>DOWNLOAD_STARTED</code> when user accepts the data transfer request.
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>USER_REJECTED</code> when user rejects the data transfer request.
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>DOWNLOADING</code> when data is in the process of being transferred.
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>DOWNLOAD_COMPLETED</code> when data transfer has completed.
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>ERROR</code> when data transfer timeout limit is reached.
+   * @alias Skylink#respondBlobRequest
+   * @since 2.0.0
+   */
+  respondBlobRequest(roomName, peerId, transferId, accept) {
+    const roomState = getRoomStateByName(roomName);
+    return DataTransfer.acceptDataTransfer(roomState, peerId, transferId, accept);
+  }
+
+  /**
+   * @description Method that cancels a data transfer
+   * @param {String} roomName - The room name.
+   * @param {String} peerId - The Peer Id.
+   * @param {String} transferId - The Transfer Id to cancel.
+   * @return {Promise<{peerId, transferId}|Error>}
+   *
+   * @fires {@link SkylinkEvents.event:DATA_TRANSFER_STATE|DATA TRANSFER STATE} event with <code>state</code> value as <code>CANCEL</code>.
+   * @alias Skylink#cancelBlobTransfer
+   * @since 2.0.0
+   */
+  cancelBlobTransfer(roomName, peerId, transferId) {
+    const roomState = getRoomStateByName(roomName);
+    return DataTransfer.cancelBlobTransfer(roomState, peerId, transferId);
   }
 }
 

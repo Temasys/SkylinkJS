@@ -18,7 +18,7 @@ class SkylinkState {
     this.apiResponse = {};
     /**
      * Stores the list of Peer DataChannel connections.
-     * @name dataChannels
+     * @name peerDataChannels
      * @type {Object}
      * @property {String} peerId - The list of DataChannels associated with Peer ID.
      * @property {RTCDataChannel} channelLabel - The DataChannel connection.
@@ -26,7 +26,7 @@ class SkylinkState {
      * @since 0.2.0
      * @private
      */
-    this.dataChannels = {};
+    this.peerDataChannels = {};
     /**
      * Stores the list of buffered ICE candidates that is received before
      *   remote session description is received and set.
@@ -338,6 +338,7 @@ class SkylinkState {
     this.peerStreams = {};
     this.streamsSettings = {};
     this.enableStatsGathering = initOptions.enableStatsGathering;
+    this.dataTransfers = {};
   }
 }
 export default SkylinkState;

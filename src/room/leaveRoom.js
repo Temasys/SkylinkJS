@@ -51,7 +51,7 @@ const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
 
     addEventListener(SkylinkConstants.EVENTS.DATA_CHANNEL_STATE, handleDataChannelClose);
 
-    PeerConnection.closeDataChannel(state, peerId);
+    PeerConnection.closeDataChannel(room.id, peerId);
   } else {
     resolve(peerId);
   }

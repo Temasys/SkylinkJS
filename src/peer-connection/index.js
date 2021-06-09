@@ -1,5 +1,6 @@
 import PeerConnectionStatistics from './helpers/statistics';
 import helpers from './helpers/index';
+import DataChannel from './helpers/data-channel';
 
 /**
  * @classdesc Class that represents a PeerConnection
@@ -41,7 +42,7 @@ class PeerConnection {
    * @param args
    */
   static createDataChannel(...args) {
-    return helpers.createDataChannel(...args);
+    return DataChannel.createDataChannel(...args);
   }
 
   /**
@@ -98,16 +99,18 @@ class PeerConnection {
    * @static
    * @return {{bufferedAmountLow: number, bufferedAmountLowThreshold: number}}
    */
+  // eslint-disable-next-line no-unused-vars
   static getDataChannelBuffer(channel) {
-    return helpers.getDataChannelBuffer(channel);
+    // TODO: what does this mean? what is it for?
+    return null;
   }
 
   static refreshDataChannel(roomState, peerId) {
-    return helpers.refreshDataChannel(roomState, peerId);
+    return DataChannel.refreshDataChannel(roomState, peerId);
   }
 
-  static closeDataChannel(roomState, peerId) {
-    return helpers.closeDataChannel(roomState, peerId);
+  static closeDataChannel(roomKey, peerId) {
+    return DataChannel.closeDataChannel(roomKey, peerId);
   }
 
   static refreshConnection(roomState, targetPeerId, iceRestart, options, callback) {

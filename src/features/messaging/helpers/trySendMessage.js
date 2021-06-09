@@ -7,7 +7,7 @@ const trySendMessage = (roomState, message, targetPeerId) => {
     const config = messagingHelpers.getMessageConfig(roomState, targetPeerId);
     messagingHelpers.sendMessageToSig(roomState, config, message, null, targetPeerId);
   } catch (error) {
-    SkylinkError.throwError(MESSAGES.MESSAGING.ERRORS.FAILED_SENDING_MESSAGE);
+    SkylinkError.throwError(targetPeerId, MESSAGES.MESSAGING.ERRORS.FAILED_SENDING_MESSAGE);
   }
 };
 
