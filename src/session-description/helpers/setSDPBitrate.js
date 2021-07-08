@@ -71,6 +71,10 @@ const setSDPBitrate = (targetMid, sessionDescription, roomKey) => {
     }
   }
 
+  if (state.hasMCU && !bASVideoBw) { // set a default max video bandwidth of 500 for MCU
+    bASVideoBw = 500;
+  }
+
   parseFn(targetMid, sdpLines, sdpType, 'audio', bASAudioBw);
   parseFn(targetMid, sdpLines, sdpType, 'video', bASVideoBw);
   parseFn(targetMid, sdpLines, sdpType, 'data', bASDataBw);
