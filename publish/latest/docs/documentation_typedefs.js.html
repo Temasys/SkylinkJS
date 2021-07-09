@@ -316,7 +316,8 @@
  * @property {number} [bandwidth.video] The maximum video streaming bandwidth sent to Peers.
  *   Recommended values are &lt;code>256&lt;/code>-&lt;code>500&lt;/code> for 180p quality,
  *   &lt;code>500&lt;/code>-&lt;code>1024&lt;/code> for 360p quality, &lt;code>1024&lt;/code>-&lt;code>2048&lt;/code> for 720p quality
- *   and &lt;code>2048&lt;/code>-&lt;code>4096&lt;/code> for 1080p quality.
+ *   and &lt;code>2048&lt;/code>-&lt;code>4096&lt;/code> for 1080p quality. For MCU rooms, the maximum video streaming bandwidth defaults to
+ *   &lt;code>500&lt;/code>.
  * @property {number} [bandwidth.data] The maximum data streaming bandwidth sent to Peers.
  *   This affects the P2P messaging in {@link Skylink#sendP2PMessage},
  *   and data transfers in {@link Skylink#sendBlobData} and {@link Skylink#sendURLData}.

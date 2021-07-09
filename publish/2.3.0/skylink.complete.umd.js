@@ -3,7 +3,7 @@
   factory();
 }(function () { 'use strict';
 
-  /* SkylinkJS v2.3.0 Wed Jun 09 2021 10:18:37 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.3.0 Fri Jul 09 2021 04:25:42 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -27912,6 +27912,10 @@
         if (typeof peerCustomSettings[targetMid].maxBandwidth.data === 'number') {
           bASDataBw = peerCustomSettings[targetMid].maxBandwidth.data;
         }
+      }
+
+      if (state.hasMCU && !bASVideoBw) { // set a default max video bandwidth of 500 for MCU
+        bASVideoBw = 500;
       }
 
       parseFn(targetMid, sdpLines, sdpType, 'audio', bASAudioBw);
