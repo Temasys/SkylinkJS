@@ -1,4 +1,4 @@
-/* SkylinkJS v2.3.0 Wed Jun 09 2021 10:18:37 GMT+0000 (Coordinated Universal Time) */
+/* SkylinkJS v2.3.1 Fri Jul 09 2021 06:39:12 GMT+0000 (Coordinated Universal Time) */
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -6366,7 +6366,7 @@ const mediaInfoDeleted = (detail = {}) => new SkylinkEvent(MEDIA_INFO_DELETED, {
  */
 const loggedOnConsole = (detail = {}) => new SkylinkEvent(LOGGED_ON_CONSOLE, { detail });
 
-var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.3.0";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.2.2","@babel/preset-env":"7.2.3","@babel/register":"7.0.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.0.5",eslint:"^5.2.0","eslint-config-airbnb":"^17.0.0","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.13.0","eslint-plugin-jsx-a11y":"^6.1.1",finalhandler:"^1.1.1",husky:"^1.0.0-rc.13",jsdoc:"^3.6.7",jsdom:"^13.0.0","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.4",rollup:"^1.2.2","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.3.0","rollup-plugin-delete":"^1.1.0","rollup-plugin-external-globals":"^0.2.1","rollup-plugin-gzip":"^2.2.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.0.2","rollup-plugin-terser":"^7.0.2","serve-static":"^1.13.2","whatwg-fetch":"^3.0.0"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
+var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.3.1";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.2.2","@babel/preset-env":"7.2.3","@babel/register":"7.0.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.0.5",eslint:"^5.2.0","eslint-config-airbnb":"^17.0.0","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.13.0","eslint-plugin-jsx-a11y":"^6.1.1",finalhandler:"^1.1.1",husky:"^1.0.0-rc.13",jsdoc:"^3.6.7",jsdom:"^13.0.0","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.4",rollup:"^1.2.2","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.3.0","rollup-plugin-delete":"^1.1.0","rollup-plugin-external-globals":"^0.2.1","rollup-plugin-gzip":"^2.2.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.0.2","rollup-plugin-terser":"^7.0.2","serve-static":"^1.13.2","whatwg-fetch":"^3.0.0"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
 
 /**
  * @namespace SkylinkConstants
@@ -27861,18 +27861,18 @@ const parseFn = (targetMid, sdpLines, sdpType, mediaType, bw) => {
   }
 
   if (!(typeof bw === 'number' && bw > 0)) {
-    logger.log.INFO([targetMid, 'RTCSessionDesription', sdpType, `Not limiting ${mediaType} bandwidth`]);
+    logger.log.INFO([targetMid, 'RTCSessionDescription', sdpType, `Not limiting ${mediaType} bandwidth`]);
     return;
   }
 
   if (mLineIndex === -1 || cLineIndex === -1) {
     // Missing c-line means no media of specified type is being sent
-    logger.log.INFO([targetMid, 'RTCSessionDesription', sdpType, `Not limiting ${mediaType} bandwidth as ${mediaType} is not being sent`]);
+    logger.log.INFO([targetMid, 'RTCSessionDescription', sdpType, `Not limiting ${mediaType} bandwidth as ${mediaType} is not being sent`]);
     return;
   }
 
   // Follow RFC 4566, that the b-line should follow after c-line.
-  logger.log.INFO([targetMid, 'RTCSessionDesription', sdpType, `Limiting maximum sending ${mediaType} bandwidth ->`], bw);
+  logger.log.INFO([targetMid, 'RTCSessionDescription', sdpType, `Limiting maximum sending ${mediaType} bandwidth ->`], bw);
   sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1000).toFixed(0) : 'b=AS:' + bw);
 };
 
@@ -27902,6 +27902,11 @@ const setSDPBitrate = (targetMid, sessionDescription, roomKey) => {
     if (typeof peerCustomSettings[targetMid].maxBandwidth.data === 'number') {
       bASDataBw = peerCustomSettings[targetMid].maxBandwidth.data;
     }
+  }
+
+  if (state.hasMCU && !bASVideoBw) { // set a default max video bandwidth of 500 for MCU
+    logger.log.DEBUG([targetMid, 'RTCSessionDescription', sdpType, 'Setting max video bandwidth limit to 500 for MCU connection']);
+    bASVideoBw = 500;
   }
 
   parseFn(targetMid, sdpLines, sdpType, 'audio', bASAudioBw);

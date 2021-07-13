@@ -28,18 +28,18 @@ const parseFn = (targetMid, sdpLines, sdpType, mediaType, bw) => {
   }
 
   if (!(typeof bw === 'number' && bw > 0)) {
-    logger.log.INFO([targetMid, 'RTCSessionDesription', sdpType, `Not limiting ${mediaType} bandwidth`]);
+    logger.log.INFO([targetMid, 'RTCSessionDescription', sdpType, `Not limiting ${mediaType} bandwidth`]);
     return;
   }
 
   if (mLineIndex === -1 || cLineIndex === -1) {
     // Missing c-line means no media of specified type is being sent
-    logger.log.INFO([targetMid, 'RTCSessionDesription', sdpType, `Not limiting ${mediaType} bandwidth as ${mediaType} is not being sent`]);
+    logger.log.INFO([targetMid, 'RTCSessionDescription', sdpType, `Not limiting ${mediaType} bandwidth as ${mediaType} is not being sent`]);
     return;
   }
 
   // Follow RFC 4566, that the b-line should follow after c-line.
-  logger.log.INFO([targetMid, 'RTCSessionDesription', sdpType, `Limiting maximum sending ${mediaType} bandwidth ->`], bw);
+  logger.log.INFO([targetMid, 'RTCSessionDescription', sdpType, `Limiting maximum sending ${mediaType} bandwidth ->`], bw);
   sdpLines.splice(cLineIndex + 1, 0, window.webrtcDetectedBrowser === 'firefox' ? 'b=TIAS:' + (bw * 1000).toFixed(0) : 'b=AS:' + bw);
 };
 
@@ -69,6 +69,11 @@ const setSDPBitrate = (targetMid, sessionDescription, roomKey) => {
     if (typeof peerCustomSettings[targetMid].maxBandwidth.data === 'number') {
       bASDataBw = peerCustomSettings[targetMid].maxBandwidth.data;
     }
+  }
+
+  if (state.hasMCU && !bASVideoBw) { // set a default max video bandwidth of 500 for MCU
+    logger.log.DEBUG([targetMid, 'RTCSessionDescription', sdpType, 'Setting max video bandwidth limit to 500 for MCU connection']);
+    bASVideoBw = 500;
   }
 
   parseFn(targetMid, sdpLines, sdpType, 'audio', bASAudioBw);
