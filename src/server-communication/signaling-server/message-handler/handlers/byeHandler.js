@@ -55,12 +55,12 @@ export const clearPeerInfo = (roomKey, peerId) => {
   // Otherwise stats module fails.
   setTimeout(() => {
     const state = Skylink.getSkylinkState(roomKey);
-    if (!isEmptyObj(state)) {
+    if (state && !isEmptyObj(state)) {
       delete state.peerConnections[peerId];
       Skylink.setSkylinkState(state, state.room.id);
     }
 
-    if (!updatedState.hasMCU) {
+    if (state && !state.hasMCU) {
       // catch media changes when remote peer leaves between the interval
       // not needed for MCU as it will be caught in onremovetrack
       new HandleUserMediaStats().send(roomKey);

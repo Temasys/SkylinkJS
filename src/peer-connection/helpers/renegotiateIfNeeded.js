@@ -23,15 +23,17 @@ const renegotiateIfNeeded = (state, peerId) => {
     }
 
     pcSenders.forEach((pcSender) => {
-      senderGetStatsPromises.push(pcSender.getStats());
+      if (pcSender.track) { // if track is null, the sender does not transmit anything
+        senderGetStatsPromises.push(pcSender.getStats());
+      }
     });
 
     const transmittingSenders = {};
 
-    Promise.all(senderGetStatsPromises).then((reslovedResults) => {
-      reslovedResults.forEach((reports, senderIndex) => {
+    Promise.all(senderGetStatsPromises).then((resolvedResults) => {
+      resolvedResults.forEach((reports, senderIndex) => {
         reports.forEach((report) => {
-          if (report && report.ssrc && report.bytesSent !== 0) {
+          if (report && report.ssrc) {
             transmittingSenders[report.ssrc] = pcSenders[senderIndex];
           } else if (report && report.type === 'ssrc' && report.id.indexOf('send') > 1) { // required for retrieving sender information for react
             // native ios

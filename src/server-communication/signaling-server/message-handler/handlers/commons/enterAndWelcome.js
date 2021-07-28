@@ -88,8 +88,12 @@ export const parseAndSendWelcome = (message, caller) => {
     rid, mid, userInfo, publisherId,
   } = parsedMsg;
   const state = Skylink.getSkylinkState(rid);
-  const { hasMCU } = state;
+  const { hasMCU, user } = state;
   const targetMid = hasMCU && publisherId ? publisherId : mid;
+
+  if (!user.sid) {
+    logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, [messages.SIGNALING.DROPPING_ENTER]]);
+  }
 
   logStats(caller, targetMid, state, parsedMsg);
 
