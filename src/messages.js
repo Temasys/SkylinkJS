@@ -201,6 +201,7 @@ const MESSAGES = {
     DROPPING_MUTE_EVENT: 'Dropping mute audio / video event message as it is processed by mediaInfoEvent',
     BUFFER_NOT_NEEDED: 'Enter message sent. Messages do not need to be buffered',
     ABORTING_OFFER: 'Aborting offer as current negotiation has not completed',
+    DROPPING_ENTER: 'Dropping enter message as inRoom message has not been received',
   },
   MESSAGING: {
     PRIVATE_MESSAGE: 'Sending private message to Peer',
