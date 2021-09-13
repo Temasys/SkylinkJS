@@ -138,7 +138,7 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
   } else if (navigator.userAgent.indexOf('CriOS') > 0) {
     hasMatch = navigator.userAgent.match(/CriOS\/([0-9]+)\./) || [];
 
-    const iOSVersion = navigator.userAgent.match(/CPU OS ([0-9]+)_([0-9]+)/g);
+    const iOSVersion = navigator.userAgent.match(/CPU(?> iPhone| iPad)? OS ([0-9]+)_([0-9]+)/g);
     // iOS Version 14 and above supports webrtc
     const isCompatible = iOSVersion[0].split(' ')[2].split('_')[0] > 13;
     if (isCompatible) {
