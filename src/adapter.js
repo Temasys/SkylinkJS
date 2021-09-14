@@ -138,9 +138,10 @@ AdapterJS.parseWebrtcDetectedBrowser = function () {
   } else if (navigator.userAgent.indexOf('CriOS') > 0) {
     hasMatch = navigator.userAgent.match(/CriOS\/([0-9]+)\./) || [];
 
-    const iOSVersion = navigator.userAgent.match(/CPU OS ([0-9]+)_([0-9]+)/g);
+    const iOSVersion = navigator.userAgent.match(/CPU( iPhone| iPad)? OS ([0-9]+)_([0-9]+)/g);
+    const parts = iOSVersion[0].split(' ');
     // iOS Version 14 and above supports webrtc
-    const isCompatible = iOSVersion[0].split(' ')[2].split('_')[0] > 13;
+    const isCompatible = parts[parts.length - 1].split('_')[0] > 13; // last section contains the version number
     if (isCompatible) {
       window.webrtcDetectedVersion   = parseInt(hasMatch[1] || '0', 10);
       window.webrtcMinimumVersion    = 53;
