@@ -22,8 +22,11 @@ const renegotiateIfNeeded = (state, peerId) => {
       return resolve(isRenegoNeeded);
     }
 
+    const pcSendersWithTracks = [];
+    // Filter for senders with tracks
     pcSenders.forEach((pcSender) => {
       if (pcSender.track) { // if track is null, the sender does not transmit anything
+        pcSendersWithTracks.push(pcSender);
         senderGetStatsPromises.push(pcSender.getStats());
       }
     });
@@ -34,12 +37,12 @@ const renegotiateIfNeeded = (state, peerId) => {
       resolvedResults.forEach((reports, senderIndex) => {
         reports.forEach((report) => {
           if (report && report.ssrc) {
-            transmittingSenders[report.ssrc] = pcSenders[senderIndex];
+            transmittingSenders[report.ssrc] = pcSendersWithTracks[senderIndex];
           } else if (report && report.type === 'ssrc' && report.id.indexOf('send') > 1) { // required for retrieving sender information for react
             // native ios
             report.values.forEach((value) => {
               if (value.ssrc) {
-                transmittingSenders[value.ssrc] = pcSenders[senderIndex];
+                transmittingSenders[value.ssrc] = pcSendersWithTracks[senderIndex];
               }
             });
           }
