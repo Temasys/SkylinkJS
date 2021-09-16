@@ -77,12 +77,12 @@ const logStats = (caller, targetMid, state, message) => {
 };
 
 /**
- * Function that parses the enterAndWelcome and welcome message and sends the offer or welcome message.
+ * Function that parses the enter and welcome message and sends the welcome or offer message.
  * @param {JSON} message
  * @param {String} caller
  * @memberOf SignalingMessageHandler
  */
-export const parseAndSendWelcome = (message, caller) => {
+export const enterAndWelcomeHandler = (message, caller) => {
   const parsedMsg = parsers.enterAndWelcome(message);
   const {
     rid, mid, userInfo, publisherId,

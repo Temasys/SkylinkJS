@@ -1,137 +1,32 @@
-/* eslint-disable no-unused-vars,no-multi-assign */
 import Skylink from '../../../../../index';
 import logger from '../../../../../logger';
 import {
-  TAGS, PEER_CONNECTION_STATE, HANDSHAKE_PROGRESS, DATA_CHANNEL_STATE,
+  TAGS, PEER_CONNECTION_STATE, DATA_CHANNEL_STATE,
 } from '../../../../../constants';
-import IceConnection from '../../../../../ice-connection/index';
 import SkylinkSignalingServer from '../../../index';
 import PeerConnection from '../../../../../peer-connection/index';
-import { handshakeProgress } from '../../../../../skylink-events';
-import { dispatchEvent } from '../../../../../utils/skylinkEventManager';
 import handleNegotiationStats from '../../../../../skylink-stats/handleNegotiationStats';
 import MESSAGES from '../../../../../messages';
 import PeerMedia from '../../../../../peer-media/index';
-import SessionDescription from '../../../../../session-description';
-import Room from '../../../../../room';
+import { onLocalDescriptionSetFailure, onRemoteDescriptionSetFailure } from './handleSetDescriptionFailure';
+import { setPeerConnectionInState, onRemoteDescriptionSetSuccess, onLocalDescriptionSetSuccess } from './handleSetDescriptionSuccess';
+import { setRemoteDescription, setLocalDescription } from './setSessionDescription';
 
-const handleSetOfferAndAnswerSuccess = (state, targetMid, description, isRemote) => {
-  const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
-  const { peerConnections, bufferedLocalOffer, room } = state;
-  const peerConnection = peerConnections[targetMid];
-  const msgType = description.type === 'offer' ? 'OFFER' : 'ANSWER';
+const setLocalOffer = (room, targetMid, localDescription) => setLocalDescription(room, targetMid, localDescription);
 
-  handleNegotiationStats.send(room.id, HANDLE_NEGOTIATION_STATS[msgType].set, targetMid, description, isRemote);
+const setLocalAnswer = (room, targetMid, localDescription) => setLocalDescription(room, targetMid, localDescription);
 
-  if (isRemote) { // handshake progress is triggered on the local end after sdp it is created
-    dispatchEvent(handshakeProgress({
-      state: HANDSHAKE_PROGRESS[msgType],
-      peerId: targetMid,
-      room: Room.getRoomInfo(room.id),
-    }));
-  }
+const onLocalOfferSetSuccess = (RTCPeerConnection, room, targetMid, localDescription) => onLocalDescriptionSetSuccess(RTCPeerConnection, room, targetMid, localDescription);
 
-  if (isRemote) {
-    if (description.type === 'offer') {
-      peerConnection.setOffer = 'remote';
-    } else {
-      peerConnection.setAnswer = 'remote';
-    }
-    IceConnection.addIceCandidateFromQueue(targetMid, room);
-  } else {
-    bufferedLocalOffer[targetMid] = null;
-    if (description.type === 'offer') {
-      peerConnection.setOffer = 'local';
-    } else {
-      peerConnection.setAnswer = 'local';
-    }
-  }
+const onLocalAnswerSetSuccess = (RTCPeerConnection, room, targetMid, localDescription) => onLocalDescriptionSetSuccess(RTCPeerConnection, room, targetMid, localDescription);
 
-  Skylink.setSkylinkState(state, room.id);
-};
+const onLocalOfferSetFailure = (room, targetMid, localDescription, error) => onLocalDescriptionSetFailure(room, targetMid, localDescription, error);
 
-const handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote, error) => {
-  const { room, user } = state;
-  const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
-  const msgType = description.type === 'offer' ? 'OFFER' : 'ANSWER';
+const onLocalAnswerSetFailure = (room, targetMid, localDescription, error) => onLocalDescriptionSetFailure(room, targetMid, localDescription, error);
 
-  handleNegotiationStats.send(room.id, HANDLE_NEGOTIATION_STATS[msgType].set_error, targetMid, description, isRemote, error);
+const setRemoteOffer = (room, targetMid, remoteDescription) => setRemoteDescription(room, targetMid, remoteDescription);
 
-  dispatchEvent(handshakeProgress({
-    state: HANDSHAKE_PROGRESS.ERROR,
-    peerId: isRemote ? targetMid : user.sid,
-    error,
-    room: Room.getRoomInfo(room.id),
-  }));
-};
-
-// modifying the remote description received
-const mungeSDP = (targetMid, sessionDescription, roomKey) => {
-  const mungedSessionDescription = sessionDescription;
-  // TODO: Below SDP methods needs to be implemented in the SessionDescription Class.
-  mungedSessionDescription.sdp = SessionDescription.setSDPBitrate(targetMid, mungedSessionDescription, roomKey);
-  mungedSessionDescription.sdp = SessionDescription.removeSDPFilteredCandidates(targetMid, mungedSessionDescription, roomKey);
-
-  logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, mungedSessionDescription.type, `Updated remote ${mungedSessionDescription.type} ->`], mungedSessionDescription);
-  return mungedSessionDescription;
-};
-
-const setLocalDescription = (room, targetMid, localDescription) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const { type } = localDescription;
-  const peerConnection = peerConnections[targetMid];
-  const { STATS_MODULE } = MESSAGES;
-  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-
-  peerConnection.processingLocalSDP = true;
-
-  handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, localDescription, false);
-
-  return peerConnection.setLocalDescription(localDescription)
-    .then(() => peerConnection);
-};
-
-const onLocalDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, localDescription) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const { NEGOTIATION_PROGRESS } = MESSAGES;
-  const peerConnection = peerConnections[targetMid] = RTCPeerConnection;
-
-  logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, localDescription.type, NEGOTIATION_PROGRESS.SET_LOCAL_DESCRIPTION], localDescription);
-
-  peerConnection.processingLocalSDP = false;
-  handleSetOfferAndAnswerSuccess(state, targetMid, localDescription, false);
-};
-
-const onLocalDescriptionSetFailure = (room, targetMid, localDescription, error) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const peerConnection = peerConnections[targetMid];
-  const { NEGOTIATION_PROGRESS } = MESSAGES;
-
-  logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, localDescription.type, NEGOTIATION_PROGRESS.FAILED_SET_LOCAL_DESCRIPTION], error);
-
-  peerConnection.processingLocalSDP = false;
-  peerConnection.negotiating = false;
-
-  handleSetOfferAndAnswerFailure(state, targetMid, localDescription, false, error);
-};
-
-const setRemoteDescription = (room, targetMid, remoteDescription) => {
-  const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const { type } = remoteDescription;
-  const { STATS_MODULE } = MESSAGES;
-  const peerConnection = peerConnections[targetMid];
-  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-
-  peerConnection.processingRemoteSDP = true;
-  const mungedSessionDescription = mungeSDP(targetMid, remoteDescription, room.id);
-  handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, mungedSessionDescription, true);
-  return peerConnection.setRemoteDescription(mungedSessionDescription)
-    .then(() => peerConnection);
-};
+const setRemoteAnswer = (room, targetMid, remoteDescription) => setRemoteDescription(room, targetMid, remoteDescription);
 
 const sendAnswerAck = (state, targetMid, success) => {
   const updatedState = state;
@@ -142,27 +37,23 @@ const sendAnswerAck = (state, targetMid, success) => {
   signaling.answerAck(state, targetMid, success);
 };
 
-const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remoteDescription) => {
+const onRemoteOfferSetSuccess = (RTCPeerConnection, room, targetMid, remoteDescription) => {
+  setPeerConnectionInState(RTCPeerConnection, room, targetMid);
+  onRemoteDescriptionSetSuccess(RTCPeerConnection, room, targetMid, remoteDescription);
+
+  // create and return the answer
+  const state = Skylink.getSkylinkState(room.id);
   const signaling = new SkylinkSignalingServer();
-  const { type } = remoteDescription;
-  const { NEGOTIATION_PROGRESS, DATA_CHANNEL } = MESSAGES;
+  return signaling.answer(state, targetMid);
+};
+
+const onRemoteAnswerSetSuccess = (RTCPeerConnection, room, targetMid, remoteDescription) => {
+  setPeerConnectionInState(RTCPeerConnection, room, targetMid);
+  onRemoteDescriptionSetSuccess(RTCPeerConnection, room, targetMid, remoteDescription);
 
   const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const peerConnection = peerConnections[targetMid] = RTCPeerConnection;
-
-  logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.SET_REMOTE_DESCRIPTION], remoteDescription);
-
-  peerConnection.processingRemoteSDP = false;
-
-  if (type === 'offer') {
-    handleSetOfferAndAnswerSuccess(state, targetMid, remoteDescription, true);
-    return signaling.answer(state, targetMid);
-  }
-  // FIXME: why is this needed?
-  if (state.peerMessagesStamps[targetMid]) {
-    state.peerMessagesStamps[targetMid].hasRestart = false;
-  }
+  const peerConnection = state.peerConnections[targetMid];
+  const { DATA_CHANNEL } = MESSAGES;
 
   // if remote peer does not have data channel
   if (state.peerDataChannels[targetMid] && (peerConnection.remoteDescription.sdp.indexOf('m=application') === -1 || peerConnection.remoteDescription.sdp.indexOf('m=application 0') > 0)) {
@@ -170,36 +61,24 @@ const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remot
     PeerConnection.closeDataChannel(room.id, targetMid);
   }
 
-  handleSetOfferAndAnswerSuccess(state, targetMid, remoteDescription, true);
-  sendAnswerAck(state, targetMid, true);
-  return true;
+  return sendAnswerAck(state, targetMid, true);
 };
 
-const onRemoteDescriptionSetFailure = (room, targetMid, remoteDescription, error) => {
+const onRemoteOfferSetFailure = (room, targetMid, remoteDescription, error) => onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error);
+
+const onRemoteAnswerSetFailure = (room, targetMid, remoteDescription, error) => {
+  onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error);
+
   const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const peerConnection = peerConnections[targetMid];
-  const { type } = remoteDescription;
-
-  logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, type, `${MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_SET_REMOTE_DESCRIPTION} ->`], {
-    error,
-    state: peerConnection.signalingState,
-    [type]: remoteDescription,
-  });
-
-  peerConnection.processingRemoteSDP = false;
-  peerConnection.negotiating = false;
-
-  handleSetOfferAndAnswerFailure(state, targetMid, remoteDescription, true, error);
-
-  if (type === 'answer') {
-    sendAnswerAck(state, targetMid, false);
-  }
+  sendAnswerAck(state, targetMid, false);
 };
 
-const updateState = (state, message) => {
+const updateStateInformation = (state, message) => {
   const updatedState = state;
-  const { userInfo, rid, mid } = message;
+  const {
+    userInfo, rid, mid, mediaInfoList,
+  } = message;
+  const { room } = updatedState;
   const updatedUserInfo = userInfo;
   const targetMid = mid;
 
@@ -211,27 +90,27 @@ const updateState = (state, message) => {
   }
 
   updatedState.peerConnections[targetMid].negotiating = true;
-
   Skylink.setSkylinkState(updatedState, rid);
+
+  PeerMedia.setPeerMediaInfo(room, targetMid, mediaInfoList);
+  PeerMedia.deleteUnavailableMedia(room, targetMid); // mediaState can be unavailable during renegotiation
 };
 
-const canProceed = (state, message) => {
+const canProceed = (message) => {
   const {
-    weight, type, mid, sdp, resend,
+    weight, type, mid, sdp, resend, rid,
   } = message;
+  const state = Skylink.getSkylinkState(rid);
   const {
     peerPriorityWeight, bufferedLocalOffer, room, peerConnections,
   } = state;
   const { STATS_MODULE, NEGOTIATION_PROGRESS, PEER_CONNECTION } = MESSAGES;
   const targetMid = mid;
   const peerConnection = peerConnections[targetMid];
-  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-  let error = null;
 
   if (!peerConnection) {
     logger.log.ERROR([targetMid, null, type, `${PEER_CONNECTION.NO_PEER_CONNECTION}. Unable to set${type === 'offer' ? 'Remote' : 'Local'}Offer.`]);
-    error = PEER_CONNECTION.NO_PEER_CONNECTION;
-    handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType].dropped, targetMid, message, true, error);
+    handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()].dropped, targetMid, message, true, PEER_CONNECTION.NO_PEER_CONNECTION);
     return false;
   }
 
@@ -239,119 +118,151 @@ const canProceed = (state, message) => {
     processingRemoteSDP, processingLocalSDP, negotiating,
   } = peerConnection;
 
-  if (type === 'offer' && peerConnections[targetMid].signalingState !== PEER_CONNECTION_STATE.STABLE) {
-    logger.log.WARN([targetMid, null, type, NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE], {
-      signalingState: peerConnections[targetMid].signalingState,
-      isRestart: !!resend,
-    });
-    error = `Peer connection state is ${peerConnections[targetMid].signalingState}.`;
+  switch (type) {
+    case 'offer':
+      if (peerConnections[targetMid].signalingState !== PEER_CONNECTION_STATE.STABLE) {
+        logger.log.WARN([targetMid, null, type, NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE], {
+          signalingState: peerConnections[targetMid].signalingState,
+          isRestart: !!resend,
+        });
+        handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()].dropped, targetMid, message, true, `Peer connection state is ${peerConnections[targetMid].signalingState}.`);
+        return false;
+      }
+
+      if (bufferedLocalOffer[targetMid] && peerPriorityWeight > weight) {
+        logger.log.WARN([targetMid, null, type, NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER], {
+          selfWeight: peerPriorityWeight,
+          messageWeight: weight,
+        });
+        handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()].dropped, targetMid, message, true, NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER);
+        return false;
+      }
+
+      // if processing remote SDP
+      if (processingRemoteSDP) {
+        logger.log.WARN([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP], sdp);
+        handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()].dropped, targetMid, message, true, NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP);
+        return false;
+      }
+
+      // or completed processing local and remote sdp but answerAck has not been received
+      if (!processingLocalSDP && !processingRemoteSDP && negotiating) {
+        // add to bufferedRemoteOffer
+        const updatedState = state;
+        logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.ERRORS.ADDING_REMOTE_OFFER_TO_BUFFER], message);
+        updatedState.bufferedRemoteOffers[targetMid] = updatedState.bufferedRemoteOffers[targetMid] ? updatedState.bufferedRemoteOffers[targetMid] : [];
+        updatedState.bufferedRemoteOffers[targetMid].push(message);
+        Skylink.setSkylinkState(updatedState, room.id);
+        return false;
+      }
+      break;
+
+    case 'answer':
+      // if processing remote SDP
+      if (processingRemoteSDP) {
+        logger.log.WARN([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP], sdp);
+        handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()].dropped, targetMid, message, true, NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP);
+        return false;
+      }
+      break;
+
+    default:
+      // should not come here
+      return false;
   }
 
-  if (type === 'offer' && bufferedLocalOffer[targetMid] && peerPriorityWeight > weight) {
-    logger.log.WARN([targetMid, null, type, NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER], {
-      selfWeight: peerPriorityWeight,
-      messageWeight: weight,
-    });
-    error = NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER;
+  return true;
+};
+
+const onRemoteAnswer = (message) => {
+  const {
+    rid, mid, type, sdp,
+  } = message;
+  const state = Skylink.getSkylinkState(rid);
+  const targetMid = mid;
+  const { hasMCU, bufferedLocalOffer, room } = state;
+
+  logger.log.INFO([mid, null, type, 'Received answer from peer. ANSWER:'], message);
+
+  try {
+    updateStateInformation(state, message);
+
+    if (bufferedLocalOffer[targetMid]) {
+      const localDescription = bufferedLocalOffer[targetMid];
+      const remoteDescription = {
+        type,
+        sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
+      };
+
+      setLocalOffer(room, targetMid, localDescription)
+        .then(peerConnection => onLocalOfferSetSuccess(peerConnection, room, targetMid, localDescription))
+        .catch(error => onLocalOfferSetFailure(room, targetMid, localDescription, error))
+        .then(() => setRemoteAnswer(room, targetMid, remoteDescription))
+        .then(peerConnection => onRemoteAnswerSetSuccess(peerConnection, room, targetMid, remoteDescription))
+        .catch(error => onRemoteAnswerSetFailure(room, targetMid, remoteDescription, error));
+    } else {
+      logger.log.ERROR([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.NO_LOCAL_BUFFERED_OFFER]);
+    }
+  } catch (err) {
+    logger.log.ERROR([mid, TAGS.SESSION_DESCRIPTION, type, 'Failed processing ANSWER ->'], err);
   }
+};
 
-  // if processing remote SDP
-  if (processingRemoteSDP) {
-    logger.log.WARN([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP], sdp);
-    error = NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP;
+const onRemoteOffer = (message) => {
+  const {
+    rid, mid, type, sdp,
+  } = message;
+  const state = Skylink.getSkylinkState(rid);
+  const targetMid = mid;
+  const { room, hasMCU } = state;
+  const remoteDescription = {
+    type,
+    sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
+  };
+  let localDescription = null;
 
-    // or completed processing local and remote sdp but answerAck has not been received
-  } else if ((!processingLocalSDP && !processingRemoteSDP && negotiating) && type === 'offer') {
-    // add to bufferedRemoteOffer
-    const updatedState = state;
-    logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.ERRORS.ADDING_REMOTE_OFFER_TO_BUFFER], message);
-    updatedState.bufferedRemoteOffers[targetMid] = updatedState.bufferedRemoteOffers[targetMid] ? updatedState.bufferedRemoteOffers[targetMid] : [];
-    updatedState.bufferedRemoteOffers[targetMid].push(message);
-    Skylink.setSkylinkState(updatedState, room.id);
-    return false;
+  logger.log.INFO([mid, null, type, 'Received offer from peer. OFFER:'], message);
+
+  try {
+    updateStateInformation(state, message);
+
+    setRemoteOffer(room, targetMid, remoteDescription)
+      .then(peerConnection => onRemoteOfferSetSuccess(peerConnection, room, targetMid, remoteDescription))
+      .catch(error => onRemoteOfferSetFailure(room, targetMid, remoteDescription, error))
+      .then((answer) => {
+        localDescription = {
+          type: answer.type,
+          sdp: answer.sdp,
+        };
+        return setLocalAnswer(room, targetMid, localDescription);
+      })
+      .then(peerConnection => onLocalAnswerSetSuccess(peerConnection, room, targetMid, localDescription))
+      .catch(error => onLocalAnswerSetFailure(room, targetMid, localDescription, error));
+  } catch (err) {
+    logger.log.ERROR([mid, TAGS.SESSION_DESCRIPTION, type, 'Failed processing OFFER ->'], err);
   }
-
-  if (error) {
-    handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType].dropped, targetMid, message, true, error);
-  }
-
-  return !error;
 };
 
 /**
- * Function that parses and sets the remote description for offer and answer.
+ * Function that handles the remote offer and answer
  * @param {JSON} message
- * @return {null}
  * @memberOf SignalingMessageHandler
  * @fires HANDSHAKE_PROGRESS
  */
 // eslint-disable-next-line import/prefer-default-export
-export const parseAndSetRemoteDescription = (message) => {
-  const {
-    rid,
-    mid,
-    type,
-    sdp,
-    mediaInfoList,
-  } = message;
-  const state = Skylink.getSkylinkState(rid);
-  const {
-    hasMCU,
-    room,
-    bufferedLocalOffer,
-  } = state;
-  const targetMid = mid;
-  const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-  const { NEGOTIATION_PROGRESS } = MESSAGES;
+export const offerAndAnswerHandler = (message) => {
+  if (canProceed(message)) {
+    switch (message.type) {
+      case 'offer':
+        onRemoteOffer(message);
+        break;
 
-  logger.log.INFO([targetMid, null, type, `Received ${type} from peer. ${msgType}:`], message);
+      case 'answer':
+        onRemoteAnswer(message);
+        break;
 
-  if (canProceed(state, message)) {
-    try {
-      updateState(state, message);
-
-      PeerMedia.setPeerMediaInfo(room, targetMid, mediaInfoList);
-      PeerMedia.deleteUnavailableMedia(room, targetMid); // mediaState can be unavailable during renegotiation
-
-      if (type === 'offer') {
-        let localDescription = null;
-        const remoteDescription = {
-          type,
-          sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
-        };
-
-        setRemoteDescription(room, targetMid, remoteDescription)
-          .then(peerConnection => onRemoteDescriptionSetSuccess(peerConnection, room, targetMid, remoteDescription))
-          .catch(error => onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error))
-          .then((answer) => {
-            localDescription = {
-              type: answer.type,
-              sdp: answer.sdp,
-            };
-            return setLocalDescription(room, targetMid, localDescription);
-          })
-          .then(peerConnection => onLocalDescriptionSetSuccess(peerConnection, room, targetMid, localDescription))
-          .catch(error => onLocalDescriptionSetFailure(room, targetMid, localDescription, error));
-      } else if (bufferedLocalOffer[targetMid]) {
-        const localDescription = bufferedLocalOffer[targetMid];
-        const remoteDescription = {
-          type,
-          sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
-        };
-
-        setLocalDescription(room, targetMid, localDescription)
-          .then(peerConnection => onLocalDescriptionSetSuccess(peerConnection, room, targetMid, localDescription))
-          .catch(error => onLocalDescriptionSetFailure(room, targetMid, localDescription, error))
-          .then(() => setRemoteDescription(room, targetMid, remoteDescription))
-          .then(peerConnection => onRemoteDescriptionSetSuccess(peerConnection, room, targetMid, remoteDescription))
-          .catch(error => onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error));
-      } else {
-        logger.log.ERROR([targetMid, TAGS.PEER_CONNECTION, null, NEGOTIATION_PROGRESS.ERRORS.NO_LOCAL_BUFFERED_OFFER]);
-      }
-    } catch (error) {
-      logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, type, `Failed processing ${msgType} ->`], error);
+      default:
+          // should not come here
     }
   }
-
-  return null;
 };

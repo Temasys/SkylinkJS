@@ -7,13 +7,13 @@ import MESSAGES from '../../../../messages';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { handshakeProgress } from '../../../../skylink-events';
 import { isEmptyArray } from '../../../../utils/helpers';
-import { parseAndSetRemoteDescription } from './commons/offerAndAnswer';
+import { offerAndAnswerHandler } from './commons/offerAndAnswer';
 
 const hasAppliedBufferedRemoteOffer = (updatedState, targetMid) => {
   if (updatedState.bufferedRemoteOffers[targetMid] && !isEmptyArray(updatedState.bufferedRemoteOffers[targetMid])) {
     const offerMessage = updatedState.bufferedRemoteOffers[targetMid].shift(); // the first buffered message
     logger.log.DEBUG([targetMid, 'RTCSessionDescription', offerMessage.type, MESSAGES.NEGOTIATION_PROGRESS.APPLYING_BUFFERED_REMOTE_OFFER], offerMessage);
-    parseAndSetRemoteDescription(offerMessage);
+    offerAndAnswerHandler(offerMessage);
     Skylink.setSkylinkState(updatedState, updatedState.room.id);
     return true;
   }

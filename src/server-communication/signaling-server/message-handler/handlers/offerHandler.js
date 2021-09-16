@@ -1,7 +1,7 @@
-import { parseAndSetRemoteDescription } from './commons/offerAndAnswer';
+import { offerAndAnswerHandler } from './commons/offerAndAnswer';
 
 const offerHandler = (message) => {
-  parseAndSetRemoteDescription(message);
+  offerAndAnswerHandler(message);
 };
 
 export default offerHandler;

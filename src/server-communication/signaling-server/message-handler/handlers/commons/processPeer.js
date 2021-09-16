@@ -40,6 +40,7 @@ const processPeer = (params) => {
   const state = Skylink.getSkylinkState(currentRoom.id);
   const { hasMCU } = state;
   const { peerInformations } = state;
+
   if ((!peerInformations[targetMid] && !hasMCU) || (hasMCU && targetMid === PEER_TYPE.MCU && !peerInformations.MCU)) {
     const hasScreenshare = !!userInfo.screenshare;
     isNewPeer = true;

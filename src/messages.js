@@ -185,6 +185,7 @@ const MESSAGES = {
       FAILED_SET_REMOTE_ANSWER: 'Peer failed to set remote answer.',
       FAILED_RENEGOTIATION: 'Failed renegotiation after answerAck',
       NOT_STABLE: 'Dropping of message as signaling state is not stable',
+      INCORRECT_DESCRIPTION: 'Incorrect session description type',
       PROCESSING_EXISTING_SDP: 'Dropping message as there is another sessionDescription being processed -->',
       OFFER_TIEBREAKER: 'Dropping the received offer: self weight is greater than incoming offer weight -->',
       NO_LOCAL_BUFFERED_OFFER: 'FATAL: No buffered local offer found - Unable to setLocalDescription',
