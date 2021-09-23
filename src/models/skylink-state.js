@@ -339,6 +339,11 @@ class SkylinkState {
     this.streamsSettings = {};
     this.enableStatsGathering = initOptions.enableStatsGathering;
     this.dataTransfers = {};
+    /**
+     * Stores the negotiation state keyed by peerId
+     * @type {{}}
+     */
+    this.negotiationState = {};
   }
 }
 export default SkylinkState;

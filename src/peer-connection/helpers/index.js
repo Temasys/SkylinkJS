@@ -7,18 +7,19 @@ import signalingEndOfCandidates from './signalingEndOfCandidates';
 import refreshConnection from './refresh-connection/refreshConnection';
 import refreshPeerConnection from './refresh-connection/refreshPeerConnection';
 import restartPeerConnection from './refresh-connection/restartPeerConnection';
-import buildPeerInformations from './buildPeerInformations';
+import buildAndSetPeerInformations from './buildAndSetPeerInformations';
 import getConnectionStatus from './getConnectionStatus';
 import closePeerConnection from './closePeerConnection';
 import updatePeerInformationsMediaStatus from './updatePeerInformationsMediaStatus';
 import processNewSender from './processNewSender';
+import renegotiateIfNeeded from './renegotiateIfNeeded';
 
 /**
  * @namespace PeerConnectionHelpers
  * @description All helper and utility functions for <code>{@link PeerConnection}</code> class are listed here.
  * @private
  * @memberOf PeerConnection
- * @type {{createOffer, createAnswer, addPeer, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, refreshConnection, refreshPeerConnection, restartPeerConnection, buildPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus, processNewSender }}
+ * @type {{createOffer, createAnswer, addPeer, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, refreshConnection, refreshPeerConnection, restartPeerConnection, buildAndSetPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus, processNewSender, renegotiateIfNeeded }}
  */
 const helpers = {
   createOffer,
@@ -30,11 +31,12 @@ const helpers = {
   refreshConnection,
   refreshPeerConnection,
   restartPeerConnection,
-  buildPeerInformations,
+  buildAndSetPeerInformations,
   getConnectionStatus,
   closePeerConnection,
   updatePeerInformationsMediaStatus,
   processNewSender,
+  renegotiateIfNeeded,
 };
 
 export default helpers;

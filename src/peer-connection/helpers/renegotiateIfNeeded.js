@@ -1,12 +1,13 @@
 import Skylink from '../../index';
 import { isEmptyArray } from '../../utils/helpers';
 import logger from '../../logger';
-import { TAGS } from '../../constants';
+import { BROWSER_AGENT, TAGS } from '../../constants';
 import MESSAGES from '../../messages';
 
 const renegotiateIfNeeded = (state, peerId) => {
   const { peerConnections, currentRTCRTPSenders, hasMCU } = state;
   const initOptions = Skylink.getInitOptions();
+  const { AdapterJS } = window;
 
   // eslint-disable-next-line consistent-return
   return new Promise((resolve) => {
@@ -37,7 +38,11 @@ const renegotiateIfNeeded = (state, peerId) => {
       resolvedResults.forEach((reports, senderIndex) => {
         reports.forEach((report) => {
           if (report && report.ssrc) {
-            transmittingSenders[report.ssrc] = pcSendersWithTracks[senderIndex];
+            if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.FIREFOX && report.bytesSent !== 0) {
+              transmittingSenders[report.ssrc] = pcSendersWithTracks[senderIndex];
+            } else if (AdapterJS.webrtcDetectedBrowser !== BROWSER_AGENT.FIREFOX) {
+              transmittingSenders[report.ssrc] = pcSendersWithTracks[senderIndex];
+            }
           } else if (report && report.type === 'ssrc' && report.id.indexOf('send') > 1) { // required for retrieving sender information for react
             // native ios
             report.values.forEach((value) => {

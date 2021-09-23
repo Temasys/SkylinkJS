@@ -1,6 +1,6 @@
 import Skylink from '../../../index';
-import sendRestartOfferMsg from './sendRestartOfferMsg';
 import { PEER_TYPE } from '../../../constants';
+import { sendRestartOffer } from '../../../server-communication/signaling-server/message-handler/handlers/commons/offerAndAnswer';
 
 /**
  * @param {SkylinkState} roomState
@@ -23,7 +23,7 @@ const restartMCUConnection = (roomState, doIceRestart, bwOptions) => new Promise
       updatedRoomState.peerEndOfCandidatesCounter.MCU.len = 0;
 
       Skylink.setSkylinkState(updatedRoomState);
-      resolve(sendRestartOfferMsg(updatedRoomState, PEER_TYPE.MCU, doIceRestart));
+      resolve(sendRestartOffer(updatedRoomState, PEER_TYPE.MCU, doIceRestart));
     }
   } catch (error) {
     resolve([PEER_TYPE.MCU, error]);

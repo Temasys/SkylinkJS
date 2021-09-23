@@ -24,14 +24,9 @@ const _handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote
 
 const onLocalDescriptionSetFailure = (room, targetMid, localDescription, error) => {
   const state = Skylink.getSkylinkState(room.id);
-  const { peerConnections } = state;
-  const peerConnection = peerConnections[targetMid];
   const { NEGOTIATION_PROGRESS } = MESSAGES;
 
   logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, localDescription.type, NEGOTIATION_PROGRESS.FAILED_SET_LOCAL_DESCRIPTION], error);
-
-  peerConnection.processingLocalSDP = false;
-  peerConnection.negotiating = false;
 
   _handleSetOfferAndAnswerFailure(state, targetMid, localDescription, false, error);
 };
@@ -47,9 +42,6 @@ const onRemoteDescriptionSetFailure = (room, targetMid, remoteDescription, error
     state: peerConnection.signalingState,
     [type]: remoteDescription,
   });
-
-  peerConnection.processingRemoteSDP = false;
-  peerConnection.negotiating = false;
 
   _handleSetOfferAndAnswerFailure(state, targetMid, remoteDescription, true, error);
 };

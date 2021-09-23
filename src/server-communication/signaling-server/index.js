@@ -15,7 +15,7 @@ import {
 import { dispatchEvent } from '../../utils/skylinkEventManager';
 import Skylink from '../../index';
 import MESSAGES from '../../messages';
-import { TAGS, SOCKET_ERROR, HANDSHAKE_PROGRESS } from '../../constants';
+import { SOCKET_ERROR, HANDSHAKE_PROGRESS } from '../../constants';
 import Room from '../../room';
 import HandleSessionStats from '../../skylink-stats/handleSessionStats';
 
@@ -161,15 +161,12 @@ class SkylinkSignalingServer {
 
   /**
    *
-   * @param args
+   * @param state
+   * @param answer
    */
-  answer(...args) {
-    return this.messageBuilder.getAnswerMessage(...args).then((answer) => {
-      const state = args[0];
-      this.sendMessage(answer);
-      this.dispatchHandshakeProgress(state, 'ANSWER');
-      return answer;
-    });
+  answer(state, answer) {
+    this.sendMessage(answer);
+    this.dispatchHandshakeProgress(state, 'ANSWER');
   }
 
   answerAck(...args) {
@@ -196,19 +193,9 @@ class SkylinkSignalingServer {
     this.logClientSessionStats(args[0].room.id, join);
   }
 
-  offer(...args) {
-    const room = args[0];
-    const peerId = args[1];
-    const state = Skylink.getSkylinkState(room.id);
-    if (state.peerConnections[peerId].negotiating) {
-      logger.log.DEBUG([peerId, TAGS.SIG_SERVER, null, `${MESSAGES.SIGNALING.ABORTING_OFFER}`]);
-      return;
-    }
-
-    this.messageBuilder.getOfferMessage(...args).then((offer) => {
-      this.sendMessage(offer);
-      this.dispatchHandshakeProgress(state, 'OFFER');
-    });
+  offer(state, offer) {
+    this.sendMessage(offer);
+    this.dispatchHandshakeProgress(state, 'OFFER');
   }
 
   welcome(...args) {

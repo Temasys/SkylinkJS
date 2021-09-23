@@ -8,20 +8,19 @@ import Room from '../../../../../room';
 import IceConnection from '../../../../../ice-connection';
 
 // eslint-disable-next-line no-underscore-dangle
-const _setPeerConnectionInstate = (RTCPeerConnection, room, targetMid) => {
+const _setPeerConnectionInState = (RTCPeerConnection, room, targetMid) => {
   const updatedState = Skylink.getSkylinkState(room.id);
   updatedState.peerConnections[targetMid] = RTCPeerConnection;
   Skylink.setSkylinkState(updatedState, room.id);
 };
 
-const setPeerConnectionInState = (RTCPeerConnection, room, targetMid) => _setPeerConnectionInstate(RTCPeerConnection, room, targetMid);
+const setPeerConnectionInState = (RTCPeerConnection, room, targetMid) => _setPeerConnectionInState(RTCPeerConnection, room, targetMid);
 
 const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remoteDescription) => {
   const { type } = remoteDescription;
   const { NEGOTIATION_PROGRESS } = MESSAGES;
 
   const updatedState = Skylink.getSkylinkState(room.id);
-  updatedState.peerConnections[targetMid].processingRemoteSDP = false;
 
   if (remoteDescription.type === 'offer') {
     updatedState.peerConnections[targetMid].setOffer = 'remote';
@@ -43,7 +42,7 @@ const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remot
 };
 
 const onLocalDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, localDescription) => {
-  _setPeerConnectionInstate(RTCPeerConnection, room, targetMid);
+  _setPeerConnectionInState(RTCPeerConnection, room, targetMid);
 
   const updatedState = Skylink.getSkylinkState(room.id);
   const { NEGOTIATION_PROGRESS } = MESSAGES;

@@ -21,15 +21,20 @@ const setRemoteDescription = (room, targetMid, remoteDescription) => {
   const state = Skylink.getSkylinkState(room.id);
   const { peerConnections } = state;
   const { type } = remoteDescription;
-  const { STATS_MODULE } = MESSAGES;
   const peerConnection = peerConnections[targetMid];
 
+  if (peerConnection) {
+    const mungedSessionDescription = _mungeSDP(targetMid, remoteDescription, room.id);
 
-  peerConnection.processingRemoteSDP = true;
-  const mungedSessionDescription = _mungeSDP(targetMid, remoteDescription, room.id);
-  handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()][type], targetMid, mungedSessionDescription, true);
-  return peerConnection.setRemoteDescription(mungedSessionDescription)
-    .then(() => peerConnection);
+    handleNegotiationStats.send(room.id, MESSAGES.STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()][type], targetMid, mungedSessionDescription, true);
+
+    return peerConnection.setRemoteDescription(mungedSessionDescription)
+      .then(() => peerConnection);
+  }
+
+  logger.log.ERROR([targetMid, TAGS.NEGOTIATION, type, `${MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION} - Unable to set remote ${type}`]);
+
+  return handleNegotiationStats.send(room.id, MESSAGES.STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()].dropped, targetMid, remoteDescription, true, MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION);
 };
 
 const setLocalDescription = (room, targetMid, localDescription) => {
@@ -37,14 +42,17 @@ const setLocalDescription = (room, targetMid, localDescription) => {
   const { peerConnections } = state;
   const { type } = localDescription;
   const peerConnection = peerConnections[targetMid];
-  const { STATS_MODULE } = MESSAGES;
 
-  peerConnection.processingLocalSDP = true;
+  if (peerConnection) {
+    handleNegotiationStats.send(room.id, MESSAGES.STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()][type], targetMid, localDescription, false);
 
-  handleNegotiationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()][type], targetMid, localDescription, false);
+    return peerConnection.setLocalDescription(localDescription)
+      .then(() => peerConnection);
+  }
 
-  return peerConnection.setLocalDescription(localDescription)
-    .then(() => peerConnection);
+  logger.log.ERROR([targetMid, TAGS.NEGOTIATION, type, `${MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION} - Unable to set local ${type}`]);
+
+  return handleNegotiationStats.send(room.id, MESSAGES.STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()].dropped, targetMid, localDescription, true, MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION);
 };
 
 export {

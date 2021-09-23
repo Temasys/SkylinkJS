@@ -181,16 +181,20 @@ const MESSAGES = {
     APPLYING_BUFFERED_REMOTE_OFFER: 'Applying buffered remote offer',
     ERRORS: {
       FAILED_SET_LOCAL_DESCRIPTION: 'Failed setting local description -->',
-      FAILED_SET_REMOTE_DESCRIPTION: 'Failed setting remote description',
-      FAILED_SET_REMOTE_ANSWER: 'Peer failed to set remote answer.',
+      FAILED_SET_REMOTE_DESCRIPTION: 'Failed setting remote description -->',
+      FAILED_SET_REMOTE_ANSWER: 'Remote Peer failed to set answer.',
+      FAILED_PROCESSING_OFFER: 'Failed processing OFFER ->',
+      FAILED_PROCESSING_ANSWER: 'Failed processing ANSWER ->',
+      FAILED_PROCESSING_ANSWER_ACK: 'Failed processing ANSWER_ACK ->',
       FAILED_RENEGOTIATION: 'Failed renegotiation after answerAck',
-      NOT_STABLE: 'Dropping of message as signaling state is not stable',
-      INCORRECT_DESCRIPTION: 'Incorrect session description type',
-      PROCESSING_EXISTING_SDP: 'Dropping message as there is another sessionDescription being processed -->',
       OFFER_TIEBREAKER: 'Dropping the received offer: self weight is greater than incoming offer weight -->',
       NO_LOCAL_BUFFERED_OFFER: 'FATAL: No buffered local offer found - Unable to setLocalDescription',
       ADDING_REMOTE_OFFER_TO_BUFFER: 'Adding remote offer received to buffer as current negotiation has not completed',
       STOP_RENEGOTIATION_FORCE_TURN: 'Stopping renegotiation as TURN is not enabled but forceTURN in init options is enforced',
+      DROPPING_ANSWER: 'Dropping ANSWER as previous negotiation state is not \'LOCAL_OFFER_SENT\'',
+      DROPPING_ANSWER_ACK: 'Dropping ANSWER_ACK as previous negotiation state is not \'LOCAL_ANSWER_SET\'',
+      DROPPING_WELCOME_NEG_STATE: 'Dropping WELCOME as previous negotiation state is not \'undefined\'',
+      DROPPING_WELCOME_MCU_FORWARDED: 'Dropping extra WELCOME from remote peer in MCU room',
     },
   },
   SIGNALING: {
@@ -325,6 +329,9 @@ const MESSAGES = {
       BUFFERED: 'buffered',
     },
     HANDLE_NEGOTIATION_STATS: {
+      WELCOME: {
+        dropped: 'dropped_welcome',
+      },
       OFFER: {
         create: 'create_offer',
         create_error: 'error_create_offer',
@@ -332,6 +339,7 @@ const MESSAGES = {
         set_error: 'error_set_offer',
         offer: 'offer',
         dropped: 'dropped_offer',
+        error: 'error_offer',
       },
       ANSWER: {
         create: 'create_answer',
@@ -340,6 +348,10 @@ const MESSAGES = {
         set_error: 'error_set_ANSWER',
         answer: 'answer',
         dropped: 'dropped_answer',
+        error: 'error_answer',
+      },
+      ANSWERACK: {
+        error: 'error_answer_ack',
       },
     },
     HANDLE_DATA_CHANNEL_STATS: {
