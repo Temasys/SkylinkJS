@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-connection/helpers/refresh-connection/restartPeerConnection.js - Documentation
+      server-communication/signaling-server/message-handler/handlers/commons/enterAndWelcome.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        peer-connection/helpers/refresh-connection/restartPeerConnection.js
+        server-communication/signaling-server/message-handler/handlers/commons/enterAndWelcome.js
       </h1>
     
 
@@ -93,92 +93,46 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import Skylink from '../../..';
-import logger from '../../../logger';
-import { PEER_CONNECTION_STATE, TAGS } from '../../../constants';
-import SkylinkSignalingServer from '../../../server-communication/signaling-server';
-import MESSAGES from '../../../messages';
-import sendRestartOfferMsg from './sendRestartOfferMsg';
+    <pre class="prettyprint source linenums"><code>import Skylink from '../../../../../index';
+import { TAGS } from '../../../../../constants';
+import handleNegotiationStats from '../../../../../skylink-stats/handleNegotiationStats';
+import logger from '../../../../../logger';
+import messages from '../../../../../messages';
+import parsers from '../../../parsers';
+import NegotiationState from '../../../negotiationState/negotiationState';
 
 /**
- * Function that sends restart message to the signaling server.
- * @param {String} peerId
- * @param {SkylinkState} roomState
- * @param {Object} options
- * @param {Object} options.bandwidth
- * @return {Promise}
- * @memberOf PeerConnection.PeerConnectionHelpers
+ * Function that parses the enter and welcome message and sends the welcome or offer message.
+ * @param {JSON} message
+ * @memberOf SignalingMessageHandler
  */
-const restartPeerConnection = (peerId, roomState, options) => {
-  const updateState = Skylink.getSkylinkState(roomState.room.id);
+// eslint-disable-next-line consistent-return
+const enterAndWelcomeHandler = (message) => {
+  const parsedMsg = parsers.enterAndWelcome(message);
   const {
-    peerConnections, streamsBandwidthSettings, peerEndOfCandidatesCounter, room, user,
-  } = updateState;
-  const { doIceRestart, bwOptions } = options;
-  const signaling = new SkylinkSignalingServer();
-  const errors = [];
+    rid, mid, publisherId,
+  } = parsedMsg;
+  const state = Skylink.getSkylinkState(rid);
+  const { hasMCU, user } = state;
+  const targetMid = hasMCU &amp;&amp; publisherId ? publisherId : mid;
 
-  return new Promise((resolve) => {
-    // reject with wrong peerId
-    if (!peerConnections[peerId]) {
-      logger.log.ERROR([peerId, null, null, MESSAGES.PEER_CONNECTION.ERRORS.NOT_FOUND]);
-      errors.push(MESSAGES.PEER_CONNECTION.ERRORS.NOT_FOUND);
-      return resolve([peerId, errors]);
-    }
+  if (!user.sid) {
+    return logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, [messages.SIGNALING.DROPPING_ENTER]]);
+  }
 
-    const peerConnection = peerConnections[peerId];
+  logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, `Peer ${parsedMsg.type} received ->`], message);
+  handleNegotiationStats.send(rid, parsedMsg.type, targetMid, message, true);
 
-    if (errors.length !== 0) {
-      return resolve([peerId, errors]);
-    }
+  if (parsedMsg.type === 'enter') {
+    return NegotiationState.onEnterReceived(message);
+  }
 
-    // Let's check if the signalingState is stable first.
-    // In another galaxy or universe, where the local description gets dropped..
-    // In the offerHandler or answerHandler, do the appropriate flags to ignore or drop "extra" descriptions
-    if (peerConnection.signalingState === PEER_CONNECTION_STATE.STABLE) {
-      logger.log.INFO([peerId, null, null, MESSAGES.PEER_CONNECTION.REFRESH_CONNECTION.SEND_RESTART_OFFER], {
-        iceRestart: doIceRestart,
-        options: bwOptions,
-      });
-
-      updateState.streamsBandwidthSettings.bAS = bwOptions.bandwidth || streamsBandwidthSettings.bAS;
-      updateState.peerEndOfCandidatesCounter[peerId] = peerEndOfCandidatesCounter[peerId] || {};
-      updateState.peerEndOfCandidatesCounter[peerId].len = 0;
-      Skylink.setSkylinkState(updateState, updateState.room.id);
-
-      return resolve(sendRestartOfferMsg(updateState, peerId, doIceRestart));
-    }
-
-    // Checks if the local description is defined first
-    const hasLocalDescription = peerConnection.localDescription &amp;&amp; peerConnection.localDescription.sdp;
-    // This is when the state is stable and re-handshaking is possible
-    // This could be due to previous connection handshaking that is already done
-    if (peerConnection.signalingState === PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER &amp;&amp; hasLocalDescription) {
-      signaling.sendMessage({
-        type: peerConnection.localDescription.type,
-        sdp: peerConnection.localDescription.sdp,
-        mid: user.sid,
-        target: peerId,
-        rid: room.id,
-        restart: true,
-      });
-      return resolve(peerId);
-    }
-
-    logger.log.DEBUG([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.REFRESH_CONNECTION.NO_LOCAL_DESCRIPTION], {
-      localDescription: peerConnection.localDescription,
-      remoteDescription: peerConnection.remoteDescription,
-      signalingState: peerConnection.signalingState,
-    });
-    errors.push(MESSAGES.PEER_CONNECTION.REFRESH_CONNECTION.NO_LOCAL_DESCRIPTION);
-
-    resolve([peerId, errors]);
-
-    return null;
-  });
+  if (parsedMsg.type === 'welcome') {
+    return NegotiationState.onWelcomeReceived(message);
+  }
 };
 
-export default restartPeerConnection;
+export default enterAndWelcomeHandler;
 </code></pre>
   </article>
 </section>

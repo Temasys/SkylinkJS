@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-connection/helpers/peer-addition/createPeerConnection.js - Documentation
+      server-communication/signaling-server/negotiationState/helpers/processNewPeer.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        peer-connection/helpers/peer-addition/createPeerConnection.js
+        server-communication/signaling-server/negotiationState/helpers/processNewPeer.js
       </h1>
     
 
@@ -93,121 +93,212 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import {
-  HANDSHAKE_PROGRESS, PEER_TYPE, BROWSER_AGENT, TAGS, CONFIG_NAME,
-} from '../../../constants';
-import Skylink from '../../../index';
-import logger from '../../../logger';
-import callbacks from './callbacks/index';
-import { dispatchEvent } from '../../../utils/skylinkEventManager';
-import { handshakeProgress } from '../../../skylink-events';
-import MESSAGES from '../../../messages';
-import { isAgent } from '../../../utils/helpers';
-import retrieveConfig from '../../../defaults';
-import Room from '../../../room';
+    <pre class="prettyprint source linenums"><code>/* eslint-disable no-underscore-dangle */
+import Skylink from '../../../../index';
+import {
+  HANDSHAKE_PROGRESS, PEER_TYPE, SERVER_PEER_TYPE, TAGS,
+} from '../../../../constants';
+import PeerConnection from '../../../../peer-connection';
+import logger from '../../../../logger';
+import MESSAGES from '../../../../messages';
+import { dispatchEvent } from '../../../../utils/skylinkEventManager';
+import { handshakeProgress, peerJoined, serverPeerJoined } from '../../../../skylink-events';
+import Room from '../../../../room';
+import PeerData from '../../../../peer-data';
+import parsers from '../../parsers';
 
-const createNativePeerConnection = (targetMid, constraints, hasScreenShare, currentRoom) => {
-  const initOptions = Skylink.getInitOptions();
-  const state = Skylink.getSkylinkState(currentRoom.id);
-  logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.CREATE_NEW], {
-    constraints,
-  });
-  const { RTCPeerConnection, msRTCPeerConnection } = window;
-  const rtcPeerConnection = new (initOptions.useEdgeWebRTC &amp;&amp; msRTCPeerConnection ? window.msRTCPeerConnection : RTCPeerConnection)(constraints);
-  const callbackExtraParams = [rtcPeerConnection, targetMid, state];
-
-  // attributes (added on by Temasys)
-  rtcPeerConnection.setOffer = '';
-  rtcPeerConnection.setAnswer = '';
-  rtcPeerConnection.negotiating = false;
-  rtcPeerConnection.hasMainChannel = false;
-  rtcPeerConnection.processingLocalSDP = false;
-  rtcPeerConnection.processingRemoteSDP = false;
-  rtcPeerConnection.gathered = false;
-  rtcPeerConnection.gathering = false;
-
-  // candidates
-  state.gatheredCandidates[targetMid] = {
-    sending: { host: [], srflx: [], relay: [] },
-    receiving: { host: [], srflx: [], relay: [] },
-  };
-
-  state.peerEndOfCandidatesCounter[targetMid] = state.peerEndOfCandidatesCounter[targetMid] || {};
-
-  // FIXME: ESS-1620 - To check if still needed
-  if (targetMid === PEER_TYPE.MCU) {
-    logger.log.INFO('Creating an empty transceiver of kind video with MCU');
-    if (typeof rtcPeerConnection.addTransceiver === 'function') {
-      rtcPeerConnection.addTransceiver('video');
-    }
-  }
-
-  if (rtcPeerConnection.restartIce) {
-    state.enableIceRestart = true;
-  }
-
-  Skylink.setSkylinkState(state, currentRoom.id);
-
-  /* CALLBACKS */
-  rtcPeerConnection.ontrack = callbacks.ontrack.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.ondatachannel = callbacks.ondatachannel.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.onicecandidate = callbacks.onicecandidate.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.oniceconnectionstatechange = callbacks.oniceconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.onconnectionstatechange = callbacks.onconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.onsignalingstatechange = callbacks.onsignalingstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.onicegatheringstatechange = callbacks.onicegatheringstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
-
-  if (isAgent(BROWSER_AGENT.REACT_NATIVE)) {
-    rtcPeerConnection.onsenderadded = callbacks.onsenderadded.bind(rtcPeerConnection, ...callbackExtraParams);
-    rtcPeerConnection.onremovetrack = callbacks.onremovetrack.bind(rtcPeerConnection, targetMid, state.room, false);
-  }
-
-  return rtcPeerConnection;
-};
-
-/**
- * Function that creates the Peer Connection.
- * @param {JSON} params
- * @return {RTCPeerConnection} peerConnection
- * @memberOf PeerConnection.PeerConnectionHelpers
- * @fires HANDSHAKE_PROGRESS
- */
-const createPeerConnection = (params) => {
-  let peerConnection = null;
+const _addPeerConnection = (params) => {
   const {
     currentRoom,
     targetMid,
     cert,
-    hasScreenShare,
+    userInfo,
+    message,
   } = params;
   const state = Skylink.getSkylinkState(currentRoom.id);
-  const { room } = state;
-  const constraints = Object.assign({ iceServers: room.connection.peerConfig.iceServers }, retrieveConfig(CONFIG_NAME.PEER_CONNECTION, { rid: currentRoom.id }));
+  const hasScreenshare = !!userInfo.screenshare;
 
-  if (cert) {
-    constraints.certificates = [cert];
-  }
+  PeerConnection.buildAndSetPeerInformations(targetMid, message.userInfo, state);
 
-  Skylink.setSkylinkState(state, currentRoom.id);
-
-  try {
-    peerConnection = createNativePeerConnection(targetMid, constraints, hasScreenShare, currentRoom);
-    peerConnection.constraints = constraints;
-  } catch (error) {
-    logger.log.ERROR([targetMid, null, null, 'Failed creating peer connection:'], error);
-    peerConnection = null;
-    dispatchEvent(handshakeProgress({
-      state: HANDSHAKE_PROGRESS.ERROR,
-      peerId: targetMid,
-      error,
-      room: Room.getRoomInfo(room.id),
-    }));
-  }
-
-  return peerConnection;
+  PeerConnection.addPeer({
+    currentRoom,
+    targetMid,
+    peerBrowser: {
+      agent: userInfo.agent.name,
+      version: userInfo.agent.version,
+      os: userInfo.agent.os,
+    },
+    cert,
+    hasScreenshare,
+  });
 };
 
-export default createPeerConnection;
+const _processPeerFromWelcome = (params) => {
+  const {
+    currentRoom,
+    targetMid,
+    message,
+  } = params;
+  const state = Skylink.getSkylinkState(currentRoom.id);
+  const { hasMCU, peerInformations } = state;
+
+  // process based on room type
+  switch (hasMCU) {
+    case true:
+      // MCU will always send welcome
+      // 1) process the new MCU connection
+      if (targetMid === PEER_TYPE.MCU &amp;&amp; !peerInformations.MCU) {
+        _addPeerConnection(params);
+
+        logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.MCU]);
+
+        state.hasMCU = true;
+
+        dispatchEvent(serverPeerJoined({
+          peerId: targetMid,
+          serverPeerType: SERVER_PEER_TYPE.MCU,
+          room: Room.getRoomInfo(currentRoom.id),
+        }));
+
+        dispatchEvent(handshakeProgress({
+          peerId: targetMid,
+          state: HANDSHAKE_PROGRESS.WELCOME,
+          error: null,
+          room: Room.getRoomInfo(currentRoom.id),
+        }));
+      }
+
+      // process other peers in the room if any
+      if (Array.isArray(message.peersInRoom) &amp;&amp; message.peersInRoom.length) {
+        const userId = state.user.sid;
+        for (let peersInRoomIndex = 0; peersInRoomIndex &lt; message.peersInRoom.length; peersInRoomIndex += 1) {
+          const PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
+          if (PEER_ID !== userId) {
+            const parsedMsg = parsers.enterAndWelcome(message.peersInRoom[peersInRoomIndex]);
+            const peerUserInfo = parsedMsg.userInfo;
+
+            PeerConnection.buildAndSetPeerInformations(PEER_ID, peerUserInfo, state);
+
+            dispatchEvent(peerJoined({
+              peerId: PEER_ID,
+              peerInfo: PeerData.getPeerInfo(PEER_ID, currentRoom),
+              isSelf: false,
+              room: Room.getRoomInfo(currentRoom.id),
+            }));
+          }
+        }
+      }
+
+
+      break;
+    case false: // P2P
+      if (!peerInformations[targetMid]) {
+        _addPeerConnection(params);
+
+        dispatchEvent(peerJoined({
+          peerId: targetMid,
+          peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+          isSelf: false,
+          room: Room.getRoomInfo(currentRoom.id),
+        }));
+
+        dispatchEvent(handshakeProgress({
+          peerId: targetMid,
+          state: HANDSHAKE_PROGRESS.WELCOME,
+          error: null,
+          room: Room.getRoomInfo(currentRoom.id),
+        }));
+      }
+
+      break;
+    default:
+      // should not come here
+      break;
+  }
+};
+
+const _processPeerFromEnter = (params) => {
+  const {
+    currentRoom,
+    userInfo,
+    targetMid,
+  } = params;
+  const state = Skylink.getSkylinkState(currentRoom.id);
+  const { hasMCU, peerInformations } = state;
+
+  switch (hasMCU) {
+    case true:
+      // enter is forwarded by the MCU from a new peer that enters a room
+      PeerConnection.buildAndSetPeerInformations(targetMid, userInfo, state);
+
+      dispatchEvent(peerJoined({
+        peerId: targetMid,
+        peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+        isSelf: false,
+        room: Room.getRoomInfo(currentRoom.id),
+      }));
+
+      break;
+    case false:
+
+      if (!peerInformations[targetMid]) {
+        _addPeerConnection(params);
+
+        dispatchEvent(peerJoined({
+          peerId: targetMid,
+          peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+          isSelf: false,
+          room: Room.getRoomInfo(currentRoom.id),
+        }));
+      }
+
+      break;
+    default:
+      // should not come here
+      break;
+  }
+};
+
+/**
+ * Function that adds a Peer Connection and updates the state(Skylink State).
+ * @param {JSON} message
+ * @memberOf SignalingMessageHandler
+ * @fires SERVER_PEER_JOINED
+ * @fires PEER_JOINED
+ * @fires HANDSHAKE_PROGRESS
+ */
+const processNewPeer = (message) => {
+  const parsedMsg = parsers.enterAndWelcome(message);
+  const {
+    rid, mid, userInfo, publisherId,
+  } = parsedMsg;
+  const state = Skylink.getSkylinkState(rid);
+  const { hasMCU } = state;
+  const targetMid = hasMCU &amp;&amp; publisherId ? publisherId : mid;
+  const peerParams = {
+    currentRoom: state.room,
+    targetMid,
+    userInfo,
+    message: parsedMsg,
+  };
+  const updatedState = Skylink.getSkylinkState(rid);
+
+  // TODO: check if this is used
+  updatedState.peerMessagesStamps[targetMid] = updatedState.peerMessagesStamps[targetMid] || {
+    userData: 0,
+    audioMuted: 0,
+    videoMuted: 0,
+  };
+  Skylink.setSkylinkState(updatedState, rid);
+
+  if (message.type === 'enter') {
+    _processPeerFromEnter(peerParams);
+  } else if (message.type === 'welcome') {
+    _processPeerFromWelcome(peerParams);
+  }
+};
+
+export default processNewPeer;
 </code></pre>
   </article>
 </section>

@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-connection/index.js - Documentation
+      server-communication/signaling-server/message-handler/handlers/inRoomHandler.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        peer-connection/index.js
+        server-communication/signaling-server/message-handler/handlers/inRoomHandler.js
       </h1>
     
 
@@ -93,143 +93,101 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import PeerConnectionStatistics from './helpers/statistics';
-import helpers from './helpers/index';
-import DataChannel from './helpers/data-channel';
+    <pre class="prettyprint source linenums"><code>import Skylink from '../../../../index';
+import SkylinkSignalingServer from '../../index';
+import IceConnection from '../../../../ice-connection/index';
+import PeerData from '../../../../peer-data';
+import PeerMedia from '../../../../peer-media/index';
+import { peerJoined } from '../../../../skylink-events';
+import { dispatchEvent } from '../../../../utils/skylinkEventManager';
+import Room from '../../../../room';
+import PeerStream from '../../../../peer-stream';
+import { ON_INCOMING_STREAM } from '../../../../skylink-events/constants';
+import logger from '../../../../logger';
+import MESSAGES from '../../../../messages';
+import HandleUserMediaStats from '../../../../skylink-stats/handleUserMediaStats';
+import HandleSessionStats from '../../../../skylink-stats/handleSessionStats';
+import { TAGS } from '../../../../constants';
+
+const dispatchIncomingStream = (room, sid) => {
+  const state = Skylink.getSkylinkState(room.id);
+  if (!state.peerStreams[sid]) {
+    return;
+  }
+
+  Object.values(state.peerStreams[sid]).forEach((stream) => {
+    PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
+      stream,
+      peerId: sid,
+      room: Room.getRoomInfo(room.id),
+      isSelf: true,
+      peerInfo: PeerData.getCurrentSessionInfo(room),
+      streamId: stream.id,
+      isVideo: stream.getVideoTracks().length > 0,
+      isAudio: stream.getAudioTracks().length > 0,
+    });
+  });
+};
+
+const startUserMediaStatsInterval = (roomKey, peerId) => {
+  const initOptions = Skylink.getInitOptions();
+  new HandleUserMediaStats().send(roomKey); // send first stat
+
+  const interval = setInterval(() => {
+    const currentState = Skylink.getSkylinkState(roomKey);
+    const userId = currentState ? currentState.user.sid : null;
+
+    if (!currentState || userId !== peerId) { // user has left the room  or there is a new socket connection, so stop sending stats
+      clearInterval(interval);
+    } else {
+      new HandleUserMediaStats().send(currentState.room.id);
+    }
+  }, initOptions.statsInterval * 1000);
+};
 
 /**
- * @classdesc Class that represents a PeerConnection
- * @class
- * @private
+ * Function that handles the "inRoom" socket message received.
+ * @param {JSON} message
+ * @memberOf SignalingMessageHandler
+ * @fires PEER_JOINED
+ * @fires HANDSHAKE_PROGRESS
+ * @fires ON_INCOMING_STREAM
  */
-class PeerConnection {
-  /**
-   * @static
-   * @param {object} params - options required to create a PeerConnection
-   * @param {SkylinkRoom} params.currentRoom - The currrent state
-   * @param {String} params.targetMid - Peer's id
-   * @param {Object} params.peerBrowser - Peer's user agent object
-   * @param {RTCCertificate} params.cert - Represents a certificate that an RTCPeerConnection uses to authenticate.
-   * @param {boolean} hasScreenshare - Is screenshare enabled
-   */
-  static addPeer(params) {
-    helpers.addPeer(params);
-  }
+const inRoomHandler = (message) => {
+  const {
+    pc_config: { iceServers },
+    sid,
+    rid,
+    tieBreaker,
+  } = message;
+  const roomState = Skylink.getSkylinkState(rid);
+  const signaling = new SkylinkSignalingServer();
 
-  /**
-   * @static
-   * @param args
-   */
-  static createOffer(...args) {
-    return helpers.createOffer(...args);
-  }
+  roomState.room.connection.peerConfig = IceConnection.setIceServers(rid, iceServers);
+  roomState.room.inRoom = true;
+  roomState.user.sid = sid;
+  logger.log.INFO([null, TAGS.SIG_SERVER, null, `${MESSAGES.PEER_INFORMATIONS.SET_PEER_PRIORITY_WEIGHT}: `], tieBreaker);
+  roomState.peerPriorityWeight = tieBreaker;
 
-  /**
-   * @static
-   * @param args
-   */
-  static createAnswer(...args) {
-    return helpers.createAnswer(...args);
-  }
+  PeerMedia.updatePeerMediaWithUserSid(roomState.room, sid);
+  PeerStream.updatePeerStreamWithUserSid(roomState.room, sid);
+  Skylink.setSkylinkState(roomState, rid);
 
-  /**
-   * @static
-   * @param args
-   */
-  static createDataChannel(...args) {
-    return DataChannel.createDataChannel(...args);
-  }
+  dispatchEvent(peerJoined({
+    peerId: roomState.user.sid,
+    peerInfo: PeerData.getCurrentSessionInfo(roomState.room),
+    isSelf: true,
+    room: roomState.room,
+  }));
 
-  /**
-   * @static
-   * @param args
-   */
-  static sendP2PMessage(...args) {
-    return helpers.sendP2PMessage(...args);
-  }
+  new HandleSessionStats().send(rid, message);
 
-  /**
-   * @static
-   * @param args
-   */
-  static getPeersInRoom(...args) {
-    return helpers.getPeersInRoom(...args);
-  }
+  dispatchIncomingStream(roomState.room, sid);
+  startUserMediaStatsInterval(roomState.room.id, sid);
+  signaling.enterRoom(roomState);
+};
 
-  /**
-   * Get webRTC statistics via the getStats() method of RTCPeerConnection inside a Room
-   * @param {SkylinkRoom.id} roomKey
-   * @param {String} peerId
-   * @param {boolean} beSilentOnLogs
-   * @static
-   * @return {Promise}
-   */
-  static retrieveStatistics(roomKey, peerId, beSilentOnLogs) {
-    const peerConnectionStatistics = new PeerConnectionStatistics(roomKey, peerId);
-    return peerConnectionStatistics.getStatistics(beSilentOnLogs);
-  }
-
-  /**
-   * @static
-   * @param args
-   */
-  static signalingEndOfCandidates(...args) {
-    return helpers.signalingEndOfCandidates(...args);
-  }
-
-  /**
-   * Get RTCPeerConnection status
-   * @param {SkylinkState} roomState
-   * @param {String|Array} peerId
-   * @static
-   * @return {Promise&lt;statistics>}
-   */
-  static getConnectionStatus(roomState, peerId) {
-    return helpers.getConnectionStatus(roomState, peerId);
-  }
-
-  /**
-   * Get RTCDataChannel buffer thresholds
-   * @param {RTCDataChannel.channel} channel
-   * @static
-   * @return {{bufferedAmountLow: number, bufferedAmountLowThreshold: number}}
-   */
-  // eslint-disable-next-line no-unused-vars
-  static getDataChannelBuffer(channel) {
-    // TODO: what does this mean? what is it for?
-    return null;
-  }
-
-  static refreshDataChannel(roomState, peerId) {
-    return DataChannel.refreshDataChannel(roomState, peerId);
-  }
-
-  static closeDataChannel(roomKey, peerId) {
-    return DataChannel.closeDataChannel(roomKey, peerId);
-  }
-
-  static refreshConnection(roomState, targetPeerId, iceRestart, options, callback) {
-    return helpers.refreshConnection(roomState, targetPeerId, iceRestart, options, callback);
-  }
-
-  static refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions) {
-    return helpers.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
-  }
-
-  static buildPeerInformations(...args) {
-    return helpers.buildPeerInformations(...args);
-  }
-
-  static closePeerConnection(roomState, peerId) {
-    return helpers.closePeerConnection(roomState, peerId);
-  }
-
-  static updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream) {
-    return helpers.updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream);
-  }
-}
-
-export default PeerConnection;
+export default inRoomHandler;
 </code></pre>
   </article>
 </section>

@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-connection/helpers/refresh-connection/refreshConnection.js - Documentation
+      peer-connection/helpers/createOffer.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        peer-connection/helpers/refresh-connection/refreshConnection.js
+        peer-connection/helpers/createOffer.js
       </h1>
     
 
@@ -93,137 +93,106 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>/* eslint-disable prefer-promise-reject-errors */
-import Skylink from '../../../index';
-import MESSAGES from '../../../messages';
-import logger from '../../../logger';
-import PeerConnection from '../../index';
-import {
-  isEmptyArray, isAObj, isAString, isABoolean,
-} from '../../../utils/helpers';
-import buildRefreshConnectionResult from './buildRefreshConnectionResult';
-import { TAGS } from '../../../constants';
+    <pre class="prettyprint source linenums"><code>import Skylink from '../../index';
+import logger from '../../logger';
+import PeerConnection from '../index';
+import MediaStream from '../../media-stream/index';
+import { HANDSHAKE_PROGRESS, PEER_TYPE } from '../../constants';
+import getCommonOfferAnswerMessage from '../../server-communication/signaling-server/message-builder/builders/commons/offerAndAnswer';
+import handleNegotiationStats from '../../skylink-stats/handleNegotiationStats';
+import MESSAGES from '../../messages';
+import { dispatchEvent } from '../../utils/skylinkEventManager';
+import { handshakeProgress } from '../../skylink-events';
+import Room from '../../room';
 
-const buildResult = (listOfPeers, refreshErrors, refreshSettings) => {
-  const result = {};
-  result.listOfPeers = listOfPeers;
-  result.refreshErrors = refreshErrors;
-  result.refreshSettings = refreshSettings;
+const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
 
-  return result;
+const onOfferCreated = (resolve, targetMid, roomState, restartOfferMsg, offer) => {
+  const { room } = roomState;
+
+  logger.log.DEBUG([targetMid, null, null, 'Created offer'], offer);
+  handleNegotiationStats.send(room.id, HANDLE_NEGOTIATION_STATS.OFFER.create, targetMid, offer, false);
+
+  getCommonOfferAnswerMessage(resolve, targetMid, roomState, offer, restartOfferMsg);
 };
 
-const buildPeerRefreshSettings = (listOfPeers, room, doIceRestart) => {
-  const refreshSettings = [];
+const onOfferFailed = (reject, targetMid, roomState, error) => {
+  const { room } = roomState;
 
-  Object.keys(listOfPeers).forEach((i) => {
-    refreshSettings.push(buildRefreshConnectionResult(listOfPeers[i], room, doIceRestart));
-  });
-
-  return refreshSettings;
-};
-
-const buildPeerRefreshErrors = (peerId, errors) => {
-  const peerRefreshError = {};
-  peerRefreshError[peerId] = errors;
-
-  return peerRefreshError;
-};
-
-const filterParams = (targetPeerId, iceRestart, options, peerConnections) => {
-  let doIceRestart = false;
-  let bwOptions = {};
-  let listOfPeers = Object.keys(peerConnections);
-
-  if (Array.isArray(targetPeerId)) {
-    listOfPeers = targetPeerId;
-  } else if (isAString(targetPeerId)) {
-    listOfPeers = [targetPeerId];
-  } else if (isABoolean(targetPeerId)) {
-    doIceRestart = targetPeerId;
-  } else if (targetPeerId &amp;&amp; isAObj(targetPeerId)) {
-    bwOptions = targetPeerId;
-  }
-
-  if (isABoolean(iceRestart)) {
-    doIceRestart = iceRestart;
-  } else if (iceRestart &amp;&amp; isAObj(iceRestart)) {
-    bwOptions = iceRestart;
-  }
-
-  if (options &amp;&amp; isAObj(options)) {
-    bwOptions = options;
-  }
-
-  return {
-    listOfPeers,
-    doIceRestart,
-    bwOptions,
-  };
+  logger.log.ERROR([targetMid, null, null, 'Failed creating an offer:'], error);
+  handleNegotiationStats.send(room.id, HANDLE_NEGOTIATION_STATS.OFFER.create_error, targetMid, null, false, error);
+  dispatchEvent(handshakeProgress({
+    state: HANDSHAKE_PROGRESS.ERROR,
+    peerId: targetMid,
+    error,
+    room: Room.getRoomInfo(roomState.room.id),
+  }));
+  reject(error);
 };
 
 /**
- * Function that refreshes Peer connections to update with the current streaming.
- * @param {SkylinkState} roomState
- * @param {String} targetPeerId
- * @param {boolean} iceRestart
- * @param {Object} options
- * @param {Object} options.bandwidth
- * @return {Promise}
- * @memberOf PeerConnection
+ * @param {SkylinkRoom} currentRoom
+ * @param {String} targetMid
+ * @param {Boolean} iceRestart
+ * @param {object} restartOfferMsg
+ * @return {*}
+ * @memberOf PeerConnection.PeerConnectionHelpers
+ * @fires HANDSHAKE_PROGRESS
  */
-const refreshConnection = (roomState, targetPeerId, iceRestart, options) => new Promise((resolve, reject) => {
-  if (!roomState) {
-    reject(new Error(MESSAGES.ROOM_STATE.NO_ROOM_NAME));
-  }
-
-  const { peerConnections, hasMCU, room } = roomState;
+const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg) => {
+  const state = Skylink.getSkylinkState(currentRoom.id);
   const initOptions = Skylink.getInitOptions();
-  const { mcuUseRenegoRestart } = initOptions;
-  const { PEER_CONNECTION } = MESSAGES;
-  const params = filterParams(targetPeerId, iceRestart, options, peerConnections);
-  const { listOfPeers, doIceRestart, bwOptions } = params;
+  const { enableDataChannel } = initOptions;
+  const {
+    peerConnections,
+    hasMCU,
+    enableIceRestart,
+    peerInformations,
+    voiceActivityDetection,
+    peerDataChannels,
+  } = state;
+  const peerConnection = peerConnections[targetMid];
 
-  try {
-    if (isEmptyArray(listOfPeers) &amp;&amp; !(hasMCU &amp;&amp; !mcuUseRenegoRestart)) {
-      logger.log.ERROR(PEER_CONNECTION.NO_PEER_CONNECTION);
-      reject({
-        refreshErrors: { self: PEER_CONNECTION.NO_PEER_CONNECTION },
-        listOfPeers,
-      });
-    }
+  const offerConstraints = {
+    iceRestart: !!((peerInformations[targetMid] || {}).config || {}).enableIceRestart &amp;&amp; iceRestart &amp;&amp; enableIceRestart,
+    voiceActivityDetection,
+  };
 
-    logger.log.INFO([null, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.START]);
-
-    const refreshPeerConnectionPromises = PeerConnection.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
-    refreshPeerConnectionPromises
-      .then((results) => {
-        const mResults = hasMCU ? [results] : results;
-        const refreshErrors = [];
-        for (let i = 0; i &lt; mResults.length; i += 1) {
-          if (Array.isArray(mResults[i])) {
-            const error = mResults[i];
-            refreshErrors.push(buildPeerRefreshErrors(error[0], error[1]));
-            logger.log.WARN([listOfPeers, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.FAILED], error[0]);
-          } else if (isAString(mResults[i])) {
-            logger.log.INFO([listOfPeers, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.SUCCESS], mResults[i]);
-          }
-        }
-
-        if (refreshErrors.length === listOfPeers.length) {
-          reject(buildResult(listOfPeers, refreshErrors, buildPeerRefreshSettings(listOfPeers, room, doIceRestart)));
-        } else {
-          resolve(buildResult(listOfPeers, refreshErrors, buildPeerRefreshSettings(listOfPeers, room, doIceRestart)));
-        }
-      })
-      .catch(error => logger.log.ERROR([null, TAGS.PEER_CONNECTION, null, PEER_CONNECTION.REFRESH_CONNECTION.FAILED], error))
-      .finally(() => logger.log.INFO(PEER_CONNECTION.REFRESH_CONNECTION.COMPLETED));
-  } catch (error) {
-    reject(error);
+  if (hasMCU &amp;&amp; typeof peerConnection.addTransceiver !== 'function') {
+    offerConstraints.offerToReceiveVideo = true;
   }
-});
 
-export default refreshConnection;
+  // Add stream only at offer/answer end
+  if (!hasMCU || targetMid === PEER_TYPE.MCU) {
+    MediaStream.addLocalMediaStreams(targetMid, state);
+  }
+
+  if (enableDataChannel &amp;&amp; peerInformations[targetMid].config.enableDataChannel) {
+    if (!(peerDataChannels[targetMid] &amp;&amp; peerDataChannels[targetMid].main)) {
+      PeerConnection.createDataChannel({
+        peerId: targetMid,
+        roomState: state,
+        createAsMessagingChannel: true,
+      });
+      state.peerConnections[targetMid].hasMainChannel = true;
+    }
+  }
+
+  logger.log.DEBUG([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
+
+  peerConnection.endOfCandidates = false;
+  peerConnection.sdpConstraints = offerConstraints;
+
+  Skylink.setSkylinkState(state, currentRoom.id);
+
+  return new Promise((resolve, reject) => {
+    peerConnection.createOffer(offerConstraints)
+      .then(offer => onOfferCreated(resolve, targetMid, state, restartOfferMsg, offer))
+      .catch(error => onOfferFailed(reject, targetMid, state, error));
+  });
+};
+
+export default createOffer;
 </code></pre>
   </article>
 </section>
