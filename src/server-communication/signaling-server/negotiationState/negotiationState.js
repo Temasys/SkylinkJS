@@ -47,6 +47,10 @@ class NegotiationState {
     return this._changeState(roomKey, peerId, newState);
   }
 
+  static getState(roomKey, peerId) {
+    return this._getState(roomKey, peerId);
+  }
+
   static onEnterReceived(enter) {
     const {
       rid, mid, publisherId,
@@ -61,10 +65,10 @@ class NegotiationState {
       // process the new peer
       negotiationStateHelpers.processNewPeer(enter);
 
+      this._changeState(rid, targetMid, NEGOTIATION_STATES.WELCOMING);
+
       const signaling = new SkylinkSignalingServer();
       signaling.welcome(room, targetMid);
-
-      this._changeState(rid, targetMid, NEGOTIATION_STATES.WELCOMING);
     }
   }
 
@@ -92,8 +96,8 @@ class NegotiationState {
 
       return createOffer(room, targetMid)
         .then((offer) => {
-          sendOffer(room, offer);
           this._changeState(rid, targetMid, NEGOTIATION_STATES.LOCAL_OFFER_SENT);
+          sendOffer(room, offer);
         });
     }
 
@@ -115,14 +119,15 @@ class NegotiationState {
     let answer;
 
     const negState = this._getState(rid, targetMid);
-    if (!(negState === NEGOTIATION_STATES.WELCOMING || negState === NEGOTIATION_STATES.NEGOTIATED || negState === NEGOTIATION_STATES.LOCAL_OFFER_SENT)) {
-      if (negState === NEGOTIATION_STATES.LOCAL_OFFER_SENT && peerPriorityWeight > weight) {
-        return negotiationStateHelpers.logInfoOrErrorAndSendStats(targetMid, type, room, offer, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER, {
-          selfWeight: peerPriorityWeight,
-          messageWeight: weight,
-        }).DEBUG();
-      }
 
+    if (negState === NEGOTIATION_STATES.LOCAL_OFFER_SENT && peerPriorityWeight > weight) {
+      return negotiationStateHelpers.logInfoOrErrorAndSendStats(targetMid, type, room, offer, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER, {
+        selfWeight: peerPriorityWeight,
+        messageWeight: weight,
+      }).DEBUG();
+    }
+
+    if (!(negState === NEGOTIATION_STATES.WELCOMING || negState === NEGOTIATION_STATES.NEGOTIATED || negState === NEGOTIATION_STATES.LOCAL_OFFER_SENT)) {
       return bufferRemoteOffer(room, targetMid, offer);
     }
 
@@ -167,7 +172,9 @@ class NegotiationState {
       rid, mid, publisherId, type, sdp,
     } = answer;
     const state = Skylink.getSkylinkState(rid);
-    const { hasMCU, room, bufferedLocalOffer } = state;
+    const {
+      hasMCU, room, bufferedLocalOffer,
+    } = state;
     const targetMid = hasMCU && publisherId ? publisherId : mid;
 
     const negState = this._getState(rid, targetMid);
@@ -205,9 +212,9 @@ class NegotiationState {
         })
         .catch(error => onRemoteAnswerSetFailure(room, targetMid, remoteDescription, error))
         .then(() => {
-          sendAnswerAck(room, targetMid, true);
-
           this._changeState(rid, targetMid, NEGOTIATION_STATES.NEGOTIATED);
+          sendAnswerAck(room, targetMid, true);
+          return negotiationStateHelpers.checkAndApplyBufferedRestart(room, targetMid);
         });
     } catch (error) {
       return negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answer, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_PROCESSING_ANSWER, error).ERROR();
@@ -244,6 +251,8 @@ class NegotiationState {
         if (shouldRenegotiate) {
           refreshConnection(state, targetMid)
             .catch(error => negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answerAck, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_RENEGOTIATION, error).ERROR());
+        } else {
+          negotiationStateHelpers.checkAndApplyBufferedRestart(room, targetMid);
         }
       });
     } catch (error) {

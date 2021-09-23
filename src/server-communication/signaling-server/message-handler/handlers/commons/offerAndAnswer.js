@@ -28,12 +28,19 @@ export const sendRestartOffer = (state, peerId, doIceRestart) => {
   const signaling = new SkylinkSignalingServer();
 
   try {
+    if (NegotiationState.getState(room.id, peerId) !== NEGOTIATION_STATES.NEGOTIATED) {
+      const updatedState = state;
+      updatedState.bufferedRestart[peerId] = { doIceRestart };
+      Skylink.setSkylinkState(updatedState, room.id);
+      return logger.log.DEBUG([peerId, TAGS.NEGOTIATION, null, MESSAGES.NEGOTIATION_PROGRESS.BUFFERING_RESTART]);
+    }
+
     const restartOfferMsg = signaling.messageBuilder.getRestartOfferMessage(room.id, peerId, doIceRestart);
 
     return createOffer(room, peerId, doIceRestart, restartOfferMsg)
       .then((offer) => {
-        sendOffer(room, offer);
         NegotiationState.changeState(room.id, peerId, NEGOTIATION_STATES.LOCAL_OFFER_SENT);
+        sendOffer(room, offer);
         return peerId;
       });
   } catch (ex) {
