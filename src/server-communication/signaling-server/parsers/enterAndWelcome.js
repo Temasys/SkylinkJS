@@ -41,6 +41,7 @@ const enterAndWelcome = (msg) => {
     publisherId,
   } = msg;
 
+  parsedMsg.type = msg.type;
   parsedMsg.publisherId = publisherId || null;
   parsedMsg.rid = rid;
   parsedMsg.mid = mid;

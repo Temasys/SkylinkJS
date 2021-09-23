@@ -86,7 +86,6 @@ const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg
   logger.log.DEBUG([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
 
   peerConnection.endOfCandidates = false;
-  peerConnection.negotiating = true;
   peerConnection.sdpConstraints = offerConstraints;
 
   Skylink.setSkylinkState(state, currentRoom.id);

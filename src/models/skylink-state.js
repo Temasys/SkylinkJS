@@ -287,6 +287,14 @@ class SkylinkState {
      */
     this.bufferedLocalOffer = {};
     /**
+     * Restart buffered in order to apply when negotiation state is 'negotiated'
+     * @name bufferedRestart
+     * @type Object
+     * @private
+     * @since 2.3.3
+     */
+    this.bufferedRestart = {};
+    /**
      * Offers buffered in order to apply when answerAck has been received
      * @name bufferedRemoteOffers
      * @type Object
@@ -339,6 +347,11 @@ class SkylinkState {
     this.streamsSettings = {};
     this.enableStatsGathering = initOptions.enableStatsGathering;
     this.dataTransfers = {};
+    /**
+     * Stores the negotiation state keyed by peerId
+     * @type {{}}
+     */
+    this.negotiationState = {};
   }
 }
 export default SkylinkState;

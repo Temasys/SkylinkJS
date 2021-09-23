@@ -3,7 +3,7 @@ import logger from '../../../logger';
 import { PEER_CONNECTION_STATE, TAGS } from '../../../constants';
 import SkylinkSignalingServer from '../../../server-communication/signaling-server';
 import MESSAGES from '../../../messages';
-import sendRestartOfferMsg from './sendRestartOfferMsg';
+import { sendRestartOffer } from '../../../server-communication/signaling-server/message-handler/handlers/commons/offerAndAnswer';
 
 /**
  * Function that sends restart message to the signaling server.
@@ -51,7 +51,7 @@ const restartPeerConnection = (peerId, roomState, options) => {
       updateState.peerEndOfCandidatesCounter[peerId].len = 0;
       Skylink.setSkylinkState(updateState, updateState.room.id);
 
-      return resolve(sendRestartOfferMsg(updateState, peerId, doIceRestart));
+      return resolve(sendRestartOffer(updateState, peerId, doIceRestart));
     }
 
     // Checks if the local description is defined first
