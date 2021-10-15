@@ -1485,7 +1485,6 @@ export const MEDIA_ACCESS_FALLBACK_STATE = {
  *   and at this stage, any current recording session or mixin is aborted.
  * @constant
  * @type Object
- * beta
  * @memberOf SkylinkConstants
  * @since 0.6.16
  */
@@ -2004,6 +2003,7 @@ export const BROWSER_AGENT = {
  */
 export const PEER_TYPE = {
   MCU: 'MCU',
+  REC_SRV: 'REC_SRV',
 };
 
 /**

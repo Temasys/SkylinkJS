@@ -4,6 +4,7 @@ import HandleRecordingStats from '../../skylink-stats/handleRecordingStats';
 import { SkylinkConstants } from '../../index';
 import { addEventListener, removeEventListener } from '../../utils/skylinkEventManager';
 import SkylinkSignalingServer from '../../server-communication/signaling-server';
+import { PEER_TYPE } from '../../constants';
 
 const sendRecordingMessageViaSig = (roomState, isStartRecording, currentRecordingId = null) => {
   const signaling = new SkylinkSignalingServer();
@@ -39,30 +40,31 @@ const manageErrorStatsAndCallback = (roomState, errorMessage, statsKey, currentR
  * @param {boolean} isStartRecording
  * @private
  */
+// eslint-disable-next-line consistent-return
 const commonRecordingOperations = (roomState, isStartRecording) => new Promise((resolve, reject) => {
-  const { hasMCU, currentRecordingId, recordingStartInterval } = roomState;
-  let errorMessage = isStartRecording ? MESSAGES.RECORDING.START_FAILED : MESSAGES.RECORDING.STOP_FAILED;
-
-  if (!hasMCU) {
-    errorMessage = `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.MCU_NOT_CONNECTED}`;
-    const statsStateKey = isStartRecording ? MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_NO_MCU_START : MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_NO_MCU_STOP;
-    const error = manageErrorStatsAndCallback(roomState, errorMessage, statsStateKey, null, null);
-    reject(error);
-  }
+  const {
+    currentRecordingId, recordingStartInterval, peerConnections, hasMCU,
+  } = roomState;
+  const errorMessage = isStartRecording ? MESSAGES.RECORDING.START_FAILED : MESSAGES.RECORDING.STOP_FAILED;
 
   if (isStartRecording && currentRecordingId) {
     const error = manageErrorStatsAndCallback(roomState, `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.EXISTING_RECORDING_IN_PROGRESS}`, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_START_ACTIVE, currentRecordingId, null);
-    reject(error);
+    return reject(error);
+  }
+
+  if (isStartRecording && !hasMCU && peerConnections[PEER_TYPE.REC_SRV]) {
+    const error = manageErrorStatsAndCallback(roomState, `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.REC_SERVER_UNAVAILABLE}`, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.REC_SERVER_UNAVAILABLE, currentRecordingId || null, null);
+    return reject(error);
   }
 
   if (!isStartRecording && !currentRecordingId) {
     const error = manageErrorStatsAndCallback(roomState, `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.NO_RECORDING_IN_PROGRESS}`, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_STOP_ACTIVE, currentRecordingId, null);
-    reject(error);
+    return reject(error);
   }
 
   if (!isStartRecording && recordingStartInterval) {
     const error = manageErrorStatsAndCallback(roomState, `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.MIN_RECORDING_TIME}`, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_MIN_STOP, currentRecordingId, null);
-    reject(error);
+    return reject(error);
   }
 
   manageRecordingEventListeners(resolve, isStartRecording);
