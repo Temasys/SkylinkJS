@@ -36,7 +36,6 @@ import pkg from '../package.json';
  *  <li>{@link SkylinkConstants.RTMP_STATE|RTMP_STATE} </li>
  *  <li>{@link SkylinkConstants.RECORDING_STATE|RECORDING_STATE} </li>
  *  <li>{@link SkylinkConstants.SDP_SEMANTICS|SDP_SEMANTICS} </li>
- *  <li>{@link SkylinkConstants.SERVER_PEER_TYPE|SERVER_PEER_TYPE} </li>
  *  <li>{@link SkylinkConstants.SOCKET_ERROR|SOCKET_ERROR} </li>
  *  <li>{@link SkylinkConstants.SOCKET_FALLBACK|SOCKET_FALLBACK} </li>
  *  <li>{@link SkylinkConstants.SYSTEM_ACTION|SYSTEM_ACTION} </li>
@@ -676,6 +675,7 @@ export const GET_CONNECTION_STATUS_STATE = {
  * @readOnly
  * @memberOf SkylinkConstants
  * @since 0.6.1
+ * @deprecated
  */
 export const SERVER_PEER_TYPE = {
   MCU: 'mcu',

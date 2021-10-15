@@ -36,6 +36,7 @@ const MESSAGES = {
       ERROR: 'Leave room error -->',
       NO_PEERS: 'No peers in room',
       DROPPING_HANGUP: 'Dropping hang-up from remote peer',
+      DROPPING_DUPLICATE_BYE: 'Dropping duplicate bye',
       LEAVE_ALL_ROOMS: {
         SUCCESS: 'Successfully left all rooms',
         ERROR: 'Leave all rooms error -->',
