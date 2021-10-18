@@ -1920,6 +1920,7 @@ export const TAGS = {
   ASYNC_MESSAGING: 'ASYNC MESSAGING',
   ENCRYPTED_MESSAGING: 'ENCRYPTED MESSAGING',
   STATS: 'STATS',
+  NEGOTIATION: 'NEGOTIATION',
 };
 
 /**
@@ -2164,6 +2165,28 @@ export const STATES = {
 export const CONFIG_NAME = {
   PEER_CONNECTION: 'PEER_CONNECTION',
   SOCKET: 'SOCKET',
+};
+
+/**
+ * The negotiation states for the negotiation state machine
+ * @type {{WELCOMING: string, LOCAL_OFFER_SENT: string, REMOTE_OFFER_SET: string, REMOTE_ANSWER_RECEIVED: string, LOCAL_OFFER_SET: string, REMOTE_OFFER_RECEIVED: string, LOCAL_ANSWER_SET: string, ENTERING: string, NEGOTIATED: string, REMOTE_ANSWER_SET: string}}
+ * @private
+ * @constant
+ * @readonly
+ * @memberOf SkylinkConstants
+ * @since 2.3.3
+ */
+export const NEGOTIATION_STATES = {
+  ENTERING: 'entering',
+  WELCOMING: 'welcoming',
+  LOCAL_OFFER_SENT: 'localOfferSent',
+  LOCAL_OFFER_SET: ' localOfferSet',
+  REMOTE_OFFER_RECEIVED: 'remoteOfferReceived',
+  REMOTE_ANSWER_RECEIVED: 'remoteAnswerReceived',
+  REMOTE_OFFER_SET: 'remoteOfferSet',
+  LOCAL_ANSWER_SET: 'localAnswerSet',
+  REMOTE_ANSWER_SET: 'remoteAnswerSet',
+  NEGOTIATED: 'negotiated',
 };
 
 export const EVENTS = SkylinkEventsConstants;

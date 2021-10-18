@@ -104,10 +104,10 @@ import Room from '../../../../room';
 import PeerStream from '../../../../peer-stream';
 import { ON_INCOMING_STREAM } from '../../../../skylink-events/constants';
 import logger from '../../../../logger';
-import { TAGS } from '../../../../constants';
 import MESSAGES from '../../../../messages';
 import HandleUserMediaStats from '../../../../skylink-stats/handleUserMediaStats';
 import HandleSessionStats from '../../../../skylink-stats/handleSessionStats';
+import { TAGS } from '../../../../constants';
 
 const dispatchIncomingStream = (room, sid) => {
   const state = Skylink.getSkylinkState(room.id);

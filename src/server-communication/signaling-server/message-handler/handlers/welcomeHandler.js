@@ -1,7 +1,7 @@
-import { parseAndSendWelcome, CALLERS } from './commons/enterAndWelcome';
+import enterAndWelcomeHandler from './commons/enterAndWelcome';
 
 const welcomeHandler = (message) => {
-  parseAndSendWelcome(message, CALLERS.WELCOME);
+  enterAndWelcomeHandler(message);
 };
 
 export default welcomeHandler;
