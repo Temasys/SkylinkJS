@@ -24,10 +24,7 @@ const createNativePeerConnection = (targetMid, constraints, hasScreenShare, curr
   // attributes (added on by Temasys)
   rtcPeerConnection.setOffer = '';
   rtcPeerConnection.setAnswer = '';
-  rtcPeerConnection.negotiating = false;
   rtcPeerConnection.hasMainChannel = false;
-  rtcPeerConnection.processingLocalSDP = false;
-  rtcPeerConnection.processingRemoteSDP = false;
   rtcPeerConnection.gathered = false;
   rtcPeerConnection.gathering = false;
 

@@ -3,7 +3,7 @@
   factory();
 }(function () { 'use strict';
 
-  /* SkylinkJS v2.3.2 Wed Jul 28 2021 04:34:40 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.4.0 Thu Sep 23 2021 11:00:40 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -5466,9 +5466,10 @@
       } else if (navigator.userAgent.indexOf('CriOS') > 0) {
         hasMatch = navigator.userAgent.match(/CriOS\/([0-9]+)\./) || [];
 
-        const iOSVersion = navigator.userAgent.match(/CPU OS ([0-9]+)_([0-9]+)/g);
+        const iOSVersion = navigator.userAgent.match(/CPU( iPhone| iPad)? OS ([0-9]+)_([0-9]+)/g);
+        const parts = iOSVersion[0].split(' ');
         // iOS Version 14 and above supports webrtc
-        const isCompatible = iOSVersion[0].split(' ')[2].split('_')[0] > 13;
+        const isCompatible = parts[parts.length - 1].split('_')[0] > 13; // last section contains the version number
         if (isCompatible) {
           window.webrtcDetectedVersion   = parseInt(hasMatch[1] || '0', 10);
           window.webrtcMinimumVersion    = 53;
@@ -6376,7 +6377,7 @@
      */
     const loggedOnConsole = (detail = {}) => new SkylinkEvent(LOGGED_ON_CONSOLE, { detail });
 
-    var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.3.2";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.2.2","@babel/preset-env":"7.2.3","@babel/register":"7.0.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.0.5",eslint:"^5.2.0","eslint-config-airbnb":"^17.0.0","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.13.0","eslint-plugin-jsx-a11y":"^6.1.1",finalhandler:"^1.1.1",husky:"^1.0.0-rc.13",jsdoc:"^3.6.7",jsdom:"^13.0.0","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.4",rollup:"^1.2.2","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.3.0","rollup-plugin-delete":"^1.1.0","rollup-plugin-external-globals":"^0.2.1","rollup-plugin-gzip":"^2.2.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.0.2","rollup-plugin-terser":"^7.0.2","serve-static":"^1.13.2","whatwg-fetch":"^3.0.0"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
+    var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.4.0";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.2.2","@babel/preset-env":"7.2.3","@babel/register":"7.0.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.0.5",eslint:"^5.2.0","eslint-config-airbnb":"^17.0.0","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.13.0","eslint-plugin-jsx-a11y":"^6.1.1",finalhandler:"^1.1.1",husky:"^1.0.0-rc.13",jsdoc:"^3.6.7",jsdom:"^13.0.0","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.4",rollup:"^1.2.2","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.3.0","rollup-plugin-delete":"^1.1.0","rollup-plugin-external-globals":"^0.2.1","rollup-plugin-gzip":"^2.2.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.0.2","rollup-plugin-terser":"^7.0.2","serve-static":"^1.13.2","whatwg-fetch":"^3.0.0"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
 
     /**
      * @namespace SkylinkConstants
@@ -8202,6 +8203,7 @@
       ASYNC_MESSAGING: 'ASYNC MESSAGING',
       ENCRYPTED_MESSAGING: 'ENCRYPTED MESSAGING',
       STATS: 'STATS',
+      NEGOTIATION: 'NEGOTIATION',
     };
 
     /**
@@ -8448,6 +8450,28 @@
       SOCKET: 'SOCKET',
     };
 
+    /**
+     * The negotiation states for the negotiation state machine
+     * @type {{WELCOMING: string, LOCAL_OFFER_SENT: string, REMOTE_OFFER_SET: string, REMOTE_ANSWER_RECEIVED: string, LOCAL_OFFER_SET: string, REMOTE_OFFER_RECEIVED: string, LOCAL_ANSWER_SET: string, ENTERING: string, NEGOTIATED: string, REMOTE_ANSWER_SET: string}}
+     * @private
+     * @constant
+     * @readonly
+     * @memberOf SkylinkConstants
+     * @since 2.3.3
+     */
+    const NEGOTIATION_STATES = {
+      ENTERING: 'entering',
+      WELCOMING: 'welcoming',
+      LOCAL_OFFER_SENT: 'localOfferSent',
+      LOCAL_OFFER_SET: ' localOfferSet',
+      REMOTE_OFFER_RECEIVED: 'remoteOfferReceived',
+      REMOTE_ANSWER_RECEIVED: 'remoteAnswerReceived',
+      REMOTE_OFFER_SET: 'remoteOfferSet',
+      LOCAL_ANSWER_SET: 'localAnswerSet',
+      REMOTE_ANSWER_SET: 'remoteAnswerSet',
+      NEGOTIATED: 'negotiated',
+    };
+
     const EVENTS = SkylinkEventsConstants;
 
     var constants = /*#__PURE__*/Object.freeze({
@@ -8521,6 +8545,7 @@
       SOCKET_TYPE: SOCKET_TYPE,
       STATES: STATES,
       CONFIG_NAME: CONFIG_NAME,
+      NEGOTIATION_STATES: NEGOTIATION_STATES,
       EVENTS: EVENTS
     });
 
@@ -8705,17 +8730,24 @@
         SET_LOCAL_DESCRIPTION: 'Successfully set local description -->',
         SET_REMOTE_DESCRIPTION: 'Successfully set remote description -->',
         APPLYING_BUFFERED_REMOTE_OFFER: 'Applying buffered remote offer',
+        BUFFERING_RESTART: 'Buffering restart offer until \'negotiated\' state is reached',
+        APPLY_BUFFERED_RESTART: 'Applying buffered restart offer now that \'negotiated\' state is reached',
         ERRORS: {
           FAILED_SET_LOCAL_DESCRIPTION: 'Failed setting local description -->',
-          FAILED_SET_REMOTE_DESCRIPTION: 'Failed setting remote description',
-          FAILED_SET_REMOTE_ANSWER: 'Peer failed to set remote answer.',
+          FAILED_SET_REMOTE_DESCRIPTION: 'Failed setting remote description -->',
+          FAILED_SET_REMOTE_ANSWER: 'Remote Peer failed to set answer.',
+          FAILED_PROCESSING_OFFER: 'Failed processing OFFER ->',
+          FAILED_PROCESSING_ANSWER: 'Failed processing ANSWER ->',
+          FAILED_PROCESSING_ANSWER_ACK: 'Failed processing ANSWER_ACK ->',
           FAILED_RENEGOTIATION: 'Failed renegotiation after answerAck',
-          NOT_STABLE: 'Dropping of message as signaling state is not stable',
-          PROCESSING_EXISTING_SDP: 'Dropping message as there is another sessionDescription being processed -->',
           OFFER_TIEBREAKER: 'Dropping the received offer: self weight is greater than incoming offer weight -->',
           NO_LOCAL_BUFFERED_OFFER: 'FATAL: No buffered local offer found - Unable to setLocalDescription',
           ADDING_REMOTE_OFFER_TO_BUFFER: 'Adding remote offer received to buffer as current negotiation has not completed',
           STOP_RENEGOTIATION_FORCE_TURN: 'Stopping renegotiation as TURN is not enabled but forceTURN in init options is enforced',
+          DROPPING_ANSWER: 'Dropping ANSWER as previous negotiation state is not \'LOCAL_OFFER_SENT\'',
+          DROPPING_ANSWER_ACK: 'Dropping ANSWER_ACK as previous negotiation state is not \'LOCAL_ANSWER_SET\'',
+          DROPPING_WELCOME_NEG_STATE: 'Dropping WELCOME as previous negotiation state is not \'undefined\'',
+          DROPPING_WELCOME_MCU_FORWARDED: 'Dropping extra WELCOME from remote peer in MCU room',
         },
       },
       SIGNALING: {
@@ -8850,6 +8882,9 @@
           BUFFERED: 'buffered',
         },
         HANDLE_NEGOTIATION_STATS: {
+          WELCOME: {
+            dropped: 'dropped_welcome',
+          },
           OFFER: {
             create: 'create_offer',
             create_error: 'error_create_offer',
@@ -8857,6 +8892,7 @@
             set_error: 'error_set_offer',
             offer: 'offer',
             dropped: 'dropped_offer',
+            error: 'error_offer',
           },
           ANSWER: {
             create: 'create_answer',
@@ -8865,6 +8901,10 @@
             set_error: 'error_set_ANSWER',
             answer: 'answer',
             dropped: 'dropped_answer',
+            error: 'error_answer',
+          },
+          ANSWERACK: {
+            error: 'error_answer_ack',
           },
         },
         HANDLE_DATA_CHANNEL_STATS: {
@@ -20061,15 +20101,12 @@
       // TODO: Full implementation to be done from _setLocalAndSendMessage under peer-handshake.js
       const state = Skylink.getSkylinkState(roomState.room.id);
       const {
-        peerConnections, bufferedLocalOffer, peerPriorityWeight, room,
+        bufferedLocalOffer, peerPriorityWeight, room,
       } = state;
-      const peerConnection = peerConnections[targetMid];
       const sd = {
         type: sessionDescription.type,
         sdp: sessionDescription.sdp,
       };
-
-      peerConnection.processingLocalSDP = true;
 
       logger.log.INFO([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local session description updated ->'], sd.sdp);
 
@@ -20243,7 +20280,6 @@
       logger.log.DEBUG([targetMid, null, null, 'Creating offer with config:'], offerConstraints);
 
       peerConnection.endOfCandidates = false;
-      peerConnection.negotiating = true;
       peerConnection.sdpConstraints = offerConstraints;
 
       Skylink.setSkylinkState(state, currentRoom.id);
@@ -20268,10 +20304,7 @@
       // attributes (added on by Temasys)
       rtcPeerConnection.setOffer = '';
       rtcPeerConnection.setAnswer = '';
-      rtcPeerConnection.negotiating = false;
       rtcPeerConnection.hasMainChannel = false;
-      rtcPeerConnection.processingLocalSDP = false;
-      rtcPeerConnection.processingRemoteSDP = false;
       rtcPeerConnection.gathered = false;
       rtcPeerConnection.gathering = false;
 
@@ -22161,8 +22194,8 @@
      * Function that refreshes Peer connections to update with the current streaming.
      * @param {SkylinkState} roomState
      * @param {String} targetPeerId
-     * @param {boolean} iceRestart
-     * @param {Object} options
+     * @param {boolean} [iceRestart]
+     * @param {Object} [options]
      * @param {Object} options.bandwidth
      * @return {Promise}
      * @memberOf PeerConnection
@@ -22218,17 +22251,828 @@
       }
     });
 
-    const sendRestartOfferMsg = (state, peerId, doIceRestart) => {
+    // eslint-disable-next-line no-underscore-dangle
+    const _handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote, error) => {
+      const { room, user } = state;
+      const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
+
+      handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS[description.type.toUpperCase()].set_error, targetMid, description, isRemote, error);
+
+      dispatchEvent(handshakeProgress({
+        state: HANDSHAKE_PROGRESS$1.ERROR,
+        peerId: isRemote ? targetMid : user.sid,
+        error,
+        room: Room.getRoomInfo(room.id),
+      }));
+    };
+
+    const onLocalDescriptionSetFailure = (room, targetMid, localDescription, error) => {
+      const state = Skylink.getSkylinkState(room.id);
+      const { NEGOTIATION_PROGRESS } = MESSAGES;
+
+      logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, localDescription.type, NEGOTIATION_PROGRESS.FAILED_SET_LOCAL_DESCRIPTION], error);
+
+      _handleSetOfferAndAnswerFailure(state, targetMid, localDescription, false, error);
+    };
+
+    const onRemoteDescriptionSetFailure = (room, targetMid, remoteDescription, error) => {
+      const state = Skylink.getSkylinkState(room.id);
+      const { peerConnections } = state;
+      const peerConnection = peerConnections[targetMid];
+      const { type } = remoteDescription;
+
+      logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, type, `${MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_SET_REMOTE_DESCRIPTION} ->`], {
+        error,
+        state: peerConnection.signalingState,
+        [type]: remoteDescription,
+      });
+
+      _handleSetOfferAndAnswerFailure(state, targetMid, remoteDescription, true, error);
+    };
+
+    // eslint-disable-next-line no-underscore-dangle
+    const _setPeerConnectionInState = (RTCPeerConnection, room, targetMid) => {
+      const updatedState = Skylink.getSkylinkState(room.id);
+      updatedState.peerConnections[targetMid] = RTCPeerConnection;
+      Skylink.setSkylinkState(updatedState, room.id);
+    };
+
+    const setPeerConnectionInState = (RTCPeerConnection, room, targetMid) => _setPeerConnectionInState(RTCPeerConnection, room, targetMid);
+
+    const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remoteDescription) => {
+      const { type } = remoteDescription;
+      const { NEGOTIATION_PROGRESS } = MESSAGES;
+
+      const updatedState = Skylink.getSkylinkState(room.id);
+
+      if (remoteDescription.type === 'offer') {
+        updatedState.peerConnections[targetMid].setOffer = 'remote';
+      } else if (remoteDescription.type === 'answer') {
+        updatedState.peerConnections[targetMid].setAnswer = 'remote';
+      }
+
+      Skylink.setSkylinkState(updatedState, room.id);
+
+      logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.SET_REMOTE_DESCRIPTION], remoteDescription);
+
+      dispatchEvent(handshakeProgress({
+        state: HANDSHAKE_PROGRESS$1[remoteDescription.type.toUpperCase()],
+        peerId: targetMid,
+        room: Room.getRoomInfo(room.id),
+      }));
+
+      IceConnection.addIceCandidateFromQueue(targetMid, room);
+    };
+
+    const onLocalDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, localDescription) => {
+      _setPeerConnectionInState(RTCPeerConnection, room, targetMid);
+
+      const updatedState = Skylink.getSkylinkState(room.id);
+      const { NEGOTIATION_PROGRESS } = MESSAGES;
+
+      if (localDescription.type === 'offer') {
+        updatedState.peerConnections[targetMid].setOffer = 'local';
+      } else if (localDescription.type === 'answer') {
+        updatedState.peerConnections[targetMid].setAnswer = 'local';
+      }
+
+      updatedState.bufferedLocalOffer[targetMid] = null;
+      Skylink.setSkylinkState(updatedState, room.id);
+
+      logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, localDescription.type, NEGOTIATION_PROGRESS.SET_LOCAL_DESCRIPTION], localDescription);
+    };
+
+    // modifying the remote description received
+    // eslint-disable-next-line no-underscore-dangle
+    const _mungeSDP = (targetMid, sessionDescription, roomKey) => {
+      const mungedSessionDescription = sessionDescription;
+      // TODO: Below SDP methods needs to be implemented in the SessionDescription Class.
+      mungedSessionDescription.sdp = SessionDescription.setSDPBitrate(targetMid, mungedSessionDescription, roomKey);
+      mungedSessionDescription.sdp = SessionDescription.removeSDPFilteredCandidates(targetMid, mungedSessionDescription, roomKey);
+
+      logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, mungedSessionDescription.type, `Updated remote ${mungedSessionDescription.type} ->`], mungedSessionDescription);
+      return mungedSessionDescription;
+    };
+
+    const setRemoteDescription = (room, targetMid, remoteDescription) => {
+      const state = Skylink.getSkylinkState(room.id);
+      const { peerConnections } = state;
+      const { type } = remoteDescription;
+      const peerConnection = peerConnections[targetMid];
+
+      if (peerConnection) {
+        const mungedSessionDescription = _mungeSDP(targetMid, remoteDescription, room.id);
+
+        handleNegotationStats.send(room.id, MESSAGES.STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()][type], targetMid, mungedSessionDescription, true);
+
+        return peerConnection.setRemoteDescription(mungedSessionDescription)
+          .then(() => peerConnection);
+      }
+
+      logger.log.ERROR([targetMid, TAGS.NEGOTIATION, type, `${MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION} - Unable to set remote ${type}`]);
+
+      return handleNegotationStats.send(room.id, MESSAGES.STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()].dropped, targetMid, remoteDescription, true, MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION);
+    };
+
+    const setLocalDescription = (room, targetMid, localDescription) => {
+      const state = Skylink.getSkylinkState(room.id);
+      const { peerConnections } = state;
+      const { type } = localDescription;
+      const peerConnection = peerConnections[targetMid];
+
+      if (peerConnection) {
+        handleNegotationStats.send(room.id, MESSAGES.STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()][type], targetMid, localDescription, false);
+
+        return peerConnection.setLocalDescription(localDescription)
+          .then(() => peerConnection);
+      }
+
+      logger.log.ERROR([targetMid, TAGS.NEGOTIATION, type, `${MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION} - Unable to set local ${type}`]);
+
+      return handleNegotationStats.send(room.id, MESSAGES.STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()].dropped, targetMid, localDescription, true, MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION);
+    };
+
+    const parseVersion = (version) => {
+      if (!(version && typeof version === 'string')) {
+        return 0;
+      }
+      // E.g. 0.9.6, replace minor "." with 0
+      if (version.indexOf('.') > -1) {
+        const parts = version.split('.');
+        if (parts.length > 2) {
+          const majorVer = parts[0] || '0';
+          parts.splice(0, 1);
+          return parseFloat(`${majorVer}.${parts.join('0')}`, 10);
+        }
+        return parseFloat(version || '0', 10);
+      }
+      return parseInt(version || '0', 10);
+    };
+
+
+    const enterAndWelcome = (msg) => {
+      const state = Skylink.getSkylinkState(msg.rid);
+      const parsedMsg = {};
+      const { hasMCU } = state;
+      const {
+        rid,
+        mid,
+        enableIceRestart,
+        enableDataChannel,
+        weight,
+        agent,
+        os,
+        temasysPluginVersion,
+        SMProtocolVersion,
+        DTProtocolVersion,
+        version,
+        publisherId,
+      } = msg;
+
+      parsedMsg.type = msg.type;
+      parsedMsg.publisherId = publisherId || null;
+      parsedMsg.rid = rid;
+      parsedMsg.mid = mid;
+      parsedMsg.agent = agent && isAString(agent) ? agent : 'other';
+      parsedMsg.version = parseVersion(version);
+      parsedMsg.SMProtocolVersion = isAString(SMProtocolVersion) ? SMProtocolVersion : SM_PROTOCOL_VERSION;
+      // eslint-disable-next-line no-nested-ternary
+      parsedMsg.DTProtocolVersion = isAString(DTProtocolVersion) ? DTProtocolVersion : (hasMCU || mid === PEER_TYPE.MCU ? DT_PROTOCOL_VERSION : '0.1.0');
+      parsedMsg.weight = isANumber(weight) ? weight : 0;
+      parsedMsg.enableDataChannel = isABoolean(enableDataChannel) ? enableDataChannel : true;
+      parsedMsg.enableIceRestart = isABoolean(enableIceRestart) ? enableIceRestart : false;
+      parsedMsg.os = os && isAString(os) ? os : null;
+      parsedMsg.temasysPluginVersion = temasysPluginVersion && isAString(temasysPluginVersion) ? temasysPluginVersion : null;
+      parsedMsg.userInfo = parsers.parseUserInfo(state, msg, parsedMsg);
+
+      if (hasMCU) {
+        parsedMsg.peersInRoom = msg.peersInRoom;
+      }
+
+      return clone_1(parsedMsg);
+    };
+
+    const parseUserInfo = (state, msg, parsedMsg) => {
+      const info = Object.assign({}, msg.userInfo);
+
+      info.config = info.config ? info.config : {
+        enableDataChannel: parsedMsg.enableDataChannel,
+        enableIceRestart: parsedMsg.enableIceRestart,
+        priorityWeight: parsedMsg.weight,
+      };
+
+      info.agent = info.agent ? info.agent : {
+        name: parsedMsg.agent,
+        version: parsedMsg.version,
+        os: parsedMsg.os,
+        pluginVersion: parsedMsg.temasysPluginVersion,
+        SMProtocolVersion: parsedMsg.SMProtocolVersion,
+        DTProtocolVersion: parsedMsg.DTProtocolVersion,
+      };
+
+      info.settings = info.settings ? info.settings : {};
+      info.mediaStatus = info.mediaStatus ? info.mediaStatus : {};
+
+      return info;
+    };
+
+    const parsers = {
+      enterAndWelcome,
+      parseUserInfo,
+    };
+
+    /* eslint-disable no-underscore-dangle */
+
+    const _addPeerConnection = (params) => {
+      const {
+        currentRoom,
+        targetMid,
+        cert,
+        userInfo,
+        message,
+      } = params;
+      const state = Skylink.getSkylinkState(currentRoom.id);
+      const hasScreenshare = !!userInfo.screenshare;
+
+      PeerConnection.buildAndSetPeerInformations(targetMid, message.userInfo, state);
+
+      PeerConnection.addPeer({
+        currentRoom,
+        targetMid,
+        peerBrowser: {
+          agent: userInfo.agent.name,
+          version: userInfo.agent.version,
+          os: userInfo.agent.os,
+        },
+        cert,
+        hasScreenshare,
+      });
+    };
+
+    const _processPeerFromWelcome = (params) => {
+      const {
+        currentRoom,
+        targetMid,
+        message,
+      } = params;
+      const state = Skylink.getSkylinkState(currentRoom.id);
+      const { hasMCU, peerInformations } = state;
+
+      // process based on room type
+      switch (hasMCU) {
+        case true:
+          // MCU will always send welcome
+          // 1) process the new MCU connection
+          if (targetMid === PEER_TYPE.MCU && !peerInformations.MCU) {
+            _addPeerConnection(params);
+
+            logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.MCU]);
+
+            state.hasMCU = true;
+
+            dispatchEvent(serverPeerJoined({
+              peerId: targetMid,
+              serverPeerType: SERVER_PEER_TYPE.MCU,
+              room: Room.getRoomInfo(currentRoom.id),
+            }));
+
+            dispatchEvent(handshakeProgress({
+              peerId: targetMid,
+              state: HANDSHAKE_PROGRESS$1.WELCOME,
+              error: null,
+              room: Room.getRoomInfo(currentRoom.id),
+            }));
+          }
+
+          // process other peers in the room if any
+          if (Array.isArray(message.peersInRoom) && message.peersInRoom.length) {
+            const userId = state.user.sid;
+            for (let peersInRoomIndex = 0; peersInRoomIndex < message.peersInRoom.length; peersInRoomIndex += 1) {
+              const PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
+              if (PEER_ID !== userId) {
+                const parsedMsg = parsers.enterAndWelcome(message.peersInRoom[peersInRoomIndex]);
+                const peerUserInfo = parsedMsg.userInfo;
+
+                PeerConnection.buildAndSetPeerInformations(PEER_ID, peerUserInfo, state);
+
+                dispatchEvent(peerJoined({
+                  peerId: PEER_ID,
+                  peerInfo: PeerData.getPeerInfo(PEER_ID, currentRoom),
+                  isSelf: false,
+                  room: Room.getRoomInfo(currentRoom.id),
+                }));
+              }
+            }
+          }
+
+
+          break;
+        case false: // P2P
+          if (!peerInformations[targetMid]) {
+            _addPeerConnection(params);
+
+            dispatchEvent(peerJoined({
+              peerId: targetMid,
+              peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+              isSelf: false,
+              room: Room.getRoomInfo(currentRoom.id),
+            }));
+
+            dispatchEvent(handshakeProgress({
+              peerId: targetMid,
+              state: HANDSHAKE_PROGRESS$1.WELCOME,
+              error: null,
+              room: Room.getRoomInfo(currentRoom.id),
+            }));
+          }
+
+          break;
+        default:
+          // should not come here
+          break;
+      }
+    };
+
+    const _processPeerFromEnter = (params) => {
+      const {
+        currentRoom,
+        userInfo,
+        targetMid,
+      } = params;
+      const state = Skylink.getSkylinkState(currentRoom.id);
+      const { hasMCU, peerInformations } = state;
+
+      switch (hasMCU) {
+        case true:
+          // enter is forwarded by the MCU from a new peer that enters a room
+          PeerConnection.buildAndSetPeerInformations(targetMid, userInfo, state);
+
+          dispatchEvent(peerJoined({
+            peerId: targetMid,
+            peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+            isSelf: false,
+            room: Room.getRoomInfo(currentRoom.id),
+          }));
+
+          break;
+        case false:
+
+          if (!peerInformations[targetMid]) {
+            _addPeerConnection(params);
+
+            dispatchEvent(peerJoined({
+              peerId: targetMid,
+              peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+              isSelf: false,
+              room: Room.getRoomInfo(currentRoom.id),
+            }));
+          }
+
+          break;
+        default:
+          // should not come here
+          break;
+      }
+    };
+
+    /**
+     * Function that adds a Peer Connection and updates the state(Skylink State).
+     * @param {JSON} message
+     * @memberOf SignalingMessageHandler
+     * @fires SERVER_PEER_JOINED
+     * @fires PEER_JOINED
+     * @fires HANDSHAKE_PROGRESS
+     */
+    const processNewPeer = (message) => {
+      const parsedMsg = parsers.enterAndWelcome(message);
+      const {
+        rid, mid, userInfo, publisherId,
+      } = parsedMsg;
+      const state = Skylink.getSkylinkState(rid);
+      const { hasMCU } = state;
+      const targetMid = hasMCU && publisherId ? publisherId : mid;
+      const peerParams = {
+        currentRoom: state.room,
+        targetMid,
+        userInfo,
+        message: parsedMsg,
+      };
+      const updatedState = Skylink.getSkylinkState(rid);
+
+      // TODO: check if this is used
+      updatedState.peerMessagesStamps[targetMid] = updatedState.peerMessagesStamps[targetMid] || {
+        userData: 0,
+        audioMuted: 0,
+        videoMuted: 0,
+      };
+      Skylink.setSkylinkState(updatedState, rid);
+
+      if (message.type === 'enter') {
+        _processPeerFromEnter(peerParams);
+      } else if (message.type === 'welcome') {
+        _processPeerFromWelcome(peerParams);
+      }
+    };
+
+    const updateStateInformation = (state, message) => {
+      const updatedState = state;
+      const {
+        userInfo, rid, mid, mediaInfoList,
+      } = message;
+      const { room } = updatedState;
+      const updatedUserInfo = userInfo;
+      const targetMid = mid;
+
+      if (userInfo && typeof userInfo === 'object') {
+        updatedUserInfo.settings.data = !!(updatedState.peerDataChannels[targetMid] && updatedState.peerDataChannels[targetMid].main && updatedState.peerDataChannels[targetMid].main.channel && updatedState.peerDataChannels[targetMid].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
+        updatedState.peerInformations[targetMid].settings = updatedUserInfo.settings || {};
+        updatedState.peerInformations[targetMid].mediaStatus = updatedUserInfo.mediaStatus || {};
+        updatedState.peerInformations[targetMid].userData = updatedUserInfo.userData;
+      }
+
+      Skylink.setSkylinkState(updatedState, rid);
+
+      PeerMedia.setPeerMediaInfo(room, targetMid, mediaInfoList);
+      PeerMedia.deleteUnavailableMedia(room, targetMid); // mediaState can be unavailable during renegotiation
+    };
+
+    const getBufferedRemoteOffer = (state, targetMid) => {
+      if (state.bufferedRemoteOffers[targetMid] && !isEmptyArray(state.bufferedRemoteOffers[targetMid])) {
+        const offerMessage = state.bufferedRemoteOffers[targetMid].shift(); // the first buffered message
+        logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, offerMessage.type, MESSAGES.NEGOTIATION_PROGRESS.APPLYING_BUFFERED_REMOTE_OFFER], offerMessage);
+        return offerMessage;
+      }
+
+      return null;
+    };
+
+    const logInfoOrErrorAndSendStats = (targetMid, type, room, negoMsg, isRemote, message, debugObj) => ({
+      DEBUG: () => {
+        logger.log.DEBUG([targetMid, TAGS.NEGOTIATION, type, message], debugObj);
+
+        return handleNegotationStats.send(room.id, MESSAGES.STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()].dropped, targetMid, negoMsg, isRemote, message);
+      },
+      ERROR: () => {
+        logger.log.ERROR([targetMid, TAGS.NEGOTIATION, type, message], debugObj || null);
+
+        return handleNegotationStats.send(room.id, MESSAGES.STATS_MODULE.HANDLE_NEGOTIATION_STATS[type.toUpperCase()].error, targetMid, negoMsg, isRemote, message);
+      },
+    });
+
+    const bufferRemoteOffer = (room, targetMid, offer) => {
+      const updatedState = Skylink.getSkylinkState(room.id);
+      logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, offer.type, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.ADDING_REMOTE_OFFER_TO_BUFFER], offer);
+      updatedState.bufferedRemoteOffers[targetMid] = updatedState.bufferedRemoteOffers[targetMid] ? updatedState.bufferedRemoteOffers[targetMid] : [];
+      updatedState.bufferedRemoteOffers[targetMid].push(offer);
+      Skylink.setSkylinkState(updatedState, room.id);
+    };
+
+    const checkAndApplyBufferedRestart = (room, peerId) => {
+      const updatedState = Skylink.getSkylinkState(room.id);
+      const { bufferedRestart } = updatedState;
+
+      if (bufferedRestart[peerId]) {
+        delete updatedState.bufferedRestart[peerId];
+        Skylink.setSkylinkState(updatedState, room.id);
+
+        logger.log.DEBUG([peerId, TAGS.NEGOTIATION, null, MESSAGES.NEGOTIATION_PROGRESS.APPLY_BUFFERED_RESTART]);
+        sendRestartOffer(updatedState, peerId, bufferedRestart.doIceRestart);
+      }
+    };
+
+    const negotiationStateHelpers = {
+      processNewPeer,
+      updateStateInformation,
+      getBufferedRemoteOffer,
+      logInfoOrErrorAndSendStats,
+      bufferRemoteOffer,
+      checkAndApplyBufferedRestart,
+    };
+
+    /* eslint-disable no-underscore-dangle */
+
+    class NegotiationState {
+      static _changeState(roomKey, peerId, newState) {
+        const updatedState = Skylink.getSkylinkState(roomKey);
+        updatedState.negotiationState[peerId] = newState;
+        Skylink.setSkylinkState(updatedState, roomKey);
+      }
+
+      static _getState(roomKey, peerId) {
+        const state = Skylink.getSkylinkState(roomKey);
+        return state.negotiationState[peerId];
+      }
+
+      static clearState(roomKey, peerId) {
+        const updatedState = Skylink.getSkylinkState(roomKey);
+        delete updatedState.negotiationState[peerId];
+        Skylink.setSkylinkState(updatedState, roomKey);
+      }
+
+      static changeState(roomKey, peerId, newState) {
+        return this._changeState(roomKey, peerId, newState);
+      }
+
+      static getState(roomKey, peerId) {
+        return this._getState(roomKey, peerId);
+      }
+
+      static onEnterReceived(enter) {
+        const {
+          rid, mid, publisherId,
+        } = enter;
+        const state = Skylink.getSkylinkState(rid);
+        const { hasMCU, room } = state;
+        const targetMid = hasMCU && publisherId ? publisherId : mid;
+
+        // peer Connection does not exist
+        if (!state.peerConnections[targetMid]) {
+          this._changeState(rid, targetMid, NEGOTIATION_STATES.ENTERING);
+          // process the new peer
+          negotiationStateHelpers.processNewPeer(enter);
+
+          this._changeState(rid, targetMid, NEGOTIATION_STATES.WELCOMING);
+
+          const signaling = new SkylinkSignalingServer();
+          signaling.welcome(room, targetMid);
+        }
+      }
+
+      static onWelcomeReceived(welcome) {
+        const {
+          rid, mid, publisherId, type,
+        } = welcome;
+        const state = Skylink.getSkylinkState(rid);
+        const { hasMCU, room } = state;
+        const targetMid = hasMCU && publisherId ? publisherId : mid;
+
+        const negState = this._getState(rid, targetMid);
+        if (negState) { // it should be undefined as this will be the first message from the remote peer
+          return negotiationStateHelpers.logInfoOrErrorAndSendStats(targetMid, type, room, welcome, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.DROPPING_WELCOME_NEG_STATE, `Current state: ${negState}`).DEBUG();
+        }
+
+        if (hasMCU && targetMid !== PEER_TYPE.MCU) { // welcome forwarded by signaling server
+          return negotiationStateHelpers.logInfoOrErrorAndSendStats(targetMid, type, room, welcome, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.DROPPING_WELCOME_MCU_FORWARDED, `Current state: ${negState}`).DEBUG();
+        }
+
+        // peer Connection does not exist
+        if (!state.peerConnections[targetMid]) {
+          // process the new peer
+          negotiationStateHelpers.processNewPeer(welcome);
+
+          return createOffer$1(room, targetMid)
+            .then((offer) => {
+              this._changeState(rid, targetMid, NEGOTIATION_STATES.LOCAL_OFFER_SENT);
+              sendOffer(room, offer);
+            });
+        }
+
+        return false;
+      }
+
+      static onOfferReceived(offer) {
+        const {
+          rid, mid, publisherId, weight, type, sdp,
+        } = offer;
+        const state = Skylink.getSkylinkState(rid);
+        const { hasMCU, room, peerPriorityWeight } = state;
+        const targetMid = hasMCU && publisherId ? publisherId : mid;
+        const remoteDescription = {
+          type,
+          sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
+        };
+        let localDescription;
+        let answer;
+
+        const negState = this._getState(rid, targetMid);
+
+        if (negState === NEGOTIATION_STATES.LOCAL_OFFER_SENT && peerPriorityWeight > weight) {
+          return negotiationStateHelpers.logInfoOrErrorAndSendStats(targetMid, type, room, offer, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER, {
+            selfWeight: peerPriorityWeight,
+            messageWeight: weight,
+          }).DEBUG();
+        }
+
+        if (!(negState === NEGOTIATION_STATES.WELCOMING || negState === NEGOTIATION_STATES.NEGOTIATED || negState === NEGOTIATION_STATES.LOCAL_OFFER_SENT)) {
+          return bufferRemoteOffer(room, targetMid, offer);
+        }
+
+        this._changeState(rid, targetMid, NEGOTIATION_STATES.REMOTE_OFFER_RECEIVED);
+
+        try {
+          negotiationStateHelpers.updateStateInformation(state, offer);
+
+          return setRemoteOffer(room, targetMid, remoteDescription)
+            .then((peerConnection) => {
+              this._changeState(rid, targetMid, NEGOTIATION_STATES.REMOTE_OFFER_SET);
+
+              onRemoteOfferSetSuccess(peerConnection, room, targetMid, remoteDescription);
+
+              return createAnswer$1(state, targetMid);
+            })
+            .catch(error => onRemoteOfferSetFailure(room, targetMid, remoteDescription, error))
+            .then((ans) => {
+              answer = ans;
+              localDescription = {
+                type: answer.type,
+                sdp: answer.sdp,
+              };
+
+              return setLocalAnswer(room, targetMid, localDescription);
+            })
+            .then((peerConnection) => {
+              this._changeState(rid, targetMid, NEGOTIATION_STATES.LOCAL_ANSWER_SET);
+
+              onLocalAnswerSetSuccess(peerConnection, room, targetMid, localDescription);
+
+              sendAnswer(room, answer);
+            })
+            .catch(error => onLocalAnswerSetFailure(room, targetMid, localDescription, error));
+        } catch (error) {
+          return negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answer, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_PROCESSING_OFFER, error).ERROR();
+        }
+      }
+
+      static onAnswerReceived(answer) {
+        const {
+          rid, mid, publisherId, type, sdp,
+        } = answer;
+        const state = Skylink.getSkylinkState(rid);
+        const {
+          hasMCU, room, bufferedLocalOffer,
+        } = state;
+        const targetMid = hasMCU && publisherId ? publisherId : mid;
+
+        const negState = this._getState(rid, targetMid);
+        if (negState !== NEGOTIATION_STATES.LOCAL_OFFER_SENT) {
+          return negotiationStateHelpers.logInfoOrErrorAndSendStats(targetMid, type, room, answer, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.DROPPING_ANSWER, `Current state: ${negState}`).DEBUG();
+        }
+
+        if (!bufferedLocalOffer[targetMid]) {
+          return negotiationStateHelpers.logInfoOrErrorAndSendStats(targetMid, type, room, answer, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.NO_LOCAL_BUFFERED_OFFER).ERROR();
+        }
+
+        this._changeState(rid, targetMid, NEGOTIATION_STATES.REMOTE_ANSWER_RECEIVED);
+
+        try {
+          negotiationStateHelpers.updateStateInformation(state, answer);
+
+          const localDescription = bufferedLocalOffer[targetMid];
+          const remoteDescription = {
+            type,
+            sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
+          };
+
+          return setLocalOffer(room, targetMid, localDescription)
+            .then((peerConnection) => {
+              this._changeState(rid, targetMid, NEGOTIATION_STATES.LOCAL_OFFER_SET);
+
+              return onLocalOfferSetSuccess(peerConnection, room, targetMid, localDescription);
+            })
+            .catch(error => onLocalOfferSetFailure(room, targetMid, localDescription, error))
+            .then(() => setRemoteAnswer(room, targetMid, remoteDescription))
+            .then((peerConnection) => {
+              this._changeState(rid, targetMid, NEGOTIATION_STATES.REMOTE_ANSWER_SET);
+
+              return onRemoteAnswerSetSuccess(peerConnection, room, targetMid, remoteDescription);
+            })
+            .catch(error => onRemoteAnswerSetFailure(room, targetMid, remoteDescription, error))
+            .then(() => {
+              this._changeState(rid, targetMid, NEGOTIATION_STATES.NEGOTIATED);
+              sendAnswerAck(room, targetMid, true);
+              return negotiationStateHelpers.checkAndApplyBufferedRestart(room, targetMid);
+            });
+        } catch (error) {
+          return negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answer, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_PROCESSING_ANSWER, error).ERROR();
+        }
+      }
+
+      static onAnswerAckReceived(answerAck) {
+        const {
+          rid, mid, publisherId, type, success,
+        } = answerAck;
+        const state = Skylink.getSkylinkState(rid);
+        const { hasMCU, room } = state;
+        const targetMid = hasMCU && publisherId ? publisherId : mid;
+
+        const negState = this._getState(rid, targetMid);
+        if (negState !== NEGOTIATION_STATES.LOCAL_ANSWER_SET) {
+          return negotiationStateHelpers.logInfoOrErrorAndSendStats(targetMid, type, room, answerAck, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.DROPPING_ANSWER_ACK, `Current state: ${negState}`).DEBUG();
+        }
+
+        if (!success) {
+          return negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answerAck, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_SET_REMOTE_ANSWER).ERROR();
+        }
+
+        this._changeState(rid, targetMid, NEGOTIATION_STATES.NEGOTIATED);
+
+        try {
+          const bufferedOffer = negotiationStateHelpers.getBufferedRemoteOffer(state, targetMid);
+
+          if (bufferedOffer) {
+            return this.onOfferReceived(bufferedOffer);
+          }
+
+          return helpers$4.renegotiateIfNeeded(state, targetMid).then((shouldRenegotiate) => {
+            if (shouldRenegotiate) {
+              refreshConnection(state, targetMid)
+                .catch(error => negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answerAck, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_RENEGOTIATION, error).ERROR());
+            } else {
+              negotiationStateHelpers.checkAndApplyBufferedRestart(room, targetMid);
+            }
+          });
+        } catch (error) {
+          return negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answerAck, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_PROCESSING_ANSWER_ACK, error).ERROR();
+        }
+      }
+    }
+
+    const createAnswer$1 = (state, targetMid) => PeerConnection.createAnswer(state, targetMid);
+
+    const sendAnswer = (room, answer) => {
+      const state = Skylink.getSkylinkState(room.id);
+      new SkylinkSignalingServer().answer(state, answer);
+    };
+
+    const createOffer$1 = (room, targetMid, doIceRestart, restartOffer) => PeerConnection.createOffer(room, targetMid, doIceRestart, restartOffer);
+
+    const sendOffer = (room, offer) => {
+      const state = Skylink.getSkylinkState(room.id);
+      new SkylinkSignalingServer().offer(state, offer);
+    };
+
+    const sendRestartOffer = (state, peerId, doIceRestart) => {
       const { room } = state;
       const signaling = new SkylinkSignalingServer();
 
       try {
+        if (NegotiationState.getState(room.id, peerId) !== NEGOTIATION_STATES.NEGOTIATED) {
+          const updatedState = state;
+          updatedState.bufferedRestart[peerId] = { doIceRestart };
+          Skylink.setSkylinkState(updatedState, room.id);
+          return logger.log.DEBUG([peerId, TAGS.NEGOTIATION, null, MESSAGES.NEGOTIATION_PROGRESS.BUFFERING_RESTART]);
+        }
+
         const restartOfferMsg = signaling.messageBuilder.getRestartOfferMessage(room.id, peerId, doIceRestart);
-        signaling.offer(room, peerId, doIceRestart, restartOfferMsg);
-        return peerId;
+
+        return createOffer$1(room, peerId, doIceRestart, restartOfferMsg)
+          .then((offer) => {
+            NegotiationState.changeState(room.id, peerId, NEGOTIATION_STATES.LOCAL_OFFER_SENT);
+            sendOffer(room, offer);
+            return peerId;
+          });
       } catch (ex) {
         return [peerId, ex];
       }
+    };
+
+    const setLocalOffer = (room, targetMid, localDescription) => setLocalDescription(room, targetMid, localDescription);
+
+    const setLocalAnswer = (room, targetMid, localDescription) => setLocalDescription(room, targetMid, localDescription);
+
+    const onLocalOfferSetSuccess = (RTCPeerConnection, room, targetMid, localDescription) => onLocalDescriptionSetSuccess(RTCPeerConnection, room, targetMid, localDescription);
+
+    const onLocalAnswerSetSuccess = (RTCPeerConnection, room, targetMid, localDescription) => onLocalDescriptionSetSuccess(RTCPeerConnection, room, targetMid, localDescription);
+
+    const onLocalOfferSetFailure = (room, targetMid, localDescription, error) => onLocalDescriptionSetFailure(room, targetMid, localDescription, error);
+
+    const onLocalAnswerSetFailure = (room, targetMid, localDescription, error) => onLocalDescriptionSetFailure(room, targetMid, localDescription, error);
+
+    const setRemoteOffer = (room, targetMid, remoteDescription) => setRemoteDescription(room, targetMid, remoteDescription);
+
+    const setRemoteAnswer = (room, targetMid, remoteDescription) => setRemoteDescription(room, targetMid, remoteDescription);
+
+    const sendAnswerAck = (room, targetMid, success) => {
+      const state = Skylink.getSkylinkState(room.id);
+      new SkylinkSignalingServer().answerAck(state, targetMid, success);
+    };
+
+    const onRemoteOfferSetSuccess = (RTCPeerConnection, room, targetMid, remoteDescription) => {
+      setPeerConnectionInState(RTCPeerConnection, room, targetMid);
+      onRemoteDescriptionSetSuccess(RTCPeerConnection, room, targetMid, remoteDescription);
+    };
+
+    const onRemoteAnswerSetSuccess = (RTCPeerConnection, room, targetMid, remoteDescription) => {
+      setPeerConnectionInState(RTCPeerConnection, room, targetMid);
+      onRemoteDescriptionSetSuccess(RTCPeerConnection, room, targetMid, remoteDescription);
+
+      const state = Skylink.getSkylinkState(room.id);
+      const peerConnection = state.peerConnections[targetMid];
+      const { DATA_CHANNEL } = MESSAGES;
+
+      // if remote peer does not have data channel
+      if (state.peerDataChannels[targetMid] && (peerConnection.remoteDescription.sdp.indexOf('m=application') === -1 || peerConnection.remoteDescription.sdp.indexOf('m=application 0') > 0)) {
+        logger.log.WARN([targetMid, TAGS.PEER_CONNECTION, null, `${DATA_CHANNEL.CLOSING} - ${DATA_CHANNEL.NO_REMOTE_DATA_CHANNEL}`]);
+        PeerConnection.closeDataChannel(room.id, targetMid);
+      }
+    };
+
+    const onRemoteOfferSetFailure = (room, targetMid, remoteDescription, error) => onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error);
+
+    const onRemoteAnswerSetFailure = (room, targetMid, remoteDescription, error) => {
+      onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error);
+
+      sendAnswerAck(room, targetMid, false);
     };
 
     /**
@@ -22277,7 +23121,7 @@
           updateState.peerEndOfCandidatesCounter[peerId].len = 0;
           Skylink.setSkylinkState(updateState, updateState.room.id);
 
-          return resolve(sendRestartOfferMsg(updateState, peerId, doIceRestart));
+          return resolve(sendRestartOffer(updateState, peerId, doIceRestart));
         }
 
         // Checks if the local description is defined first
@@ -22330,7 +23174,7 @@
           updatedRoomState.peerEndOfCandidatesCounter.MCU.len = 0;
 
           Skylink.setSkylinkState(updatedRoomState);
-          resolve(sendRestartOfferMsg(updatedRoomState, PEER_TYPE.MCU, doIceRestart));
+          resolve(sendRestartOffer(updatedRoomState, PEER_TYPE.MCU, doIceRestart));
         }
       } catch (error) {
         resolve([PEER_TYPE.MCU, error]);
@@ -22375,12 +23219,15 @@
       }
     };
 
-    const buildPeerInformations = (userInfo, state) => {
+    const buildAndSetPeerInformations = (peerId, userInfo, state) => {
+      const updatedState = state;
       const peerInfo = userInfo;
-      const peerId = peerInfo.sid;
 
       peerInfo.room = state.room.roomName;
       peerInfo.settings.data = !!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId].main && state.peerDataChannels[peerId].main.channel && state.peerDataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
+
+      updatedState.peerInformations[peerId] = peerInfo;
+      Skylink.setSkylinkState(updatedState, state.room.id);
 
       return peerInfo;
     };
@@ -22489,12 +23336,85 @@
       Skylink.setSkylinkState(updatedState, updatedState.room.id);
     };
 
+    const renegotiateIfNeeded = (state, peerId) => {
+      const { peerConnections, currentRTCRTPSenders, hasMCU } = state;
+      const initOptions = Skylink.getInitOptions();
+      const { AdapterJS } = window;
+
+      // eslint-disable-next-line consistent-return
+      return new Promise((resolve) => {
+        const peerConnection = peerConnections[peerId];
+        const pcSenders = peerConnection.getSenders() ? peerConnection.getSenders() : [];
+        const senderGetStatsPromises = [];
+        const savedSenders = currentRTCRTPSenders[peerId] || [];
+        let isRenegoNeeded = false;
+
+        // Stop the renegotiation as it will loop since transmittingSendersKeys !== savedSenders
+        if (isEmptyArray(peerConnection.constraints.iceServers) && initOptions.forceTURN && !hasMCU) {
+          logger.log.WARN([null, TAGS.PEER_CONNECTION, null, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.STOP_RENEGOTIATION_FORCE_TURN]);
+          return resolve(isRenegoNeeded);
+        }
+
+        const pcSendersWithTracks = [];
+        // Filter for senders with tracks
+        pcSenders.forEach((pcSender) => {
+          if (pcSender.track) { // if track is null, the sender does not transmit anything
+            pcSendersWithTracks.push(pcSender);
+            senderGetStatsPromises.push(pcSender.getStats());
+          }
+        });
+
+        const transmittingSenders = {};
+
+        Promise.all(senderGetStatsPromises).then((resolvedResults) => {
+          resolvedResults.forEach((reports, senderIndex) => {
+            reports.forEach((report) => {
+              if (report && report.ssrc) {
+                if (AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.FIREFOX && report.bytesSent !== 0) {
+                  transmittingSenders[report.ssrc] = pcSendersWithTracks[senderIndex];
+                } else if (AdapterJS.webrtcDetectedBrowser !== BROWSER_AGENT.FIREFOX) {
+                  transmittingSenders[report.ssrc] = pcSendersWithTracks[senderIndex];
+                }
+              } else if (report && report.type === 'ssrc' && report.id.indexOf('send') > 1) { // required for retrieving sender information for react
+                // native ios
+                report.values.forEach((value) => {
+                  if (value.ssrc) {
+                    transmittingSenders[value.ssrc] = pcSendersWithTracks[senderIndex];
+                  }
+                });
+              }
+            });
+          });
+
+          const transmittingSendersKeys = Object.keys(transmittingSenders);
+
+          if (transmittingSendersKeys.length !== savedSenders.length) {
+            isRenegoNeeded = true;
+          } else {
+            let senderMatchedCount = 0;
+            for (let tKey = 0; tKey < transmittingSendersKeys.length; tKey += 1) {
+              const tSender = transmittingSenders[transmittingSendersKeys[tKey]];
+              for (let sIndex = 0; sIndex < savedSenders.length; sIndex += 1) {
+                const sSender = savedSenders[sIndex];
+                if (tSender === sSender) {
+                  senderMatchedCount += 1;
+                  break;
+                }
+              }
+            }
+            isRenegoNeeded = senderMatchedCount !== transmittingSendersKeys.length;
+          }
+          resolve(isRenegoNeeded);
+        });
+      });
+    };
+
     /**
      * @namespace PeerConnectionHelpers
      * @description All helper and utility functions for <code>{@link PeerConnection}</code> class are listed here.
      * @private
      * @memberOf PeerConnection
-     * @type {{createOffer, createAnswer, addPeer, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, refreshConnection, refreshPeerConnection, restartPeerConnection, buildPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus, processNewSender }}
+     * @type {{createOffer, createAnswer, addPeer, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, refreshConnection, refreshPeerConnection, restartPeerConnection, buildAndSetPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus, processNewSender, renegotiateIfNeeded }}
      */
     const helpers$4 = {
       createOffer,
@@ -22506,11 +23426,12 @@
       refreshConnection,
       refreshPeerConnection,
       restartPeerConnection,
-      buildPeerInformations,
+      buildAndSetPeerInformations,
       getConnectionStatus,
       closePeerConnection,
       updatePeerInformationsMediaStatus,
       processNewSender,
+      renegotiateIfNeeded,
     };
 
     /**
@@ -22969,741 +23890,49 @@
       signaling.enterRoom(roomState);
     };
 
-    const parseVersion = (version) => {
-      if (!(version && typeof version === 'string')) {
-        return 0;
-      }
-      // E.g. 0.9.6, replace minor "." with 0
-      if (version.indexOf('.') > -1) {
-        const parts = version.split('.');
-        if (parts.length > 2) {
-          const majorVer = parts[0] || '0';
-          parts.splice(0, 1);
-          return parseFloat(`${majorVer}.${parts.join('0')}`, 10);
-        }
-        return parseFloat(version || '0', 10);
-      }
-      return parseInt(version || '0', 10);
-    };
-
-
-    const enterAndWelcome = (msg) => {
-      const state = Skylink.getSkylinkState(msg.rid);
-      const parsedMsg = {};
-      const { hasMCU } = state;
-      const {
-        rid,
-        mid,
-        enableIceRestart,
-        enableDataChannel,
-        weight,
-        agent,
-        os,
-        temasysPluginVersion,
-        SMProtocolVersion,
-        DTProtocolVersion,
-        version,
-        publisherId,
-      } = msg;
-
-      parsedMsg.publisherId = publisherId || null;
-      parsedMsg.rid = rid;
-      parsedMsg.mid = mid;
-      parsedMsg.agent = agent && isAString(agent) ? agent : 'other';
-      parsedMsg.version = parseVersion(version);
-      parsedMsg.SMProtocolVersion = isAString(SMProtocolVersion) ? SMProtocolVersion : SM_PROTOCOL_VERSION;
-      // eslint-disable-next-line no-nested-ternary
-      parsedMsg.DTProtocolVersion = isAString(DTProtocolVersion) ? DTProtocolVersion : (hasMCU || mid === PEER_TYPE.MCU ? DT_PROTOCOL_VERSION : '0.1.0');
-      parsedMsg.weight = isANumber(weight) ? weight : 0;
-      parsedMsg.enableDataChannel = isABoolean(enableDataChannel) ? enableDataChannel : true;
-      parsedMsg.enableIceRestart = isABoolean(enableIceRestart) ? enableIceRestart : false;
-      parsedMsg.os = os && isAString(os) ? os : null;
-      parsedMsg.temasysPluginVersion = temasysPluginVersion && isAString(temasysPluginVersion) ? temasysPluginVersion : null;
-      parsedMsg.userInfo = parsers.parseUserInfo(state, msg, parsedMsg);
-
-      if (hasMCU) {
-        parsedMsg.peersInRoom = msg.peersInRoom;
-      }
-
-      return clone_1(parsedMsg);
-    };
-
-    const parseUserInfo = (state, msg, parsedMsg) => {
-      const info = Object.assign({}, msg.userInfo);
-
-      info.config = info.config ? info.config : {
-        enableDataChannel: parsedMsg.enableDataChannel,
-        enableIceRestart: parsedMsg.enableIceRestart,
-        priorityWeight: parsedMsg.weight,
-      };
-
-      info.agent = info.agent ? info.agent : {
-        name: parsedMsg.agent,
-        version: parsedMsg.version,
-        os: parsedMsg.os,
-        pluginVersion: parsedMsg.temasysPluginVersion,
-        SMProtocolVersion: parsedMsg.SMProtocolVersion,
-        DTProtocolVersion: parsedMsg.DTProtocolVersion,
-      };
-
-      info.settings = info.settings ? info.settings : {};
-      info.mediaStatus = info.mediaStatus ? info.mediaStatus : {};
-
-      return info;
-    };
-
-    const parsers = {
-      enterAndWelcome,
-      parseUserInfo,
-    };
-
-    const setPeerInformations = (state, peerId, userInfo) => {
-      const { room } = state;
-      // eslint-disable-next-line no-param-reassign
-      state.peerInformations[peerId] = PeerConnection.buildPeerInformations(userInfo, state);
-      Skylink.setSkylinkState(state, room.id);
-    };
-
     /**
-     * Function that adds a Peer Connection and updates the state(Skylink State).
-     * @param {JSON} params
-     * @memberOf SignalingMessageHandler
-     * @fires SERVER_PEER_JOINED
-     * @fires PEER_JOINED
-     * @fires HANDSHAKE_PROGRESS
-     */
-    const processPeer = (params) => {
-      const {
-        currentRoom,
-        targetMid,
-        cert,
-        userInfo,
-        message,
-        caller,
-      } = params;
-      let isNewPeer = false;
-      const state = Skylink.getSkylinkState(currentRoom.id);
-      const { hasMCU } = state;
-      const { peerInformations } = state;
-      if ((!peerInformations[targetMid] && !hasMCU) || (hasMCU && targetMid === PEER_TYPE.MCU && !peerInformations.MCU)) {
-        const hasScreenshare = !!userInfo.screenshare;
-        isNewPeer = true;
-        state.peerInformations[targetMid] = PeerConnection.buildPeerInformations(message.userInfo, state);
-
-        const peerBrowser = {
-          agent: userInfo.agent.name,
-          version: userInfo.agent.version,
-          os: userInfo.agent.os,
-        };
-
-        Skylink.setSkylinkState(state, currentRoom.id);
-
-        PeerConnection.addPeer({
-          currentRoom,
-          targetMid,
-          peerBrowser,
-          cert,
-          hasScreenshare,
-        });
-
-        if (targetMid === PEER_TYPE.MCU) {
-          logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.MCU]);
-          state.hasMCU = true;
-          dispatchEvent(serverPeerJoined({
-            peerId: targetMid,
-            serverPeerType: SERVER_PEER_TYPE.MCU,
-            room: Room.getRoomInfo(currentRoom.id),
-          }));
-        } else {
-          dispatchEvent(peerJoined({
-            peerId: targetMid,
-            peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
-            isSelf: false,
-            room: Room.getRoomInfo(currentRoom.id),
-          }));
-        }
-      }
-
-      state.peerMessagesStamps[targetMid] = state.peerMessagesStamps[targetMid] || {
-        userData: 0,
-        audioMuted: 0,
-        videoMuted: 0,
-      };
-
-      if (caller === CALLERS.WELCOME) {
-        state.peerMessagesStamps[targetMid].hasWelcome = false;
-      }
-
-      if (caller === CALLERS.WELCOME && hasMCU && Array.isArray(message.peersInRoom) && message.peersInRoom.length) {
-        const userId = state.user.sid;
-        for (let peersInRoomIndex = 0; peersInRoomIndex < message.peersInRoom.length; peersInRoomIndex += 1) {
-          const PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
-          if (PEER_ID !== userId) {
-            const parsedMsg = parsers.enterAndWelcome(message.peersInRoom[peersInRoomIndex]);
-            const peerUserInfo = parsedMsg.userInfo;
-            setPeerInformations(state, PEER_ID, peerUserInfo);
-            dispatchEvent(peerJoined({
-              peerId: PEER_ID,
-              peerInfo: PeerData.getPeerInfo(PEER_ID, currentRoom),
-              isSelf: false,
-              room: Room.getRoomInfo(currentRoom.id),
-            }));
-          }
-        }
-      } else if (hasMCU && targetMid !== state.user.sid && targetMid !== PEER_TYPE.MCU) {
-        setPeerInformations(state, targetMid, userInfo);
-        dispatchEvent(peerJoined({
-          peerId: targetMid,
-          peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
-          isSelf: false,
-          room: Room.getRoomInfo(currentRoom.id),
-        }));
-      }
-
-      Skylink.setSkylinkState(state, currentRoom.id);
-
-      if (isNewPeer) {
-        dispatchEvent(handshakeProgress({
-          peerId: targetMid,
-          state: HANDSHAKE_PROGRESS$1.WELCOME,
-          error: null,
-          room: Room.getRoomInfo(currentRoom.id),
-        }));
-      }
-    };
-
-    const CALLERS = {
-      ENTER: 'enterHandler',
-      WELCOME: 'welcomeHander',
-    };
-
-    const getNextNegotiationStep = (params) => {
-      let method = 'welcome';
-
-      if (params.caller === CALLERS.WELCOME) {
-        const state = Skylink.getSkylinkState(params.currentRoom.id);
-        const { peerMessagesStamps, peerPriorityWeight, hasMCU } = state;
-        if (hasMCU || peerPriorityWeight > params.message.weight) {
-          if (peerMessagesStamps[params.targetMid].hasWelcome) {
-            method = 'noop';
-            logger.log.WARN([params.targetMid, TAGS.PEER_CONNECTION, null, 'Discarding extra "welcome" received.']);
-          } else {
-            method = 'offer';
-            state.peerMessagesStamps[params.targetMid].hasWelcome = true;
-            Skylink.setSkylinkState(state, params.currentRoom.id);
-          }
-        }
-      }
-      return method;
-    };
-
-    // eslint-disable-next-line consistent-return
-    const checkStampBeforeSendingWelcome = (params) => {
-      const { currentRoom, targetMid, message } = params;
-      const state = Skylink.getSkylinkState(currentRoom.id);
-      const { peerConnections, hasMCU } = state;
-      const { STATS_MODULE, NEGOTIATION_PROGRESS, PEER_CONNECTION } = MESSAGES;
-      const signaling = new SkylinkSignalingServer();
-      const method = getNextNegotiationStep(params);
-
-      if (method === 'offer') {
-      // Added checks to ensure that connection object is defined first
-        if (!peerConnections[targetMid]) {
-          logger.log.WARN([targetMid, 'RTCSessionDescription', 'offer', PEER_CONNECTION.NO_PEER_CONNECTION]);
-          handleNegotationStats.send(currentRoom.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS.OFFER.dropped, targetMid, message, false, PEER_CONNECTION.NO_PEER_CONNECTION);
-          return null;
-        }
-
-        const { signalingState } = peerConnections[targetMid];
-
-        // Added checks to ensure that state is "stable" if setting local "offer"
-        if (signalingState !== PEER_CONNECTION_STATE$1.STABLE) {
-          logger.log.WARN([targetMid, 'RTCSessionDescription', 'offer', NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE], signalingState);
-          handleNegotationStats.send(currentRoom.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS.OFFER.dropped, targetMid, message, false, NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE);
-          return null;
-        }
-
-        signaling[method](params.currentRoom, params.targetMid);
-      } else if (!hasMCU) {
-        signaling[method](params.currentRoom, params.targetMid);
-      }
-    };
-
-    const logStats = (caller, targetMid, state, message) => {
-      const { room } = state;
-
-      let callerState = 'enter';
-      if (caller === CALLERS.WELCOME) {
-        callerState = 'welcome';
-      }
-
-      logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, `Peer ${callerState} received ->`], message);
-      handleNegotationStats.send(room.id, callerState, targetMid, message, true);
-    };
-
-    /**
-     * Function that parses the enterAndWelcome and welcome message and sends the offer or welcome message.
+     * Function that parses the enter and welcome message and sends the welcome or offer message.
      * @param {JSON} message
-     * @param {String} caller
      * @memberOf SignalingMessageHandler
      */
-    const parseAndSendWelcome = (message, caller) => {
+    // eslint-disable-next-line consistent-return
+    const enterAndWelcomeHandler = (message) => {
       const parsedMsg = parsers.enterAndWelcome(message);
       const {
-        rid, mid, userInfo, publisherId,
+        rid, mid, publisherId,
       } = parsedMsg;
       const state = Skylink.getSkylinkState(rid);
       const { hasMCU, user } = state;
       const targetMid = hasMCU && publisherId ? publisherId : mid;
 
       if (!user.sid) {
-        logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, [MESSAGES.SIGNALING.DROPPING_ENTER]]);
+        return logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, [MESSAGES.SIGNALING.DROPPING_ENTER]]);
       }
 
-      logStats(caller, targetMid, state, parsedMsg);
+      logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, `Peer ${parsedMsg.type} received ->`], message);
+      handleNegotationStats.send(rid, parsedMsg.type, targetMid, message, true);
 
-      const peerParams = {
-        currentRoom: state.room,
-        targetMid,
-        userInfo,
-        message: parsedMsg,
-        caller,
-      };
+      if (parsedMsg.type === 'enter') {
+        return NegotiationState.onEnterReceived(message);
+      }
 
-      processPeer(peerParams);
-      checkStampBeforeSendingWelcome(peerParams);
+      if (parsedMsg.type === 'welcome') {
+        return NegotiationState.onWelcomeReceived(message);
+      }
     };
 
     const enterHandler = (message) => {
-      parseAndSendWelcome(message, CALLERS.ENTER);
-    };
-
-    /* eslint-disable no-unused-vars,no-multi-assign */
-
-    const handleSetOfferAndAnswerSuccess = (state, targetMid, description, isRemote) => {
-      const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
-      const { peerConnections, bufferedLocalOffer, room } = state;
-      const peerConnection = peerConnections[targetMid];
-      const msgType = description.type === 'offer' ? 'OFFER' : 'ANSWER';
-
-      handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS[msgType].set, targetMid, description, isRemote);
-
-      if (isRemote) { // handshake progress is triggered on the local end after sdp it is created
-        dispatchEvent(handshakeProgress({
-          state: HANDSHAKE_PROGRESS$1[msgType],
-          peerId: targetMid,
-          room: Room.getRoomInfo(room.id),
-        }));
-      }
-
-      if (isRemote) {
-        if (description.type === 'offer') {
-          peerConnection.setOffer = 'remote';
-        } else {
-          peerConnection.setAnswer = 'remote';
-        }
-        IceConnection.addIceCandidateFromQueue(targetMid, room);
-      } else {
-        bufferedLocalOffer[targetMid] = null;
-        if (description.type === 'offer') {
-          peerConnection.setOffer = 'local';
-        } else {
-          peerConnection.setAnswer = 'local';
-        }
-      }
-
-      Skylink.setSkylinkState(state, room.id);
-    };
-
-    const handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote, error) => {
-      const { room, user } = state;
-      const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
-      const msgType = description.type === 'offer' ? 'OFFER' : 'ANSWER';
-
-      handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS[msgType].set_error, targetMid, description, isRemote, error);
-
-      dispatchEvent(handshakeProgress({
-        state: HANDSHAKE_PROGRESS$1.ERROR,
-        peerId: isRemote ? targetMid : user.sid,
-        error,
-        room: Room.getRoomInfo(room.id),
-      }));
-    };
-
-    // modifying the remote description received
-    const mungeSDP = (targetMid, sessionDescription, roomKey) => {
-      const mungedSessionDescription = sessionDescription;
-      // TODO: Below SDP methods needs to be implemented in the SessionDescription Class.
-      mungedSessionDescription.sdp = SessionDescription.setSDPBitrate(targetMid, mungedSessionDescription, roomKey);
-      mungedSessionDescription.sdp = SessionDescription.removeSDPFilteredCandidates(targetMid, mungedSessionDescription, roomKey);
-
-      logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, mungedSessionDescription.type, `Updated remote ${mungedSessionDescription.type} ->`], mungedSessionDescription);
-      return mungedSessionDescription;
-    };
-
-    const setLocalDescription = (room, targetMid, localDescription) => {
-      const state = Skylink.getSkylinkState(room.id);
-      const { peerConnections } = state;
-      const { type } = localDescription;
-      const peerConnection = peerConnections[targetMid];
-      const { STATS_MODULE } = MESSAGES;
-      const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-
-      peerConnection.processingLocalSDP = true;
-
-      handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, localDescription, false);
-
-      return peerConnection.setLocalDescription(localDescription)
-        .then(() => peerConnection);
-    };
-
-    const onLocalDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, localDescription) => {
-      const state = Skylink.getSkylinkState(room.id);
-      const { peerConnections } = state;
-      const { NEGOTIATION_PROGRESS } = MESSAGES;
-      const peerConnection = peerConnections[targetMid] = RTCPeerConnection;
-
-      logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, localDescription.type, NEGOTIATION_PROGRESS.SET_LOCAL_DESCRIPTION], localDescription);
-
-      peerConnection.processingLocalSDP = false;
-      handleSetOfferAndAnswerSuccess(state, targetMid, localDescription, false);
-    };
-
-    const onLocalDescriptionSetFailure = (room, targetMid, localDescription, error) => {
-      const state = Skylink.getSkylinkState(room.id);
-      const { peerConnections } = state;
-      const peerConnection = peerConnections[targetMid];
-      const { NEGOTIATION_PROGRESS } = MESSAGES;
-
-      logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, localDescription.type, NEGOTIATION_PROGRESS.FAILED_SET_LOCAL_DESCRIPTION], error);
-
-      peerConnection.processingLocalSDP = false;
-      peerConnection.negotiating = false;
-
-      handleSetOfferAndAnswerFailure(state, targetMid, localDescription, false, error);
-    };
-
-    const setRemoteDescription = (room, targetMid, remoteDescription) => {
-      const state = Skylink.getSkylinkState(room.id);
-      const { peerConnections } = state;
-      const { type } = remoteDescription;
-      const { STATS_MODULE } = MESSAGES;
-      const peerConnection = peerConnections[targetMid];
-      const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-
-      peerConnection.processingRemoteSDP = true;
-      const mungedSessionDescription = mungeSDP(targetMid, remoteDescription, room.id);
-      handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType][type], targetMid, mungedSessionDescription, true);
-      return peerConnection.setRemoteDescription(mungedSessionDescription)
-        .then(() => peerConnection);
-    };
-
-    const sendAnswerAck = (state, targetMid, success) => {
-      const updatedState = state;
-      updatedState.peerConnections[targetMid].negotiating = false;
-      Skylink.setSkylinkState(updatedState, targetMid);
-
-      const signaling = new SkylinkSignalingServer();
-      signaling.answerAck(state, targetMid, success);
-    };
-
-    const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remoteDescription) => {
-      const signaling = new SkylinkSignalingServer();
-      const { type } = remoteDescription;
-      const { NEGOTIATION_PROGRESS, DATA_CHANNEL } = MESSAGES;
-
-      const state = Skylink.getSkylinkState(room.id);
-      const { peerConnections } = state;
-      const peerConnection = peerConnections[targetMid] = RTCPeerConnection;
-
-      logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.SET_REMOTE_DESCRIPTION], remoteDescription);
-
-      peerConnection.processingRemoteSDP = false;
-
-      if (type === 'offer') {
-        handleSetOfferAndAnswerSuccess(state, targetMid, remoteDescription, true);
-        return signaling.answer(state, targetMid);
-      }
-      // FIXME: why is this needed?
-      if (state.peerMessagesStamps[targetMid]) {
-        state.peerMessagesStamps[targetMid].hasRestart = false;
-      }
-
-      // if remote peer does not have data channel
-      if (state.peerDataChannels[targetMid] && (peerConnection.remoteDescription.sdp.indexOf('m=application') === -1 || peerConnection.remoteDescription.sdp.indexOf('m=application 0') > 0)) {
-        logger.log.WARN([targetMid, TAGS.PEER_CONNECTION, null, `${DATA_CHANNEL.CLOSING} - ${DATA_CHANNEL.NO_REMOTE_DATA_CHANNEL}`]);
-        PeerConnection.closeDataChannel(room.id, targetMid);
-      }
-
-      handleSetOfferAndAnswerSuccess(state, targetMid, remoteDescription, true);
-      sendAnswerAck(state, targetMid, true);
-      return true;
-    };
-
-    const onRemoteDescriptionSetFailure = (room, targetMid, remoteDescription, error) => {
-      const state = Skylink.getSkylinkState(room.id);
-      const { peerConnections } = state;
-      const peerConnection = peerConnections[targetMid];
-      const { type } = remoteDescription;
-
-      logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, type, `${MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_SET_REMOTE_DESCRIPTION} ->`], {
-        error,
-        state: peerConnection.signalingState,
-        [type]: remoteDescription,
-      });
-
-      peerConnection.processingRemoteSDP = false;
-      peerConnection.negotiating = false;
-
-      handleSetOfferAndAnswerFailure(state, targetMid, remoteDescription, true, error);
-
-      if (type === 'answer') {
-        sendAnswerAck(state, targetMid, false);
-      }
-    };
-
-    const updateState = (state, message) => {
-      const updatedState = state;
-      const { userInfo, rid, mid } = message;
-      const updatedUserInfo = userInfo;
-      const targetMid = mid;
-
-      if (userInfo && typeof userInfo === 'object') {
-        updatedUserInfo.settings.data = !!(updatedState.peerDataChannels[targetMid] && updatedState.peerDataChannels[targetMid].main && updatedState.peerDataChannels[targetMid].main.channel && updatedState.peerDataChannels[targetMid].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
-        updatedState.peerInformations[targetMid].settings = updatedUserInfo.settings || {};
-        updatedState.peerInformations[targetMid].mediaStatus = updatedUserInfo.mediaStatus || {};
-        updatedState.peerInformations[targetMid].userData = updatedUserInfo.userData;
-      }
-
-      updatedState.peerConnections[targetMid].negotiating = true;
-
-      Skylink.setSkylinkState(updatedState, rid);
-    };
-
-    const canProceed = (state, message) => {
-      const {
-        weight, type, mid, sdp, resend,
-      } = message;
-      const {
-        peerPriorityWeight, bufferedLocalOffer, room, peerConnections,
-      } = state;
-      const { STATS_MODULE, NEGOTIATION_PROGRESS, PEER_CONNECTION } = MESSAGES;
-      const targetMid = mid;
-      const peerConnection = peerConnections[targetMid];
-      const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-      let error = null;
-
-      if (!peerConnection) {
-        logger.log.ERROR([targetMid, null, type, `${PEER_CONNECTION.NO_PEER_CONNECTION}. Unable to set${type === 'offer' ? 'Remote' : 'Local'}Offer.`]);
-        error = PEER_CONNECTION.NO_PEER_CONNECTION;
-        handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType].dropped, targetMid, message, true, error);
-        return false;
-      }
-
-      const {
-        processingRemoteSDP, processingLocalSDP, negotiating,
-      } = peerConnection;
-
-      if (type === 'offer' && peerConnections[targetMid].signalingState !== PEER_CONNECTION_STATE$1.STABLE) {
-        logger.log.WARN([targetMid, null, type, NEGOTIATION_PROGRESS.ERRORS.NOT_STABLE], {
-          signalingState: peerConnections[targetMid].signalingState,
-          isRestart: !!resend,
-        });
-        error = `Peer connection state is ${peerConnections[targetMid].signalingState}.`;
-      }
-
-      if (type === 'offer' && bufferedLocalOffer[targetMid] && peerPriorityWeight > weight) {
-        logger.log.WARN([targetMid, null, type, NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER], {
-          selfWeight: peerPriorityWeight,
-          messageWeight: weight,
-        });
-        error = NEGOTIATION_PROGRESS.ERRORS.OFFER_TIEBREAKER;
-      }
-
-      // if processing remote SDP
-      if (processingRemoteSDP) {
-        logger.log.WARN([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP], sdp);
-        error = NEGOTIATION_PROGRESS.ERRORS.PROCESSING_EXISTING_SDP;
-
-        // or completed processing local and remote sdp but answerAck has not been received
-      } else if ((!processingLocalSDP && !processingRemoteSDP && negotiating) && type === 'offer') {
-        // add to bufferedRemoteOffer
-        const updatedState = state;
-        logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.ERRORS.ADDING_REMOTE_OFFER_TO_BUFFER], message);
-        updatedState.bufferedRemoteOffers[targetMid] = updatedState.bufferedRemoteOffers[targetMid] ? updatedState.bufferedRemoteOffers[targetMid] : [];
-        updatedState.bufferedRemoteOffers[targetMid].push(message);
-        Skylink.setSkylinkState(updatedState, room.id);
-        return false;
-      }
-
-      if (error) {
-        handleNegotationStats.send(room.id, STATS_MODULE.HANDLE_NEGOTIATION_STATS[msgType].dropped, targetMid, message, true, error);
-      }
-
-      return !error;
-    };
-
-    /**
-     * Function that parses and sets the remote description for offer and answer.
-     * @param {JSON} message
-     * @return {null}
-     * @memberOf SignalingMessageHandler
-     * @fires HANDSHAKE_PROGRESS
-     */
-    // eslint-disable-next-line import/prefer-default-export
-    const parseAndSetRemoteDescription = (message) => {
-      const {
-        rid,
-        mid,
-        type,
-        sdp,
-        mediaInfoList,
-      } = message;
-      const state = Skylink.getSkylinkState(rid);
-      const {
-        hasMCU,
-        room,
-        bufferedLocalOffer,
-      } = state;
-      const targetMid = mid;
-      const msgType = type === 'offer' ? 'OFFER' : 'ANSWER';
-      const { NEGOTIATION_PROGRESS } = MESSAGES;
-
-      logger.log.INFO([targetMid, null, type, `Received ${type} from peer. ${msgType}:`], message);
-
-      if (canProceed(state, message)) {
-        try {
-          updateState(state, message);
-
-          PeerMedia.setPeerMediaInfo(room, targetMid, mediaInfoList);
-          PeerMedia.deleteUnavailableMedia(room, targetMid); // mediaState can be unavailable during renegotiation
-
-          if (type === 'offer') {
-            let localDescription = null;
-            const remoteDescription = {
-              type,
-              sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
-            };
-
-            setRemoteDescription(room, targetMid, remoteDescription)
-              .then(peerConnection => onRemoteDescriptionSetSuccess(peerConnection, room, targetMid, remoteDescription))
-              .catch(error => onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error))
-              .then((answer) => {
-                localDescription = {
-                  type: answer.type,
-                  sdp: answer.sdp,
-                };
-                return setLocalDescription(room, targetMid, localDescription);
-              })
-              .then(peerConnection => onLocalDescriptionSetSuccess(peerConnection, room, targetMid, localDescription))
-              .catch(error => onLocalDescriptionSetFailure(room, targetMid, localDescription, error));
-          } else if (bufferedLocalOffer[targetMid]) {
-            const localDescription = bufferedLocalOffer[targetMid];
-            const remoteDescription = {
-              type,
-              sdp: hasMCU ? sdp.replace(/\r\n/g, '\n').split('\n').join('\r\n') : sdp,
-            };
-
-            setLocalDescription(room, targetMid, localDescription)
-              .then(peerConnection => onLocalDescriptionSetSuccess(peerConnection, room, targetMid, localDescription))
-              .catch(error => onLocalDescriptionSetFailure(room, targetMid, localDescription, error))
-              .then(() => setRemoteDescription(room, targetMid, remoteDescription))
-              .then(peerConnection => onRemoteDescriptionSetSuccess(peerConnection, room, targetMid, remoteDescription))
-              .catch(error => onRemoteDescriptionSetFailure(room, targetMid, remoteDescription, error));
-          } else {
-            logger.log.ERROR([targetMid, TAGS.PEER_CONNECTION, null, NEGOTIATION_PROGRESS.ERRORS.NO_LOCAL_BUFFERED_OFFER]);
-          }
-        } catch (error) {
-          logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, type, `Failed processing ${msgType} ->`], error);
-        }
-      }
-
-      return null;
+      enterAndWelcomeHandler(message);
     };
 
     const offerHandler = (message) => {
-      parseAndSetRemoteDescription(message);
+      logger.log.INFO([message.mid, null, message.type, 'Received OFFER from peer:'], message);
+      NegotiationState.onOfferReceived(message);
     };
 
     const answerHandler = (message) => {
-      parseAndSetRemoteDescription(message);
-    };
-
-    const renegotiateIfNeeded = (state, peerId) => {
-      const { peerConnections, currentRTCRTPSenders, hasMCU } = state;
-      const initOptions = Skylink.getInitOptions();
-
-      // eslint-disable-next-line consistent-return
-      return new Promise((resolve) => {
-        const peerConnection = peerConnections[peerId];
-        const pcSenders = peerConnection.getSenders() ? peerConnection.getSenders() : [];
-        const senderGetStatsPromises = [];
-        const savedSenders = currentRTCRTPSenders[peerId] || [];
-        let isRenegoNeeded = false;
-
-        // Stop the renegotiation as it will loop since transmittingSendersKeys !== savedSenders
-        if (isEmptyArray(peerConnection.constraints.iceServers) && initOptions.forceTURN && !hasMCU) {
-          logger.log.WARN([null, TAGS.PEER_CONNECTION, null, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.STOP_RENEGOTIATION_FORCE_TURN]);
-          return resolve(isRenegoNeeded);
-        }
-
-        pcSenders.forEach((pcSender) => {
-          if (pcSender.track) { // if track is null, the sender does not transmit anything
-            senderGetStatsPromises.push(pcSender.getStats());
-          }
-        });
-
-        const transmittingSenders = {};
-
-        Promise.all(senderGetStatsPromises).then((resolvedResults) => {
-          resolvedResults.forEach((reports, senderIndex) => {
-            reports.forEach((report) => {
-              if (report && report.ssrc) {
-                transmittingSenders[report.ssrc] = pcSenders[senderIndex];
-              } else if (report && report.type === 'ssrc' && report.id.indexOf('send') > 1) { // required for retrieving sender information for react
-                // native ios
-                report.values.forEach((value) => {
-                  if (value.ssrc) {
-                    transmittingSenders[value.ssrc] = pcSenders[senderIndex];
-                  }
-                });
-              }
-            });
-          });
-
-          const transmittingSendersKeys = Object.keys(transmittingSenders);
-
-          if (transmittingSendersKeys.length !== savedSenders.length) {
-            isRenegoNeeded = true;
-          } else {
-            let senderMatchedCount = 0;
-            for (let tKey = 0; tKey < transmittingSendersKeys.length; tKey += 1) {
-              const tSender = transmittingSenders[transmittingSendersKeys[tKey]];
-              for (let sIndex = 0; sIndex < savedSenders.length; sIndex += 1) {
-                const sSender = savedSenders[sIndex];
-                if (tSender === sSender) {
-                  senderMatchedCount += 1;
-                  break;
-                }
-              }
-            }
-            isRenegoNeeded = senderMatchedCount !== transmittingSendersKeys.length;
-          }
-          resolve(isRenegoNeeded);
-        });
-      });
-    };
-
-    const hasAppliedBufferedRemoteOffer = (updatedState, targetMid) => {
-      if (updatedState.bufferedRemoteOffers[targetMid] && !isEmptyArray(updatedState.bufferedRemoteOffers[targetMid])) {
-        const offerMessage = updatedState.bufferedRemoteOffers[targetMid].shift(); // the first buffered message
-        logger.log.DEBUG([targetMid, 'RTCSessionDescription', offerMessage.type, MESSAGES.NEGOTIATION_PROGRESS.APPLYING_BUFFERED_REMOTE_OFFER], offerMessage);
-        parseAndSetRemoteDescription(offerMessage);
-        Skylink.setSkylinkState(updatedState, updatedState.room.id);
-        return true;
-      }
-
-      return false;
+      logger.log.INFO([message.mid, null, message.type, 'Received ANSWER from peer:'], message);
+      NegotiationState.onAnswerReceived(message);
     };
 
     /**
@@ -23715,38 +23944,23 @@
      * @since 1.0.0
      */
     const answerAckHandler = (message) => {
-      const { mid, rid, success } = message;
-      const updatedState = Skylink.getSkylinkState(rid);
+      const { mid, rid, type } = message;
+      const state = Skylink.getSkylinkState(rid);
       const targetMid = mid;
 
+      logger.log.INFO([message.mid, null, message.type, 'Received ANSWER_ACK from peer:'], message);
+
       dispatchEvent(handshakeProgress({
-        state: HANDSHAKE_PROGRESS$1.ANSWER_ACK,
+        state: type,
         peerId: targetMid,
-        room: updatedState.room,
+        room: state.room,
       }));
 
-      updatedState.peerConnections[targetMid].negotiating = false;
-      Skylink.setSkylinkState(updatedState, rid);
-
-      if (!success) {
-        logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, HANDSHAKE_PROGRESS$1.ANSWER, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_SET_REMOTE_ANSWER]);
-        return;
-      }
-
-      if (!hasAppliedBufferedRemoteOffer(updatedState, targetMid)) {
-        renegotiateIfNeeded(updatedState, targetMid).then((shouldRenegotiate) => {
-          if (shouldRenegotiate) {
-            refreshConnection(updatedState, targetMid)
-              .catch((error) => {
-                logger.log.ERROR([mid, TAGS.SESSION_DESCRIPTION, HANDSHAKE_PROGRESS$1.ANSWER_ACK, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_RENEGOTIATION], error);
-              });
-          }
-        });
-      }
+      NegotiationState.onAnswerAckReceived(message);
     };
 
     const welcomeHandler = (message) => {
-      parseAndSendWelcome(message, CALLERS.WELCOME);
+      enterAndWelcomeHandler(message);
     };
 
     /**
@@ -23984,6 +24198,7 @@
       delete updatedState.peerStreams[peerId];
       delete updatedState.currentRTCRTPSenders[peerId];
       delete updatedState.bufferedLocalOffer[peerId];
+      delete updatedState.negotiationState[peerId];
     };
 
     /**
@@ -25327,15 +25542,12 @@
 
       /**
        *
-       * @param args
+       * @param state
+       * @param answer
        */
-      answer(...args) {
-        return this.messageBuilder.getAnswerMessage(...args).then((answer) => {
-          const state = args[0];
-          this.sendMessage(answer);
-          this.dispatchHandshakeProgress(state, 'ANSWER');
-          return answer;
-        });
+      answer(state, answer) {
+        this.sendMessage(answer);
+        this.dispatchHandshakeProgress(state, 'ANSWER');
       }
 
       answerAck(...args) {
@@ -25362,19 +25574,9 @@
         this.logClientSessionStats(args[0].room.id, join);
       }
 
-      offer(...args) {
-        const room = args[0];
-        const peerId = args[1];
-        const state = Skylink.getSkylinkState(room.id);
-        if (state.peerConnections[peerId].negotiating) {
-          logger.log.DEBUG([peerId, TAGS.SIG_SERVER, null, `${MESSAGES.SIGNALING.ABORTING_OFFER}`]);
-          return;
-        }
-
-        this.messageBuilder.getOfferMessage(...args).then((offer) => {
-          this.sendMessage(offer);
-          this.dispatchHandshakeProgress(state, 'OFFER');
-        });
+      offer(state, offer) {
+        this.sendMessage(offer);
+        this.dispatchHandshakeProgress(state, 'OFFER');
       }
 
       welcome(...args) {
@@ -26029,6 +26231,14 @@
          */
         this.bufferedLocalOffer = {};
         /**
+         * Restart buffered in order to apply when negotiation state is 'negotiated'
+         * @name bufferedRestart
+         * @type Object
+         * @private
+         * @since 2.3.3
+         */
+        this.bufferedRestart = {};
+        /**
          * Offers buffered in order to apply when answerAck has been received
          * @name bufferedRemoteOffers
          * @type Object
@@ -26081,6 +26291,11 @@
         this.streamsSettings = {};
         this.enableStatsGathering = initOptions.enableStatsGathering;
         this.dataTransfers = {};
+        /**
+         * Stores the negotiation state keyed by peerId
+         * @type {{}}
+         */
+        this.negotiationState = {};
       }
     }
 
@@ -29195,8 +29410,8 @@
         return helpers$4.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
       }
 
-      static buildPeerInformations(...args) {
-        return helpers$4.buildPeerInformations(...args);
+      static buildAndSetPeerInformations(...args) {
+        return helpers$4.buildAndSetPeerInformations(...args);
       }
 
       static closePeerConnection(roomState, peerId) {

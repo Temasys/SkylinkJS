@@ -121,8 +121,8 @@ class PeerConnection {
     return helpers.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
   }
 
-  static buildPeerInformations(...args) {
-    return helpers.buildPeerInformations(...args);
+  static buildAndSetPeerInformations(...args) {
+    return helpers.buildAndSetPeerInformations(...args);
   }
 
   static closePeerConnection(roomState, peerId) {
