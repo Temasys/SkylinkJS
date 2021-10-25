@@ -155,7 +155,7 @@ export const peerLeft = (detail = {}) => new SkylinkEvent(PEER_LEFT, { detail })
  * @param {Object} detail - Event's payload.
  * @param {roomInfo} detail.room - The current room
  * @param {String} detail.peerId - The peer's id
- * @param {SkylinkConstants.SERVER_PEER_TYPE} detail.serverPeerType - The server Peer type
+ * @param {SkylinkConstants.PEER_TYPE} detail.serverPeerType - The server Peer type
  */
 export const serverPeerJoined = (detail = {}) => new SkylinkEvent(SERVER_PEER_JOINED, { detail });
 
@@ -166,7 +166,7 @@ export const serverPeerJoined = (detail = {}) => new SkylinkEvent(SERVER_PEER_JO
  * @param {Object} detail - Event's payload
  * @param {String} detail.peerId - The Peer ID
  * @param {roomInfo} detail.room - The room.
- * @param {SkylinkConstants.SERVER_PEER_TYPE} detail.serverPeerType - The server Peer type
+ * @param {SkylinkConstants.PEER_TYPE} detail.serverPeerType - The server Peer type
  */
 export const serverPeerLeft = (detail = {}) => new SkylinkEvent(SERVER_PEER_LEFT, { detail });
 
