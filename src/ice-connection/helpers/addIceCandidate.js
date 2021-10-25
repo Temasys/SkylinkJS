@@ -53,7 +53,7 @@ const addIceCandidateFailure = (room, targetMid, candidateId, candidateType, can
   const { STATS_MODULE, ICE_CANDIDATE } = messages;
   const { CANDIDATE_PROCESSING_STATE, TAGS } = constants;
 
-  logger.log.ERROR([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FAILED_ADDING_CANDIDATE], error);
+  logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FAILED_ADDING_CANDIDATE], error);
   dispatchEvent(candidateProcessingState({
     room: Room.getRoomInfo(room.id),
     state: CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
@@ -76,6 +76,7 @@ const addIceCandidateFailure = (room, targetMid, candidateId, candidateType, can
  * @memberOf IceConnectionHelpers
  * @private
  */
+// eslint-disable-next-line consistent-return
 const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate, roomState) => {
   const state = Skylink.getSkylinkState(roomState.room.id);
   const { peerConnections, room } = state;
@@ -99,13 +100,27 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
     error: null,
   }));
   handleIceCandidateStats.send(room.id, STATS_MODULE.HANDLE_ICE_GATHERING_STATS.PROCESSING, targetMid, candidateId, candidate);
+  let errorMessage = null;
 
-  if (!(peerConnection
-    && peerConnection.signalingState !== PEER_CONNECTION_STATE.CLOSED
-    && peerConnection.remoteDescription
-    && peerConnection.remoteDescription.sdp
-    && peerConnection.remoteDescription.sdp.indexOf(`\r\na=mid:${candidate.sdpMid}\r\n`) > -1)) {
-    logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, `${ICE_CANDIDATE.DROPPING_CANDIDATE} - ${PEER_CONNECTION.NO_PEER_CONNECTION}`]);
+  if (!peerConnection) {
+    errorMessage = PEER_CONNECTION.NO_PEER_CONNECTION;
+  }
+
+  if (peerConnection.signalingState === PEER_CONNECTION_STATE.CLOSED) {
+    errorMessage = PEER_CONNECTION.PEER_CONNECTION_CLOSED;
+  }
+
+  if (!peerConnection.remoteDescription
+    && !peerConnection.remoteDescription.sdp) {
+    errorMessage = 'No remote description';
+  }
+
+  if (targetMid !== constants.PEER_TYPE.REC_SRV && peerConnection.remoteDescription.sdp.indexOf(`\r\na=mid:${candidate.sdpMid}\r\n`) === -1) {
+    errorMessage = PEER_CONNECTION.SDP_ERROR;
+  }
+
+  if (errorMessage) {
+    logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, `${ICE_CANDIDATE.DROPPING_CANDIDATE} - ${errorMessage}`]);
 
     dispatchEvent(candidateProcessingState({
       peerId: targetMid,
@@ -114,9 +129,10 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
       candidate,
       candidateId,
       state: constants.CANDIDATE_PROCESSING_STATE.DROPPED,
-      error: new Error(PEER_CONNECTION.NO_PEER_CONNECTION),
+      error: new Error(errorMessage),
     }));
-    handleIceCandidateStats.send(room.id, STATS_MODULE.HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, targetMid, candidateId, candidate, PEER_CONNECTION.NO_PEER_CONNECTION);
+
+    return handleIceCandidateStats.send(room.id, STATS_MODULE.HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, targetMid, candidateId, candidate, errorMessage);
   }
 
   try {
