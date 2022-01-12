@@ -28,6 +28,7 @@ const getSDPCommonSupports = (targetMid, sessionDescription = null, roomKey) => 
 
   /* eslint-disable no-restricted-syntax */
   /* eslint-disable no-prototype-builtins */
+  // eslint-disable-next-line no-unused-vars
   for (const ac in localCodecs.audio) {
     if (localCodecs.audio.hasOwnProperty(ac) && localCodecs.audio[ac] && remoteCodecs.audio[ac]) {
       offer.audio = true;
@@ -35,6 +36,7 @@ const getSDPCommonSupports = (targetMid, sessionDescription = null, roomKey) => 
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   for (const vc in localCodecs.video) {
     if (localCodecs.video.hasOwnProperty(vc) && localCodecs.video[vc] && remoteCodecs.video[vc]) {
       offer.video = true;

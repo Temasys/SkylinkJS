@@ -45,6 +45,12 @@ const isProtocol = (data, peerId, channelName, channelType, channelProp) => {
  */
 const processDataChannelData = (roomKey, rawData, peerId, channelName, channelType) => {
   const state = Skylink.getSkylinkState(roomKey);
+
+  if (!state) {
+    logger.log.WARN([peerId, TAGS.DATA_CHANNEL, null, 'Dropping data received as peer is no longer in the room'], rawData);
+    return null;
+  }
+
   const { room, dataTransfers } = state;
   let transferId = null;
   // let streamId = null;
