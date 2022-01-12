@@ -39,6 +39,9 @@ You'll need a Temasys Account, and an App key to use this. [Register here to get
 
 ## How to build your own Temasys SkylinkJS Web SDK
 Using [Git](https://git-scm.com/download) command line tools, execute the following:
+
+Node version: `14.17.5`
+
 ```
 # 1. Clone or download this repository via git terminal.
 
