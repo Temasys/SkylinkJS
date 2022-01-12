@@ -3,7 +3,7 @@
   factory();
 })((function () { 'use strict';
 
-  /* SkylinkJS v2.4.1 Wed Jan 12 2022 05:58:03 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.4.1 Wed Jan 12 2022 06:46:06 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -6142,7 +6142,7 @@
      * @param {Object} detail - Event's payload.
      * @param {roomInfo} detail.room - The current room
      * @param {String} detail.peerId - The peer's id
-     * @param {SkylinkConstants.PEER_TYPE} detail.serverPeerType - The server Peer type
+     * @param {SkylinkConstants.SERVER_PEER_TYPE} detail.serverPeerType - The server Peer type
      */
     const serverPeerJoined = (detail = {}) => new SkylinkEvent(SERVER_PEER_JOINED, { detail });
 
@@ -6153,7 +6153,7 @@
      * @param {Object} detail - Event's payload
      * @param {String} detail.peerId - The Peer ID
      * @param {roomInfo} detail.room - The room.
-     * @param {SkylinkConstants.PEER_TYPE} detail.serverPeerType - The server Peer type
+     * @param {SkylinkConstants.SERVER_PEER_TYPE} detail.serverPeerType - The server Peer type
      */
     const serverPeerLeft = (detail = {}) => new SkylinkEvent(SERVER_PEER_LEFT, { detail });
 
@@ -6380,7 +6380,7 @@
      */
     const loggedOnConsole = (detail = {}) => new SkylinkEvent(LOGGED_ON_CONSOLE, { detail });
 
-    var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.4.1";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"^7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.16.0","@babel/preset-env":"7.16.0","@babel/register":"7.16.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.2.3",eslint:"^8.1.0","eslint-config-airbnb":"^18.2.1","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.25.2","eslint-plugin-jsx-a11y":"^6.4.1",finalhandler:"^1.1.2",husky:"^7.0.4",jsdoc:"^3.6.7",jsdom:"^18.0.1","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.14",rollup:"^2.59.0","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.4.0","rollup-plugin-delete":"^2.0.0","rollup-plugin-external-globals":"^0.6.1","rollup-plugin-gzip":"^2.5.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2","serve-static":"^1.14.1","whatwg-fetch":"^3.6.2"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
+    var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.4.1";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.16.0","@babel/preset-env":"7.16.0","@babel/register":"7.16.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.2.3",eslint:"^8.1.0","eslint-config-airbnb":"^18.2.1","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.25.2","eslint-plugin-jsx-a11y":"^6.4.1",finalhandler:"^1.1.2",husky:"^7.0.4",jsdoc:"^3.6.7",jsdom:"^18.0.1","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.14",rollup:"^2.59.0","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.4.0","rollup-plugin-delete":"^2.0.0","rollup-plugin-external-globals":"^0.6.1","rollup-plugin-gzip":"^2.5.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2","serve-static":"^1.14.1","whatwg-fetch":"^3.6.2"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
 
     /**
      * @namespace SkylinkConstants
@@ -6417,6 +6417,7 @@
      *  <li>{@link SkylinkConstants.RTMP_STATE|RTMP_STATE} </li>
      *  <li>{@link SkylinkConstants.RECORDING_STATE|RECORDING_STATE} </li>
      *  <li>{@link SkylinkConstants.SDP_SEMANTICS|SDP_SEMANTICS} </li>
+     *  <li>{@link SkylinkConstants.SERVER_PEER_TYPE|SERVER_PEER_TYPE} </li>
      *  <li>{@link SkylinkConstants.SOCKET_ERROR|SOCKET_ERROR} </li>
      *  <li>{@link SkylinkConstants.SOCKET_FALLBACK|SOCKET_FALLBACK} </li>
      *  <li>{@link SkylinkConstants.SYSTEM_ACTION|SYSTEM_ACTION} </li>
@@ -7056,7 +7057,6 @@
      * @readOnly
      * @memberOf SkylinkConstants
      * @since 0.6.1
-     * @deprecated
      */
     const SERVER_PEER_TYPE = {
       MCU: 'mcu',
@@ -7866,6 +7866,7 @@
      *   and at this stage, any current recording session or mixin is aborted.
      * @constant
      * @type Object
+     * beta
      * @memberOf SkylinkConstants
      * @since 0.6.16
      */
@@ -8384,7 +8385,6 @@
      */
     const PEER_TYPE = {
       MCU: 'MCU',
-      REC_SRV: 'REC_SRV',
     };
 
     /**
@@ -8561,7 +8561,7 @@
           NO_FETCH_SUPPORT: 'Fetch API is not supported in your browser. Please make sure you are using a modern browser: https://caniuse.com/#search=fetch',
           NO_APP_KEY: 'Please provide an App Key - Get one at console.temasys.io!',
           AUTH_CORS: 'Promise rejected due to CORS forbidden request - Please visit: http://support.temasys.com.sg/support/solutions/articles/12000006761-i-get-a-403-forbidden-access-is-denied-when-i-load-the-application-why-',
-          AUTH_GENERAL: 'Promise rejected due to authentication issue',
+          AUTH_GENERAL: 'Promise rejected due to network issue',
           SOCKET_CREATE_FAILED: 'Failed creating socket connection object ->',
           SOCKET_ERROR_ABORT: 'Reconnection aborted as the connection timed out or there no more available ports, transports and final attempts left',
         },
@@ -8591,7 +8591,6 @@
           ERROR: 'Leave room error -->',
           NO_PEERS: 'No peers in room',
           DROPPING_HANGUP: 'Dropping hang-up from remote peer',
-          DROPPING_DUPLICATE_BYE: 'Dropping duplicate bye',
           LEAVE_ALL_ROOMS: {
             SUCCESS: 'Successfully left all rooms',
             ERROR: 'Leave all rooms error -->',
@@ -8633,11 +8632,10 @@
         MCU: 'MCU connected',
         FAILED_STATE: 'Peer Connection state: failed',
         ADD_TRANSCEIVER: 'Adding empty transceiver',
-        SDP_ERROR: 'Sdp error',
         ERRORS: {
           REMOVE_TRACK: 'Error removing track from peer connection',
           NOT_FOUND: 'Peer Connection not found',
-          NOT_STABLE: 'Peer Connection is not stable',
+          NOT_STABLE: 'Peer Connetion is not stable',
         },
         REFRESH_CONNECTION: {
           START: 'Refreshing peer connections',
@@ -8678,11 +8676,9 @@
         ADD_CANDIDATE_TO_BUFFER: 'Adding ICE candidate to buffer',
         CANDIDATE_GENERATED: 'Generated ICE candidate ->',
         SENDING_CANDIDATE: 'Sending ICE candidate ->',
-        NO_SDP_MID: 'No mid for the candidate in sdp',
       },
       SESSION_DESCRIPTION: {
         parsing_media_ssrc: 'Parsing session description media SSRCs ->',
-        NO_REMOTE_DESCRIPTION: 'No remote description',
       },
       DATA_CHANNEL: {
         NO_DATA_CHANNEL_CONNECTION: 'No Data Channel connection',
@@ -8940,12 +8936,9 @@
           ERROR_STOP_ACTIVE: 'error-stop-when-active',
           ERROR_MIN_STOP: 'error-min-stop',
           MCU_RECORDING_ERROR: 'mcu-recording-error',
-          REC_SERVER_UNAVAILABLE: 'rec-server-unavailable',
         },
       },
       RECORDING: {
-        AVAILABLE: 'Recording server is available to start a recording',
-        UNAVAILABLE: 'Recording server is unavailable to start a recording',
         START_SUCCESS: 'Started recording',
         STOP_SUCCESS: 'Stopped recording',
         START_FAILED: 'Failed to start recording',
@@ -8959,7 +8952,6 @@
           STOP_ABRUPT: 'Recording stopped abruptly before 4 seconds',
           SESSION_EMPTY: 'Received request of "off" but the session is empty',
           MCU_RECORDING_ERROR: 'Recording error received from MCU',
-          REC_SERVER_UNAVAILABLE: 'Recording server is unavailable to start a recording - retry later',
         },
       },
       RTMP: {
@@ -18359,7 +18351,7 @@
       const { STATS_MODULE, ICE_CANDIDATE } = MESSAGES;
       const { CANDIDATE_PROCESSING_STATE, TAGS } = constants;
 
-      logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FAILED_ADDING_CANDIDATE], error);
+      logger.log.ERROR([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FAILED_ADDING_CANDIDATE], error);
       dispatchEvent(candidateProcessingState({
         room: Room.getRoomInfo(room.id),
         state: CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
@@ -18382,7 +18374,6 @@
      * @memberOf IceConnectionHelpers
      * @private
      */
-    // eslint-disable-next-line consistent-return
     const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate, roomState) => {
       const state = Skylink.getSkylinkState(roomState.room.id);
       const { peerConnections, room } = state;
@@ -18392,9 +18383,7 @@
         sdpMid: nativeCandidate.sdpMid,
         sdpMLineIndex: nativeCandidate.sdpMLineIndex,
       };
-      const {
-        STATS_MODULE, ICE_CANDIDATE, PEER_CONNECTION, SESSION_DESCRIPTION,
-      } = MESSAGES;
+      const { STATS_MODULE, ICE_CANDIDATE, PEER_CONNECTION } = MESSAGES;
       const { CANDIDATE_PROCESSING_STATE: CANDIDATE_PROCESSING_STATE$1, PEER_CONNECTION_STATE, TAGS } = constants;
 
       logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.ADDING_CANDIDATE]);
@@ -18408,26 +18397,13 @@
         error: null,
       }));
       handleIceCandidateStats.send(room.id, STATS_MODULE.HANDLE_ICE_GATHERING_STATS.PROCESSING, targetMid, candidateId, candidate);
-      let errorMessage = null;
 
-      if (!peerConnection) {
-        errorMessage = PEER_CONNECTION.NO_PEER_CONNECTION;
-      }
-
-      if (peerConnection.signalingState === PEER_CONNECTION_STATE.CLOSED) {
-        errorMessage = PEER_CONNECTION.PEER_CONNECTION_CLOSED;
-      }
-
-      if (!peerConnection.remoteDescription || !peerConnection.remoteDescription.sdp) {
-        errorMessage = SESSION_DESCRIPTION.NO_REMOTE_DESCRIPTION;
-      }
-
-      if (targetMid !== PEER_TYPE.REC_SRV && peerConnection.remoteDescription.sdp.indexOf(`\r\na=mid:${candidate.sdpMid}\r\n`) === -1) {
-        errorMessage = PEER_CONNECTION.SDP_ERROR;
-      }
-
-      if (errorMessage) {
-        logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, `${ICE_CANDIDATE.DROPPING_CANDIDATE} - ${errorMessage}`]);
+      if (!(peerConnection
+        && peerConnection.signalingState !== PEER_CONNECTION_STATE.CLOSED
+        && peerConnection.remoteDescription
+        && peerConnection.remoteDescription.sdp
+        && peerConnection.remoteDescription.sdp.indexOf(`\r\na=mid:${candidate.sdpMid}\r\n`) > -1)) {
+        logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, `${ICE_CANDIDATE.DROPPING_CANDIDATE} - ${PEER_CONNECTION.NO_PEER_CONNECTION}`]);
 
         dispatchEvent(candidateProcessingState({
           peerId: targetMid,
@@ -18436,10 +18412,9 @@
           candidate,
           candidateId,
           state: CANDIDATE_PROCESSING_STATE.DROPPED,
-          error: new Error(errorMessage),
+          error: new Error(PEER_CONNECTION.NO_PEER_CONNECTION),
         }));
-
-        return handleIceCandidateStats.send(room.id, STATS_MODULE.HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, targetMid, candidateId, candidate, errorMessage);
+        handleIceCandidateStats.send(room.id, STATS_MODULE.HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, targetMid, candidateId, candidate, PEER_CONNECTION.NO_PEER_CONNECTION);
       }
 
       try {
@@ -22559,7 +22534,7 @@
 
             dispatchEvent(serverPeerJoined({
               peerId: targetMid,
-              serverPeerType: PEER_TYPE.MCU,
+              serverPeerType: SERVER_PEER_TYPE.MCU,
               room: Room.getRoomInfo(currentRoom.id),
             }));
 
@@ -22598,20 +22573,12 @@
           if (!peerInformations[targetMid]) {
             _addPeerConnection(params);
 
-            if (targetMid === PEER_TYPE.REC_SRV) {
-              dispatchEvent(serverPeerJoined({
-                peerId: targetMid,
-                serverPeerType: PEER_TYPE.REC_SRV,
-                room: Room.getRoomInfo(currentRoom.id),
-              }));
-            } else {
-              dispatchEvent(peerJoined({
-                peerId: targetMid,
-                peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
-                isSelf: false,
-                room: Room.getRoomInfo(currentRoom.id),
-              }));
-            }
+            dispatchEvent(peerJoined({
+              peerId: targetMid,
+              peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+              isSelf: false,
+              room: Room.getRoomInfo(currentRoom.id),
+            }));
 
             dispatchEvent(handshakeProgress({
               peerId: targetMid,
@@ -22632,10 +22599,7 @@
         targetMid,
       } = params;
       const state = Skylink.getSkylinkState(currentRoom.id);
-      const {
-        hasMCU,
-        peerInformations,
-      } = state;
+      const { hasMCU, peerInformations } = state;
 
       switch (hasMCU) {
         case true:
@@ -22650,25 +22614,17 @@
           }));
 
           break;
-        case false: // P2P
+        case false:
 
           if (!peerInformations[targetMid]) {
             _addPeerConnection(params);
 
-            if (targetMid === PEER_TYPE.REC_SRV) {
-              dispatchEvent(serverPeerJoined({
-                peerId: targetMid,
-                serverPeerType: PEER_TYPE.REC_SRV,
-                room: Room.getRoomInfo(currentRoom.id),
-              }));
-            } else {
-              dispatchEvent(peerJoined({
-                peerId: targetMid,
-                peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
-                isSelf: false,
-                room: Room.getRoomInfo(currentRoom.id),
-              }));
-            }
+            dispatchEvent(peerJoined({
+              peerId: targetMid,
+              peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+              isSelf: false,
+              room: Room.getRoomInfo(currentRoom.id),
+            }));
           }
 
           break;
@@ -24268,17 +24224,17 @@
       const { room } = roomState;
       const peerInfo = PeerData.getPeerInfo(peerId, room);
 
-      if (peerId === PEER_TYPE.MCU || peerId === PEER_TYPE.REC_SRV) {
+      if (peerId === PEER_TYPE.MCU) {
         const updatedState = roomState;
         dispatchEvent(serverPeerLeft({
           peerId,
-          serverPeerType: peerId,
+          serverPeerType: SERVER_PEER_TYPE.MCU,
           room,
         }));
         updatedState.hasMCU = false;
 
-        // eslint-disable-next-line consistent-return
-        return Skylink.setSkylinkState(updatedState, room.id);
+        Skylink.setSkylinkState(updatedState, room.id);
+        return;
       }
 
       dispatchEvent(peerLeft({
@@ -24305,7 +24261,6 @@
      * @memberOf SignalingMessageHandler
      * @private
      */
-    // eslint-disable-next-line consistent-return
     const byeHandler = (message) => {
       const { mid, rid, publisherId } = message;
       const roomKey = rid;
@@ -24314,10 +24269,6 @@
 
       if (roomState.hasMCU) {
         peerId = publisherId;
-      }
-
-      if (!roomState.peerConnections[peerId] || !roomState.peerInformations[peerId]) {
-        return logger.log.DEBUG([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.DROPPING_DUPLICATE_BYE], message);
       }
 
       logger.log.INFO([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.START]);
@@ -25224,14 +25175,11 @@
       settings: options,
     });
 
-    const recordingMessage = (rid, type) => {
-      const state = Skylink.getSkylinkState(rid);
-      return {
-        type,
-        rid,
-        target: state.hasMCU ? PEER_TYPE.MCU : PEER_TYPE.REC_SRV,
-      };
-    };
+    const recordingMessage = (rid, type) => ({
+      type,
+      rid,
+      target: PEER_TYPE.MCU,
+    });
 
     const rtmpMessage = (type, rid, mid, rtmpId, streamId = null, endpoint = null) => {
       const message = {
@@ -29846,31 +29794,30 @@
      * @param {boolean} isStartRecording
      * @private
      */
-    // eslint-disable-next-line consistent-return
     const commonRecordingOperations = (roomState, isStartRecording) => new Promise((resolve, reject) => {
-      const {
-        currentRecordingId, recordingStartInterval, peerConnections, hasMCU,
-      } = roomState;
-      const errorMessage = isStartRecording ? MESSAGES.RECORDING.START_FAILED : MESSAGES.RECORDING.STOP_FAILED;
+      const { hasMCU, currentRecordingId, recordingStartInterval } = roomState;
+      let errorMessage = isStartRecording ? MESSAGES.RECORDING.START_FAILED : MESSAGES.RECORDING.STOP_FAILED;
+
+      if (!hasMCU) {
+        errorMessage = `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.MCU_NOT_CONNECTED}`;
+        const statsStateKey = isStartRecording ? MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_NO_MCU_START : MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_NO_MCU_STOP;
+        const error = manageErrorStatsAndCallback(roomState, errorMessage, statsStateKey, null, null);
+        reject(error);
+      }
 
       if (isStartRecording && currentRecordingId) {
         const error = manageErrorStatsAndCallback(roomState, `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.EXISTING_RECORDING_IN_PROGRESS}`, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_START_ACTIVE, currentRecordingId, null);
-        return reject(error);
-      }
-
-      if (isStartRecording && !hasMCU && peerConnections[PEER_TYPE.REC_SRV]) {
-        const error = manageErrorStatsAndCallback(roomState, `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.REC_SERVER_UNAVAILABLE}`, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.REC_SERVER_UNAVAILABLE, currentRecordingId || null, null);
-        return reject(error);
+        reject(error);
       }
 
       if (!isStartRecording && !currentRecordingId) {
         const error = manageErrorStatsAndCallback(roomState, `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.NO_RECORDING_IN_PROGRESS}`, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_STOP_ACTIVE, currentRecordingId, null);
-        return reject(error);
+        reject(error);
       }
 
       if (!isStartRecording && recordingStartInterval) {
         const error = manageErrorStatsAndCallback(roomState, `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.MIN_RECORDING_TIME}`, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_MIN_STOP, currentRecordingId, null);
-        return reject(error);
+        reject(error);
       }
 
       manageRecordingEventListeners(resolve, isStartRecording);
