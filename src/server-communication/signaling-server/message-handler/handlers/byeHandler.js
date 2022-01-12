@@ -5,7 +5,7 @@ import { peerLeft, serverPeerLeft } from '../../../../skylink-events';
 import PeerData from '../../../../peer-data';
 import PeerConnection from '../../../../peer-connection/index';
 import {
-  PEER_TYPE, PEER_CONNECTION_STATE, TAGS,
+  PEER_TYPE, PEER_CONNECTION_STATE, SERVER_PEER_TYPE, TAGS,
 } from '../../../../constants';
 import MESSAGES from '../../../../messages';
 import { isEmptyObj } from '../../../../utils/helpers';
@@ -108,17 +108,17 @@ const triggerPeerLeftEventAndChangeState = (roomKey, peerId) => {
   const { room } = roomState;
   const peerInfo = PeerData.getPeerInfo(peerId, room);
 
-  if (peerId === PEER_TYPE.MCU || peerId === PEER_TYPE.REC_SRV) {
+  if (peerId === PEER_TYPE.MCU) {
     const updatedState = roomState;
     dispatchEvent(serverPeerLeft({
       peerId,
-      serverPeerType: peerId,
+      serverPeerType: SERVER_PEER_TYPE.MCU,
       room,
     }));
     updatedState.hasMCU = false;
 
-    // eslint-disable-next-line consistent-return
-    return Skylink.setSkylinkState(updatedState, room.id);
+    Skylink.setSkylinkState(updatedState, room.id);
+    return;
   }
 
   dispatchEvent(peerLeft({
@@ -145,7 +145,6 @@ const tryCloseDataChannel = (roomKey, peerId) => {
  * @memberOf SignalingMessageHandler
  * @private
  */
-// eslint-disable-next-line consistent-return
 const byeHandler = (message) => {
   const { mid, rid, publisherId } = message;
   const roomKey = rid;
@@ -154,10 +153,6 @@ const byeHandler = (message) => {
 
   if (roomState.hasMCU) {
     peerId = publisherId;
-  }
-
-  if (!roomState.peerConnections[peerId] || !roomState.peerInformations[peerId]) {
-    return logger.log.DEBUG([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.DROPPING_DUPLICATE_BYE], message);
   }
 
   logger.log.INFO([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.START]);
