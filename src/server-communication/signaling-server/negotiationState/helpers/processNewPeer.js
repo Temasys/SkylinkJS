@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import Skylink from '../../../../index';
 import {
-  HANDSHAKE_PROGRESS, PEER_TYPE, TAGS,
+  HANDSHAKE_PROGRESS, PEER_TYPE, SERVER_PEER_TYPE, TAGS,
 } from '../../../../constants';
 import PeerConnection from '../../../../peer-connection';
 import logger from '../../../../logger';
@@ -61,7 +61,7 @@ const _processPeerFromWelcome = (params) => {
 
         dispatchEvent(serverPeerJoined({
           peerId: targetMid,
-          serverPeerType: PEER_TYPE.MCU,
+          serverPeerType: SERVER_PEER_TYPE.MCU,
           room: Room.getRoomInfo(currentRoom.id),
         }));
 
@@ -100,13 +100,7 @@ const _processPeerFromWelcome = (params) => {
       if (!peerInformations[targetMid]) {
         _addPeerConnection(params);
 
-        if (targetMid === PEER_TYPE.REC_SRV) {
-          dispatchEvent(serverPeerJoined({
-            peerId: targetMid,
-            serverPeerType: PEER_TYPE.REC_SRV,
-            room: Room.getRoomInfo(currentRoom.id),
-          }));
-        } else {
+        if (targetMid !== PEER_TYPE.REC_SRV) { // recording server peer should not be surfaced to client
           dispatchEvent(peerJoined({
             peerId: targetMid,
             peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
@@ -155,18 +149,12 @@ const _processPeerFromEnter = (params) => {
       }));
 
       break;
-    case false: // P2P
+    case false:
 
       if (!peerInformations[targetMid]) {
         _addPeerConnection(params);
 
-        if (targetMid === PEER_TYPE.REC_SRV) {
-          dispatchEvent(serverPeerJoined({
-            peerId: targetMid,
-            serverPeerType: PEER_TYPE.REC_SRV,
-            room: Room.getRoomInfo(currentRoom.id),
-          }));
-        } else {
+        if (targetMid !== PEER_TYPE.REC_SRV) { // recording server peer should not be surfaced to client
           dispatchEvent(peerJoined({
             peerId: targetMid,
             peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
