@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      logger/index.js - Documentation
+      SkylinkLogger - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,154 +82,943 @@
   <div id="main">
     
       <h1 class="page-title">
-        logger/index.js
+        SkylinkLogger
       </h1>
     
 
     
-      
 
 <section>
+  <header>
+    
+      <h2>
+        
+        SkylinkLogger
+        
+      </h2>
+
+      
+        <div class="class-description">
+          <p>Class used for logging messages on the console. Exports a singleton logger object.</p>
+        </div>
+      
+    
+  </header>
+
   <article>
-    <pre class="prettyprint source linenums"><code>import { logFn, persistLogLevel, getPersistedLevel } from './log-helpers';
-import MESSAGES from '../messages';
-import { isANumber } from '../utils/helpers';
+    <div class="container-overview">
+      
+        
 
-/**
- * @classdesc Class used for logging messages on the console. Exports a singleton logger object.
- * @class SkylinkLogger
- * @public
- * @example
- * import { SkylinkLogger } from 'skylinkjs';
- *
- * const skylinkLogger = new SkylinkLogger();
- */
-class SkylinkLogger {
-  constructor() {
-    /**
-     * @description List of log levels.
-     * @type {Object} logLevels
-     * @property {number} TRACE - All logs.
-     * @property {number} DEBUG
-     * @property {number} INFO
-     * @property {number} WARN
-     * @property {number} ERROR
-     * @property {number} SILENT - No logs.
-     */
-    this.logLevels = {
-      TRACE: 0, // All Logs
-      DEBUG: 1,
-      INFO: 2,
-      WARN: 3,
-      ERROR: 4, // Ideal level for Production Env.
-      SILENT: 5, // No logging
-    };
 
-    this.level = getPersistedLevel(this.logLevels);
+  
+    <h2>Constructor</h2>
+  
 
-    /**
-     * @description The flag that enables the store logs function.
-     * @type {boolean}
-     */
-    this.storeLogs = false;
+  <span class='name-container'>
+    <a class="link-icon" href="#SkylinkLogger">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="SkylinkLogger">
+      <span class="type-signature"></span>new SkylinkLogger<span class="signature">()</span><span class="type-signature"></span>
+    </h4>
+  </span>
 
-    /**
-     * @description The stored logs when storeLogs flag is set to true.
-     * @type {Array.&lt;logItems>} The array of stored logs
-     */
-    this.storedLogs = [];
-  }
+  
 
-  /**
-   * @description Method that sets the log level.
-   * @param {number} level - The log level to be set. REF: {@link SkylinkLogger#logLevels|logLevels}
-   * @param {Boolean} storeLogs - The flag if logs should be stored.
-   * @public
-   * @example
-   * skylinkLogger.setLogLevels(skylinkLogger.logLevels.TRACE);
-   * @alias SkylinkLogger#setLevel
-   */
-  setLevel(level = this.levels.ERROR, storeLogs) {
-    if (isANumber(level)) {
-      this.level = level;
-      persistLogLevel(this.level);
-    } else {
-      this.level = this.levels.ERROR;
-    }
 
-    if (storeLogs) {
-      this.storeLogs = storeLogs;
-    }
-  }
 
-  /**
-   * @description Enables logging with highest level (TRACE).
-   * @public
-   * @alias SkylinkLogger#enableAll
-   */
-  enableAll() {
-    this.setLevel(this.logLevels.TRACE);
-  }
 
-  /**
-   * @description Disables all logging with lowest level (SILENT).
-   * @public
-   * @alias SkylinkLogger#disableAll
-   */
-  disableAll() {
-    this.setLevel(this.logLevels.SILENT);
-  }
 
-  getLogs() {
-    if (this.storeLogs) {
-      return this.storedLogs;
-    }
 
-    this.log.WARN(MESSAGES.LOGGER.LOGS_NOT_STORED);
-    return null;
-  }
 
-  clearLogs() {
-    this.log.INFO(MESSAGES.LOGGER.LOGS_CLEARED);
-    this.storedLogs = [];
-  }
-}
 
-/**
- * @type {SkylinkLogger}
- * @private
- */
-const logger = new SkylinkLogger();
 
-/**
- * @description Method to trigger a log
- * @type {{TRACE: SkylinkLogger.log.TRACE, DEBUG: SkylinkLogger.log.DEBUG, INFO: SkylinkLogger.log.INFO, WARN: SkylinkLogger.log.WARN, ERROR: SkylinkLogger.log.ERROR}}
- * @private
- */
-SkylinkLogger.prototype.log = {
-  TRACE: (...params) => {
-    logFn(logger, logger.logLevels.TRACE, ...params);
-  },
-  DEBUG: (...params) => {
-    logFn(logger, logger.logLevels.DEBUG, ...params);
-  },
-  INFO: (...params) => {
-    logFn(logger, logger.logLevels.INFO, ...params);
-  },
-  WARN: (...params) => {
-    logFn(logger, logger.logLevels.WARN, ...params);
-  },
-  ERROR: (...params) => {
-    logFn(logger, logger.logLevels.ERROR, ...params);
-  },
-};
 
-export default logger;
-</code></pre>
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="logger_index.js.html">logger/index.js</a>, <a href="logger_index.js.html#line5">line 5</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="example-container">
+    <a class="link-icon" href="#SkylinkLogger-examples">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h5 id="SkylinkLogger-examples">Example</h5>
+    
+
+  <pre class="prettyprint"><code>import { SkylinkLogger } from 'skylinkjs';
+
+SkylinkLogger.setLevel(SkylinkLogger.logLevels.DEBUG);</code></pre>
+
+
+  </div>
+
+
+      
+    </div>
+
+    
+
+    
+
+    
+
+     
+
+    
+
+    
+        <h3 class="subsection-title">Members</h3>
+
+        
+            
+
+<h4 class="name" id="logLevels">
+  <span class="type-signature"></span>logLevels<span class="type-signature"> :Object</span>
+</h4>
+
+
+
+
+  <div class="description">
+    <p>List of log levels.</p>
+  </div>
+
+
+
+
+  <h5 class="subsection-title">Properties:</h5>
+
+  
+
+<table class="props">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+
+    <tr>
+      
+        <td class="name"><code>TRACE</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>All logs.</p>
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>DEBUG</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>INFO</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>WARN</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>ERROR</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          
+          </td>
+    </tr>
+
+  
+
+    <tr>
+      
+        <td class="name"><code>SILENT</code></td>
+      
+
+      <td class="type">
+        
+          
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+        
+      </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>No logs.</p>
+          </td>
+    </tr>
+
+  
+  </tbody>
+</table>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="logger_index.js.html">logger/index.js</a>, <a href="logger_index.js.html#line26">line 26</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+          
+        
+            
+
+<h4 class="name" id="storedLogs">
+  <span class="type-signature"></span>storedLogs<span class="type-signature"> :Array.&lt;<a href="global.html#logItems">logItems</a>></span>
+</h4>
+
+
+
+
+  <div class="description">
+    <p>The stored logs when storeLogs flag is set to true.</p>
+  </div>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="logger_index.js.html">logger/index.js</a>, <a href="logger_index.js.html#line47">line 47</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+          
+        
+            
+
+<h4 class="name" id="storeLogs">
+  <span class="type-signature"></span>storeLogs<span class="type-signature"> :boolean</span>
+</h4>
+
+
+
+
+  <div class="description">
+    <p>The flag that enables the store logs function.</p>
+  </div>
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="logger_index.js.html">logger/index.js</a>, <a href="logger_index.js.html#line41">line 41</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+          
+        
+    
+
+    
+      <h3 class="subsection-title">Methods</h3>
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#disableAll">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="disableAll">
+      <span class="type-signature"></span>disableAll<span class="signature">()</span><span class="type-signature"></span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>Disables all logging with lowest level (SILENT).</p>
+  </div>
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="logger_index.js.html">logger/index.js</a>, <a href="logger_index.js.html#line86">line 86</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#enableAll">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="enableAll">
+      <span class="type-signature"></span>enableAll<span class="signature">()</span><span class="type-signature"></span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>Enables logging with highest level (TRACE).</p>
+  </div>
+
+
+
+
+
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="logger_index.js.html">logger/index.js</a>, <a href="logger_index.js.html#line77">line 77</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+      
+        
+
+
+  
+
+  <span class='name-container'>
+    <a class="link-icon" href="#setLevel">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h4 class="name" id="setLevel">
+      <span class="type-signature"></span>setLevel<span class="signature">(level, storeLogs)</span><span class="type-signature"></span>
+    </h4>
+  </span>
+
+  
+
+
+
+  <div class="description">
+    <p>Method that sets the log level.</p>
+  </div>
+
+
+
+
+
+
+
+  <h5>Parameters:</h5>
+  
+
+<table class="params">
+  <thead>
+    <tr>
+      
+        <th>Name</th>
+      
+
+      <th>Type</th>
+
+      
+
+      
+
+      <th class="last">Description</th>
+    </tr>
+  </thead>
+
+  <tbody>
+    
+      <tr>
+        
+          <td class="name"><code>level</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      number
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The log level to be set. REF: <a href="SkylinkLogger.html#logLevels"><code>logLevels</code></a></p>
+          
+        </td>
+      </tr>
+
+    
+      <tr>
+        
+          <td class="name"><code>storeLogs</code></td>
+        
+
+        <td class="type">
+          
+            
+    <span class="param-type">
+      Boolean
+    </span>
+
+    
+
+
+          
+        </td>
+
+        
+
+        
+
+        <td class="description last">
+          <p>The flag if logs should be stored.</p>
+          
+        </td>
+      </tr>
+
+    
+  </tbody>
+</table>
+
+
+
+
+
+<dl class="details">
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    <dt class="tag-source">Source:</dt>
+    <dd class="tag-source">
+      <ul class="dummy">
+        <li>
+          <a href="logger_index.js.html">logger/index.js</a>, <a href="logger_index.js.html#line59">line 59</a>
+        </li>
+      </ul>
+    </dd>
+  
+
+  
+
+  
+
+  
+</dl>
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <div class="example-container">
+    <a class="link-icon" href="#setLevel-examples">
+      <svg height="20" width="20" style="fill: black;">
+        <use xlink:href="#linkIcon"></use>
+      </svg>
+    </a>
+    <h5 id="setLevel-examples">Example</h5>
+    
+
+  <pre class="prettyprint"><code>skylinkLogger.setLogLevels(skylinkLogger.logLevels.TRACE);</code></pre>
+
+
+  </div>
+
+
+      
+    
+
+    
+
+    
   </article>
 </section>
 
-    
+
 
 
   </div>

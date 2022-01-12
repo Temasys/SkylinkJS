@@ -100,7 +100,7 @@ class SkylinkPublicInterface {
    * const message = "Hello everyone!";
    * const roomName = "Room_1";
    *
-   * skylink.sendP2PMessage(message, null, roomName);
+   * skylink.sendP2PMessage(roomName, message);
    * @example
    * Example 3: Sending message to a peer in all rooms
    *
@@ -115,7 +115,7 @@ class SkylinkPublicInterface {
    * const targetPeerId = "peerId";
    * const roomName = "Room_1";
    *
-   * skylink.sendP2PMessage(message, targetPeerId, roomName);
+   * skylink.sendP2PMessage(roomName, message, targetPeerId);
    * @example
    * Example 5: Sending message to selected Peers in a room
    *
@@ -123,7 +123,7 @@ class SkylinkPublicInterface {
    * const selectedPeers = ["peerId_1", "peerId_2"];
    * const roomName = "Room_1";
    *
-   * skylink.sendP2PMessage(message, selectedPeers, roomName);
+   * skylink.sendP2PMessage(roomName, message, selectedPeers);
    * @example
    * // Listen for onIncomingMessage event
    * skylink.addEventListener(SkylinkEvents.ON_INCOMING_MESSAGE, (evt) => {
@@ -150,12 +150,11 @@ class SkylinkPublicInterface {
    * - When provided as an Array, it will send the message to only peers which ids are in the list.
    * - When not provided, it will broadcast the message to all connected peers in the room.
    * @example
-   * Example 1: Broadcasting to all peers
+   * Example 1: Broadcasting to all peers in a room
    *
    * let sendMessage = (roomName) => {
    *    const message = "Hi!";
-   *    const selectedPeers = this.state[location]['selectedPeers'];
-   *    skylink.sendMessage(roomName, message, selectedPeers);
+   *    skylink.sendMessage(roomName, message);
    * }
    * @example
    * Example 2: Broadcasting to selected peers
@@ -481,11 +480,11 @@ class SkylinkPublicInterface {
    * @property {Number} [maxBandwidth.video] - The maximum video streaming bandwidth sent from peer.
    * @property {Number} [maxBandwidth.data] - The maximum data streaming bandwidth sent from peer.
    * @property {Object} mediaStatus The peer streaming media status.
-   * @property {Boolean} mediaStatus.audioMuted -  The value of the audio status.
+   * @property {Number} mediaStatus.audioMuted -  The value of the audio status.
    *   <small>If peer <code>mediaStatus</code> is <code>-1</code>, audio is not present in the stream. If peer <code>mediaStatus</code> is <code>1</code>, audio is present
    *   in the stream and active (not muted). If peer <code>mediaStatus</code> is <code>0</code>, audio is present in the stream and muted.
    *   </small>
-   * @property {Boolean} mediaStatus.videoMuted - The value of the video status.
+   * @property {Number} mediaStatus.videoMuted - The value of the video status.
    *   <small>If peer <code>mediaStatus</code> is <code>-1</code>, video is not present in the stream. If peer <code>mediaStatus</code> is <code>1</code>, video is present
    *   in the stream and active (not muted). If peer <code>mediaStatus</code> is <code>0</code>, video is present in the stream and muted.
    *   </small>

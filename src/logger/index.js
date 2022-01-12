@@ -9,7 +9,7 @@ import { isANumber } from '../utils/helpers';
  * @example
  * import { SkylinkLogger } from 'skylinkjs';
  *
- * const skylinkLogger = new SkylinkLogger();
+ * SkylinkLogger.setLevel(SkylinkLogger.logLevels.DEBUG);
  */
 class SkylinkLogger {
   constructor() {
