@@ -1,4 +1,4 @@
-/* SkylinkJS v2.4.0 Mon Oct 25 2021 08:43:41 GMT+0000 (Coordinated Universal Time) */
+/* SkylinkJS v2.4.1 Wed Jan 12 2022 05:58:03 GMT+0000 (Coordinated Universal Time) */
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -39,18 +39,11 @@ function wrapPeerConnectionEvent(window, eventNameToWrap, wrapper) {
     const wrappedCallback = (e) => {
       const modifiedEvent = wrapper(e);
       if (modifiedEvent) {
-        if (cb.handleEvent) {
-          cb.handleEvent(modifiedEvent);
-        } else {
-          cb(modifiedEvent);
-        }
+        cb(modifiedEvent);
       }
     };
     this._eventMap = this._eventMap || {};
-    if (!this._eventMap[eventNameToWrap]) {
-      this._eventMap[eventNameToWrap] = new Map();
-    }
-    this._eventMap[eventNameToWrap].set(cb, wrappedCallback);
+    this._eventMap[cb] = wrappedCallback;
     return nativeAddEventListener.apply(this, [nativeEventName,
       wrappedCallback]);
   };
@@ -58,20 +51,11 @@ function wrapPeerConnectionEvent(window, eventNameToWrap, wrapper) {
   const nativeRemoveEventListener = proto.removeEventListener;
   proto.removeEventListener = function(nativeEventName, cb) {
     if (nativeEventName !== eventNameToWrap || !this._eventMap
-        || !this._eventMap[eventNameToWrap]) {
+        || !this._eventMap[cb]) {
       return nativeRemoveEventListener.apply(this, arguments);
     }
-    if (!this._eventMap[eventNameToWrap].has(cb)) {
-      return nativeRemoveEventListener.apply(this, arguments);
-    }
-    const unwrappedCb = this._eventMap[eventNameToWrap].get(cb);
-    this._eventMap[eventNameToWrap].delete(cb);
-    if (this._eventMap[eventNameToWrap].size === 0) {
-      delete this._eventMap[eventNameToWrap];
-    }
-    if (Object.keys(this._eventMap).length === 0) {
-      delete this._eventMap;
-    }
+    const unwrappedCb = this._eventMap[cb];
+    delete this._eventMap[cb];
     return nativeRemoveEventListener.apply(this, [nativeEventName,
       unwrappedCb]);
   };
@@ -148,6 +132,8 @@ function deprecated(oldMethod, newMethod) {
  *     properties.
  */
 function detectBrowser(window) {
+  const {navigator} = window;
+
   // Returned result object.
   const result = {browser: null, version: null};
 
@@ -156,8 +142,6 @@ function detectBrowser(window) {
     result.browser = 'Not a browser.';
     return result;
   }
-
-  const {navigator} = window;
 
   if (navigator.mozGetUserMedia) { // Firefox.
     result.browser = 'firefox';
@@ -274,12 +258,14 @@ function filterStats(result, track, outbound) {
  */
 const logging = log;
 
-function shimGetUserMedia(window, browserDetails) {
+function shimGetUserMedia$3(window) {
   const navigator = window && window.navigator;
 
   if (!navigator.mediaDevices) {
     return;
   }
+
+  const browserDetails = detectBrowser(window);
 
   const constraintsToChrome_ = function(c) {
     if (typeof c !== 'object' || c.mandatory || c.optional) {
@@ -458,7 +444,7 @@ function shimGetUserMedia(window, browserDetails) {
  *  that can be found in the LICENSE file in the root of the source
  *  tree.
  */
-function shimGetDisplayMedia(window, getSourceId) {
+function shimGetDisplayMedia$2(window, getSourceId) {
   if (window.navigator.mediaDevices &&
     'getDisplayMedia' in window.navigator.mediaDevices) {
     return;
@@ -500,19 +486,11 @@ function shimGetDisplayMedia(window, getSourceId) {
     };
 }
 
-/*
- *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
- *
- *  Use of this source code is governed by a BSD-style license
- *  that can be found in the LICENSE file in the root of the source
- *  tree.
- */
-
 function shimMediaStream(window) {
   window.MediaStream = window.MediaStream || window.webkitMediaStream;
 }
 
-function shimOnTrack(window) {
+function shimOnTrack$1(window) {
   if (typeof window === 'object' && window.RTCPeerConnection && !('ontrack' in
       window.RTCPeerConnection.prototype)) {
     Object.defineProperty(window.RTCPeerConnection.prototype, 'ontrack', {
@@ -932,10 +910,11 @@ function shimAddTrackRemoveTrackWithNative(window) {
     };
 }
 
-function shimAddTrackRemoveTrack(window, browserDetails) {
+function shimAddTrackRemoveTrack(window) {
   if (!window.RTCPeerConnection) {
     return;
   }
+  const browserDetails = detectBrowser(window);
   // shim addTrack and removeTrack.
   if (window.RTCPeerConnection.prototype.addTrack &&
       browserDetails.version >= 65) {
@@ -1158,7 +1137,9 @@ function shimAddTrackRemoveTrack(window, browserDetails) {
     };
 }
 
-function shimPeerConnection(window, browserDetails) {
+function shimPeerConnection$2(window) {
+  const browserDetails = detectBrowser(window);
+
   if (!window.RTCPeerConnection && window.webkitRTCPeerConnection) {
     // very basic support for old versions.
     window.RTCPeerConnection = window.webkitRTCPeerConnection;
@@ -1166,6 +1147,9 @@ function shimPeerConnection(window, browserDetails) {
   if (!window.RTCPeerConnection) {
     return;
   }
+
+  const addIceCandidateNullSupported =
+    window.RTCPeerConnection.prototype.addIceCandidate.length === 0;
 
   // shim implicit creation of RTCSessionDescription/RTCIceCandidate
   if (browserDetails.version < 53) {
@@ -1181,34 +1165,51 @@ function shimPeerConnection(window, browserDetails) {
           window.RTCPeerConnection.prototype[method] = methodObj[method];
         });
   }
+
+  // support for addIceCandidate(null or undefined)
+  const nativeAddIceCandidate =
+      window.RTCPeerConnection.prototype.addIceCandidate;
+  window.RTCPeerConnection.prototype.addIceCandidate =
+    function addIceCandidate() {
+      if (!addIceCandidateNullSupported && !arguments[0]) {
+        if (arguments[1]) {
+          arguments[1].apply(null);
+        }
+        return Promise.resolve();
+      }
+      // Firefox 68+ emits and processes {candidate: "", ...}, ignore
+      // in older versions. Native support planned for Chrome M77.
+      if (browserDetails.version < 78 &&
+        arguments[0] && arguments[0].candidate === '') {
+        return Promise.resolve();
+      }
+      return nativeAddIceCandidate.apply(this, arguments);
+    };
 }
 
-// Attempt to fix ONN in plan-b mode.
-function fixNegotiationNeeded(window, browserDetails) {
+function fixNegotiationNeeded(window) {
   wrapPeerConnectionEvent(window, 'negotiationneeded', e => {
     const pc = e.target;
-    if (browserDetails.version < 72 || (pc.getConfiguration &&
-        pc.getConfiguration().sdpSemantics === 'plan-b')) {
-      if (pc.signalingState !== 'stable') {
-        return;
-      }
+    if (pc.signalingState !== 'stable') {
+      return;
     }
     return e;
   });
 }
 
 var chromeShim = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   shimMediaStream: shimMediaStream,
-  shimOnTrack: shimOnTrack,
+  shimOnTrack: shimOnTrack$1,
   shimGetSendersWithDtmf: shimGetSendersWithDtmf,
   shimGetStats: shimGetStats,
   shimSenderReceiverGetStats: shimSenderReceiverGetStats,
   shimAddTrackRemoveTrackWithNative: shimAddTrackRemoveTrackWithNative,
   shimAddTrackRemoveTrack: shimAddTrackRemoveTrack,
-  shimPeerConnection: shimPeerConnection,
+  shimPeerConnection: shimPeerConnection$2,
   fixNegotiationNeeded: fixNegotiationNeeded,
-  shimGetUserMedia: shimGetUserMedia,
-  shimGetDisplayMedia: shimGetDisplayMedia
+  shimGetUserMedia: shimGetUserMedia$3,
+  shimGetDisplayMedia: shimGetDisplayMedia$2
 });
 
 /*
@@ -1223,12 +1224,12 @@ var chromeShim = /*#__PURE__*/Object.freeze({
 // 2) turn: that does not have all of turn:host:port?transport=udp
 // 3) turn: with ipv6 addresses
 // 4) turn: occurring muliple times
-function filterIceServers(iceServers, edgeVersion) {
+function filterIceServers$1(iceServers, edgeVersion) {
   let hasTurn = false;
   iceServers = JSON.parse(JSON.stringify(iceServers));
   return iceServers.filter(server => {
     if (server && (server.urls || server.url)) {
-      let urls = server.urls || server.url;
+      var urls = server.urls || server.url;
       if (server.url && !server.urls) {
         deprecated('RTCIceServer.url', 'RTCIceServer.urls');
       }
@@ -1685,8 +1686,6 @@ SDPUtils.parseRtpParameters = function(mediaSection) {
         case 'ULPFEC':
           description.fecMechanisms.push(codec.name.toUpperCase());
           break;
-        default: // only RED and ULPFEC are recognized as FEC mechanisms.
-          break;
       }
     }
   }
@@ -2026,7 +2025,6 @@ SDPUtils.getDirection = function(mediaSection, sessionpart) {
       case 'a=recvonly':
       case 'a=inactive':
         return lines[i].substr(2);
-      default:
         // FIXME: What should happen here?
     }
   }
@@ -2162,7 +2160,7 @@ function writeMediaSection(transceiver, caps, type, stream, dtlsRole) {
 // 2) turn: that does not have all of turn:host:port?transport=udp
 // 3) turn: with ipv6 addresses
 // 4) turn: occurring muliple times
-function filterIceServers$1(iceServers, edgeVersion) {
+function filterIceServers(iceServers, edgeVersion) {
   var hasTurn = false;
   iceServers = JSON.parse(JSON.stringify(iceServers));
   return iceServers.filter(function(server) {
@@ -2401,7 +2399,7 @@ var rtcpeerconnection = function(window, edgeVersion) {
         break;
     }
 
-    config.iceServers = filterIceServers$1(config.iceServers || [], edgeVersion);
+    config.iceServers = filterIceServers(config.iceServers || [], edgeVersion);
 
     this._iceGatherers = [];
     if (config.iceCandidatePoolSize) {
@@ -3943,7 +3941,7 @@ var rtcpeerconnection = function(window, edgeVersion) {
  *  tree.
  */
 
-function shimGetUserMedia$1(window) {
+function shimGetUserMedia$2(window) {
   const navigator = window && window.navigator;
 
   const shimError_ = function(e) {
@@ -3996,7 +3994,9 @@ function shimGetDisplayMedia$1(window) {
  *  tree.
  */
 
-function shimPeerConnection$1(window, browserDetails) {
+function shimPeerConnection$1(window) {
+  const browserDetails = detectBrowser(window);
+
   if (window.RTCIceGatherer) {
     if (!window.RTCIceCandidate) {
       window.RTCIceCandidate = function RTCIceCandidate(args) {
@@ -4051,7 +4051,7 @@ function shimPeerConnection$1(window, browserDetails) {
       browserDetails.version);
   window.RTCPeerConnection = function RTCPeerConnection(config) {
     if (config && config.iceServers) {
-      config.iceServers = filterIceServers(config.iceServers,
+      config.iceServers = filterIceServers$1(config.iceServers,
         browserDetails.version);
       log('ICE servers after filtering:', config.iceServers);
     }
@@ -4070,9 +4070,10 @@ function shimReplaceTrack(window) {
 }
 
 var edgeShim = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   shimPeerConnection: shimPeerConnection$1,
   shimReplaceTrack: shimReplaceTrack,
-  shimGetUserMedia: shimGetUserMedia$1,
+  shimGetUserMedia: shimGetUserMedia$2,
   shimGetDisplayMedia: shimGetDisplayMedia$1
 });
 
@@ -4084,7 +4085,8 @@ var edgeShim = /*#__PURE__*/Object.freeze({
  *  tree.
  */
 
-function shimGetUserMedia$2(window, browserDetails) {
+function shimGetUserMedia$1(window) {
+  const browserDetails = detectBrowser(window);
   const navigator = window && window.navigator;
   const MediaStreamTrack = window && window.MediaStreamTrack;
 
@@ -4148,7 +4150,7 @@ function shimGetUserMedia$2(window, browserDetails) {
  *  tree.
  */
 
-function shimGetDisplayMedia$2(window, preferredMediaSource) {
+function shimGetDisplayMedia(window, preferredMediaSource) {
   if (window.navigator.mediaDevices &&
     'getDisplayMedia' in window.navigator.mediaDevices) {
     return;
@@ -4183,7 +4185,7 @@ function shimGetDisplayMedia$2(window, preferredMediaSource) {
  *  tree.
  */
 
-function shimOnTrack$1(window) {
+function shimOnTrack(window) {
   if (typeof window === 'object' && window.RTCTrackEvent &&
       ('receiver' in window.RTCTrackEvent.prototype) &&
       !('transceiver' in window.RTCTrackEvent.prototype)) {
@@ -4195,7 +4197,9 @@ function shimOnTrack$1(window) {
   }
 }
 
-function shimPeerConnection$2(window, browserDetails) {
+function shimPeerConnection(window) {
+  const browserDetails = detectBrowser(window);
+
   if (typeof window !== 'object' ||
       !(window.RTCPeerConnection || window.mozRTCPeerConnection)) {
     return; // probably media.peerconnection.enabled=false in about:config
@@ -4218,6 +4222,28 @@ function shimPeerConnection$2(window, browserDetails) {
           }};
           window.RTCPeerConnection.prototype[method] = methodObj[method];
         });
+  }
+
+  // support for addIceCandidate(null or undefined)
+  // as well as ignoring {sdpMid, candidate: ""}
+  if (browserDetails.version < 68) {
+    const nativeAddIceCandidate =
+        window.RTCPeerConnection.prototype.addIceCandidate;
+    window.RTCPeerConnection.prototype.addIceCandidate =
+    function addIceCandidate() {
+      if (!arguments[0]) {
+        if (arguments[1]) {
+          arguments[1].apply(null);
+        }
+        return Promise.resolve();
+      }
+      // Firefox 68+ emits and processes {candidate: "", ...}, ignore
+      // in older versions.
+      if (arguments[0] && arguments[0].candidate === '') {
+        return Promise.resolve();
+      }
+      return nativeAddIceCandidate.apply(this, arguments);
+    };
   }
 
   const modernStatsTypes = {
@@ -4385,39 +4411,15 @@ function shimAddTransceiver(window) {
           // opportunity to recreate offer.
           const {sender} = transceiver;
           const params = sender.getParameters();
-          if (!('encodings' in params) ||
-              // Avoid being fooled by patched getParameters() below.
-              (params.encodings.length === 1 &&
-               Object.keys(params.encodings[0]).length === 0)) {
+          if (!('encodings' in params)) {
             params.encodings = initParameters.sendEncodings;
-            sender.sendEncodings = initParameters.sendEncodings;
-            this.setParametersPromises.push(sender.setParameters(params)
-              .then(() => {
-                delete sender.sendEncodings;
-              }).catch(() => {
-                delete sender.sendEncodings;
-              })
+            this.setParametersPromises.push(
+              sender.setParameters(params)
+              .catch(() => {})
             );
           }
         }
         return transceiver;
-      };
-  }
-}
-
-function shimGetParameters(window) {
-  if (!(typeof window === 'object' && window.RTCRtpSender)) {
-    return;
-  }
-  const origGetParameters = window.RTCRtpSender.prototype.getParameters;
-  if (origGetParameters) {
-    window.RTCRtpSender.prototype.getParameters =
-      function getParameters() {
-        const params = origGetParameters.apply(this, arguments);
-        if (!('encodings' in params)) {
-          params.encodings = [].concat(this.sendEncodings || [{}]);
-        }
-        return params;
       };
   }
 }
@@ -4467,18 +4469,18 @@ function shimCreateAnswer(window) {
 }
 
 var firefoxShim = /*#__PURE__*/Object.freeze({
-  shimOnTrack: shimOnTrack$1,
-  shimPeerConnection: shimPeerConnection$2,
+  __proto__: null,
+  shimOnTrack: shimOnTrack,
+  shimPeerConnection: shimPeerConnection,
   shimSenderGetStats: shimSenderGetStats,
   shimReceiverGetStats: shimReceiverGetStats,
   shimRemoveStream: shimRemoveStream,
   shimRTCDataChannel: shimRTCDataChannel,
   shimAddTransceiver: shimAddTransceiver,
-  shimGetParameters: shimGetParameters,
   shimCreateOffer: shimCreateOffer,
   shimCreateAnswer: shimCreateAnswer,
-  shimGetUserMedia: shimGetUserMedia$2,
-  shimGetDisplayMedia: shimGetDisplayMedia$2
+  shimGetUserMedia: shimGetUserMedia$1,
+  shimGetDisplayMedia: shimGetDisplayMedia
 });
 
 /*
@@ -4681,7 +4683,7 @@ function shimCallbacksAPI(window) {
   prototype.addIceCandidate = withCallback;
 }
 
-function shimGetUserMedia$3(window) {
+function shimGetUserMedia(window) {
   const navigator = window && window.navigator;
 
   if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
@@ -4714,9 +4716,6 @@ function shimConstraints(constraints) {
 }
 
 function shimRTCIceServerUrls(window) {
-  if (!window.RTCPeerConnection) {
-    return;
-  }
   // migrate from non-spec RTCIceServer.url to RTCIceServer.urls
   const OrigPeerConnection = window.RTCPeerConnection;
   window.RTCPeerConnection =
@@ -4742,7 +4741,7 @@ function shimRTCIceServerUrls(window) {
     };
   window.RTCPeerConnection.prototype = OrigPeerConnection.prototype;
   // wrap static methods. Currently just generateCertificate.
-  if ('generateCertificate' in OrigPeerConnection) {
+  if ('generateCertificate' in window.RTCPeerConnection) {
     Object.defineProperty(window.RTCPeerConnection, 'generateCertificate', {
       get() {
         return OrigPeerConnection.generateCertificate;
@@ -4825,23 +4824,16 @@ function shimCreateOfferLegacy(window) {
     };
 }
 
-function shimAudioContext(window) {
-  if (typeof window !== 'object' || window.AudioContext) {
-    return;
-  }
-  window.AudioContext = window.webkitAudioContext;
-}
-
 var safariShim = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   shimLocalStreamsAPI: shimLocalStreamsAPI,
   shimRemoteStreamsAPI: shimRemoteStreamsAPI,
   shimCallbacksAPI: shimCallbacksAPI,
-  shimGetUserMedia: shimGetUserMedia$3,
+  shimGetUserMedia: shimGetUserMedia,
   shimConstraints: shimConstraints,
   shimRTCIceServerUrls: shimRTCIceServerUrls,
   shimTrackEventTransceiver: shimTrackEventTransceiver,
-  shimCreateOfferLegacy: shimCreateOfferLegacy,
-  shimAudioContext: shimAudioContext
+  shimCreateOfferLegacy: shimCreateOfferLegacy
 });
 
 /*
@@ -4904,10 +4896,11 @@ function shimRTCIceCandidate(window) {
   });
 }
 
-function shimMaxMessageSize(window, browserDetails) {
+function shimMaxMessageSize(window) {
   if (!window.RTCPeerConnection) {
     return;
   }
+  const browserDetails = detectBrowser(window);
 
   if (!('sctp' in window.RTCPeerConnection.prototype)) {
     Object.defineProperty(window.RTCPeerConnection.prototype, 'sctp', {
@@ -5157,83 +5150,34 @@ function shimConnectionState(window) {
   });
 }
 
-function removeExtmapAllowMixed(window, browserDetails) {
-  /* remove a=extmap-allow-mixed for webrtc.org < M71 */
+function removeAllowExtmapMixed(window) {
+  /* remove a=extmap-allow-mixed for Chrome < M71 */
   if (!window.RTCPeerConnection) {
     return;
   }
+  const browserDetails = detectBrowser(window);
   if (browserDetails.browser === 'chrome' && browserDetails.version >= 71) {
-    return;
-  }
-  if (browserDetails.browser === 'safari' && browserDetails.version >= 605) {
     return;
   }
   const nativeSRD = window.RTCPeerConnection.prototype.setRemoteDescription;
   window.RTCPeerConnection.prototype.setRemoteDescription =
   function setRemoteDescription(desc) {
     if (desc && desc.sdp && desc.sdp.indexOf('\na=extmap-allow-mixed') !== -1) {
-      const sdp = desc.sdp.split('\n').filter((line) => {
+      desc.sdp = desc.sdp.split('\n').filter((line) => {
         return line.trim() !== 'a=extmap-allow-mixed';
       }).join('\n');
-      // Safari enforces read-only-ness of RTCSessionDescription fields.
-      if (window.RTCSessionDescription &&
-          desc instanceof window.RTCSessionDescription) {
-        arguments[0] = new window.RTCSessionDescription({
-          type: desc.type,
-          sdp,
-        });
-      } else {
-        desc.sdp = sdp;
-      }
     }
     return nativeSRD.apply(this, arguments);
   };
 }
 
-function shimAddIceCandidateNullOrEmpty(window, browserDetails) {
-  // Support for addIceCandidate(null or undefined)
-  // as well as addIceCandidate({candidate: "", ...})
-  // https://bugs.chromium.org/p/chromium/issues/detail?id=978582
-  // Note: must be called before other polyfills which change the signature.
-  if (!(window.RTCPeerConnection && window.RTCPeerConnection.prototype)) {
-    return;
-  }
-  const nativeAddIceCandidate =
-      window.RTCPeerConnection.prototype.addIceCandidate;
-  if (!nativeAddIceCandidate || nativeAddIceCandidate.length === 0) {
-    return;
-  }
-  window.RTCPeerConnection.prototype.addIceCandidate =
-    function addIceCandidate() {
-      if (!arguments[0]) {
-        if (arguments[1]) {
-          arguments[1].apply(null);
-        }
-        return Promise.resolve();
-      }
-      // Firefox 68+ emits and processes {candidate: "", ...}, ignore
-      // in older versions.
-      // Native support for ignoring exists for Chrome M77+.
-      // Safari ignores as well, exact version unknown but works in the same
-      // version that also ignores addIceCandidate(null).
-      if (((browserDetails.browser === 'chrome' && browserDetails.version < 78)
-           || (browserDetails.browser === 'firefox'
-               && browserDetails.version < 68)
-           || (browserDetails.browser === 'safari'))
-          && arguments[0] && arguments[0].candidate === '') {
-        return Promise.resolve();
-      }
-      return nativeAddIceCandidate.apply(this, arguments);
-    };
-}
-
 var commonShim = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   shimRTCIceCandidate: shimRTCIceCandidate,
   shimMaxMessageSize: shimMaxMessageSize,
   shimSendThrowTypeError: shimSendThrowTypeError,
   shimConnectionState: shimConnectionState,
-  removeExtmapAllowMixed: removeExtmapAllowMixed,
-  shimAddIceCandidateNullOrEmpty: shimAddIceCandidateNullOrEmpty
+  removeAllowExtmapMixed: removeAllowExtmapMixed
 });
 
 /*
@@ -5266,40 +5210,33 @@ function adapterFactory({window} = {}, options = {
   // Shim browser if found.
   switch (browserDetails.browser) {
     case 'chrome':
-      if (!chromeShim || !shimPeerConnection ||
+      if (!chromeShim || !shimPeerConnection$2 ||
           !options.shimChrome) {
         logging('Chrome shim is not included in this adapter release.');
-        return adapter;
-      }
-      if (browserDetails.version === null) {
-        logging('Chrome shim can not determine version, not shimming.');
         return adapter;
       }
       logging('adapter.js shimming chrome.');
       // Export to the adapter global object visible in the browser.
       adapter.browserShim = chromeShim;
 
-      // Must be called before shimPeerConnection.
-      shimAddIceCandidateNullOrEmpty(window, browserDetails);
+      shimGetUserMedia$3(window);
+      shimMediaStream(window);
+      shimPeerConnection$2(window);
+      shimOnTrack$1(window);
+      shimAddTrackRemoveTrack(window);
+      shimGetSendersWithDtmf(window);
+      shimGetStats(window);
+      shimSenderReceiverGetStats(window);
+      fixNegotiationNeeded(window);
 
-      shimGetUserMedia(window, browserDetails);
-      shimMediaStream(window, browserDetails);
-      shimPeerConnection(window, browserDetails);
-      shimOnTrack(window, browserDetails);
-      shimAddTrackRemoveTrack(window, browserDetails);
-      shimGetSendersWithDtmf(window, browserDetails);
-      shimGetStats(window, browserDetails);
-      shimSenderReceiverGetStats(window, browserDetails);
-      fixNegotiationNeeded(window, browserDetails);
-
-      shimRTCIceCandidate(window, browserDetails);
-      shimConnectionState(window, browserDetails);
-      shimMaxMessageSize(window, browserDetails);
-      shimSendThrowTypeError(window, browserDetails);
-      removeExtmapAllowMixed(window, browserDetails);
+      shimRTCIceCandidate(window);
+      shimConnectionState(window);
+      shimMaxMessageSize(window);
+      shimSendThrowTypeError(window);
+      removeAllowExtmapMixed(window);
       break;
     case 'firefox':
-      if (!firefoxShim || !shimPeerConnection$2 ||
+      if (!firefoxShim || !shimPeerConnection ||
           !options.shimFirefox) {
         logging('Firefox shim is not included in this adapter release.');
         return adapter;
@@ -5308,25 +5245,21 @@ function adapterFactory({window} = {}, options = {
       // Export to the adapter global object visible in the browser.
       adapter.browserShim = firefoxShim;
 
-      // Must be called before shimPeerConnection.
-      shimAddIceCandidateNullOrEmpty(window, browserDetails);
+      shimGetUserMedia$1(window);
+      shimPeerConnection(window);
+      shimOnTrack(window);
+      shimRemoveStream(window);
+      shimSenderGetStats(window);
+      shimReceiverGetStats(window);
+      shimRTCDataChannel(window);
+      shimAddTransceiver(window);
+      shimCreateOffer(window);
+      shimCreateAnswer(window);
 
-      shimGetUserMedia$2(window, browserDetails);
-      shimPeerConnection$2(window, browserDetails);
-      shimOnTrack$1(window, browserDetails);
-      shimRemoveStream(window, browserDetails);
-      shimSenderGetStats(window, browserDetails);
-      shimReceiverGetStats(window, browserDetails);
-      shimRTCDataChannel(window, browserDetails);
-      shimAddTransceiver(window, browserDetails);
-      shimGetParameters(window, browserDetails);
-      shimCreateOffer(window, browserDetails);
-      shimCreateAnswer(window, browserDetails);
-
-      shimRTCIceCandidate(window, browserDetails);
-      shimConnectionState(window, browserDetails);
-      shimMaxMessageSize(window, browserDetails);
-      shimSendThrowTypeError(window, browserDetails);
+      shimRTCIceCandidate(window);
+      shimConnectionState(window);
+      shimMaxMessageSize(window);
+      shimSendThrowTypeError(window);
       break;
     case 'edge':
       if (!edgeShim || !shimPeerConnection$1 || !options.shimEdge) {
@@ -5337,15 +5270,15 @@ function adapterFactory({window} = {}, options = {
       // Export to the adapter global object visible in the browser.
       adapter.browserShim = edgeShim;
 
-      shimGetUserMedia$1(window, browserDetails);
-      shimGetDisplayMedia$1(window, browserDetails);
-      shimPeerConnection$1(window, browserDetails);
-      shimReplaceTrack(window, browserDetails);
+      shimGetUserMedia$2(window);
+      shimGetDisplayMedia$1(window);
+      shimPeerConnection$1(window);
+      shimReplaceTrack(window);
 
       // the edge shim implements the full RTCIceCandidate object.
 
-      shimMaxMessageSize(window, browserDetails);
-      shimSendThrowTypeError(window, browserDetails);
+      shimMaxMessageSize(window);
+      shimSendThrowTypeError(window);
       break;
     case 'safari':
       if (!safariShim || !options.shimSafari) {
@@ -5356,22 +5289,18 @@ function adapterFactory({window} = {}, options = {
       // Export to the adapter global object visible in the browser.
       adapter.browserShim = safariShim;
 
-      // Must be called before shimCallbackAPI.
-      shimAddIceCandidateNullOrEmpty(window, browserDetails);
+      shimRTCIceServerUrls(window);
+      shimCreateOfferLegacy(window);
+      shimCallbacksAPI(window);
+      shimLocalStreamsAPI(window);
+      shimRemoteStreamsAPI(window);
+      shimTrackEventTransceiver(window);
+      shimGetUserMedia(window);
 
-      shimRTCIceServerUrls(window, browserDetails);
-      shimCreateOfferLegacy(window, browserDetails);
-      shimCallbacksAPI(window, browserDetails);
-      shimLocalStreamsAPI(window, browserDetails);
-      shimRemoteStreamsAPI(window, browserDetails);
-      shimTrackEventTransceiver(window, browserDetails);
-      shimGetUserMedia$3(window, browserDetails);
-      shimAudioContext(window, browserDetails);
-
-      shimRTCIceCandidate(window, browserDetails);
-      shimMaxMessageSize(window, browserDetails);
-      shimSendThrowTypeError(window, browserDetails);
-      removeExtmapAllowMixed(window, browserDetails);
+      shimRTCIceCandidate(window);
+      shimMaxMessageSize(window);
+      shimSendThrowTypeError(window);
+      removeAllowExtmapMixed(window);
       break;
     default:
       logging('Unsupported browser!');
@@ -5389,8 +5318,7 @@ function adapterFactory({window} = {}, options = {
  *  tree.
  */
 
-const adapter =
-  adapterFactory({window: typeof window === 'undefined' ? undefined : window});
+const adapter = adapterFactory({window});
 
 /* eslint-disable */
 
@@ -5730,17 +5658,17 @@ const STREAM_ENDED = 'streamEnded';
 const PEER_UPDATED = 'peerUpdated';
 const PEER_JOINED = 'peerJoined';
 const PEER_LEFT = 'peerLeft';
-const PEER_CONNECTION_STATE = 'peerConnectionState';
-const DATA_CHANNEL_STATE = 'dataChannelState';
+const PEER_CONNECTION_STATE$1 = 'peerConnectionState';
+const DATA_CHANNEL_STATE$1 = 'dataChannelState';
 const ON_INCOMING_MESSAGE = 'onIncomingMessage';
-const HANDSHAKE_PROGRESS = 'handshakeProgress';
+const HANDSHAKE_PROGRESS$1 = 'handshakeProgress';
 const SERVER_PEER_JOINED = 'serverPeerJoined';
 const SERVER_PEER_LEFT = 'serverPeerLeft';
-const CANDIDATE_PROCESSING_STATE = 'candidateProcessingState';
-const CANDIDATE_GENERATION_STATE = 'candidateGenerationState';
+const CANDIDATE_PROCESSING_STATE$1 = 'candidateProcessingState';
+const CANDIDATE_GENERATION_STATE$1 = 'candidateGenerationState';
 const CANDIDATES_GATHERED = 'candidatesGathered';
-const DATA_STREAM_STATE = 'dataStreamState';
-const DATA_TRANSFER_STATE = 'dataTransferState';
+const DATA_STREAM_STATE$1 = 'dataStreamState';
+const DATA_TRANSFER_STATE$1 = 'dataTransferState';
 const ON_INCOMING_DATA = 'onIncomingData';
 const ON_INCOMING_DATA_REQUEST = 'onIncomingDataRequest';
 const ON_INCOMING_DATA_STREAM = 'onIncomingDataStream';
@@ -5755,22 +5683,22 @@ const CHANNEL_CLOSE = 'channelClose';
 const CHANNEL_MESSAGE = 'channelMessage';
 const CHANNEL_ERROR = 'channelError';
 const CHANNEL_RETRY = 'channelRetry';
-const SOCKET_ERROR = 'socketError';
-const SYSTEM_ACTION = 'systemAction';
+const SOCKET_ERROR$1 = 'socketError';
+const SYSTEM_ACTION$1 = 'systemAction';
 const MEDIA_ACCESS_FALLBACK = 'mediaAccessFallback';
 const MEDIA_ACCESS_REQUIRED = 'mediaAccessRequired';
 const MEDIA_ACCESS_STOPPED = 'mediaAccessStopped';
 const MEDIA_ACCESS_SUCCESS = 'mediaAccessSuccess';
-const RECORDING_STATE = 'recordingState';
+const RECORDING_STATE$1 = 'recordingState';
 const LOCAL_MEDIA_MUTED = 'localMediaMuted';
 const MEDIA_ACCESS_ERROR = 'mediaAccessError';
 const GET_CONNECTION_STATUS_STATE_CHANGE = 'getConnectionStatusStateChange';
-const READY_STATE_CHANGE = 'readyStateChange';
+const READY_STATE_CHANGE$1 = 'readyStateChange';
 const ROOM_LOCK = 'roomLock';
 const INTRODUCE_STATE_CHANGE = 'introduceStateChange';
-const ICE_CONNECTION_STATE = 'iceConnectionState';
+const ICE_CONNECTION_STATE$1 = 'iceConnectionState';
 const BYE = 'bye';
-const RTMP_STATE = 'rtmpState';
+const RTMP_STATE$1 = 'rtmpState';
 const LOGGED_ON_CONSOLE = 'loggedOnConsole';
 const MEDIA_INFO_DELETED = 'mediaInfoDeleted';
 const STORED_MESSAGES = 'storedMessages';
@@ -5779,23 +5707,24 @@ const PERSISTENT_MESSAGE_STATE = 'persistentMessageState';
 const ROOM_REJOIN = 'roomRejoin';
 
 var SkylinkEventsConstants = /*#__PURE__*/Object.freeze({
+  __proto__: null,
   ON_INCOMING_STREAM: ON_INCOMING_STREAM,
   ON_INCOMING_SCREEN_STREAM: ON_INCOMING_SCREEN_STREAM,
   STREAM_ENDED: STREAM_ENDED,
   PEER_UPDATED: PEER_UPDATED,
   PEER_JOINED: PEER_JOINED,
   PEER_LEFT: PEER_LEFT,
-  PEER_CONNECTION_STATE: PEER_CONNECTION_STATE,
-  DATA_CHANNEL_STATE: DATA_CHANNEL_STATE,
+  PEER_CONNECTION_STATE: PEER_CONNECTION_STATE$1,
+  DATA_CHANNEL_STATE: DATA_CHANNEL_STATE$1,
   ON_INCOMING_MESSAGE: ON_INCOMING_MESSAGE,
-  HANDSHAKE_PROGRESS: HANDSHAKE_PROGRESS,
+  HANDSHAKE_PROGRESS: HANDSHAKE_PROGRESS$1,
   SERVER_PEER_JOINED: SERVER_PEER_JOINED,
   SERVER_PEER_LEFT: SERVER_PEER_LEFT,
-  CANDIDATE_PROCESSING_STATE: CANDIDATE_PROCESSING_STATE,
-  CANDIDATE_GENERATION_STATE: CANDIDATE_GENERATION_STATE,
+  CANDIDATE_PROCESSING_STATE: CANDIDATE_PROCESSING_STATE$1,
+  CANDIDATE_GENERATION_STATE: CANDIDATE_GENERATION_STATE$1,
   CANDIDATES_GATHERED: CANDIDATES_GATHERED,
-  DATA_STREAM_STATE: DATA_STREAM_STATE,
-  DATA_TRANSFER_STATE: DATA_TRANSFER_STATE,
+  DATA_STREAM_STATE: DATA_STREAM_STATE$1,
+  DATA_TRANSFER_STATE: DATA_TRANSFER_STATE$1,
   ON_INCOMING_DATA: ON_INCOMING_DATA,
   ON_INCOMING_DATA_REQUEST: ON_INCOMING_DATA_REQUEST,
   ON_INCOMING_DATA_STREAM: ON_INCOMING_DATA_STREAM,
@@ -5810,22 +5739,22 @@ var SkylinkEventsConstants = /*#__PURE__*/Object.freeze({
   CHANNEL_MESSAGE: CHANNEL_MESSAGE,
   CHANNEL_ERROR: CHANNEL_ERROR,
   CHANNEL_RETRY: CHANNEL_RETRY,
-  SOCKET_ERROR: SOCKET_ERROR,
-  SYSTEM_ACTION: SYSTEM_ACTION,
+  SOCKET_ERROR: SOCKET_ERROR$1,
+  SYSTEM_ACTION: SYSTEM_ACTION$1,
   MEDIA_ACCESS_FALLBACK: MEDIA_ACCESS_FALLBACK,
   MEDIA_ACCESS_REQUIRED: MEDIA_ACCESS_REQUIRED,
   MEDIA_ACCESS_STOPPED: MEDIA_ACCESS_STOPPED,
   MEDIA_ACCESS_SUCCESS: MEDIA_ACCESS_SUCCESS,
-  RECORDING_STATE: RECORDING_STATE,
+  RECORDING_STATE: RECORDING_STATE$1,
   LOCAL_MEDIA_MUTED: LOCAL_MEDIA_MUTED,
   MEDIA_ACCESS_ERROR: MEDIA_ACCESS_ERROR,
   GET_CONNECTION_STATUS_STATE_CHANGE: GET_CONNECTION_STATUS_STATE_CHANGE,
-  READY_STATE_CHANGE: READY_STATE_CHANGE,
+  READY_STATE_CHANGE: READY_STATE_CHANGE$1,
   ROOM_LOCK: ROOM_LOCK,
   INTRODUCE_STATE_CHANGE: INTRODUCE_STATE_CHANGE,
-  ICE_CONNECTION_STATE: ICE_CONNECTION_STATE,
+  ICE_CONNECTION_STATE: ICE_CONNECTION_STATE$1,
   BYE: BYE,
-  RTMP_STATE: RTMP_STATE,
+  RTMP_STATE: RTMP_STATE$1,
   LOGGED_ON_CONSOLE: LOGGED_ON_CONSOLE,
   MEDIA_INFO_DELETED: MEDIA_INFO_DELETED,
   STORED_MESSAGES: STORED_MESSAGES,
@@ -5916,7 +5845,7 @@ const streamMuted = (detail = {}) => new SkylinkEvent(STREAM_MUTED, { detail });
  * @param {number} detail.bufferAmount.bufferedAmount - The size of currently queued data to send on the Datachannel connection.
  * @param {number} detail.bufferAmount.bufferedAmountLowThreshold - Threshold The current buffered amount low threshold configured.
  */
-const onDataChannelStateChanged = (detail = {}) => new SkylinkEvent(DATA_CHANNEL_STATE, { detail });
+const onDataChannelStateChanged = (detail = {}) => new SkylinkEvent(DATA_CHANNEL_STATE$1, { detail });
 
 /**
  * @event SkylinkEvents.ON_INCOMING_MESSAGE
@@ -6013,7 +5942,7 @@ const persistentMessageState = (detail = {}) => new SkylinkEvent(PERSISTENT_MESS
  * @param {Error|String} [detail.error] The error object.
  *   Defined only when <code>state</code> is <code>ERROR</code>.
  */
-const handshakeProgress = (detail = {}) => new SkylinkEvent(HANDSHAKE_PROGRESS, { detail });
+const handshakeProgress = (detail = {}) => new SkylinkEvent(HANDSHAKE_PROGRESS$1, { detail });
 
 /**
  * @description Event triggered when {@link Skylink#introducePeer}
@@ -6043,7 +5972,7 @@ const introduceStateChange = (detail = {}) => new SkylinkEvent(INTRODUCE_STATE_C
  * @param {Error} detail.error.content - The error object.
  * @param {String} detail.room - The Room to The Room to retrieve session token for.
  */
-const readyStateChange = (detail = {}) => new SkylinkEvent(READY_STATE_CHANGE, { detail });
+const readyStateChange = (detail = {}) => new SkylinkEvent(READY_STATE_CHANGE$1, { detail });
 
 /**
  * @event SkylinkEvents.CANDIDATE_PROCESSING_STATE
@@ -6060,7 +5989,7 @@ const readyStateChange = (detail = {}) => new SkylinkEvent(READY_STATE_CHANGE, {
  * @param {number} detail.candidate.sdpMLineIndex - The remote ICE candidate media description index (starting from 0) based on the remote session description.
  * @param {Error} detail.error - The error object.
  */
-const candidateProcessingState = detail => new SkylinkEvent(CANDIDATE_PROCESSING_STATE, { detail });
+const candidateProcessingState = detail => new SkylinkEvent(CANDIDATE_PROCESSING_STATE$1, { detail });
 
 /**
  * @event SkylinkEvents.CANDIDATE_GENERATION_STATE
@@ -6070,7 +5999,7 @@ const candidateProcessingState = detail => new SkylinkEvent(CANDIDATE_PROCESSING
  * @param {String} detail.peerId - The peer's id
  * @param {SkylinkConstants.CANDIDATE_GENERATION_STATE} detail.state - The current Peer connection ICE gathering state.
  */
-const candidateGenerationState = detail => new SkylinkEvent(CANDIDATE_GENERATION_STATE, { detail });
+const candidateGenerationState = detail => new SkylinkEvent(CANDIDATE_GENERATION_STATE$1, { detail });
 
 /**
  * @event SkylinkEvents.CANDIDATES_GATHERED
@@ -6094,7 +6023,7 @@ const candidatesGathered = detail => new SkylinkEvent(CANDIDATES_GATHERED, { det
  * @param {SkylinkConstants.ICE_CONNECTION_STATE} detail.state - The current Peer connection ICE connection state.
  * @param {String} detail.state - The Peer ID.
  */
-const iceConnectionState = detail => new SkylinkEvent(ICE_CONNECTION_STATE, { detail });
+const iceConnectionState = detail => new SkylinkEvent(ICE_CONNECTION_STATE$1, { detail });
 
 /**
  * @event SkylinkEvents.ROOM_LOCK
@@ -6122,7 +6051,7 @@ const roomLock = (detail = {}) => new SkylinkEvent(ROOM_LOCK, { detail });
  * @param {Error|String} detail.error.message The error message.
  * @param {SkylinkConstants.DATA_TRANSFER_DIRECTION} detail.error.transferType The data transfer direction from where the error occurred.
  */
-const dataTransferState = detail => new SkylinkEvent(DATA_TRANSFER_STATE, { detail });
+const dataTransferState = detail => new SkylinkEvent(DATA_TRANSFER_STATE$1, { detail });
 
 /**
  * @event SkylinkEvents.ON_INCOMING_DATA
@@ -6241,7 +6170,7 @@ const getPeersStateChange = (detail = {}) => new SkylinkEvent(GET_PEERS_STATE_CH
  * @param {SkylinkConstants.PEER_CONNECTION_STATE} detail.state - The current Peer connection session description exchanging states.
  * @param {String} detail.peerId - The Peer ID
  */
-const peerConnectionState = (detail = {}) => new SkylinkEvent(PEER_CONNECTION_STATE, { detail });
+const peerConnectionState = (detail = {}) => new SkylinkEvent(PEER_CONNECTION_STATE$1, { detail });
 
 /**
  * @event SkylinkEvents.SESSION_DISCONNECT
@@ -6318,7 +6247,7 @@ const channelMessage = detail => new SkylinkEvent(CHANNEL_MESSAGE, { detail });
  * @param {SkylinkConstants.SOCKET_FALLBACK} detail.type The fallback state of the socket connection attempt.
  * @param {socketSession} detail.session The socket connection session information.
  */
-const socketError = detail => new SkylinkEvent(SOCKET_ERROR, { detail });
+const socketError = detail => new SkylinkEvent(SOCKET_ERROR$1, { detail });
 
 /**
  * @description Event triggered when Signaling server reaction state has changed.
@@ -6328,7 +6257,7 @@ const socketError = detail => new SkylinkEvent(SOCKET_ERROR, { detail });
  * @param {String} detail.message The message.
  * @param {SkylinkConstants.SYSTEM_ACTION_REASON} detail.reason The Signaling server reaction state reason of action code.
  */
-const systemAction = detail => new SkylinkEvent(SYSTEM_ACTION, { detail });
+const systemAction = detail => new SkylinkEvent(SYSTEM_ACTION$1, { detail });
 
 /**
  * @event SkylinkEvents.MEDIA_ACCESS_FALLBACK
@@ -6381,7 +6310,7 @@ const mediaAccessSuccess = (detail = {}) => new SkylinkEvent(MEDIA_ACCESS_SUCCES
  * @param {String} detail.recordingId - The recording session ID.
  * @param {Error | String} detail.error - The error object. Defined only when <code>state</code> payload is <code>ERROR</code>.
  */
-const recordingState = (detail = {}) => new SkylinkEvent(RECORDING_STATE, { detail });
+const recordingState = (detail = {}) => new SkylinkEvent(RECORDING_STATE$1, { detail });
 
 /**
  * @event SkylinkEvents.RTMP_STATE
@@ -6391,7 +6320,7 @@ const recordingState = (detail = {}) => new SkylinkEvent(RECORDING_STATE, { deta
  * @param {String} detail.rtmpId - The rtmp session ID.
  * @param {Error | String} detail.error - The error object. Defined only when <code>state</code> payload is <code>ERROR</code>.
  */
-const rtmpState = (detail = {}) => new SkylinkEvent(RTMP_STATE, { detail });
+const rtmpState = (detail = {}) => new SkylinkEvent(RTMP_STATE$1, { detail });
 
 /**
  * @event SkylinkEvents.LOCAL_MEDIA_MUTED
@@ -6441,7 +6370,7 @@ const mediaInfoDeleted = (detail = {}) => new SkylinkEvent(MEDIA_INFO_DELETED, {
  */
 const loggedOnConsole = (detail = {}) => new SkylinkEvent(LOGGED_ON_CONSOLE, { detail });
 
-var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.4.0";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"^7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.2.2","@babel/preset-env":"7.2.3","@babel/register":"7.0.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.0.5",eslint:"^5.2.0","eslint-config-airbnb":"^17.0.0","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.13.0","eslint-plugin-jsx-a11y":"^6.1.1",finalhandler:"^1.1.1",husky:"^1.0.0-rc.13",jsdoc:"^3.6.7",jsdom:"^13.0.0","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.4",rollup:"^1.2.2","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.3.0","rollup-plugin-delete":"^1.1.0","rollup-plugin-external-globals":"^0.2.1","rollup-plugin-gzip":"^2.2.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.0.2","rollup-plugin-terser":"^7.0.2","serve-static":"^1.13.2","whatwg-fetch":"^3.0.0"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
+var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.4.1";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"^7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.16.0","@babel/preset-env":"7.16.0","@babel/register":"7.16.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.2.3",eslint:"^8.1.0","eslint-config-airbnb":"^18.2.1","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.25.2","eslint-plugin-jsx-a11y":"^6.4.1",finalhandler:"^1.1.2",husky:"^7.0.4",jsdoc:"^3.6.7",jsdom:"^18.0.1","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.14",rollup:"^2.59.0","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.4.0","rollup-plugin-delete":"^2.0.0","rollup-plugin-external-globals":"^0.6.1","rollup-plugin-gzip":"^2.5.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2","serve-static":"^1.14.1","whatwg-fetch":"^3.6.2"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
 
 /**
  * @namespace SkylinkConstants
@@ -6549,7 +6478,7 @@ var name="skylinkjs";var description="Temasys Web SDK is an open-source client-s
  * @since 0.1.0
  * @memberOf SkylinkConstants
  */
-const DATA_CHANNEL_STATE$1 = {
+const DATA_CHANNEL_STATE = {
   CONNECTING: 'connecting',
   OPEN: 'open',
   CLOSING: 'closing',
@@ -6778,7 +6707,7 @@ const SESSION_CHUNK_TYPE = {
  * @memberOf SkylinkConstants
  * @since 0.4.0
  */
-const DATA_TRANSFER_STATE$1 = {
+const DATA_TRANSFER_STATE = {
   UPLOAD_REQUEST: 'request',
   UPLOAD_STARTED: 'uploadStarted',
   DOWNLOAD_STARTED: 'downloadStarted',
@@ -6861,7 +6790,7 @@ const AUTH_STATE = {
  * @since 0.6.18
  * @ignore
  */
-const DATA_STREAM_STATE$1 = {
+const DATA_STREAM_STATE = {
   SENDING_STARTED: 'sendStart',
   SENDING_STOPPED: 'sendStop',
   RECEIVING_STARTED: 'receiveStart',
@@ -6894,7 +6823,7 @@ const DATA_STREAM_STATE$1 = {
  * @memberOf SkylinkConstants
  * @since 0.4.1
  */
-const CANDIDATE_GENERATION_STATE$1 = {
+const CANDIDATE_GENERATION_STATE = {
   NEW: 'new',
   GATHERING: 'gathering',
   COMPLETED: 'complete',
@@ -6927,7 +6856,7 @@ const CANDIDATE_GENERATION_STATE$1 = {
  * @memberOf SkylinkConstants
  * @since 0.6.16
  */
-const CANDIDATE_PROCESSING_STATE$1 = {
+const CANDIDATE_PROCESSING_STATE = {
   RECEIVED: 'received',
   DROPPED: 'dropped',
   BUFFERED: 'buffered',
@@ -6973,7 +6902,7 @@ const CANDIDATE_PROCESSING_STATE$1 = {
  * @memberOf SkylinkConstants
  * @since 0.1.0
  */
-const ICE_CONNECTION_STATE$1 = {
+const ICE_CONNECTION_STATE = {
   STARTING: 'starting',
   CHECKING: 'checking',
   CONNECTED: 'connected',
@@ -7069,7 +6998,7 @@ const TURN_TRANSPORT = {
  * @memberOf SkylinkConstants
  * @since 0.5.0
  */
-const PEER_CONNECTION_STATE$1 = {
+const PEER_CONNECTION_STATE = {
   // onsignalingstatechange
   STABLE: 'stable',
   HAVE_LOCAL_OFFER: 'have-local-offer',
@@ -7232,7 +7161,7 @@ const PEER_CERTIFICATE = {
  * @memberOf SkylinkConstants
  * @since 0.1.0
  */
-const HANDSHAKE_PROGRESS$1 = {
+const HANDSHAKE_PROGRESS = {
   ENTER: 'enter',
   WELCOME: 'welcome',
   OFFER: 'offer',
@@ -7314,7 +7243,7 @@ const INTRODUCE_STATE = {
  * @memberOf SkylinkConstants
  * @since 0.5.1
  */
-const SYSTEM_ACTION$1 = {
+const SYSTEM_ACTION = {
   WARNING: 'warning',
   REJECT: 'reject',
   LOCKED: 'locked',
@@ -7413,7 +7342,7 @@ const SYSTEM_ACTION_REASON = {
  * @memberOf SkylinkConstants
  * @since 0.1.0
  */
-const READY_STATE_CHANGE$1 = {
+const READY_STATE_CHANGE = {
   INIT: 0,
   LOADING: 1,
   COMPLETED: 2,
@@ -7602,7 +7531,7 @@ const LOG_LEVEL = {
  * @memberOf SkylinkConstants
  * @since 0.5.6
  */
-const SOCKET_ERROR$1 = {
+const SOCKET_ERROR = {
   CONNECTION_FAILED: 0,
   RECONNECTION_FAILED: -1,
   CONNECTION_ABORTED: -2,
@@ -7930,7 +7859,7 @@ const MEDIA_ACCESS_FALLBACK_STATE = {
  * @memberOf SkylinkConstants
  * @since 0.6.16
  */
-const RECORDING_STATE$1 = {
+const RECORDING_STATE = {
   START: 0,
   STOP: 1,
   LINK: 2,
@@ -8203,7 +8132,7 @@ const SDP_SEMANTICS = {
  * @memberOf SkylinkConstants
  * @since 0.6.34
  */
-const RTMP_STATE$1 = {
+const RTMP_STATE = {
   START: 0,
   STOP: 1,
   ERROR: -1,
@@ -8479,7 +8408,7 @@ const SOCKET_EVENTS = {
  * @memberOf SkylinkConstants
  * @since 2.0
  */
-const SOCKET_TYPE = {
+const SOCKET_TYPE$1 = {
   POLLING: 'Polling',
   WEBSOCKET: 'WebSocket',
   XHR_POLLING: 'xhr-polling',
@@ -8539,7 +8468,8 @@ const NEGOTIATION_STATES = {
 const EVENTS = SkylinkEventsConstants;
 
 var constants = /*#__PURE__*/Object.freeze({
-  DATA_CHANNEL_STATE: DATA_CHANNEL_STATE$1,
+  __proto__: null,
+  DATA_CHANNEL_STATE: DATA_CHANNEL_STATE,
   DATA_CHANNEL_TYPE: DATA_CHANNEL_TYPE,
   DATA_CHANNEL_MESSAGE_TYPE: DATA_CHANNEL_MESSAGE_TYPE,
   DATA_CHANNEL_MESSAGE_ERROR: DATA_CHANNEL_MESSAGE_ERROR,
@@ -8548,30 +8478,30 @@ var constants = /*#__PURE__*/Object.freeze({
   DATA_TRANSFER_DIRECTION: DATA_TRANSFER_DIRECTION,
   DATA_TRANSFER_SESSION_TYPE: DATA_TRANSFER_SESSION_TYPE,
   SESSION_CHUNK_TYPE: SESSION_CHUNK_TYPE,
-  DATA_TRANSFER_STATE: DATA_TRANSFER_STATE$1,
+  DATA_TRANSFER_STATE: DATA_TRANSFER_STATE,
   ACK_PROTOCOL_NUMBER: ACK_PROTOCOL_NUMBER,
   AUTH_STATE: AUTH_STATE,
-  DATA_STREAM_STATE: DATA_STREAM_STATE$1,
-  CANDIDATE_GENERATION_STATE: CANDIDATE_GENERATION_STATE$1,
-  CANDIDATE_PROCESSING_STATE: CANDIDATE_PROCESSING_STATE$1,
-  ICE_CONNECTION_STATE: ICE_CONNECTION_STATE$1,
+  DATA_STREAM_STATE: DATA_STREAM_STATE,
+  CANDIDATE_GENERATION_STATE: CANDIDATE_GENERATION_STATE,
+  CANDIDATE_PROCESSING_STATE: CANDIDATE_PROCESSING_STATE,
+  ICE_CONNECTION_STATE: ICE_CONNECTION_STATE,
   TURN_TRANSPORT: TURN_TRANSPORT,
-  PEER_CONNECTION_STATE: PEER_CONNECTION_STATE$1,
+  PEER_CONNECTION_STATE: PEER_CONNECTION_STATE,
   GET_CONNECTION_STATUS_STATE: GET_CONNECTION_STATUS_STATE,
   SERVER_PEER_TYPE: SERVER_PEER_TYPE,
   BUNDLE_POLICY: BUNDLE_POLICY,
   RTCP_MUX_POLICY: RTCP_MUX_POLICY,
   PEER_CERTIFICATE: PEER_CERTIFICATE,
-  HANDSHAKE_PROGRESS: HANDSHAKE_PROGRESS$1,
+  HANDSHAKE_PROGRESS: HANDSHAKE_PROGRESS,
   GET_PEERS_STATE: GET_PEERS_STATE,
   INTRODUCE_STATE: INTRODUCE_STATE,
-  SYSTEM_ACTION: SYSTEM_ACTION$1,
+  SYSTEM_ACTION: SYSTEM_ACTION,
   SYSTEM_ACTION_REASON: SYSTEM_ACTION_REASON,
-  READY_STATE_CHANGE: READY_STATE_CHANGE$1,
+  READY_STATE_CHANGE: READY_STATE_CHANGE,
   READY_STATE_CHANGE_ERROR: READY_STATE_CHANGE_ERROR,
   REGIONAL_SERVER: REGIONAL_SERVER,
   LOG_LEVEL: LOG_LEVEL,
-  SOCKET_ERROR: SOCKET_ERROR$1,
+  SOCKET_ERROR: SOCKET_ERROR,
   SOCKET_FALLBACK: SOCKET_FALLBACK,
   SM_PROTOCOL_VERSION: SM_PROTOCOL_VERSION,
   VIDEO_CODEC: VIDEO_CODEC,
@@ -8579,7 +8509,7 @@ var constants = /*#__PURE__*/Object.freeze({
   MEDIA_SOURCE: MEDIA_SOURCE,
   VIDEO_RESOLUTION: VIDEO_RESOLUTION,
   MEDIA_ACCESS_FALLBACK_STATE: MEDIA_ACCESS_FALLBACK_STATE,
-  RECORDING_STATE: RECORDING_STATE$1,
+  RECORDING_STATE: RECORDING_STATE,
   CHUNK_FILE_SIZE: CHUNK_FILE_SIZE,
   MOZ_CHUNK_FILE_SIZE: MOZ_CHUNK_FILE_SIZE,
   BINARY_FILE_SIZE: BINARY_FILE_SIZE,
@@ -8591,7 +8521,7 @@ var constants = /*#__PURE__*/Object.freeze({
   GROUP_MESSAGE_LIST: GROUP_MESSAGE_LIST,
   VIDEO_QUALITY: VIDEO_QUALITY,
   SDP_SEMANTICS: SDP_SEMANTICS,
-  RTMP_STATE: RTMP_STATE$1,
+  RTMP_STATE: RTMP_STATE,
   MEDIA_STATUS: MEDIA_STATUS,
   TAGS: TAGS,
   MEDIA_TYPE: MEDIA_TYPE,
@@ -8606,7 +8536,7 @@ var constants = /*#__PURE__*/Object.freeze({
   BROWSER_AGENT: BROWSER_AGENT,
   PEER_TYPE: PEER_TYPE,
   SOCKET_EVENTS: SOCKET_EVENTS,
-  SOCKET_TYPE: SOCKET_TYPE,
+  SOCKET_TYPE: SOCKET_TYPE$1,
   STATES: STATES,
   CONFIG_NAME: CONFIG_NAME,
   NEGOTIATION_STATES: NEGOTIATION_STATES,
@@ -9261,7 +9191,7 @@ const getPersistedLevel = (logLevels) => {
  * @example
  * import { SkylinkLogger } from 'skylinkjs';
  *
- * const skylinkLogger = new SkylinkLogger();
+ * SkylinkLogger.setLevel(SkylinkLogger.logLevels.DEBUG);
  */
 class SkylinkLogger {
   constructor() {
@@ -9692,7 +9622,7 @@ const SOCKET_CONFIG = options => ({
   reconnectionAttempts: SOCKET_DEFAULTS.RECONNECTION_ATTEMPTS.WEBSOCKET,
   reconnectionDelayMax: SOCKET_DEFAULTS.RECONNECTION_DELAY_MAX,
   reconnectionDelay: SOCKET_DEFAULTS.RECONNECTION_DELAY,
-  transports: [SOCKET_TYPE.WEBSOCKET.toLowerCase()],
+  transports: [SOCKET_TYPE$1.WEBSOCKET.toLowerCase()],
   query: {
     Skylink_SDK_type: SDK_NAME.WEB,
     Skylink_SDK_version: SDK_VERSION,
@@ -9926,7 +9856,7 @@ const getPeerInfo = (peerId, room) => {
   }
 
   peerInfo.room = room.roomName;
-  peerInfo.settings.data = !!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId].main && state.peerDataChannels[peerId].main.channel && state.peerDataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
+  peerInfo.settings.data = !!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId].main && state.peerDataChannels[peerId].main.channel && state.peerDataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE.OPEN);
 
   return peerInfo;
 };
@@ -10073,8 +10003,6 @@ const getConnectionPortsAndProtocolByBrowser = (params) => {
 
   return connectionConfig;
 };
-
-/* eslint-disable import/prefer-default-export */
 
 /**
  * @classdesc Class representing a Skylink Room.
@@ -10465,7 +10393,7 @@ const validateOptions = (options) => {
     toReturn.isValid = false;
     toReturn.message = MESSAGES.INIT.ERRORS.NO_APP_KEY;
     dispatchEvent(readyStateChange({
-      readyState: READY_STATE_CHANGE$1.ERROR,
+      readyState: READY_STATE_CHANGE.ERROR,
       error: {
         status: -2,
         content: new Error(MESSAGES.INIT.ERRORS.NO_APP_KEY),
@@ -10559,7 +10487,7 @@ const webRTCReadyOperations = () => {
     returnObject.message = 'WebRTC not supported. Please upgrade your browser';
     returnObject.ready = false;
     dispatchEvent(readyStateChange({
-      readyState: READY_STATE_CHANGE$1.ERROR,
+      readyState: READY_STATE_CHANGE.ERROR,
       error: {
         status: -2,
         content: new Error(returnObject.message),
@@ -10582,7 +10510,7 @@ const codecSupport = roomKey => new Promise((resolve, reject) => {
       if (Object.keys(currentCodecSupport.audio).length === 0 && Object.keys(currentCodecSupport.video).length === 0) {
         logger.log.ERROR(MESSAGES.JOIN_ROOM.ERRORS.CODEC_SUPPORT);
         dispatchEvent(readyStateChange({
-          readyState: READY_STATE_CHANGE$1.ERROR,
+          readyState: READY_STATE_CHANGE.ERROR,
           error: {
             status: -2,
             content: new Error(MESSAGES.JOIN_ROOM.ERRORS.CODEC_SUPPORT),
@@ -10604,7 +10532,7 @@ const codecSupport = roomKey => new Promise((resolve, reject) => {
 
       logger.log.ERROR(error);
       dispatchEvent(readyStateChange({
-        readyState: READY_STATE_CHANGE$1.ERROR,
+        readyState: READY_STATE_CHANGE.ERROR,
         error: {
           status: -2,
           content: new Error(error.message || error.toString()),
@@ -10618,7 +10546,7 @@ const codecSupport = roomKey => new Promise((resolve, reject) => {
 
 /* eslint-disable class-methods-use-this */
 
-let instance = null;
+let instance$4 = null;
 
 /**
  * @class
@@ -10627,13 +10555,13 @@ let instance = null;
  */
 class SkylinkAPIServer {
   constructor() {
-    if (!instance) {
-      instance = this;
+    if (!instance$4) {
+      instance$4 = this;
     }
 
     this.options = {};
 
-    return instance;
+    return instance$4;
   }
 
   // eslint-disable-next-line class-methods-use-this
@@ -10650,7 +10578,7 @@ class SkylinkAPIServer {
       Skylink.setUserInitOptions(options);
     }
     dispatchEvent(readyStateChange({
-      readyState: READY_STATE_CHANGE$1.INIT,
+      readyState: READY_STATE_CHANGE.INIT,
       error: null,
       room: null,
     }));
@@ -10658,7 +10586,7 @@ class SkylinkAPIServer {
     const { AdapterJS } = window;
     if (!dependencies.fulfilled) {
       dispatchEvent(readyStateChange({
-        readyState: READY_STATE_CHANGE$1.ERROR,
+        readyState: READY_STATE_CHANGE.ERROR,
         error: {
           status: -2,
           content: new Error(dependencies.message),
@@ -10693,7 +10621,7 @@ class SkylinkAPIServer {
         const isResponseValid = validateAPIResponse(response);
         if (isResponseValid) {
           dispatchEvent(readyStateChange({
-            readyState: READY_STATE_CHANGE$1.COMPLETED,
+            readyState: READY_STATE_CHANGE.COMPLETED,
             error: null,
             room,
           }));
@@ -10706,7 +10634,7 @@ class SkylinkAPIServer {
           });
         } else {
           dispatchEvent(readyStateChange({
-            readyState: READY_STATE_CHANGE$1.ERROR,
+            readyState: READY_STATE_CHANGE.ERROR,
             error: {
               status: response.status,
               content: new Error(response.info || `XMLHttpRequest status not OK\nStatus was: ${response.status}`),
@@ -10721,7 +10649,7 @@ class SkylinkAPIServer {
         }
       }).catch((error) => {
         dispatchEvent(readyStateChange({
-          readyState: READY_STATE_CHANGE$1.ERROR,
+          readyState: READY_STATE_CHANGE.ERROR,
           error: {
             status: error.status || -1,
             content: new Error(error.message || 'Network error occurred'),
@@ -10790,7 +10718,7 @@ const getSignalingServerUrl = (params) => {
   return url;
 };
 
-const createSocket = (params) => {
+const createSocket$1 = (params) => {
   const skylinkState = Skylink.getSkylinkState(params.roomKey);
   const initOptions = Skylink.getInitOptions();
   const { config } = params;
@@ -10811,8 +10739,8 @@ const createSocket = (params) => {
     config.fallbackType = SOCKET_FALLBACK.NON_FALLBACK;
   } else if (isLastPort(ports, config) || isAString(initOptions.socketServer)) {
     // re-refresh to long-polling port
-    if (config.socketType === SOCKET_TYPE.WEBSOCKET) {
-      config.socketType = SOCKET_TYPE.POLLING;
+    if (config.socketType === SOCKET_TYPE$1.WEBSOCKET) {
+      config.socketType = SOCKET_TYPE$1.POLLING;
       config.signalingServerPort = ports[0];
     } else {
       config.socketSession.finalAttempts += 1;
@@ -10823,10 +10751,10 @@ const createSocket = (params) => {
     config.signalingServerPort = ports[ports.indexOf(config.signalingServerPort) + 1];
   }
 
-  if (config.socketType === SOCKET_TYPE.POLLING) {
+  if (config.socketType === SOCKET_TYPE$1.POLLING) {
     socketConfig.reconnectionDelayMax = DEFAULTS.SOCKET.RECONNECTION_DELAY_MAX;
     socketConfig.reconnectionAttempts = DEFAULTS.SOCKET.RECONNECTION_ATTEMPTS.POLLING;
-    socketConfig.transports = [SOCKET_TYPE.XHR_POLLING, SOCKET_TYPE.JSONP_POLLING, SOCKET_TYPE.POLLING.toLowerCase()];
+    socketConfig.transports = [SOCKET_TYPE$1.XHR_POLLING, SOCKET_TYPE$1.JSONP_POLLING, SOCKET_TYPE$1.POLLING.toLowerCase()];
   }
 
   const url = getSignalingServerUrl({
@@ -10844,7 +10772,7 @@ const createSocket = (params) => {
   return window.io(url, socketConfig);
 };
 
-const processSignalingMessage = (messageHandler, message) => {
+const processSignalingMessage$1 = (messageHandler, message) => {
   const { type } = message;
   logger.log.INFO(['SIG SERVER', null, type, 'received']);
   switch (type) {
@@ -10870,11 +10798,10 @@ const processSignalingMessage = (messageHandler, message) => {
     // Backward compatibility for public and private message protocol
     case SIG_MESSAGE_TYPE.PUBLIC_MESSAGE: messageHandler.userMessageHandler(message, true); break;
     case SIG_MESSAGE_TYPE.PRIVATE_MESSAGE: messageHandler.userMessageHandler(message, false); break;
-    default: break;
   }
 };
 
-const handleSocketClose = (roomKey, peerId, reason) => {
+const handleSocketClose$1 = (roomKey, peerId, reason) => {
   const state = Skylink.getSkylinkState(roomKey) || Object.values(Skylink.getSkylinkState())[0]; // to handle leaveAllRooms method
 
   const {
@@ -10972,7 +10899,7 @@ const onDisconnect = (roomKey, reason) => {
   new HandleSignalingStats().send(room.id, STATES.SIGNALING.DISCONNECT, peerId, error);
 
   if (isChannelOpen || (!isChannelOpen && roomKey !== room.roomName)) { // to handle leaveAllRooms method
-    handleSocketClose$1(room.id, peerId, reason);
+    handleSocketClose(room.id, peerId, reason);
   }
 };
 
@@ -10992,17 +10919,17 @@ const onError = (signaling, roomKey, error) => {
   }));
 };
 
-const callbacks = {
+const callbacks$2 = {
   onConnection,
   onDisconnect,
   onError,
 };
 
-const setSocketCallbacks = (roomKey, signaling, resolve) => {
-  signaling.socket.on(SOCKET_EVENTS.CONNECT, () => callbacks.onConnection(signaling, resolve, roomKey));
+const setSocketCallbacks$1 = (roomKey, signaling, resolve) => {
+  signaling.socket.on(SOCKET_EVENTS.CONNECT, () => callbacks$2.onConnection(signaling, resolve, roomKey));
   signaling.socket.on(SOCKET_EVENTS.MESSAGE, signaling.onMessage.bind(signaling));
-  signaling.socket.on(SOCKET_EVENTS.DISCONNECT, reason => callbacks.onDisconnect(roomKey, reason));
-  signaling.socket.on(SOCKET_EVENTS.ERROR, error => callbacks.onError(signaling, roomKey, error));
+  signaling.socket.on(SOCKET_EVENTS.DISCONNECT, reason => callbacks$2.onDisconnect(roomKey, reason));
+  signaling.socket.on(SOCKET_EVENTS.ERROR, error => callbacks$2.onError(signaling, roomKey, error));
 };
 
 const isNegotiationTypeMsg = (message) => {
@@ -11035,7 +10962,7 @@ const executeCallbackAndRemoveListener = (rid, evt) => {
   const state = Skylink.getSkylinkState(rid);
   const { detail } = evt;
 
-  if (detail.state === HANDSHAKE_PROGRESS$1.ENTER) {
+  if (detail.state === HANDSHAKE_PROGRESS.ENTER) {
     const currentBufferedMsgs = clone_1(state.socketMessageQueue);
     state.user.bufferMessage = false;
     state.socketMessageQueue = [];
@@ -11047,7 +10974,7 @@ const executeCallbackAndRemoveListener = (rid, evt) => {
   }
 };
 
-const shouldBufferMessage = (message) => {
+const shouldBufferMessage$1 = (message) => {
   const { rid } = message;
   const updatedState = Skylink.getSkylinkState(rid);
   const { user, room } = updatedState;
@@ -11067,7 +10994,7 @@ const shouldBufferMessage = (message) => {
     return true;
   }
 
-  if (message.type === HANDSHAKE_PROGRESS$1.ENTER && isNull(user.bufferMessage)) {
+  if (message.type === HANDSHAKE_PROGRESS.ENTER && isNull(user.bufferMessage)) {
     logger.log.DEBUG([user.sid, TAGS.SIG_SERVER, null, MESSAGES.SIGNALING.BUFFER_NOT_NEEDED]);
     updatedState.user.bufferMessage = false;
     updatedState.socketMessageQueue = [];
@@ -11077,25 +11004,25 @@ const shouldBufferMessage = (message) => {
   return false;
 };
 
-const createSocket$1 = params => createSocket(params);
+const createSocket = params => createSocket$1(params);
 
-const processSignalingMessage$1 = (messageHandler, message) => {
-  processSignalingMessage(messageHandler, message);
+const processSignalingMessage = (messageHandler, message) => {
+  processSignalingMessage$1(messageHandler, message);
 };
 
 const sendChannelMessage = (socket, message) => {
   socket.send(JSON.stringify(message));
 };
 
-const handleSocketClose$1 = (roomKey, peerId, reason) => {
-  handleSocketClose(roomKey, peerId, reason);
+const handleSocketClose = (roomKey, peerId, reason) => {
+  handleSocketClose$1(roomKey, peerId, reason);
 };
 
-const setSocketCallbacks$1 = (roomKey, signaling, resolve) => {
-  setSocketCallbacks(roomKey, signaling, resolve);
+const setSocketCallbacks = (roomKey, signaling, resolve) => {
+  setSocketCallbacks$1(roomKey, signaling, resolve);
 };
 
-const shouldBufferMessage$1 = message => shouldBufferMessage(message);
+const shouldBufferMessage = message => shouldBufferMessage$1(message);
 
 /**
  * Method that deletes the encryption secret associated with the given secretId. If the secretId is not provided all encryption secrets are deleted.
@@ -11118,13 +11045,13 @@ const deleteEncryptSecrets = (encryptSecrets, selectedSecretId, secretId) => {
 
     // selectedSecretId should be set to default if there are no encryptSecrets stored
     if (updatedData.selectedSecretId === secretId) {
-      updatedData.selectedSecretId = helpers$1.setSelectedSecretId();
+      updatedData.selectedSecretId = helpers$9.setSelectedSecretId();
     }
 
     delete updatedData.encryptSecrets[secretId];
   } else {
     logger.log.DEBUG([null, TAGS.ENCRYPTED_MESSAGING, null, `${MESSAGES.MESSAGING.ENCRYPTION.DELETE_ALL}`]);
-    updatedData.selectedSecretId = helpers$1.setSelectedSecretId();
+    updatedData.selectedSecretId = helpers$9.setSelectedSecretId();
     updatedData.encryptSecrets = {};
   }
 
@@ -11136,9 +11063,7 @@ const isValidSecret = (secret) => {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.NO_SECRET_OR_SECRET_ID);
   }
 
-  if (!helpers$1.utils.isValidString(secret)) {
-    throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_TYPE);
-  }
+  if (!helpers$9.utils.isValidString(secret)) ;
 
   return true;
 };
@@ -11148,11 +11073,9 @@ const isValidSecretId = (secretId, updatedEncryptSecrets) => {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.NO_SECRET_OR_SECRET_ID);
   }
 
-  if (!helpers$1.utils.isValidString(secretId)) {
-    throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_TYPE);
-  }
+  if (!helpers$9.utils.isValidString(secretId)) ;
 
-  if (helpers$1.utils.isExisting(secretId, updatedEncryptSecrets)) {
+  if (helpers$9.utils.isExisting(secretId, updatedEncryptSecrets)) {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SECRET_ID_NOT_UNIQUE);
   }
 
@@ -11174,7 +11097,7 @@ var core = createCommonjsModule(function (module, exports) {
 (function (root, factory) {
 	{
 		// CommonJS
-		module.exports = exports = factory();
+		module.exports = factory();
 	}
 }(commonjsGlobal, function () {
 
@@ -11782,7 +11705,7 @@ var core = createCommonjsModule(function (module, exports) {
 	     *
 	     * @property {number} blockSize The number of 32-bit words this hasher operates on. Default: 16 (512 bits)
 	     */
-	    var Hasher = C_lib.Hasher = BufferedBlockAlgorithm.extend({
+	    C_lib.Hasher = BufferedBlockAlgorithm.extend({
 	        /**
 	         * Configuration options.
 	         */
@@ -11928,7 +11851,7 @@ var x64Core = createCommonjsModule(function (module, exports) {
 (function (root, factory) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core);
+		module.exports = factory(core);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -11947,7 +11870,7 @@ var x64Core = createCommonjsModule(function (module, exports) {
 	    /**
 	     * A 64-bit word.
 	     */
-	    var X64Word = C_x64.Word = Base.extend({
+	    C_x64.Word = Base.extend({
 	        /**
 	         * Initializes a newly created 64-bit word.
 	         *
@@ -12135,7 +12058,7 @@ var x64Core = createCommonjsModule(function (module, exports) {
 	     * @property {Array} words The array of CryptoJS.x64.Word objects.
 	     * @property {number} sigBytes The number of significant bytes in this word array.
 	     */
-	    var X64WordArray = C_x64.WordArray = Base.extend({
+	    C_x64.WordArray = Base.extend({
 	        /**
 	         * Initializes a newly created word array.
 	         *
@@ -12227,7 +12150,7 @@ var libTypedarrays = createCommonjsModule(function (module, exports) {
 (function (root, factory) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core);
+		module.exports = factory(core);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -12298,7 +12221,7 @@ var encUtf16 = createCommonjsModule(function (module, exports) {
 (function (root, factory) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core);
+		module.exports = factory(core);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -12312,7 +12235,7 @@ var encUtf16 = createCommonjsModule(function (module, exports) {
 	    /**
 	     * UTF-16 BE encoding strategy.
 	     */
-	    var Utf16BE = C_enc.Utf16 = C_enc.Utf16BE = {
+	    C_enc.Utf16 = C_enc.Utf16BE = {
 	        /**
 	         * Converts a word array to a UTF-16 BE string.
 	         *
@@ -12442,7 +12365,7 @@ var encBase64 = createCommonjsModule(function (module, exports) {
 (function (root, factory) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core);
+		module.exports = factory(core);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -12456,7 +12379,7 @@ var encBase64 = createCommonjsModule(function (module, exports) {
 	    /**
 	     * Base64 encoding strategy.
 	     */
-	    var Base64 = C_enc.Base64 = {
+	    C_enc.Base64 = {
 	        /**
 	         * Converts a word array to a Base64 string.
 	         *
@@ -12572,7 +12495,7 @@ var md5 = createCommonjsModule(function (module, exports) {
 (function (root, factory) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core);
+		module.exports = factory(core);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -12835,7 +12758,7 @@ var sha1 = createCommonjsModule(function (module, exports) {
 (function (root, factory) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core);
+		module.exports = factory(core);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -12980,7 +12903,7 @@ var sha256 = createCommonjsModule(function (module, exports) {
 (function (root, factory) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core);
+		module.exports = factory(core);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -13174,7 +13097,7 @@ var sha224 = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, sha256);
+		module.exports = factory(core, sha256);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -13249,7 +13172,7 @@ var sha512 = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, x64Core);
+		module.exports = factory(core, x64Core);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -13567,7 +13490,7 @@ var sha384 = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, x64Core, sha512);
+		module.exports = factory(core, x64Core, sha512);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -13645,7 +13568,7 @@ var sha3 = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, x64Core);
+		module.exports = factory(core, x64Core);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -13863,7 +13786,7 @@ var sha3 = createCommonjsModule(function (module, exports) {
 	            // Shortcuts
 	            var data = this._data;
 	            var dataWords = data.words;
-	            var nBitsTotal = this._nDataBytes * 8;
+	            this._nDataBytes * 8;
 	            var nBitsLeft = data.sigBytes * 8;
 	            var blockSizeBits = this.blockSize * 32;
 
@@ -13962,7 +13885,7 @@ var ripemd160 = createCommonjsModule(function (module, exports) {
 (function (root, factory) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core);
+		module.exports = factory(core);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -14212,7 +14135,7 @@ var ripemd160 = createCommonjsModule(function (module, exports) {
 	     *     var hmac = CryptoJS.HmacRIPEMD160(message, key);
 	     */
 	    C.HmacRIPEMD160 = Hasher._createHmacHelper(RIPEMD160);
-	}(Math));
+	}());
 
 
 	return CryptoJS.RIPEMD160;
@@ -14224,7 +14147,7 @@ var hmac = createCommonjsModule(function (module, exports) {
 (function (root, factory) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core);
+		module.exports = factory(core);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -14240,7 +14163,7 @@ var hmac = createCommonjsModule(function (module, exports) {
 	    /**
 	     * HMAC algorithm.
 	     */
-	    var HMAC = C_algo.HMAC = Base.extend({
+	    C_algo.HMAC = Base.extend({
 	        /**
 	         * Initializes a newly created HMAC.
 	         *
@@ -14362,7 +14285,7 @@ var pbkdf2 = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, sha1, hmac);
+		module.exports = factory(core, sha1, hmac);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -14502,7 +14425,7 @@ var evpkdf = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, sha1, hmac);
+		module.exports = factory(core, sha1, hmac);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -14629,7 +14552,7 @@ var cipherCore = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, evpkdf);
+		module.exports = factory(core, evpkdf);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -14644,7 +14567,7 @@ var cipherCore = createCommonjsModule(function (module, exports) {
 	    var WordArray = C_lib.WordArray;
 	    var BufferedBlockAlgorithm = C_lib.BufferedBlockAlgorithm;
 	    var C_enc = C.enc;
-	    var Utf8 = C_enc.Utf8;
+	    C_enc.Utf8;
 	    var Base64 = C_enc.Base64;
 	    var C_algo = C.algo;
 	    var EvpKDF = C_algo.EvpKDF;
@@ -14834,7 +14757,7 @@ var cipherCore = createCommonjsModule(function (module, exports) {
 	     *
 	     * @property {number} blockSize The number of 32-bit words this cipher operates on. Default: 1 (32 bits)
 	     */
-	    var StreamCipher = C_lib.StreamCipher = Cipher.extend({
+	    C_lib.StreamCipher = Cipher.extend({
 	        _doFinalize: function () {
 	            // Process partial blocks
 	            var finalProcessedBlocks = this._process(!!'flush');
@@ -15060,7 +14983,7 @@ var cipherCore = createCommonjsModule(function (module, exports) {
 	     *
 	     * @property {number} blockSize The number of 32-bit words this cipher operates on. Default: 4 (128 bits)
 	     */
-	    var BlockCipher = C_lib.BlockCipher = Cipher.extend({
+	    C_lib.BlockCipher = Cipher.extend({
 	        /**
 	         * Configuration options.
 	         *
@@ -15504,7 +15427,7 @@ var modeCfb = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, cipherCore);
+		module.exports = factory(core, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -15577,7 +15500,7 @@ var modeCtr = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, cipherCore);
+		module.exports = factory(core, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -15630,7 +15553,7 @@ var modeCtrGladman = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, cipherCore);
+		module.exports = factory(core, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -15741,7 +15664,7 @@ var modeOfb = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, cipherCore);
+		module.exports = factory(core, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -15790,7 +15713,7 @@ var modeEcb = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, cipherCore);
+		module.exports = factory(core, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -15825,7 +15748,7 @@ var padAnsix923 = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, cipherCore);
+		module.exports = factory(core, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -15869,7 +15792,7 @@ var padIso10126 = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, cipherCore);
+		module.exports = factory(core, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -15908,7 +15831,7 @@ var padIso97971 = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, cipherCore);
+		module.exports = factory(core, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -15943,7 +15866,7 @@ var padZeropadding = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, cipherCore);
+		module.exports = factory(core, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -15983,7 +15906,7 @@ var padNopadding = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, cipherCore);
+		module.exports = factory(core, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -16008,7 +15931,7 @@ var formatHex = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, cipherCore);
+		module.exports = factory(core, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -16021,7 +15944,7 @@ var formatHex = createCommonjsModule(function (module, exports) {
 	    var Hex = C_enc.Hex;
 	    var C_format = C.format;
 
-	    var HexFormatter = C_format.Hex = {
+	    C_format.Hex = {
 	        /**
 	         * Converts the ciphertext of a cipher params object to a hexadecimally encoded string.
 	         *
@@ -16069,7 +15992,7 @@ var aes = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, encBase64, md5, evpkdf, cipherCore);
+		module.exports = factory(core, encBase64, md5, evpkdf, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -16296,7 +16219,7 @@ var tripledes = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, encBase64, md5, evpkdf, cipherCore);
+		module.exports = factory(core, encBase64, md5, evpkdf, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -17061,7 +16984,7 @@ var rc4 = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, encBase64, md5, evpkdf, cipherCore);
+		module.exports = factory(core, encBase64, md5, evpkdf, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -17195,7 +17118,7 @@ var rabbit = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, encBase64, md5, evpkdf, cipherCore);
+		module.exports = factory(core, encBase64, md5, evpkdf, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -17382,7 +17305,7 @@ var rabbitLegacy = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, encBase64, md5, evpkdf, cipherCore);
+		module.exports = factory(core, encBase64, md5, evpkdf, cipherCore);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -17567,7 +17490,7 @@ var cryptoJs = createCommonjsModule(function (module, exports) {
 (function (root, factory, undef) {
 	{
 		// CommonJS
-		module.exports = exports = factory(core, x64Core, libTypedarrays, encUtf16, encBase64, md5, sha1, sha256, sha224, sha512, sha384, sha3, ripemd160, hmac, pbkdf2, evpkdf, cipherCore, modeCfb, modeCtr, modeCtrGladman, modeOfb, modeEcb, padAnsix923, padIso10126, padIso97971, padZeropadding, padNopadding, formatHex, aes, tripledes, rc4, rabbit, rabbitLegacy);
+		module.exports = factory(core, x64Core, libTypedarrays, encUtf16, encBase64, md5, sha1, sha256, sha224, sha512, sha384, sha3, ripemd160, hmac, pbkdf2, evpkdf, cipherCore, modeCfb, modeCtr, modeCtrGladman, modeOfb, modeEcb, padAnsix923, padIso10126, padIso97971, padZeropadding, padNopadding, formatHex, aes, tripledes, rc4, rabbit, rabbitLegacy);
 	}
 }(commonjsGlobal, function (CryptoJS) {
 
@@ -17633,7 +17556,7 @@ const setSelectedSecretId = (encryptSecrets, secretId) => {
     return '';
   }
 
-  if (!helpers$1.utils.isValidString(secretId)) ;
+  if (!helpers$9.utils.isValidString(secretId)) ;
 
   if (!encryptSecrets[secretId]) {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SECRET_ID_NOT_FOUND);
@@ -17642,7 +17565,7 @@ const setSelectedSecretId = (encryptSecrets, secretId) => {
   return secretId;
 };
 
-const getMessageConfig = (roomState, targetPeerId) => {
+const getMessageConfig$2 = (roomState, targetPeerId) => {
   const {
     peerInformations,
     room,
@@ -17684,7 +17607,7 @@ const getMessageConfig = (roomState, targetPeerId) => {
 const sendMessageToSig = (roomState, config, message, encryptedMessage = '', targetPeerId) => {
   const signaling = new SkylinkSignalingServer();
   signaling.sendUserMessage(roomState, config, encryptedMessage || message);
-  helpers.dispatchOnIncomingMessage(roomState, config, message, true, targetPeerId);
+  helpers$a.dispatchOnIncomingMessage(roomState, config, message, true, targetPeerId);
 };
 
 // if isSelf = true, targetPeerId is the peer id targeted in sendMessage
@@ -17725,24 +17648,24 @@ class SkylinkError {
 
 const trySendMessage = (roomState, message, targetPeerId) => {
   try {
-    const config = helpers.getMessageConfig(roomState, targetPeerId);
-    helpers.sendMessageToSig(roomState, config, message, null, targetPeerId);
+    const config = helpers$a.getMessageConfig(roomState, targetPeerId);
+    helpers$a.sendMessageToSig(roomState, config, message, null, targetPeerId);
   } catch (error) {
     SkylinkError.throwError(targetPeerId, MESSAGES.MESSAGING.ERRORS.FAILED_SENDING_MESSAGE);
   }
 };
 
-const helpers = {
-  getMessageConfig,
+const helpers$a = {
+  getMessageConfig: getMessageConfig$2,
   sendMessageToSig,
   dispatchOnIncomingMessage,
   trySendMessage,
 };
 
 const getMessageConfig$1 = (roomState, targetPeerId, encryptSecrets, selectedSecretId, isPersistent) => {
-  const config = helpers.getMessageConfig(roomState, targetPeerId);
+  const config = helpers$a.getMessageConfig(roomState, targetPeerId);
 
-  if (helpers$1.utils.hasCrypto() && helpers$1.utils.canEncrypt(selectedSecretId, encryptSecrets)) {
+  if (helpers$9.utils.hasCrypto() && helpers$9.utils.canEncrypt(selectedSecretId, encryptSecrets)) {
     config.secretId = selectedSecretId;
   }
 
@@ -17770,7 +17693,7 @@ const encryptMessage = (message, secret, decrypt = false) => {
 };
 
 const tryDecryptMessage = (message, secretId, encryptSecrets) => {
-  const decryptedMessage = helpers$1.encryptMessage(message, encryptSecrets[secretId], true);
+  const decryptedMessage = helpers$9.encryptMessage(message, encryptSecrets[secretId], true);
   if (isEmptyString(decryptedMessage)) {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.ENCRYPT_SECRET);
   } else {
@@ -17778,7 +17701,7 @@ const tryDecryptMessage = (message, secretId, encryptSecrets) => {
   }
 };
 
-const helpers$1 = {
+const helpers$9 = {
   deleteEncryptSecrets,
   setEncryptSecret,
   setSelectedSecretId,
@@ -17796,12 +17719,12 @@ const helpers$1 = {
  * @memberOf PeerDataHelpers
  */
 const getUserInfo = (room) => {
-  const userInfo = helpers$6.getCurrentSessionInfo(room);
+  const userInfo = helpers$4.getCurrentSessionInfo(room);
   delete userInfo.room;
   return userInfo;
 };
 
-const instance$1 = {};
+const instance$3 = {};
 /**
  * @classdesc Class used for handling encryption
  * @class
@@ -17811,8 +17734,8 @@ class EncryptedMessaging {
   constructor(roomState) {
     const { room, user } = roomState;
 
-    if (!instance$1[room.id]) {
-      instance$1[room.id] = this;
+    if (!instance$3[room.id]) {
+      instance$3[room.id] = this;
     }
 
     this.room = room;
@@ -17830,12 +17753,12 @@ class EncryptedMessaging {
      */
     this.selectedSecretId = '';
 
-    return instance$1[room.id];
+    return instance$3[room.id];
   }
 
   setEncryptSecret(secret, secretId) {
     try {
-      this.encryptSecrets = helpers$1.setEncryptSecret(this.encryptSecrets, secret, secretId);
+      this.encryptSecrets = helpers$9.setEncryptSecret(this.encryptSecrets, secret, secretId);
       this.dispatchEncryptSecretEvent();
     } catch (error) {
       SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_ENCRYPT_SECRET, error.message);
@@ -17848,7 +17771,7 @@ class EncryptedMessaging {
 
   deleteEncryptSecrets(secretId) {
     try {
-      const updatedData = helpers$1.deleteEncryptSecrets(this.encryptSecrets, this.selectedSecretId, secretId);
+      const updatedData = helpers$9.deleteEncryptSecrets(this.encryptSecrets, this.selectedSecretId, secretId);
       this.encryptSecrets = updatedData.encryptSecrets;
       this.selectedSecretId = updatedData.selectedSecretId;
       this.dispatchEncryptSecretEvent();
@@ -17859,7 +17782,7 @@ class EncryptedMessaging {
 
   setSelectedSecretId(secretId) {
     try {
-      this.selectedSecretId = helpers$1.setSelectedSecretId(this.encryptSecrets, secretId);
+      this.selectedSecretId = helpers$9.setSelectedSecretId(this.encryptSecrets, secretId);
       this.dispatchEncryptSecretEvent();
     } catch (error) {
       SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_SELECTED_SECRET, error.message);
@@ -17882,8 +17805,8 @@ class EncryptedMessaging {
 
   canEncrypt(throwError) {
     try {
-      if (helpers$1.utils.canEncrypt(this.selectedSecretId, this.encryptSecrets)) {
-        return helpers$1.utils.isValidString(this.selectedSecretId) && helpers$1.utils.isValidString(this.encryptSecrets[this.selectedSecretId]);
+      if (helpers$9.utils.canEncrypt(this.selectedSecretId, this.encryptSecrets)) {
+        return helpers$9.utils.isValidString(this.selectedSecretId) && helpers$9.utils.isValidString(this.encryptSecrets[this.selectedSecretId]);
       }
 
       return false;
@@ -17896,7 +17819,7 @@ class EncryptedMessaging {
   }
 
   decryptStoredMessages(message, secretId) {
-    if (helpers$1.utils.canEncrypt(secretId, this.encryptSecrets) && !Object.keys(this.encryptSecrets).filter(key => key === secretId).length) {
+    if (helpers$9.utils.canEncrypt(secretId, this.encryptSecrets) && !Object.keys(this.encryptSecrets).filter(key => key === secretId).length) {
       throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SECRET_ID_NOT_FOUND);
     }
 
@@ -17904,8 +17827,8 @@ class EncryptedMessaging {
   }
 
   decryptMessage(message, secretId = '') {
-    if (secretId && helpers$1.utils.canDecrypt(this.encryptSecrets)) {
-      return helpers$1.tryDecryptMessage(message, secretId, this.encryptSecrets);
+    if (secretId && helpers$9.utils.canDecrypt(this.encryptSecrets)) {
+      return helpers$9.tryDecryptMessage(message, secretId, this.encryptSecrets);
     }
 
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_SECRETS);
@@ -17916,9 +17839,9 @@ class EncryptedMessaging {
     if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
       try {
         logger.log.DEBUG([null, TAGS.ASYNC_MESSAGING, null, MESSAGES.MESSAGING.ENCRYPTION.SEND_MESSAGE]);
-        const config = helpers$1.getMessageConfig(roomState, targetPeerId, this.encryptSecrets, this.selectedSecretId, isPersistent);
-        const encryptedMessage = helpers$1.encryptMessage(message, this.encryptSecrets[this.selectedSecretId]);
-        helpers.sendMessageToSig(roomState, config, message, encryptedMessage, targetPeerId);
+        const config = helpers$9.getMessageConfig(roomState, targetPeerId, this.encryptSecrets, this.selectedSecretId, isPersistent);
+        const encryptedMessage = helpers$9.encryptMessage(message, this.encryptSecrets[this.selectedSecretId]);
+        helpers$a.sendMessageToSig(roomState, config, message, encryptedMessage, targetPeerId);
       } catch (error) {
         SkylinkError.throwError(targetPeerId, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
       }
@@ -17926,12 +17849,12 @@ class EncryptedMessaging {
   }
 
   static deleteEncryptedInstance(room) {
-    delete instance$1[room.id];
+    delete instance$3[room.id];
   }
 }
 
-const getMessageConfig$2 = (roomState, targetPeerId) => {
-  const config = helpers$1.getMessageConfig(roomState, targetPeerId);
+const getMessageConfig = (roomState, targetPeerId) => {
+  const config = helpers$9.getMessageConfig(roomState, targetPeerId);
   config.isPersistent = true;
 
   return config;
@@ -17946,8 +17869,8 @@ const parseDecryptedMessageData = (message, targetMid) => ({
   isDataChannel: false,
 });
 
-const helpers$2 = {
-  getMessageConfig: getMessageConfig$2,
+const helpers$8 = {
+  getMessageConfig,
   parseDecryptedMessageData,
 };
 
@@ -18057,7 +17980,7 @@ class AsyncMessaging {
     try {
       for (let i = 0; i < messageData.length; i += 1) {
         messageData[i].data = encryptedMessaging.decryptStoredMessages(messageData[i].data, messageData[i].secretId);
-        messages.push(helpers$2.parseDecryptedMessageData(messageData[i], targetMid));
+        messages.push(helpers$8.parseDecryptedMessageData(messageData[i], targetMid));
       }
     } catch (error) {
       throw SkylinkError.throwError(targetMid, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.FAILED_DECRYPTING_MESSAGE, error.message);
@@ -18093,7 +18016,7 @@ class Messaging {
       } else if (encryptedMessaging.canEncrypt()) {
         encryptedMessaging.sendMessage(roomName, message, targetPeerId);
       } else {
-        helpers.trySendMessage(roomState, message, targetPeerId);
+        helpers$a.trySendMessage(roomState, message, targetPeerId);
       }
     }
   }
@@ -18126,7 +18049,7 @@ class Messaging {
       }
     }
 
-    helpers.dispatchOnIncomingMessage(roomState, { isPrivate: isABoolean(isPublic) ? !isPublic : !!target }, messageData, false, targetMid);
+    helpers$a.dispatchOnIncomingMessage(roomState, { isPrivate: isABoolean(isPublic) ? !isPublic : !!target }, messageData, false, targetMid);
   }
 }
 
@@ -18462,7 +18385,7 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
   const {
     STATS_MODULE, ICE_CANDIDATE, PEER_CONNECTION, SESSION_DESCRIPTION,
   } = MESSAGES;
-  const { CANDIDATE_PROCESSING_STATE, PEER_CONNECTION_STATE, TAGS } = constants;
+  const { CANDIDATE_PROCESSING_STATE: CANDIDATE_PROCESSING_STATE$1, PEER_CONNECTION_STATE, TAGS } = constants;
 
   logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.ADDING_CANDIDATE]);
   dispatchEvent(candidateProcessingState({
@@ -18471,7 +18394,7 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
     candidateType,
     candidate,
     candidateId,
-    state: CANDIDATE_PROCESSING_STATE.PROCESSING,
+    state: CANDIDATE_PROCESSING_STATE$1.PROCESSING,
     error: null,
   }));
   handleIceCandidateStats.send(room.id, STATS_MODULE.HANDLE_ICE_GATHERING_STATS.PROCESSING, targetMid, candidateId, candidate);
@@ -18502,7 +18425,7 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
       candidateType,
       candidate,
       candidateId,
-      state: CANDIDATE_PROCESSING_STATE$1.DROPPED,
+      state: CANDIDATE_PROCESSING_STATE.DROPPED,
       error: new Error(errorMessage),
     }));
 
@@ -18572,7 +18495,7 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
   const signalingServer = new SkylinkSignalingServer();
   let gatheredCandidates = state.gatheredCandidates[targetMid];
   const { filterCandidatesType } = initOptions;
-  const { CANDIDATE_GENERATION_STATE, TAGS } = constants;
+  const { CANDIDATE_GENERATION_STATE: CANDIDATE_GENERATION_STATE$1, TAGS } = constants;
 
   if (!peerConnection) {
     logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, null, MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION], candidate);
@@ -18587,9 +18510,9 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
       dispatchEvent(candidateGenerationState({
         room: Room.getRoomInfo(currentRoom.id),
         peerId: targetMid,
-        state: CANDIDATE_GENERATION_STATE$1.GATHERING,
+        state: CANDIDATE_GENERATION_STATE.GATHERING,
       }));
-      handleIceGatheringStats.send(currentRoom.id, CANDIDATE_GENERATION_STATE.GATHERING, targetMid, false);
+      handleIceGatheringStats.send(currentRoom.id, CANDIDATE_GENERATION_STATE$1.GATHERING, targetMid, false);
     }
 
     const candidateType = candidate.candidate.split(' ')[7];
@@ -18643,10 +18566,10 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
 
     dispatchEvent(candidateGenerationState({
       peerId: targetMid,
-      state: CANDIDATE_GENERATION_STATE$1.COMPLETED,
+      state: CANDIDATE_GENERATION_STATE.COMPLETED,
       room: currentRoom,
     }));
-    handleIceGatheringStats.send(currentRoom.id, CANDIDATE_GENERATION_STATE.COMPLETED, targetMid, false);
+    handleIceGatheringStats.send(currentRoom.id, CANDIDATE_GENERATION_STATE$1.COMPLETED, targetMid, false);
 
     if (state.gatheredCandidates[targetMid]) {
       const sendEndOfCandidates = () => {
@@ -18692,7 +18615,7 @@ const addIceCandidateToQueue = (targetMid, candidateId, candidateType, nativeCan
   handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.BUFFERED, targetMid, candidateId, nativeCandidate);
   dispatchEvent(candidateProcessingState({
     room: Room.getRoomInfo(room.id),
-    state: CANDIDATE_PROCESSING_STATE$1.BUFFERED,
+    state: CANDIDATE_PROCESSING_STATE.BUFFERED,
     peerId: targetMid,
     candidateId,
     candidateType,
@@ -18711,7 +18634,7 @@ const addIceCandidateToQueue = (targetMid, candidateId, candidateType, nativeCan
  * @private
  * @type {{setIceServers, addIceCandidateFromQueue, addIceCandidate, onIceCandidate, addIceCandidateToQueue}}
  */
-const helpers$3 = {
+const helpers$7 = {
   setIceServers,
   addIceCandidateFromQueue,
   addIceCandidate,
@@ -18733,7 +18656,7 @@ class IceConnection {
    * @return {filteredIceServers}
    */
   static setIceServers(roomKey, iceServers) {
-    return helpers$3.setIceServers(roomKey, iceServers);
+    return helpers$7.setIceServers(roomKey, iceServers);
   }
 
   /**
@@ -18743,11 +18666,11 @@ class IceConnection {
    * @param {SkylinkRoom} room - Current Room
    */
   static addIceCandidateFromQueue(targetMid, room) {
-    return helpers$3.addIceCandidateFromQueue(targetMid, room);
+    return helpers$7.addIceCandidateFromQueue(targetMid, room);
   }
 
   static addIceCandidateToQueue(targetMid, candidateId, candidateType, nativeCandidate, state) {
-    return helpers$3.addIceCandidateToQueue(targetMid, candidateId, candidateType, nativeCandidate, state);
+    return helpers$7.addIceCandidateToQueue(targetMid, candidateId, candidateType, nativeCandidate, state);
   }
 
   /**
@@ -18760,7 +18683,7 @@ class IceConnection {
    * @fires CANDIDATE_PROCESSING_STATE
    */
   static addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState) {
-    return helpers$3.addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState);
+    return helpers$7.addIceCandidate(targetMid, candidateId, candidateType, nativeCandidate, roomState);
   }
 
   /**
@@ -18772,7 +18695,7 @@ class IceConnection {
    * @return {null}
    */
   static onIceCandidate(targetMid, rtcIceConnectionEvent, room) {
-    return helpers$3.onIceCandidate(targetMid, rtcIceConnectionEvent, room);
+    return helpers$7.onIceCandidate(targetMid, rtcIceConnectionEvent, room);
   }
 }
 
@@ -18852,7 +18775,7 @@ const doUpdate = (room, peerId, dispatchEvent, mediaId, key = false, value = fal
   } else if (mediaInfo && !key && !value) {
     updatedState.peerMedias[peerId] = updatedState.peerMedias[peerId] || {};
     updatedState.peerMedias[peerId][mediaId] = mediaInfo;
-  }
+  } else ;
 
   Skylink.setSkylinkState(updatedState, room.id);
 };
@@ -19580,7 +19503,6 @@ class PeerStream {
       case STREAM_MUTED:
         dispatchEvent(streamMuted(detail));
         break;
-      default:
         // do nothing
     }
   }
@@ -19679,7 +19601,7 @@ const removeTrack = (state, peerConnections, track) => {
       const targetMid = peerIds[i];
       const peerConnection = peerConnections[targetMid];
 
-      if (peerConnection.connectionState === PEER_CONNECTION_STATE$1.CLOSED) {
+      if (peerConnection.connectionState === PEER_CONNECTION_STATE.CLOSED) {
         break;
       }
 
@@ -19725,7 +19647,7 @@ const listenForEventAndDeleteMediaInfo = (room, stream) => {
     const s = stream;
     const { user } = state;
     const { detail } = evt;
-    if (detail.state === HANDSHAKE_PROGRESS$1.OFFER) {
+    if (detail.state === HANDSHAKE_PROGRESS.OFFER) {
       const mediaId = PeerMedia.retrieveMediaId(hasAudioTrack(s) ? TRACK_KIND.AUDIO : TRACK_KIND.VIDEO, s.id);
       PeerMedia.deleteUnavailableMedia(room, user.sid, mediaId);
     }
@@ -19762,7 +19684,7 @@ const updateMediaInfoMediaState = (room, stream) => {
  * @memberOf MediaStreamHelpers
  * @fires STREAM_ENDED
  */
-const dispatchEvents = (room, stream, isScreensharing = false) => {
+const dispatchEvents$1 = (room, stream, isScreensharing = false) => {
   const state = Skylink.getSkylinkState(room.id);
   const { MEDIA_STREAM } = MESSAGES;
   const { user } = state;
@@ -19790,7 +19712,7 @@ const dispatchEvents = (room, stream, isScreensharing = false) => {
 
   dispatchEvent(peerUpdated({
     peerId: user.sid,
-    peerInfo: helpers$6.getCurrentSessionInfo(room),
+    peerInfo: helpers$4.getCurrentSessionInfo(room),
     isSelf: true,
   }));
 };
@@ -19810,7 +19732,7 @@ const prepStopScreenStream = (room, streamId, fromLeaveRoom = false) => new Prom
   }
 });
 
-const dispatchPeerUpdatedEvent = (roomState) => {
+const dispatchPeerUpdatedEvent$1 = (roomState) => {
   const { room, user } = roomState;
 
   dispatchEvent(peerUpdated({
@@ -19831,7 +19753,7 @@ const initRefreshConnectionAndResolve = (room, fromLeaveRoom, resolve, reject) =
         // eslint-disable-next-line consistent-return
         const executeAnswerAckCallback = (evt) => {
           const { detail } = evt;
-          if (detail.state === HANDSHAKE_PROGRESS$1.ANSWER_ACK) {
+          if (detail.state === HANDSHAKE_PROGRESS.ANSWER_ACK) {
             return (resolve());
           }
         };
@@ -19840,7 +19762,7 @@ const initRefreshConnectionAndResolve = (room, fromLeaveRoom, resolve, reject) =
 
         PeerConnection.refreshConnection(state);
       } else {
-        dispatchPeerUpdatedEvent(state);
+        dispatchPeerUpdatedEvent$1(state);
         PeerMedia.deleteUnavailableMedia(state.room, state.user.sid);
         return resolve();
       }
@@ -19869,7 +19791,7 @@ const stopStreamHelpers = {
   listenForEventAndDeleteMediaInfo,
   stopAddedStreams,
   updateMediaInfoMediaState,
-  dispatchEvents,
+  dispatchEvents: dispatchEvents$1,
   prepStopScreenStream,
   initRefreshConnectionAndResolve,
   updateMediaStatusMutedSettings,
@@ -19889,12 +19811,12 @@ class MediaStream {
    */
   static getUserMedia(state, mediaOptions = {}) {
     const { room } = state;
-    const updatedRoomState = helpers$7.parseMediaOptions(mediaOptions, state);
+    const updatedRoomState = helpers$3.parseMediaOptions(mediaOptions, state);
     const { audio, video } = mediaOptions;
     const useExactConstraints = !!mediaOptions.useExactConstraints;
     Skylink.setSkylinkState(updatedRoomState, room.id);
 
-    return helpers$7.prepMediaAccessRequest({
+    return helpers$3.prepMediaAccessRequest({
       useExactConstraints,
       audio,
       video,
@@ -19949,7 +19871,7 @@ class MediaStream {
    * @param {SkylinkState} roomState - Skylink State of current room
    */
   static addLocalMediaStreams(targetMid, roomState) {
-    helpers$7.addLocalMediaStreams(targetMid, roomState);
+    helpers$3.addLocalMediaStreams(targetMid, roomState);
   }
 
   /**
@@ -19960,7 +19882,7 @@ class MediaStream {
    * @param {boolean} [isScreensharing=false] - The flag if stream is a screenshare stream.
    */
   static onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio) {
-    helpers$7.onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio);
+    helpers$3.onRemoteTrackAdded(stream, currentRoomState, targetMid, isScreensharing, isVideo, isAudio);
   }
 
   /**
@@ -19972,7 +19894,7 @@ class MediaStream {
    * @param {String} streamId
    */
   static muteStreams(roomState, options, streamId) {
-    return helpers$7.muteStreams(roomState, options, streamId);
+    return helpers$3.muteStreams(roomState, options, streamId);
   }
 
   /**
@@ -19981,11 +19903,11 @@ class MediaStream {
    * @param {MediaStream|Object} options
    */
   static sendStream(roomState, options) {
-    return helpers$7.sendStream(roomState, options);
+    return helpers$3.sendStream(roomState, options);
   }
 
   static getStreamSources() {
-    return helpers$7.getStreamSources();
+    return helpers$3.getStreamSources();
   }
 
   /**
@@ -19995,16 +19917,16 @@ class MediaStream {
    * @return {streamList} streamList
    */
   static getStreams(roomState, includeSelf) {
-    return helpers$7.getStreams(roomState, includeSelf);
+    return helpers$3.getStreams(roomState, includeSelf);
   }
 
   static usePrefetchedStream(roomKey, prefetchedStream) {
     return new Promise((resolve) => {
       const streamOptions = { audio: prefetchedStream.getAudioTracks().length !== 0, video: prefetchedStream.getVideoTracks().length !== 0 };
-      const audioSettings = helpers$7.parseStreamSettings(streamOptions, TRACK_KIND.AUDIO);
-      const videoSettings = helpers$7.parseStreamSettings(streamOptions, TRACK_KIND.VIDEO);
+      const audioSettings = helpers$3.parseStreamSettings(streamOptions, TRACK_KIND.AUDIO);
+      const videoSettings = helpers$3.parseStreamSettings(streamOptions, TRACK_KIND.VIDEO);
       const isAudioFallback = false;
-      const stream = helpers$7.onStreamAccessSuccess(roomKey, prefetchedStream, audioSettings, videoSettings, isAudioFallback, false, true);
+      const stream = helpers$3.onStreamAccessSuccess(roomKey, prefetchedStream, audioSettings, videoSettings, isAudioFallback, false, true);
 
       resolve(stream);
     });
@@ -20054,7 +19976,7 @@ class MediaStream {
   }
 
   static buildStreamSettings(room, stream, settings) {
-    return helpers$7.buildStreamSettings(room, stream, settings);
+    return helpers$3.buildStreamSettings(room, stream, settings);
   }
 }
 
@@ -20111,7 +20033,7 @@ const ontrack = (RTCPeerConnection, targetMid, currentRoomState, rtcTrackEvent) 
 
   const isScreensharing = PeerMedia.retrieveScreenMediaInfo(state.room, peerId, { transceiverMid: transceiver.mid });
   const callbackExtraParams = [peerId, room, isScreensharing];
-  stream.onremovetrack = callbacks$2.onremovetrack.bind(undefined, ...callbackExtraParams);
+  stream.onremovetrack = callbacks.onremovetrack.bind(undefined, ...callbackExtraParams);
   PeerMedia.updateStreamIdFromOntrack(state.room, peerId, transceiver.mid, stream.id);
   PeerConnection.updatePeerInformationsMediaStatus(state.room, peerId, transceiver, stream);
   PeerStream.addStream(peerId, stream, room.id);
@@ -20199,7 +20121,7 @@ const getCommonMessage = (resolve, targetMid, roomState, sessionDescription, res
 
   logger.log.INFO([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local session description updated ->'], sd.sdp);
 
-  if (sessionDescription.type === HANDSHAKE_PROGRESS$1.OFFER) {
+  if (sessionDescription.type === HANDSHAKE_PROGRESS.OFFER) {
     logger.log.INFO([targetMid, 'RTCSessionDescription', sessionDescription.type, 'Local offer saved.']);
     bufferedLocalOffer[targetMid] = sessionDescription;
 
@@ -20293,13 +20215,13 @@ class HandleNegotiationStats extends SkylinkStats {
 
 const handleNegotationStats = new HandleNegotiationStats();
 
-const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
+const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS: HANDLE_NEGOTIATION_STATS$1 } } = MESSAGES;
 
 const onOfferCreated = (resolve, targetMid, roomState, restartOfferMsg, offer) => {
   const { room } = roomState;
 
   logger.log.DEBUG([targetMid, null, null, 'Created offer'], offer);
-  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS.OFFER.create, targetMid, offer, false);
+  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS$1.OFFER.create, targetMid, offer, false);
 
   getCommonMessage(resolve, targetMid, roomState, offer, restartOfferMsg);
 };
@@ -20308,9 +20230,9 @@ const onOfferFailed = (reject, targetMid, roomState, error) => {
   const { room } = roomState;
 
   logger.log.ERROR([targetMid, null, null, 'Failed creating an offer:'], error);
-  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS.OFFER.create_error, targetMid, null, false, error);
+  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS$1.OFFER.create_error, targetMid, null, false, error);
   dispatchEvent(handshakeProgress({
-    state: HANDSHAKE_PROGRESS$1.ERROR,
+    state: HANDSHAKE_PROGRESS.ERROR,
     peerId: targetMid,
     error,
     room: Room.getRoomInfo(roomState.room.id),
@@ -20327,7 +20249,7 @@ const onOfferFailed = (reject, targetMid, roomState, error) => {
  * @memberOf PeerConnection.PeerConnectionHelpers
  * @fires HANDSHAKE_PROGRESS
  */
-const createOffer = (currentRoom, targetMid, iceRestart = false, restartOfferMsg) => {
+const createOffer$1 = (currentRoom, targetMid, iceRestart = false, restartOfferMsg) => {
   const state = Skylink.getSkylinkState(currentRoom.id);
   const initOptions = Skylink.getInitOptions();
   const { enableDataChannel } = initOptions;
@@ -20420,17 +20342,17 @@ const createNativePeerConnection = (targetMid, constraints, hasScreenShare, curr
   Skylink.setSkylinkState(state, currentRoom.id);
 
   /* CALLBACKS */
-  rtcPeerConnection.ontrack = callbacks$2.ontrack.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.ondatachannel = callbacks$2.ondatachannel.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.onicecandidate = callbacks$2.onicecandidate.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.oniceconnectionstatechange = callbacks$2.oniceconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.onconnectionstatechange = callbacks$2.onconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.onsignalingstatechange = callbacks$2.onsignalingstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
-  rtcPeerConnection.onicegatheringstatechange = callbacks$2.onicegatheringstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.ontrack = callbacks.ontrack.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.ondatachannel = callbacks.ondatachannel.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.onicecandidate = callbacks.onicecandidate.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.oniceconnectionstatechange = callbacks.oniceconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.onconnectionstatechange = callbacks.onconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.onsignalingstatechange = callbacks.onsignalingstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.onicegatheringstatechange = callbacks.onicegatheringstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
 
   if (isAgent(BROWSER_AGENT.REACT_NATIVE)) {
-    rtcPeerConnection.onsenderadded = callbacks$2.onsenderadded.bind(rtcPeerConnection, ...callbackExtraParams);
-    rtcPeerConnection.onremovetrack = callbacks$2.onremovetrack.bind(rtcPeerConnection, targetMid, state.room, false);
+    rtcPeerConnection.onsenderadded = callbacks.onsenderadded.bind(rtcPeerConnection, ...callbackExtraParams);
+    rtcPeerConnection.onremovetrack = callbacks.onremovetrack.bind(rtcPeerConnection, targetMid, state.room, false);
   }
 
   return rtcPeerConnection;
@@ -20468,7 +20390,7 @@ const createPeerConnection = (params) => {
     logger.log.ERROR([targetMid, null, null, 'Failed creating peer connection:'], error);
     peerConnection = null;
     dispatchEvent(handshakeProgress({
-      state: HANDSHAKE_PROGRESS$1.ERROR,
+      state: HANDSHAKE_PROGRESS.ERROR,
       peerId: targetMid,
       error,
       room: Room.getRoomInfo(room.id),
@@ -20539,13 +20461,13 @@ const addPeer = (params) => {
   return connection;
 };
 
-const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS: HANDLE_NEGOTIATION_STATS$1 } } = MESSAGES;
+const { STATS_MODULE: { HANDLE_NEGOTIATION_STATS } } = MESSAGES;
 
 const onAnswerCreated = (resolve, targetMid, roomState, answer) => {
   const { room } = roomState;
 
   logger.log.DEBUG([targetMid, null, null, 'Created answer'], answer);
-  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS$1.ANSWER.create, targetMid, answer, false);
+  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS.ANSWER.create, targetMid, answer, false);
   getCommonMessage(resolve, targetMid, roomState, answer);
 };
 
@@ -20553,9 +20475,9 @@ const onAnswerFailed = (reject, targetMid, roomState, error) => {
   const { room } = roomState;
 
   logger.log.ERROR([targetMid, null, null, 'Failed creating an answer:'], error);
-  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS$1.ANSWER.create_error, targetMid, null, false, error);
+  handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS.ANSWER.create_error, targetMid, null, false, error);
   dispatchEvent(handshakeProgress({
-    state: HANDSHAKE_PROGRESS$1.ERROR,
+    state: HANDSHAKE_PROGRESS.ERROR,
     peerId: targetMid,
     error,
     room: Room.getRoomInfo(roomState.room.id),
@@ -20570,7 +20492,7 @@ const onAnswerFailed = (reject, targetMid, roomState, error) => {
  * @memberOf PeerConnection.PeerConnectionHelpers
  * @fires HANDSHAKE_PROGRESS
  */
-const createAnswer = (roomState, targetMid) => {
+const createAnswer$1 = (roomState, targetMid) => {
   const state = Skylink.getSkylinkState(roomState.room.id);
   const {
     peerConnections,
@@ -20772,7 +20694,7 @@ const canSendMessage = (state, peerId, data, channelProperty, type) => {
     return false;
   }
 
-  if (peerConnection && peerConnection.signalingState === PEER_CONNECTION_STATE$1.CLOSED) {
+  if (peerConnection && peerConnection.signalingState === PEER_CONNECTION_STATE.CLOSED) {
     logger.log.WARN([peerId, TAGS.DATA_CHANNEL, channelProp, `${MESSAGES.DATA_CHANNEL.ERRORS.DROP_SENDING_MESSAGE} - ${MESSAGES.PEER_CONNECTION.PEER_CONNECTION_CLOSED}`], data);
     return false;
   }
@@ -20782,14 +20704,14 @@ const canSendMessage = (state, peerId, data, channelProperty, type) => {
     return false;
   }
 
-  if (channel.readyState !== DATA_CHANNEL_STATE$1.OPEN) {
+  if (channel.readyState !== DATA_CHANNEL_STATE.OPEN) {
     dispatchEvent(onDataChannelStateChanged({
       peerId,
       channelName,
       channelType,
       messageType,
       error: `${MESSAGES.DATA_CHANNEL.ERRORS.FAILED_SENDING_MESSAGE} - ${MESSAGES.DATA_CHANNEL.DATA_CHANNEL_NOT_OPEN}`,
-      state: DATA_CHANNEL_STATE$1.SEND_MESSAGE_ERROR,
+      state: DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR,
       // bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel[channelProp].channel),
     }));
 
@@ -20832,7 +20754,7 @@ const sendMessageToDataChannel = (roomKey, peerId, data, channelProperty, type) 
         channelType,
         messageType,
         error,
-        state: DATA_CHANNEL_STATE$1.SEND_MESSAGE_ERROR,
+        state: DATA_CHANNEL_STATE.SEND_MESSAGE_ERROR,
       }));
       SkylinkError.throwError(peerId, TAGS.DATA_CHANNEL, MESSAGES.DATA_CHANNEL.ERRORS.FAILED_SENDING_MESSAGE, null, { error, data });
     }
@@ -20900,7 +20822,7 @@ const manageDataTransferTimeout = (roomKey, transferId, peerId, restartTimeout) 
       }, channelProperty, DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL);
 
       dispatchEvent(dataTransferState({
-        state: DATA_TRANSFER_STATE$1.ERROR,
+        state: DATA_TRANSFER_STATE.ERROR,
         transferId,
         peerId,
         transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -20933,7 +20855,7 @@ const canDataTransferProceed = (roomKey, direction, peerId, transferId, channelP
         }
 
         // When Peer connection is not STABLE
-        if (peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE$1.STABLE) {
+        if (peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE.STABLE) {
           throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_UPLOAD_TERMINATED} - ${MESSAGES.PEER_CONNECTION.ERRORS.NOT_STABLE}`);
         }
 
@@ -20945,7 +20867,7 @@ const canDataTransferProceed = (roomKey, direction, peerId, transferId, channelP
           throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_UPLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.NO_DATA_CHANNEL_CONNECTION}`);
         }
 
-        if (peerDataChannels[peerId].main.channel.readyState !== DATA_CHANNEL_STATE$1.OPEN) {
+        if (peerDataChannels[peerId].main.channel.readyState !== DATA_CHANNEL_STATE.OPEN) {
           throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_UPLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.DATA_CHANNEL_NOT_OPEN}`);
         }
 
@@ -20962,7 +20884,7 @@ const canDataTransferProceed = (roomKey, direction, peerId, transferId, channelP
           logger.log.ERROR([peerId, TAGS.DATA_CHANNEL, channelProp, `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_DOWNLOAD_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.USER_REJECTED_TRANSFER}`]);
 
           dispatchEvent(dataTransferState({
-            state: DATA_TRANSFER_STATE$1.USER_REJECTED,
+            state: DATA_TRANSFER_STATE.USER_REJECTED,
             transferId,
             peerId,
             transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -20992,7 +20914,7 @@ const canDataTransferProceed = (roomKey, direction, peerId, transferId, channelP
         }
 
         return true;
-      case DATA_TRANSFER_STATE$1.CANCEL:
+      case DATA_TRANSFER_STATE.CANCEL:
         if (!isAString(transferId)) {
           throw new Error(`${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_CANCEL_TERMINATED} - ${MESSAGES.DATA_CHANNEL.ERRORS.NO_TRANSFER_ID}`);
         }
@@ -21018,7 +20940,7 @@ const canDataTransferProceed = (roomKey, direction, peerId, transferId, channelP
     logger.log.ERROR([peerId, TAGS.DATA_CHANNEL, channelProp, MESSAGES.DATA_CHANNEL.DATA_TRANSFER_ERROR], error);
 
     dispatchEvent(dataTransferState({
-      state: DATA_TRANSFER_STATE$1.ERROR,
+      state: DATA_TRANSFER_STATE.ERROR,
       transferId,
       peerId,
       transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -21042,16 +20964,16 @@ const listenOnDataTransferState = (roomKey, direction, peerId, transferId, resol
       `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_STATE} - ${state}`]);
 
     if (evt.detail.peerId === peerId) {
-      if ((direction === DATA_TRANSFER_DIRECTION.UPLOAD && state === DATA_TRANSFER_STATE$1.UPLOAD_COMPLETED) || (direction === DATA_TRANSFER_DIRECTION.DOWNLOAD && state === DATA_TRANSFER_STATE$1.DOWNLOAD_COMPLETED)) {
+      if ((direction === DATA_TRANSFER_DIRECTION.UPLOAD && state === DATA_TRANSFER_STATE.UPLOAD_COMPLETED) || (direction === DATA_TRANSFER_DIRECTION.DOWNLOAD && state === DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED)) {
         removeEventListener(EVENTS.DATA_TRANSFER_STATE, resolveOrRejectAndRemoveEventListener);
         resolve({ [peerId]: { success: dataTransferHelpers.getTransferInfo(roomKey, transferId, peerId), transferType: DATA_TRANSFER_DIRECTION.UPLOAD } });
 
         updatedState.peerDataChannels[peerId].main.transferId = null;
-      } else if (state === DATA_TRANSFER_STATE$1.ERROR || state === DATA_TRANSFER_STATE$1.CANCEL || state === DATA_TRANSFER_STATE$1.REJECTED || state === DATA_TRANSFER_STATE$1.REJECTED) {
+      } else if (state === DATA_TRANSFER_STATE.ERROR || state === DATA_TRANSFER_STATE.CANCEL || state === DATA_TRANSFER_STATE.REJECTED || state === DATA_TRANSFER_STATE.REJECTED) {
         removeEventListener(EVENTS.DATA_TRANSFER_STATE, resolveOrRejectAndRemoveEventListener);
         reject({ [peerId]: { error: error.message, transferType: DATA_TRANSFER_DIRECTION.UPLOAD } });
 
-        if (state === DATA_TRANSFER_STATE$1.CANCEL) {
+        if (state === DATA_TRANSFER_STATE.CANCEL) {
           updatedState.dataTransfers[transferId].cancelled = true;
         }
         updatedState.peerDataChannels[peerId].main.transferId = null;
@@ -21098,10 +21020,10 @@ const sendWRQMessage = (roomKey, transferId, peerId, channelProp) => {
   }));
 
   logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId,
-    `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_STATE} - ${DATA_TRANSFER_STATE$1.USER_UPLOAD_REQUEST}`]);
+    `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_STATE} - ${DATA_TRANSFER_STATE.USER_UPLOAD_REQUEST}`]);
 
   dispatchEvent(dataTransferState({
-    state: DATA_TRANSFER_STATE$1.USER_UPLOAD_REQUEST,
+    state: DATA_TRANSFER_STATE.USER_UPLOAD_REQUEST,
     transferId,
     peerId,
     transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -21174,7 +21096,7 @@ const WRQProtocolHandler = (roomKey, peerId, data, channelProp) => {
   }));
 
   dispatchEvent(dataTransferState({
-    state: DATA_TRANSFER_STATE$1.UPLOAD_REQUEST,
+    state: DATA_TRANSFER_STATE.UPLOAD_REQUEST,
     transferId,
     peerId,
     transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -21189,7 +21111,7 @@ const uploadData = (roomKey, peerId, transferId, channelProp, ackN, chunk) => {
 
   if (ackN < dataTransfers[transferId].chunks.length) {
     dispatchEvent(dataTransferState({
-      state: DATA_TRANSFER_STATE$1.UPLOADING,
+      state: DATA_TRANSFER_STATE.UPLOADING,
       transferId,
       peerId,
       transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -21214,10 +21136,10 @@ const ACKProtocolHandler = (roomKey, peerId, data, channelProp) => {
   if (data.ackN > -1) {
     if (data.ackN === 0) {
       logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId,
-        `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_STATE} - ${DATA_TRANSFER_STATE$1.UPLOAD_STARTED}`]);
+        `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_STATE} - ${DATA_TRANSFER_STATE.UPLOAD_STARTED}`]);
 
       dispatchEvent(dataTransferState({
-        state: DATA_TRANSFER_STATE$1.UPLOAD_STARTED,
+        state: DATA_TRANSFER_STATE.UPLOAD_STARTED,
         transferId,
         peerId,
         transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -21226,7 +21148,7 @@ const ACKProtocolHandler = (roomKey, peerId, data, channelProp) => {
       updatedState.dataTransfers[transferId].sessions[peerId].ackN = data.ackN;
 
       dispatchEvent(dataTransferState({
-        state: DATA_TRANSFER_STATE$1.UPLOAD_COMPLETED,
+        state: DATA_TRANSFER_STATE.UPLOAD_COMPLETED,
         transferId,
         peerId,
         transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -21251,7 +21173,7 @@ const ACKProtocolHandler = (roomKey, peerId, data, channelProp) => {
     }
   } else {
     dispatchEvent(dataTransferState({
-      state: DATA_TRANSFER_STATE$1.REJECTED,
+      state: DATA_TRANSFER_STATE.REJECTED,
       transferId,
       peerId,
       transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -21309,7 +21231,7 @@ const dataChunkHandler = (roomKey, peerId, chunk, chunkType, chunkSize, channelP
     }));
 
     dispatchEvent(dataTransferState({
-      state: DATA_TRANSFER_STATE$1.DOWNLOAD_COMPLETED,
+      state: DATA_TRANSFER_STATE.DOWNLOAD_COMPLETED,
       transferId,
       peerId: senderPeerId,
       transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, senderPeerId),
@@ -21321,7 +21243,7 @@ const dataChunkHandler = (roomKey, peerId, chunk, chunkType, chunkSize, channelP
     dataTransferHelpers.sendACKProtocol(room.id, peerId, user.sid, dataTransfers[transferId].sessions[peerId].ackN, channelProp);
 
     dispatchEvent(dataTransferState({
-      state: DATA_TRANSFER_STATE$1.DOWNLOADING,
+      state: DATA_TRANSFER_STATE.DOWNLOADING,
       transferId,
       peerId: senderPeerId,
       transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, senderPeerId),
@@ -21342,7 +21264,7 @@ const CANCELProtocolHandler = (roomKey, peerId, data, channelProp) => {
   dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, false);
 
   dispatchEvent(dataTransferState({
-    state: DATA_TRANSFER_STATE$1.CANCEL,
+    state: DATA_TRANSFER_STATE.CANCEL,
     transferId,
     peerId,
     transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -21368,7 +21290,7 @@ const ERRORProtocolHandler = (roomKey, peerId, data, channelProp) => {
   logger.log.ERROR([peerId, TAGS.DATA_CHANNEL, transferId, MESSAGES.DATA_CHANNEL.ERRORS.RECEIVED_ERROR], data);
 
   dispatchEvent(dataTransferState({
-    state: DATA_TRANSFER_STATE$1.ERROR,
+    state: DATA_TRANSFER_STATE.ERROR,
     transferId,
     peerId,
     transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -21399,7 +21321,7 @@ const isProtocol = (data, peerId, channelName, channelType, channelProp) => {
         channelName,
         channelType,
         error,
-        state: DATA_CHANNEL_STATE$1.ERROR,
+        state: DATA_CHANNEL_STATE.ERROR,
         // bufferAmount: PeerConnection.getDataChannelBuffer(state.peerDataChannels[peerId][channelProp].channel),
       }));
 
@@ -21423,6 +21345,12 @@ const isProtocol = (data, peerId, channelName, channelType, channelProp) => {
  */
 const processDataChannelData = (roomKey, rawData, peerId, channelName, channelType) => {
   const state = Skylink.getSkylinkState(roomKey);
+
+  if (!state) {
+    logger.log.WARN([peerId, TAGS.DATA_CHANNEL, null, 'Dropping data received as peer is no longer in the room'], rawData);
+    return null;
+  }
+
   const { room, dataTransfers } = state;
   let transferId = null;
   // let streamId = null;
@@ -21601,9 +21529,9 @@ const onerror = (params, error) => {
     const handleDataChannelStats = new HandleDataChannelStats();
 
     logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Datachannel has an exception ->'], error);
-    handleDataChannelStats.send(state ? state.room.id : roomState.room.id, DATA_CHANNEL_STATE$1.ERROR, peerId, dataChannel, channelProp, error);
+    handleDataChannelStats.send(state ? state.room.id : roomState.room.id, DATA_CHANNEL_STATE.ERROR, peerId, dataChannel, channelProp, error);
     dispatchEvent(onDataChannelStateChanged({
-      state: DATA_CHANNEL_STATE$1.ERROR,
+      state: DATA_CHANNEL_STATE.ERROR,
       peerId,
       channelName,
       channelType,
@@ -21636,7 +21564,7 @@ const onopen = (params) => {
   dataChannel.bufferedAmountLowThreshold = bufferThreshold || 0;
   handleDataChannelStats.send(room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
   dispatchEvent(onDataChannelStateChanged({
-    state: DATA_CHANNEL_STATE$1.OPEN,
+    state: DATA_CHANNEL_STATE.OPEN,
     peerId,
     channelName,
     channelType,
@@ -21665,7 +21593,7 @@ const onbufferedamountlow = (params) => {
   logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, 'Datachannel buffering data transfer low']);
 
   dispatchEvent(onDataChannelStateChanged({
-    state: DATA_CHANNEL_STATE$1.BUFFERED_AMOUNT_LOW,
+    state: DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW,
     room: Room.getRoomInfo(room.id),
     peerId,
     channelName,
@@ -21704,7 +21632,7 @@ const onclose = (params) => {
   try {
     handleDataChannelStats.send(room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
     dispatchEvent(onDataChannelStateChanged({
-      state: DATA_CHANNEL_STATE$1.CLOSED,
+      state: DATA_CHANNEL_STATE.CLOSED,
       peerId,
       room: Room.getRoomInfo(room.id),
       channelName,
@@ -21723,9 +21651,9 @@ const onclose = (params) => {
     if (channelType === DATA_CHANNEL_TYPE.MESSAGING) {
       setTimeout(() => {
         if (peerConnections[peerId]
-          && peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE$1.CLOSED
+          && peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE.CLOSED
           && (peerConnections[peerId].localDescription
-            && peerConnections[peerId].localDescription.type === HANDSHAKE_PROGRESS$1.OFFER)) {
+            && peerConnections[peerId].localDescription.type === HANDSHAKE_PROGRESS.OFFER)) {
           logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, DATA_CHANNEL.reviving_dataChannel]);
 
           PeerConnection.createDataChannel({
@@ -21787,7 +21715,7 @@ const createDataChannel = (params) => {
     return null;
   }
 
-  if (!(peerConnection && peerConnection.signalingState !== PEER_CONNECTION_STATE$1.CLOSED)) {
+  if (!(peerConnection && peerConnection.signalingState !== PEER_CONNECTION_STATE.CLOSED)) {
     logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Aborting of creating or initializing Datachannel as Peer connection does not exists']);
     return null;
   }
@@ -21821,9 +21749,9 @@ const createDataChannel = (params) => {
       const handleDataChannelStats = new HandleDataChannelStats();
       const { room } = roomState;
 
-      handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE$1.ERROR, peerId, { label: channelName }, channelProp, error);
+      handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE.ERROR, peerId, { label: channelName }, channelProp, error);
       dispatchEvent(onDataChannelStateChanged({
-        state: DATA_CHANNEL_STATE$1.CREATE_ERROR,
+        state: DATA_CHANNEL_STATE.CREATE_ERROR,
         peerId,
         error,
         channelName,
@@ -21864,7 +21792,7 @@ const createDataChannel = (params) => {
   return null;
 };
 
-const hasPeerDataChannels = peerDataChannels => !isEmptyObj(peerDataChannels);
+const hasPeerDataChannels$1 = peerDataChannels => !isEmptyObj(peerDataChannels);
 
 /**
  * Function that refreshes the main messaging Datachannel.
@@ -21875,7 +21803,7 @@ const hasPeerDataChannels = peerDataChannels => !isEmptyObj(peerDataChannels);
 const refreshDataChannel = (state, peerId) => {
   const { room, peerDataChannels, peerConnections } = state;
 
-  if (hasPeerDataChannels(peerDataChannels) && Object.hasOwnProperty.call(peerDataChannels, peerId)) {
+  if (hasPeerDataChannels$1(peerDataChannels) && Object.hasOwnProperty.call(peerDataChannels, peerId)) {
     if (Object.hasOwnProperty.call(peerDataChannels[peerId], 'main')) {
       const mainDataChannel = peerDataChannels[peerId].main;
       const { channelName, channelType } = mainDataChannel;
@@ -21884,7 +21812,7 @@ const refreshDataChannel = (state, peerId) => {
       if (channelType === DATA_CHANNEL_TYPE.MESSAGING) {
         setTimeout(() => {
           if (Object.hasOwnProperty.call(peerConnections, peerId)) {
-            if (peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE$1.CLOSED && peerConnections[peerId].localDescription.type === HANDSHAKE_PROGRESS$1.OFFER) {
+            if (peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE.CLOSED && peerConnections[peerId].localDescription.type === HANDSHAKE_PROGRESS.OFFER) {
               PeerConnection.closeDataChannel(room.id, peerId);
               logger.log.DEBUG([peerId, 'RTCDataChannel', 'main', MESSAGES.DATA_CHANNEL.reviving_dataChannel]);
               PeerConnection.createDataChannel({
@@ -21909,17 +21837,17 @@ const closeFn = (roomState, peerId, channelNameProp) => {
   const targetDataChannel = peerDataChannels[peerId][channelNameProp];
   const { channelName, channelType } = targetDataChannel.channelName;
 
-  if (targetDataChannel.readyState !== DATA_CHANNEL_STATE$1.CLOSED) {
+  if (targetDataChannel.readyState !== DATA_CHANNEL_STATE.CLOSED) {
     const { room } = roomState;
     const handleDataChannelStats = new HandleDataChannelStats();
     logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, channelNameProp, MESSAGES.DATA_CHANNEL.CLOSING]);
 
-    handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE$1.CLOSING, peerId, targetDataChannel.channel, channelNameProp);
+    handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE.CLOSING, peerId, targetDataChannel.channel, channelNameProp);
 
     dispatchEvent(onDataChannelStateChanged({
       room,
       peerId,
-      state: DATA_CHANNEL_STATE$1.CLOSING,
+      state: DATA_CHANNEL_STATE.CLOSING,
       channelName,
       channelType,
       bufferAmount: PeerConnection.getDataChannelBuffer(targetDataChannel.channel),
@@ -22154,7 +22082,7 @@ const signalingEndOfCandidates = (targetMid, roomState) => {
 
   if (
     // If peer connection exists first and state is not closed.
-    peerConnection && peerConnection.signalingState !== PEER_CONNECTION_STATE$1.CLOSED
+    peerConnection && peerConnection.signalingState !== PEER_CONNECTION_STATE.CLOSED
     // If remote description is set
     && peerConnection.remoteDescription && peerConnection.remoteDescription.sdp
     // If end-of-candidates signal is received
@@ -22348,7 +22276,7 @@ const _handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote
   handleNegotationStats.send(room.id, HANDLE_NEGOTIATION_STATS[description.type.toUpperCase()].set_error, targetMid, description, isRemote, error);
 
   dispatchEvent(handshakeProgress({
-    state: HANDSHAKE_PROGRESS$1.ERROR,
+    state: HANDSHAKE_PROGRESS.ERROR,
     peerId: isRemote ? targetMid : user.sid,
     error,
     room: Room.getRoomInfo(room.id),
@@ -22405,7 +22333,7 @@ const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remot
   logger.log.DEBUG([targetMid, TAGS.SESSION_DESCRIPTION, type, NEGOTIATION_PROGRESS.SET_REMOTE_DESCRIPTION], remoteDescription);
 
   dispatchEvent(handshakeProgress({
-    state: HANDSHAKE_PROGRESS$1[remoteDescription.type.toUpperCase()],
+    state: HANDSHAKE_PROGRESS[remoteDescription.type.toUpperCase()],
     peerId: targetMid,
     room: Room.getRoomInfo(room.id),
   }));
@@ -22532,7 +22460,7 @@ const enterAndWelcome = (msg) => {
   parsedMsg.enableIceRestart = isABoolean(enableIceRestart) ? enableIceRestart : false;
   parsedMsg.os = os && isAString(os) ? os : null;
   parsedMsg.temasysPluginVersion = temasysPluginVersion && isAString(temasysPluginVersion) ? temasysPluginVersion : null;
-  parsedMsg.userInfo = parsers.parseUserInfo(state, msg, parsedMsg);
+  parsedMsg.userInfo = parsers$1.parseUserInfo(state, msg, parsedMsg);
 
   if (hasMCU) {
     parsedMsg.peersInRoom = msg.peersInRoom;
@@ -22565,7 +22493,7 @@ const parseUserInfo = (state, msg, parsedMsg) => {
   return info;
 };
 
-const parsers = {
+const parsers$1 = {
   enterAndWelcome,
   parseUserInfo,
 };
@@ -22627,7 +22555,7 @@ const _processPeerFromWelcome = (params) => {
 
         dispatchEvent(handshakeProgress({
           peerId: targetMid,
-          state: HANDSHAKE_PROGRESS$1.WELCOME,
+          state: HANDSHAKE_PROGRESS.WELCOME,
           error: null,
           room: Room.getRoomInfo(currentRoom.id),
         }));
@@ -22639,7 +22567,7 @@ const _processPeerFromWelcome = (params) => {
         for (let peersInRoomIndex = 0; peersInRoomIndex < message.peersInRoom.length; peersInRoomIndex += 1) {
           const PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
           if (PEER_ID !== userId) {
-            const parsedMsg = parsers.enterAndWelcome(message.peersInRoom[peersInRoomIndex]);
+            const parsedMsg = parsers$1.enterAndWelcome(message.peersInRoom[peersInRoomIndex]);
             const peerUserInfo = parsedMsg.userInfo;
 
             PeerConnection.buildAndSetPeerInformations(PEER_ID, peerUserInfo, state);
@@ -22677,15 +22605,12 @@ const _processPeerFromWelcome = (params) => {
 
         dispatchEvent(handshakeProgress({
           peerId: targetMid,
-          state: HANDSHAKE_PROGRESS$1.WELCOME,
+          state: HANDSHAKE_PROGRESS.WELCOME,
           error: null,
           room: Room.getRoomInfo(currentRoom.id),
         }));
       }
 
-      break;
-    default:
-      // should not come here
       break;
   }
 };
@@ -22737,9 +22662,6 @@ const _processPeerFromEnter = (params) => {
       }
 
       break;
-    default:
-      // should not come here
-      break;
   }
 };
 
@@ -22752,7 +22674,7 @@ const _processPeerFromEnter = (params) => {
  * @fires HANDSHAKE_PROGRESS
  */
 const processNewPeer = (message) => {
-  const parsedMsg = parsers.enterAndWelcome(message);
+  const parsedMsg = parsers$1.enterAndWelcome(message);
   const {
     rid, mid, userInfo, publisherId,
   } = parsedMsg;
@@ -22792,7 +22714,7 @@ const updateStateInformation = (state, message) => {
   const targetMid = mid;
 
   if (userInfo && typeof userInfo === 'object') {
-    updatedUserInfo.settings.data = !!(updatedState.peerDataChannels[targetMid] && updatedState.peerDataChannels[targetMid].main && updatedState.peerDataChannels[targetMid].main.channel && updatedState.peerDataChannels[targetMid].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
+    updatedUserInfo.settings.data = !!(updatedState.peerDataChannels[targetMid] && updatedState.peerDataChannels[targetMid].main && updatedState.peerDataChannels[targetMid].main.channel && updatedState.peerDataChannels[targetMid].main.channel.readyState === DATA_CHANNEL_STATE.OPEN);
     updatedState.peerInformations[targetMid].settings = updatedUserInfo.settings || {};
     updatedState.peerInformations[targetMid].mediaStatus = updatedUserInfo.mediaStatus || {};
     updatedState.peerInformations[targetMid].userData = updatedUserInfo.userData;
@@ -22928,7 +22850,7 @@ class NegotiationState {
       // process the new peer
       negotiationStateHelpers.processNewPeer(welcome);
 
-      return createOffer$1(room, targetMid)
+      return createOffer(room, targetMid)
         .then((offer) => {
           this._changeState(rid, targetMid, NEGOTIATION_STATES.LOCAL_OFFER_SENT);
           sendOffer(room, offer);
@@ -22976,7 +22898,7 @@ class NegotiationState {
 
           onRemoteOfferSetSuccess(peerConnection, room, targetMid, remoteDescription);
 
-          return createAnswer$1(state, targetMid);
+          return createAnswer(state, targetMid);
         })
         .catch(error => onRemoteOfferSetFailure(room, targetMid, remoteDescription, error))
         .then((ans) => {
@@ -23081,7 +23003,7 @@ class NegotiationState {
         return this.onOfferReceived(bufferedOffer);
       }
 
-      return helpers$4.renegotiateIfNeeded(state, targetMid).then((shouldRenegotiate) => {
+      return helpers$6.renegotiateIfNeeded(state, targetMid).then((shouldRenegotiate) => {
         if (shouldRenegotiate) {
           refreshConnection(state, targetMid)
             .catch(error => negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answerAck, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_RENEGOTIATION, error).ERROR());
@@ -23095,14 +23017,14 @@ class NegotiationState {
   }
 }
 
-const createAnswer$1 = (state, targetMid) => PeerConnection.createAnswer(state, targetMid);
+const createAnswer = (state, targetMid) => PeerConnection.createAnswer(state, targetMid);
 
 const sendAnswer = (room, answer) => {
   const state = Skylink.getSkylinkState(room.id);
   new SkylinkSignalingServer().answer(state, answer);
 };
 
-const createOffer$1 = (room, targetMid, doIceRestart, restartOffer) => PeerConnection.createOffer(room, targetMid, doIceRestart, restartOffer);
+const createOffer = (room, targetMid, doIceRestart, restartOffer) => PeerConnection.createOffer(room, targetMid, doIceRestart, restartOffer);
 
 const sendOffer = (room, offer) => {
   const state = Skylink.getSkylinkState(room.id);
@@ -23123,7 +23045,7 @@ const sendRestartOffer = (state, peerId, doIceRestart) => {
 
     const restartOfferMsg = signaling.messageBuilder.getRestartOfferMessage(room.id, peerId, doIceRestart);
 
-    return createOffer$1(room, peerId, doIceRestart, restartOfferMsg)
+    return createOffer(room, peerId, doIceRestart, restartOfferMsg)
       .then((offer) => {
         NegotiationState.changeState(room.id, peerId, NEGOTIATION_STATES.LOCAL_OFFER_SENT);
         sendOffer(room, offer);
@@ -23218,7 +23140,7 @@ const restartPeerConnection = (peerId, roomState, options) => {
     // Let's check if the signalingState is stable first.
     // In another galaxy or universe, where the local description gets dropped..
     // In the offerHandler or answerHandler, do the appropriate flags to ignore or drop "extra" descriptions
-    if (peerConnection.signalingState === PEER_CONNECTION_STATE$1.STABLE) {
+    if (peerConnection.signalingState === PEER_CONNECTION_STATE.STABLE) {
       logger.log.INFO([peerId, null, null, MESSAGES.PEER_CONNECTION.REFRESH_CONNECTION.SEND_RESTART_OFFER], {
         iceRestart: doIceRestart,
         options: bwOptions,
@@ -23236,7 +23158,7 @@ const restartPeerConnection = (peerId, roomState, options) => {
     const hasLocalDescription = peerConnection.localDescription && peerConnection.localDescription.sdp;
     // This is when the state is stable and re-handshaking is possible
     // This could be due to previous connection handshaking that is already done
-    if (peerConnection.signalingState === PEER_CONNECTION_STATE$1.HAVE_LOCAL_OFFER && hasLocalDescription) {
+    if (peerConnection.signalingState === PEER_CONNECTION_STATE.HAVE_LOCAL_OFFER && hasLocalDescription) {
       signaling.sendMessage({
         type: peerConnection.localDescription.type,
         sdp: peerConnection.localDescription.sdp,
@@ -23332,7 +23254,7 @@ const buildAndSetPeerInformations = (peerId, userInfo, state) => {
   const peerInfo = userInfo;
 
   peerInfo.room = state.room.roomName;
-  peerInfo.settings.data = !!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId].main && state.peerDataChannels[peerId].main.channel && state.peerDataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE$1.OPEN);
+  peerInfo.settings.data = !!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId].main && state.peerDataChannels[peerId].main.channel && state.peerDataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE.OPEN);
 
   updatedState.peerInformations[peerId] = peerInfo;
   Skylink.setSkylinkState(updatedState, state.room.id);
@@ -23396,7 +23318,7 @@ const getConnectionStatus = (roomState, peerId = null) => {
   return Promise.all(connectionStatusPromises);
 };
 
-const closePeerConnection = (roomState, peerId) => {
+const closePeerConnection$1 = (roomState, peerId) => {
   const updatedState = Skylink.getSkylinkState(roomState.room.id);
   const { peerConnections, room } = updatedState;
 
@@ -23524,9 +23446,9 @@ const renegotiateIfNeeded = (state, peerId) => {
  * @memberOf PeerConnection
  * @type {{createOffer, createAnswer, addPeer, sendP2PMessage, getPeersInRoom, signalingEndOfCandidates, refreshConnection, refreshPeerConnection, restartPeerConnection, buildAndSetPeerInformations, getConnectionStatus, closePeerConnection, updatePeerInformationsMediaStatus, processNewSender, renegotiateIfNeeded }}
  */
-const helpers$4 = {
-  createOffer,
-  createAnswer,
+const helpers$6 = {
+  createOffer: createOffer$1,
+  createAnswer: createAnswer$1,
   addPeer,
   sendP2PMessage,
   getPeersInRoom,
@@ -23536,7 +23458,7 @@ const helpers$4 = {
   restartPeerConnection,
   buildAndSetPeerInformations,
   getConnectionStatus,
-  closePeerConnection,
+  closePeerConnection: closePeerConnection$1,
   updatePeerInformationsMediaStatus,
   processNewSender,
   renegotiateIfNeeded,
@@ -23553,7 +23475,7 @@ const helpers$4 = {
 const onsenderadded = (peerConnection, targetMid, currentRoomState, event) => {
   const updatedState = Skylink.getSkylinkState(currentRoomState.room.id);
   const { sender } = event;
-  helpers$4.processNewSender(updatedState, targetMid, sender);
+  helpers$6.processNewSender(updatedState, targetMid, sender);
 };
 
 const onconnectionstatechange = (peerConnection, targetMid, state) => {
@@ -23562,7 +23484,7 @@ const onconnectionstatechange = (peerConnection, targetMid, state) => {
 
   // some states are not dispatched on oniceconnectionstatechange
   const handleIceConnectionStats = new HandleIceConnectionStats();
-  handleIceConnectionStats.send(room.id, connectionState === PEER_CONNECTION_STATE$1.FAILED ? ICE_CONNECTION_STATE$1.FAILED : iceConnectionState, targetMid);
+  handleIceConnectionStats.send(room.id, connectionState === PEER_CONNECTION_STATE.FAILED ? ICE_CONNECTION_STATE.FAILED : iceConnectionState, targetMid);
 
   logger.log.DEBUG([targetMid, 'RTCPeerConnectionState', null, MESSAGES.PEER_CONNECTION.STATE_CHANGE], peerConnection.connectionState);
   dispatchEvent(peerConnectionState({
@@ -23578,7 +23500,7 @@ const onconnectionstatechange = (peerConnection, targetMid, state) => {
  * @namespace CreatePeerConnectionCallbacks
  * @private
  */
-const callbacks$2 = {
+const callbacks = {
   ontrack,
   ondatachannel,
   onicecandidate,
@@ -23616,7 +23538,7 @@ const processOnRemoveTrack = (state, peerId, clonedMediaInfo) => {
       logger.log.DEBUG([peerId, TAGS.MEDIA_STREAM, null, `${MESSAGES.BROWSER_AGENT.REACT_NATIVE.ERRORS.DROPPING_ONREMOVETRACK}`], trackInfo);
       return;
     }
-    callbacks$2.onremovetrack(peerId, room, clonedMediaInfo.mediaType === MEDIA_TYPE.VIDEO_SCREEN, trackInfo);
+    callbacks.onremovetrack(peerId, room, clonedMediaInfo.mediaType === MEDIA_TYPE.VIDEO_SCREEN, trackInfo);
   }
 };
 
@@ -24005,7 +23927,7 @@ const inRoomHandler = (message) => {
  */
 // eslint-disable-next-line consistent-return
 const enterAndWelcomeHandler = (message) => {
-  const parsedMsg = parsers.enterAndWelcome(message);
+  const parsedMsg = parsers$1.enterAndWelcome(message);
   const {
     rid, mid, publisherId,
   } = parsedMsg;
@@ -24121,7 +24043,7 @@ const candidateHandler = (message) => {
 
   dispatchEvent(candidateProcessingState({
     room,
-    state: CANDIDATE_PROCESSING_STATE$1.RECEIVED,
+    state: CANDIDATE_PROCESSING_STATE.RECEIVED,
     peerId: mid,
     candidateId,
     candidateType,
@@ -24129,14 +24051,14 @@ const candidateHandler = (message) => {
     error: candidateProcessingStateEventDetail.error,
   }));
 
-  if (!(peerConnection && peerConnection.signalingState !== PEER_CONNECTION_STATE$1.CLOSED)) {
+  if (!(peerConnection && peerConnection.signalingState !== PEER_CONNECTION_STATE.CLOSED)) {
     logger.log.WARN([mid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, PEER_CONNECTION.NO_PEER_CONNECTION]);
 
     candidateProcessingStateEventDetail.error = new Error(PEER_CONNECTION.NO_PEER_CONNECTION);
     handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
     dispatchEvent(candidateProcessingState({
       room,
-      state: CANDIDATE_PROCESSING_STATE$1.DROPPED,
+      state: CANDIDATE_PROCESSING_STATE.DROPPED,
       peerId: mid,
       candidateId,
       candidateType,
@@ -24156,7 +24078,7 @@ const candidateHandler = (message) => {
       handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.DROPPED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
       dispatchEvent(candidateProcessingState({
         room,
-        state: CANDIDATE_PROCESSING_STATE$1.DROPPED,
+        state: CANDIDATE_PROCESSING_STATE.DROPPED,
         peerId: mid,
         candidateId,
         candidateType,
@@ -24264,9 +24186,9 @@ const isPeerConnected = (roomState, peerId) => {
  * @param {String} peerId
  * @private
  */
-const closePeerConnection$1 = (roomKey, peerId) => {
+const closePeerConnection = (roomKey, peerId) => {
   const roomState = Skylink.getSkylinkState(roomKey);
-  if (roomState.peerConnections[peerId].signalingState === PEER_CONNECTION_STATE$1.CLOSED) return;
+  if (roomState.peerConnections[peerId].signalingState === PEER_CONNECTION_STATE.CLOSED) return;
 
   roomState.peerConnections[peerId].close();
 };
@@ -24319,7 +24241,7 @@ const checksIfHealthTimerExists = (roomKey, peerId) => {
   const roomState = Skylink.getSkylinkState(roomKey);
   if (!roomState.peerConnections[peerId]) return;
 
-  closePeerConnection$1(roomKey, peerId);
+  closePeerConnection(roomKey, peerId);
 };
 
 /**
@@ -24506,7 +24428,7 @@ const recordingStarted = (roomState, recordingId) => {
 
   updatedRoomState.recordings[recordingId] = {
     active: true,
-    state: RECORDING_STATE$1.START,
+    state: RECORDING_STATE.START,
     startedDateTime: (new Date()).toISOString(),
     endedDateTime: null,
     error: null,
@@ -24518,7 +24440,7 @@ const recordingStarted = (roomState, recordingId) => {
   }, 4000);
 
   Skylink.setSkylinkState(updatedRoomState, room.id);
-  dispatchRecordingEvent(RECORDING_STATE$1.START, recordingId);
+  dispatchRecordingEvent(RECORDING_STATE.START, recordingId);
 };
 
 /**
@@ -24549,11 +24471,11 @@ const recordingStopped = (roomState, recordingId) => {
   logger.log.DEBUG([PEER_TYPE.MCU, TAGS.RECORDING, recordingId, MESSAGES.RECORDING.STOP_SUCCESS]);
 
   updatedRoomState.recordings[recordingId].active = false;
-  updatedRoomState.recordings[recordingId].state = RECORDING_STATE$1.STOP;
+  updatedRoomState.recordings[recordingId].state = RECORDING_STATE.STOP;
   updatedRoomState.recordings[recordingId].endedDateTime = (new Date()).toISOString();
 
   Skylink.setSkylinkState(updatedRoomState, room.id);
-  dispatchRecordingEvent(RECORDING_STATE$1.STOP, recordingId);
+  dispatchRecordingEvent(RECORDING_STATE.STOP, recordingId);
 
   return null;
 };
@@ -24587,7 +24509,7 @@ const redirectHandler = (message) => {
 
   logger.log.INFO(['Server', null, type, 'System action warning:'], message);
 
-  if (Object.keys((new SkylinkStates()).getAllStates()).length > 1 && action === SYSTEM_ACTION$1.REJECT) {
+  if (Object.keys((new SkylinkStates()).getAllStates()).length > 1 && action === SYSTEM_ACTION.REJECT) {
     disconnect();
   }
 
@@ -24618,7 +24540,7 @@ const rtmpSessionStartSuccess = (roomState, message) => {
 
     updatedState.rtmpSessions[rtmpId] = {
       active: true,
-      state: RTMP_STATE$1.START,
+      state: RTMP_STATE.START,
       startedDateTime: (new Date()).toISOString(),
       endedDateTime: null,
       peerId,
@@ -24626,7 +24548,7 @@ const rtmpSessionStartSuccess = (roomState, message) => {
     };
 
     dispatchEvent(rtmpState({
-      state: RTMP_STATE$1.START,
+      state: RTMP_STATE.START,
       rtmpId,
       error: null,
     }));
@@ -24649,11 +24571,11 @@ const rtmpSessionStopSuccess = (roomState, message) => {
   logger.log.DEBUG([PEER_TYPE.MCU, 'RTMP', MESSAGES.RTMP.stopped_success]);
 
   updatedState.rtmpSessions[rtmpId].active = false;
-  updatedState.rtmpSessions[rtmpId].state = RTMP_STATE$1.STOP;
+  updatedState.rtmpSessions[rtmpId].state = RTMP_STATE.STOP;
   updatedState.rtmpSessions[rtmpId].endedDateTime = (new Date()).toISOString();
 
   dispatchEvent(rtmpState({
-    state: RTMP_STATE$1.STOP,
+    state: RTMP_STATE.STOP,
     rtmpId,
     error: null,
   }));
@@ -24675,7 +24597,7 @@ const rtmpSessionFailed = (roomState, message) => {
 
   logger.log.DEBUG([PEER_TYPE.MCU, 'RTMP', MESSAGES.RTMP.error_session]);
 
-  updatedState.rtmpSessions[rtmpId].state = RTMP_STATE$1.ERROR;
+  updatedState.rtmpSessions[rtmpId].state = RTMP_STATE.ERROR;
   updatedState.rtmpSessions[rtmpId].error = rtmpError;
 
   if (rtmpSessions[rtmpId].active) {
@@ -24684,7 +24606,7 @@ const rtmpSessionFailed = (roomState, message) => {
   }
 
   dispatchEvent(rtmpState({
-    state: RTMP_STATE$1.ERROR,
+    state: RTMP_STATE.ERROR,
     rtmpId,
     error: rtmpError,
   }));
@@ -25516,14 +25438,14 @@ class SignalingMessageBuilder {
   }
 }
 
-const SOCKET_TYPE$1 = {
+const SOCKET_TYPE = {
   POLLING: 'Polling',
   WEBSOCKET: 'WebSocket',
   XHR_POLLING: 'xhr-polling',
   JSONP_POLLING: 'jsonp-polling',
 };
 
-let instance$3 = null;
+let instance$1 = null;
 
 /**
  * @class
@@ -25532,8 +25454,8 @@ let instance$3 = null;
  */
 class SkylinkSignalingServer {
   constructor() {
-    if (!instance$3) {
-      instance$3 = this;
+    if (!instance$1) {
+      instance$1 = this;
     }
     /**
      * Stores the WebSocket object
@@ -25565,14 +25487,14 @@ class SkylinkSignalingServer {
      * @type {{protocol: Window.location.protocol, socketType: string, signalingServerProtocol: Window.location.protocol, socketSession: {finalAttempts: number, attempts: number}, fallbackType: null, signalingServerPort: null}}
      */
     this.config = null;
-    return instance$3;
+    return instance$1;
   }
 
   // eslint-disable-next-line class-methods-use-this
   resetSocketConfig(protocol) {
     return {
       protocol,
-      socketType: !window.WebSocket ? SOCKET_TYPE$1.POLLING : SOCKET_TYPE$1.WEBSOCKET,
+      socketType: !window.WebSocket ? SOCKET_TYPE.POLLING : SOCKET_TYPE.WEBSOCKET,
       signalingServerProtocol: protocol,
       socketSession: {
         finalAttempts: 0,
@@ -25613,12 +25535,12 @@ class SkylinkSignalingServer {
       const roomState = Skylink.getSkylinkState(roomKey);
       const { socketSession } = roomState;
 
-      this.socket = createSocket$1({
+      this.socket = createSocket({
         config: socketSession,
         roomKey,
       });
 
-      setSocketCallbacks$1(roomKey, this, resolve);
+      setSocketCallbacks(roomKey, this, resolve);
     } catch (error) {
       reject(error);
     }
@@ -25632,7 +25554,7 @@ class SkylinkSignalingServer {
 
     dispatchEvent(socketError({
       session: clone_1(socketSession),
-      errorCode: SOCKET_ERROR$1.CONNECTION_FAILED,
+      errorCode: SOCKET_ERROR.CONNECTION_FAILED,
       type: socketSession.fallbackType,
       error,
     }));
@@ -25644,7 +25566,7 @@ class SkylinkSignalingServer {
   dispatchHandshakeProgress(roomState, state) {
     dispatchEvent(handshakeProgress({
       peerId: roomState.user.sid,
-      state: HANDSHAKE_PROGRESS$1[state],
+      state: HANDSHAKE_PROGRESS[state],
       error: null,
       room: Room.getRoomInfo(roomState.room.id),
     }));
@@ -25785,11 +25707,11 @@ class SkylinkSignalingServer {
       message,
       socketSession: clone_1(socketSession),
     }));
-    processSignalingMessage$1(this.messageHandler, JSON.parse(message));
+    processSignalingMessage(this.messageHandler, JSON.parse(message));
   }
 
   sendMessage(message) {
-    if (!shouldBufferMessage$1(message)) {
+    if (!shouldBufferMessage(message)) {
       logger.log.INFO(['SIG SERVER', null, message.type, 'sent']);
       sendChannelMessage(this.socket, message);
     }
@@ -25841,14 +25763,14 @@ const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
     }));
   }
 
-  if (peerConnections[peerId] && peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE$1.CLOSED) {
+  if (peerConnections[peerId] && peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE.CLOSED) {
     PeerConnection.closePeerConnection(state, peerId);
   }
 
   if (enableDataChannel) {
     const handleDataChannelClose = (evt) => {
       const { detail } = evt;
-      if (detail.state === DATA_CHANNEL_STATE$1.CLOSED || detail.state === DATA_CHANNEL_STATE$1.CLOSING) {
+      if (detail.state === DATA_CHANNEL_STATE.CLOSED || detail.state === DATA_CHANNEL_STATE.CLOSING) {
         logger.log.INFO([detail.peerId, room.roomName, null, LEAVE_ROOM.PEER_LEFT.SUCCESS]);
         removeEventListener(EVENTS.DATA_CHANNEL_STATE, handleDataChannelClose);
         resolve(detail.peerId);
@@ -26457,7 +26379,7 @@ const joinRoom = (opts = {}, prefetchedStream = null) => new Promise((resolve, r
   }
 
   dispatchEvent(readyStateChange({
-    readyState: READY_STATE_CHANGE$1.LOADING,
+    readyState: READY_STATE_CHANGE.LOADING,
     error: null,
     room: { roomName },
   }));
@@ -26490,7 +26412,7 @@ const joinRoom = (opts = {}, prefetchedStream = null) => new Promise((resolve, r
             reject(streamException);
           });
         } else {
-          const updatedRoomState = helpers$7.parseMediaOptions(options, skylinkState);
+          const updatedRoomState = helpers$3.parseMediaOptions(options, skylinkState);
           Skylink.setSkylinkState(updatedRoomState, room.id);
           // If no audio is requested for Safari, audio will not be heard on the Safari peer even if the remote peer has audio. Workaround to
           // request media access but not add the track to the peer connection. Does not seem to apply to video.
@@ -26711,14 +26633,14 @@ const setUserData = (room, userData) => {
 
   dispatchEvent(peerUpdated({
     peerId: roomState.user.sid,
-    peerInfo: helpers$6.getCurrentSessionInfo(room),
+    peerInfo: helpers$4.getCurrentSessionInfo(room),
     isSelf: true,
   }));
 
   logger.log.INFO(UPDATE_USER_DATA, updatedUserData);
 };
 
-const hasPeerDataChannels$1 = peerDataChannels => !isEmptyObj(peerDataChannels);
+const hasPeerDataChannels = peerDataChannels => !isEmptyObj(peerDataChannels);
 
 /**
  * @description Function that gets the current list of connected Peers Datachannel connections in the Room.
@@ -26736,7 +26658,7 @@ const getPeersDataChannels = (roomState) => {
     const peerId = listOfPeers[i];
     listOfPeersDataChannels[peerId] = {};
 
-    if (hasPeerDataChannels$1(peerDataChannels)) {
+    if (hasPeerDataChannels(peerDataChannels)) {
       const channelProp = Object.keys(peerDataChannels[peerId]);
       for (let y = 0; y < channelProp.length; y += 1) {
         const channel = peerDataChannels[peerId][channelProp[y]];
@@ -26754,7 +26676,7 @@ const getPeersDataChannels = (roomState) => {
         peerChannel.currentTransferId = transferId;
         peerChannel.currentStreamId = streamId;
         peerChannel.readyState = channel.channel
-          ? channel.channel.readyState : DATA_CHANNEL_STATE$1.CREATE_ERROR;
+          ? channel.channel.readyState : DATA_CHANNEL_STATE.CREATE_ERROR;
 
         listOfPeersDataChannels[peerId][channelName] = peerChannel;
       }
@@ -26778,7 +26700,7 @@ const getPeerCustomSettings = (state, peerId) => {
   const usePeerId = state.hasMCU ? PEER_TYPE.MCU : peerId;
   let customSettings = {};
 
-  if (state.peerConnections[usePeerId].connectionState !== PEER_CONNECTION_STATE$1.CLOSED) {
+  if (state.peerConnections[usePeerId].connectionState !== PEER_CONNECTION_STATE.CLOSED) {
     const peerInfo = PeerData.getPeerInfo(peerId, state.room);
 
     customSettings = clone_1(peerInfo.settings);
@@ -26820,7 +26742,7 @@ const getPeersCustomSettings = (roomState) => {
  * @private
  * @type {{getCurrentSessionInfo, getPeerInfo, getUserData, getUserInfo, setUserData, getPeersDataChannels, getPeersCustomSettings}}
  */
-const helpers$6 = {
+const helpers$4 = {
   getPeerInfo,
   getCurrentSessionInfo,
   getUserInfo,
@@ -26844,7 +26766,7 @@ class PeerData {
    * @return {peerInfo}
    */
   static getPeerInfo(peerId, room) {
-    return helpers$6.getPeerInfo(peerId, room);
+    return helpers$4.getPeerInfo(peerId, room);
   }
 
   /**
@@ -26853,7 +26775,7 @@ class PeerData {
    * @return {peerInfo}
    */
   static getCurrentSessionInfo(room) {
-    return helpers$6.getCurrentSessionInfo(room);
+    return helpers$4.getCurrentSessionInfo(room);
   }
 
   /**
@@ -26863,7 +26785,7 @@ class PeerData {
    * @return {Object}
    */
   static getUserInfo(room) {
-    return helpers$6.getUserInfo(room);
+    return helpers$4.getUserInfo(room);
   }
 
   /**
@@ -26874,7 +26796,7 @@ class PeerData {
    * @return {roomState.userData}
    */
   static getUserData(roomState, peerId) {
-    return helpers$6.getUserData(roomState, peerId);
+    return helpers$4.getUserData(roomState, peerId);
   }
 
   /**
@@ -26884,7 +26806,7 @@ class PeerData {
    * @param {String | Object} userData
    */
   static setUserData(room, userData) {
-    helpers$6.setUserData(room, userData);
+    helpers$4.setUserData(room, userData);
   }
 
   /**
@@ -26895,7 +26817,7 @@ class PeerData {
    * @return {Object}
    */
   static getPeersStreams(roomState, includeSelf) {
-    return helpers$6.getPeersStreams(roomState, includeSelf);
+    return helpers$4.getPeersStreams(roomState, includeSelf);
   }
 
   /**
@@ -26905,7 +26827,7 @@ class PeerData {
    * @return {Object} listOfPeersDataChannels
    */
   static getPeersDataChannels(roomState) {
-    return helpers$6.getPeersDataChannels(roomState);
+    return helpers$4.getPeersDataChannels(roomState);
   }
 
   /**
@@ -26914,7 +26836,7 @@ class PeerData {
    * @return {Object}
    */
   static getPeersCustomSettings(roomState) {
-    return helpers$6.getPeersCustomSettings(roomState);
+    return helpers$4.getPeersCustomSettings(roomState);
   }
 }
 
@@ -26931,7 +26853,7 @@ const dispatchStreamMutedEvent = (room, stream, isScreensharing) => {
   });
 };
 
-const dispatchPeerUpdatedEvent$1 = (room) => {
+const dispatchPeerUpdatedEvent = (room) => {
   const roomState = Skylink.getSkylinkState(room.id);
   const isSelf = true;
   const peerId = roomState.user.sid;
@@ -27024,7 +26946,7 @@ const retrieveToggleState = (state, options, streamId) => {
   };
 };
 
-const updateStreamsMutedSettings = (state, toggleState, streamId) => {
+const updateStreamsMutedSettings$1 = (state, toggleState, streamId) => {
   const updatedState = state;
   const { room } = updatedState;
 
@@ -27058,10 +26980,10 @@ const startMuteEvents = (roomKey, streamId, options) => {
     return;
   }
 
-  updateStreamsMutedSettings(roomState, toggleState, streamId);
+  updateStreamsMutedSettings$1(roomState, toggleState, streamId);
   muteFn(mutedStream, roomState);
   dispatchLocalMediaMutedEvent(hasToggledVideo, hasToggledAudio, mutedStream, room.id, isScreensharing);
-  dispatchPeerUpdatedEvent$1(room);
+  dispatchPeerUpdatedEvent(room);
   dispatchStreamMutedEvent(room, mutedStream, isScreensharing);
 
   // wait for at least 1 connection before sending mediaInfoEvent otherwise sig message will be dropped at sendMediaInfoMsg if there are no
@@ -27069,7 +26991,7 @@ const startMuteEvents = (roomKey, streamId, options) => {
   if ((!peerConnections[PEER_TYPE.MCU] && isEmptyArray(Object.keys(peerConnections))) || (peerConnections[PEER_TYPE.MCU] && isEmptyArray(Object.keys(peerInformations)))) { // no P2P peers || no MCU peers
     const updateMediaInfoAndRemoveListener = (evt) => {
       const { state } = evt.detail;
-      if (state === HANDSHAKE_PROGRESS$1.ANSWER_ACK) {
+      if (state === HANDSHAKE_PROGRESS.ANSWER_ACK) {
         updateMediaInfo(hasToggledVideo, hasToggledAudio, room, streamId);
         removeEventListener(EVENTS.HANDSHAKE_PROGRESS, updateMediaInfoAndRemoveListener);
       }
@@ -27157,8 +27079,8 @@ const muteStreams = (roomState, options, streamId = null) => {
  */
 const prepMediaAccessRequest = params => new Promise((resolve, reject) => {
   const { roomKey, ...rest } = params;
-  const audioSettings = helpers$7.parseStreamSettings(rest, TRACK_KIND.AUDIO);
-  const videoSettings = helpers$7.parseStreamSettings(rest, TRACK_KIND.VIDEO);
+  const audioSettings = helpers$3.parseStreamSettings(rest, TRACK_KIND.AUDIO);
+  const videoSettings = helpers$3.parseStreamSettings(rest, TRACK_KIND.VIDEO);
   const { AdapterJS } = window;
 
   if (!audioSettings.getUserMediaSettings.audio && !videoSettings.getUserMediaSettings.video) {
@@ -27169,7 +27091,7 @@ const prepMediaAccessRequest = params => new Promise((resolve, reject) => {
     window.navigator.mediaDevices.getUserMedia({ audio: audioSettings.getUserMediaSettings.audio, video: videoSettings.getUserMediaSettings.video }).then((stream) => {
       const isAudioFallback = false;
 
-      const streams = helpers$7.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback);
+      const streams = helpers$3.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback);
       const state = Skylink.getSkylinkState(roomKey);
       if (streams[0] && audioSettings.mutedSettings.shouldAudioMuted) {
         muteStreams(state, { audioMuted: audioSettings.mutedSettings.shouldAudioMuted, videoMuted: videoSettings.mutedSettings.shouldVideoMuted }, streams[0].id);
@@ -27180,7 +27102,7 @@ const prepMediaAccessRequest = params => new Promise((resolve, reject) => {
       }
 
       resolve(streams);
-    }).catch(error => helpers$7.onStreamAccessError(error, reject, resolve, roomKey, audioSettings, videoSettings));
+    }).catch(error => helpers$3.onStreamAccessError(error, reject, resolve, roomKey, audioSettings, videoSettings));
   });
 });
 
@@ -27217,7 +27139,7 @@ const addTracksToPC = (state, peerId, stream, peerConnection) => {
   for (let track = 0; track < tracks.length; track += 1) { // there should only be 1 track
     const sender = peerConnection.addTrack(tracks[track], stream);
     if (sender) {
-      helpers$4.processNewSender(updatedState, peerId, sender);
+      helpers$6.processNewSender(updatedState, peerId, sender);
     }
   }
 
@@ -27328,7 +27250,7 @@ const onStreamAccessError = (error, reject, resolve, roomKey, audioSettings, vid
 
     return window.navigator.mediaDevices.getUserMedia({ audio: true })
       .then((stream) => {
-        const streams = helpers$7.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback);
+        const streams = helpers$3.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback);
         resolve(streams);
       })
       .catch((fallbackError) => {
@@ -27356,7 +27278,7 @@ const onStreamAccessError = (error, reject, resolve, roomKey, audioSettings, vid
   reject(error);
 };
 
-const dispatchEvents$1 = (roomState) => {
+const dispatchEvents = (roomState) => {
   const { user, room } = roomState;
   const isSelf = true;
   const peerId = user.sid;
@@ -27373,7 +27295,7 @@ const restartFn = (roomState, streams, resolve, reject) => {
   const { peerConnections, hasMCU } = roomState;
 
   try {
-    dispatchEvents$1(roomState);
+    dispatchEvents(roomState);
 
     if (Object.keys(peerConnections).length > 0 || hasMCU) {
       const refreshPeerConnectionPromise = PeerConnection.refreshPeerConnection(Object.keys(peerConnections), roomState, false, {});
@@ -27648,7 +27570,7 @@ const splitAudioAndVideoStream = (stream) => {
   return streams;
 };
 
-const updateStreamsMutedSettings$1 = (roomKey, settings, stream) => {
+const updateStreamsMutedSettings = (roomKey, settings, stream) => {
   const updatedState = Skylink.getSkylinkState(roomKey);
   const { room, streamsMutedSettings } = updatedState;
   const { audio, video } = settings.settings;
@@ -27661,7 +27583,7 @@ const updateStreamsMutedSettings$1 = (roomKey, settings, stream) => {
 };
 
 const onStreamAccessSuccess = (roomKey, ogStream, audioSettings, videoSettings, isAudioFallback, isScreensharing = false, isPrefetchedStream) => {
-  const streams = isScreensharing ? [ogStream] : helpers$7.splitAudioAndVideoStream(ogStream);
+  const streams = isScreensharing ? [ogStream] : helpers$3.splitAudioAndVideoStream(ogStream);
   const state = Skylink.getSkylinkState(roomKey);
   const { room, user } = state;
 
@@ -27669,8 +27591,8 @@ const onStreamAccessSuccess = (roomKey, ogStream, audioSettings, videoSettings, 
     if (!stream) return;
     PeerStream.addStream(user.sid, stream, roomKey);
     MediaStream.buildStreamSettings(room, stream, hasAudioTrack(stream) ? audioSettings : videoSettings);
-    helpers$7.updateStreamsMutedSettings(room.id, hasAudioTrack(stream) ? audioSettings : videoSettings, stream);
-    helpers$7.updateStreamsMediaStatus(room.id, hasAudioTrack(stream) ? audioSettings : videoSettings, stream);
+    helpers$3.updateStreamsMutedSettings(room.id, hasAudioTrack(stream) ? audioSettings : videoSettings, stream);
+    helpers$3.updateStreamsMediaStatus(room.id, hasAudioTrack(stream) ? audioSettings : videoSettings, stream);
     PeerMedia.processPeerMedia(room, user.sid, stream, isScreensharing);
     if (user.sid !== null) { // do not send stats when inRoom has not been received
       new HandleUserMediaStats().send(room.id);
@@ -27737,7 +27659,7 @@ const buildStreamSettings = (room, stream, settings) => {
  * @private
  * @type {{parseMediaOptions, parseStreamSettings, prepMediaAccessRequest, addLocalMediaStreams, onRemoteTrackAdded, onStreamAccessError, buildPeerStreamsInfo, muteStreams, getStreamSources, sendStream, getStreams, updateStreamsMediaStatus, splitAudioAndVideoStream, updateStreamsMutedSettings, onStreamAccessSuccess, buildStreamSettings}}
  */
-const helpers$7 = {
+const helpers$3 = {
   parseMediaOptions,
   parseStreamSettings,
   prepMediaAccessRequest,
@@ -27750,7 +27672,7 @@ const helpers$7 = {
   getStreams,
   updateStreamsMediaStatus,
   splitAudioAndVideoStream,
-  updateStreamsMutedSettings: updateStreamsMutedSettings$1,
+  updateStreamsMutedSettings,
   onStreamAccessSuccess,
   buildStreamSettings,
 };
@@ -27953,7 +27875,7 @@ const statelessGetUserMedia = options => new Promise((resolve, reject) => {
   }
 
   navigator.mediaDevices.getUserMedia(options).then((stream) => {
-    const streams = helpers$7.splitAudioAndVideoStream(stream);
+    const streams = helpers$3.splitAudioAndVideoStream(stream);
     resolve(streams);
   }).catch((error) => {
     reject(error);
@@ -28068,11 +27990,12 @@ const getSDPCommonSupports = (targetMid, sessionDescription = null, roomKey) => 
     return offer;
   }
 
-  const remoteCodecs = helpers$8.getSDPCodecsSupport(targetMid, sessionDescription, beSilentOnParseLogs);
+  const remoteCodecs = helpers$2.getSDPCodecsSupport(targetMid, sessionDescription, beSilentOnParseLogs);
   const localCodecs = currentCodecSupport;
 
   /* eslint-disable no-restricted-syntax */
   /* eslint-disable no-prototype-builtins */
+  // eslint-disable-next-line no-unused-vars
   for (const ac in localCodecs.audio) {
     if (localCodecs.audio.hasOwnProperty(ac) && localCodecs.audio[ac] && remoteCodecs.audio[ac]) {
       offer.audio = true;
@@ -28080,6 +28003,7 @@ const getSDPCommonSupports = (targetMid, sessionDescription = null, roomKey) => 
     }
   }
 
+  // eslint-disable-next-line no-unused-vars
   for (const vc in localCodecs.video) {
     if (localCodecs.video.hasOwnProperty(vc) && localCodecs.video[vc] && remoteCodecs.video[vc]) {
       offer.video = true;
@@ -28443,7 +28367,7 @@ const removeSDPFilteredCandidates = (targetMid, sessionDescription, roomKey) => 
   return sessionDescription.sdp;
 };
 
-const helpers$8 = {
+const helpers$2 = {
   getSDPCommonSupports,
   getSDPCodecsSupport,
   getCodecsSupport,
@@ -28456,35 +28380,35 @@ const helpers$8 = {
 
 class SessionDescription {
   static getSDPCommonSupports(...args) {
-    return helpers$8.getSDPCommonSupports(...args);
+    return helpers$2.getSDPCommonSupports(...args);
   }
 
   static getCodecsSupport(...args) {
-    return helpers$8.getCodecsSupport(...args);
+    return helpers$2.getCodecsSupport(...args);
   }
 
   static setSDPBitrate(...args) {
-    return helpers$8.setSDPBitrate(...args);
+    return helpers$2.setSDPBitrate(...args);
   }
 
   static getSDPCodecsSupport(...args) {
-    return helpers$8.getSDPCodecsSupport(...args);
+    return helpers$2.getSDPCodecsSupport(...args);
   }
 
   static getSDPICECandidates(...args) {
-    return helpers$8.getSDPICECandidates(...args);
+    return helpers$2.getSDPICECandidates(...args);
   }
 
   static getSDPSelectedCodec(...args) {
-    return helpers$8.getSDPSelectedCodec(...args);
+    return helpers$2.getSDPSelectedCodec(...args);
   }
 
   static getTransceiverMid(...args) {
-    return helpers$8.getTransceiverMid(...args);
+    return helpers$2.getTransceiverMid(...args);
   }
 
   static removeSDPFilteredCandidates(...args) {
-    return helpers$8.removeSDPFilteredCandidates(...args);
+    return helpers$2.removeSDPFilteredCandidates(...args);
   }
 }
 
@@ -28551,27 +28475,27 @@ const parseSelectedCandidatePair = (roomState, output, type, value, peerConnecti
         // FF has not implemented the following stats
         const totalRoundTripTime = parseInt(statsReport.totalRoundTripTime || '0', 10);
         selectedCandidatePair.totalRoundTripTime = totalRoundTripTime;
-        selectedCandidatePair.roundTripTime = parsers$1.tabulateStats(prevStats, statsReport, 'totalRoundTripTime');
+        selectedCandidatePair.roundTripTime = parsers.tabulateStats(prevStats, statsReport, 'totalRoundTripTime');
 
         const consentRequestsSent = parseInt(statsReport.consentRequestsSent || '0', 10);
         selectedCandidatePair.consentRequests.totalSent = consentRequestsSent;
-        selectedCandidatePair.consentRequests.sent = parsers$1.tabulateStats(prevStats, statsReport, 'consentRequestsSent');
+        selectedCandidatePair.consentRequests.sent = parsers.tabulateStats(prevStats, statsReport, 'consentRequestsSent');
 
         const requestsReceived = parseInt(statsReport.requestsReceived || '0', 10);
         selectedCandidatePair.requests.totalReceived = requestsReceived;
-        selectedCandidatePair.requests.received = parsers$1.tabulateStats(prevStats, statsReport, 'requestsReceived');
+        selectedCandidatePair.requests.received = parsers.tabulateStats(prevStats, statsReport, 'requestsReceived');
 
         const requestsSent = parseInt(statsReport.requestsSent || '0', 10);
         selectedCandidatePair.requests.totalSent = requestsSent;
-        selectedCandidatePair.requests.sent = parsers$1.tabulateStats(prevStats, statsReport, 'requestsSent');
+        selectedCandidatePair.requests.sent = parsers.tabulateStats(prevStats, statsReport, 'requestsSent');
 
         const responsesSent = parseInt(statsReport.responsesSent || '0', 10);
         selectedCandidatePair.responses.totalSent = responsesSent;
-        selectedCandidatePair.responses.sent = parsers$1.tabulateStats(prevStats, statsReport, 'responsesSent');
+        selectedCandidatePair.responses.sent = parsers.tabulateStats(prevStats, statsReport, 'responsesSent');
 
         const responsesReceived = parseInt(statsReport.responsesReceived || '0', 10);
         selectedCandidatePair.responses.totalReceived = responsesReceived;
-        selectedCandidatePair.responses.received = parsers$1.tabulateStats(prevStats, statsReport, 'responsesReceived');
+        selectedCandidatePair.responses.received = parsers.tabulateStats(prevStats, statsReport, 'responsesReceived');
       }
     }
   }
@@ -28738,26 +28662,26 @@ const tabulateStats = (prevStats = null, stats, prop) => {
  *   Defined as <code>null</code> if it's not available in original raw statistics.before parsing.
  */
 
-const parseReceiving = (output, value, prevStats) => {
+const parseReceiving$1 = (output, value, prevStats) => {
   const parsedStats = output.audio.receiving;
 
   parsedStats.bytes = parsedStats.bytes || 0;
   if (value.bytesReceived) {
     const bytesReceived = parseInt(value.bytesReceived || '0', 10);
     parsedStats.totalBytes = bytesReceived;
-    parsedStats.bytes += parsers$1.tabulateStats(prevStats, value, 'bytesReceived');
+    parsedStats.bytes += parsers.tabulateStats(prevStats, value, 'bytesReceived');
   }
 
   if (value.packetsReceived) {
     const packetsReceived = parseInt(value.packetsReceived || '0', 10);
     parsedStats.totalPackets = packetsReceived;
-    parsedStats.packets = parsers$1.tabulateStats(prevStats, value, 'packetsReceived');
+    parsedStats.packets = parsers.tabulateStats(prevStats, value, 'packetsReceived');
   }
 
   if (Number.isInteger(value.packetsLost)) {
     const packetsLost = parseInt(value.packetsLost || '0', 10);
     parsedStats.totalPacketsLost = packetsLost;
-    parsedStats.packetsLost = parsers$1.tabulateStats(prevStats, value, 'packetsLost');
+    parsedStats.packetsLost = parsers.tabulateStats(prevStats, value, 'packetsLost');
   }
 
   parsedStats.jitter = parseInt(value.jitter || '0', 10);
@@ -28783,7 +28707,7 @@ const parseReceiving = (output, value, prevStats) => {
   }
 };
 
-const parseSending = (output, value, prevStats) => {
+const parseSending$1 = (output, value, prevStats) => {
   const parsedStats = output.audio.sending;
 
   parsedStats.bytes = parsedStats.bytes || 0;
@@ -28791,25 +28715,25 @@ const parseSending = (output, value, prevStats) => {
     parsedStats.bytes = parsedStats.bytes ? parsedStats.bytes : 0;
     const bytesSent = parseInt(value.bytesSent || '0', 10);
     parsedStats.totalBytes = bytesSent;
-    parsedStats.bytes += parsers$1.tabulateStats(prevStats, value, 'bytesSent');
+    parsedStats.bytes += parsers.tabulateStats(prevStats, value, 'bytesSent');
   }
 
   if (value.packetsSent) {
     const packetsSent = parseInt(value.packetsSent || '0', 10);
     parsedStats.totalPackets = packetsSent;
-    parsedStats.packets = parsers$1.tabulateStats(prevStats, value, 'packetsSent');
+    parsedStats.packets = parsers.tabulateStats(prevStats, value, 'packetsSent');
   }
 
   if (value.retransmittedBytesSent || isANumber(value.retransmittedBytesSent)) {
     const retransmittedBytesSent = parseInt(value.retransmittedBytesSent || '0', 10);
     parsedStats.totalRetransmittedBytesSent = retransmittedBytesSent;
-    parsedStats.retransmittedBytesSent = parsers$1.tabulateStats(prevStats, value, 'retransmittedBytesSent');
+    parsedStats.retransmittedBytesSent = parsers.tabulateStats(prevStats, value, 'retransmittedBytesSent');
   }
 
   if (value.retransmittedPacketsSent || isANumber(value.retransmittedPacketsSent)) {
     const retransmittedPacketsSent = parseInt(value.retransmittedPacketsSent || '0', 10);
     parsedStats.totalRetransmittedPacketsSent = retransmittedPacketsSent;
-    parsedStats.retransmittedPacketsSent = parsers$1.tabulateStats(prevStats, value, 'retransmittedPacketsSent');
+    parsedStats.retransmittedPacketsSent = parsers.tabulateStats(prevStats, value, 'retransmittedPacketsSent');
   }
 
   parsedStats.ssrc = value.ssrc;
@@ -28855,10 +28779,10 @@ const parseAudio = (state, output, type, value, peerId, direction) => {
   const prevStats = peerStats[peerId][value.id];
   switch (direction) {
     case 'receiving':
-      parseReceiving(output, value, prevStats);
+      parseReceiving$1(output, value, prevStats);
       break;
     case 'sending':
-      parseSending(output, value, prevStats);
+      parseSending$1(output, value, prevStats);
       break;
     default:
       logger.log.DEBUG([peerId, TAGS.STATS_MODULE, null, MESSAGES.STATS_MODULE.ERRORS.PARSE_FAILED]);
@@ -28971,44 +28895,44 @@ const parseAudio = (state, output, type, value, peerId, direction) => {
  *   Defined as <code>null</code> if it's not available in original raw statistics before parsing.
  */
 
-const parseReceiving$1 = (output, value, prevStats) => {
+const parseReceiving = (output, value, prevStats) => {
   const parsedStats = output.video.receiving;
 
   parsedStats.bytes = parsedStats.bytes || 0;
   if (value.bytesReceived) {
     const bytesReceived = parseInt(value.bytesReceived || '0', 10);
     parsedStats.totalBytes = bytesReceived;
-    parsedStats.bytes += parsers$1.tabulateStats(prevStats, value, 'bytesReceived');
+    parsedStats.bytes += parsers.tabulateStats(prevStats, value, 'bytesReceived');
   }
 
   if (value.packetsReceived) {
     const packetsReceived = parseInt(value.packetsReceived || '0', 10);
     parsedStats.totalPackets = packetsReceived;
-    parsedStats.packets = parsers$1.tabulateStats(prevStats, value, 'packetsReceived');
+    parsedStats.packets = parsers.tabulateStats(prevStats, value, 'packetsReceived');
   }
 
   if (Number.isInteger(value.packetsLost)) {
     const packetsLost = parseInt(value.packetsLost || '0', 10);
     parsedStats.totalPacketsLost = packetsLost;
-    parsedStats.packetsLost = parsers$1.tabulateStats(prevStats, value, 'packetsLost');
+    parsedStats.packetsLost = parsers.tabulateStats(prevStats, value, 'packetsLost');
   }
 
   if (Number.isInteger(value.firCount)) {
     const firsSent = parseInt(value.firCount || '0', 10);
     parsedStats.totalFirs = firsSent;
-    parsedStats.firs = parsers$1.tabulateStats(prevStats, value, 'firCount');
+    parsedStats.firs = parsers.tabulateStats(prevStats, value, 'firCount');
   }
 
   if (Number.isInteger(value.nackCount)) {
     const nacksSent = parseInt(value.nackCount || '0', 10);
     parsedStats.totalNacks = nacksSent;
-    parsedStats.nacks = parsers$1.tabulateStats(prevStats, value, 'nackCount');
+    parsedStats.nacks = parsers.tabulateStats(prevStats, value, 'nackCount');
   }
 
   if (value.pliCount || Number.isInteger(value.pliCount)) {
     const plisSent = parseInt(value.pliCount || '0', 10);
     parsedStats.totalPlis = plisSent;
-    parsedStats.plis = parsers$1.tabulateStats(prevStats, value, 'pliCount');
+    parsedStats.plis = parsers.tabulateStats(prevStats, value, 'pliCount');
   }
 
   parsedStats.ssrc = value.ssrc;
@@ -29027,38 +28951,38 @@ const parseReceiving$1 = (output, value, prevStats) => {
   }
 };
 
-const parseSending$1 = (output, value, prevStats) => {
+const parseSending = (output, value, prevStats) => {
   const parsedStats = output.video.sending;
 
   parsedStats.bytes = parsedStats.bytes || 0;
   if (value.bytesSent) {
     const bytesSent = parseInt(value.bytesSent || '0', 10);
     parsedStats.totalBytes = bytesSent;
-    parsedStats.bytes += parsers$1.tabulateStats(prevStats, value, 'bytesSent');
+    parsedStats.bytes += parsers.tabulateStats(prevStats, value, 'bytesSent');
   }
 
   if (value.packetsSent) {
     const packetsSent = parseInt(value.packetsSent || '0', 10);
     parsedStats.totalPackets = packetsSent;
-    parsedStats.packets = parsers$1.tabulateStats(prevStats, value, 'packetsSent');
+    parsedStats.packets = parsers.tabulateStats(prevStats, value, 'packetsSent');
   }
 
   if (Number.isInteger(value.firCount)) {
     const firsReceived = parseInt(value.firCount || '0', 10);
     parsedStats.totalFirs = firsReceived;
-    parsedStats.firs = parsers$1.tabulateStats(prevStats, value, 'firCount');
+    parsedStats.firs = parsers.tabulateStats(prevStats, value, 'firCount');
   }
 
   if (Number.isInteger(value.nackCount)) {
     const nacksReceived = parseInt(value.nackCount || '0', 10);
     parsedStats.totalNacks = nacksReceived;
-    parsedStats.nacks = parsers$1.tabulateStats(prevStats, value, 'nackCount');
+    parsedStats.nacks = parsers.tabulateStats(prevStats, value, 'nackCount');
   }
 
   if (Number.isInteger(value.pliCount)) {
     const plisReceived = parseInt(value.pliCount || '0', 10);
     parsedStats.totalPlis = plisReceived;
-    parsedStats.plis = parsers$1.tabulateStats(prevStats, value, 'pliCount');
+    parsedStats.plis = parsers.tabulateStats(prevStats, value, 'pliCount');
   }
 
   if (value.jitter) {
@@ -29108,10 +29032,10 @@ const parseVideo = (state, output, type, value, peerId, direction) => {
   const prevStats = peerStats[peerId][value.id];
   switch (direction) {
     case 'receiving':
-      parseReceiving$1(output, value, prevStats);
+      parseReceiving(output, value, prevStats);
       break;
     case 'sending':
-      parseSending$1(output, value, prevStats);
+      parseSending(output, value, prevStats);
       break;
     default:
       logger.log.DEBUG([peerId, TAGS.STATS_MODULE, null, MESSAGES.STATS_MODULE.ERRORS.PARSE_FAILED]);
@@ -29122,9 +29046,9 @@ const parseMedia = (state, output, type, value, peerConnection, peerId, directio
   const trackKind = value.kind || value.mediaType; // Safari uses mediaType key
 
   if (trackKind === TRACK_KIND.AUDIO) {
-    parsers$1.parseAudio(state, output, type, value, peerId, direction);
+    parsers.parseAudio(state, output, type, value, peerId, direction);
   } else if (trackKind === TRACK_KIND.VIDEO) {
-    parsers$1.parseVideo(state, output, type, value, peerId, direction);
+    parsers.parseVideo(state, output, type, value, peerId, direction);
   } else {
     logger.log.DEBUG([peerId, TAGS.STATS_MODULE, null, MESSAGES.STATS_MODULE.INVALID_TRACK_KIND], value);
   }
@@ -29136,7 +29060,7 @@ const parseMedia = (state, output, type, value, peerConnection, peerId, directio
  * @private
  * @type {{parseVideo: parseVideo, parseAudio: parseAudio, tabulateStats: tabulateStats, parseSelectedCandidatePair: parseSelectedCandidatePair, parseCertificates: parseCertificates, parseMedia: parseMedia}}
  */
-const parsers$1 = {
+const parsers = {
   parseSelectedCandidatePair,
   parseCertificates,
   tabulateStats,
@@ -29232,20 +29156,20 @@ class PeerConnectionStatistics {
           case 'outbound-rtp':
           case 'inbound-rtp':
             if (type === 'inbound-rtp') {
-              parsers$1.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, 'receiving');
+              parsers.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, 'receiving');
             } else {
-              parsers$1.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, 'sending');
+              parsers.parseMedia(this.roomState, this.output, type, value, this.peerConnection, this.peerId, 'sending');
             }
             break;
           case 'certificate':
-            parsers$1.parseCertificates(this.output, value);
+            parsers.parseCertificates(this.output, value);
             break;
           case 'local-candidate':
           case 'remote-candidate':
-            parsers$1.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId);
+            parsers.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId);
             break;
           case 'media-source':
-            parsers$1.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId);
+            parsers.parseSelectedCandidatePair(this.roomState, this.output, type, value, this.peerConnection, this.peerId);
             break;
           default:
             // do nothing
@@ -29423,7 +29347,7 @@ class PeerConnection {
    * @param {boolean} hasScreenshare - Is screenshare enabled
    */
   static addPeer(params) {
-    helpers$4.addPeer(params);
+    helpers$6.addPeer(params);
   }
 
   /**
@@ -29431,7 +29355,7 @@ class PeerConnection {
    * @param args
    */
   static createOffer(...args) {
-    return helpers$4.createOffer(...args);
+    return helpers$6.createOffer(...args);
   }
 
   /**
@@ -29439,7 +29363,7 @@ class PeerConnection {
    * @param args
    */
   static createAnswer(...args) {
-    return helpers$4.createAnswer(...args);
+    return helpers$6.createAnswer(...args);
   }
 
   /**
@@ -29455,7 +29379,7 @@ class PeerConnection {
    * @param args
    */
   static sendP2PMessage(...args) {
-    return helpers$4.sendP2PMessage(...args);
+    return helpers$6.sendP2PMessage(...args);
   }
 
   /**
@@ -29463,7 +29387,7 @@ class PeerConnection {
    * @param args
    */
   static getPeersInRoom(...args) {
-    return helpers$4.getPeersInRoom(...args);
+    return helpers$6.getPeersInRoom(...args);
   }
 
   /**
@@ -29484,7 +29408,7 @@ class PeerConnection {
    * @param args
    */
   static signalingEndOfCandidates(...args) {
-    return helpers$4.signalingEndOfCandidates(...args);
+    return helpers$6.signalingEndOfCandidates(...args);
   }
 
   /**
@@ -29495,7 +29419,7 @@ class PeerConnection {
    * @return {Promise<statistics>}
    */
   static getConnectionStatus(roomState, peerId) {
-    return helpers$4.getConnectionStatus(roomState, peerId);
+    return helpers$6.getConnectionStatus(roomState, peerId);
   }
 
   /**
@@ -29519,23 +29443,23 @@ class PeerConnection {
   }
 
   static refreshConnection(roomState, targetPeerId, iceRestart, options, callback) {
-    return helpers$4.refreshConnection(roomState, targetPeerId, iceRestart, options, callback);
+    return helpers$6.refreshConnection(roomState, targetPeerId, iceRestart, options, callback);
   }
 
   static refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions) {
-    return helpers$4.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
+    return helpers$6.refreshPeerConnection(listOfPeers, roomState, doIceRestart, bwOptions);
   }
 
   static buildAndSetPeerInformations(...args) {
-    return helpers$4.buildAndSetPeerInformations(...args);
+    return helpers$6.buildAndSetPeerInformations(...args);
   }
 
   static closePeerConnection(roomState, peerId) {
-    return helpers$4.closePeerConnection(roomState, peerId);
+    return helpers$6.closePeerConnection(roomState, peerId);
   }
 
   static updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream) {
-    return helpers$4.updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream);
+    return helpers$6.updatePeerInformationsMediaStatus(roomState, peerId, transceiverMid, stream);
   }
 }
 
@@ -29572,10 +29496,10 @@ const addScreenStreamCallbacks = (state, stream) => {
 };
 
 const onScreenStreamAccessSuccess = (roomKey, stream, audioSettings, videoSettings, isAudioFallback, isScreensharing) => {
-  helpers$7.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, isScreensharing);
+  helpers$3.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback, isScreensharing);
 };
 
-const helpers$9 = {
+const helpers$1 = {
   addScreenStreamCallbacks,
   retrievePeersScreenStreamId,
   stopScreenStream,
@@ -29607,7 +29531,7 @@ class ScreenSharing {
   }
 
   streamExists() {
-    const streamList = helpers$7.getStreams(this.roomState, this.roomState.room.name);
+    const streamList = helpers$3.getStreams(this.roomState, this.roomState.room.name);
     const streamIds = Object.keys(streamList.userMedia);
 
     for (let i = 0; i < streamIds.length; i += 1) {
@@ -29626,7 +29550,7 @@ class ScreenSharing {
    */
   async start(streamId = null, options) {
     this.streamId = streamId;
-    this.settings = this.isValidOptions(options) ? helpers$7.parseStreamSettings(options) : helpers$7.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
+    this.settings = this.isValidOptions(options) ? helpers$3.parseStreamSettings(options) : helpers$3.parseStreamSettings(DEFAULTS.MEDIA_OPTIONS.SCREENSHARE);
     if (!options || !(options.video && options.video.resolution)) {
       // defaults for video were set so delete video width and height constraints if not provided in options
       delete this.settings.getUserMediaSettings.video.width;
@@ -29644,8 +29568,8 @@ class ScreenSharing {
         return null;
       }
 
-      helpers$9.onScreenStreamAccessSuccess(this.roomState.room.id, this.stream, null, this.settings, false, true);
-      helpers$9.addScreenStreamCallbacks(this.roomState, this.stream);
+      helpers$1.onScreenStreamAccessSuccess(this.roomState.room.id, this.stream, null, this.settings, false, true);
+      helpers$1.addScreenStreamCallbacks(this.roomState, this.stream);
       this.addScreenshareStream();
     } catch (error) {
       logger.log.ERROR([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.START_SCREEN], error);
@@ -29666,7 +29590,7 @@ class ScreenSharing {
     }
 
     try {
-      helpers$9.stopScreenStream(this.roomState.room, this.stream, this.roomState.user.sid, fromLeaveRoom);
+      helpers$1.stopScreenStream(this.roomState.room, this.stream, this.roomState.user.sid, fromLeaveRoom);
       this.streamId = null;
       this.stream = null;
     } catch (error) {
@@ -29715,7 +29639,7 @@ class ScreenSharing {
   }
 
   checkForExistingScreenStreams() {
-    const peersScreenStream = helpers$9.retrievePeersScreenStreamId(this.roomState);
+    const peersScreenStream = helpers$1.retrievePeersScreenStreamId(this.roomState);
 
     if (!isEmptyObj(peersScreenStream)) {
       logger.log.WARN([this.roomState.user.sid, TAGS.MEDIA_STREAM, null, MESSAGES.MEDIA_STREAM.ERRORS.PEER_SCREEN_ACTIVE]);
@@ -29737,7 +29661,7 @@ class ScreenSharing {
   }
 }
 
-let instance$4 = null;
+let instance = null;
 
 /**
  * @class SkylinkStates
@@ -29747,13 +29671,13 @@ let instance$4 = null;
  */
 class SkylinkStates {
   constructor() {
-    if (!instance$4) {
-      instance$4 = this;
+    if (!instance) {
+      instance = this;
     }
 
     this.states = {};
 
-    return instance$4;
+    return instance;
   }
 
   /**
@@ -29889,7 +29813,7 @@ const sendRecordingMessageViaSig = (roomState, isStartRecording, currentRecordin
 const manageRecordingEventListeners = (resolve, isStartRecording) => {
   const executeCallbackAndRemoveEvtListener = (evt) => {
     const result = evt.detail;
-    const stateToCompare = isStartRecording ? RECORDING_STATE$1.START : RECORDING_STATE$1.STOP;
+    const stateToCompare = isStartRecording ? RECORDING_STATE.START : RECORDING_STATE.STOP;
 
     if (result.state === stateToCompare) {
       removeEventListener(EVENTS.RECORDING_STATE, executeCallbackAndRemoveEvtListener);
@@ -30009,7 +29933,7 @@ const checkRTMPDependencies = (isStartSession, roomState, streamId = null, endpo
 const registerRTMPEventListenersAndResolve = (isStartRTMPSession, resolve) => {
   const executeCallbackAndRemoveEvtListener = (evt) => {
     const result = evt.detail;
-    const stateToCompare = isStartRTMPSession ? RTMP_STATE$1.START : RTMP_STATE$1.STOP;
+    const stateToCompare = isStartRTMPSession ? RTMP_STATE.START : RTMP_STATE.STOP;
 
     if (result.state === stateToCompare) {
       removeEventListener(EVENTS.RTMP_STATE, executeCallbackAndRemoveEvtListener);
@@ -30037,7 +29961,7 @@ const sendRTMPMessageViaSig = (roomState, isStartRTMPSession, rtmpId, streamId =
   signaling.rtmp(messageType, room.id, user.sid, rtmpId, streamId, endpoint);
 };
 
-var helpers$a = {
+var helpers = {
   checkRTMPDependencies,
   registerRTMPEventListenersAndResolve,
   sendRTMPMessageViaSig,
@@ -30071,12 +29995,12 @@ class RTMP {
   static commonRTMPOperations(roomState, streamId, rtmpId, endpoint, isStartRTMPSession, msg) {
     return new Promise((resolve, reject) => {
       try {
-        const result = helpers$a.checkRTMPDependencies(isStartRTMPSession, roomState, streamId, endpoint);
+        const result = helpers.checkRTMPDependencies(isStartRTMPSession, roomState, streamId, endpoint);
         const gRtmpId = rtmpId || generateUUID();
 
         if (result.shouldProceed) {
-          helpers$a.registerRTMPEventListenersAndResolve(isStartRTMPSession, resolve);
-          helpers$a.sendRTMPMessageViaSig(roomState, isStartRTMPSession, gRtmpId, streamId, endpoint);
+          helpers.registerRTMPEventListenersAndResolve(isStartRTMPSession, resolve);
+          helpers.sendRTMPMessageViaSig(roomState, isStartRTMPSession, gRtmpId, streamId, endpoint);
           logger.log.INFO([PEER_TYPE.MCU, 'RTMP', msg]);
         } else {
           this.logErrorAndReject(new Error(result.errorMessage), reject);
@@ -30206,10 +30130,10 @@ class DataTransfer {
         dataTransferHelpers.sendACKProtocol(room.id, peerId, user.sid, ACK_PROTOCOL_NUMBER.ACCEPT, channelProp);
 
         logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, transferId,
-          `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_STATE} - ${DATA_TRANSFER_STATE$1.DOWNLOAD_STARTED}`]);
+          `${MESSAGES.DATA_CHANNEL.DATA_TRANSFER_STATE} - ${DATA_TRANSFER_STATE.DOWNLOAD_STARTED}`]);
 
         dispatchEvent(dataTransferState({
-          state: DATA_TRANSFER_STATE$1.DOWNLOAD_STARTED,
+          state: DATA_TRANSFER_STATE.DOWNLOAD_STARTED,
           transferId,
           peerId,
           transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -30223,7 +30147,7 @@ class DataTransfer {
       const { room, user, dataTransfers } = roomState;
       const channelProp = 'main';
 
-      if (dataTransferHelpers.canDataTransferProceed(room.id, DATA_TRANSFER_STATE$1.CANCEL, peerId, transferId, channelProp, null, reject)) {
+      if (dataTransferHelpers.canDataTransferProceed(room.id, DATA_TRANSFER_STATE.CANCEL, peerId, transferId, channelProp, null, reject)) {
         dataTransferHelpers.manageDataTransferTimeout(room.id, transferId, peerId, false);
 
         resolve({ peerId, transferId });
@@ -30237,7 +30161,7 @@ class DataTransfer {
         }, channelProp, DATA_CHANNEL_MESSAGE_TYPE.PROTOCOL);
 
         dispatchEvent(dataTransferState({
-          state: DATA_TRANSFER_STATE$1.CANCEL,
+          state: DATA_TRANSFER_STATE.CANCEL,
           transferId,
           peerId,
           transferInfo: dataTransferHelpers.getTransferInfo(room.id, transferId, peerId),
@@ -30354,7 +30278,7 @@ class SkylinkPublicInterface {
    * const message = "Hello everyone!";
    * const roomName = "Room_1";
    *
-   * skylink.sendP2PMessage(message, null, roomName);
+   * skylink.sendP2PMessage(roomName, message);
    * @example
    * Example 3: Sending message to a peer in all rooms
    *
@@ -30369,7 +30293,7 @@ class SkylinkPublicInterface {
    * const targetPeerId = "peerId";
    * const roomName = "Room_1";
    *
-   * skylink.sendP2PMessage(message, targetPeerId, roomName);
+   * skylink.sendP2PMessage(roomName, message, targetPeerId);
    * @example
    * Example 5: Sending message to selected Peers in a room
    *
@@ -30377,7 +30301,7 @@ class SkylinkPublicInterface {
    * const selectedPeers = ["peerId_1", "peerId_2"];
    * const roomName = "Room_1";
    *
-   * skylink.sendP2PMessage(message, selectedPeers, roomName);
+   * skylink.sendP2PMessage(roomName, message, selectedPeers);
    * @example
    * // Listen for onIncomingMessage event
    * skylink.addEventListener(SkylinkEvents.ON_INCOMING_MESSAGE, (evt) => {
@@ -30404,12 +30328,11 @@ class SkylinkPublicInterface {
    * - When provided as an Array, it will send the message to only peers which ids are in the list.
    * - When not provided, it will broadcast the message to all connected peers in the room.
    * @example
-   * Example 1: Broadcasting to all peers
+   * Example 1: Broadcasting to all peers in a room
    *
    * let sendMessage = (roomName) => {
    *    const message = "Hi!";
-   *    const selectedPeers = this.state[location]['selectedPeers'];
-   *    skylink.sendMessage(roomName, message, selectedPeers);
+   *    skylink.sendMessage(roomName, message);
    * }
    * @example
    * Example 2: Broadcasting to selected peers
@@ -30735,11 +30658,11 @@ class SkylinkPublicInterface {
    * @property {Number} [maxBandwidth.video] - The maximum video streaming bandwidth sent from peer.
    * @property {Number} [maxBandwidth.data] - The maximum data streaming bandwidth sent from peer.
    * @property {Object} mediaStatus The peer streaming media status.
-   * @property {Boolean} mediaStatus.audioMuted -  The value of the audio status.
+   * @property {Number} mediaStatus.audioMuted -  The value of the audio status.
    *   <small>If peer <code>mediaStatus</code> is <code>-1</code>, audio is not present in the stream. If peer <code>mediaStatus</code> is <code>1</code>, audio is present
    *   in the stream and active (not muted). If peer <code>mediaStatus</code> is <code>0</code>, audio is present in the stream and muted.
    *   </small>
-   * @property {Boolean} mediaStatus.videoMuted - The value of the video status.
+   * @property {Number} mediaStatus.videoMuted - The value of the video status.
    *   <small>If peer <code>mediaStatus</code> is <code>-1</code>, video is not present in the stream. If peer <code>mediaStatus</code> is <code>1</code>, video is present
    *   in the stream and active (not muted). If peer <code>mediaStatus</code> is <code>0</code>, video is present in the stream and muted.
    *   </small>
@@ -31875,5 +31798,4 @@ class Skylink extends SkylinkPublicInterface {
   }
 }
 
-export default Skylink;
-export { logger as SkylinkLogger, skylinkEventManager as SkylinkEventManager, SkylinkEvents, constants as SkylinkConstants };
+export { constants as SkylinkConstants, skylinkEventManager as SkylinkEventManager, SkylinkEvents, logger as SkylinkLogger, Skylink as default };
