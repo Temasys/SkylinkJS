@@ -86,9 +86,7 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
     sdpMid: nativeCandidate.sdpMid,
     sdpMLineIndex: nativeCandidate.sdpMLineIndex,
   };
-  const {
-    STATS_MODULE, ICE_CANDIDATE, PEER_CONNECTION, SESSION_DESCRIPTION,
-  } = messages;
+  const { STATS_MODULE, ICE_CANDIDATE, PEER_CONNECTION } = messages;
   const { CANDIDATE_PROCESSING_STATE, PEER_CONNECTION_STATE, TAGS } = constants;
 
   logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.ADDING_CANDIDATE]);
@@ -112,8 +110,9 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
     errorMessage = PEER_CONNECTION.PEER_CONNECTION_CLOSED;
   }
 
-  if (!peerConnection.remoteDescription || !peerConnection.remoteDescription.sdp) {
-    errorMessage = SESSION_DESCRIPTION.NO_REMOTE_DESCRIPTION;
+  if (!peerConnection.remoteDescription
+    && !peerConnection.remoteDescription.sdp) {
+    errorMessage = 'No remote description';
   }
 
   if (targetMid !== constants.PEER_TYPE.REC_SRV && peerConnection.remoteDescription.sdp.indexOf(`\r\na=mid:${candidate.sdpMid}\r\n`) === -1) {

@@ -127,7 +127,6 @@ const MESSAGES = {
   },
   SESSION_DESCRIPTION: {
     parsing_media_ssrc: 'Parsing session description media SSRCs ->',
-    NO_REMOTE_DESCRIPTION: 'No remote description',
   },
   DATA_CHANNEL: {
     NO_DATA_CHANNEL_CONNECTION: 'No Data Channel connection',
