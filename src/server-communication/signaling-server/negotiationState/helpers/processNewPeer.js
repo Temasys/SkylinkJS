@@ -100,14 +100,12 @@ const _processPeerFromWelcome = (params) => {
       if (!peerInformations[targetMid]) {
         _addPeerConnection(params);
 
-        if (targetMid !== PEER_TYPE.REC_SRV) { // recording server peer should not be surfaced to client
-          dispatchEvent(peerJoined({
-            peerId: targetMid,
-            peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
-            isSelf: false,
-            room: Room.getRoomInfo(currentRoom.id),
-          }));
-        }
+        dispatchEvent(peerJoined({
+          peerId: targetMid,
+          peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+          isSelf: false,
+          room: Room.getRoomInfo(currentRoom.id),
+        }));
 
         dispatchEvent(handshakeProgress({
           peerId: targetMid,
@@ -131,10 +129,7 @@ const _processPeerFromEnter = (params) => {
     targetMid,
   } = params;
   const state = Skylink.getSkylinkState(currentRoom.id);
-  const {
-    hasMCU,
-    peerInformations,
-  } = state;
+  const { hasMCU, peerInformations } = state;
 
   switch (hasMCU) {
     case true:
@@ -154,14 +149,12 @@ const _processPeerFromEnter = (params) => {
       if (!peerInformations[targetMid]) {
         _addPeerConnection(params);
 
-        if (targetMid !== PEER_TYPE.REC_SRV) { // recording server peer should not be surfaced to client
-          dispatchEvent(peerJoined({
-            peerId: targetMid,
-            peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
-            isSelf: false,
-            room: Room.getRoomInfo(currentRoom.id),
-          }));
-        }
+        dispatchEvent(peerJoined({
+          peerId: targetMid,
+          peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
+          isSelf: false,
+          room: Room.getRoomInfo(currentRoom.id),
+        }));
       }
 
       break;
