@@ -19,7 +19,7 @@
   ],
   "scripts": {
     "build": "./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",
-    "publish": "npm run build && ./node_modules/rollup/bin/rollup --config configs/rollup/rollup.prod.config.js",
+    "publish": "npm run build && ./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.prod.config.js",
     "prestart": "npm run build && ./start.sh &",
     "lint": "node_modules/eslint/bin/eslint.js src/**",
     "build:doc-public": "npx jsdoc -r -c configs/jsdoc/jsdoc.config.json",
