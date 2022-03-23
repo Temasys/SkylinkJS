@@ -77,10 +77,19 @@ export const logFn = (logger, level, message, debugObject = null) => {
 };
 
 export const persistLogLevel = (level) => {
-  window.localStorage.setItem(LEVEL_STORAGE_KEY, level);
+  if (window.localStorage) {
+    window.localStorage.setItem(LEVEL_STORAGE_KEY, level);
+  } else {
+    // eslint-disable-next-line no-console
+    console.warn('[ENVIRONMENT] window.localStorage is unavailable. Defaulting to log level: Error');
+  }
 };
 
 export const getPersistedLevel = (logLevels) => {
-  const level = window.localStorage.getItem(LEVEL_STORAGE_KEY);
-  return level !== null && !Number.isNaN(+level) ? +level : logLevels.ERROR;
+  if (window.localStorage) {
+    const level = window.localStorage.getItem(LEVEL_STORAGE_KEY);
+    return level !== null && !Number.isNaN(+level) ? +level : logLevels.ERROR;
+  }
+
+  return logLevels.ERROR;
 };
