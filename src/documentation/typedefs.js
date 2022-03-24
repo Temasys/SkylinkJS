@@ -90,9 +90,8 @@
  * @typedef initOptions
  * @type {Object}
  * @property {String} appKey - The App Key. By default, {@link Skylink} uses <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing">HTTP CORS</a>
- *   authentication. For credentials based authentication, see the <code>credentials</code> configuration below. You can find out more details on the various authentication methods from the article <a href="http://support.temasys.io/support/solutions/articles/
- *   12000002712-authenticating-your-application-key-to-start-a-connection">here</a>. If you are using the Persistent Room feature for scheduled meetings, you will be required to
- *   use credential based authentication. See the <a href="http://support.temasys.io/support/solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article
+ *   authentication. For credentials based authentication, see the <code>credentials</code> configuration below. You can find out more details on the various authentication methods from the article <a href="https://support.temasys.com.sg/support/solutions/articles/12000002712-authenticating-your-application-key-to-start-a-connection">here</a>. If you are using the Persistent Room feature for scheduled meetings, you will be required to
+ *   use credential based authentication. See the <a href="https://support.temasys.com.sg/support/solutions/articles/12000002811-how-can-i-use-the-scheduled-sessions-persistent-room-feature-to-configure-meetings-">Persistent Room article
  *   </a> for more information.
  * @property {String} [defaultRoom=appKey] The default Room to connect to when no <code>room</code> parameter
  *    is provided in {@link Skylink#joinRoom} method</a>. When not provided or is provided as an empty string, its value is <code>appKey</code>. Note that switching Rooms is not available when using <code>credentials</code> based authentication.
@@ -328,8 +327,7 @@
  * mozilla.org/en-US/docs/Web/API/MediaDevices/enumerateDevices"><code>navigator.mediaDevices.enumerateDevices</code>
  *   API</a>.
  * @property {String|JSON} [video.facingMode] The video camera facing mode.
- *   The list of available video source ID can be retrieved by the <a href="https://developer.mozilla.org
- *   /en-US/docs/Web/API/MediaTrackConstraints/facingMode">MediaTrackConstraints <code>facingMode</code> API</a>.
+ *   The list of available video source ID can be retrieved by the <a href="https://developer.mozilla.org/en-US/docs/Web/API/MediaTrackConstraints/facingMode">MediaTrackConstraints <code>facingMode</code> API</a>.
  */
 
 /**

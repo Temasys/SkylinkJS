@@ -50,7 +50,7 @@ export const candidatesGathered = detail => new SkylinkEvent(CANDIDATES_GATHERED
 /**
  * @event SkylinkEvents.ICE_CONNECTION_STATE
  * @description Learn more about how ICE works in this
- *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
  * Event triggered when a Peer connection ICE connection state has changed.
  * @param {Object} detail - Event's payload.
  * @param {SkylinkConstants.ICE_CONNECTION_STATE} detail.state - The current Peer connection ICE connection state.
