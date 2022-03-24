@@ -3,7 +3,7 @@
   factory();
 })((function () { 'use strict';
 
-  /* SkylinkJS v2.4.1 Wed Jan 12 2022 06:46:06 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.4.2 Wed Mar 23 2022 06:13:19 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -6027,7 +6027,7 @@
     /**
      * @event SkylinkEvents.ICE_CONNECTION_STATE
      * @description Learn more about how ICE works in this
-     *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+     *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
      * Event triggered when a Peer connection ICE connection state has changed.
      * @param {Object} detail - Event's payload.
      * @param {SkylinkConstants.ICE_CONNECTION_STATE} detail.state - The current Peer connection ICE connection state.
@@ -6174,7 +6174,7 @@
      * @description Event triggered when a Peer connection session description exchanging state has changed.
      *  <blockquote class="info">
      *   Learn more about how ICE works in this
-     *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+     *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
      * </blockquote>
      * @param {Object} detail - Event's payload
      * @param {SkylinkConstants.PEER_CONNECTION_STATE} detail.state - The current Peer connection session description exchanging states.
@@ -6194,7 +6194,8 @@
     const sessionDisconnect = (detail = {}) => new SkylinkEvent(SESSION_DISCONNECT, { detail });
 
     /**
-     * Event triggered when <code>{@link PeerConnection.getConnectionStatus|getConnectionStatus}</code> method
+     * Event triggered when <code>{@link
+      * Skylink#getConnectionStatus|getConnectionStatus}</code> method
      * retrieval state changes.
      * @event SkylinkEvents.GET_CONNECTION_STATUS_STATE_CHANGE
      * @param {Object} detail - Event's payload/
@@ -6380,7 +6381,7 @@
      */
     const loggedOnConsole = (detail = {}) => new SkylinkEvent(LOGGED_ON_CONSOLE, { detail });
 
-    var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.4.1";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.16.0","@babel/preset-env":"7.16.0","@babel/register":"7.16.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.2.3",eslint:"^8.1.0","eslint-config-airbnb":"^18.2.1","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.25.2","eslint-plugin-jsx-a11y":"^6.4.1",finalhandler:"^1.1.2",husky:"^7.0.4",jsdoc:"^3.6.7",jsdom:"^18.0.1","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.14",rollup:"^2.59.0","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.4.0","rollup-plugin-delete":"^2.0.0","rollup-plugin-external-globals":"^0.6.1","rollup-plugin-gzip":"^2.5.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2","serve-static":"^1.14.1","whatwg-fetch":"^3.6.2"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
+    var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.4.2";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.16.0","@babel/preset-env":"7.16.0","@babel/register":"7.16.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.2.3",eslint:"^6.8.0","eslint-config-airbnb":"^18.2.1","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.25.2","eslint-plugin-jsx-a11y":"^6.4.1",finalhandler:"^1.1.2",husky:"^7.0.4",jsdoc:"^3.6.7",jsdom:"^18.0.1","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.14",rollup:"^2.59.0","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.4.0","rollup-plugin-delete":"^2.0.0","rollup-plugin-external-globals":"^0.6.1","rollup-plugin-gzip":"^2.5.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2","serve-static":"^1.14.1","whatwg-fetch":"^3.6.2"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
 
     /**
      * @namespace SkylinkConstants
@@ -6815,7 +6816,7 @@
     /**
      * <blockquote class="info">
      *   Learn more about how ICE works in this
-     *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+     *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
      * </blockquote>
      * The list of Peer connection ICE gathering states.
      * @typedef CANDIDATE_GENERATION_STATE
@@ -6843,7 +6844,7 @@
     /**
      * <blockquote class="info">
      *   Learn more about how ICE works in this
-     *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+     *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
      * </blockquote>
      * The list of Peer connection remote ICE candidate processing states for trickle ICE connections.
      * @typedef CANDIDATE_PROCESSING_STATE
@@ -6879,7 +6880,7 @@
     /**
      * <blockquote class="info">
      *   Learn more about how ICE works in this
-     *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+     *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
      * </blockquote>
      * The list of Peer connection ICE connection states.
      * @typedef ICE_CONNECTION_STATE
@@ -6975,7 +6976,7 @@
     /**
      * <blockquote class="info">
      *   Learn more about how ICE works in this
-     *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+     *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
      * </blockquote>
      * The list of Peer connection session description exchanging states.
      * @typedef PEER_CONNECTION_STATE
@@ -7065,7 +7066,7 @@
     /**
      * <blockquote class="info">
      *  Learn more about how ICE works in this
-     *  <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+     *  <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
      * </blockquote>
      * The list of available Peer connection bundle policies.
      * @typedef BUNDLE_POLICY
@@ -7097,7 +7098,7 @@
     /**
      * <blockquote class="info">
      *  Learn more about how ICE works in this
-     *  <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+     *  <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
      * </blockquote>
      * The list of available Peer connection RTCP mux policies.
      * @typedef RTCP_MUX_POLICY
@@ -7119,7 +7120,7 @@
     /**
      * <blockquote class="info">
      *  Learn more about how ICE works in this
-     *  <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+     *  <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
      * </blockquote>
      * The list of available Peer connection certificates cryptographic algorithm to use.
      * @typedef PEER_CERTIFICATE
@@ -7186,7 +7187,7 @@
      *   provided in Skylink {@link initOptions}, as only Users connecting using
      *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
      *   Peer IDs from Rooms within the same App space.
-     *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+     *   <a href="https://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
      *   Read more about privileged App Key feature here</a>.
      * </blockquote>
      * The list of <code>{@link Skylink#getPeers|getPeers}</code> method retrieval states.
@@ -7217,7 +7218,7 @@
      *   Skylink {@link initOptions}, as only Users connecting using
      *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
      *   Peer IDs from Rooms within the same App space.
-     *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+     *   <a href="https://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
      *   Read more about privileged App Key feature here</a>.
      * </blockquote>
      * The list of {@link Skylink#introducePeer} Peer introduction request states.
@@ -7369,7 +7370,7 @@
      * @property {number} API_DOMAIN_NOT_MATCH        Value <code>4002</code>
      *   The value of the failure code when <code>"domainName"</code> property in the App Key does not
      *   match the accessing server IP address.
-     *   To resolve this, contact our <a href="http://support.temasys.io">support portal</a>.
+     *   To resolve this, contact our <a href="https://temasys.atlassian.net/servicedesk/customer/portals">support portal</a>.
      * @property {number} API_CORS_DOMAIN_NOT_MATCH   Value <code>4003</code>
      *   The value of the failure code when <code>"corsurl"</code> property in the App Key does not match accessing CORS.
      *   To resolve this, configure the App Key CORS in
@@ -7393,28 +7394,24 @@
      * @property {number} API_NO_MEETING_RECORD_FOUND Value <code>4010</code>
      *   The value of the failure code when provided <code>options.credentials</code>
      *   does not match any scheduled meetings available for the "Persistent Room" enabled App Key provided.
-     *   See the <a href="http://support.temasys.io/support/solutions/articles/
-     * 12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article</a> to learn more.
+     *   See the <a href="https://support.temasys.com.sg/support/solutions/articles/12000002811-how-can-i-use-the-scheduled-sessions-persistent-room-feature-to-configure-meetings-">Persistent Room article</a> to learn more.
      * @property {number} API_OVER_SEAT_LIMIT         Value <code>4020</code>
      *   The value of the failure code when App Key has reached its current concurrent users limit.
-     *   To resolve this, use another App Key. To create App Keys dynamically, see the
-     *   <a href="https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Application+Resources">Application REST API
-     *   docs</a> for more information.
      * @property {number} API_RETRIEVAL_FAILED        Value <code>4021</code>
      *   The value of the failure code when App Key retrieval of authentication token fails.
-     *   If this happens frequently, contact our <a href="http://support.temasys.io">support portal</a>.
+     *   If this happens frequently, contact our <a href="https://temasys.atlassian.net/servicedesk/customer/portals">support portal</a>.
      * @property {number} API_WRONG_ACCESS_DOMAIN     Value <code>5005</code>
      *   The value of the failure code when App Key makes request to the incorrect Auth server.
      *   To resolve this, ensure that the <code>roomServer</code> is not configured. If this persists even without
-     *   <code>roomServer</code> configuration, contact our <a href="http://support.temasys.io">support portal</a>.
+     *   <code>roomServer</code> configuration, contact our <a href="https://temasys.atlassian.net/servicedesk/customer/portals">support portal</a>.
      * @property {number} XML_HTTP_REQUEST_ERROR      Value <code>-1</code>
      *   The value of the failure code when requesting to Auth server has timed out.
      * @property {number} XML_HTTP_NO_REPONSE_ERROR      Value <code>-2</code>
      *   The value of the failure code when response from Auth server is empty or timed out.
      * @property {number} NO_SOCKET_IO                Value <code>1</code>
-     *   The value of the failure code when dependency <a href="http://socket.io/download/">Socket.IO client</a> is not loaded.
+     *   The value of the failure code when dependency <a href="https://socket.io/docs/v2/">Socket.IO client</a> is not loaded.
      *   To resolve this, ensure that the Socket.IO client dependency is loaded before the Skylink SDK.
-     *   You may use the provided Socket.IO client <a href="http://socket.io/download/">CDN here</a>.
+     *   You may use the provided Socket.IO client <a href="https://socket.io/docs/v2/">CDN here</a>.
      * @property {number} NO_XMLHTTPREQUEST_SUPPORT   Value <code>2</code>
      *   The value of the failure code when <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest">
      *   XMLHttpRequest API</a> required to make request to Auth server is not supported.
@@ -7425,7 +7422,7 @@
      *   RTCPeerConnection API</a> required for Peer connections is not supported.
      *   To resolve this, display in the Web UI to ask clients to switch to the list of supported browser
      *   as <a href="https://github.com/Temasys/SkylinkJS/tree/0.6.14#supported-browsers">listed in here</a>.
-     *   For <a href="http://confluence.temasys.com.sg/display/TWPP">plugin supported browsers</a>, if the clients
+     *   For plugin supported browsers, if the clients
      *   does not have the plugin installed, there will be an installation toolbar that will prompt for installation
      *   to support the RTCPeerConnection API.
      * @property {number} NO_PATH                     Value <code>4</code>
@@ -8560,7 +8557,7 @@
           NO_SOCKET_IO: 'Socket.io not loaded - Please load socket.io',
           NO_FETCH_SUPPORT: 'Fetch API is not supported in your browser. Please make sure you are using a modern browser: https://caniuse.com/#search=fetch',
           NO_APP_KEY: 'Please provide an App Key - Get one at console.temasys.io!',
-          AUTH_CORS: 'Promise rejected due to CORS forbidden request - Please visit: http://support.temasys.com.sg/support/solutions/articles/12000006761-i-get-a-403-forbidden-access-is-denied-when-i-load-the-application-why-',
+          AUTH_CORS: 'Promise rejected due to CORS forbidden request - Please visit: https://support.temasys.com.sg/support/solutions/articles/12000006761-i-get-a-403-forbidden-access-is-denied-when-i-load-the-application-why-',
           AUTH_GENERAL: 'Promise rejected due to network issue',
           SOCKET_CREATE_FAILED: 'Failed creating socket connection object ->',
           SOCKET_ERROR_ABORT: 'Reconnection aborted as the connection timed out or there no more available ports, transports and final attempts left',
@@ -9178,12 +9175,21 @@
     };
 
     const persistLogLevel = (level) => {
-      window.localStorage.setItem(LEVEL_STORAGE_KEY, level);
+      try {
+        window.localStorage.setItem(LEVEL_STORAGE_KEY, level);
+      } catch (err) {
+        // eslint-disable-next-line no-console
+        console.warn('[ENVIRONMENT] window.localStorage is unavailable. Defaulting to log level: Error');
+      }
     };
 
     const getPersistedLevel = (logLevels) => {
-      const level = window.localStorage.getItem(LEVEL_STORAGE_KEY);
-      return level !== null && !Number.isNaN(+level) ? +level : logLevels.ERROR;
+      try {
+        const level = window.localStorage.getItem(LEVEL_STORAGE_KEY);
+        return level !== null && !Number.isNaN(+level) ? +level : logLevels.ERROR;
+      } catch (err) {
+        return logLevels.ERROR;
+      }
     };
 
     /**
@@ -9873,12 +9879,10 @@
        * @param {String} options.appKey The App Key.
        * <small>By default, <code>init()</code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
        * authentication. For credentials based authentication, see the <code>options.credentials</code> configuration
-       * below. You can know more about the <a href="http://support.temasys.io/support/solutions/articles/
-       * 12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here</a>
+       * below. You can know more <a href="https://support.temasys.com.sg/support/solutions/articles/12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here</a>
        * for more details on the various authentication methods.</small>
        * <small>If you are using the Persistent Room feature for scheduled meetings, you will require to
-       * use the credential based authentication. See the <a href="http://support.temasys.io/support
-       * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
+       * use the credential based authentication. See the <a href="https://support.temasys.com.sg/support/solutions/articles/12000002811-how-can-i-use-the-scheduled-sessions-persistent-room-feature-to-configure-meetings-">Persistent Room article here
        * </a> for more information.</small>
        */
       defaultRoom: null,
@@ -30494,7 +30498,7 @@
        *   provided in the {@link initOptions}, as only Users connecting using
        *   the App Key with this flag enabled (which we call privileged Users / peers) can retrieve the list of
        *   peer ids from rooms within the same App space.
-       *   {@link http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-|What is a privileged key?}
+       *   {@link https://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-|What is a privileged key?}
        * </blockquote>
        * @param {String} roomName - The room name
        * @param {Boolean} [showAll=false] - The flag if Signaling server should also return the list of privileged peer ids.
@@ -30668,18 +30672,6 @@
 
       /**
        * @description Method that refreshes peer connections to update with the current streaming.
-       * <blockquote class="info">
-       *   Note that Edge browser does not support renegotiation.
-       *   For MCU enabled peer connections with <code>options.mcuUseRenegoRestart</code> set to <code>false</code>
-       *   in the {@link initOptions}, the restart method may differ, you
-       *   may learn more about how to workaround it in this article
-       *   {@link http://support.temasys.io/support/discussions/topics/12000002853|here}.
-       *   For restarts with peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in this article
-       *   {@link http://support.temasys.io/support/discussions/topics/12000005188|here}.
-       *   Note that this functionality should be used when peer connection stream freezes during a connection.
-       *   For a better user experience for only MCU enabled peer connections, the method is throttled when invoked many
-       *   times in less than the milliseconds interval configured in {@link initOptions}.
-       * </blockquote>
        * @param {String} roomName - The name of the room.
        * @param {String|Array} [targetPeerId] <blockquote class="info">
        *   Note that this is ignored if MCU is enabled for the App Key provided in
@@ -30969,7 +30961,7 @@
        * <blockquote class="info">
        *   Note that this feature requires MCU and recording to be enabled for the App Key provided in
        *   {@link initOptions}. If recording feature is not available to
-       *   be enabled in the {@link https://console.temasys.io|Temasys Developer Console}, please contact us on our support portal {@link http://support.temasys.io|here}.
+       *   be enabled in the {@link https://console.temasys.io|Temasys Developer Console}, please contact us on our support portal {@link https://temasys.atlassian.net/servicedesk/customer/portals|here}.
        * </blockquote>
        * @param {String} roomName - The room name.
        * @return {Promise<String>} recordingId - The recording session id.
@@ -31005,7 +30997,7 @@
        *     <li>
        *      Note that this feature requires MCU and recording to be enabled for the App Key provided in the
        *      {@link initOptions}. If recording feature is not available to be enabled in the {@link https://console.temasys.io|Temasys Developer Console},
-       *      please contact us on our support portal {@link http://support.temasys.io|here}.
+       *      please contact us on our support portal {@link https://temasys.atlassian.net/servicedesk/customer/portals|here}.
        *    </li>
        *    <li>
        *      It is mandatory for the recording session to have elapsed for more than 4 minutes before calling <code>stopRecording</code> method.
@@ -31121,7 +31113,7 @@
        * <blockquote class="info">
        *   Note that this feature requires MCU and recording to be enabled for the App Key provided in
        *   {@link initOptions}. If recording feature is not available to be enabled in the {@link https://console.temasys.io|Temasys Developer Console},
-       *   please contact us on our support portal {@link http://support.temasys.io|here}.
+       *   please contact us on our support portal {@link https://temasys.atlassian.net/servicedesk/customer/portals|here}.
        * </blockquote>
        * @param {String} roomName - The room name.
        * @return {recordingSessions|{}} The list of recording sessions.

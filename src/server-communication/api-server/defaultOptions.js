@@ -14,12 +14,10 @@ const defaultOptions = {
    * @param {String} options.appKey The App Key.
    * <small>By default, <code>init()</code> uses [HTTP CORS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing)
    * authentication. For credentials based authentication, see the <code>options.credentials</code> configuration
-   * below. You can know more about the <a href="http://support.temasys.io/support/solutions/articles/
-   * 12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here</a>
+   * below. You can know more <a href="https://support.temasys.com.sg/support/solutions/articles/12000002712-authenticating-your-application-key-to-start-a-connection">in the authentication methods article here</a>
    * for more details on the various authentication methods.</small>
    * <small>If you are using the Persistent Room feature for scheduled meetings, you will require to
-   * use the credential based authentication. See the <a href="http://support.temasys.io/support
-   * /solutions/articles/12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article here
+   * use the credential based authentication. See the <a href="https://support.temasys.com.sg/support/solutions/articles/12000002811-how-can-i-use-the-scheduled-sessions-persistent-room-feature-to-configure-meetings-">Persistent Room article here
    * </a> for more information.</small>
    */
   defaultRoom: null,

@@ -454,7 +454,7 @@ class SkylinkPublicInterface {
    *   provided in the {@link initOptions}, as only Users connecting using
    *   the App Key with this flag enabled (which we call privileged Users / peers) can retrieve the list of
    *   peer ids from rooms within the same App space.
-   *   {@link http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-|What is a privileged key?}
+   *   {@link https://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-|What is a privileged key?}
    * &lt;/blockquote>
    * @param {String} roomName - The room name
    * @param {Boolean} [showAll=false] - The flag if Signaling server should also return the list of privileged peer ids.
@@ -628,18 +628,6 @@ class SkylinkPublicInterface {
 
   /**
    * @description Method that refreshes peer connections to update with the current streaming.
-   * &lt;blockquote class="info">
-   *   Note that Edge browser does not support renegotiation.
-   *   For MCU enabled peer connections with &lt;code>options.mcuUseRenegoRestart&lt;/code> set to &lt;code>false&lt;/code>
-   *   in the {@link initOptions}, the restart method may differ, you
-   *   may learn more about how to workaround it in this article
-   *   {@link http://support.temasys.io/support/discussions/topics/12000002853|here}.
-   *   For restarts with peers connecting from Android, iOS or C++ SDKs, restarts might not work as written in this article
-   *   {@link http://support.temasys.io/support/discussions/topics/12000005188|here}.
-   *   Note that this functionality should be used when peer connection stream freezes during a connection.
-   *   For a better user experience for only MCU enabled peer connections, the method is throttled when invoked many
-   *   times in less than the milliseconds interval configured in {@link initOptions}.
-   * &lt;/blockquote>
    * @param {String} roomName - The name of the room.
    * @param {String|Array} [targetPeerId] &lt;blockquote class="info">
    *   Note that this is ignored if MCU is enabled for the App Key provided in
@@ -929,7 +917,7 @@ class SkylinkPublicInterface {
    * &lt;blockquote class="info">
    *   Note that this feature requires MCU and recording to be enabled for the App Key provided in
    *   {@link initOptions}. If recording feature is not available to
-   *   be enabled in the {@link https://console.temasys.io|Temasys Developer Console}, please contact us on our support portal {@link http://support.temasys.io|here}.
+   *   be enabled in the {@link https://console.temasys.io|Temasys Developer Console}, please contact us on our support portal {@link https://temasys.atlassian.net/servicedesk/customer/portals|here}.
    * &lt;/blockquote>
    * @param {String} roomName - The room name.
    * @return {Promise&lt;String>} recordingId - The recording session id.
@@ -965,7 +953,7 @@ class SkylinkPublicInterface {
    *     &lt;li>
    *      Note that this feature requires MCU and recording to be enabled for the App Key provided in the
    *      {@link initOptions}. If recording feature is not available to be enabled in the {@link https://console.temasys.io|Temasys Developer Console},
-   *      please contact us on our support portal {@link http://support.temasys.io|here}.
+   *      please contact us on our support portal {@link https://temasys.atlassian.net/servicedesk/customer/portals|here}.
    *    &lt;/li>
    *    &lt;li>
    *      It is mandatory for the recording session to have elapsed for more than 4 minutes before calling &lt;code>stopRecording&lt;/code> method.
@@ -1081,7 +1069,7 @@ class SkylinkPublicInterface {
    * &lt;blockquote class="info">
    *   Note that this feature requires MCU and recording to be enabled for the App Key provided in
    *   {@link initOptions}. If recording feature is not available to be enabled in the {@link https://console.temasys.io|Temasys Developer Console},
-   *   please contact us on our support portal {@link http://support.temasys.io|here}.
+   *   please contact us on our support portal {@link https://temasys.atlassian.net/servicedesk/customer/portals|here}.
    * &lt;/blockquote>
    * @param {String} roomName - The room name.
    * @return {recordingSessions|{}} The list of recording sessions.
