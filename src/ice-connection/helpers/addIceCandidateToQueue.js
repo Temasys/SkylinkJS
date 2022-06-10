@@ -27,7 +27,7 @@ const addIceCandidateToQueue = (targetMid, candidateId, candidateType, nativeCan
 
   handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.BUFFERED, targetMid, candidateId, nativeCandidate);
   dispatchEvent(candidateProcessingState({
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     state: CANDIDATE_PROCESSING_STATE.BUFFERED,
     peerId: targetMid,
     candidateId,

@@ -49,7 +49,7 @@ class AsyncMessaging {
     this.isPersistent = isPersistent;
 
     dispatchEvent(persistentMessageState({
-      room: Room.getRoomInfo(this.room.id),
+      room: Room.getRoomInfo(this.room),
       isPersistent: this.isPersistent,
       peerInfo: getUserInfo(this.room),
       peerId: this.peerId,
@@ -128,7 +128,7 @@ class AsyncMessaging {
     }
 
     dispatchEvent(storedMessages({
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
       storedMessages: messages,
       isSelf: false,
       peerId: targetMid,

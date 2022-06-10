@@ -26,7 +26,7 @@ const addIceCandidateSuccess = (room, targetMid, candidateId, candidateType, can
 
   logger.log.INFO([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.CANDIDATE_ADDED]);
   dispatchEvent(candidateProcessingState({
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     state: CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS,
     peerId: targetMid,
     candidateId,
@@ -55,7 +55,7 @@ const addIceCandidateFailure = (room, targetMid, candidateId, candidateType, can
 
   logger.log.ERROR([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FAILED_ADDING_CANDIDATE], error);
   dispatchEvent(candidateProcessingState({
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     state: CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
     peerId: targetMid,
     candidateId,
@@ -91,7 +91,7 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
   logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.ADDING_CANDIDATE]);
   dispatchEvent(candidateProcessingState({
     peerId: targetMid,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     candidateType,
     candidate,
     candidateId,
@@ -109,7 +109,7 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
 
     dispatchEvent(candidateProcessingState({
       peerId: targetMid,
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
       candidateType,
       candidate,
       candidateId,

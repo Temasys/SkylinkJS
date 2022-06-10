@@ -149,7 +149,7 @@ class SkylinkSignalingServer {
       peerId: roomState.user.sid,
       state: HANDSHAKE_PROGRESS[state],
       error: null,
-      room: Room.getRoomInfo(roomState.room.id),
+      room: Room.getRoomInfo(roomState.room),
     }));
   }
 

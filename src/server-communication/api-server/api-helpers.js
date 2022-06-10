@@ -186,7 +186,7 @@ export const codecSupport = roomKey => new Promise((resolve, reject) => {
             content: new Error(MESSAGES.JOIN_ROOM.ERRORS.CODEC_SUPPORT),
             errorCode: READY_STATE_CHANGE_ERROR.PARSE_CODECS,
           },
-          room: Room.getRoomInfo(room.id),
+          room: Room.getRoomInfo(room),
         }));
         reject(new Error(MESSAGES.JOIN_ROOM.ERRORS.CODEC_SUPPORT));
       } else {
@@ -208,7 +208,7 @@ export const codecSupport = roomKey => new Promise((resolve, reject) => {
           content: new Error(error.message || error.toString()),
           errorCode: READY_STATE_CHANGE_ERROR.PARSE_CODECS,
         },
-        room: Room.getRoomInfo(room.id),
+        room: Room.getRoomInfo(room),
       }));
       reject(new Error(error.message || error.toString()));
     });
