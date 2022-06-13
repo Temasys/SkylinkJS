@@ -32,7 +32,7 @@ class HandleDataChannelStats extends SkylinkStats {
     this.model.client_id = roomState.clientId;
     this.model.state = state;
     this.model.channel = channel;
-    this.model.channel_id = channel.id;
+    this.model.channel_id = `${channel.id}`;
     this.model.channel_label = channel.label;
     this.model.channel_type = channelProp === 'main' ? 'persistent' : 'temporal';
     this.model.channel_binary_type = channel.binaryType;
