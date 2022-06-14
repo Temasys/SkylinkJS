@@ -1,4 +1,4 @@
-/* SkylinkJS v2.4.2 Tue Jun 14 2022 09:19:35 GMT+0000 (Coordinated Universal Time) */
+/* SkylinkJS v2.4.2 Tue Jun 14 2022 09:23:18 GMT+0000 (Coordinated Universal Time) */
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -21460,7 +21460,7 @@ class HandleDataChannelStats extends SkylinkStats {
     this.model.client_id = roomState && roomState.clientId;
     this.model.state = state;
     this.model.channel = channel;
-    this.model.channel_id = channel.id;
+    this.model.channel_id = `${channel.id}`;
     this.model.channel_label = channel.label;
     this.model.channel_type = channelProp === 'main' ? 'persistent' : 'temporal';
     this.model.channel_binary_type = channel.binaryType;

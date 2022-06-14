@@ -3,7 +3,7 @@
   factory();
 })((function () { 'use strict';
 
-  /* SkylinkJS v2.4.2 Tue Jun 14 2022 09:19:35 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.4.2 Tue Jun 14 2022 09:23:18 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -21470,7 +21470,7 @@
         this.model.client_id = roomState && roomState.clientId;
         this.model.state = state;
         this.model.channel = channel;
-        this.model.channel_id = channel.id;
+        this.model.channel_id = `${channel.id}`;
         this.model.channel_label = channel.label;
         this.model.channel_type = channelProp === 'main' ? 'persistent' : 'temporal';
         this.model.channel_binary_type = channel.binaryType;
