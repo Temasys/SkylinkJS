@@ -1,4 +1,4 @@
-/* SkylinkJS v2.4.2 Wed Mar 23 2022 06:13:19 GMT+0000 (Coordinated Universal Time) */
+/* SkylinkJS v2.4.2 Tue Jun 14 2022 09:19:35 GMT+0000 (Coordinated Universal Time) */
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -10512,7 +10512,7 @@ const codecSupport = roomKey => new Promise((resolve, reject) => {
             content: new Error(MESSAGES.JOIN_ROOM.ERRORS.CODEC_SUPPORT),
             errorCode: READY_STATE_CHANGE_ERROR.PARSE_CODECS,
           },
-          room: Room.getRoomInfo(room.id),
+          room: Room.getRoomInfo(room),
         }));
         reject(new Error(MESSAGES.JOIN_ROOM.ERRORS.CODEC_SUPPORT));
       } else {
@@ -10534,7 +10534,7 @@ const codecSupport = roomKey => new Promise((resolve, reject) => {
           content: new Error(error.message || error.toString()),
           errorCode: READY_STATE_CHANGE_ERROR.PARSE_CODECS,
         },
-        room: Room.getRoomInfo(room.id),
+        room: Room.getRoomInfo(room),
       }));
       reject(new Error(error.message || error.toString()));
     });
@@ -17627,7 +17627,7 @@ const dispatchOnIncomingMessage = (roomState, config, messageContent, isSelf, ta
   }
 
   dispatchEvent(onIncomingMessage({
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     message,
     isSelf,
     peerId: isSelf ? user.sid : targetPeerId,
@@ -17791,7 +17791,7 @@ class EncryptedMessaging {
 
   dispatchEncryptSecretEvent() {
     dispatchEvent(encryptionSecretsUpdated({
-      room: Room.getRoomInfo(this.room.id),
+      room: Room.getRoomInfo(this.room),
       encryptSecrets: this.encryptSecrets,
       selectedSecretId: this.selectedSecretId,
       peerInfo: getUserInfo(this.room),
@@ -17904,7 +17904,7 @@ class AsyncMessaging {
     this.isPersistent = isPersistent;
 
     dispatchEvent(persistentMessageState({
-      room: Room.getRoomInfo(this.room.id),
+      room: Room.getRoomInfo(this.room),
       isPersistent: this.isPersistent,
       peerInfo: getUserInfo(this.room),
       peerId: this.peerId,
@@ -17983,7 +17983,7 @@ class AsyncMessaging {
     }
 
     dispatchEvent(storedMessages({
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
       storedMessages: messages,
       isSelf: false,
       peerId: targetMid,
@@ -18318,7 +18318,7 @@ const addIceCandidateSuccess = (room, targetMid, candidateId, candidateType, can
 
   logger.log.INFO([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.CANDIDATE_ADDED]);
   dispatchEvent(candidateProcessingState({
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     state: CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS,
     peerId: targetMid,
     candidateId,
@@ -18347,7 +18347,7 @@ const addIceCandidateFailure = (room, targetMid, candidateId, candidateType, can
 
   logger.log.ERROR([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FAILED_ADDING_CANDIDATE], error);
   dispatchEvent(candidateProcessingState({
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     state: CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
     peerId: targetMid,
     candidateId,
@@ -18383,7 +18383,7 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
   logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.ADDING_CANDIDATE]);
   dispatchEvent(candidateProcessingState({
     peerId: targetMid,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     candidateType,
     candidate,
     candidateId,
@@ -18401,7 +18401,7 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
 
     dispatchEvent(candidateProcessingState({
       peerId: targetMid,
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
       candidateType,
       candidate,
       candidateId,
@@ -18487,7 +18487,7 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
       peerConnection.gathering = true;
       peerConnection.gathered = false;
       dispatchEvent(candidateGenerationState({
-        room: Room.getRoomInfo(currentRoom.id),
+        room: Room.getRoomInfo(currentRoom),
         peerId: targetMid,
         state: CANDIDATE_GENERATION_STATE.GATHERING,
       }));
@@ -18593,7 +18593,7 @@ const addIceCandidateToQueue = (targetMid, candidateId, candidateType, nativeCan
 
   handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.BUFFERED, targetMid, candidateId, nativeCandidate);
   dispatchEvent(candidateProcessingState({
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     state: CANDIDATE_PROCESSING_STATE.BUFFERED,
     peerId: targetMid,
     candidateId,
@@ -19237,7 +19237,7 @@ const onicegatheringstatechange = (peerConnection, targetMid, roomState) => {
   logger.log.INFO([targetMid, 'RTCIceGatheringState', null, ICE_CONNECTION.STATE_CHANGE], iceGatheringState);
   dispatchEvent(candidateGenerationState({
     state: iceGatheringState,
-    room: Room.getRoomInfo(roomState.room.id),
+    room: Room.getRoomInfo(roomState.room),
     peerId: targetMid,
   }));
 };
@@ -19674,7 +19674,7 @@ const dispatchEvents$1 = (room, stream, isScreensharing = false) => {
   });
 
   PeerStream.dispatchStreamEvent(STREAM_ENDED, {
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     peerId: user.sid,
     peerInfo: PeerData.getCurrentSessionInfo(room),
     isSelf,
@@ -20214,7 +20214,7 @@ const onOfferFailed = (reject, targetMid, roomState, error) => {
     state: HANDSHAKE_PROGRESS.ERROR,
     peerId: targetMid,
     error,
-    room: Room.getRoomInfo(roomState.room.id),
+    room: Room.getRoomInfo(roomState.room),
   }));
   reject(error);
 };
@@ -20372,7 +20372,7 @@ const createPeerConnection = (params) => {
       state: HANDSHAKE_PROGRESS.ERROR,
       peerId: targetMid,
       error,
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
     }));
   }
 
@@ -20459,7 +20459,7 @@ const onAnswerFailed = (reject, targetMid, roomState, error) => {
     state: HANDSHAKE_PROGRESS.ERROR,
     peerId: targetMid,
     error,
-    room: Room.getRoomInfo(roomState.room.id),
+    room: Room.getRoomInfo(roomState.room),
   }));
   reject(error);
 };
@@ -21452,11 +21452,12 @@ class HandleDataChannelStats extends SkylinkStats {
   }
 
   send(roomKey, state, peerId, channel, channelProp, error) {
-    const roomState = Skylink.getSkylinkState(roomKey);
+    const roomState = Skylink.getSkylinkState(roomKey) || Object.values(Skylink.getSkylinkState())[0]; // user.uid and clientId should be the same
+    // regardless of the room
     this.model.room_id = roomKey;
     this.model.user_id = (roomState && roomState.user && roomState.user.uid) || null;
     this.model.peer_id = peerId;
-    this.model.client_id = roomState.clientId;
+    this.model.client_id = roomState && roomState.clientId;
     this.model.state = state;
     this.model.channel = channel;
     this.model.channel_id = channel.id;
@@ -21573,7 +21574,7 @@ const onbufferedamountlow = (params) => {
 
   dispatchEvent(onDataChannelStateChanged({
     state: DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     peerId,
     channelName,
     channelType,
@@ -21597,23 +21598,31 @@ const onclose = (params) => {
     roomState,
   } = params;
   const { DATA_CHANNEL, STATS_MODULE } = MESSAGES;
-  const state = Skylink.getSkylinkState(roomState.room.id) || Object.values(Skylink.getSkylinkState())[0]; // to handle leaveAllRooms method
-
-  if (!state) {
-    return;
-  }
-
-  const { room, peerConnections } = state;
+  const state = Skylink.getSkylinkState(roomState.room.id);
   const handleDataChannelStats = new HandleDataChannelStats();
 
   logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, DATA_CHANNEL.closed]);
 
+  if (!state) {
+    handleDataChannelStats.send(roomState.room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
+    dispatchEvent(onDataChannelStateChanged({
+      state: DATA_CHANNEL_STATE.CLOSED,
+      peerId,
+      room: Room.getRoomInfo(roomState.room),
+      channelName,
+      channelType,
+      bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
+    }));
+    return;
+  }
+
   try {
+    const { room, peerConnections } = state;
     handleDataChannelStats.send(room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
     dispatchEvent(onDataChannelStateChanged({
       state: DATA_CHANNEL_STATE.CLOSED,
       peerId,
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
       channelName,
       channelType,
       bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
@@ -21682,13 +21691,13 @@ const createDataChannel = (params) => {
     roomState,
   } = params;
   const state = Skylink.getSkylinkState(roomState.room.id);
-  const { user, peerConnections, peerDataChannels } = state;
+  const { room, user, peerConnections, peerDataChannels } = state;
   const peerConnection = peerConnections[peerId];
   let channelName = `-_${peerId}`;
   let channelType = createAsMessagingChannel === true ? DATA_CHANNEL_TYPE.MESSAGING : DATA_CHANNEL_TYPE.DATA;
   let channelProp = channelType === DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
   if (user && user.sid) {
-    channelName = `${user.sid}_${peerId}`;
+    channelName = `${room.id}_${user.sid}_${peerId}`;
   } else {
     logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Aborting of creating or initializing DataChannel as User does not have Room session']);
     return null;
@@ -21814,9 +21823,9 @@ const refreshDataChannel = (state, peerId) => {
 const closeFn = (roomState, peerId, channelNameProp) => {
   const { peerDataChannels } = roomState;
   const targetDataChannel = peerDataChannels[peerId][channelNameProp];
-  const { channelName, channelType } = targetDataChannel.channelName;
+  const { channelName, channelType } = targetDataChannel;
 
-  if (targetDataChannel.readyState !== DATA_CHANNEL_STATE.CLOSED) {
+  if (targetDataChannel.channel.readyState !== DATA_CHANNEL_STATE.CLOSED) {
     const { room } = roomState;
     const handleDataChannelStats = new HandleDataChannelStats();
     logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, channelNameProp, MESSAGES.DATA_CHANNEL.CLOSING]);
@@ -21979,7 +21988,7 @@ const sendP2PMessageForRoom = (roomState, message, targetPeerId) => {
 
   if (targetPeerId || !hasMCU) {
     dispatchEvent(onIncomingMessage({
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
       message: {
         targetPeerId: targetPeerId || null,
         content: message,
@@ -22258,7 +22267,7 @@ const _handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote
     state: HANDSHAKE_PROGRESS.ERROR,
     peerId: isRemote ? targetMid : user.sid,
     error,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
   }));
 };
 
@@ -22314,7 +22323,7 @@ const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remot
   dispatchEvent(handshakeProgress({
     state: HANDSHAKE_PROGRESS[remoteDescription.type.toUpperCase()],
     peerId: targetMid,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
   }));
 
   IceConnection.addIceCandidateFromQueue(targetMid, room);
@@ -22529,14 +22538,14 @@ const _processPeerFromWelcome = (params) => {
         dispatchEvent(serverPeerJoined({
           peerId: targetMid,
           serverPeerType: SERVER_PEER_TYPE.MCU,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
 
         dispatchEvent(handshakeProgress({
           peerId: targetMid,
           state: HANDSHAKE_PROGRESS.WELCOME,
           error: null,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
       }
 
@@ -22555,7 +22564,7 @@ const _processPeerFromWelcome = (params) => {
               peerId: PEER_ID,
               peerInfo: PeerData.getPeerInfo(PEER_ID, currentRoom),
               isSelf: false,
-              room: Room.getRoomInfo(currentRoom.id),
+              room: Room.getRoomInfo(currentRoom),
             }));
           }
         }
@@ -22571,14 +22580,14 @@ const _processPeerFromWelcome = (params) => {
           peerId: targetMid,
           peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
           isSelf: false,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
 
         dispatchEvent(handshakeProgress({
           peerId: targetMid,
           state: HANDSHAKE_PROGRESS.WELCOME,
           error: null,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
       }
 
@@ -22604,7 +22613,7 @@ const _processPeerFromEnter = (params) => {
         peerId: targetMid,
         peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
         isSelf: false,
-        room: Room.getRoomInfo(currentRoom.id),
+        room: Room.getRoomInfo(currentRoom),
       }));
 
       break;
@@ -22617,7 +22626,7 @@ const _processPeerFromEnter = (params) => {
           peerId: targetMid,
           peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
           isSelf: false,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
       }
 
@@ -23812,7 +23821,7 @@ const dispatchIncomingStream = (room, sid) => {
     PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
       stream,
       peerId: sid,
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
       isSelf: true,
       peerInfo: PeerData.getCurrentSessionInfo(room),
       streamId: stream.id,
@@ -24852,7 +24861,7 @@ const roomLockHandler = (message) => {
     peerInfo: PeerData.getPeerInfo(mid, state.room),
     peerId: mid,
     isSelf: false,
-    room: Room.getRoomInfo(rid),
+    room: Room.getRoomInfo(state.room),
   }));
 };
 
@@ -25520,7 +25529,7 @@ class SkylinkSignalingServer {
       peerId: roomState.user.sid,
       state: HANDSHAKE_PROGRESS[state],
       error: null,
-      room: Room.getRoomInfo(roomState.room.id),
+      room: Room.getRoomInfo(roomState.room),
     }));
   }
 
@@ -25711,7 +25720,7 @@ const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
     dispatchEvent(serverPeerLeft({
       peerId,
       serverPeerType: SERVER_PEER_TYPE.MCU,
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
     }));
   }
 
@@ -25828,7 +25837,7 @@ const leaveRoom = (roomState, stopStreamsB = true) => new Promise((resolve, reje
             peerId: user.sid,
             peerInfo: PeerData.getCurrentSessionInfo(room),
             isSelf: true,
-            room: Room.getRoomInfo(room.id),
+            room: Room.getRoomInfo(room),
           }));
           clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);
@@ -25853,7 +25862,7 @@ const leaveRoom = (roomState, stopStreamsB = true) => new Promise((resolve, reje
             peerId: user.sid,
             peerInfo: PeerData.getCurrentSessionInfo(room),
             isSelf: true,
-            room: Room.getRoomInfo(room.id),
+            room: Room.getRoomInfo(room),
           }));
           clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);
@@ -26406,7 +26415,7 @@ const lockOrUnlockRoom = (roomState, lockRoom = true) => {
     peerInfo: PeerData.getCurrentSessionInfo(room),
     peerId: user.sid,
     isSelf: true,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
   }));
 };
 
@@ -26426,20 +26435,28 @@ const unlockRoom = roomState => lockOrUnlockRoom(roomState, false);
 
 /**
  * @typedef roomInfo
- * @property {String} roomName - The room name
+ * @property {roomInfo} room - The room info
  * @property {Number} duration - The maximum allowed room duration
  * @property {String} id - The room id
  * @property {Boolean} inRoom - The flag if the peer is in the room
  */
 /**
- * @param roomKey
+ * @param room
  * @return {roomInfo}
  * @private
  */
-const getRoomInfo = (roomKey) => {
-  const state = Skylink.getSkylinkState(roomKey);
-  const { room } = state;
-  const roomInfo = Object.assign({}, room);
+const getRoomInfo = (room) => {
+  const state = Skylink.getSkylinkState(room.id);
+  // eslint-disable-next-line no-underscore-dangle
+  let _room;
+
+  if (state) {
+    _room = state.room;
+  } else {
+    _room = room;
+  }
+
+  const roomInfo = Object.assign({}, _room);
   delete roomInfo.connection;
   delete roomInfo.token;
   delete roomInfo.startDateTime;
@@ -26515,7 +26532,7 @@ const getCurrentSessionInfo = (room) => {
       DTProtocolVersion: DT_PROTOCOL_VERSION,
       SDKVersion: SDK_VERSION,
     },
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     config: {
       enableDataChannel,
       enableIceRestart,
@@ -27153,7 +27170,7 @@ const onRemoteTrackAdded = (stream, currentRoomState, targetMid, isScreensharing
   const detail = {
     stream,
     peerId: targetMid,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     isSelf: hasMCU ? (targetMid === user.sid || false) : false,
     peerInfo: PeerData.getPeerInfo(targetMid, room),
     streamId: stream.id,
@@ -27559,7 +27576,7 @@ const onStreamAccessSuccess = (roomKey, ogStream, audioSettings, videoSettings, 
       PeerStream.dispatchStreamEvent(ON_INCOMING_SCREEN_STREAM, {
         stream,
         peerId: user.sid,
-        room: Room.getRoomInfo(room.id),
+        room: Room.getRoomInfo(room),
         isSelf: true,
         peerInfo: PeerData.getCurrentSessionInfo(room),
         streamId: stream.id,
@@ -27571,7 +27588,7 @@ const onStreamAccessSuccess = (roomKey, ogStream, audioSettings, videoSettings, 
       PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
         stream,
         peerId: user.sid,
-        room: Room.getRoomInfo(room.id),
+        room: Room.getRoomInfo(room),
         isSelf: true,
         peerInfo: PeerData.getCurrentSessionInfo(room),
         streamId: stream.id,

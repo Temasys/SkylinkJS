@@ -125,7 +125,7 @@ const dispatchEvents = (room, stream, isScreensharing = false) => {
   });
 
   PeerStream.dispatchStreamEvent(STREAM_ENDED, {
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     peerId: user.sid,
     peerInfo: PeerData.getCurrentSessionInfo(room),
     isSelf,

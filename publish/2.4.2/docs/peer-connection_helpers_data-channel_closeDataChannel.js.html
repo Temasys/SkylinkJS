@@ -105,9 +105,9 @@ import Skylink from '../../../index';
 const closeFn = (roomState, peerId, channelNameProp) => {
   const { peerDataChannels } = roomState;
   const targetDataChannel = peerDataChannels[peerId][channelNameProp];
-  const { channelName, channelType } = targetDataChannel.channelName;
+  const { channelName, channelType } = targetDataChannel;
 
-  if (targetDataChannel.readyState !== DATA_CHANNEL_STATE.CLOSED) {
+  if (targetDataChannel.channel.readyState !== DATA_CHANNEL_STATE.CLOSED) {
     const { room } = roomState;
     const handleDataChannelStats = new HandleDataChannelStats();
     logger.log.DEBUG([peerId, TAGS.DATA_CHANNEL, channelNameProp, MESSAGES.DATA_CHANNEL.CLOSING]);
