@@ -25,11 +25,12 @@ class HandleDataChannelStats extends SkylinkStats {
   }
 
   send(roomKey, state, peerId, channel, channelProp, error) {
-    const roomState = Skylink.getSkylinkState(roomKey);
+    const roomState = Skylink.getSkylinkState(roomKey) || Object.values(Skylink.getSkylinkState())[0]; // user.uid and clientId should be the same
+    // regardless of the room
     this.model.room_id = roomKey;
     this.model.user_id = (roomState && roomState.user && roomState.user.uid) || null;
     this.model.peer_id = peerId;
-    this.model.client_id = roomState.clientId;
+    this.model.client_id = roomState && roomState.clientId;
     this.model.state = state;
     this.model.channel = channel;
     this.model.channel_id = channel.id;

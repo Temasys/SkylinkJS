@@ -18,7 +18,7 @@ const _handleSetOfferAndAnswerFailure = (state, targetMid, description, isRemote
     state: HANDSHAKE_PROGRESS.ERROR,
     peerId: isRemote ? targetMid : user.sid,
     error,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
   }));
 };
 
