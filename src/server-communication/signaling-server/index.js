@@ -226,10 +226,11 @@ class SkylinkSignalingServer {
   }
 
   /**
+   * @param {object} roomState
    * @param {boolean} showAll
    */
-  getPeerList(showAll) {
-    const peers = this.messageBuilder.getPeerListMessage(showAll);
+  getPeerList(roomState, showAll) {
+    const peers = this.messageBuilder.getPeerListMessage(roomState, showAll);
     if (peers) {
       this.sendMessage(peers);
     }
