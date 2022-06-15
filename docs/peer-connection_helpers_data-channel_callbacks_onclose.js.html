@@ -127,7 +127,7 @@ const onclose = (params) => {
   logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, DATA_CHANNEL.closed]);
 
   if (!state) {
-    handleDataChannelStats.send(roomState.room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
+    handleDataChannelStats.sendWithRoomState(roomState, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
     dispatchEvent(onDataChannelStateChanged({
       state: DATA_CHANNEL_STATE.CLOSED,
       peerId,

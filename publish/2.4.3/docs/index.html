@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-privileged/index.js - Documentation
+      Home - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -53,16 +51,15 @@
 
   <div class="top-nav-wrapper">
     <ul>
-      <li >
+      <li  class="active" >
         <a href="index.html">
           
-            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          
+            <svg fill="#0095dd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
               <path d="M0 0h24v24H0z" fill="none"/>
             </svg>
-           <div>Web SDK Client Reference</div>
-
-          
+            <div>Web SDK Client Reference</div>
           
         </a>
       </li>
@@ -83,104 +80,133 @@
 
   <div id="main">
     
-      <h1 class="page-title">
-        peer-privileged/index.js
-      </h1>
-    
 
     
       
 
-<section>
-  <article>
-    <pre class="prettyprint source linenums"><code>import Skylink, { SkylinkConstants } from '../index';
-import logger from '../logger';
-import messages from '../messages';
-import { GET_PEERS_STATE } from '../constants';
-import SkylinkSignalingServer from '../server-communication/signaling-server';
-import { dispatchEvent, removeEventListener, addEventListener } from '../utils/skylinkEventManager';
-import { getPeersStateChange } from '../skylink-events';
 
-/**
- * @classdesc Class that represents a Privilege Peer methods
- * @class
- * @private
- */
-class PeerPrivileged {
-  static shouldProceed(state, appKey, reject) {
-    let errMsg = null;
 
-    if (!state.isPrivileged) {
-      errMsg = messages.PEER_PRIVILEGED.not_privileged;
-    }
+    
 
-    if (!appKey) {
-      errMsg = messages.PEER_PRIVILEGED.no_appkey;
-    }
+      
 
-    if (errMsg) {
-      logger.log.DEBUG(errMsg);
-      reject(new Error(errMsg));
-    }
 
-    return !errMsg;
-  }
+  <section class="readme">
+    <article>
+      <h1>SKYLINK WEB SDK 2.4.3</h1>
+<blockquote>
+<p>Temasys SkylinkJS Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing.</p>
+</blockquote>
+<p>You'll need a Temasys Account, and an App key to use this. <a href="https://console.temasys.io">Register here to get your App key</a>.</p>
+<h4>Supported Browsers</h4>
+<table>
+<thead>
+<tr>
+<th>Features</th>
+<th>Chrome</th>
+<th>Firefox</th>
+<th>Safari</th>
+<th>Edge (Chromium)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Platforms:</td>
+<td>Win, Mac, Linux, Android</td>
+<td>Win, Mac, Linux, Android</td>
+<td>Mac, iOS</td>
+<td>Win, Mac</td>
+</tr>
+<tr>
+<td>Minimum Recommended Versions:</td>
+<td>72</td>
+<td>66</td>
+<td>13</td>
+<td>80</td>
+</tr>
+<tr>
+<td>Screensharing</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Video Call</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Audio Call</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Messaging</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>(+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.</li>
+</ul>
+<h4>Read more</h4>
+<ul>
+<li><a href="https://github.com/Temasys/GettingStarted">Getting started</a></li>
+<li><a href="https://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html">API Docs</a></li>
+<li><a href="https://github.com/Temasys/SkylinkJS/releases">Versions</a></li>
+<li><a href="https://console.temasys.io">Temasys Console  - Get your App key</a></li>
+<li><a href="https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/demos/collection/README.md">View Code Examples</a></li>
+</ul>
+<h4>MCU Behaviour</h4>
+<ul>
+<li>There are certain considerations to note when using an MCU key. Read more <a href="https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/MCU_BEHAVIOUR.md">here</a></li>
+</ul>
+<h4>Need help or want something changed?</h4>
+<ul>
+<li>You can raise tickets at our <a href="https://temasys.io/knowledge-center/">knowledge center</a> or on our <a href="https://github.com/Temasys/SkylinkJS/issues">Github Page</a>.</li>
+</ul>
+<h4>Current versions and stability</h4>
+<ul>
+<li>We recommend that you always use the latest versions of the Temasys SkylinkJS Web SDK as WebRTC is still evolving and we adapt to changes very frequently.</li>
+<li>It is advised to not attach any event handlers to the WebRTC APIs as doing so may override the handlers set in SkylinkJS and result in unexpected behaviour.</li>
+</ul>
+<p><a href="https://github.com/Temasys/SkylinkJS/releases/tag/2.4.3">Latest version: 2.4.3</a></p>
+<h2>How to build your own Temasys SkylinkJS Web SDK</h2>
+<p>Using <a href="https://git-scm.com/download">Git</a> command line tools, execute the following:</p>
+<p>Node version: <code>14.17.5</code></p>
+<pre class="prettyprint source"><code># 1. Clone or download this repository via git terminal.
 
-  /**
-   * Function that retrieves the list of Peer IDs from Rooms within the same App space.
-   * @param {SkylinkRoom} room
-   * @param {boolean} showAll
-   * @return {Promise&lt;object>}
-   * @fires GET_PEERS_STATE_CHANGE
-   */
-  static getPeerList(room, showAll) {
-    return new Promise((resolve, reject) => {
-      try {
-        const state = Skylink.getSkylinkState(room.id);
-        const initOptions = Skylink.getInitOptions();
-        const pShowAll = showAll || false;
+git clone https://github.com/Temasys/SkylinkJS.git
 
-        const executeCallbackAndRemoveEvtListener = (evt) => {
-          const result = evt.detail;
+# 2. Install all required dependencies. Use (sudo npm install) if required.
 
-          if (result.state === GET_PEERS_STATE.DISPATCHED) {
-            removeEventListener(SkylinkConstants.EVENTS.GET_PEERS_STATE_CHANGE, executeCallbackAndRemoveEvtListener);
+npm install
 
-            dispatchEvent(getPeersStateChange({
-              state: GET_PEERS_STATE.RECEIVED,
-              privilegePeerId: state.user.sid,
-              peerList: result.peerList,
-            }));
+# 3. Run the start script to start a local webserver to access the demo and doc folders. This will popup Chrome (Mac). You can configure a different browser in the start.sh file. Alternatively, you can run (sh start.sh)
 
-            resolve(result.peerList);
-          }
-        };
-
-        if (this.shouldProceed(state, initOptions.appKey, reject)) {
-          new SkylinkSignalingServer().getPeerList(pShowAll);
-
-          dispatchEvent(getPeersStateChange({
-            state: GET_PEERS_STATE.ENQUIRED,
-            privilegePeerId: state.user.sid,
-            peerList: null,
-          }));
-
-          logger.log.INFO(messages.PEER_PRIVILEGED.getPeerListFromServer);
-
-          addEventListener(SkylinkConstants.EVENTS.GET_PEERS_STATE_CHANGE, executeCallbackAndRemoveEvtListener);
-        }
-      } catch (error) {
-        logger.log.ERROR(error);
-        reject(error);
-      }
-    });
-  }
-}
-
-export default PeerPrivileged;
+npm start # Note that this runs in Chrome currently.
 </code></pre>
-  </article>
-</section>
+<p><strong>What's included in the repository?</strong></p>
+<ul>
+<li><code>demos</code> : Reference Code Examples.</li>
+<li><code>docs</code> : Generated documentation for the Temasys Web SDK.</li>
+<li><code>temasys-jsdoc-template</code> : Templates used documentation.</li>
+<li><code>publish</code> : Production version of the library as well as minified variants</li>
+<li><code>src</code> : Temasys Web SDK source</li>
+</ul>
+<h2>License</h2>
+<p><a href="https://www.apache.org/licenses/LICENSE-2.0.html">APACHE 2.0</a></p>
+    </article>
+  </section>
+
 
     
 

@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-connection/helpers/data-channel/callbacks/onclose.js - Documentation
+      media-stream/helpers/prepMediaAccessRequest.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        peer-connection/helpers/data-channel/callbacks/onclose.js
+        media-stream/helpers/prepMediaAccessRequest.js
       </h1>
     
 
@@ -93,97 +93,48 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import logger from '../../../../logger';
-import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import { onDataChannelStateChanged } from '../../../../skylink-events';
-import {
-  DATA_CHANNEL_STATE, DATA_CHANNEL_TYPE, PEER_CONNECTION_STATE, HANDSHAKE_PROGRESS,
-} from '../../../../constants';
-import Skylink from '../../../../index';
-import messages from '../../../../messages';
-import HandleDataChannelStats from '../../../../skylink-stats/handleDataChannelStats';
-import PeerConnection from '../../../index';
-import Room from '../../../../room';
+    <pre class="prettyprint source linenums"><code>import helpers from './index';
+import messages from '../../messages';
+import { TRACK_KIND } from '../../constants';
+import muteStreams from './muteStreams';
+import Skylink from '../../index';
 
 /**
- * @param {Object} params
- * @fires DATA_CHANNEL_STATE
- * @fires DATA_CHANNEL_STATE
- * @memberOf PeerConnection.PeerConnectionHelpers.CreateDataChannelCallbacks
+ * @description Helper function for {@link MediaStream.getUserMedia}
+ * @param {getUserMediaOptions} params - The camera Stream configuration options.
+ * @memberOf MediaStreamHelpers
+ * @return {Promise}
  */
-const onclose = (params) => {
-  const {
-    dataChannel,
-    peerId,
-    channelName,
-    channelProp,
-    channelType,
-    roomState,
-  } = params;
-  const { DATA_CHANNEL, STATS_MODULE } = messages;
-  const state = Skylink.getSkylinkState(roomState.room.id);
-  const handleDataChannelStats = new HandleDataChannelStats();
+const prepMediaAccessRequest = params => new Promise((resolve, reject) => {
+  const { roomKey } = params;
+  const audioSettings = helpers.parseStreamSettings(params, TRACK_KIND.AUDIO);
+  const videoSettings = helpers.parseStreamSettings(params, TRACK_KIND.VIDEO);
+  const { AdapterJS } = window;
 
-  logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, DATA_CHANNEL.closed]);
-
-  if (!state) {
-    handleDataChannelStats.send(roomState.room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
-    dispatchEvent(onDataChannelStateChanged({
-      state: DATA_CHANNEL_STATE.CLOSED,
-      peerId,
-      room: Room.getRoomInfo(roomState.room),
-      channelName,
-      channelType,
-      bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
-    }));
-    return;
+  if (!audioSettings.getUserMediaSettings.audio &amp;&amp; !videoSettings.getUserMediaSettings.video) {
+    reject(messages.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS);
   }
 
-  try {
-    const { room, peerConnections } = state;
-    handleDataChannelStats.send(room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
-    dispatchEvent(onDataChannelStateChanged({
-      state: DATA_CHANNEL_STATE.CLOSED,
-      peerId,
-      room: Room.getRoomInfo(room),
-      channelName,
-      channelType,
-      bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
-    }));
+  AdapterJS.webRTCReady(() => {
+    window.navigator.mediaDevices.getUserMedia({ audio: audioSettings.getUserMediaSettings.audio, video: videoSettings.getUserMediaSettings.video }).then((stream) => {
+      const isAudioFallback = false;
 
-    if (peerConnections[peerId] &amp;&amp; peerConnections[peerId].remoteDescription
-      &amp;&amp; peerConnections[peerId].remoteDescription.sdp &amp;&amp; (peerConnections[peerId].remoteDescription.sdp.indexOf(
-      // eslint-disable-next-line comma-dangle
-      'm=application'
-    ) === -1 || peerConnections[peerId].remoteDescription.sdp.indexOf('m=application 0') > 0)) {
-      return;
-    }
+      const streams = helpers.onStreamAccessSuccess(roomKey, stream, audioSettings, videoSettings, isAudioFallback);
+      const state = Skylink.getSkylinkState(roomKey);
+      if (streams[0] &amp;&amp; audioSettings.mutedSettings.shouldAudioMuted) {
+        muteStreams(state, { audioMuted: audioSettings.mutedSettings.shouldAudioMuted, videoMuted: videoSettings.mutedSettings.shouldVideoMuted }, streams[0].id);
+      }
 
-    if (channelType === DATA_CHANNEL_TYPE.MESSAGING) {
-      setTimeout(() => {
-        if (peerConnections[peerId]
-          &amp;&amp; peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE.CLOSED
-          &amp;&amp; (peerConnections[peerId].localDescription
-            &amp;&amp; peerConnections[peerId].localDescription.type === HANDSHAKE_PROGRESS.OFFER)) {
-          logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, DATA_CHANNEL.reviving_dataChannel]);
+      if (streams[1] &amp;&amp; videoSettings.mutedSettings.shouldVideoMuted) {
+        muteStreams(state, { audioMuted: audioSettings.mutedSettings.shouldAudioMuted, videoMuted: videoSettings.mutedSettings.shouldVideoMuted }, streams[1].id);
+      }
 
-          PeerConnection.createDataChannel({
-            peerId,
-            dataChannel,
-            bufferThreshold: PeerConnection.getDataChannelBuffer(dataChannel),
-            createAsMessagingChannel: true,
-            roomState: state,
-          });
-          handleDataChannelStats.send(room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.reconnecting, peerId, { label: channelName }, 'main');
-        }
-      }, 100);
-    }
-  } catch (error) {
-    logger.log.WARN([peerId, 'RTCDataChannel', channelProp, DATA_CHANNEL.closed]);
-  }
-};
+      resolve(streams);
+    }).catch(error => helpers.onStreamAccessError(error, reject, resolve, roomKey, audioSettings, videoSettings));
+  });
+});
 
-export default onclose;
+export default prepMediaAccessRequest;
 </code></pre>
   </article>
 </section>

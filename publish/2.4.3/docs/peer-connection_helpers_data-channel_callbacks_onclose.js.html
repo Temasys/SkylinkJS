@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-connection/helpers/data-channel/createDataChannel.js - Documentation
+      peer-connection/helpers/data-channel/callbacks/onclose.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        peer-connection/helpers/data-channel/createDataChannel.js
+        peer-connection/helpers/data-channel/callbacks/onclose.js
       </h1>
     
 
@@ -93,121 +93,97 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import Skylink from '../../../index';
-import logger from '../../../logger';
-import { DATA_CHANNEL_TYPE, PEER_CONNECTION_STATE, DATA_CHANNEL_STATE } from '../../../constants';
-import callbacks from './callbacks/index';
-import { onDataChannelStateChanged } from '../../../skylink-events';
-import PeerConnection from '../..';
-import { dispatchEvent } from '../../../utils/skylinkEventManager';
-import HandleDataChannelStats from '../../../skylink-stats/handleDataChannelStats';
+    <pre class="prettyprint source linenums"><code>import logger from '../../../../logger';
+import { dispatchEvent } from '../../../../utils/skylinkEventManager';
+import { onDataChannelStateChanged } from '../../../../skylink-events';
+import {
+  DATA_CHANNEL_STATE, DATA_CHANNEL_TYPE, PEER_CONNECTION_STATE, HANDSHAKE_PROGRESS,
+} from '../../../../constants';
+import Skylink from '../../../../index';
+import messages from '../../../../messages';
+import HandleDataChannelStats from '../../../../skylink-stats/handleDataChannelStats';
+import PeerConnection from '../../../index';
+import Room from '../../../../room';
 
-/* eslint-disable prefer-const */
 /**
- * @param params
- * @returns {null}
- * @memberOf PeerConnection.PeerConnectionHelpers
+ * @param {Object} params
  * @fires DATA_CHANNEL_STATE
+ * @fires DATA_CHANNEL_STATE
+ * @memberOf PeerConnection.PeerConnectionHelpers.CreateDataChannelCallbacks
  */
-const createDataChannel = (params) => {
-  let {
-    peerId,
-    dataChannel,
-    bufferThreshold,
-    createAsMessagingChannel,
-    roomState,
-  } = params;
-  const state = Skylink.getSkylinkState(roomState.room.id);
-  const { room, user, peerConnections, peerDataChannels } = state;
-  const peerConnection = peerConnections[peerId];
-  let channelName = `-_${peerId}`;
-  let channelType = createAsMessagingChannel === true ? DATA_CHANNEL_TYPE.MESSAGING : DATA_CHANNEL_TYPE.DATA;
-  let channelProp = channelType === DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
-  if (user &amp;&amp; user.sid) {
-    channelName = `${room.id}_${user.sid}_${peerId}`;
-  } else {
-    logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Aborting of creating or initializing DataChannel as User does not have Room session']);
-    return null;
-  }
-
-  if (!(peerConnection &amp;&amp; peerConnection.signalingState !== PEER_CONNECTION_STATE.CLOSED)) {
-    logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Aborting of creating or initializing Datachannel as Peer connection does not exists']);
-    return null;
-  }
-
-  if (dataChannel &amp;&amp; typeof dataChannel === 'object') {
-    channelName = dataChannel.label;
-  } else if (typeof dataChannel === 'string') {
-    channelName = dataChannel;
-    dataChannel = null;
-  }
-
-  if (!peerDataChannels[peerId]) {
-    channelProp = 'main';
-    channelType = DATA_CHANNEL_TYPE.MESSAGING;
-    peerDataChannels[peerId] = {};
-    logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, 'initializing main DataChannel']);
-  } else if (peerDataChannels[peerId].main &amp;&amp; peerDataChannels[peerId].main.channel.label === channelName) {
-    channelProp = 'main';
-    channelType = DATA_CHANNEL_TYPE.MESSAGING;
-  }
-
-  if (!dataChannel) {
-    try {
-      dataChannel = peerConnection.createDataChannel(channelName, {
-        reliable: true,
-        ordered: true,
-      });
-    } catch (error) {
-      logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Failed creating Datachannel ->'], error);
-
-      const handleDataChannelStats = new HandleDataChannelStats();
-      const { room } = roomState;
-
-      handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE.ERROR, peerId, { label: channelName }, channelProp, error);
-      dispatchEvent(onDataChannelStateChanged({
-        state: DATA_CHANNEL_STATE.CREATE_ERROR,
-        peerId,
-        error,
-        channelName,
-        channelType,
-        buferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
-      }));
-      return null;
-    }
-  }
-
-  const callbackExtraParams = {
+const onclose = (params) => {
+  const {
     dataChannel,
     peerId,
     channelName,
     channelProp,
     channelType,
     roomState,
-    bufferThreshold,
-  };
+  } = params;
+  const { DATA_CHANNEL, STATS_MODULE } = messages;
+  const state = Skylink.getSkylinkState(roomState.room.id);
+  const handleDataChannelStats = new HandleDataChannelStats();
 
-  dataChannel.onopen = callbacks.onopen.bind(dataChannel, callbackExtraParams);
-  dataChannel.onmessage = callbacks.onmessage.bind(dataChannel, callbackExtraParams);
-  dataChannel.onerror = callbacks.onerror.bind(dataChannel, callbackExtraParams);
-  dataChannel.onbufferedamountlow = callbacks.onbufferedamountlow.bind(dataChannel, callbackExtraParams);
-  dataChannel.onclose = callbacks.onclose.bind(dataChannel, callbackExtraParams);
+  logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, DATA_CHANNEL.closed]);
 
-  const channel = channelType === DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
-  state.peerDataChannels[peerId][channel] = {
-    channelName,
-    channelType,
-    transferId: null,
-    streamId: null,
-    channel: dataChannel,
-  };
+  if (!state) {
+    handleDataChannelStats.sendWithRoomState(roomState, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
+    dispatchEvent(onDataChannelStateChanged({
+      state: DATA_CHANNEL_STATE.CLOSED,
+      peerId,
+      room: Room.getRoomInfo(roomState.room),
+      channelName,
+      channelType,
+      bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
+    }));
+    return;
+  }
 
-  Skylink.setSkylinkState(state, roomState.room.id);
+  try {
+    const { room, peerConnections } = state;
+    handleDataChannelStats.send(room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
+    dispatchEvent(onDataChannelStateChanged({
+      state: DATA_CHANNEL_STATE.CLOSED,
+      peerId,
+      room: Room.getRoomInfo(room),
+      channelName,
+      channelType,
+      bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
+    }));
 
-  return null;
+    if (peerConnections[peerId] &amp;&amp; peerConnections[peerId].remoteDescription
+      &amp;&amp; peerConnections[peerId].remoteDescription.sdp &amp;&amp; (peerConnections[peerId].remoteDescription.sdp.indexOf(
+      // eslint-disable-next-line comma-dangle
+      'm=application'
+    ) === -1 || peerConnections[peerId].remoteDescription.sdp.indexOf('m=application 0') > 0)) {
+      return;
+    }
+
+    if (channelType === DATA_CHANNEL_TYPE.MESSAGING) {
+      setTimeout(() => {
+        if (peerConnections[peerId]
+          &amp;&amp; peerConnections[peerId].signalingState !== PEER_CONNECTION_STATE.CLOSED
+          &amp;&amp; (peerConnections[peerId].localDescription
+            &amp;&amp; peerConnections[peerId].localDescription.type === HANDSHAKE_PROGRESS.OFFER)) {
+          logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, DATA_CHANNEL.reviving_dataChannel]);
+
+          PeerConnection.createDataChannel({
+            peerId,
+            dataChannel,
+            bufferThreshold: PeerConnection.getDataChannelBuffer(dataChannel),
+            createAsMessagingChannel: true,
+            roomState: state,
+          });
+          handleDataChannelStats.send(room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.reconnecting, peerId, { label: channelName }, 'main');
+        }
+      }, 100);
+    }
+  } catch (error) {
+    logger.log.WARN([peerId, 'RTCDataChannel', channelProp, DATA_CHANNEL.closed]);
+  }
 };
 
-export default createDataChannel;
+export default onclose;
 </code></pre>
   </article>
 </section>
