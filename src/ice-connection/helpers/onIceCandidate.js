@@ -37,7 +37,7 @@ const onIceCandidate = (targetMid, candidate, currentRoom) => {
       peerConnection.gathering = true;
       peerConnection.gathered = false;
       dispatchEvent(candidateGenerationState({
-        room: Room.getRoomInfo(currentRoom.id),
+        room: Room.getRoomInfo(currentRoom),
         peerId: targetMid,
         state: constants.CANDIDATE_GENERATION_STATE.GATHERING,
       }));

@@ -87,7 +87,7 @@ const sendP2PMessageForRoom = (roomState, message, targetPeerId) => {
 
   if (targetPeerId || !hasMCU) {
     dispatchEvent(onIncomingMessage({
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
       message: {
         targetPeerId: targetPeerId || null,
         content: message,

@@ -62,14 +62,14 @@ const _processPeerFromWelcome = (params) => {
         dispatchEvent(serverPeerJoined({
           peerId: targetMid,
           serverPeerType: SERVER_PEER_TYPE.MCU,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
 
         dispatchEvent(handshakeProgress({
           peerId: targetMid,
           state: HANDSHAKE_PROGRESS.WELCOME,
           error: null,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
       }
 
@@ -88,7 +88,7 @@ const _processPeerFromWelcome = (params) => {
               peerId: PEER_ID,
               peerInfo: PeerData.getPeerInfo(PEER_ID, currentRoom),
               isSelf: false,
-              room: Room.getRoomInfo(currentRoom.id),
+              room: Room.getRoomInfo(currentRoom),
             }));
           }
         }
@@ -104,14 +104,14 @@ const _processPeerFromWelcome = (params) => {
           peerId: targetMid,
           peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
           isSelf: false,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
 
         dispatchEvent(handshakeProgress({
           peerId: targetMid,
           state: HANDSHAKE_PROGRESS.WELCOME,
           error: null,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
       }
 
@@ -140,7 +140,7 @@ const _processPeerFromEnter = (params) => {
         peerId: targetMid,
         peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
         isSelf: false,
-        room: Room.getRoomInfo(currentRoom.id),
+        room: Room.getRoomInfo(currentRoom),
       }));
 
       break;
@@ -153,7 +153,7 @@ const _processPeerFromEnter = (params) => {
           peerId: targetMid,
           peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
           isSelf: false,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
       }
 

@@ -113,7 +113,7 @@ const onicegatheringstatechange = (peerConnection, targetMid, roomState) => {
   logger.log.INFO([targetMid, 'RTCIceGatheringState', null, ICE_CONNECTION.STATE_CHANGE], iceGatheringState);
   dispatchEvent(candidateGenerationState({
     state: iceGatheringState,
-    room: Room.getRoomInfo(roomState.room.id),
+    room: Room.getRoomInfo(roomState.room),
     peerId: targetMid,
   }));
 };

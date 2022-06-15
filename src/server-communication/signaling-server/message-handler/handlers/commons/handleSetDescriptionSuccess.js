@@ -35,7 +35,7 @@ const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remot
   dispatchEvent(handshakeProgress({
     state: HANDSHAKE_PROGRESS[remoteDescription.type.toUpperCase()],
     peerId: targetMid,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
   }));
 
   IceConnection.addIceCandidateFromQueue(targetMid, room);

@@ -31,7 +31,7 @@ const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
     dispatchEvent(serverPeerLeft({
       peerId,
       serverPeerType: SERVER_PEER_TYPE.MCU,
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
     }));
   }
 
@@ -148,7 +148,7 @@ export const leaveRoom = (roomState, stopStreamsB = true) => new Promise((resolv
             peerId: user.sid,
             peerInfo: PeerData.getCurrentSessionInfo(room),
             isSelf: true,
-            room: Room.getRoomInfo(room.id),
+            room: Room.getRoomInfo(room),
           }));
           clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);
@@ -173,7 +173,7 @@ export const leaveRoom = (roomState, stopStreamsB = true) => new Promise((resolv
             peerId: user.sid,
             peerInfo: PeerData.getCurrentSessionInfo(room),
             isSelf: true,
-            room: Room.getRoomInfo(room.id),
+            room: Room.getRoomInfo(room),
           }));
           clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);

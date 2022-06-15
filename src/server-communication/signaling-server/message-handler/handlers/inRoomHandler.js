@@ -24,7 +24,7 @@ const dispatchIncomingStream = (room, sid) => {
     PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
       stream,
       peerId: sid,
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
       isSelf: true,
       peerInfo: PeerData.getCurrentSessionInfo(room),
       streamId: stream.id,
