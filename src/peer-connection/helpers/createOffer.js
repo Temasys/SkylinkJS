@@ -30,7 +30,7 @@ const onOfferFailed = (reject, targetMid, roomState, error) => {
     state: HANDSHAKE_PROGRESS.ERROR,
     peerId: targetMid,
     error,
-    room: Room.getRoomInfo(roomState.room.id),
+    room: Room.getRoomInfo(roomState.room),
   }));
   reject(error);
 };

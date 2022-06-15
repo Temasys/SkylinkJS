@@ -102,7 +102,7 @@ const createPeerConnection = (params) => {
       state: HANDSHAKE_PROGRESS.ERROR,
       peerId: targetMid,
       error,
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
     }));
   }
 

@@ -28,7 +28,7 @@ const onbufferedamountlow = (params) => {
 
   dispatchEvent(onDataChannelStateChanged({
     state: DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     peerId,
     channelName,
     channelType,

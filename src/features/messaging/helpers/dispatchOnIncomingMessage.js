@@ -28,7 +28,7 @@ const dispatchOnIncomingMessage = (roomState, config, messageContent, isSelf, ta
   }
 
   dispatchEvent(onIncomingMessage({
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     message,
     isSelf,
     peerId: isSelf ? user.sid : targetPeerId,

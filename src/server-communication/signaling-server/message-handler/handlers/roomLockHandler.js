@@ -15,7 +15,7 @@ const roomLockHandler = (message) => {
     peerInfo: PeerData.getPeerInfo(mid, state.room),
     peerId: mid,
     isSelf: false,
-    room: Room.getRoomInfo(rid),
+    room: Room.getRoomInfo(state.room),
   }));
 };
 
