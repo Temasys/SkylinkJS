@@ -24,15 +24,43 @@ class HandleDataChannelStats extends SkylinkStats {
     };
   }
 
-  send(roomKey, state, peerId, channel, channelProp, error) {
-    const roomState = Skylink.getSkylinkState(roomKey);
-    this.model.room_id = roomKey;
-    this.model.user_id = (roomState && roomState.user && roomState.user.uid) || null;
+  // some stats are sent after the roomState is cleared, so use the roomState from before the clearing
+  sendWithRoomState(roomState, state, peerId, channel, channelProp, error) {
+    this.model.room_id = roomState.room.id;
+    this.model.user_id = roomState && roomState.user && roomState.user.uid;
     this.model.peer_id = peerId;
-    this.model.client_id = roomState.clientId;
+    this.model.client_id = roomState && roomState.clientId;
     this.model.state = state;
     this.model.channel = channel;
     this.model.channel_id = channel.id;
+    this.model.channel_label = channel.label;
+    this.model.channel_type = channelProp === 'main' ? 'persistent' : 'temporal';
+    this.model.channel_binary_type = channel.binaryType;
+    this.model.app_key = Skylink.getInitOptions().appKey;
+    this.model.timestamp = (new Date()).toISOString();
+    this.error = (typeof error === 'string' ? error : (error && error.message)) || null;
+
+    if (this.model.agent_name === 'plugin') {
+      this.model.channel_binary_type = 'int8Array';
+
+      // For IE 10 and below browsers, binary support is not available.
+      if (this.model.agent_name === 'IE' && this.model.agent_version < 11) {
+        this.model.channel_binary_type = 'none';
+      }
+    }
+
+    this.postStats(this.endpoints.dataChannel, this.model);
+  }
+
+  send(roomKey, state, peerId, channel, channelProp, error) {
+    const roomState = Skylink.getSkylinkState(roomKey);
+    this.model.room_id = roomKey;
+    this.model.user_id = roomState && roomState.user && roomState.user.uid;
+    this.model.peer_id = peerId;
+    this.model.client_id = roomState && roomState.clientId;
+    this.model.state = state;
+    this.model.channel = channel;
+    this.model.channel_id = `${channel.id}`;
     this.model.channel_label = channel.label;
     this.model.channel_type = channelProp === 'main' ? 'persistent' : 'temporal';
     this.model.channel_binary_type = channel.binaryType;

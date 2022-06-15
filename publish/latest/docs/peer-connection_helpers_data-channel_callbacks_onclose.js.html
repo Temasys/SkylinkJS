@@ -121,23 +121,31 @@ const onclose = (params) => {
     roomState,
   } = params;
   const { DATA_CHANNEL, STATS_MODULE } = messages;
-  const state = Skylink.getSkylinkState(roomState.room.id) || Object.values(Skylink.getSkylinkState())[0]; // to handle leaveAllRooms method
-
-  if (!state) {
-    return;
-  }
-
-  const { room, peerConnections } = state;
+  const state = Skylink.getSkylinkState(roomState.room.id);
   const handleDataChannelStats = new HandleDataChannelStats();
 
   logger.log.DEBUG([peerId, 'RTCDataChannel', channelProp, DATA_CHANNEL.closed]);
 
+  if (!state) {
+    handleDataChannelStats.sendWithRoomState(roomState, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
+    dispatchEvent(onDataChannelStateChanged({
+      state: DATA_CHANNEL_STATE.CLOSED,
+      peerId,
+      room: Room.getRoomInfo(roomState.room),
+      channelName,
+      channelType,
+      bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
+    }));
+    return;
+  }
+
   try {
+    const { room, peerConnections } = state;
     handleDataChannelStats.send(room.id, STATS_MODULE.HANDLE_DATA_CHANNEL_STATS.closed, peerId, dataChannel, channelProp);
     dispatchEvent(onDataChannelStateChanged({
       state: DATA_CHANNEL_STATE.CLOSED,
       peerId,
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
       channelName,
       channelType,
       bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),

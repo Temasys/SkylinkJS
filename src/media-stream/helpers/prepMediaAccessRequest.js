@@ -11,9 +11,9 @@ import Skylink from '../../index';
  * @return {Promise}
  */
 const prepMediaAccessRequest = params => new Promise((resolve, reject) => {
-  const { roomKey, ...rest } = params;
-  const audioSettings = helpers.parseStreamSettings(rest, TRACK_KIND.AUDIO);
-  const videoSettings = helpers.parseStreamSettings(rest, TRACK_KIND.VIDEO);
+  const { roomKey } = params;
+  const audioSettings = helpers.parseStreamSettings(params, TRACK_KIND.AUDIO);
+  const videoSettings = helpers.parseStreamSettings(params, TRACK_KIND.VIDEO);
   const { AdapterJS } = window;
 
   if (!audioSettings.getUserMediaSettings.audio && !videoSettings.getUserMediaSettings.video) {

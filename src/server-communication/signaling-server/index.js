@@ -149,7 +149,7 @@ class SkylinkSignalingServer {
       peerId: roomState.user.sid,
       state: HANDSHAKE_PROGRESS[state],
       error: null,
-      room: Room.getRoomInfo(roomState.room.id),
+      room: Room.getRoomInfo(roomState.room),
     }));
   }
 
@@ -226,10 +226,11 @@ class SkylinkSignalingServer {
   }
 
   /**
+   * @param {object} roomState
    * @param {boolean} showAll
    */
-  getPeerList(showAll) {
-    const peers = this.messageBuilder.getPeerListMessage(showAll);
+  getPeerList(roomState, showAll) {
+    const peers = this.messageBuilder.getPeerListMessage(roomState, showAll);
     if (peers) {
       this.sendMessage(peers);
     }

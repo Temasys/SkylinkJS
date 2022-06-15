@@ -81,7 +81,7 @@ class EncryptedMessaging {
 
   dispatchEncryptSecretEvent() {
     dispatchEvent(encryptionSecretsUpdated({
-      room: Room.getRoomInfo(this.room.id),
+      room: Room.getRoomInfo(this.room),
       encryptSecrets: this.encryptSecrets,
       selectedSecretId: this.selectedSecretId,
       peerInfo: getUserInfo(this.room),

@@ -27,7 +27,7 @@ const onRemoteTrackAdded = (stream, currentRoomState, targetMid, isScreensharing
   const detail = {
     stream,
     peerId: targetMid,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     isSelf: hasMCU ? (targetMid === user.sid || false) : false,
     peerInfo: PeerData.getPeerInfo(targetMid, room),
     streamId: stream.id,

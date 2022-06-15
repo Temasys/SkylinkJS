@@ -41,7 +41,7 @@ const getCurrentSessionInfo = (room) => {
       DTProtocolVersion: DT_PROTOCOL_VERSION,
       SDKVersion: SDK_VERSION,
     },
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
     config: {
       enableDataChannel,
       enableIceRestart,

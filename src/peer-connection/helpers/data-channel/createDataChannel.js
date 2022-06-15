@@ -23,13 +23,18 @@ const createDataChannel = (params) => {
     roomState,
   } = params;
   const state = Skylink.getSkylinkState(roomState.room.id);
-  const { user, peerConnections, peerDataChannels } = state;
+  const {
+    room,
+    user,
+    peerConnections,
+    peerDataChannels,
+  } = state;
   const peerConnection = peerConnections[peerId];
   let channelName = `-_${peerId}`;
   let channelType = createAsMessagingChannel === true ? DATA_CHANNEL_TYPE.MESSAGING : DATA_CHANNEL_TYPE.DATA;
   let channelProp = channelType === DATA_CHANNEL_TYPE.MESSAGING ? 'main' : channelName;
   if (user && user.sid) {
-    channelName = `${user.sid}_${peerId}`;
+    channelName = `${room.id}_${user.sid}_${peerId}`;
   } else {
     logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Aborting of creating or initializing DataChannel as User does not have Room session']);
     return null;
@@ -67,7 +72,6 @@ const createDataChannel = (params) => {
       logger.log.ERROR([peerId, 'RTCDataChannel', channelProp, 'Failed creating Datachannel ->'], error);
 
       const handleDataChannelStats = new HandleDataChannelStats();
-      const { room } = roomState;
 
       handleDataChannelStats.send(room.id, DATA_CHANNEL_STATE.ERROR, peerId, { label: channelName }, channelProp, error);
       dispatchEvent(onDataChannelStateChanged({
