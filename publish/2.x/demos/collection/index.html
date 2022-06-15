@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>Temasys Web SDK Demos</title>
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="shortcut icon" href="./assets/imgs/favicon.ico">
+        <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet" media="screen">
+        <link href="https://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.css" type="text/css">
+        <script src="//cdnjs.cloudflare.com/ajax/libs/jquery/2.1.0/jquery.min.js" type="text/javascript"></script>
+        <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.1.1/js/bootstrap.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/prettify/r224/prettify.js" type="text/javascript"></script>
+        <style>
+            .row-eq-height {
+                display: -webkit-box;
+                display: -webkit-flex;
+                display: -ms-flexbox;
+                display: flex;
+            }
+            .table {
+                font-size: 12px;
+            }
+            .table th {
+                font-size: 14px;
+            }
+            .page {
+                padding: 0 1rem;
+            }
+        </style>
+    </head>
+<body>
+<div>
+    <div class="page">
+        <!-- header -->
+        <div class="container-fluid">
+            <div class="page-header">
+                <h2>
+                    <a href="http://temasys.github.io/">
+                        <img class="img-responsive" src="assets/imgs/skylinkjs.svg" alt="Skylink JS" height="120px" ; width="135px">
+                    </a>
+                    <small>Client API Documentation</small>
+                </h2>
+            </div>
+        </div>
+        <!-- banner -->
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h4>Temasys Web SDK Documentation</h4>
+            </div>
+            <div class="panel-body">
+                <div class="panel panel-info">
+                    <div class="panel-heading">Getting started</div>
+                    <div class="panel-body">
+                        To get started, you will require an API Key to begin.<br>
+                        To register for an API Key, simply signup for a developer account at
+                        our <a href="https://console.temasys.io">Developer Console</a>.<br>
+                        Once you received your API key, create a config.js file
+                        (take example on config-example.js) and fill it with your information.
+                    </div>
+                </div>
+                <p>
+                    <i>Only one module/namespace: <u>Skylink</u>.</i><br>
+                    The public API and events appear by default.
+                </p>
+                <p>
+                    <a href="http://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html" class="btn btn-primary">View Documentation</a>
+                </p>
+            </div>
+        </div>
+        <!-- row -->
+        <div class="row-eq-height">
+            <!-- column -->
+            <div class="col-md-4 panel panel-default">
+                <div class="panel-heading">
+                    <h4>Audio Call (1 - 1) <br><small>(/audio-call)</small></h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        <em>This demo uses your API test account to create an audio call. New users are displayed
+                            beside your personal video element.</em>
+                    </p>
+                    <hr>
+                    <ul>
+                        <li>Automatically fetch for microphone</li>
+                        <li>Automatically connects to default Room</li>
+                        <li>Handle connection and disconnection of peers</li>
+                    </ul>
+                    <div class="panel panel-info">
+                        <div class="panel-heading">Difficulty</div>
+                        <div class="progress" style="height:20px;margin:5px;">
+                            <div class="progress-bar progress-bar-success"
+                                 role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="10" style="width:10%;">
+                                Easy
+                            </div>
+                        </div>
+                    </div>
+                    <p>
+                        <a href="audio-call/index.html" class="btn btn-primary">View Demo</a>
+                    </p>
+                </div>
+            </div>
+            <!-- column -->
+            <div class="col-md-4 panel panel-default">
+                <div class="panel-heading">
+                    <h4>Video Call (1 - 1 Media) <br><small>(/video-call)</small></h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        <em>This demo uses your API test account to create a video call. New users are displayed
+                            below your personal video element.</em>
+                    </p>
+                    <hr>
+                    <ul>
+                        <li>Automatically fetch for video camera</li>
+                        <li>Automatically connects to default Room</li>
+                        <li>Handle connection and disconnection of peers</li>
+                    </ul>
+                    <div class="panel panel-info">
+                        <div class="panel-heading">Difficulty</div>
+                        <div class="progress" style="height:20px;margin:5px;">
+                            <div class="progress-bar progress-bar-success"
+                                 role="progressbar" aria-valuenow="1" aria-valuemin="0" aria-valuemax="10" style="width:15%;">
+                                Easy
+                            </div>
+                        </div>
+                    </div>
+                    <p>
+                        <a href="video-call/index.html" class="btn btn-primary">View Demo</a>
+                    </p>
+                </div>
+            </div>
+            <!-- column -->
+            <div class="col-md-4 panel panel-default">
+                <div class="panel-heading">
+                    <h4>Chat Room <br><small>(/chat)</small></h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        <em>This demo presents the different possibilities to send messages with Temasys Web SDK.</em>
+                    </p>
+                    <hr>
+                    <ul>
+                        <li>Automatically connects to default Room</li>
+                        <li>Handle connection and disconnection of peers</li>
+                        <br/>
+                    </ul>
+                    <div class="panel panel-info">
+                        <div class="panel-heading">Difficulty</div>
+                        <div class="progress" style="height:20px;margin:5px;">
+                            <div class="progress-bar progress-bar-success"
+                                 role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:20%;">
+                                Easy
+                            </div>
+                        </div>
+                    </div>
+                    <p>
+                        <a href="chat/index.html" class="btn btn-primary">View Demo</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- row -->
+        <div class="row-eq-height">
+            <!-- column -->
+            <div class="col-md-12 panel panel-default">
+                <div class="panel-heading">
+                    <h4>Demo <br><small>(/kitchensink)</small></h4>
+                </div>
+                <div class="panel-body">
+                    <p>
+                        <em>This demo shows you most of the functionality Temasys Web SDK can provide.</em>
+                        All the states and information provided by the API are displayed.
+                    </p>
+                    <hr>
+                    <ul>
+                        <li>Automatically fetch for cam</li>
+                        <li>Automatically connects to default Room</li>
+                        <li>Handle connection and disconnection of peers</li>
+                        <li>With list of users in room</li>
+                        <li>Feedback on channel status</li>
+                        <li>Feedback on handshake and Connection</li>
+                        <li>File sharing features using DataChannel</li>
+                        <li>Chat via Signaling or DataChannel</li>
+                        <li>Users to update their own Display Name and add custom information</li>
+                        <li>Muting of Audio/Video</li>
+                        <li>Locking and Unlocking of Room</li>
+                    </ul>
+                    <div class="panel panel-info">
+                        <div class="panel-heading">Difficulty</div>
+                        <div class="progress" style="height:20px;margin:5px;">
+                            <div class="progress-bar progress-bar-warning"
+                                 role="progressbar" aria-valuenow="2" aria-valuemin="0" aria-valuemax="10" style="width:80%;">
+                                Hard
+                            </div>
+                        </div>
+                    </div>
+                    <p>
+                        <a href="kitchensink/index.html" class="btn btn-primary">View Demo</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+        <!-- row -->
+        <div class="row-eq-height">
+            <!-- column -->
+            <div class="col-md-6 panel panel-default">
+                <div class="panel-heading">
+                    <h4>Data Streaming [Future Feature]<br><small>(/data-streaming)</small></h4>
+                </div>
+            </div>
+            <!-- column -->
+            <div class="col-md-6 panel panel-default">
+                <div class="panel-heading">
+                    <h4>File Transfer [Future Feature]<br><small>(/file-transfer)</small></h4>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
+</title>
+</head>
+<body>
+
+</body>
+</html>

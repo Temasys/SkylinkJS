@@ -1,0 +1,441 @@
+
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+  <title>
+      utils/helpers.js - Documentation
+  </title>
+
+  <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.7.0/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.1.0/jquery.min.js"></script>
+
+  <link type="text/css" rel="stylesheet" href="styles/prettify-tomorrow.css">
+  <link type="text/css" rel="stylesheet" href="styles/jsdoc-default.css">
+  
+
+  
+
+  <!-- start Mixpanel -->
+  <script type="text/javascript">(function(e,a){if(!a.__SV){var b=window;try{var c,l,i,j=b.location,g=j.hash;c=function(a,b){return(l=a.match(RegExp(b+"=([^&]*)")))?l[1]:null};g&&c(g,"state")&&(i=JSON.parse(decodeURIComponent(c(g,"state"))),"mpeditor"===i.action&&(b.sessionStorage.setItem("_mpcehash",g),history.replaceState(i.desiredHash||"",e.title,j.pathname+j.search)))}catch(m){}var k,h;window.mixpanel=a;a._i=[];a.init=function(b,c,f){function e(b,a){var c=a.split(".");2==c.length&&(b=b[c[0]],a=c[1]);b[a]=function(){b.push([a].concat(Array.prototype.slice.call(arguments,
+  0)))}}var d=a;"undefined"!==typeof f?d=a[f]=[]:f="mixpanel";d.people=d.people||[];d.toString=function(b){var a="mixpanel";"mixpanel"!==f&&(a+="."+f);b||(a+=" (stub)");return a};d.people.toString=function(){return d.toString(1)+".people (stub)"};k="disable time_event track track_pageview track_links track_forms register register_once alias unregister identify name_tag set_config reset people.set people.set_once people.increment people.append people.union people.track_charge people.clear_charges people.delete_user".split(" ");
+  for(h=0;h<k.length;h++)e(d,k[h]);a._i.push([b,c,f])};a.__SV=1.2;b=e.createElement("script");b.type="text/javascript";b.async=!0;b.src="undefined"!==typeof MIXPANEL_CUSTOM_LIB_URL?MIXPANEL_CUSTOM_LIB_URL:"file:"===e.location.protocol&&"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js".match(/^\/\//)?"https://cdn.mxpnl.com/libs/mixpanel-2-latest.min.js":"//cdn.mxpnl.com/libs/mixpanel-2-latest.min.js";c=e.getElementsByTagName("script")[0];c.parentNode.insertBefore(b,c)}})(document,window.mixpanel||[]);
+  mixpanel.init("1919205b2da72e4da3b9b6639b444d59");</script>
+  <!-- end Mixpanel -->
+  <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700,900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css?family=Roboto+Slab:400,700&display=swap" rel="stylesheet">
+</head>
+
+<body>
+  <svg style="display: none;">
+    <defs>
+      <symbol id="linkIcon" fill="#706d77" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          <path d="M0 0h24v24H0z" fill="none"/>
+          <path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8v2zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/>
+      </symbol>
+    </defs>
+  </svg>
+
+  <input type="checkbox" id="nav-trigger" class="nav-trigger" />
+  <label for="nav-trigger" class="navicon-button x">
+    <div class="navicon"></div>
+  </label>
+
+  <label for="nav-trigger" class="overlay"></label>
+
+  <div class="top-nav-wrapper">
+    <ul>
+      <li >
+        <a href="index.html">
+          
+            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+              <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
+              <path d="M0 0h24v24H0z" fill="none"/>
+            </svg>
+           <div>Web SDK Client Reference</div>
+
+          
+          
+        </a>
+      </li>
+
+      
+
+    </ul>
+  </div>
+
+  <nav>
+    <h3 class="reference-title">
+    </h3>
+
+    
+
+    <h3>Classes</h3><ul><li id="Skylink-nav"><a href="Skylink.html">Skylink</a><ul class='methods'><li data-type="method" id="Skylink-cancelBlobTransfer-nav"><a href="Skylink.html#cancelBlobTransfer">cancelBlobTransfer</a></li><li data-type="method" id="Skylink-deleteEncryptSecrets-nav"><a href="Skylink.html#deleteEncryptSecrets">deleteEncryptSecrets</a></li><li data-type="method" id="Skylink-generateUUID-nav"><a href="Skylink.html#generateUUID">generateUUID</a></li><li data-type="method" id="Skylink-getConnectionStatus-nav"><a href="Skylink.html#getConnectionStatus">getConnectionStatus</a></li><li data-type="method" id="Skylink-getEncryptSecrets-nav"><a href="Skylink.html#getEncryptSecrets">getEncryptSecrets</a></li><li data-type="method" id="Skylink-getMessagePersistence-nav"><a href="Skylink.html#getMessagePersistence">getMessagePersistence</a></li><li data-type="method" id="Skylink-getPeerInfo-nav"><a href="Skylink.html#getPeerInfo">getPeerInfo</a></li><li data-type="method" id="Skylink-getPeers-nav"><a href="Skylink.html#getPeers">getPeers</a></li><li data-type="method" id="Skylink-getPeersCustomSettings-nav"><a href="Skylink.html#getPeersCustomSettings">getPeersCustomSettings</a></li><li data-type="method" id="Skylink-getPeersDataChannels-nav"><a href="Skylink.html#getPeersDataChannels">getPeersDataChannels</a></li><li data-type="method" id="Skylink-getPeersInRoom-nav"><a href="Skylink.html#getPeersInRoom">getPeersInRoom</a></li><li data-type="method" id="Skylink-getRecordings-nav"><a href="Skylink.html#getRecordings">getRecordings</a></li><li data-type="method" id="Skylink-getSdkVersion-nav"><a href="Skylink.html#getSdkVersion">getSdkVersion</a></li><li data-type="method" id="Skylink-getSelectedSecret-nav"><a href="Skylink.html#getSelectedSecret">getSelectedSecret</a></li><li data-type="method" id="Skylink-getStoredMessages-nav"><a href="Skylink.html#getStoredMessages">getStoredMessages</a></li><li data-type="method" id="Skylink-getStreams-nav"><a href="Skylink.html#getStreams">getStreams</a></li><li data-type="method" id="Skylink-getStreamSources-nav"><a href="Skylink.html#getStreamSources">getStreamSources</a></li><li data-type="method" id="Skylink-getUserData-nav"><a href="Skylink.html#getUserData">getUserData</a></li><li data-type="method" id="Skylink-getUserMedia-nav"><a href="Skylink.html#getUserMedia">getUserMedia</a></li><li data-type="method" id="Skylink-joinRoom-nav"><a href="Skylink.html#joinRoom">joinRoom</a></li><li data-type="method" id="Skylink-leaveAllRooms-nav"><a href="Skylink.html#leaveAllRooms">leaveAllRooms</a></li><li data-type="method" id="Skylink-leaveRoom-nav"><a href="Skylink.html#leaveRoom">leaveRoom</a></li><li data-type="method" id="Skylink-lockRoom-nav"><a href="Skylink.html#lockRoom">lockRoom</a></li><li data-type="method" id="Skylink-muteStreams-nav"><a href="Skylink.html#muteStreams">muteStreams</a></li><li data-type="method" id="Skylink-refreshConnection-nav"><a href="Skylink.html#refreshConnection">refreshConnection</a></li><li data-type="method" id="Skylink-refreshDatachannel-nav"><a href="Skylink.html#refreshDatachannel">refreshDatachannel</a></li><li data-type="method" id="Skylink-respondBlobRequest-nav"><a href="Skylink.html#respondBlobRequest">respondBlobRequest</a></li><li data-type="method" id="Skylink-sendBlobData-nav"><a href="Skylink.html#sendBlobData">sendBlobData</a></li><li data-type="method" id="Skylink-sendMessage-nav"><a href="Skylink.html#sendMessage">sendMessage</a></li><li data-type="method" id="Skylink-sendP2PMessage-nav"><a href="Skylink.html#sendP2PMessage">sendP2PMessage</a></li><li data-type="method" id="Skylink-sendStream-nav"><a href="Skylink.html#sendStream">sendStream</a></li><li data-type="method" id="Skylink-setEncryptSecret-nav"><a href="Skylink.html#setEncryptSecret">setEncryptSecret</a></li><li data-type="method" id="Skylink-setMessagePersistence-nav"><a href="Skylink.html#setMessagePersistence">setMessagePersistence</a></li><li data-type="method" id="Skylink-setSelectedSecret-nav"><a href="Skylink.html#setSelectedSecret">setSelectedSecret</a></li><li data-type="method" id="Skylink-setUserData-nav"><a href="Skylink.html#setUserData">setUserData</a></li><li data-type="method" id="Skylink-shareScreen-nav"><a href="Skylink.html#shareScreen">shareScreen</a></li><li data-type="method" id="Skylink-startRecording-nav"><a href="Skylink.html#startRecording">startRecording</a></li><li data-type="method" id="Skylink-startRTMPSession-nav"><a href="Skylink.html#startRTMPSession">startRTMPSession</a></li><li data-type="method" id="Skylink-stopRecording-nav"><a href="Skylink.html#stopRecording">stopRecording</a></li><li data-type="method" id="Skylink-stopRTMPSession-nav"><a href="Skylink.html#stopRTMPSession">stopRTMPSession</a></li><li data-type="method" id="Skylink-stopScreen-nav"><a href="Skylink.html#stopScreen">stopScreen</a></li><li data-type="method" id="Skylink-stopStreams-nav"><a href="Skylink.html#stopStreams">stopStreams</a></li><li data-type="method" id="Skylink-unlockRoom-nav"><a href="Skylink.html#unlockRoom">unlockRoom</a></li></ul></li><li id="SkylinkLogger-nav"><a href="SkylinkLogger.html">SkylinkLogger</a><ul class='methods'><li data-type="method" id="SkylinkLogger-disableAll-nav"><a href="SkylinkLogger.html#disableAll">disableAll</a></li><li data-type="method" id="SkylinkLogger-enableAll-nav"><a href="SkylinkLogger.html#enableAll">enableAll</a></li><li data-type="method" id="SkylinkLogger-setLevel-nav"><a href="SkylinkLogger.html#setLevel">setLevel</a></li></ul></li></ul><h3>Namespaces</h3><ul><li id="Reconnection-nav"><a href="Reconnection.html">Reconnection</a></li><li id="SkylinkConstants-nav"><a href="SkylinkConstants.html">SkylinkConstants</a></li><li id="SkylinkEvents-nav"><a href="SkylinkEvents.html">SkylinkEvents</a></li></ul><h3 id="global-nav">Global</h3><ul><li><a href="global.html#AdapterJS">AdapterJS</a></li><li><a href="global.html#io">io</a></li></ul>
+  </nav>
+
+  <div id="main">
+    
+      <h1 class="page-title">
+        utils/helpers.js
+      </h1>
+    
+
+    
+      
+
+<section>
+  <article>
+    <pre class="prettyprint source linenums"><code>import Skylink from '../index';
+import logger from '../logger';
+import MESSAGES from '../messages';
+import mediaStreamHelpers from '../media-stream/helpers/index';
+import SkylinkSignalingServer from '../server-communication/signaling-server/index';
+import { BROWSER_AGENT } from '../constants';
+
+/**
+ * @namespace UtilHelpers
+ * @description Util helper functions
+ * @private
+ */
+
+/**
+ * Function that tests if an object is empty.
+ * @param {Object} obj
+ * @return {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isEmptyObj = (obj) => {
+  const keys = Object.keys(obj);
+  return keys.length === 0;
+};
+
+/**
+ * Function that tests if an array is empty.
+ * @param {Array} array
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isEmptyArray = array => array.length === 0;
+
+/**
+ * Function that tests if a string is an empty string.
+ * @param string
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isEmptyString = string => string === '';
+
+/**
+ * Function that tests if type is 'Object'.
+ * @param {*} param
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isAObj = param => typeof param === 'object' &amp;&amp; param !== null;
+
+/**
+ * Function that tests if type is 'Null'.
+ * @param {*} param
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isNull = param => typeof param === 'object' &amp;&amp; param == null;
+
+/**
+ * Function that tests if type is 'Number'.
+ * @param {*} param
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isANumber = param => typeof param === 'number';
+
+/**
+ * Function that tests if type is 'Function'.
+ * @param {*} param
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isAFunction = param => typeof param === 'function';
+
+/**
+ * Function that tests if type is 'Boolean'.
+ * @param {Object|boolean}
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isABoolean = obj => typeof obj !== 'undefined' &amp;&amp; typeof obj === 'boolean';
+
+/**
+ * Function that tests if type is 'String'.
+ * @param {*} param
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isAString = param => typeof param === 'string';
+
+/**
+ * Function that tests if a param is null, undefined or a string.
+ * @param param
+ * @param paramName
+ * @param methodName
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const getParamValidity = (param, paramName, methodName) => {
+  let proceed = true;
+  if (param === null || typeof param === 'undefined' || !isAString(param)) {
+    logger.log.ERROR(`${methodName}: ${paramName} is null, undefined or not a string.`);
+    proceed = false;
+  }
+  return proceed;
+};
+
+/**
+ * Function that returns the Skylink state.
+ * @param {SkylinkRoom.id} rid
+ * @returns {SkylinkState|null} state
+ * @memberOf UtilHelpers
+ */
+export const getStateByRid = (rid) => {
+  const proceed = getParamValidity(rid, 'roomId', 'getStateByRid');
+  if (proceed) {
+    const states = Skylink.getSkylinkState();
+    const roomKeys = Object.keys(states);
+    let roomState = null;
+    for (let i = 0; i &lt; roomKeys.length; i += 1) {
+      const key = roomKeys[i];
+      if (key === rid) {
+        roomState = states[key];
+        break;
+      }
+    }
+    return roomState;
+  }
+  logger.log.ERROR(`getRoomStateByRid: ${MESSAGES.ROOM_STATE.NOT_FOUND} - ${rid}`);
+  return null;
+};
+
+/**
+ * Function that returns the Skylink state.
+ * @param {String} roomkey - The room key.
+ * @returns {SkylinkState}
+ * @memberOf UtilHelpers
+ */
+export const getStateByKey = roomkey => getStateByRid(roomkey);
+
+/**
+ * Function that returns the room state.
+ * @param {String} roomName - The room name.
+ * @returns {SkylinkState|null} - The room state.
+ * @memberOf UtilHelpers
+ */
+export const getRoomStateByName = (roomName) => {
+  const proceed = getParamValidity(roomName, 'roomName', 'getRoomStateByName');
+  let matchedRoomState = null;
+  if (proceed) {
+    const state = Skylink.getSkylinkState();
+    const roomKeys = Object.keys(state);
+    for (let i = 0; i &lt; roomKeys.length; i += 1) {
+      const roomState = state[roomKeys[i]];
+      if (roomState.room.roomName.toLowerCase() === roomName.toLowerCase()) {
+        matchedRoomState = roomState;
+        break;
+      }
+    }
+  }
+  if (!matchedRoomState) {
+    logger.log.ERROR(`getRoomStateByName: ${MESSAGES.ROOM_STATE.NOT_FOUND} - ${roomName}`);
+  }
+  return matchedRoomState;
+};
+
+/**
+ * Disconnects from the signaling server.
+ * @memberOf UtilHelpers
+ */
+export const disconnect = () => {
+  try {
+    new SkylinkSignalingServer().socket.disconnect();
+  } catch (error) {
+    logger.log.ERROR(error);
+  }
+};
+
+/**
+ * Function that generates an &lt;a href="https://en.wikipedia.org/wiki/Universally_unique_identifier">UUID&lt;/a> (Unique ID).
+ * @returns {String} Returns a generated UUID (Unique ID).
+ * @memberOf UtilHelpers
+ */
+export const generateUUID = () => {
+  /* eslint-disable no-bitwise */
+  let d = new Date().getTime();
+  const uuid = 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, (c) => {
+    const r = (d + Math.random() * 16) % 16 | 0;
+    d = Math.floor(d / 16);
+    return (c === 'x' ? r : (r &amp;&amp; 0x7 | 0x8)).toString(16);
+  });
+  return uuid;
+};
+
+/**
+ * Function that returns the getUserMedia stream when the user had not joined a room (is stateless)
+ * @param {Object} options
+ * @returns {Promise}
+ * @memberOf UtilHelpers
+ */
+export const statelessGetUserMedia = options => new Promise((resolve, reject) => {
+  const { navigator } = window;
+  if (!options || !isAObj(options)) {
+    reject(new Error(`${MESSAGES.MEDIA_STREAM.ERRORS.INVALID_GUM_OPTIONS} ${options}`));
+  }
+
+  navigator.mediaDevices.getUserMedia(options).then((stream) => {
+    const streams = mediaStreamHelpers.splitAudioAndVideoStream(stream);
+    resolve(streams);
+  }).catch((error) => {
+    reject(error);
+  });
+});
+
+/**
+ * Function that always returns are rejected Promise.
+ * @param {String} errorMsg
+ * @returns {Promise}
+ * @memberOf UtilHelpers
+ */
+export const rejectPromise = errorMsg => new Promise((resolve, reject) => {
+  reject(new Error(errorMsg));
+});
+
+/**
+ * Function that checks if the peerId exists on the peerConnection
+ * @param {SkylinkRoom} room
+ * @param {String} peerId
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isValidPeerId = (room, peerId) => {
+  const state = Skylink.getSkylinkState(room.id);
+
+  const { peerConnections } = state;
+  const peerIds = Object.keys(peerConnections);
+
+  let isValid = false;
+  peerIds.forEach((validPeerId) => {
+    if (validPeerId === peerId) {
+      isValid = true;
+    }
+  });
+
+  return isValid;
+};
+
+/**
+ * Function that checks if a media stream has an audio track.
+ * @param {MediaStream} stream
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const hasAudioTrack = stream => stream.getAudioTracks().length > 0;
+
+/**
+ * Function that checks if a media stream has a video track.
+ * @param {MediaStream} stream
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const hasVideoTrack = stream => stream.getVideoTracks().length > 0;
+
+/**
+ * Function that checks the browser agent.
+ * @param {String} agent
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isAgent = (agent) => {
+  const { AdapterJS } = window;
+  switch (agent) {
+    case BROWSER_AGENT.CHROME:
+      return AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.CHROME;
+    case BROWSER_AGENT.SAFARI:
+      return AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.SAFARI;
+    case BROWSER_AGENT.FIREFOX:
+      return AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.FIREFOX;
+    case BROWSER_AGENT.REACT_NATIVE:
+      return AdapterJS.webrtcDetectedBrowser === BROWSER_AGENT.REACT_NATIVE;
+    default:
+      logger.log.DEBUG(MESSAGES.UTILS.INVALID_BROWSER_AGENT);
+      return false;
+  }
+};
+
+/**
+ * Function that checks the browser version.
+ * @param {number} version
+ * @param {string} operator
+ * @returns {boolean}
+ * @memberOf UtilHelpers
+ */
+export const isVersion = (version, operator = '===') => {
+  const { AdapterJS } = window;
+  switch (operator) {
+    case '>':
+      return AdapterJS.webrtcDetectedVersion > version;
+    case '&lt;':
+      return AdapterJS.webrtcDetectedVersion &lt; version;
+    default:
+      return AdapterJS.webrtcDetectedVersion === version;
+  }
+};
+
+/**
+ * Function that generates a timestamp in UNIX format.
+ * @returns {number}
+ * @memberOf UtilHelpers
+ */
+export const generateUNIXTimeStamp = () => Math.round(new Date().getTime() / 1000);
+
+/**
+ * Function that parses UNIX timestamp and returns timestamp in ISO string.
+ * @param timestamp
+ * @returns {string}
+ * @memberOf UtilHelpers
+ */
+export const parseUNIXTimeStamp = timestamp => new Date(timestamp).toISOString();
+
+/**
+ * Function that generates a timestamp in ISO string format.
+ * @returns {string}
+ * @memberOf UtilHelpers
+ */
+export const generateISOStringTimesStamp = () => new Date().toISOString();
+</code></pre>
+  </article>
+</section>
+
+    
+
+
+  </div>
+
+  <br class="clear">
+
+  <footer>
+    Documentation generated by <a href="https://temasys.io/">Temasys</a>
+  </footer>
+
+  <script src="scripts/linenumber.js"></script>
+  <script src="scripts/pagelocation.js"></script>
+
+  
+
+</body>
+</html>
