@@ -15,6 +15,7 @@ const getUserMessages = (roomState, config, message) => {
     mid: user.sid,
     rid: room.id,
     msgId: generateUUID(),
+    roomSessionId: room.roomSessionId,
     type: SIG_MESSAGE_TYPE.MESSAGE,
   };
 

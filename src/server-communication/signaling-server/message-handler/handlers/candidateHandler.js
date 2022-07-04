@@ -7,6 +7,7 @@ import PeerConnection from '../../../../peer-connection';
 import IceConnection from '../../../../ice-connection';
 import messages from '../../../../messages';
 import HandleIceCandidateStats from '../../../../skylink-stats/handleIceCandidateStats';
+import Room from '../../../../room';
 
 
 /**
@@ -58,7 +59,7 @@ const candidateHandler = (message) => {
   };
 
   dispatchEvent(candidateProcessingState({
-    room,
+    room: Room.getRoomInfo(room),
     state: constants.CANDIDATE_PROCESSING_STATE.RECEIVED,
     peerId: mid,
     candidateId,
@@ -73,7 +74,7 @@ const candidateHandler = (message) => {
     candidateProcessingStateEventDetail.error = new Error(PEER_CONNECTION.NO_PEER_CONNECTION);
     handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
     dispatchEvent(candidateProcessingState({
-      room,
+      room: Room.getRoomInfo(room),
       state: constants.CANDIDATE_PROCESSING_STATE.DROPPED,
       peerId: mid,
       candidateId,
@@ -93,7 +94,7 @@ const candidateHandler = (message) => {
       candidateProcessingStateEventDetail.error = new Error(ICE_CANDIDATE.FILTERED_CANDIDATE);
       handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.DROPPED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
       dispatchEvent(candidateProcessingState({
-        room,
+        room: Room.getRoomInfo(room),
         state: constants.CANDIDATE_PROCESSING_STATE.DROPPED,
         peerId: mid,
         candidateId,

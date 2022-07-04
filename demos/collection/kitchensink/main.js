@@ -1062,7 +1062,8 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#get_stored_messages_button').click(function() {
-    Demo.Skylink.getStoredMessages(config.defaultRoom);
+    Demo.Skylink.getStoredMessages(config.defaultRoom, $('#room_session_id').val());
+    $('#room_session_id').val('');
   });
   // //---------------------------------------------------
   $('#update_user_info_btn').click(function() {

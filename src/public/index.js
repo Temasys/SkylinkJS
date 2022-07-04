@@ -190,6 +190,7 @@ class SkylinkPublicInterface {
   /**
    * @description Method that retrieves the message history from server if Persistent Message feature is enabled for the key.
    * @param {String} roomName - The name of the room.
+   * @param {String} [roomSessionId] - The room session id to retrieve the messages from.
    * @example
    * Example 1: Retrieving stored messages
    *
@@ -208,10 +209,10 @@ class SkylinkPublicInterface {
    * @alias Skylink#getStoredMessages
    * @since 2.1
    */
-  getStoredMessages(roomName) {
+  getStoredMessages(roomName, roomSessionId = '') {
     const roomState = getRoomStateByName(roomName);
     if (roomState) {
-      new AsyncMessaging(roomState).getStoredMessages();
+      new AsyncMessaging(roomState).getStoredMessages(roomSessionId);
     }
   }
 

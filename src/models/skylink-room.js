@@ -35,6 +35,11 @@ class SkylinkRoom {
      */
     this.roomName = rawApiResponse.roomName;
     /**
+     * The room session id
+     * @type {String}
+     */
+    this.roomSessionId = rawApiResponse.roomSessionId;
+    /**
      * The peer connection configuration
      * @type {{mediaConstraints: any, peerConstraints: any, offerConstraints: any, peerConfig: {iceServers: Array}, sdpConstraints: {}}}
      */

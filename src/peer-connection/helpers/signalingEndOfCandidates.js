@@ -4,6 +4,7 @@ import messages from '../../messages';
 import logger from '../../logger';
 import { dispatchEvent } from '../../utils/skylinkEventManager';
 import { candidatesGathered } from '../../skylink-events';
+import Room from '../../room';
 
 /**
  * @param {String} targetMid
@@ -50,7 +51,7 @@ const signalingEndOfCandidates = (targetMid, roomState) => {
           processed: gatheredCandidates.receiving.srflx.length + gatheredCandidates.receiving.relay.length + gatheredCandidates.receiving.host.length,
         };
         dispatchEvent(candidatesGathered({
-          room: state.room,
+          room: Room.getRoomInfo(state.room),
           peerId: targetMid,
           candidatesLength,
         }));

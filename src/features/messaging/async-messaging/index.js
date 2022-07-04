@@ -80,14 +80,14 @@ class AsyncMessaging {
     }
   }
 
-  getStoredMessages() {
+  getStoredMessages(roomSessionId) {
     const roomState = Skylink.getSkylinkState(this.room.id);
     if (!this.hasPersistentMessage) {
       logger.log.WARN([this.peerId, TAGS.ASYNC_MESSAGING, null, `${MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED}`]);
       return;
     }
 
-    new SkylinkSignalingServer().getStoredMessages(roomState);
+    new SkylinkSignalingServer().getStoredMessages(roomState, roomSessionId);
   }
 
   canPersist() {
