@@ -83,6 +83,7 @@ const inRoomHandler = (message) => {
     peerInfo: PeerData.getCurrentSessionInfo(roomState.room),
     isSelf: true,
     room: Room.getRoomInfo(roomState.room),
+    peerSessionId: roomState.user.peerSessionId,
   }));
 
   new HandleSessionStats().send(rid, message);

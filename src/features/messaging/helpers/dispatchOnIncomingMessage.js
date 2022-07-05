@@ -23,6 +23,10 @@ const dispatchOnIncomingMessage = (roomState, config, messageContent, isSelf, ta
     timeStamp: generateISOStringTimesStamp(),
   };
 
+  if (config.peerSessionId) {
+    message.peerSessionId = config.peerSessionId;
+  }
+
   if (isSelf) {
     message.listOfPeers = config.listOfPeers;
   }

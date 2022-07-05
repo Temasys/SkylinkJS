@@ -1030,7 +1030,7 @@ $(document).ready(function() {
       if (selectedPeers.length > 0) {
         Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), selectedPeers);
       } else {
-        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val());
+        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), null);
       }
     }
     $('#chat_input').val('');
