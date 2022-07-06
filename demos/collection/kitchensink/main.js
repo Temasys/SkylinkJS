@@ -1028,9 +1028,9 @@ $(document).ready(function() {
       }
     } else {
       if (selectedPeers.length > 0) {
-        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), selectedPeers);
+        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), selectedPeers, $('#peer_session_id').val());
       } else {
-        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), null);
+        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), null, $('#peer_session_id').val());
       }
     }
     $('#chat_input').val('');

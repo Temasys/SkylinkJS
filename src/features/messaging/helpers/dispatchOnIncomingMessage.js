@@ -17,15 +17,11 @@ const dispatchOnIncomingMessage = (roomState, config, messageContent, isSelf, ta
     // eslint-disable-next-line no-nested-ternary
     targetPeerId: isSelf ? (config.isPrivate ? targetPeerId : null) : user.sid,
     content: messageContent,
-    senderPeerId: isSelf ? user.sid : targetPeerId,
+    senderPeerId: config.peerSessionId || (isSelf ? user.sid : targetPeerId), // always use the peerSessionId if present
     isDataChannel: false,
     isPrivate: config.isPrivate,
     timeStamp: generateISOStringTimesStamp(),
   };
-
-  if (config.peerSessionId) {
-    message.peerSessionId = config.peerSessionId;
-  }
 
   if (isSelf) {
     message.listOfPeers = config.listOfPeers;
