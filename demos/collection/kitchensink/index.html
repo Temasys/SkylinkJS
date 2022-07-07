@@ -179,10 +179,41 @@
 
                 </div>
               </div>
-              <button id="join_room_btn" type="button" title="Join room" class="btn btn-primary">
-                <span class="glyphicon glyphicon glyphicon-play-circle"></span>
-                Join Room
-              </button>
+              <table>
+                <tbody>
+                <tr>
+                  <td>
+                    <div >
+                      <table>
+                        <tr>
+                          <td>
+                            <div class="margin-right-5">
+                              <input id="join_room_user_info" type="text" class="form-control">
+                            </div>
+                          </td>
+                          <td>
+                            <div class="margin-right-5">
+                              <button id="join_room_btn" type="button" title="Join room" class="btn btn-primary">
+                                <span class="glyphicon glyphicon glyphicon-play-circle"></span>
+                                Join Room
+                              </button>
+                            </div>
+                          </td>
+                          <td>
+                            <div class="checkbox">
+                              <label for="remember_me">
+                                <input id="remember_me" type="checkbox" checked="true" value="true" onclick="rememberMe(this)">
+                                <b>remember me</b>
+                              </label>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>

@@ -19,7 +19,13 @@ Demo.isMCU = false;
 Demo.videoStream = null;
 Demo.audioStream = null;
 Demo.transferIds = [];
+Demo.localStorageAccess = false;
+Demo.rememberMe = false;
 
+if (window.localStorage) {
+  console.log("[Kitchensink] Local Storage available");
+  Demo.localStorageAccess = true;
+}
 
 window.Demo = Demo;
 let selectedPeers = [];
@@ -35,12 +41,9 @@ if (window.location.href.indexOf("appKey=") > -1) {
 }
 
 //----- join room options
-const displayName = `name_user_${  Math.floor((Math.random() * 1000) + 1)}`;
-$('#display_user_info').val(displayName);
 const joinRoomOptions = {
   audio: true,
   video: true,
-  userData: displayName,
   autoBandwidthAdjustment: true
 };
 
@@ -198,6 +201,42 @@ Demo.Methods.logToConsoleDOM = (message, level) => {
   $logListItem.prependTo($loggerListParentDOM);
 };
 
+Demo.Methods.saveToLocalStorage = (key, value) => {
+  if (Demo.localStorageAccess) {
+    let skylink = window.localStorage.getItem("kitchensink");
+
+    if (skylink) {
+      skylink = JSON.parse(skylink);
+    } else {
+      skylink = {};
+    }
+
+    skylink[key] = value;
+    window.localStorage.setItem("kitchensink", JSON.stringify(skylink));
+    console.log("[Kitchensink] Saved to localStorage", key, value);
+  }
+}
+
+Demo.Methods.getFromLocalStorage = (key) => {
+  if (Demo.localStorageAccess) {
+    let skylink = window.localStorage.getItem("kitchensink");
+
+    if (skylink) {
+      skylink = JSON.parse(skylink);
+      console.log("[Kitchensink] Using existing peerSessionId", skylink[key]);
+      return skylink[key];
+    } else {
+      console.log("[Kitchensink] No value for key", key);
+      return '';
+    }
+  } else {
+    throw Error('[Kitchensink] No localStorage access');
+  }
+}
+
+let displayName = Demo.Methods.getFromLocalStorage('displayName') || `name_user_${  Math.floor((Math.random() * 1000) + 1)}`;
+$('#join_room_user_info').val(displayName);
+
 /********************************************************
  SKYLINK EVENTS
  *********************************************************/
@@ -207,10 +246,11 @@ Demo.Methods.logToConsoleDOM = (message, level) => {
 // //---------------------------------------------------
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) => {
   const eventDetail = evt.detail;
-  const { isSelf, peerId, peerInfo } = eventDetail;
+  const { isSelf, peerId, peerInfo, peerSessionId } = eventDetail;
   const streamIds = Object.keys(peerInfo.mediaStatus);
   let audioStreamId = null;
   let videoStreamId = null;
+  const userData = JSON.parse(peerInfo.userData);
 
   if (streamIds[0] && peerInfo.mediaStatus[streamIds[0]].videoMuted === -1) {
     audioStreamId = streamIds[0];
@@ -218,6 +258,16 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
   }
 
   if (isSelf) {
+    $('#display_user_info').val(userData.displayName);
+    console.log(`[Kitchensink] Room Session Id - ${peerInfo.room.roomSessionId}`);
+
+    if (Demo.rememberMe && Demo.Methods.getFromLocalStorage('peerSessionId')) {
+      // has existing peerSessionId
+    } else if (Demo.rememberMe) {
+      Demo.Methods.saveToLocalStorage('peerSessionId', peerSessionId);
+      Demo.Methods.saveToLocalStorage('displayName', userData.displayName);
+    }
+
     _peerId = peerId;
     if (!Demo.isMCU)  {
       Demo.Methods.toggleInRoomSettings(peerId, true);
@@ -236,7 +286,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
     Demo.Methods.logToConsoleDOM(`Peer ${peerId} has joined the room`, 'System');
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
       '<td><input class="select-user" target="' + peerId + '" type="checkbox" onclick="selectTargetPeer(this);">' +
-      '<span class="name">' + peerInfo.userData + '</span></td><td>';
+      '<span class="name">' + userData.displayName + '</span></td><td>';
     var titleList = [
       'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
       'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
@@ -345,6 +395,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_UPDATED, (evt)
   let streamIds = Object.keys(peerInfo.mediaStatus);
   let audioStreamId = null;
   let videoStreamId = null;
+  const userData = JSON.parse(peerInfo.userData);
 
   if (Demo.Streams && Demo.Streams[_peerId] && Demo.Streams[_peerId].streams.screenShare) {
     streamIds = streamIds.filter((id) => id !== Object.keys(Demo.Streams[_peerId].streams.screenShare)[0]);
@@ -378,7 +429,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_UPDATED, (evt)
       Demo.Methods.logToConsoleDOM(`Peer ${peerId} ${audioMuted ? 'muted' : 'unmuted' } audio`, 'Media');
     }
 
-    $('#user' + peerId + ' .name').html(peerInfo.userData);
+    $('#user' + peerId + ' .name').html(userData.displayName);
   }
 });
 
@@ -396,6 +447,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.SERVER_PEER_JOINED,
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM, (evt) => {
   const eventDetail = evt.detail;
   const { peerId, stream, isSelf, peerInfo, isVideo, isAudio } = eventDetail;
+  const userData = JSON.parse(peerInfo.userData);
   let peerVideo = $('#video' + peerId + ' .video-obj')[0];
   let peerAudio = $('#video' + peerId + ' .audio-obj')[0];
 
@@ -424,7 +476,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM,
         (isVideoStream && peerInfo.mediaStatus[stream.id].videoMuted === 1) ? 'green' : 'red');
     }
   } else {
-    $('#user' + peerId + ' .name').html(peerInfo.userData);
+    $('#user' + peerId + ' .name').html(userData.displayName);
   }
 
   if (Demo.ShowStats[peerId]) {
@@ -525,7 +577,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ENCRYPT_SECRETS_UPD
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_MESSAGE, (evt) => {
   const eventDetail = evt.detail;
   const { isSelf, peerInfo, message } = eventDetail;
-  const peerId = isSelf ? 'You' : peerInfo.userData;
+  const userData = JSON.parse(peerInfo.userData);
+  const peerId = isSelf ? 'You' : userData.displayName;
   const isPrivate = message.isPrivate;
   let content = message.isDataChannel ? 'P2P' : 'Socket';
 
@@ -544,11 +597,19 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_MESSAGE
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STORED_MESSAGES, (evt) => {
   const eventDetail = evt.detail;
-  const { storedMessages } = eventDetail;
+  const { storedMessages, room } = eventDetail;
+  const peersInRoom = Demo.Skylink.getPeersInRoom(room.roomName);
+  const peerSessions = {};
+  Object.values(peersInRoom).forEach((peer) => {
+    const userData = JSON.parse(peer.userData);
+    peerSessions[userData.peerSessionId] = {};
+    peerSessions[userData.peerSessionId].isSelf = peer.isSelf;
+    peerSessions[userData.peerSessionId].displayName = userData.displayName;
 
+  })
 
   storedMessages.forEach((message) => {
-    const peerId = 'Stored Message' + ` [${message.senderPeerId}]`;
+    const peerId = 'Stored Message' + ` [${(peerSessions[message.senderPeerId].isSelf ? 'You' : peerSessions[message.senderPeerId].displayName)}]`;
     const content = `${message.isDataChannel ? 'P2P' : 'Socket'} -> GRP [${message['timeStamp'].replace('T', ", ").replace("Z", "")}] : ${message.content}`;
     Demo.Methods.displayChatMessage(peerId, content, message.isPrivate);
   })
@@ -1028,9 +1089,9 @@ $(document).ready(function() {
       }
     } else {
       if (selectedPeers.length > 0) {
-        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), selectedPeers, $('#peer_session_id').val());
+        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), selectedPeers, $('#peer_session_id').val() || Demo.Methods.getFromLocalStorage('peerSessionId'));
       } else {
-        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), null, $('#peer_session_id').val());
+        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), null, $('#peer_session_id').val() || Demo.Methods.getFromLocalStorage('peerSessionId'));
       }
     }
     $('#chat_input').val('');
@@ -1238,7 +1299,11 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#join_room_btn').click(function () {
+    joinRoomOptions.userData = JSON.stringify({ displayName: $('#join_room_user_info').val(), peerSessionId: Demo.Methods.getFromLocalStorage('peerSessionId')})
+    Demo.rememberMe = $('#remember_me').prop('checked');
+
     config.appKey = selectedAppKey || config.appKey;
+
     Demo.Skylink = new Skylink(config);
     Demo.Skylink.joinRoom(joinRoomOptions);
     $('#join_room_btn').addClass('disabled');
@@ -1392,6 +1457,10 @@ $(document).ready(function() {
       selectedPeers.push(peerId);
     }
   };
+
+  window.rememberMe = dom => {
+    console.log('save user to local storage', dom.checked);
+  }
 
   window.onerror = function (error) {
     let message = 'Check console for error';

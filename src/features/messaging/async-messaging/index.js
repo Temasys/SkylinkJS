@@ -130,9 +130,9 @@ class AsyncMessaging {
     dispatchEvent(storedMessages({
       room: Room.getRoomInfo(room),
       storedMessages: messages,
-      isSelf: false,
+      isSelf: true, // local peer is the one retrieving the stored messages
       peerId: targetMid,
-      peerInfo: PeerData.getPeerInfo(targetMid, room),
+      peerInfo: PeerData.getCurrentSessionInfo(room),
     }));
   }
 
