@@ -234,6 +234,13 @@ Demo.Methods.getFromLocalStorage = (key) => {
   }
 }
 
+Demo.Methods.clearLocalStorage = () => {
+  if (Demo.localStorageAccess) {
+    window.localStorage.removeItem('kitchensink');
+    console.log("[Kitchensink] Cleared localStorage");
+  }
+}
+
 let displayName = Demo.Methods.getFromLocalStorage('displayName') || `name_user_${  Math.floor((Math.random() * 1000) + 1)}`;
 $('#join_room_user_info').val(displayName);
 
@@ -1301,6 +1308,10 @@ $(document).ready(function() {
   $('#join_room_btn').click(function () {
     joinRoomOptions.userData = JSON.stringify({ displayName: $('#join_room_user_info').val(), peerSessionId: Demo.Methods.getFromLocalStorage('peerSessionId')})
     Demo.rememberMe = $('#remember_me').prop('checked');
+
+    if (!Demo.rememberMe) {
+      Demo.Methods.clearLocalStorage();
+    }
 
     config.appKey = selectedAppKey || config.appKey;
 
