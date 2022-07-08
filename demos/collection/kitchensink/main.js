@@ -1,6 +1,36 @@
 /* eslint-disable import/extensions */
 import Skylink, { SkylinkLogger, SkylinkEventManager, SkylinkConstants } from '../../../build/skylink.complete.js';
 import { config, APPKEYS } from '../config.js';
+import { nanoid } from 'https://cdn.jsdelivr.net/npm/nanoid/nanoid.js'
+
+const tabSession = {};
+const tabSessionId = nanoid();
+
+const bc = new BroadcastChannel('temasys-kitchensink');
+bc.onmessage = event => {
+  if (event.origin === window.location.origin) {
+    if (event.data.action === "room-joined") {
+      if (tabSession[event.data.tabSessionId]) {
+
+      } else {
+        tabSession[event.data.tabSessionId] = 1;
+        // inform other tab of this tab presence
+        bc.postMessage({
+          action: "room-joined",
+          tabSessionId,
+        })
+      }
+    }
+
+    if (event.data.action === "tab-close") {
+      if (tabSession[event.data.tabSessionId]) {
+        delete tabSession[event.data.tabSessionId];
+      }
+    }
+  }
+
+  console.log('[Kitchensink] tabSession', tabSession);
+}
 
 /********************************************************
   API Settings
@@ -265,12 +295,17 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
   }
 
   if (isSelf) {
+    bc.postMessage({
+      action: "room-joined",
+      tabSessionId,
+    })
+
     $('#display_user_info').val(userData.displayName);
     console.log(`[Kitchensink] Room Session Id - ${peerInfo.room.roomSessionId}`);
 
-    if (Demo.rememberMe && Demo.Methods.getFromLocalStorage('peerSessionId')) {
+    if (Demo.Methods.getFromLocalStorage('peerSessionId')) {
       // has existing peerSessionId
-    } else if (Demo.rememberMe) {
+    } else {
       Demo.Methods.saveToLocalStorage('peerSessionId', peerSessionId);
       Demo.Methods.saveToLocalStorage('displayName', userData.displayName);
     }
@@ -1309,10 +1344,6 @@ $(document).ready(function() {
     joinRoomOptions.userData = JSON.stringify({ displayName: $('#join_room_user_info').val(), peerSessionId: Demo.Methods.getFromLocalStorage('peerSessionId')})
     Demo.rememberMe = $('#remember_me').prop('checked');
 
-    if (!Demo.rememberMe) {
-      Demo.Methods.clearLocalStorage();
-    }
-
     config.appKey = selectedAppKey || config.appKey;
 
     Demo.Skylink = new Skylink(config);
@@ -1490,6 +1521,14 @@ $(document).ready(function() {
     let message = promiseRejectionEvent.reason;
     Demo.Methods.logToConsoleDOM(message, 'error');
   });
+
+  window.onbeforeunload = () => {
+    if (!Demo.rememberMe) {
+      if (Object.keys(tabSession).length === 0) {
+        Demo.Methods.clearLocalStorage();
+      }
+    }
+  };
 });
 
 var DemoSkylinkEventManager = SkylinkEventManager;
