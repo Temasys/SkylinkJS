@@ -112,7 +112,7 @@ const triggerPeerLeftEventAndChangeState = (roomKey, peerId) => {
     const updatedState = roomState;
     dispatchEvent(serverPeerLeft({
       peerId,
-      serverPeerType: peerId,
+      serverPeerType: peerId, //
       room,
     }));
     updatedState.hasMCU = false;
