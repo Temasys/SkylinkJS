@@ -1,7 +1,5 @@
 import Skylink, { SkylinkConstants } from '../index';
-import {
-  SERVER_PEER_TYPE, PEER_CONNECTION_STATE, DATA_CHANNEL_STATE, PEER_TYPE,
-} from '../constants';
+import { PEER_CONNECTION_STATE, DATA_CHANNEL_STATE, PEER_TYPE } from '../constants';
 import PeerData from '../peer-data';
 import { SkylinkSignalingServer } from '../server-communication/index';
 import { peerLeft, serverPeerLeft } from '../skylink-events';
@@ -30,7 +28,7 @@ const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
   if (peerId === PEER_TYPE.MCU) {
     dispatchEvent(serverPeerLeft({
       peerId,
-      serverPeerType: SERVER_PEER_TYPE.MCU,
+      serverPeerType: PEER_TYPE.MCU,
       room: Room.getRoomInfo(room),
     }));
   }

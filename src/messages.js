@@ -6,7 +6,7 @@ const MESSAGES = {
       NO_FETCH_SUPPORT: 'Fetch API is not supported in your browser. Please make sure you are using a modern browser: https://caniuse.com/#search=fetch',
       NO_APP_KEY: 'Please provide an App Key - Get one at console.temasys.io!',
       AUTH_CORS: 'Promise rejected due to CORS forbidden request - Please visit: https://support.temasys.com.sg/support/solutions/articles/12000006761-i-get-a-403-forbidden-access-is-denied-when-i-load-the-application-why-',
-      AUTH_GENERAL: 'Promise rejected due to network issue',
+      AUTH_GENERAL: 'Promise rejected due to authentication issue',
       SOCKET_CREATE_FAILED: 'Failed creating socket connection object ->',
       SOCKET_ERROR_ABORT: 'Reconnection aborted as the connection timed out or there no more available ports, transports and final attempts left',
     },
@@ -36,6 +36,7 @@ const MESSAGES = {
       ERROR: 'Leave room error -->',
       NO_PEERS: 'No peers in room',
       DROPPING_HANGUP: 'Dropping hang-up from remote peer',
+      DROPPING_DUPLICATE_BYE: 'Dropping duplicate bye',
       LEAVE_ALL_ROOMS: {
         SUCCESS: 'Successfully left all rooms',
         ERROR: 'Leave all rooms error -->',
@@ -77,10 +78,11 @@ const MESSAGES = {
     MCU: 'MCU connected',
     FAILED_STATE: 'Peer Connection state: failed',
     ADD_TRANSCEIVER: 'Adding empty transceiver',
+    SDP_ERROR: 'Sdp error',
     ERRORS: {
       REMOVE_TRACK: 'Error removing track from peer connection',
       NOT_FOUND: 'Peer Connection not found',
-      NOT_STABLE: 'Peer Connetion is not stable',
+      NOT_STABLE: 'Peer Connection is not stable',
     },
     REFRESH_CONNECTION: {
       START: 'Refreshing peer connections',
@@ -121,9 +123,11 @@ const MESSAGES = {
     ADD_CANDIDATE_TO_BUFFER: 'Adding ICE candidate to buffer',
     CANDIDATE_GENERATED: 'Generated ICE candidate ->',
     SENDING_CANDIDATE: 'Sending ICE candidate ->',
+    NO_SDP_MID: 'No mid for the candidate in sdp',
   },
   SESSION_DESCRIPTION: {
     parsing_media_ssrc: 'Parsing session description media SSRCs ->',
+    NO_REMOTE_DESCRIPTION: 'No remote description',
   },
   DATA_CHANNEL: {
     NO_DATA_CHANNEL_CONNECTION: 'No Data Channel connection',
@@ -381,9 +385,12 @@ const MESSAGES = {
       ERROR_STOP_ACTIVE: 'error-stop-when-active',
       ERROR_MIN_STOP: 'error-min-stop',
       MCU_RECORDING_ERROR: 'mcu-recording-error',
+      REC_SERVER_UNAVAILABLE: 'rec-server-unavailable',
     },
   },
   RECORDING: {
+    AVAILABLE: 'Recording server is available to start a recording',
+    UNAVAILABLE: 'Recording server is unavailable to start a recording',
     START_SUCCESS: 'Started recording',
     STOP_SUCCESS: 'Stopped recording',
     START_FAILED: 'Failed to start recording',
@@ -397,6 +404,7 @@ const MESSAGES = {
       STOP_ABRUPT: 'Recording stopped abruptly before 4 seconds',
       SESSION_EMPTY: 'Received request of "off" but the session is empty',
       MCU_RECORDING_ERROR: 'Recording error received from MCU ->',
+      REC_SERVER_UNAVAILABLE: 'Recording server is unavailable to start a recording - retry later',
     },
   },
   RTMP: {
