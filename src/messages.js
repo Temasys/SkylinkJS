@@ -396,7 +396,7 @@ const MESSAGES = {
       MIN_RECORDING_TIME: '4 seconds has not been recorded yet',
       STOP_ABRUPT: 'Recording stopped abruptly before 4 seconds',
       SESSION_EMPTY: 'Received request of "off" but the session is empty',
-      MCU_RECORDING_ERROR: 'Recording error received from MCU',
+      MCU_RECORDING_ERROR: 'Recording error received from MCU ->',
     },
   },
   RTMP: {
