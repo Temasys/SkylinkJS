@@ -1288,7 +1288,7 @@ $(document).ready(function() {
       Demo.Stats[peerId] = true;
       var test = setInterval(function () {
         if (Demo.Stats[peerId]) {
-          Demo.Skylink.getConnectionStatus(config.defaultRoom, peerId);
+          Demo.Skylink.getConnectionStatus(config.defaultRoom, peerId)
         } else {
           clearInterval(test);
         }
@@ -1303,6 +1303,7 @@ $(document).ready(function() {
     .then((recordingId) => {
       Demo.Methods.logToConsoleDOM(`Recording started: ${recordingId}`, 'Recording');
     })
+    .catch((error) => Demo.Methods.logToConsoleDOM(error.message, 'error'))
   });
   // //---------------------------------------------------
   $('#stop_recording_btn').click(function() {
