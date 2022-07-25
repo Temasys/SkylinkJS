@@ -98,12 +98,14 @@ const recordingHandler = (message) => {
   } = message;
   const roomState = getStateByRid(rid);
 
+  // NB: Recording server will send an 'unavailable' state when a recording has been stopped but the SDK does not need to handle that as a new
+  // recording can be immediately started.
   if (action === 'on') {
     recordingStarted(roomState, recordingId);
   } else if (action === 'off') {
     recordingStopped(roomState, recordingId);
   } else if (action === 'error') {
-    dispatchRecordingEvent(null, recordingId, error);
+    dispatchRecordingEvent(RECORDING_STATE.ERROR, recordingId, error);
     logger.log.ERROR([PEER_TYPE.MCU, TAGS.RECORDING, recordingId, MESSAGES.RECORDING.ERRORS.MCU_RECORDING_ERROR], error);
     handleRecordingStats.send(roomState.room.id, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.MCU_RECORDING_ERROR, recordingId, null, error);
   }
