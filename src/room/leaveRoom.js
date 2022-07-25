@@ -1,7 +1,5 @@
 import Skylink, { SkylinkConstants } from '../index';
-import {
-  SERVER_PEER_TYPE, PEER_CONNECTION_STATE, DATA_CHANNEL_STATE, PEER_TYPE,
-} from '../constants';
+import { PEER_CONNECTION_STATE, DATA_CHANNEL_STATE, PEER_TYPE } from '../constants';
 import PeerData from '../peer-data';
 import { SkylinkSignalingServer } from '../server-communication/index';
 import { peerLeft, serverPeerLeft } from '../skylink-events';
@@ -30,8 +28,8 @@ const executePeerLeftProcess = (state, peerId) => new Promise((resolve) => {
   if (peerId === PEER_TYPE.MCU) {
     dispatchEvent(serverPeerLeft({
       peerId,
-      serverPeerType: SERVER_PEER_TYPE.MCU,
-      room: Room.getRoomInfo(room.id),
+      serverPeerType: PEER_TYPE.MCU,
+      room: Room.getRoomInfo(room),
     }));
   }
 
@@ -148,7 +146,7 @@ export const leaveRoom = (roomState, stopStreamsB = true) => new Promise((resolv
             peerId: user.sid,
             peerInfo: PeerData.getCurrentSessionInfo(room),
             isSelf: true,
-            room: Room.getRoomInfo(room.id),
+            room: Room.getRoomInfo(room),
           }));
           clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);
@@ -173,7 +171,7 @@ export const leaveRoom = (roomState, stopStreamsB = true) => new Promise((resolv
             peerId: user.sid,
             peerInfo: PeerData.getCurrentSessionInfo(room),
             isSelf: true,
-            room: Room.getRoomInfo(room.id),
+            room: Room.getRoomInfo(room),
           }));
           clearRoomState(removedState.room.id);
           resolve(removedState.room.roomName);

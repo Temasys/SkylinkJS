@@ -997,6 +997,20 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
   }
 });
 
+
+// //---------------------------------------------------
+// // RECORDING EVENTS
+// //---------------------------------------------------
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.RECORDING_STATE, (evt) => {
+  const eventDetail = evt.detail;
+  const { recordingId, state, error } = eventDetail;
+  if (state === SkylinkConstants.RECORDING_STATE.ERROR) {
+    Demo.Methods.logToConsoleDOM(`Recording Error - ${error}`, 'error');
+  }
+});
+
+
+
 /********************************************************
   DOM Events
 *********************************************************/

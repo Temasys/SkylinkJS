@@ -433,7 +433,7 @@ export const DATA_STREAM_STATE = {
 /**
  * <blockquote class="info">
  *   Learn more about how ICE works in this
- *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
  * </blockquote>
  * The list of Peer connection ICE gathering states.
  * @typedef CANDIDATE_GENERATION_STATE
@@ -461,7 +461,7 @@ export const CANDIDATE_GENERATION_STATE = {
 /**
  * <blockquote class="info">
  *   Learn more about how ICE works in this
- *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
  * </blockquote>
  * The list of Peer connection remote ICE candidate processing states for trickle ICE connections.
  * @typedef CANDIDATE_PROCESSING_STATE
@@ -497,7 +497,7 @@ export const CANDIDATE_PROCESSING_STATE = {
 /**
  * <blockquote class="info">
  *   Learn more about how ICE works in this
- *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
  * </blockquote>
  * The list of Peer connection ICE connection states.
  * @typedef ICE_CONNECTION_STATE
@@ -593,7 +593,7 @@ export const TURN_TRANSPORT = {
 /**
  * <blockquote class="info">
  *   Learn more about how ICE works in this
- *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
  * </blockquote>
  * The list of Peer connection session description exchanging states.
  * @typedef PEER_CONNECTION_STATE
@@ -667,6 +667,7 @@ export const GET_CONNECTION_STATUS_STATE = {
  *  server Peers.
  * </blockquote>
  * The list of available types of server Peer connections.
+ * Use PEER_TYPE instead of SERVER_PEER_TYPE
  * @typedef SERVER_PEER_TYPE
  * @property {String} MCU Value <code>"mcu"</code>
  *   The value of the server Peer type that is used for MCU connection.
@@ -684,7 +685,7 @@ export const SERVER_PEER_TYPE = {
 /**
  * <blockquote class="info">
  *  Learn more about how ICE works in this
- *  <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ *  <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
  * </blockquote>
  * The list of available Peer connection bundle policies.
  * @typedef BUNDLE_POLICY
@@ -716,7 +717,7 @@ export const BUNDLE_POLICY = {
 /**
  * <blockquote class="info">
  *  Learn more about how ICE works in this
- *  <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ *  <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
  * </blockquote>
  * The list of available Peer connection RTCP mux policies.
  * @typedef RTCP_MUX_POLICY
@@ -738,7 +739,7 @@ export const RTCP_MUX_POLICY = {
 /**
  * <blockquote class="info">
  *  Learn more about how ICE works in this
- *  <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ *  <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
  * </blockquote>
  * The list of available Peer connection certificates cryptographic algorithm to use.
  * @typedef PEER_CERTIFICATE
@@ -805,7 +806,7 @@ export const HANDSHAKE_PROGRESS = {
  *   provided in Skylink {@link initOptions}, as only Users connecting using
  *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
  *   Peer IDs from Rooms within the same App space.
- *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+ *   <a href="https://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
  *   Read more about privileged App Key feature here</a>.
  * </blockquote>
  * The list of <code>{@link Skylink#getPeers|getPeers}</code> method retrieval states.
@@ -836,7 +837,7 @@ export const GET_PEERS_STATE = {
  *   Skylink {@link initOptions}, as only Users connecting using
  *   the App Key with this flag enabled (which we call privileged Users / Peers) can retrieve the list of
  *   Peer IDs from Rooms within the same App space.
- *   <a href="http://support.temasys.io/support/solutions/articles/12000012342-what-is-a-privileged-key-">
+ *   <a href="https://support.temasys.com.sg/support/solutions/articles/12000012342-what-is-a-privileged-key-">
  *   Read more about privileged App Key feature here</a>.
  * </blockquote>
  * The list of {@link Skylink#introducePeer} Peer introduction request states.
@@ -988,7 +989,7 @@ export const READY_STATE_CHANGE = {
  * @property {number} API_DOMAIN_NOT_MATCH        Value <code>4002</code>
  *   The value of the failure code when <code>"domainName"</code> property in the App Key does not
  *   match the accessing server IP address.
- *   To resolve this, contact our <a href="http://support.temasys.io">support portal</a>.
+ *   To resolve this, contact our <a href="https://temasys.atlassian.net/servicedesk/customer/portals">support portal</a>.
  * @property {number} API_CORS_DOMAIN_NOT_MATCH   Value <code>4003</code>
  *   The value of the failure code when <code>"corsurl"</code> property in the App Key does not match accessing CORS.
  *   To resolve this, configure the App Key CORS in
@@ -1012,28 +1013,24 @@ export const READY_STATE_CHANGE = {
  * @property {number} API_NO_MEETING_RECORD_FOUND Value <code>4010</code>
  *   The value of the failure code when provided <code>options.credentials</code>
  *   does not match any scheduled meetings available for the "Persistent Room" enabled App Key provided.
- *   See the <a href="http://support.temasys.io/support/solutions/articles/
- * 12000002811-using-the-persistent-room-feature-to-configure-meetings">Persistent Room article</a> to learn more.
+ *   See the <a href="https://support.temasys.com.sg/support/solutions/articles/12000002811-how-can-i-use-the-scheduled-sessions-persistent-room-feature-to-configure-meetings-">Persistent Room article</a> to learn more.
  * @property {number} API_OVER_SEAT_LIMIT         Value <code>4020</code>
  *   The value of the failure code when App Key has reached its current concurrent users limit.
- *   To resolve this, use another App Key. To create App Keys dynamically, see the
- *   <a href="https://temasys.atlassian.net/wiki/display/TPD/SkylinkAPI+-+Application+Resources">Application REST API
- *   docs</a> for more information.
  * @property {number} API_RETRIEVAL_FAILED        Value <code>4021</code>
  *   The value of the failure code when App Key retrieval of authentication token fails.
- *   If this happens frequently, contact our <a href="http://support.temasys.io">support portal</a>.
+ *   If this happens frequently, contact our <a href="https://temasys.atlassian.net/servicedesk/customer/portals">support portal</a>.
  * @property {number} API_WRONG_ACCESS_DOMAIN     Value <code>5005</code>
  *   The value of the failure code when App Key makes request to the incorrect Auth server.
  *   To resolve this, ensure that the <code>roomServer</code> is not configured. If this persists even without
- *   <code>roomServer</code> configuration, contact our <a href="http://support.temasys.io">support portal</a>.
+ *   <code>roomServer</code> configuration, contact our <a href="https://temasys.atlassian.net/servicedesk/customer/portals">support portal</a>.
  * @property {number} XML_HTTP_REQUEST_ERROR      Value <code>-1</code>
  *   The value of the failure code when requesting to Auth server has timed out.
  * @property {number} XML_HTTP_NO_REPONSE_ERROR      Value <code>-2</code>
  *   The value of the failure code when response from Auth server is empty or timed out.
  * @property {number} NO_SOCKET_IO                Value <code>1</code>
- *   The value of the failure code when dependency <a href="http://socket.io/download/">Socket.IO client</a> is not loaded.
+ *   The value of the failure code when dependency <a href="https://socket.io/docs/v2/">Socket.IO client</a> is not loaded.
  *   To resolve this, ensure that the Socket.IO client dependency is loaded before the Skylink SDK.
- *   You may use the provided Socket.IO client <a href="http://socket.io/download/">CDN here</a>.
+ *   You may use the provided Socket.IO client <a href="https://socket.io/docs/v2/">CDN here</a>.
  * @property {number} NO_XMLHTTPREQUEST_SUPPORT   Value <code>2</code>
  *   The value of the failure code when <a href="https://developer.mozilla.org/en-US/docs/Web/API/XMLHttpRequest">
  *   XMLHttpRequest API</a> required to make request to Auth server is not supported.
@@ -1044,7 +1041,7 @@ export const READY_STATE_CHANGE = {
  *   RTCPeerConnection API</a> required for Peer connections is not supported.
  *   To resolve this, display in the Web UI to ask clients to switch to the list of supported browser
  *   as <a href="https://github.com/Temasys/SkylinkJS/tree/0.6.14#supported-browsers">listed in here</a>.
- *   For <a href="http://confluence.temasys.com.sg/display/TWPP">plugin supported browsers</a>, if the clients
+ *   For plugin supported browsers, if the clients
  *   does not have the plugin installed, there will be an installation toolbar that will prompt for installation
  *   to support the RTCPeerConnection API.
  * @property {number} NO_PATH                     Value <code>4</code>

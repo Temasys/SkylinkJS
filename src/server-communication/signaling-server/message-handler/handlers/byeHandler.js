@@ -22,8 +22,13 @@ const isPeerConnected = (roomState, peerId) => {
 
   if (!roomStateObj) return false;
 
-  if (!roomStateObj.peerConnections[peerId] && !roomStateObj.peerInformations[peerId]) {
+  if (!roomStateObj.peerConnections[peerId]) {
     logger.log.DEBUG([peerId, TAGS.PEER_CONNECTION, null, `${MESSAGES.ROOM.LEAVE_ROOM.DROPPING_HANGUP} - ${MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION}`]);
+    return false;
+  }
+
+  if (!roomStateObj.peerInformations[peerId]) {
+    logger.log.DEBUG([peerId, TAGS.PEER_CONNECTION, null, `${MESSAGES.ROOM.LEAVE_ROOM.DROPPING_HANGUP} - ${MESSAGES.PEER_INFORMATIONS.NO_PEER_INFO} ${peerId}`]);
     return false;
   }
 
@@ -65,7 +70,7 @@ export const clearPeerInfo = (roomKey, peerId) => {
       // not needed for MCU as it will be caught in onremovetrack
       new HandleUserMediaStats().send(roomKey);
     }
-    logger.log.INFO([peerId, TAGS.PEER_CONNECTION, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.SUCCESS]);
+    logger.log.INFO([peerId, state.room.roomName, null, MESSAGES.ROOM.LEAVE_ROOM.PEER_LEFT.SUCCESS]);
   }, 500);
 
   delete updatedState.peerInformations[peerId];

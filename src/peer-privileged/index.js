@@ -62,7 +62,7 @@ class PeerPrivileged {
         };
 
         if (this.shouldProceed(state, initOptions.appKey, reject)) {
-          new SkylinkSignalingServer().getPeerList(pShowAll);
+          new SkylinkSignalingServer().getPeerList(state, pShowAll);
 
           dispatchEvent(getPeersStateChange({
             state: GET_PEERS_STATE.ENQUIRED,

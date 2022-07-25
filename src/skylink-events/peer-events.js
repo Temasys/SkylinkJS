@@ -92,7 +92,7 @@ export const getPeersStateChange = (detail = {}) => new SkylinkEvent(GET_PEERS_S
  * @description Event triggered when a Peer connection session description exchanging state has changed.
  *  <blockquote class="info">
  *   Learn more about how ICE works in this
- *   <a href="https://temasys.com.sg/ice-what-is-this-sorcery/">article here</a>.
+ *   <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
  * </blockquote>
  * @param {Object} detail - Event's payload
  * @param {SkylinkConstants.PEER_CONNECTION_STATE} detail.state - The current Peer connection session description exchanging states.
@@ -112,7 +112,8 @@ export const peerConnectionState = (detail = {}) => new SkylinkEvent(PEER_CONNEC
 export const sessionDisconnect = (detail = {}) => new SkylinkEvent(SESSION_DISCONNECT, { detail });
 
 /**
- * Event triggered when <code>{@link PeerConnection.getConnectionStatus|getConnectionStatus}</code> method
+ * Event triggered when <code>{@link
+  * Skylink#getConnectionStatus|getConnectionStatus}</code> method
  * retrieval state changes.
  * @event SkylinkEvents.GET_CONNECTION_STATUS_STATE_CHANGE
  * @param {Object} detail - Event's payload/

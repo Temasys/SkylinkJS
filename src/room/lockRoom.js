@@ -26,7 +26,7 @@ export const lockOrUnlockRoom = (roomState, lockRoom = true) => {
     peerInfo: PeerData.getCurrentSessionInfo(room),
     peerId: user.sid,
     isSelf: true,
-    room: Room.getRoomInfo(room.id),
+    room: Room.getRoomInfo(room),
   }));
 };
 

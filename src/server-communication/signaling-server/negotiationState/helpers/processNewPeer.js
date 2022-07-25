@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import Skylink from '../../../../index';
 import {
-  HANDSHAKE_PROGRESS, PEER_TYPE, TAGS,
+  HANDSHAKE_PROGRESS, PEER_TYPE, TAGS
 } from '../../../../constants';
 import PeerConnection from '../../../../peer-connection';
 import logger from '../../../../logger';
@@ -62,14 +62,14 @@ const _processPeerFromWelcome = (params) => {
         dispatchEvent(serverPeerJoined({
           peerId: targetMid,
           serverPeerType: PEER_TYPE.MCU,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
 
         dispatchEvent(handshakeProgress({
           peerId: targetMid,
           state: HANDSHAKE_PROGRESS.WELCOME,
           error: null,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
       }
 
@@ -88,7 +88,7 @@ const _processPeerFromWelcome = (params) => {
               peerId: PEER_ID,
               peerInfo: PeerData.getPeerInfo(PEER_ID, currentRoom),
               isSelf: false,
-              room: Room.getRoomInfo(currentRoom.id),
+              room: Room.getRoomInfo(currentRoom),
             }));
           }
         }
@@ -104,14 +104,14 @@ const _processPeerFromWelcome = (params) => {
           dispatchEvent(serverPeerJoined({
             peerId: targetMid,
             serverPeerType: PEER_TYPE.REC_SRV,
-            room: Room.getRoomInfo(currentRoom.id),
+            room: Room.getRoomInfo(currentRoom),
           }));
         } else {
           dispatchEvent(peerJoined({
             peerId: targetMid,
             peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
             isSelf: false,
-            room: Room.getRoomInfo(currentRoom.id),
+            room: Room.getRoomInfo(currentRoom),
           }));
         }
 
@@ -119,7 +119,7 @@ const _processPeerFromWelcome = (params) => {
           peerId: targetMid,
           state: HANDSHAKE_PROGRESS.WELCOME,
           error: null,
-          room: Room.getRoomInfo(currentRoom.id),
+          room: Room.getRoomInfo(currentRoom),
         }));
       }
 
@@ -151,7 +151,7 @@ const _processPeerFromEnter = (params) => {
         peerId: targetMid,
         peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
         isSelf: false,
-        room: Room.getRoomInfo(currentRoom.id),
+        room: Room.getRoomInfo(currentRoom),
       }));
 
       break;
@@ -164,14 +164,14 @@ const _processPeerFromEnter = (params) => {
           dispatchEvent(serverPeerJoined({
             peerId: targetMid,
             serverPeerType: PEER_TYPE.REC_SRV,
-            room: Room.getRoomInfo(currentRoom.id),
+            room: Room.getRoomInfo(currentRoom),
           }));
         } else {
           dispatchEvent(peerJoined({
             peerId: targetMid,
             peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
             isSelf: false,
-            room: Room.getRoomInfo(currentRoom.id),
+            room: Room.getRoomInfo(currentRoom),
           }));
         }
       }
