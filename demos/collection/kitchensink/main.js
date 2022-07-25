@@ -1288,7 +1288,7 @@ $(document).ready(function() {
       Demo.Stats[peerId] = true;
       var test = setInterval(function () {
         if (Demo.Stats[peerId]) {
-          Demo.Skylink.getConnectionStatus(config.defaultRoom, peerId);
+          Demo.Skylink.getConnectionStatus(config.defaultRoom, peerId)
         } else {
           clearInterval(test);
         }

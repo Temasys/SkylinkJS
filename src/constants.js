@@ -663,27 +663,6 @@ export const GET_CONNECTION_STATUS_STATE = {
 
 /**
  * <blockquote class="info">
- *  As there are more features getting implemented, there will be eventually more different types of
- *  server Peers.
- * </blockquote>
- * The list of available types of server Peer connections.
- * Use PEER_TYPE instead of SERVER_PEER_TYPE
- * @typedef SERVER_PEER_TYPE
- * @property {String} MCU Value <code>"mcu"</code>
- *   The value of the server Peer type that is used for MCU connection.
- * @constant
- * @type Object
- * @readOnly
- * @memberOf SkylinkConstants
- * @since 0.6.1
- * @deprecated
- */
-export const SERVER_PEER_TYPE = {
-  MCU: 'mcu',
-};
-
-/**
- * <blockquote class="info">
  *  Learn more about how ICE works in this
  *  <a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here</a>.
  * </blockquote>
