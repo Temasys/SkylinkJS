@@ -36,6 +36,7 @@ import pkg from '../package.json';
  *  <li>{@link SkylinkConstants.RTMP_STATE|RTMP_STATE} </li>
  *  <li>{@link SkylinkConstants.RECORDING_STATE|RECORDING_STATE} </li>
  *  <li>{@link SkylinkConstants.SDP_SEMANTICS|SDP_SEMANTICS} </li>
+ *  <li>{@link SkylinkConstants.SERVER_PEER_TYPE|SERVER_PEER_TYPE} </li>
  *  <li>{@link SkylinkConstants.SOCKET_ERROR|SOCKET_ERROR} </li>
  *  <li>{@link SkylinkConstants.SOCKET_FALLBACK|SOCKET_FALLBACK} </li>
  *  <li>{@link SkylinkConstants.SYSTEM_ACTION|SYSTEM_ACTION} </li>
@@ -659,6 +660,25 @@ export const GET_CONNECTION_STATUS_STATE = {
   RETRIEVING: 0,
   RETRIEVE_SUCCESS: 1,
   RETRIEVE_ERROR: -1,
+};
+
+/**
+ * <blockquote class="info">
+ *  As there are more features getting implemented, there will be eventually more different types of
+ *  server Peers.
+ * </blockquote>
+ * The list of available types of server Peer connections.
+ * @typedef SERVER_PEER_TYPE
+ * @property {String} MCU Value <code>"mcu"</code>
+ *   The value of the server Peer type that is used for MCU connection.
+ * @constant
+ * @type Object
+ * @readOnly
+ * @memberOf SkylinkConstants
+ * @since 0.6.1
+ */
+export const SERVER_PEER_TYPE = {
+  MCU: 'mcu',
 };
 
 /**
@@ -1461,6 +1481,7 @@ export const MEDIA_ACCESS_FALLBACK_STATE = {
  *   and at this stage, any current recording session or mixin is aborted.
  * @constant
  * @type Object
+ * beta
  * @memberOf SkylinkConstants
  * @since 0.6.16
  */
@@ -1979,7 +2000,6 @@ export const BROWSER_AGENT = {
  */
 export const PEER_TYPE = {
   MCU: 'MCU',
-  REC_SRV: 'REC_SRV',
 };
 
 /**
