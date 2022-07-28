@@ -215,12 +215,12 @@ class EncryptedMessaging {
     throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_SECRETS);
   }
 
-  sendMessage(roomName, message, targetPeerId, isPersistent = false) {
+  sendMessage(roomName, message, targetPeerId, isPersistent = false, peerSessionId) {
     const roomState = getRoomStateByName(roomName);
     if (getParamValidity(message, 'message', 'sendMessage') &amp;&amp; roomState) {
       try {
         logger.log.DEBUG([null, TAGS.ASYNC_MESSAGING, null, MESSAGES.MESSAGING.ENCRYPTION.SEND_MESSAGE]);
-        const config = encryptHelpers.getMessageConfig(roomState, targetPeerId, this.encryptSecrets, this.selectedSecretId, isPersistent);
+        const config = encryptHelpers.getMessageConfig(roomState, targetPeerId, this.encryptSecrets, this.selectedSecretId, isPersistent, peerSessionId);
         const encryptedMessage = encryptHelpers.encryptMessage(message, this.encryptSecrets[this.selectedSecretId]);
         messagingHelpers.sendMessageToSig(roomState, config, message, encryptedMessage, targetPeerId);
       } catch (error) {
