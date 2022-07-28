@@ -10,6 +10,7 @@ import {
 import MESSAGES from '../../../../messages';
 import { isEmptyObj } from '../../../../utils/helpers';
 import HandleUserMediaStats from '../../../../skylink-stats/handleUserMediaStats';
+import Room from '../../../../room';
 
 /**
  * Checks if peer is connected.
@@ -118,7 +119,7 @@ const triggerPeerLeftEventAndChangeState = (roomKey, peerId) => {
     dispatchEvent(serverPeerLeft({
       peerId,
       serverPeerType: SERVER_PEER_TYPE.MCU,
-      room,
+      room: Room.getRoomInfo(room),
     }));
     updatedState.hasMCU = false;
 
@@ -130,7 +131,7 @@ const triggerPeerLeftEventAndChangeState = (roomKey, peerId) => {
     peerId,
     peerInfo,
     isSelf: false,
-    room,
+    room: Room.getRoomInfo(room),
   }));
 };
 
