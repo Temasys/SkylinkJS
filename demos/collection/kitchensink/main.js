@@ -51,6 +51,7 @@ Demo.audioStream = null;
 Demo.transferIds = [];
 Demo.localStorageAccess = false;
 Demo.rememberMe = false;
+Demo.userData = null;
 
 if (window.localStorage) {
   console.log("[Kitchensink] Local Storage available");
@@ -309,6 +310,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
       // has existing peerSessionId
     } else {
       Demo.Methods.saveToLocalStorage('peerSessionId', peerSessionId);
+      Demo.userData.peerSessionId = peerSessionId;
+      Demo.Skylink.setUserData(config.defaultRoom, JSON.stringify(Demo.userData));
       Demo.Methods.saveToLocalStorage('displayName', userData.displayName);
     }
 
@@ -1172,7 +1175,8 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#update_user_info_btn').click(function() {
-    Demo.Skylink.setUserData(config.defaultRoom, $('#display_user_info').val());
+    Demo.userData.displayName = $('#display_user_info').val();
+    Demo.Skylink.setUserData(config.defaultRoom, JSON.stringify(Demo.userData));
   });
   // //---------------------------------------------------
   $('#lock_btn').click(function() {
@@ -1343,7 +1347,8 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#join_room_btn').click(function () {
-    joinRoomOptions.userData = JSON.stringify({ displayName: $('#join_room_user_info').val(), peerSessionId: Demo.Methods.getFromLocalStorage('peerSessionId')})
+    Demo.userData = { displayName: $('#join_room_user_info').val(), peerSessionId: Demo.Methods.getFromLocalStorage('peerSessionId')};
+    joinRoomOptions.userData = JSON.stringify(Demo.userData);
     Demo.rememberMe = $('#remember_me').prop('checked');
 
     config.appKey = selectedAppKey || config.appKey;
