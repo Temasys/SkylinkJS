@@ -283,7 +283,7 @@ $('#join_room_user_info').val(displayName);
 // //---------------------------------------------------
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) => {
   const eventDetail = evt.detail;
-  const { isSelf, peerId, peerInfo, peerSessionId } = eventDetail;
+  const { isSelf, peerId, peerInfo, peerSessionId, room } = eventDetail;
   const streamIds = Object.keys(peerInfo.mediaStatus);
   let audioStreamId = null;
   let videoStreamId = null;
@@ -295,6 +295,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
   }
 
   if (isSelf) {
+    $('#display_room_session_id').html(room.roomSessionId);
+
     bc.postMessage({
       action: "room-joined",
       tabSessionId,
