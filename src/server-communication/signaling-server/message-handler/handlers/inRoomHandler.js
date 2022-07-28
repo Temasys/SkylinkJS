@@ -5,7 +5,6 @@ import PeerData from '../../../../peer-data';
 import PeerMedia from '../../../../peer-media/index';
 import { peerJoined } from '../../../../skylink-events';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import Room from '../../../../room';
 import PeerStream from '../../../../peer-stream';
 import { ON_INCOMING_STREAM } from '../../../../skylink-events/constants';
 import logger from '../../../../logger';
@@ -13,6 +12,7 @@ import MESSAGES from '../../../../messages';
 import HandleUserMediaStats from '../../../../skylink-stats/handleUserMediaStats';
 import HandleSessionStats from '../../../../skylink-stats/handleSessionStats';
 import { TAGS } from '../../../../constants';
+import Room from '../../../../room/index';
 
 const dispatchIncomingStream = (room, sid) => {
   const state = Skylink.getSkylinkState(room.id);
@@ -82,7 +82,8 @@ const inRoomHandler = (message) => {
     peerId: roomState.user.sid,
     peerInfo: PeerData.getCurrentSessionInfo(roomState.room),
     isSelf: true,
-    room: roomState.room,
+    room: Room.getRoomInfo(roomState.room),
+    peerSessionId: roomState.user.peerSessionId,
   }));
 
   new HandleSessionStats().send(rid, message);

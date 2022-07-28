@@ -47,7 +47,6 @@ const getCurrentSessionInfo = (room) => {
       enableIceRestart,
       priorityWeight: peerPriorityWeight,
     },
-    sid: user.sid,
   };
 
   if (peerStreams[user.sid]) {

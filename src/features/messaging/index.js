@@ -16,17 +16,17 @@ import { TAGS } from '../../constants';
  * @private
  */
 class Messaging {
-  static sendMessage(roomName, message, targetPeerId) {
+  static sendMessage(roomName, message, targetPeerId, peerSessionId) {
     const roomState = getRoomStateByName(roomName);
     if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
       const encryptedMessaging = new EncryptedMessaging(roomState);
       const asyncMessaging = new AsyncMessaging(roomState);
       if (asyncMessaging.canPersist()) {
-        asyncMessaging.sendMessage(roomName, message, targetPeerId);
+        asyncMessaging.sendMessage(roomName, message, targetPeerId, peerSessionId);
       } else if (encryptedMessaging.canEncrypt()) {
-        encryptedMessaging.sendMessage(roomName, message, targetPeerId);
+        encryptedMessaging.sendMessage(roomName, message, targetPeerId, peerSessionId);
       } else {
-        messagingHelpers.trySendMessage(roomState, message, targetPeerId);
+        messagingHelpers.trySendMessage(roomState, message, targetPeerId, peerSessionId);
       }
     }
   }
@@ -45,6 +45,7 @@ class Messaging {
       rid,
       secretId,
       data,
+      peerSessionId,
     } = message;
     const roomState = Skylink.getSkylinkState(rid);
     const targetMid = mid;
@@ -59,7 +60,7 @@ class Messaging {
       }
     }
 
-    messagingHelpers.dispatchOnIncomingMessage(roomState, { isPrivate: isABoolean(isPublic) ? !isPublic : !!target }, messageData, false, targetMid);
+    messagingHelpers.dispatchOnIncomingMessage(roomState, { isPrivate: isABoolean(isPublic) ? !isPublic : !!target, peerSessionId }, messageData, false, targetMid);
   }
 }
 

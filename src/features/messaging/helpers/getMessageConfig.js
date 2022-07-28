@@ -3,7 +3,7 @@ import logger from '../../../logger';
 import { PEER_TYPE, TAGS } from '../../../constants';
 import MESSAGES from '../../../messages';
 
-const getMessageConfig = (roomState, targetPeerId) => {
+const getMessageConfig = (roomState, targetPeerId, peerSessionId) => {
   const {
     peerInformations,
     room,
@@ -39,7 +39,7 @@ const getMessageConfig = (roomState, targetPeerId) => {
     logger.log.WARN([null, TAGS.MESSAGING, null, MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION]);
   }
 
-  return { listOfPeers, isPrivate };
+  return { listOfPeers, isPrivate, peerSessionId };
 };
 
 export default getMessageConfig;
