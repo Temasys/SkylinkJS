@@ -228,6 +228,7 @@ class NegotiationState {
     const state = Skylink.getSkylinkState(rid);
     const { hasMCU, room } = state;
     const targetMid = hasMCU && publisherId ? publisherId : mid;
+    const peerConnection = state.peerConnections[targetMid];
 
     const negState = this._getState(rid, targetMid);
     if (negState !== NEGOTIATION_STATES.LOCAL_ANSWER_SET) {
@@ -249,6 +250,9 @@ class NegotiationState {
 
       return peerConnectionHelpers.renegotiateIfNeeded(state, targetMid).then((shouldRenegotiate) => {
         if (shouldRenegotiate) {
+          console.log("-------- RENEGOTIATE setRemoteDescriptionSuccess set to null --------", peerConnection.setRemoteDescriptionSuccess);
+          peerConnection.setRemoteDescriptionSuccess = null;
+
           refreshConnection(state, targetMid)
             .catch(error => negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answerAck, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_RENEGOTIATION, error).ERROR());
         } else {

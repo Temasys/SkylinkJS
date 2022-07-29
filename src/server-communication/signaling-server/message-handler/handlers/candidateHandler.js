@@ -110,7 +110,7 @@ const candidateHandler = (message) => {
     logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FILTERING_FLAG_NOT_HONOURED], nativeCandidate);
   }
 
-  if (peerConnection.remoteDescription && peerConnection.remoteDescription.sdp && peerConnection.localDescription && peerConnection.localDescription.sdp) {
+  if (peerConnection.remoteDescription && peerConnection.remoteDescription.sdp && peerConnection.localDescription && peerConnection.localDescription.sdp && peerConnection.setRemoteDescriptionSuccess) {
     IceConnection.addIceCandidate(mid, candidateId, candidateType, nativeCandidate, state);
   } else {
     IceConnection.addIceCandidateToQueue(mid, candidateId, candidateType, nativeCandidate, state);
