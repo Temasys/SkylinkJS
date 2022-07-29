@@ -1,4 +1,4 @@
-/* SkylinkJS v2.5.0 Fri Jul 29 2022 04:11:08 GMT+0000 (Coordinated Universal Time) */
+/* SkylinkJS v2.5.0 Fri Jul 29 2022 05:10:12 GMT+0000 (Coordinated Universal Time) */
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -30344,7 +30344,7 @@ class SkylinkPublicInterface {
    * - When provided as an Array, it will send the message to only peers which ids are in the list.
    * - When not provided, it will broadcast the message to all connected peers in the room.
    * @param {String} [peerSessionId] - The peer session id can be used to attribute the message to a client across sessions. It will replace the
-   * peerId. The peer session id is returned in the peerInfo object.
+   * peerId. The peer session id is returned in the peerInfo object. <i>This is an advanced feature.</i>
    * @example
    * Example 1: Broadcasting to all peers in a room
    *
@@ -30386,7 +30386,10 @@ class SkylinkPublicInterface {
   /**
    * @description Method that retrieves the message history from server if Persistent Message feature is enabled for the key.
    * @param {String} roomName - The name of the room.
-   * @param {String} [roomSessionId] - The room session id to retrieve the messages from.
+   * @param {String} [roomSessionId] - The room session id to retrieve the messages from. The room session id is found in the <code>peerInfo</code> object in
+   * most event payloads, e.g. <code>PEER_JOINED</code>.
+   * - A room session starts when the first peer joins a room. A room session ends when the last peer leaves the room.
+   * - Subsequent peers that join the same room, i.e. the same room name, starts a new room session.
    * @example
    * Example 1: Retrieving stored messages
    *
