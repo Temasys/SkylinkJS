@@ -1549,6 +1549,12 @@ $(document).ready(function() {
         Demo.Methods.clearLocalStorage();
       }
     }
+
+    // alert other tabs that this tab is closing
+    bc.postMessage({
+      action: "tab-close",
+      tabSessionId,
+    })
   };
 });
 
