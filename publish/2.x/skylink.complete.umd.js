@@ -3,7 +3,7 @@
   factory();
 })((function () { 'use strict';
 
-  /* SkylinkJS v2.5.0 Fri Jul 29 2022 03:42:39 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.5.0 Fri Jul 29 2022 04:11:08 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
