@@ -656,7 +656,13 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STORED_MESSAGES, (e
   })
 
   storedMessages.forEach((message) => {
-    const peerId = 'Stored Message' + ` [${(peerSessions[message.senderPeerId].isSelf ? 'You' : peerSessions[message.senderPeerId].displayName)}]`;
+    let peerId;
+    if (peerSessions[message.senderPeerId]) {
+      peerId = 'Stored Message' + ` [${(peerSessions[message.senderPeerId].isSelf ? 'You' : peerSessions[message.senderPeerId].displayName)}]`;
+    } else {
+      peerId = 'Stored Message' + ` [${message.senderPeerId}]`
+    }
+
     const content = `${message.isDataChannel ? 'P2P' : 'Socket'} -> GRP [${message['timeStamp'].replace('T', ", ").replace("Z", "")}] : ${message.content}`;
     Demo.Methods.displayChatMessage(peerId, content, message.isPrivate);
   })
