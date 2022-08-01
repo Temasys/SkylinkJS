@@ -250,7 +250,7 @@ class NegotiationState {
 
       return peerConnectionHelpers.renegotiateIfNeeded(state, targetMid).then((shouldRenegotiate) => {
         if (shouldRenegotiate) {
-          console.log("-------- RENEGOTIATE setRemoteDescriptionSuccess set to null --------", peerConnection.setRemoteDescriptionSuccess);
+          negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answerAck, true, MESSAGES.NEGOTIATION_PROGRESS.RESET_SET_REMOTE_DESCRIPTION_SUCCESS).DEBUG();
           peerConnection.setRemoteDescriptionSuccess = null;
 
           refreshConnection(state, targetMid)

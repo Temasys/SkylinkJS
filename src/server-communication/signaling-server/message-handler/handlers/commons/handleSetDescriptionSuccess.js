@@ -28,7 +28,6 @@ const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remot
     updatedState.peerConnections[targetMid].setAnswer = 'remote';
   }
 
-  console.log("-------- Added new key setRemoteDescriptionSuccess and set to true --------");
   updatedState.peerConnections[targetMid].setRemoteDescriptionSuccess = true;
 
   Skylink.setSkylinkState(updatedState, room.id);

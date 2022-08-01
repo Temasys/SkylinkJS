@@ -181,6 +181,7 @@ const MESSAGES = {
     APPLYING_BUFFERED_REMOTE_OFFER: 'Applying buffered remote offer',
     BUFFERING_RESTART: 'Buffering restart offer until \'negotiated\' state is reached',
     APPLY_BUFFERED_RESTART: 'Applying buffered restart offer now that \'negotiated\' state is reached',
+    RESET_SET_REMOTE_DESCRIPTION_SUCCESS: 'Resetting setRemoteDescriptionSuccess flag',
     ERRORS: {
       FAILED_SET_LOCAL_DESCRIPTION: 'Failed setting local description -->',
       FAILED_SET_REMOTE_DESCRIPTION: 'Failed setting remote description -->',
