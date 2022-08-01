@@ -37,6 +37,8 @@ const onRemoteDescriptionSetFailure = (room, targetMid, remoteDescription, error
   const peerConnection = peerConnections[targetMid];
   const { type } = remoteDescription;
 
+  peerConnection.setRemoteDescriptionSuccess = false;
+
   logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, type, `${MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_SET_REMOTE_DESCRIPTION} ->`], {
     error,
     state: peerConnection.signalingState,
