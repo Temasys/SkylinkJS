@@ -1111,6 +1111,17 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
   }
 });
 
+// //---------------------------------------------------
+// // RECORDING EVENTS
+// //---------------------------------------------------
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.RECORDING_STATE, (evt) => {
+  const eventDetail = evt.detail;
+  const { recordingId, state, error } = eventDetail;
+  if (state === SkylinkConstants.RECORDING_STATE.ERROR) {
+    Demo.Methods.logToConsoleDOM(`Recording Error - ${error}`, 'error');
+  }
+});
+
 /********************************************************
   DOM Events
 *********************************************************/
@@ -1410,6 +1421,7 @@ $(document).ready(function() {
     .then((recordingId) => {
       Demo.Methods.logToConsoleDOM(`Recording started: ${recordingId}`, 'Recording');
     })
+    .catch((error) => Demo.Methods.logToConsoleDOM(error.message, 'error'));
   });
   // //---------------------------------------------------
   $('#stop_recording_btn').click(function() {
