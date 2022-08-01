@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      server-communication/signaling-server/message-handler/handlers/candidateHandler.js - Documentation
+      features/messaging/encrypted-messaging/index.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        server-communication/signaling-server/message-handler/handlers/candidateHandler.js
+        features/messaging/encrypted-messaging/index.js
       </h1>
     
 
@@ -93,146 +93,148 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import Skylink from '../../../../index';
-import logger from '../../../../logger';
-import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import { candidateProcessingState } from '../../../../skylink-events';
-import * as constants from '../../../../constants';
-import PeerConnection from '../../../../peer-connection';
-import IceConnection from '../../../../ice-connection';
-import messages from '../../../../messages';
-import HandleIceCandidateStats from '../../../../skylink-stats/handleIceCandidateStats';
+    <pre class="prettyprint source linenums"><code>import encryptHelpers from './helpers/index';
+import messagingHelpers from '../helpers/index';
+import { dispatchEvent } from '../../../utils/skylinkEventManager';
+import { encryptionSecretsUpdated } from '../../../skylink-events';
+import MESSAGES from '../../../messages';
+import getUserInfo from '../../../peer-data/helpers/getUserInfo';
+import { getParamValidity, getRoomStateByName } from '../../../utils/helpers';
+import SkylinkError from '../../../utils/skylinkError';
+import logger from '../../../logger';
+import { TAGS } from '../../../constants';
+import Room from '../../../room';
 
-
+const instance = {};
 /**
- * Function that handles the "candidate" socket message received.
- * @param {JSON} message
- * @memberOf SignalingMessageHandler
- * @returns {null}
- * @fires CANDIDATE_PROCESSING_STATE
+ * @classdesc Class used for handling encryption
+ * @class
+ * @private
  */
-const candidateHandler = (message) => {
-  const { candidate, mid, rid } = message;
-  const state = Skylink.getSkylinkState(rid);
-  const { room } = state;
-  const peerConnection = state.peerConnections[mid];
-  const peerEndOfCandidatesCounter = state.peerEndOfCandidatesCounter[mid] || {};
-  const { RTCIceCandidate } = window;
-  const { ICE_CANDIDATE, PEER_CONNECTION, STATS_MODULE: { HANDLE_ICE_GATHERING_STATS } } = messages;
-  const initOptions = Skylink.getInitOptions();
-  const handleIceCandidateStats = new HandleIceCandidateStats();
+class EncryptedMessaging {
+  constructor(roomState) {
+    const { room, user } = roomState;
 
-  if (!candidate &amp;&amp; !message.id) {
-    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, null, ICE_CANDIDATE.INVALID_CANDIDATE], message);
-    return null;
-  }
-
-  const nativeCandidate = new RTCIceCandidate({
-    sdpMLineIndex: message.label,
-    candidate,
-    sdpMid: message.id,
-  });
-  const candidateId = `can-${nativeCandidate.foundation}`;
-  const candidateType = nativeCandidate.candidate.split(' ')[7] || '';
-
-  logger.log.DEBUG([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.VALID_CANDIDATE], nativeCandidate);
-
-  peerEndOfCandidatesCounter.len = peerEndOfCandidatesCounter.len || 0;
-  peerEndOfCandidatesCounter.hasSet = false;
-  peerEndOfCandidatesCounter.len += 1;
-
-  Skylink.setSkylinkState(state, rid);
-
-  const candidateProcessingStateEventDetail = {
-    candidate: {
-      candidate: nativeCandidate.candidate,
-      sdpMid: nativeCandidate.sdpMid,
-      sdpMLineIndex: nativeCandidate.sdpMLineIndex,
-    },
-    error: null,
-  };
-
-  dispatchEvent(candidateProcessingState({
-    room,
-    state: constants.CANDIDATE_PROCESSING_STATE.RECEIVED,
-    peerId: mid,
-    candidateId,
-    candidateType,
-    candidate: candidateProcessingStateEventDetail.candidate,
-    error: candidateProcessingStateEventDetail.error,
-  }));
-
-  if (!(peerConnection &amp;&amp; peerConnection.signalingState !== constants.PEER_CONNECTION_STATE.CLOSED)) {
-    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, PEER_CONNECTION.NO_PEER_CONNECTION]);
-
-    candidateProcessingStateEventDetail.error = new Error(PEER_CONNECTION.NO_PEER_CONNECTION);
-    handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
-    dispatchEvent(candidateProcessingState({
-      room,
-      state: constants.CANDIDATE_PROCESSING_STATE.DROPPED,
-      peerId: mid,
-      candidateId,
-      candidateType,
-      candidate: candidateProcessingStateEventDetail.candidate,
-      error: candidateProcessingStateEventDetail.error,
-    }));
-
-    PeerConnection.signalingEndOfCandidates(mid, state);
-    return null;
-  }
-
-  if (initOptions.filterCandidatesType[candidateType]) {
-    if (!(state.hasMCU &amp;&amp; initOptions.forceTURN)) {
-      logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FILTERED_CANDIDATE], nativeCandidate);
-
-      candidateProcessingStateEventDetail.error = new Error(ICE_CANDIDATE.FILTERED_CANDIDATE);
-      handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.DROPPED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
-      dispatchEvent(candidateProcessingState({
-        room,
-        state: constants.CANDIDATE_PROCESSING_STATE.DROPPED,
-        peerId: mid,
-        candidateId,
-        candidateType,
-        candidate: candidateProcessingStateEventDetail.candidate,
-        error: candidateProcessingStateEventDetail.error,
-      }));
-
-      PeerConnection.signalingEndOfCandidates(mid, state);
-      return null;
+    if (!instance[room.id]) {
+      instance[room.id] = this;
     }
 
-    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FILTERING_FLAG_NOT_HONOURED], nativeCandidate);
+    this.room = room;
+    this.peerId = user.sid;
+
+    /**
+     * The secret id and encrypt secret key-value pair.
+     * @type {Object|{}}
+     */
+    this.encryptSecrets = {};
+
+    /**
+     * The selected secret id.
+     * @type {String}
+     */
+    this.selectedSecretId = '';
+
+    return instance[room.id];
   }
 
-  if (peerConnection.remoteDescription &amp;&amp; peerConnection.remoteDescription.sdp &amp;&amp; peerConnection.localDescription &amp;&amp; peerConnection.localDescription.sdp) {
-    IceConnection.addIceCandidate(mid, candidateId, candidateType, nativeCandidate, state);
-  } else {
-    IceConnection.addIceCandidateToQueue(mid, candidateId, candidateType, nativeCandidate, state);
+  setEncryptSecret(secret, secretId) {
+    try {
+      this.encryptSecrets = encryptHelpers.setEncryptSecret(this.encryptSecrets, secret, secretId);
+      this.dispatchEncryptSecretEvent();
+    } catch (error) {
+      SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_ENCRYPT_SECRET, error.message);
+    }
   }
 
-  PeerConnection.signalingEndOfCandidates(mid, state);
-
-  let gatheredCandidates = state.gatheredCandidates[mid];
-  if (!gatheredCandidates) {
-    gatheredCandidates = {
-      sending: { host: [], srflx: [], relay: [] },
-      receiving: { host: [], srflx: [], relay: [] },
-    };
+  getEncryptSecrets() {
+    return this.encryptSecrets;
   }
 
-  gatheredCandidates.receiving[candidateType].push({
-    sdpMid: nativeCandidate.sdpMid,
-    sdpMLineIndex: nativeCandidate.sdpMLineIndex,
-    candidate: nativeCandidate.candidate,
-  });
+  deleteEncryptSecrets(secretId) {
+    try {
+      const updatedData = encryptHelpers.deleteEncryptSecrets(this.encryptSecrets, this.selectedSecretId, secretId);
+      this.encryptSecrets = updatedData.encryptSecrets;
+      this.selectedSecretId = updatedData.selectedSecretId;
+      this.dispatchEncryptSecretEvent();
+    } catch (error) {
+      SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.DELETE_ENCRYPT_SECRETS, error.message);
+    }
+  }
 
-  state.gatheredCandidates[mid] = gatheredCandidates;
-  Skylink.setSkylinkState(state, rid);
+  setSelectedSecretId(secretId) {
+    try {
+      this.selectedSecretId = encryptHelpers.setSelectedSecretId(this.encryptSecrets, secretId);
+      this.dispatchEncryptSecretEvent();
+    } catch (error) {
+      SkylinkError.throwError(null, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SET_SELECTED_SECRET, error.message);
+    }
+  }
 
-  return null;
-};
+  getSelectedSecretId() {
+    return this.selectedSecretId;
+  }
 
-export default candidateHandler;
+  dispatchEncryptSecretEvent() {
+    dispatchEvent(encryptionSecretsUpdated({
+      room: Room.getRoomInfo(this.room),
+      encryptSecrets: this.encryptSecrets,
+      selectedSecretId: this.selectedSecretId,
+      peerInfo: getUserInfo(this.room),
+      peerId: this.peerId,
+    }));
+  }
+
+  canEncrypt(throwError) {
+    try {
+      if (encryptHelpers.utils.canEncrypt(this.selectedSecretId, this.encryptSecrets)) {
+        return encryptHelpers.utils.isValidString(this.selectedSecretId) &amp;&amp; encryptHelpers.utils.isValidString(this.encryptSecrets[this.selectedSecretId]);
+      }
+
+      return false;
+    } catch (err) {
+      if (throwError) {
+        throw new Error(err.message);
+      }
+      return false;
+    }
+  }
+
+  decryptStoredMessages(message, secretId) {
+    if (encryptHelpers.utils.canEncrypt(secretId, this.encryptSecrets) &amp;&amp; !Object.keys(this.encryptSecrets).filter(key => key === secretId).length) {
+      throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.SECRET_ID_NOT_FOUND);
+    }
+
+    return this.decryptMessage(message, secretId);
+  }
+
+  decryptMessage(message, secretId = '') {
+    if (secretId &amp;&amp; encryptHelpers.utils.canDecrypt(this.encryptSecrets)) {
+      return encryptHelpers.tryDecryptMessage(message, secretId, this.encryptSecrets);
+    }
+
+    throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_SECRETS);
+  }
+
+  sendMessage(roomName, message, targetPeerId, isPersistent = false, peerSessionId) {
+    const roomState = getRoomStateByName(roomName);
+    if (getParamValidity(message, 'message', 'sendMessage') &amp;&amp; roomState) {
+      try {
+        logger.log.DEBUG([null, TAGS.ASYNC_MESSAGING, null, MESSAGES.MESSAGING.ENCRYPTION.SEND_MESSAGE]);
+        const config = encryptHelpers.getMessageConfig(roomState, targetPeerId, this.encryptSecrets, this.selectedSecretId, isPersistent, peerSessionId);
+        const encryptedMessage = encryptHelpers.encryptMessage(message, this.encryptSecrets[this.selectedSecretId]);
+        messagingHelpers.sendMessageToSig(roomState, config, message, encryptedMessage, targetPeerId);
+      } catch (error) {
+        SkylinkError.throwError(targetPeerId, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
+      }
+    }
+  }
+
+  static deleteEncryptedInstance(room) {
+    delete instance[room.id];
+  }
+}
+
+export default EncryptedMessaging;
 </code></pre>
   </article>
 </section>

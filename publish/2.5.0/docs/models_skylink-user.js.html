@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      peer-connection/helpers/signalingEndOfCandidates.js - Documentation
+      models/skylink-user.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        peer-connection/helpers/signalingEndOfCandidates.js
+        models/skylink-user.js
       </h1>
     
 
@@ -93,74 +93,53 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import Skylink from '../../index';
-import * as constants from '../../constants';
-import messages from '../../messages';
-import logger from '../../logger';
-import { dispatchEvent } from '../../utils/skylinkEventManager';
-import { candidatesGathered } from '../../skylink-events';
-
-/**
- * @param {String} targetMid
- * @param {SkylinkState} roomState
- * @return {null}
- * @memberOf PeerConnection.PeerConnectionHelpers
- * @fires CANDIDATES_GATHERED
+    <pre class="prettyprint source linenums"><code>/**
+ * @classdesc Class representing a Skylink User.
+ * @class
+ * @private
  */
-const signalingEndOfCandidates = (targetMid, roomState) => {
-  const state = Skylink.getSkylinkState(roomState.room.id);
-  const peerEndOfCandidatesCounter = state.peerEndOfCandidatesCounter[targetMid];
-  const peerConnection = state.peerConnections[targetMid];
-  const peerCandidatesQueue = state.peerCandidatesQueue[targetMid];
-  const gatheredCandidates = state.gatheredCandidates[targetMid];
-  const { TAGS } = constants;
-  const { ICE_CONNECTION } = messages;
-
-  if (!peerEndOfCandidatesCounter) {
-    return null;
+class SkylinkUser {
+  /**
+   * @param {RawApiResponse} rawApiResponse - API response received from the API Server
+   */
+  constructor(rawApiResponse) {
+    /**
+     * The user id of the user
+     * @type {String}
+     */
+    this.uid = rawApiResponse.username;
+    /**
+     * The user credentials or token of the user
+     * @type {String}
+     */
+    this.token = rawApiResponse.userCred;
+    /**
+     * TimeStamp returned by API
+     * @type {Date}
+     */
+    this.timeStamp = rawApiResponse.timeStamp;
+    /**
+     * The socket ID of the user
+     * @type {JSON}
+     */
+    this.sid = null;
+    /**
+     * The status of whether messages via signaling server should be buffered. Messages will be buffered if it is not a handshake message and
+     * enter message has not been sent by the user.
+     * @type {Null|Boolean} Null when uninitialized i.e. no messages have been added to buffer, true when initialized i.e. messages have been
+     * added to buffer and false when enter message has been sent
+     */
+    this.bufferMessage = null;
+    /**
+     * The peer session id. A new peer session id is generated for every authenticated session. Client can choose to cache the peer session id
+     * locally to be used when sending messages for a persistent peer id.
+     * @type {String}
+     */
+    this.peerSessionId = rawApiResponse.peerSessionId;
   }
+}
 
-  if (
-    // If peer connection exists first and state is not closed.
-    peerConnection &amp;&amp; peerConnection.signalingState !== constants.PEER_CONNECTION_STATE.CLOSED
-    // If remote description is set
-    &amp;&amp; peerConnection.remoteDescription &amp;&amp; peerConnection.remoteDescription.sdp
-    // If end-of-candidates signal is received
-    &amp;&amp; typeof peerEndOfCandidatesCounter.expectedLen === 'number'
-    // If all ICE candidates are received
-    &amp;&amp; peerEndOfCandidatesCounter.len >= peerEndOfCandidatesCounter.expectedLen
-    // If there is no ICE candidates queue
-    &amp;&amp; (peerCandidatesQueue ? peerCandidatesQueue.length === 0 : true)
-    // If it has not been set yet
-    &amp;&amp; !peerEndOfCandidatesCounter.hasSet) {
-    logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, ICE_CONNECTION.END_OF_CANDIDATES_SUCCESS]);
-
-    peerEndOfCandidatesCounter.hasSet = true;
-
-    try {
-      if (gatheredCandidates) {
-        const candidatesLength = {
-          expected: peerEndOfCandidatesCounter.expectedLen || 0,
-          received: peerEndOfCandidatesCounter.len || 0,
-          processed: gatheredCandidates.receiving.srflx.length + gatheredCandidates.receiving.relay.length + gatheredCandidates.receiving.host.length,
-        };
-        dispatchEvent(candidatesGathered({
-          room: state.room,
-          peerId: targetMid,
-          candidatesLength,
-        }));
-      }
-
-      state.peerEndOfCandidatesCounter[targetMid] = peerEndOfCandidatesCounter;
-      Skylink.setSkylinkState(state, roomState.room.id);
-    } catch (error) {
-      logger.log.ERROR([targetMid, TAGS.PEER_CONNECTION, null, ICE_CONNECTION.END_OF_CANDIDATES_FAILURE], error);
-    }
-  }
-  return null;
-};
-
-export default signalingEndOfCandidates;
+export default SkylinkUser;
 </code></pre>
   </article>
 </section>
