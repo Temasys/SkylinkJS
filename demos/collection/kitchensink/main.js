@@ -1111,7 +1111,6 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
   }
 });
 
-
 // //---------------------------------------------------
 // // RECORDING EVENTS
 // //---------------------------------------------------
@@ -1122,8 +1121,6 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.RECORDING_STATE, (e
     Demo.Methods.logToConsoleDOM(`Recording Error - ${error}`, 'error');
   }
 });
-
-
 
 /********************************************************
   DOM Events
