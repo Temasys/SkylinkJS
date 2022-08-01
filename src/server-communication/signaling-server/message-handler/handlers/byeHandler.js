@@ -10,6 +10,7 @@ import {
 import MESSAGES from '../../../../messages';
 import { isEmptyObj } from '../../../../utils/helpers';
 import HandleUserMediaStats from '../../../../skylink-stats/handleUserMediaStats';
+import Room from '../../../../room';
 
 /**
  * Checks if peer is connected.

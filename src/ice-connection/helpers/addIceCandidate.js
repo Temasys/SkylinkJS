@@ -125,7 +125,7 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
 
     dispatchEvent(candidateProcessingState({
       peerId: targetMid,
-      room: Room.getRoomInfo(room.id),
+      room: Room.getRoomInfo(room),
       candidateType,
       candidate,
       candidateId,
