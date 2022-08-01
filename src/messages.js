@@ -6,7 +6,7 @@ const MESSAGES = {
       NO_FETCH_SUPPORT: 'Fetch API is not supported in your browser. Please make sure you are using a modern browser: https://caniuse.com/#search=fetch',
       NO_APP_KEY: 'Please provide an App Key - Get one at console.temasys.io!',
       AUTH_CORS: 'Promise rejected due to CORS forbidden request - Please visit: https://support.temasys.com.sg/support/solutions/articles/12000006761-i-get-a-403-forbidden-access-is-denied-when-i-load-the-application-why-',
-      AUTH_GENERAL: 'Promise rejected due to network issue',
+      AUTH_GENERAL: 'Promise rejected due to authentication issue',
       SOCKET_CREATE_FAILED: 'Failed creating socket connection object ->',
       SOCKET_ERROR_ABORT: 'Reconnection aborted as the connection timed out or there no more available ports, transports and final attempts left',
     },
