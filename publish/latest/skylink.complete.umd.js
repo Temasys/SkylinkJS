@@ -3,7 +3,7 @@
   factory();
 })((function () { 'use strict';
 
-  /* SkylinkJS v2.5.0 Fri Jul 29 2022 05:10:12 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.5.0 Mon Aug 01 2022 09:14:18 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -10933,26 +10933,30 @@
 
     const initAndTrue = value => isABoolean(value) && value;
 
-    const executeCallbackAndRemoveListener = (rid, evt) => {
-      const state = Skylink.getSkylinkState(rid);
-      const { detail } = evt;
-
-      if (detail.state === HANDSHAKE_PROGRESS.ENTER) {
-        const currentBufferedMsgs = clone_1(state.socketMessageQueue);
-        state.user.bufferMessage = false;
-        state.socketMessageQueue = [];
-        Skylink.setSkylinkState(state, state.room.id);
-
-        logger.log.DEBUG([state.user.sid, TAGS.SIG_SERVER, null, `${MESSAGES.SIGNALING.BUFFERED_MESSAGES_SENT}: ${currentBufferedMsgs.length}`]);
-        sendBufferedMsg(state, currentBufferedMsgs);
-        skylinkEventManager.removeEventListener(EVENTS.HANDSHAKE_PROGRESS, executeCallbackAndRemoveListener);
-      }
-    };
-
     const shouldBufferMessage$1 = (message) => {
       const { rid } = message;
       const updatedState = Skylink.getSkylinkState(rid);
       const { user, room } = updatedState;
+
+      let boundedEventListener;
+
+      const executeCallbackAndRemoveListener = (_rid, evt) => {
+        const state = Skylink.getSkylinkState(_rid);
+        const { detail } = evt;
+
+        if (detail.state === HANDSHAKE_PROGRESS.ENTER) {
+          const currentBufferedMsgs = clone_1(state.socketMessageQueue);
+          state.user.bufferMessage = false;
+          state.socketMessageQueue = [];
+          Skylink.setSkylinkState(state, state.room.id);
+
+          logger.log.DEBUG([state.user.sid, TAGS.SIG_SERVER, null, `${MESSAGES.SIGNALING.BUFFERED_MESSAGES_SENT}: ${currentBufferedMsgs.length}`]);
+          sendBufferedMsg(state, currentBufferedMsgs);
+          skylinkEventManager.removeEventListener(EVENTS.HANDSHAKE_PROGRESS, boundedEventListener);
+        }
+      };
+
+      boundedEventListener = executeCallbackAndRemoveListener.bind(undefined, rid);
 
       if ((isNull(user.bufferMessage) || initAndTrue(user.bufferMessage)) && !isNegotiationTypeMsg(message)) {
         logger.log.DEBUG([user.sid, TAGS.SIG_SERVER, null, MESSAGES.SIGNALING.MESSAGE_ADDED_TO_BUFFER]);
@@ -10961,7 +10965,7 @@
         if (!initAndTrue(user.bufferMessage)) {
           updatedState.user.bufferMessage = true;
           logger.log.DEBUG([user.sid, TAGS.SIG_SERVER, null, MESSAGES.SIGNALING.ENTER_LISTENER]);
-          skylinkEventManager.addEventListener(EVENTS.HANDSHAKE_PROGRESS, executeCallbackAndRemoveListener.bind(undefined, rid));
+          skylinkEventManager.addEventListener(EVENTS.HANDSHAKE_PROGRESS, boundedEventListener);
         }
 
         Skylink.setSkylinkState(updatedState, room.id);
