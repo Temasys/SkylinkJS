@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      room/getRoomInfo.js - Documentation
+      peer-connection/helpers/signalingEndOfCandidates.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        room/getRoomInfo.js
+        peer-connection/helpers/signalingEndOfCandidates.js
       </h1>
     
 
@@ -93,39 +93,75 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import Skylink from '../index';
+    <pre class="prettyprint source linenums"><code>import Skylink from '../../index';
+import * as constants from '../../constants';
+import messages from '../../messages';
+import logger from '../../logger';
+import { dispatchEvent } from '../../utils/skylinkEventManager';
+import { candidatesGathered } from '../../skylink-events';
+import Room from '../../room';
 
 /**
- * @typedef roomInfo
- * @property {roomInfo} room - The room info
- * @property {Number} duration - The maximum allowed room duration
- * @property {String} id - The room id
- * @property {Boolean} inRoom - The flag if the peer is in the room
+ * @param {String} targetMid
+ * @param {SkylinkState} roomState
+ * @return {null}
+ * @memberOf PeerConnection.PeerConnectionHelpers
+ * @fires CANDIDATES_GATHERED
  */
-/**
- * @param room
- * @return {roomInfo}
- * @private
- */
-const getRoomInfo = (room) => {
-  const state = Skylink.getSkylinkState(room.id);
-  // eslint-disable-next-line no-underscore-dangle
-  let _room;
+const signalingEndOfCandidates = (targetMid, roomState) => {
+  const state = Skylink.getSkylinkState(roomState.room.id);
+  const peerEndOfCandidatesCounter = state.peerEndOfCandidatesCounter[targetMid];
+  const peerConnection = state.peerConnections[targetMid];
+  const peerCandidatesQueue = state.peerCandidatesQueue[targetMid];
+  const gatheredCandidates = state.gatheredCandidates[targetMid];
+  const { TAGS } = constants;
+  const { ICE_CONNECTION } = messages;
 
-  if (state) {
-    _room = state.room;
-  } else {
-    _room = room;
+  if (!peerEndOfCandidatesCounter) {
+    return null;
   }
 
-  const roomInfo = Object.assign({}, _room);
-  delete roomInfo.connection;
-  delete roomInfo.token;
-  delete roomInfo.startDateTime;
-  return roomInfo;
+  if (
+    // If peer connection exists first and state is not closed.
+    peerConnection &amp;&amp; peerConnection.signalingState !== constants.PEER_CONNECTION_STATE.CLOSED
+    // If remote description is set
+    &amp;&amp; peerConnection.remoteDescription &amp;&amp; peerConnection.remoteDescription.sdp
+    // If end-of-candidates signal is received
+    &amp;&amp; typeof peerEndOfCandidatesCounter.expectedLen === 'number'
+    // If all ICE candidates are received
+    &amp;&amp; peerEndOfCandidatesCounter.len >= peerEndOfCandidatesCounter.expectedLen
+    // If there is no ICE candidates queue
+    &amp;&amp; (peerCandidatesQueue ? peerCandidatesQueue.length === 0 : true)
+    // If it has not been set yet
+    &amp;&amp; !peerEndOfCandidatesCounter.hasSet) {
+    logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, ICE_CONNECTION.END_OF_CANDIDATES_SUCCESS]);
+
+    peerEndOfCandidatesCounter.hasSet = true;
+
+    try {
+      if (gatheredCandidates) {
+        const candidatesLength = {
+          expected: peerEndOfCandidatesCounter.expectedLen || 0,
+          received: peerEndOfCandidatesCounter.len || 0,
+          processed: gatheredCandidates.receiving.srflx.length + gatheredCandidates.receiving.relay.length + gatheredCandidates.receiving.host.length,
+        };
+        dispatchEvent(candidatesGathered({
+          room: Room.getRoomInfo(state.room),
+          peerId: targetMid,
+          candidatesLength,
+        }));
+      }
+
+      state.peerEndOfCandidatesCounter[targetMid] = peerEndOfCandidatesCounter;
+      Skylink.setSkylinkState(state, roomState.room.id);
+    } catch (error) {
+      logger.log.ERROR([targetMid, TAGS.PEER_CONNECTION, null, ICE_CONNECTION.END_OF_CANDIDATES_FAILURE], error);
+    }
+  }
+  return null;
 };
 
-export default getRoomInfo;
+export default signalingEndOfCandidates;
 </code></pre>
   </article>
 </section>

@@ -7,7 +7,7 @@ const getUserMessages = (roomState, config, message) => {
   const signalingReadyMessages = [];
   const { user, room } = roomState;
   const {
-    listOfPeers, isPrivate, isPersistent, secretId,
+    listOfPeers, isPrivate, isPersistent, secretId, peerSessionId,
   } = config;
 
   const messageBody = {
@@ -15,6 +15,8 @@ const getUserMessages = (roomState, config, message) => {
     mid: user.sid,
     rid: room.id,
     msgId: generateUUID(),
+    roomSessionId: room.roomSessionId,
+    peerSessionId,
     type: SIG_MESSAGE_TYPE.MESSAGE,
   };
 

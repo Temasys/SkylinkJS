@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      models/skylink-user.js - Documentation
+      server-communication/signaling-server/message-handler/handlers/candidateHandler.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        models/skylink-user.js
+        server-communication/signaling-server/message-handler/handlers/candidateHandler.js
       </h1>
     
 
@@ -93,47 +93,147 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>/**
- * @classdesc Class representing a Skylink User.
- * @class
- * @private
- */
-class SkylinkUser {
-  /**
-   * @param {RawApiResponse} rawApiResponse - API response received from the API Server
-   */
-  constructor(rawApiResponse) {
-    /**
-     * The user id of the user
-     * @type {String}
-     */
-    this.uid = rawApiResponse.username;
-    /**
-     * The user credentials or token of the user
-     * @type {String}
-     */
-    this.token = rawApiResponse.userCred;
-    /**
-     * TimeStamp returned by API
-     * @type {Date}
-     */
-    this.timeStamp = rawApiResponse.timeStamp;
-    /**
-     * The socket ID of the user
-     * @type {JSON}
-     */
-    this.sid = null;
-    /**
-     * The status of whether messages via signaling server should be buffered. Messages will be buffered if it is not a handshake message and
-     * enter message has not been sent by the user.
-     * @type {Null|Boolean} Null when uninitialized i.e. no messages have been added to buffer, true when initialized i.e. messages have been
-     * added to buffer and false when enter message has been sent
-     */
-    this.bufferMessage = null;
-  }
-}
+    <pre class="prettyprint source linenums"><code>import Skylink from '../../../../index';
+import logger from '../../../../logger';
+import { dispatchEvent } from '../../../../utils/skylinkEventManager';
+import { candidateProcessingState } from '../../../../skylink-events';
+import * as constants from '../../../../constants';
+import PeerConnection from '../../../../peer-connection';
+import IceConnection from '../../../../ice-connection';
+import messages from '../../../../messages';
+import HandleIceCandidateStats from '../../../../skylink-stats/handleIceCandidateStats';
+import Room from '../../../../room';
 
-export default SkylinkUser;
+
+/**
+ * Function that handles the "candidate" socket message received.
+ * @param {JSON} message
+ * @memberOf SignalingMessageHandler
+ * @returns {null}
+ * @fires CANDIDATE_PROCESSING_STATE
+ */
+const candidateHandler = (message) => {
+  const { candidate, mid, rid } = message;
+  const state = Skylink.getSkylinkState(rid);
+  const { room } = state;
+  const peerConnection = state.peerConnections[mid];
+  const peerEndOfCandidatesCounter = state.peerEndOfCandidatesCounter[mid] || {};
+  const { RTCIceCandidate } = window;
+  const { ICE_CANDIDATE, PEER_CONNECTION, STATS_MODULE: { HANDLE_ICE_GATHERING_STATS } } = messages;
+  const initOptions = Skylink.getInitOptions();
+  const handleIceCandidateStats = new HandleIceCandidateStats();
+
+  if (!candidate &amp;&amp; !message.id) {
+    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, null, ICE_CANDIDATE.INVALID_CANDIDATE], message);
+    return null;
+  }
+
+  const nativeCandidate = new RTCIceCandidate({
+    sdpMLineIndex: message.label,
+    candidate,
+    sdpMid: message.id,
+  });
+  const candidateId = `can-${nativeCandidate.foundation}`;
+  const candidateType = nativeCandidate.candidate.split(' ')[7] || '';
+
+  logger.log.DEBUG([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.VALID_CANDIDATE], nativeCandidate);
+
+  peerEndOfCandidatesCounter.len = peerEndOfCandidatesCounter.len || 0;
+  peerEndOfCandidatesCounter.hasSet = false;
+  peerEndOfCandidatesCounter.len += 1;
+
+  Skylink.setSkylinkState(state, rid);
+
+  const candidateProcessingStateEventDetail = {
+    candidate: {
+      candidate: nativeCandidate.candidate,
+      sdpMid: nativeCandidate.sdpMid,
+      sdpMLineIndex: nativeCandidate.sdpMLineIndex,
+    },
+    error: null,
+  };
+
+  dispatchEvent(candidateProcessingState({
+    room: Room.getRoomInfo(room),
+    state: constants.CANDIDATE_PROCESSING_STATE.RECEIVED,
+    peerId: mid,
+    candidateId,
+    candidateType,
+    candidate: candidateProcessingStateEventDetail.candidate,
+    error: candidateProcessingStateEventDetail.error,
+  }));
+
+  if (!(peerConnection &amp;&amp; peerConnection.signalingState !== constants.PEER_CONNECTION_STATE.CLOSED)) {
+    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, PEER_CONNECTION.NO_PEER_CONNECTION]);
+
+    candidateProcessingStateEventDetail.error = new Error(PEER_CONNECTION.NO_PEER_CONNECTION);
+    handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
+    dispatchEvent(candidateProcessingState({
+      room: Room.getRoomInfo(room),
+      state: constants.CANDIDATE_PROCESSING_STATE.DROPPED,
+      peerId: mid,
+      candidateId,
+      candidateType,
+      candidate: candidateProcessingStateEventDetail.candidate,
+      error: candidateProcessingStateEventDetail.error,
+    }));
+
+    PeerConnection.signalingEndOfCandidates(mid, state);
+    return null;
+  }
+
+  if (initOptions.filterCandidatesType[candidateType]) {
+    if (!(state.hasMCU &amp;&amp; initOptions.forceTURN)) {
+      logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FILTERED_CANDIDATE], nativeCandidate);
+
+      candidateProcessingStateEventDetail.error = new Error(ICE_CANDIDATE.FILTERED_CANDIDATE);
+      handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.DROPPED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
+      dispatchEvent(candidateProcessingState({
+        room: Room.getRoomInfo(room),
+        state: constants.CANDIDATE_PROCESSING_STATE.DROPPED,
+        peerId: mid,
+        candidateId,
+        candidateType,
+        candidate: candidateProcessingStateEventDetail.candidate,
+        error: candidateProcessingStateEventDetail.error,
+      }));
+
+      PeerConnection.signalingEndOfCandidates(mid, state);
+      return null;
+    }
+
+    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FILTERING_FLAG_NOT_HONOURED], nativeCandidate);
+  }
+
+  if (peerConnection.remoteDescription &amp;&amp; peerConnection.remoteDescription.sdp &amp;&amp; peerConnection.localDescription &amp;&amp; peerConnection.localDescription.sdp) {
+    IceConnection.addIceCandidate(mid, candidateId, candidateType, nativeCandidate, state);
+  } else {
+    IceConnection.addIceCandidateToQueue(mid, candidateId, candidateType, nativeCandidate, state);
+  }
+
+  PeerConnection.signalingEndOfCandidates(mid, state);
+
+  let gatheredCandidates = state.gatheredCandidates[mid];
+  if (!gatheredCandidates) {
+    gatheredCandidates = {
+      sending: { host: [], srflx: [], relay: [] },
+      receiving: { host: [], srflx: [], relay: [] },
+    };
+  }
+
+  gatheredCandidates.receiving[candidateType].push({
+    sdpMid: nativeCandidate.sdpMid,
+    sdpMLineIndex: nativeCandidate.sdpMLineIndex,
+    candidate: nativeCandidate.candidate,
+  });
+
+  state.gatheredCandidates[mid] = gatheredCandidates;
+  Skylink.setSkylinkState(state, rid);
+
+  return null;
+};
+
+export default candidateHandler;
 </code></pre>
   </article>
 </section>

@@ -3,7 +3,7 @@
   factory();
 })((function () { 'use strict';
 
-  /* SkylinkJS v2.4.3 Wed Jun 15 2022 07:22:04 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.5.0 Fri Jul 29 2022 05:10:12 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -6381,7 +6381,7 @@
      */
     const loggedOnConsole = (detail = {}) => new SkylinkEvent(LOGGED_ON_CONSOLE, { detail });
 
-    var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.4.3";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.16.0","@babel/preset-env":"7.16.0","@babel/register":"7.16.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.2.3",eslint:"^6.8.0","eslint-config-airbnb":"^18.2.1","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.25.2","eslint-plugin-jsx-a11y":"^6.4.1",finalhandler:"^1.1.2",husky:"^7.0.4",jsdoc:"^3.6.7",jsdom:"^18.0.1","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.14",rollup:"^2.59.0","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.4.0","rollup-plugin-delete":"^2.0.0","rollup-plugin-external-globals":"^0.6.1","rollup-plugin-gzip":"^2.5.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2","serve-static":"^1.14.1","whatwg-fetch":"^3.6.2"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
+    var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.5.0";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.16.0","@babel/preset-env":"7.16.0","@babel/register":"7.16.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.2.3",eslint:"^6.8.0","eslint-config-airbnb":"^18.2.1","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.25.2","eslint-plugin-jsx-a11y":"^6.4.1",finalhandler:"^1.1.2",husky:"^7.0.4",jsdoc:"^3.6.7",jsdom:"^18.0.1","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.14",rollup:"^2.59.0","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.4.0","rollup-plugin-delete":"^2.0.0","rollup-plugin-external-globals":"^0.6.1","rollup-plugin-gzip":"^2.5.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2","serve-static":"^1.14.1","whatwg-fetch":"^3.6.2"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
 
     /**
      * @namespace SkylinkConstants
@@ -9827,48 +9827,6 @@
       };
     };
 
-    const isUser = (peerId, roomState) => {
-      const { user } = roomState;
-      return peerId === user.sid;
-    };
-
-    /**
-     * @description Function that returns the User / Peer current session information.
-     * @private
-     * @param {String} peerId
-     * @param {SkylinkRoom} room
-     * @return {peerInfo}
-     * @memberOf PeerDataHelpers
-     */
-    const getPeerInfo = (peerId, room) => {
-      let peerInfo = null;
-      if (!peerId) {
-        return null;
-      }
-      const state = Skylink.getSkylinkState(room.id);
-
-      if (!state) {
-        logger.log.ERROR(`${MESSAGES.ROOM_STATE.NOT_FOUND} ${room.id}`);
-        return peerInfo;
-      }
-
-      if (isUser(peerId, state)) {
-        return PeerData.getCurrentSessionInfo(room);
-      }
-
-      peerInfo = clone_1(state.peerInformations[peerId]);
-
-      if (!peerInfo) {
-        logger.log.ERROR(`${MESSAGES.PEER_INFORMATIONS.NO_PEER_INFO} ${peerId}`);
-        return peerInfo;
-      }
-
-      peerInfo.room = room.roomName;
-      peerInfo.settings.data = !!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId].main && state.peerDataChannels[peerId].main.channel && state.peerDataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE.OPEN);
-
-      return peerInfo;
-    };
-
     /**
      * @namespace initOptions
      * @private
@@ -10047,6 +10005,11 @@
          */
         this.roomName = rawApiResponse.roomName;
         /**
+         * The room session id
+         * @type {String}
+         */
+        this.roomSessionId = rawApiResponse.roomSessionId;
+        /**
          * The peer connection configuration
          * @type {{mediaConstraints: any, peerConstraints: any, offerConstraints: any, peerConfig: {iceServers: Array}, sdpConstraints: {}}}
          */
@@ -10104,6 +10067,12 @@
          * added to buffer and false when enter message has been sent
          */
         this.bufferMessage = null;
+        /**
+         * The peer session id. A new peer session id is generated for every authenticated session. Client can choose to cache the peer session id
+         * locally to be used when sending messages for a persistent peer id.
+         * @type {String}
+         */
+        this.peerSessionId = rawApiResponse.peerSessionId;
       }
     }
 
@@ -17571,7 +17540,7 @@
       return secretId;
     };
 
-    const getMessageConfig$2 = (roomState, targetPeerId) => {
+    const getMessageConfig$1 = (roomState, targetPeerId, peerSessionId) => {
       const {
         peerInformations,
         room,
@@ -17607,7 +17576,7 @@
         logger.log.WARN([null, TAGS.MESSAGING, null, MESSAGES.PEER_CONNECTION.NO_PEER_CONNECTION]);
       }
 
-      return { listOfPeers, isPrivate };
+      return { listOfPeers, isPrivate, peerSessionId };
     };
 
     const sendMessageToSig = (roomState, config, message, encryptedMessage = '', targetPeerId) => {
@@ -17626,7 +17595,7 @@
         // eslint-disable-next-line no-nested-ternary
         targetPeerId: isSelf ? (config.isPrivate ? targetPeerId : null) : user.sid,
         content: messageContent,
-        senderPeerId: isSelf ? user.sid : targetPeerId,
+        senderPeerId: config.peerSessionId || (isSelf ? user.sid : targetPeerId), // always use the peerSessionId if present
         isDataChannel: false,
         isPrivate: config.isPrivate,
         timeStamp: generateISOStringTimesStamp(),
@@ -17652,9 +17621,9 @@
       }
     }
 
-    const trySendMessage = (roomState, message, targetPeerId) => {
+    const trySendMessage = (roomState, message, targetPeerId, peerSessionId) => {
       try {
-        const config = helpers$a.getMessageConfig(roomState, targetPeerId);
+        const config = helpers$a.getMessageConfig(roomState, targetPeerId, peerSessionId);
         helpers$a.sendMessageToSig(roomState, config, message, null, targetPeerId);
       } catch (error) {
         SkylinkError.throwError(targetPeerId, MESSAGES.MESSAGING.ERRORS.FAILED_SENDING_MESSAGE);
@@ -17662,14 +17631,14 @@
     };
 
     const helpers$a = {
-      getMessageConfig: getMessageConfig$2,
+      getMessageConfig: getMessageConfig$1,
       sendMessageToSig,
       dispatchOnIncomingMessage,
       trySendMessage,
     };
 
-    const getMessageConfig$1 = (roomState, targetPeerId, encryptSecrets, selectedSecretId, isPersistent) => {
-      const config = helpers$a.getMessageConfig(roomState, targetPeerId);
+    const getMessageConfig = (roomState, targetPeerId, encryptSecrets, selectedSecretId, isPersistent, peerSessionId) => {
+      const config = helpers$a.getMessageConfig(roomState, targetPeerId, peerSessionId);
 
       if (helpers$9.utils.hasCrypto() && helpers$9.utils.canEncrypt(selectedSecretId, encryptSecrets)) {
         config.secretId = selectedSecretId;
@@ -17712,7 +17681,7 @@
       setEncryptSecret,
       setSelectedSecretId,
       utils,
-      getMessageConfig: getMessageConfig$1,
+      getMessageConfig,
       encryptMessage,
       tryDecryptMessage,
     };
@@ -17840,12 +17809,12 @@
         throw new Error(MESSAGES.MESSAGING.ENCRYPTION.ERRORS.INVALID_SECRETS);
       }
 
-      sendMessage(roomName, message, targetPeerId, isPersistent = false) {
+      sendMessage(roomName, message, targetPeerId, isPersistent = false, peerSessionId) {
         const roomState = getRoomStateByName(roomName);
         if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
           try {
             logger.log.DEBUG([null, TAGS.ASYNC_MESSAGING, null, MESSAGES.MESSAGING.ENCRYPTION.SEND_MESSAGE]);
-            const config = helpers$9.getMessageConfig(roomState, targetPeerId, this.encryptSecrets, this.selectedSecretId, isPersistent);
+            const config = helpers$9.getMessageConfig(roomState, targetPeerId, this.encryptSecrets, this.selectedSecretId, isPersistent, peerSessionId);
             const encryptedMessage = helpers$9.encryptMessage(message, this.encryptSecrets[this.selectedSecretId]);
             helpers$a.sendMessageToSig(roomState, config, message, encryptedMessage, targetPeerId);
           } catch (error) {
@@ -17859,16 +17828,9 @@
       }
     }
 
-    const getMessageConfig = (roomState, targetPeerId) => {
-      const config = helpers$9.getMessageConfig(roomState, targetPeerId);
-      config.isPersistent = true;
-
-      return config;
-    };
-
     const parseDecryptedMessageData = (message, targetMid) => ({
       targetPeerId: targetMid,
-      senderPeerId: message.mid,
+      senderPeerId: message.peerSessionId || message.mid,
       content: message.data,
       timeStamp: parseUNIXTimeStamp(message.timeStamp),
       isPrivate: false,
@@ -17876,7 +17838,6 @@
     });
 
     const helpers$8 = {
-      getMessageConfig,
       parseDecryptedMessageData,
     };
 
@@ -17925,7 +17886,7 @@
         return this.isPersistent;
       }
 
-      sendMessage(roomName, message, targetPeerId) {
+      sendMessage(roomName, message, targetPeerId, peerSessionId) {
         const roomState = getRoomStateByName(roomName);
         const isPublicMessage = !targetPeerId || (Array.isArray(targetPeerId) && isEmptyArray(targetPeerId));
         if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
@@ -17937,7 +17898,7 @@
             }
 
             if (encryptedMessaging.canEncrypt(true)) {
-              encryptedMessaging.sendMessage(roomName, message, targetPeerId, this.isPersistent);
+              encryptedMessaging.sendMessage(roomName, message, targetPeerId, this.isPersistent, peerSessionId);
             }
           } catch (error) {
             SkylinkError.throwError(targetPeerId, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
@@ -17945,14 +17906,14 @@
         }
       }
 
-      getStoredMessages() {
+      getStoredMessages(roomSessionId) {
         const roomState = Skylink.getSkylinkState(this.room.id);
         if (!this.hasPersistentMessage) {
           logger.log.WARN([this.peerId, TAGS.ASYNC_MESSAGING, null, `${MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED}`]);
           return;
         }
 
-        new SkylinkSignalingServer().getStoredMessages(roomState);
+        new SkylinkSignalingServer().getStoredMessages(roomState, roomSessionId);
       }
 
       canPersist() {
@@ -17995,9 +17956,9 @@
         dispatchEvent(storedMessages({
           room: Room.getRoomInfo(room),
           storedMessages: messages,
-          isSelf: false,
+          isSelf: true, // local peer is the one retrieving the stored messages
           peerId: targetMid,
-          peerInfo: PeerData.getPeerInfo(targetMid, room),
+          peerInfo: PeerData.getCurrentSessionInfo(room),
         }));
       }
 
@@ -18012,17 +17973,17 @@
      * @private
      */
     class Messaging {
-      static sendMessage(roomName, message, targetPeerId) {
+      static sendMessage(roomName, message, targetPeerId, peerSessionId) {
         const roomState = getRoomStateByName(roomName);
         if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
           const encryptedMessaging = new EncryptedMessaging(roomState);
           const asyncMessaging = new AsyncMessaging(roomState);
           if (asyncMessaging.canPersist()) {
-            asyncMessaging.sendMessage(roomName, message, targetPeerId);
+            asyncMessaging.sendMessage(roomName, message, targetPeerId, peerSessionId);
           } else if (encryptedMessaging.canEncrypt()) {
-            encryptedMessaging.sendMessage(roomName, message, targetPeerId);
+            encryptedMessaging.sendMessage(roomName, message, targetPeerId, peerSessionId);
           } else {
-            helpers$a.trySendMessage(roomState, message, targetPeerId);
+            helpers$a.trySendMessage(roomState, message, targetPeerId, peerSessionId);
           }
         }
       }
@@ -18041,6 +18002,7 @@
           rid,
           secretId,
           data,
+          peerSessionId,
         } = message;
         const roomState = Skylink.getSkylinkState(rid);
         const targetMid = mid;
@@ -18055,7 +18017,7 @@
           }
         }
 
-        helpers$a.dispatchOnIncomingMessage(roomState, { isPrivate: isABoolean(isPublic) ? !isPublic : !!target }, messageData, false, targetMid);
+        helpers$a.dispatchOnIncomingMessage(roomState, { isPrivate: isABoolean(isPublic) ? !isPublic : !!target, peerSessionId }, messageData, false, targetMid);
       }
     }
 
@@ -20521,7 +20483,7 @@
       const senderPeerId = data.sender || peerId;
       logger.log.INFO([senderPeerId, TAGS.DATA_CHANNEL, channelProp, MESSAGES.DATA_CHANNEL.RECEIVED_P2P_MESSAGE], data);
       dispatchEvent(onIncomingMessage({
-        room: roomState.room,
+        room: Room.getRoomInfo(roomState.room),
         message: {
           targetPeerId: data.target,
           content: data.data,
@@ -22134,7 +22096,7 @@
               processed: gatheredCandidates.receiving.srflx.length + gatheredCandidates.receiving.relay.length + gatheredCandidates.receiving.host.length,
             };
             dispatchEvent(candidatesGathered({
-              room: state.room,
+              room: Room.getRoomInfo(state.room),
               peerId: targetMid,
               candidatesLength,
             }));
@@ -23920,7 +23882,8 @@
         peerId: roomState.user.sid,
         peerInfo: PeerData.getCurrentSessionInfo(roomState.room),
         isSelf: true,
-        room: roomState.room,
+        room: Room.getRoomInfo(roomState.room),
+        peerSessionId: roomState.user.peerSessionId,
       }));
 
       new HandleSessionStats().send(rid, message);
@@ -23993,7 +23956,7 @@
       dispatchEvent(handshakeProgress({
         state: type,
         peerId: targetMid,
-        room: state.room,
+        room: Room.getRoomInfo(state.room),
       }));
 
       NegotiationState.onAnswerAckReceived(message);
@@ -24052,7 +24015,7 @@
       };
 
       dispatchEvent(candidateProcessingState({
-        room,
+        room: Room.getRoomInfo(room),
         state: CANDIDATE_PROCESSING_STATE.RECEIVED,
         peerId: mid,
         candidateId,
@@ -24067,7 +24030,7 @@
         candidateProcessingStateEventDetail.error = new Error(PEER_CONNECTION.NO_PEER_CONNECTION);
         handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
         dispatchEvent(candidateProcessingState({
-          room,
+          room: Room.getRoomInfo(room),
           state: CANDIDATE_PROCESSING_STATE.DROPPED,
           peerId: mid,
           candidateId,
@@ -24087,7 +24050,7 @@
           candidateProcessingStateEventDetail.error = new Error(ICE_CANDIDATE.FILTERED_CANDIDATE);
           handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.DROPPED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
           dispatchEvent(candidateProcessingState({
-            room,
+            room: Room.getRoomInfo(room),
             state: CANDIDATE_PROCESSING_STATE.DROPPED,
             peerId: mid,
             candidateId,
@@ -24278,7 +24241,7 @@
         dispatchEvent(serverPeerLeft({
           peerId,
           serverPeerType: SERVER_PEER_TYPE.MCU,
-          room,
+          room: Room.getRoomInfo(room),
         }));
         updatedState.hasMCU = false;
 
@@ -24290,7 +24253,7 @@
         peerId,
         peerInfo,
         isSelf: false,
-        room,
+        room: Room.getRoomInfo(room),
       }));
     };
 
@@ -24357,7 +24320,7 @@
         }
 
         dispatchEvent(streamEnded({
-          room,
+          room: Room.getRoomInfo(room),
           peerId: mid,
           peerInfo: PeerData.getPeerInfo(mid, room),
           streamId,
@@ -25289,12 +25252,13 @@
       mediaState: mediaInfo.mediaState,
     });
 
-    const getStoredMessagesMessage = (roomState) => {
+    const getStoredMessagesMessage = (roomState, roomSessionId) => {
       const { user, room } = roomState;
       return {
         mid: user.sid,
         rid: room.id,
         target: user.sid,
+        roomSessionId,
         type: SIG_MESSAGE_TYPE.GET_STORED_MESSAGES,
       };
     };
@@ -25303,7 +25267,7 @@
       const signalingReadyMessages = [];
       const { user, room } = roomState;
       const {
-        listOfPeers, isPrivate, isPersistent, secretId,
+        listOfPeers, isPrivate, isPersistent, secretId, peerSessionId,
       } = config;
 
       const messageBody = {
@@ -25311,6 +25275,8 @@
         mid: user.sid,
         rid: room.id,
         msgId: generateUUID(),
+        roomSessionId: room.roomSessionId,
+        peerSessionId,
         type: SIG_MESSAGE_TYPE.MESSAGE,
       };
 
@@ -25700,8 +25666,8 @@
         }
       }
 
-      getStoredMessages(roomState) {
-        const history = this.messageBuilder.getGetStoredMessagesMessage(roomState);
+      getStoredMessages(roomState, roomSessionId) {
+        const history = this.messageBuilder.getGetStoredMessagesMessage(roomState, roomSessionId);
         if (history) {
           this.sendMessage(history);
         }
@@ -26484,10 +26450,12 @@
 
     /**
      * @typedef roomInfo
-     * @property {roomInfo} room - The room info
      * @property {Number} duration - The maximum allowed room duration
      * @property {String} id - The room id
      * @property {Boolean} inRoom - The flag if the peer is in the room
+     * @property {Boolean} isLocked - The flag if the room is locked
+     * @property {String} roomName - The room name
+     * @property {String} roomSessionId - The room name session id
      */
     /**
      * @param room
@@ -26543,6 +26511,48 @@
       }
     }
 
+    const isUser = (peerId, roomState) => {
+      const { user } = roomState;
+      return peerId === user.sid;
+    };
+
+    /**
+     * @description Function that returns the User / Peer current session information.
+     * @private
+     * @param {String} peerId
+     * @param {SkylinkRoom} room
+     * @return {peerInfo}
+     * @memberOf PeerDataHelpers
+     */
+    const getPeerInfo = (peerId, room) => {
+      let peerInfo = null;
+      if (!peerId) {
+        return null;
+      }
+      const state = Skylink.getSkylinkState(room.id);
+
+      if (!state) {
+        logger.log.ERROR(`${MESSAGES.ROOM_STATE.NOT_FOUND} ${room.id}`);
+        return peerInfo;
+      }
+
+      if (isUser(peerId, state)) {
+        return PeerData.getCurrentSessionInfo(room);
+      }
+
+      peerInfo = clone_1(state.peerInformations[peerId]);
+
+      if (!peerInfo) {
+        logger.log.ERROR(`${MESSAGES.PEER_INFORMATIONS.NO_PEER_INFO} ${peerId}`);
+        return peerInfo;
+      }
+
+      peerInfo.room = Room.getRoomInfo(room);
+      peerInfo.settings.data = !!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId].main && state.peerDataChannels[peerId].main.channel && state.peerDataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE.OPEN);
+
+      return peerInfo;
+    };
+
     /**
      * @description Function that returns the current session peerInfo is peer isSelf.
      * @private
@@ -26587,7 +26597,6 @@
           enableIceRestart,
           priorityWeight: peerPriorityWeight,
         },
-        sid: user.sid,
       };
 
       if (peerStreams[user.sid]) {
@@ -30344,6 +30353,8 @@
        * @param {String|Array} [targetPeerId] - The target peer id to send message to.
        * - When provided as an Array, it will send the message to only peers which ids are in the list.
        * - When not provided, it will broadcast the message to all connected peers in the room.
+       * @param {String} [peerSessionId] - The peer session id can be used to attribute the message to a client across sessions. It will replace the
+       * peerId. The peer session id is returned in the peerInfo object. <i>This is an advanced feature.</i>
        * @example
        * Example 1: Broadcasting to all peers in a room
        *
@@ -30378,13 +30389,17 @@
        * @alias Skylink#sendMessage
        * @since 0.4.0
        */
-      sendMessage(roomName = '', message = '', targetPeerId = '') {
-        Messaging.sendMessage(roomName, message, targetPeerId);
+      sendMessage(roomName = '', message = '', targetPeerId = '', peerSessionId = '') {
+        Messaging.sendMessage(roomName, message, targetPeerId, peerSessionId);
       }
 
       /**
        * @description Method that retrieves the message history from server if Persistent Message feature is enabled for the key.
        * @param {String} roomName - The name of the room.
+       * @param {String} [roomSessionId] - The room session id to retrieve the messages from. The room session id is found in the <code>peerInfo</code> object in
+       * most event payloads, e.g. <code>PEER_JOINED</code>.
+       * - A room session starts when the first peer joins a room. A room session ends when the last peer leaves the room.
+       * - Subsequent peers that join the same room, i.e. the same room name, starts a new room session.
        * @example
        * Example 1: Retrieving stored messages
        *
@@ -30403,10 +30418,10 @@
        * @alias Skylink#getStoredMessages
        * @since 2.1
        */
-      getStoredMessages(roomName) {
+      getStoredMessages(roomName, roomSessionId = '') {
         const roomState = getRoomStateByName(roomName);
         if (roomState) {
-          new AsyncMessaging(roomState).getStoredMessages();
+          new AsyncMessaging(roomState).getStoredMessages(roomSessionId);
         }
       }
 

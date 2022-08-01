@@ -255,6 +255,8 @@
  * @property {String} roomCred
  * @property {String} room_key
  * @property {String} roomName
+ * @property {String} roomSessionId
+ * @property {String} peerSessionId
  */
 
 /**

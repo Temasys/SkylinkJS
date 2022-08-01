@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      server-communication/signaling-server/message-handler/handlers/streamHandler.js - Documentation
+      models/skylink-room.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        server-communication/signaling-server/message-handler/handlers/streamHandler.js
+        models/skylink-room.js
       </h1>
     
 
@@ -93,54 +93,69 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import { getStateByRid } from '../../../../utils/helpers';
-import * as constants from '../../../../constants';
-import { streamEnded } from '../../../../skylink-events';
-import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import PeerData from '../../../../peer-data/index';
-import Skylink from '../../../../index';
-
-/**
- * Function that handles the "stream" socket message received.
- * @param {JSON} message
- * @param {String} message.rid - The room key.
- * @param {SkylinkUser} message.mid - The source peerId.
- * @param {String} message.streamId - The media stream Id.
- * @param {String} message.status - The stream status.
- * @param {Object} message.settings
- * @param {String} message.settings.screenshareId - Id of the screenshare stream.
- * @memberOf SignalingMessageHandler
+    <pre class="prettyprint source linenums"><code>/**
+ * @classdesc Class representing a Skylink Room.
+ * @class SkylinkRoom
+ * @private
  */
-const streamHandler = (message) => {
-  const {
-    mid, rid, status, streamId, settings,
-  } = message;
-  const roomState = getStateByRid(rid);
-  const { room, peerInformations } = roomState;
-
-  if (status === constants.STREAM_STATUS.ENDED) {
-    if (settings.isScreensharing) {
-      peerInformations[mid].screenshare = false;
-      Skylink.setSkylinkState(roomState, room.id);
-    }
-
-    dispatchEvent(streamEnded({
-      room,
-      peerId: mid,
-      peerInfo: PeerData.getPeerInfo(mid, room),
-      streamId,
-      isSelf: false,
-      isScreensharing: settings.isScreensharing,
-      options: settings,
-      isVideo: !!settings.audio,
-      isAudio: !!settings.video,
-    }));
+class SkylinkRoom {
+  /**
+   * @param {RawApiResponse} rawApiResponse - API response received from the API Server
+   * @private
+   */
+  constructor(rawApiResponse) {
+    /**
+     * The room's id
+     * @type {String}
+     */
+    this.id = rawApiResponse.room_key;
+    /**
+     * The room's credentials
+     * @type {String}
+     */
+    this.token = rawApiResponse.roomCred;
+    /**
+     * The room start time
+     * @type {Date}
+     */
+    this.startDateTime = rawApiResponse.start;
+    /**
+     * The maximum allowed room duration
+     * @type {number}
+     */
+    this.duration = rawApiResponse.len;
+    /**
+     * The room name
+     * @type {String}
+     */
+    this.roomName = rawApiResponse.roomName;
+    /**
+     * The room session id
+     * @type {String}
+     */
+    this.roomSessionId = rawApiResponse.roomSessionId;
+    /**
+     * The peer connection configuration
+     * @type {{mediaConstraints: any, peerConstraints: any, offerConstraints: any, peerConfig: {iceServers: Array}, sdpConstraints: {}}}
+     */
+    this.connection = {
+      peerConstraints: JSON.parse(rawApiResponse.pc_constraints),
+      offerConstraints: JSON.parse(rawApiResponse.offer_constraints),
+      sdpConstraints: {},
+      peerConfig: {
+        iceServers: [],
+      },
+      mediaConstraints: JSON.parse(rawApiResponse.media_constraints),
+    };
+    /**
+     * Stores the flag that indicates if Room is locked.
+     * @type {boolean}
+     */
+    this.isLocked = false;
   }
+}
 
-  return null;
-};
-
-export default streamHandler;
+export default SkylinkRoom;
 </code></pre>
   </article>
 </section>
