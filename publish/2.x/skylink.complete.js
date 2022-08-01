@@ -1,4 +1,4 @@
-/* SkylinkJS v2.5.0 Mon Aug 01 2022 10:48:48 GMT+0000 (Coordinated Universal Time) */
+/* SkylinkJS v2.6.0 Mon Aug 01 2022 10:58:26 GMT+0000 (Coordinated Universal Time) */
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -6371,7 +6371,7 @@ const mediaInfoDeleted = (detail = {}) => new SkylinkEvent(MEDIA_INFO_DELETED, {
  */
 const loggedOnConsole = (detail = {}) => new SkylinkEvent(LOGGED_ON_CONSOLE, { detail });
 
-var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.5.0";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.16.0","@babel/preset-env":"7.16.0","@babel/register":"7.16.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.2.3",eslint:"^6.8.0","eslint-config-airbnb":"^18.2.1","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.25.2","eslint-plugin-jsx-a11y":"^6.4.1",finalhandler:"^1.1.2",husky:"^7.0.4",jsdoc:"^3.6.7",jsdom:"^18.0.1","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.14",rollup:"^2.59.0","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.4.0","rollup-plugin-delete":"^2.0.0","rollup-plugin-external-globals":"^0.6.1","rollup-plugin-gzip":"^2.5.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2","serve-static":"^1.14.1","whatwg-fetch":"^3.6.2"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
+var name="skylinkjs";var description="Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.";var version="2.6.0";var homepage="https://temasys.io/";var author={name:"Temasys Communications Pte. Ltd.",email:"info@temasys.io"};var main="src/index.js";var module="src/index.js";var repository="Temasys/SkylinkJS";var license="Apache-2.0";var licenses=[{type:"Apache",url:"http://www.apache.org/licenses/LICENSE-2.0"}];var scripts={build:"./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.dev.config.js && npm run build:doc-public",publish:"npm run build && ./node_modules/rollup/dist/bin/rollup --config configs/rollup/rollup.prod.config.js",prestart:"npm run build && ./start.sh &",lint:"node_modules/eslint/bin/eslint.js src/**","build:doc-public":"npx jsdoc -r -c configs/jsdoc/jsdoc.config.json","build:doc-private":"npx jsdoc -p -r -c configs/jsdoc/jsdoc.config.json","watch:doc-src":"npx nodemon --exec 'npm run build:doc-public' --watch src","watch:docs":"npm run watch:doc-src"};var dependencies={"@babel/polyfill":"^7.2.5","braintree-jsdoc-template":"^3.3.0",clone:"~2.1.2","crypto-js":"~3.1.9-1","socket.io-client":"^2.4.0","webrtc-adapter":"7.5.1"};var devServer={contentBase:"./dist"};var keywords=["webrtc","real-time","p2p"];var devDependencies={"@babel/core":"^7.16.0","@babel/preset-env":"7.16.0","@babel/register":"7.16.0","@rollup/plugin-json":"^4.1.0","babel-eslint":"^10.0.1","babel-loader":"^8.2.3",eslint:"^6.8.0","eslint-config-airbnb":"^18.2.1","eslint-loader":"^2.1.0","eslint-plugin-import":"^2.25.2","eslint-plugin-jsx-a11y":"^6.4.1",finalhandler:"^1.1.2",husky:"^7.0.4",jsdoc:"^3.6.7",jsdom:"^18.0.1","jsdom-global":"3.0.2","localstorage-polyfill":"^1.0.1",nodemon:"^2.0.14",rollup:"^2.59.0","rollup-plugin-commonjs":"^9.2.0","rollup-plugin-copy":"^3.4.0","rollup-plugin-delete":"^2.0.0","rollup-plugin-external-globals":"^0.6.1","rollup-plugin-gzip":"^2.5.0","rollup-plugin-local-resolve":"^1.0.7","rollup-plugin-node-resolve":"^4.0.0","rollup-plugin-serve":"^1.1.0","rollup-plugin-terser":"^7.0.2","serve-static":"^1.14.1","whatwg-fetch":"^3.6.2"};var husky={hooks:{"pre-commit":"npm run lint","pre-push":"npm run lint"}};var pkg = {name:name,description:description,version:version,homepage:homepage,author:author,main:main,module:module,repository:repository,license:license,licenses:licenses,scripts:scripts,dependencies:dependencies,devServer:devServer,keywords:keywords,devDependencies:devDependencies,husky:husky};
 
 /**
  * @namespace SkylinkConstants
@@ -8702,6 +8702,7 @@ const MESSAGES = {
     APPLYING_BUFFERED_REMOTE_OFFER: 'Applying buffered remote offer',
     BUFFERING_RESTART: 'Buffering restart offer until \'negotiated\' state is reached',
     APPLY_BUFFERED_RESTART: 'Applying buffered restart offer now that \'negotiated\' state is reached',
+    RESET_SET_REMOTE_DESCRIPTION_SUCCESS: 'Resetting setRemoteDescriptionSuccess flag',
     ERRORS: {
       FAILED_SET_LOCAL_DESCRIPTION: 'Failed setting local description -->',
       FAILED_SET_REMOTE_DESCRIPTION: 'Failed setting remote description -->',
@@ -8917,6 +8918,7 @@ const MESSAGES = {
       MIN_RECORDING_TIME: '4 seconds has not been recorded yet',
       STOP_ABRUPT: 'Recording stopped abruptly before 4 seconds',
       SESSION_EMPTY: 'Received request of "off" but the session is empty',
+      REC_SERVER_UNAVAILABLE: 'Recording server is unavailable to start a recording - retry later',
       MCU_RECORDING_ERROR: 'Recording error received from MCU ->',
     },
   },
@@ -20259,6 +20261,7 @@ const createNativePeerConnection = (targetMid, constraints, hasScreenShare, curr
   rtcPeerConnection.hasMainChannel = false;
   rtcPeerConnection.gathered = false;
   rtcPeerConnection.gathering = false;
+  rtcPeerConnection.setRemoteDescriptionSuccess = null;
 
   // candidates
   state.gatheredCandidates[targetMid] = {
@@ -22279,6 +22282,8 @@ const onRemoteDescriptionSetFailure = (room, targetMid, remoteDescription, error
   const peerConnection = peerConnections[targetMid];
   const { type } = remoteDescription;
 
+  peerConnection.setRemoteDescriptionSuccess = false;
+
   logger.log.ERROR([targetMid, TAGS.SESSION_DESCRIPTION, type, `${MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_SET_REMOTE_DESCRIPTION} ->`], {
     error,
     state: peerConnection.signalingState,
@@ -22308,6 +22313,8 @@ const onRemoteDescriptionSetSuccess = (RTCPeerConnection, room, targetMid, remot
   } else if (remoteDescription.type === 'answer') {
     updatedState.peerConnections[targetMid].setAnswer = 'remote';
   }
+
+  updatedState.peerConnections[targetMid].setRemoteDescriptionSuccess = true;
 
   Skylink.setSkylinkState(updatedState, room.id);
 
@@ -22965,6 +22972,7 @@ class NegotiationState {
     const state = Skylink.getSkylinkState(rid);
     const { hasMCU, room } = state;
     const targetMid = hasMCU && publisherId ? publisherId : mid;
+    const peerConnection = state.peerConnections[targetMid];
 
     const negState = this._getState(rid, targetMid);
     if (negState !== NEGOTIATION_STATES.LOCAL_ANSWER_SET) {
@@ -22986,6 +22994,9 @@ class NegotiationState {
 
       return helpers$6.renegotiateIfNeeded(state, targetMid).then((shouldRenegotiate) => {
         if (shouldRenegotiate) {
+          negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answerAck, true, MESSAGES.NEGOTIATION_PROGRESS.RESET_SET_REMOTE_DESCRIPTION_SUCCESS).DEBUG();
+          peerConnection.setRemoteDescriptionSuccess = null;
+
           refreshConnection(state, targetMid)
             .catch(error => negotiationStateHelpers.logInfoOrErrorAndSendStats(mid, type, room, answerAck, true, MESSAGES.NEGOTIATION_PROGRESS.ERRORS.FAILED_RENEGOTIATION, error).ERROR());
         } else {
@@ -24075,7 +24086,10 @@ const candidateHandler = (message) => {
     logger.log.WARN([mid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FILTERING_FLAG_NOT_HONOURED], nativeCandidate);
   }
 
-  if (peerConnection.remoteDescription && peerConnection.remoteDescription.sdp && peerConnection.localDescription && peerConnection.localDescription.sdp) {
+  // Add ice candidates only after setRemoteDescriptionSuccess according to protocol
+  // Additional flag setRemoteDescription for renegotiation scenario - remoteDescription and remoteDescription.sdp will be present due to previous
+  // negotiation
+  if (peerConnection.remoteDescription && peerConnection.remoteDescription.sdp && peerConnection.setRemoteDescriptionSuccess) {
     IceConnection.addIceCandidate(mid, candidateId, candidateType, nativeCandidate, state);
   } else {
     IceConnection.addIceCandidateToQueue(mid, candidateId, candidateType, nativeCandidate, state);
