@@ -181,6 +181,7 @@ const MESSAGES = {
     APPLYING_BUFFERED_REMOTE_OFFER: 'Applying buffered remote offer',
     BUFFERING_RESTART: 'Buffering restart offer until \'negotiated\' state is reached',
     APPLY_BUFFERED_RESTART: 'Applying buffered restart offer now that \'negotiated\' state is reached',
+    RESET_SET_REMOTE_DESCRIPTION_SUCCESS: 'Resetting setRemoteDescriptionSuccess flag',
     ERRORS: {
       FAILED_SET_LOCAL_DESCRIPTION: 'Failed setting local description -->',
       FAILED_SET_REMOTE_DESCRIPTION: 'Failed setting remote description -->',
@@ -396,6 +397,7 @@ const MESSAGES = {
       MIN_RECORDING_TIME: '4 seconds has not been recorded yet',
       STOP_ABRUPT: 'Recording stopped abruptly before 4 seconds',
       SESSION_EMPTY: 'Received request of "off" but the session is empty',
+      REC_SERVER_UNAVAILABLE: 'Recording server is unavailable to start a recording - retry later',
       MCU_RECORDING_ERROR: 'Recording error received from MCU ->',
     },
   },
