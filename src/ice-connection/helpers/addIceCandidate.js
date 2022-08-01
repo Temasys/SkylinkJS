@@ -138,8 +138,8 @@ const addIceCandidate = (targetMid, candidateId, candidateType, nativeCandidate,
 
   try {
     peerConnection.addIceCandidate(candidate)
-      .then(() => { addIceCandidateSuccess(room, targetMid, candidateId, candidateType, candidate); })
-      .catch((error) => { addIceCandidateFailure(room, targetMid, candidateId, candidateType, candidate, error); });
+    .then(() => { addIceCandidateSuccess(room, targetMid, candidateId, candidateType, candidate); })
+    .catch((error) => { addIceCandidateFailure(room, targetMid, candidateId, candidateType, candidate, error); });
   } catch (error) {
     addIceCandidateFailure.bind(peerConnection, room, targetMid, candidateId, candidateType, candidate, error);
   }

@@ -1,7 +1,7 @@
 /* eslint-disable no-underscore-dangle */
 import Skylink from '../../../../index';
 import {
-  HANDSHAKE_PROGRESS, PEER_TYPE, TAGS
+  HANDSHAKE_PROGRESS, PEER_TYPE, TAGS,
 } from '../../../../constants';
 import PeerConnection from '../../../../peer-connection';
 import logger from '../../../../logger';
