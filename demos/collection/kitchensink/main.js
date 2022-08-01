@@ -1421,6 +1421,7 @@ $(document).ready(function() {
     .then((recordingId) => {
       Demo.Methods.logToConsoleDOM(`Recording started: ${recordingId}`, 'Recording');
     })
+    .catch((error) => Demo.Methods.logToConsoleDOM(error.message, 'error'));
   });
   // //---------------------------------------------------
   $('#stop_recording_btn').click(function() {
