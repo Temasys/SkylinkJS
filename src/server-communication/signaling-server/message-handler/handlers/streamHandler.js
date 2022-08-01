@@ -4,6 +4,7 @@ import { streamEnded } from '../../../../skylink-events';
 import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import PeerData from '../../../../peer-data/index';
 import Skylink from '../../../../index';
+import Room from '../../../../room';
 
 /**
  * Function that handles the "stream" socket message received.
@@ -30,7 +31,7 @@ const streamHandler = (message) => {
     }
 
     dispatchEvent(streamEnded({
-      room,
+      room: Room.getRoomInfo(room),
       peerId: mid,
       peerInfo: PeerData.getPeerInfo(mid, room),
       streamId,

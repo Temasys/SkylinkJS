@@ -60,7 +60,7 @@ class AsyncMessaging {
     return this.isPersistent;
   }
 
-  sendMessage(roomName, message, targetPeerId) {
+  sendMessage(roomName, message, targetPeerId, peerSessionId) {
     const roomState = getRoomStateByName(roomName);
     const isPublicMessage = !targetPeerId || (Array.isArray(targetPeerId) && isEmptyArray(targetPeerId));
     if (getParamValidity(message, 'message', 'sendMessage') && roomState) {
@@ -72,7 +72,7 @@ class AsyncMessaging {
         }
 
         if (encryptedMessaging.canEncrypt(true)) {
-          encryptedMessaging.sendMessage(roomName, message, targetPeerId, this.isPersistent);
+          encryptedMessaging.sendMessage(roomName, message, targetPeerId, this.isPersistent, peerSessionId);
         }
       } catch (error) {
         SkylinkError.throwError(targetPeerId, TAGS.ASYNC_MESSAGING, MESSAGES.MESSAGING.ERRORS.DROPPING_MESSAGE, error.message);
@@ -80,14 +80,14 @@ class AsyncMessaging {
     }
   }
 
-  getStoredMessages() {
+  getStoredMessages(roomSessionId) {
     const roomState = Skylink.getSkylinkState(this.room.id);
     if (!this.hasPersistentMessage) {
       logger.log.WARN([this.peerId, TAGS.ASYNC_MESSAGING, null, `${MESSAGES.MESSAGING.PERSISTENCE.ERRORS.PERSISTENT_MESSAGE_FEATURE_NOT_ENABLED}`]);
       return;
     }
 
-    new SkylinkSignalingServer().getStoredMessages(roomState);
+    new SkylinkSignalingServer().getStoredMessages(roomState, roomSessionId);
   }
 
   canPersist() {
@@ -130,9 +130,9 @@ class AsyncMessaging {
     dispatchEvent(storedMessages({
       room: Room.getRoomInfo(room),
       storedMessages: messages,
-      isSelf: false,
+      isSelf: true, // local peer is the one retrieving the stored messages
       peerId: targetMid,
-      peerInfo: PeerData.getPeerInfo(targetMid, room),
+      peerInfo: PeerData.getCurrentSessionInfo(room),
     }));
   }
 

@@ -35,6 +35,12 @@ class SkylinkUser {
      * added to buffer and false when enter message has been sent
      */
     this.bufferMessage = null;
+    /**
+     * The peer session id. A new peer session id is generated for every authenticated session. Client can choose to cache the peer session id
+     * locally to be used when sending messages for a persistent peer id.
+     * @type {String}
+     */
+    this.peerSessionId = rawApiResponse.peerSessionId;
   }
 }
 

@@ -2,10 +2,12 @@ import Skylink from '../index';
 
 /**
  * @typedef roomInfo
- * @property {roomInfo} room - The room info
  * @property {Number} duration - The maximum allowed room duration
  * @property {String} id - The room id
  * @property {Boolean} inRoom - The flag if the peer is in the room
+ * @property {Boolean} isLocked - The flag if the room is locked
+ * @property {String} roomName - The room name
+ * @property {String} roomSessionId - The room name session id
  */
 /**
  * @param room

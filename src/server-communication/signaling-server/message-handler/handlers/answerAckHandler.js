@@ -3,6 +3,7 @@ import { dispatchEvent } from '../../../../utils/skylinkEventManager';
 import { handshakeProgress } from '../../../../skylink-events';
 import NegotiationState from '../../negotiationState/negotiationState';
 import logger from '../../../../logger';
+import Room from '../../../../room';
 
 /**
  * Method that handles the "answerAck" socket message received.
@@ -22,7 +23,7 @@ const answerAckHandler = (message) => {
   dispatchEvent(handshakeProgress({
     state: type,
     peerId: targetMid,
-    room: state.room,
+    room: Room.getRoomInfo(state.room),
   }));
 
   NegotiationState.onAnswerAckReceived(message);
