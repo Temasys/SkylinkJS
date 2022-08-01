@@ -103,7 +103,7 @@ const recordingHandler = (message) => {
   } else if (action === 'off') {
     recordingStopped(roomState, recordingId);
   } else if (action === 'error') {
-    dispatchRecordingEvent(null, recordingId, error);
+    dispatchRecordingEvent(RECORDING_STATE.ERROR, recordingId, error);
     logger.log.ERROR([PEER_TYPE.MCU, TAGS.RECORDING, recordingId, MESSAGES.RECORDING.ERRORS.MCU_RECORDING_ERROR], error);
     handleRecordingStats.send(roomState.room.id, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.MCU_RECORDING_ERROR, recordingId, null, error);
   }
