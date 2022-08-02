@@ -151,7 +151,7 @@ const _processPeerFromEnter = (params) => {
         peerId: targetMid,
         peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
         isSelf: false,
-        room: Room.getRoomInfo(currentRoom.id),
+        room: Room.getRoomInfo(currentRoom),
       }));
 
       break;
