@@ -1120,6 +1120,14 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.RECORDING_STATE, (e
   if (state === SkylinkConstants.RECORDING_STATE.ERROR) {
     Demo.Methods.logToConsoleDOM(`Recording Error - ${error}`, 'error');
   }
+
+  if (state === SkylinkConstants.RECORDING_STATE.START) {
+    Demo.Methods.logToConsoleDOM(`Recording started: ${recordingId}`, 'Recording');
+  }
+
+  if (state === SkylinkConstants.RECORDING_STATE.STOP) {
+    Demo.Methods.logToConsoleDOM(`Recording stopped: ${recordingId}`, 'Recording');
+  }
 });
 
 /********************************************************
@@ -1418,17 +1426,13 @@ $(document).ready(function() {
   // //---------------------------------------------------
   $('#start_recording_btn').click(function() {
     Demo.Skylink.startRecording(config.defaultRoom)
-    .then((recordingId) => {
-      Demo.Methods.logToConsoleDOM(`Recording started: ${recordingId}`, 'Recording');
-    })
     .catch((error) => Demo.Methods.logToConsoleDOM(error.message, 'error'));
   });
   // //---------------------------------------------------
   $('#stop_recording_btn').click(function() {
     Demo.Skylink.stopRecording(config.defaultRoom)
-    .then((recordingId) => {
-      Demo.Methods.logToConsoleDOM(`Recording stopped: ${recordingId}`, 'Recording');
-      });
+    .catch((error) => Demo.Methods.logToConsoleDOM(error.message, 'error'));
+
     $('#peer_video_list').on('click', '.toggle-connstats', function() {
       $(this).parent().find('.connstats').slideToggle();
       $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
