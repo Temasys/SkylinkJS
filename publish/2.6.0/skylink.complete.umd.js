@@ -3,7 +3,7 @@
   factory();
 })((function () { 'use strict';
 
-  /* SkylinkJS v2.6.0 Mon Aug 01 2022 10:58:26 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.6.0 Tue Aug 02 2022 04:47:07 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -8567,6 +8567,7 @@
           ERROR: 'Leave room error -->',
           NO_PEERS: 'No peers in room',
           DROPPING_HANGUP: 'Dropping hang-up from remote peer',
+          DROPPING_DUPLICATE_BYE: 'Dropping duplicate bye',
           LEAVE_ALL_ROOMS: {
             SUCCESS: 'Successfully left all rooms',
             ERROR: 'Leave all rooms error -->',
@@ -8608,10 +8609,11 @@
         MCU: 'MCU connected',
         FAILED_STATE: 'Peer Connection state: failed',
         ADD_TRANSCEIVER: 'Adding empty transceiver',
+        SDP_ERROR: 'Sdp error',
         ERRORS: {
           REMOVE_TRACK: 'Error removing track from peer connection',
           NOT_FOUND: 'Peer Connection not found',
-          NOT_STABLE: 'Peer Connetion is not stable',
+          NOT_STABLE: 'Peer Connection is not stable',
         },
         REFRESH_CONNECTION: {
           START: 'Refreshing peer connections',
@@ -8652,9 +8654,11 @@
         ADD_CANDIDATE_TO_BUFFER: 'Adding ICE candidate to buffer',
         CANDIDATE_GENERATED: 'Generated ICE candidate ->',
         SENDING_CANDIDATE: 'Sending ICE candidate ->',
+        NO_SDP_MID: 'No mid for the candidate in sdp',
       },
       SESSION_DESCRIPTION: {
         parsing_media_ssrc: 'Parsing session description media SSRCs ->',
+        NO_REMOTE_DESCRIPTION: 'No remote description',
       },
       DATA_CHANNEL: {
         NO_DATA_CHANNEL_CONNECTION: 'No Data Channel connection',
@@ -8913,9 +8917,12 @@
           ERROR_STOP_ACTIVE: 'error-stop-when-active',
           ERROR_MIN_STOP: 'error-min-stop',
           MCU_RECORDING_ERROR: 'mcu-recording-error',
+          REC_SERVER_UNAVAILABLE: 'rec-server-unavailable',
         },
       },
       RECORDING: {
+        AVAILABLE: 'Recording server is available to start a recording',
+        UNAVAILABLE: 'Recording server is unavailable to start a recording',
         START_SUCCESS: 'Started recording',
         STOP_SUCCESS: 'Stopped recording',
         START_FAILED: 'Failed to start recording',
@@ -10472,7 +10479,7 @@
                 content: new Error(MESSAGES.JOIN_ROOM.ERRORS.CODEC_SUPPORT),
                 errorCode: READY_STATE_CHANGE_ERROR.PARSE_CODECS,
               },
-              room: Room$1.getRoomInfo(room),
+              room: Room.getRoomInfo(room),
             }));
             reject(new Error(MESSAGES.JOIN_ROOM.ERRORS.CODEC_SUPPORT));
           } else {
@@ -10494,7 +10501,7 @@
               content: new Error(error.message || error.toString()),
               errorCode: READY_STATE_CHANGE_ERROR.PARSE_CODECS,
             },
-            room: Room$1.getRoomInfo(room),
+            room: Room.getRoomInfo(room),
           }));
           reject(new Error(error.message || error.toString()));
         });
@@ -17591,7 +17598,7 @@
       }
 
       dispatchEvent(onIncomingMessage({
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
         message,
         isSelf,
         peerId: isSelf ? user.sid : targetPeerId,
@@ -17755,7 +17762,7 @@
 
       dispatchEncryptSecretEvent() {
         dispatchEvent(encryptionSecretsUpdated({
-          room: Room$1.getRoomInfo(this.room),
+          room: Room.getRoomInfo(this.room),
           encryptSecrets: this.encryptSecrets,
           selectedSecretId: this.selectedSecretId,
           peerInfo: getUserInfo(this.room),
@@ -17860,7 +17867,7 @@
         this.isPersistent = isPersistent;
 
         dispatchEvent(persistentMessageState({
-          room: Room$1.getRoomInfo(this.room),
+          room: Room.getRoomInfo(this.room),
           isPersistent: this.isPersistent,
           peerInfo: getUserInfo(this.room),
           peerId: this.peerId,
@@ -17939,7 +17946,7 @@
         }
 
         dispatchEvent(storedMessages({
-          room: Room$1.getRoomInfo(room),
+          room: Room.getRoomInfo(room),
           storedMessages: messages,
           isSelf: true, // local peer is the one retrieving the stored messages
           peerId: targetMid,
@@ -18275,7 +18282,7 @@
 
       logger.log.INFO([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.CANDIDATE_ADDED]);
       dispatchEvent(candidateProcessingState({
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
         state: CANDIDATE_PROCESSING_STATE.PROCESS_SUCCESS,
         peerId: targetMid,
         candidateId,
@@ -18304,7 +18311,7 @@
 
       logger.log.WARN([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FAILED_ADDING_CANDIDATE], error);
       dispatchEvent(candidateProcessingState({
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
         state: CANDIDATE_PROCESSING_STATE.PROCESS_ERROR,
         peerId: targetMid,
         candidateId,
@@ -18343,7 +18350,7 @@
       logger.log.DEBUG([targetMid, TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.ADDING_CANDIDATE]);
       dispatchEvent(candidateProcessingState({
         peerId: targetMid,
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
         candidateType,
         candidate,
         candidateId,
@@ -18374,7 +18381,7 @@
 
         dispatchEvent(candidateProcessingState({
           peerId: targetMid,
-          room: Room$1.getRoomInfo(room.id),
+          room: Room.getRoomInfo(room),
           candidateType,
           candidate,
           candidateId,
@@ -18461,7 +18468,7 @@
           peerConnection.gathering = true;
           peerConnection.gathered = false;
           dispatchEvent(candidateGenerationState({
-            room: Room$1.getRoomInfo(currentRoom),
+            room: Room.getRoomInfo(currentRoom),
             peerId: targetMid,
             state: CANDIDATE_GENERATION_STATE.GATHERING,
           }));
@@ -18567,7 +18574,7 @@
 
       handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.BUFFERED, targetMid, candidateId, nativeCandidate);
       dispatchEvent(candidateProcessingState({
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
         state: CANDIDATE_PROCESSING_STATE.BUFFERED,
         peerId: targetMid,
         candidateId,
@@ -19211,7 +19218,7 @@
       logger.log.INFO([targetMid, 'RTCIceGatheringState', null, ICE_CONNECTION.STATE_CHANGE], iceGatheringState);
       dispatchEvent(candidateGenerationState({
         state: iceGatheringState,
-        room: Room$1.getRoomInfo(roomState.room),
+        room: Room.getRoomInfo(roomState.room),
         peerId: targetMid,
       }));
     };
@@ -19648,7 +19655,7 @@
       });
 
       PeerStream.dispatchStreamEvent(STREAM_ENDED, {
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
         peerId: user.sid,
         peerInfo: PeerData.getCurrentSessionInfo(room),
         isSelf,
@@ -20188,7 +20195,7 @@
         state: HANDSHAKE_PROGRESS.ERROR,
         peerId: targetMid,
         error,
-        room: Room$1.getRoomInfo(roomState.room),
+        room: Room.getRoomInfo(roomState.room),
       }));
       reject(error);
     };
@@ -20347,7 +20354,7 @@
           state: HANDSHAKE_PROGRESS.ERROR,
           peerId: targetMid,
           error,
-          room: Room$1.getRoomInfo(room),
+          room: Room.getRoomInfo(room),
         }));
       }
 
@@ -20434,7 +20441,7 @@
         state: HANDSHAKE_PROGRESS.ERROR,
         peerId: targetMid,
         error,
-        room: Room$1.getRoomInfo(roomState.room),
+        room: Room.getRoomInfo(roomState.room),
       }));
       reject(error);
     };
@@ -20486,7 +20493,7 @@
       const senderPeerId = data.sender || peerId;
       logger.log.INFO([senderPeerId, TAGS.DATA_CHANNEL, channelProp, MESSAGES.DATA_CHANNEL.RECEIVED_P2P_MESSAGE], data);
       dispatchEvent(onIncomingMessage({
-        room: Room$1.getRoomInfo(roomState.room),
+        room: Room.getRoomInfo(roomState.room),
         message: {
           targetPeerId: data.target,
           content: data.data,
@@ -21576,7 +21583,7 @@
 
       dispatchEvent(onDataChannelStateChanged({
         state: DATA_CHANNEL_STATE.BUFFERED_AMOUNT_LOW,
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
         peerId,
         channelName,
         channelType,
@@ -21610,7 +21617,7 @@
         dispatchEvent(onDataChannelStateChanged({
           state: DATA_CHANNEL_STATE.CLOSED,
           peerId,
-          room: Room$1.getRoomInfo(roomState.room),
+          room: Room.getRoomInfo(roomState.room),
           channelName,
           channelType,
           bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
@@ -21624,7 +21631,7 @@
         dispatchEvent(onDataChannelStateChanged({
           state: DATA_CHANNEL_STATE.CLOSED,
           peerId,
-          room: Room$1.getRoomInfo(room),
+          room: Room.getRoomInfo(room),
           channelName,
           channelType,
           bufferAmount: PeerConnection.getDataChannelBuffer(dataChannel),
@@ -21994,7 +22001,7 @@
 
       if (targetPeerId || !hasMCU) {
         dispatchEvent(onIncomingMessage({
-          room: Room$1.getRoomInfo(room),
+          room: Room.getRoomInfo(room),
           message: {
             targetPeerId: targetPeerId || null,
             content: message,
@@ -22099,7 +22106,7 @@
               processed: gatheredCandidates.receiving.srflx.length + gatheredCandidates.receiving.relay.length + gatheredCandidates.receiving.host.length,
             };
             dispatchEvent(candidatesGathered({
-              room: Room$1.getRoomInfo(state.room),
+              room: Room.getRoomInfo(state.room),
               peerId: targetMid,
               candidatesLength,
             }));
@@ -22273,7 +22280,7 @@
         state: HANDSHAKE_PROGRESS.ERROR,
         peerId: isRemote ? targetMid : user.sid,
         error,
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
       }));
     };
 
@@ -22333,7 +22340,7 @@
       dispatchEvent(handshakeProgress({
         state: HANDSHAKE_PROGRESS[remoteDescription.type.toUpperCase()],
         peerId: targetMid,
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
       }));
 
       IceConnection.addIceCandidateFromQueue(targetMid, room);
@@ -22548,14 +22555,14 @@
             dispatchEvent(serverPeerJoined({
               peerId: targetMid,
               serverPeerType: PEER_TYPE.MCU,
-              room: Room$1.getRoomInfo(currentRoom),
+              room: Room.getRoomInfo(currentRoom),
             }));
 
             dispatchEvent(handshakeProgress({
               peerId: targetMid,
               state: HANDSHAKE_PROGRESS.WELCOME,
               error: null,
-              room: Room$1.getRoomInfo(currentRoom),
+              room: Room.getRoomInfo(currentRoom),
             }));
           }
 
@@ -22574,7 +22581,7 @@
                   peerId: PEER_ID,
                   peerInfo: PeerData.getPeerInfo(PEER_ID, currentRoom),
                   isSelf: false,
-                  room: Room$1.getRoomInfo(currentRoom),
+                  room: Room.getRoomInfo(currentRoom),
                 }));
               }
             }
@@ -22590,14 +22597,14 @@
               dispatchEvent(serverPeerJoined({
                 peerId: targetMid,
                 serverPeerType: PEER_TYPE.REC_SRV,
-                room: Room$1.getRoomInfo(currentRoom),
+                room: Room.getRoomInfo(currentRoom),
               }));
             } else {
               dispatchEvent(peerJoined({
                 peerId: targetMid,
                 peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
                 isSelf: false,
-                room: Room$1.getRoomInfo(currentRoom),
+                room: Room.getRoomInfo(currentRoom),
               }));
             }
 
@@ -22605,7 +22612,7 @@
               peerId: targetMid,
               state: HANDSHAKE_PROGRESS.WELCOME,
               error: null,
-              room: Room$1.getRoomInfo(currentRoom),
+              room: Room.getRoomInfo(currentRoom),
             }));
           }
 
@@ -22634,7 +22641,7 @@
             peerId: targetMid,
             peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
             isSelf: false,
-            room: Room$1.getRoomInfo(currentRoom.id),
+            room: Room.getRoomInfo(currentRoom),
           }));
 
           break;
@@ -22647,14 +22654,14 @@
               dispatchEvent(serverPeerJoined({
                 peerId: targetMid,
                 serverPeerType: PEER_TYPE.REC_SRV,
-                room: Room$1.getRoomInfo(currentRoom),
+                room: Room.getRoomInfo(currentRoom),
               }));
             } else {
               dispatchEvent(peerJoined({
                 peerId: targetMid,
                 peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
                 isSelf: false,
-                room: Room$1.getRoomInfo(currentRoom),
+                room: Room.getRoomInfo(currentRoom),
               }));
             }
           }
@@ -23854,7 +23861,7 @@
         PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
           stream,
           peerId: sid,
-          room: Room$1.getRoomInfo(room),
+          room: Room.getRoomInfo(room),
           isSelf: true,
           peerInfo: PeerData.getCurrentSessionInfo(room),
           streamId: stream.id,
@@ -23912,7 +23919,7 @@
         peerId: roomState.user.sid,
         peerInfo: PeerData.getCurrentSessionInfo(roomState.room),
         isSelf: true,
-        room: Room$1.getRoomInfo(roomState.room),
+        room: Room.getRoomInfo(roomState.room),
         peerSessionId: roomState.user.peerSessionId,
       }));
 
@@ -23986,7 +23993,7 @@
       dispatchEvent(handshakeProgress({
         state: type,
         peerId: targetMid,
-        room: Room$1.getRoomInfo(state.room),
+        room: Room.getRoomInfo(state.room),
       }));
 
       NegotiationState.onAnswerAckReceived(message);
@@ -24045,7 +24052,7 @@
       };
 
       dispatchEvent(candidateProcessingState({
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
         state: CANDIDATE_PROCESSING_STATE.RECEIVED,
         peerId: mid,
         candidateId,
@@ -24060,7 +24067,7 @@
         candidateProcessingStateEventDetail.error = new Error(PEER_CONNECTION.NO_PEER_CONNECTION);
         handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
         dispatchEvent(candidateProcessingState({
-          room: Room$1.getRoomInfo(room),
+          room: Room.getRoomInfo(room),
           state: CANDIDATE_PROCESSING_STATE.DROPPED,
           peerId: mid,
           candidateId,
@@ -24080,7 +24087,7 @@
           candidateProcessingStateEventDetail.error = new Error(ICE_CANDIDATE.FILTERED_CANDIDATE);
           handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.DROPPED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
           dispatchEvent(candidateProcessingState({
-            room: Room$1.getRoomInfo(room),
+            room: Room.getRoomInfo(room),
             state: CANDIDATE_PROCESSING_STATE.DROPPED,
             peerId: mid,
             candidateId,
@@ -24358,7 +24365,7 @@
         }
 
         dispatchEvent(streamEnded({
-          room: Room$1.getRoomInfo(room),
+          room: Room.getRoomInfo(room),
           peerId: mid,
           peerInfo: PeerData.getPeerInfo(mid, room),
           streamId,
@@ -24491,6 +24498,8 @@
       return null;
     };
 
+    // NB: Recording server will send an 'unavailable' state when a recording has been stopped but the SDK does not need to handle that as a new
+    // recording can be immediately started.
     const recordingHandler = (message) => {
       const {
         action, rid, recordingId, error,
@@ -24908,7 +24917,7 @@
         peerInfo: PeerData.getPeerInfo(mid, state.room),
         peerId: mid,
         isSelf: false,
-        room: Room$1.getRoomInfo(state.room),
+        room: Room.getRoomInfo(state.room),
       }));
     };
 
@@ -25584,7 +25593,7 @@
           peerId: roomState.user.sid,
           state: HANDSHAKE_PROGRESS[state],
           error: null,
-          room: Room$1.getRoomInfo(roomState.room),
+          room: Room.getRoomInfo(roomState.room),
         }));
       }
 
@@ -25776,7 +25785,7 @@
         dispatchEvent(serverPeerLeft({
           peerId,
           serverPeerType: PEER_TYPE.MCU,
-          room: Room$1.getRoomInfo(room),
+          room: Room.getRoomInfo(room),
         }));
       }
 
@@ -25893,7 +25902,7 @@
                 peerId: user.sid,
                 peerInfo: PeerData.getCurrentSessionInfo(room),
                 isSelf: true,
-                room: Room$1.getRoomInfo(room),
+                room: Room.getRoomInfo(room),
               }));
               clearRoomState(removedState.room.id);
               resolve(removedState.room.roomName);
@@ -25918,7 +25927,7 @@
                 peerId: user.sid,
                 peerInfo: PeerData.getCurrentSessionInfo(room),
                 isSelf: true,
-                room: Room$1.getRoomInfo(room),
+                room: Room.getRoomInfo(room),
               }));
               clearRoomState(removedState.room.id);
               resolve(removedState.room.roomName);
@@ -26471,7 +26480,7 @@
         peerInfo: PeerData.getCurrentSessionInfo(room),
         peerId: user.sid,
         isSelf: true,
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
       }));
     };
 
@@ -26525,7 +26534,7 @@
      * @classdesc Class that contains the methods for Room.
      * @private
      */
-    class Room$1 {
+    class Room {
       /** @lends Room */
       static leaveRoom(roomState, stopStreams) {
         return leaveRoom(roomState, stopStreams);
@@ -26588,7 +26597,7 @@
         return peerInfo;
       }
 
-      peerInfo.room = Room$1.getRoomInfo(room);
+      peerInfo.room = Room.getRoomInfo(room);
       peerInfo.settings.data = !!(state.peerDataChannels[peerId] && state.peerDataChannels[peerId].main && state.peerDataChannels[peerId].main.channel && state.peerDataChannels[peerId].main.channel.readyState === DATA_CHANNEL_STATE.OPEN);
 
       return peerInfo;
@@ -26632,7 +26641,7 @@
           DTProtocolVersion: DT_PROTOCOL_VERSION,
           SDKVersion: SDK_VERSION,
         },
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
         config: {
           enableDataChannel,
           enableIceRestart,
@@ -27269,7 +27278,7 @@
       const detail = {
         stream,
         peerId: targetMid,
-        room: Room$1.getRoomInfo(room),
+        room: Room.getRoomInfo(room),
         isSelf: hasMCU ? (targetMid === user.sid || false) : false,
         peerInfo: PeerData.getPeerInfo(targetMid, room),
         streamId: stream.id,
@@ -27675,7 +27684,7 @@
           PeerStream.dispatchStreamEvent(ON_INCOMING_SCREEN_STREAM, {
             stream,
             peerId: user.sid,
-            room: Room$1.getRoomInfo(room),
+            room: Room.getRoomInfo(room),
             isSelf: true,
             peerInfo: PeerData.getCurrentSessionInfo(room),
             streamId: stream.id,
@@ -27687,7 +27696,7 @@
           PeerStream.dispatchStreamEvent(ON_INCOMING_STREAM, {
             stream,
             peerId: user.sid,
-            room: Room$1.getRoomInfo(room),
+            room: Room.getRoomInfo(room),
             isSelf: true,
             peerInfo: PeerData.getCurrentSessionInfo(room),
             streamId: stream.id,
@@ -30322,7 +30331,7 @@
        * @alias Skylink#joinRoom
        */
       async joinRoom(options = {}, prefetchedStream) {
-        return Room$1.joinRoom(options, prefetchedStream);
+        return Room.joinRoom(options, prefetchedStream);
       }
 
       /**
@@ -31052,7 +31061,7 @@
       leaveRoom(roomName, stopStreams = true) {
         const roomState = getRoomStateByName(roomName);
         if (roomState) {
-          return Room$1.leaveRoom(roomState, stopStreams);
+          return Room.leaveRoom(roomState, stopStreams);
         }
 
         return null;
@@ -31066,7 +31075,7 @@
        * @since 2.0.0
        */
       leaveAllRooms(stopStreams = true) {
-        return Room$1.leaveAllRooms(stopStreams);
+        return Room.leaveAllRooms(stopStreams);
       }
 
       /**
@@ -31175,7 +31184,7 @@
       lockRoom(roomName) {
         const roomState = getRoomStateByName(roomName);
         if (roomState) {
-          return Room$1.lockRoom(roomState);
+          return Room.lockRoom(roomState);
         }
 
         return null;
@@ -31192,7 +31201,7 @@
       unlockRoom(roomName) {
         const roomState = getRoomStateByName(roomName);
         if (roomState) {
-          return Room$1.unlockRoom(roomState);
+          return Room.unlockRoom(roomState);
         }
 
         return null;
