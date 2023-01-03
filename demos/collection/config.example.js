@@ -30,6 +30,10 @@ const config = {
   audioFallback: !!getParameterByName('audioFallback'),
   enableDataChannel: true,
   forceSSL: true,
+  bandwidth: {
+    video: 64,
+    audio: 20,
+  },
 };
 
 /**
