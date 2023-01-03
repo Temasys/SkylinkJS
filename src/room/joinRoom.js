@@ -73,6 +73,8 @@ const joinRoom = (opts = {}, prefetchedStream = null) => new Promise((resolve, r
         userMediaParams.room = room;
         // has prefetchedStream or has passed in a mediaStream as first argument or has passed in an array of mediaStreams as first argument
         if (prefetchedStream || (options.id && options.active) || Array.isArray(options)) {
+          const updatedRoomState = mediaStreamHelpers.parseMediaOptions(options, skylinkState);
+          Skylink.setSkylinkState(updatedRoomState, room.id);
           MediaStream.processPrefetchedStreams(response.room_key, prefetchedStream, options).then(() => {
             signalingServer.joinRoom(room);
             resolve(null);
