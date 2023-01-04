@@ -1379,12 +1379,25 @@ $(document).ready(function() {
     config.appKey = selectedAppKey || config.appKey;
 
     Demo.Skylink = new Skylink(config);
-    Demo.Skylink.joinRoom(joinRoomOptions);
-    $('#join_room_btn').addClass('disabled');
-    if (Demo.isMCU) {
-      $('#join_room_container').css("display", "none");
-      $('#mcu_loading').css("display", "block");
-    }
+    Demo.Skylink.getStreamSources().then(sources => {
+      const audioInputDevices = sources.audio.input;
+      const videoInputDevices = sources.video.input;
+      Demo.Skylink.getUserMedia(null, {
+        audio : {
+          deviceId : audioInputDevices[0].deviceId,
+        },
+        video : {
+          deviceId   : videoInputDevices[0].deviceId,
+        }
+      }).then(prefetchedStreams => {
+        Demo.Skylink.joinRoom(joinRoomOptions, prefetchedStreams);
+        $('#join_room_btn').addClass('disabled');
+        if (Demo.isMCU) {
+          $('#join_room_container').css("display", "none");
+          $('#mcu_loading').css("display", "block");
+        }
+      })
+    })
   });
   // //---------------------------------------------------
   $('#share_screen_btn').click(function () {

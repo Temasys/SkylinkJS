@@ -1,4 +1,4 @@
-/* SkylinkJS v2.6.0 Tue Aug 02 2022 06:16:57 GMT+0000 (Coordinated Universal Time) */
+/* SkylinkJS v2.6.0 Wed Jan 04 2023 18:31:48 GMT+0000 (Coordinated Universal Time) */
 /*
  *  Copyright (c) 2016 The WebRTC project authors. All Rights Reserved.
  *
@@ -26414,6 +26414,8 @@ const joinRoom = (opts = {}, prefetchedStream = null) => new Promise((resolve, r
         userMediaParams.room = room;
         // has prefetchedStream or has passed in a mediaStream as first argument or has passed in an array of mediaStreams as first argument
         if (prefetchedStream || (options.id && options.active) || Array.isArray(options)) {
+          const updatedRoomState = helpers$3.parseMediaOptions(options, skylinkState);
+          Skylink.setSkylinkState(updatedRoomState, room.id);
           MediaStream.processPrefetchedStreams(response.room_key, prefetchedStream, options).then(() => {
             signalingServer.joinRoom(room);
             resolve(null);
