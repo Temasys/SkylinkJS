@@ -761,13 +761,29 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @description Method that stops the <code>userMedia</code> stream returned from {@link Skylink#getUserMedia|getUserMedia}</a> method.
+   * @description Method that stops the <code>userMedia</code> stream (also known as a prefetched stream) returned from {@link
+    * Skylink#getUserMedia|getUserMedia}</a> method.
    * @param {String} roomName - The room name.
    * @param {String} streamId - The stream id of the stream to stop. If streamId is not set, all <code>userMedia</code> streams will be stopped.
    * @return {Promise}
    * @example
+   * Example 1: Stopping all the streams in a room
+   *
    * skylink.stopStreams(roomName)
    * .then(() => // do some thing);
+   *
+   * NOTE: If there is a need to call multiple stopStreams, it is recommended to implement it as a promise chain i.e. the previous call should
+   * resolve before the next call is made. This applies also to calling sendStream at the end of the stopStreams chain.
+   * Example 2: Stopping multiple streams with streamId
+   *
+   * skylink.stopStreams(roomName, streamID_1)
+   * .then(() => skylink.stopStreams(roomName, streamID_2));
+   *
+   * Example 3: Stopping a stream then sending a stream
+   *
+   * skylink.stopStreams(roomName, streamID_1)
+   * .then(() => skylink.sendStream(roomName, stream));
+   *
    * @fires {@link SkylinkEvents.event:MEDIA_ACCESS_STOPPED|MEDIA ACCESS STOPPED} event with parameter payload <code>isSelf=true</code> and <code>isScreensharing=false</code> if there is a <code>getUserMedia</code> stream.
    * @fires {@link SkylinkEvents.event:STREAM_ENDED|STREAM ENDED} event with parameter payload <code>isSelf=true</code> and <code>isScreensharing=false</code> if there is a <code>getUserMedia</code> stream and user is in a room.
    * @fires {@link SkylinkEvents.event:PEER_UPDATED|PEER UPDATED} event with parameter payload <code>isSelf=true</code>.
