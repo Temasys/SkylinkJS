@@ -1371,17 +1371,45 @@ $(document).ready(function() {
     config.appKey = selectedAppKey || config.appKey;
 
     Demo.Skylink = new Skylink(config);
+    Demo.Skylink.joinRoom(joinRoomOptions);
+    $('#join_room_btn').addClass('disabled');
+    if (Demo.isMCU) {
+      $('#join_room_container').css("display", "none");
+      $('#mcu_loading').css("display", "block");
+    }
+  })
+  // //---------------------------------------------------
+  // Uncomment join_room_with_prefetched_stream_btn in index.html to test
+  $('#join_room_with_prefetched_stream_btn').click(function () {
+    if (!joinRoomOptions.audio && !joinRoomOptions.video) {
+      console.error(`Audio or Video must be requested to join with a prefetched stream.`);
+      return
+    }
+
+    Demo.userData = { displayName: $('#join_room_user_info').val(), peerSessionId: Demo.Methods.getFromLocalStorage('peerSessionId')};
+    joinRoomOptions.userData = JSON.stringify(Demo.userData);
+    Demo.rememberMe = $('#remember_me').prop('checked');
+
+    config.appKey = selectedAppKey || config.appKey;
+
+    Demo.Skylink = new Skylink(config);
     Demo.Skylink.getStreamSources().then(sources => {
       const audioInputDevices = sources.audio.input;
       const videoInputDevices = sources.video.input;
-      Demo.Skylink.getUserMedia(null, {
-        audio : {
+      const prefetchJoinRoomOptions = {}
+      if (joinRoomOptions.audio) {
+        prefetchJoinRoomOptions.audio = {
           deviceId : audioInputDevices[0].deviceId,
-        },
-        video : {
+        }
+      }
+
+      if (joinRoomOptions.video) {
+        prefetchJoinRoomOptions.video = {
           deviceId   : videoInputDevices[0].deviceId,
         }
-      }).then(prefetchedStreams => {
+      }
+
+      Demo.Skylink.getUserMedia(null, prefetchJoinRoomOptions).then(prefetchedStreams => {
         Demo.Skylink.joinRoom(joinRoomOptions, prefetchedStreams);
         $('#join_room_btn').addClass('disabled');
         if (Demo.isMCU) {
