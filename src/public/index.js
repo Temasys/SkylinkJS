@@ -714,6 +714,8 @@ class SkylinkPublicInterface {
    */
   stopPrefetchedStream(stream) {
     if (stream) {
+      const isAudio = stream.getAudioTracks().length > 0;
+      const isVideo = stream.getVideoTracks().length > 0;
       stream.getTracks().forEach((track) => {
         track.stop();
       });
@@ -723,7 +725,8 @@ class SkylinkPublicInterface {
         peerId: null,
         peerInfo: null,
         isSelf: true,
-        isScreensharing: false,
+        isAudio,
+        isVideo,
         streamId: stream.id,
       }));
     }
