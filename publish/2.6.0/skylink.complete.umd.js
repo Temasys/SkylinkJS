@@ -3,7 +3,7 @@
   factory();
 })((function () { 'use strict';
 
-  /* SkylinkJS v2.6.0 Fri Jan 06 2023 10:41:15 GMT+0000 (Coordinated Universal Time) */
+  /* SkylinkJS v2.6.0 Mon Jan 09 2023 03:20:45 GMT+0000 (Coordinated Universal Time) */
   (function (global, factory) {
     typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports) :
     typeof define === 'function' && define.amd ? define(['exports'], factory) :
@@ -29920,7 +29920,15 @@
       const {
         currentRecordingId, recordingStartInterval, peerConnections, hasMCU,
       } = roomState;
-      const errorMessage = isStartRecording ? MESSAGES.RECORDING.START_FAILED : MESSAGES.RECORDING.STOP_FAILED;
+      let errorMessage = isStartRecording ? MESSAGES.RECORDING.START_FAILED : MESSAGES.RECORDING.STOP_FAILED;
+
+      // TODO: Remove this block of code when REC SERV is ready to be released
+      if (!hasMCU) {
+        errorMessage = `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.MCU_NOT_CONNECTED}`;
+        const statsStateKey = isStartRecording ? MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_NO_MCU_START : MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_NO_MCU_STOP;
+        const error = manageErrorStatsAndCallback(roomState, errorMessage, statsStateKey, null, null);
+        reject(error);
+      }
 
       if (isStartRecording && currentRecordingId) {
         const error = manageErrorStatsAndCallback(roomState, `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.EXISTING_RECORDING_IN_PROGRESS}`, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_START_ACTIVE, currentRecordingId, null);
@@ -29951,7 +29959,7 @@
      * @param {SkylinkState} roomState
      * @private
      */
-    const startRecording = roomState => commonRecordingOperations(roomState, true);
+    const startRecording = (roomState) => commonRecordingOperations(roomState, true);
 
     /**
      * The current room's Skylink state
