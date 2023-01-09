@@ -155,7 +155,7 @@ export const peerLeft = (detail = {}) => new SkylinkEvent(PEER_LEFT, { detail })
  * @param {Object} detail - Event's payload.
  * @param {roomInfo} detail.room - The current room
  * @param {String} detail.peerId - The peer's id
- * @param {SkylinkConstants.SERVER_PEER_TYPE} detail.serverPeerType - The server Peer type
+ * @param {SkylinkConstants.PEER_TYPE} detail.serverPeerType - The server Peer type
  */
 export const serverPeerJoined = (detail = {}) => new SkylinkEvent(SERVER_PEER_JOINED, { detail });
 
@@ -166,7 +166,7 @@ export const serverPeerJoined = (detail = {}) => new SkylinkEvent(SERVER_PEER_JO
  * @param {Object} detail - Event's payload
  * @param {String} detail.peerId - The Peer ID
  * @param {roomInfo} detail.room - The room.
- * @param {SkylinkConstants.SERVER_PEER_TYPE} detail.serverPeerType - The server Peer type
+ * @param {SkylinkConstants.PEER_TYPE} detail.serverPeerType - The server Peer type
  */
 export const serverPeerLeft = (detail = {}) => new SkylinkEvent(SERVER_PEER_LEFT, { detail });
 
@@ -218,8 +218,7 @@ export const sessionDisconnect = (detail = {}) => new SkylinkEvent(SESSION_DISCO
  * @param {statistics} [detail.stats] The Peer connection current stats.
  * @param {Error} detail.error - The error object. Defined only when &lt;code>state&lt;/code> payload is &lt;code>RETRIEVE_ERROR&lt;/code>.
  */
-export const getConnectionStatusStateChange = (detail = {}) => new SkylinkEvent(GET_CONNECTION_STATUS_STATE_CHANGE, { detail });
-</code></pre>
+export const getConnectionStatusStateChange = (detail = {}) => new SkylinkEvent(GET_CONNECTION_STATUS_STATE_CHANGE, { detail });</code></pre>
   </article>
 </section>
 

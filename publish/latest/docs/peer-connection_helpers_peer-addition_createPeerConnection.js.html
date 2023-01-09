@@ -122,6 +122,7 @@ const createNativePeerConnection = (targetMid, constraints, hasScreenShare, curr
   rtcPeerConnection.hasMainChannel = false;
   rtcPeerConnection.gathered = false;
   rtcPeerConnection.gathering = false;
+  rtcPeerConnection.setRemoteDescriptionSuccess = null;
 
   // candidates
   state.gatheredCandidates[targetMid] = {

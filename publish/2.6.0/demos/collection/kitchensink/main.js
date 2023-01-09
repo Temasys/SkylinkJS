@@ -1111,6 +1111,25 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
   }
 });
 
+// //---------------------------------------------------
+// // RECORDING EVENTS
+// //---------------------------------------------------
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.RECORDING_STATE, (evt) => {
+  const eventDetail = evt.detail;
+  const { recordingId, state, error } = eventDetail;
+  if (state === SkylinkConstants.RECORDING_STATE.ERROR) {
+    Demo.Methods.logToConsoleDOM(`Recording Error - ${error}`, 'error');
+  }
+
+  if (state === SkylinkConstants.RECORDING_STATE.START) {
+    Demo.Methods.logToConsoleDOM(`Recording started: ${recordingId}`, 'Recording');
+  }
+
+  if (state === SkylinkConstants.RECORDING_STATE.STOP) {
+    Demo.Methods.logToConsoleDOM(`Recording stopped: ${recordingId}`, 'Recording');
+  }
+});
+
 /********************************************************
   DOM Events
 *********************************************************/
@@ -1366,6 +1385,47 @@ $(document).ready(function() {
       $('#join_room_container').css("display", "none");
       $('#mcu_loading').css("display", "block");
     }
+  })
+  // //---------------------------------------------------
+  // Uncomment join_room_with_prefetched_stream_btn in index.html to test
+  $('#join_room_with_prefetched_stream_btn').click(function () {
+    if (!joinRoomOptions.audio && !joinRoomOptions.video) {
+      console.error(`Audio or Video must be requested to join with a prefetched stream.`);
+      return
+    }
+
+    Demo.userData = { displayName: $('#join_room_user_info').val(), peerSessionId: Demo.Methods.getFromLocalStorage('peerSessionId')};
+    joinRoomOptions.userData = JSON.stringify(Demo.userData);
+    Demo.rememberMe = $('#remember_me').prop('checked');
+
+    config.appKey = selectedAppKey || config.appKey;
+
+    Demo.Skylink = new Skylink(config);
+    Demo.Skylink.getStreamSources().then(sources => {
+      const audioInputDevices = sources.audio.input;
+      const videoInputDevices = sources.video.input;
+      const prefetchJoinRoomOptions = {}
+      if (joinRoomOptions.audio) {
+        prefetchJoinRoomOptions.audio = {
+          deviceId : audioInputDevices[0].deviceId,
+        }
+      }
+
+      if (joinRoomOptions.video) {
+        prefetchJoinRoomOptions.video = {
+          deviceId   : videoInputDevices[0].deviceId,
+        }
+      }
+
+      Demo.Skylink.getUserMedia(null, prefetchJoinRoomOptions).then(prefetchedStreams => {
+        Demo.Skylink.joinRoom(joinRoomOptions, prefetchedStreams);
+        $('#join_room_btn').addClass('disabled');
+        if (Demo.isMCU) {
+          $('#join_room_container').css("display", "none");
+          $('#mcu_loading').css("display", "block");
+        }
+      })
+    })
   });
   // //---------------------------------------------------
   $('#share_screen_btn').click(function () {
@@ -1407,16 +1467,13 @@ $(document).ready(function() {
   // //---------------------------------------------------
   $('#start_recording_btn').click(function() {
     Demo.Skylink.startRecording(config.defaultRoom)
-    .then((recordingId) => {
-      Demo.Methods.logToConsoleDOM(`Recording started: ${recordingId}`, 'Recording');
-    })
+    .catch((error) => Demo.Methods.logToConsoleDOM(error.message, 'error'));
   });
   // //---------------------------------------------------
   $('#stop_recording_btn').click(function() {
     Demo.Skylink.stopRecording(config.defaultRoom)
-    .then((recordingId) => {
-      Demo.Methods.logToConsoleDOM(`Recording stopped: ${recordingId}`, 'Recording');
-      });
+    .catch((error) => Demo.Methods.logToConsoleDOM(error.message, 'error'));
+
     $('#peer_video_list').on('click', '.toggle-connstats', function() {
       $(this).parent().find('.connstats').slideToggle();
       $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
