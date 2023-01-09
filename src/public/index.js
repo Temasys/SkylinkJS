@@ -149,6 +149,8 @@ class SkylinkPublicInterface {
    * @param {String|Array} [targetPeerId] - The target peer id to send message to.
    * - When provided as an Array, it will send the message to only peers which ids are in the list.
    * - When not provided, it will broadcast the message to all connected peers in the room.
+   * @param {String} [peerSessionId] - The peer session id can be used to attribute the message to a client across sessions. It will replace the
+   * peerId. The peer session id is returned in the peerInfo object. <i>This is an advanced feature.</i>
    * @example
    * Example 1: Broadcasting to all peers in a room
    *
@@ -183,13 +185,17 @@ class SkylinkPublicInterface {
    * @alias Skylink#sendMessage
    * @since 0.4.0
    */
-  sendMessage(roomName = '', message = '', targetPeerId = '') {
-    Messaging.sendMessage(roomName, message, targetPeerId);
+  sendMessage(roomName = '', message = '', targetPeerId = '', peerSessionId = '') {
+    Messaging.sendMessage(roomName, message, targetPeerId, peerSessionId);
   }
 
   /**
    * @description Method that retrieves the message history from server if Persistent Message feature is enabled for the key.
    * @param {String} roomName - The name of the room.
+   * @param {String} [roomSessionId] - The room session id to retrieve the messages from. The room session id is found in the <code>peerInfo</code> object in
+   * most event payloads, e.g. <code>PEER_JOINED</code>.
+   * - A room session starts when the first peer joins a room. A room session ends when the last peer leaves the room.
+   * - Subsequent peers that join the same room, i.e. the same room name, starts a new room session.
    * @example
    * Example 1: Retrieving stored messages
    *
@@ -208,10 +214,10 @@ class SkylinkPublicInterface {
    * @alias Skylink#getStoredMessages
    * @since 2.1
    */
-  getStoredMessages(roomName) {
+  getStoredMessages(roomName, roomSessionId = '') {
     const roomState = getRoomStateByName(roomName);
     if (roomState) {
-      new AsyncMessaging(roomState).getStoredMessages();
+      new AsyncMessaging(roomState).getStoredMessages(roomSessionId);
     }
   }
 
@@ -708,6 +714,8 @@ class SkylinkPublicInterface {
    */
   stopPrefetchedStream(stream) {
     if (stream) {
+      const isAudio = stream.getAudioTracks().length > 0;
+      const isVideo = stream.getVideoTracks().length > 0;
       stream.getTracks().forEach((track) => {
         track.stop();
       });
@@ -717,7 +725,8 @@ class SkylinkPublicInterface {
         peerId: null,
         peerInfo: null,
         isSelf: true,
-        isScreensharing: false,
+        isAudio,
+        isVideo,
         streamId: stream.id,
       }));
     }
@@ -752,13 +761,29 @@ class SkylinkPublicInterface {
   }
 
   /**
-   * @description Method that stops the <code>userMedia</code> stream returned from {@link Skylink#getUserMedia|getUserMedia}</a> method.
+   * @description Method that stops the <code>userMedia</code> stream (also known as a prefetched stream) returned from {@link
+    * Skylink#getUserMedia|getUserMedia}</a> method.
    * @param {String} roomName - The room name.
    * @param {String} streamId - The stream id of the stream to stop. If streamId is not set, all <code>userMedia</code> streams will be stopped.
    * @return {Promise}
    * @example
+   * Example 1: Stopping all the streams in a room
+   *
    * skylink.stopStreams(roomName)
    * .then(() => // do some thing);
+   *
+   * NOTE: If there is a need to call multiple stopStreams, it is recommended to implement it as a promise chain i.e. the previous call should
+   * resolve before the next call is made. This applies also to calling sendStream at the end of the stopStreams chain.
+   * Example 2: Stopping multiple streams with streamId
+   *
+   * skylink.stopStreams(roomName, streamID_1)
+   * .then(() => skylink.stopStreams(roomName, streamID_2));
+   *
+   * Example 3: Stopping a stream then sending a stream
+   *
+   * skylink.stopStreams(roomName, streamID_1)
+   * .then(() => skylink.sendStream(roomName, stream));
+   *
    * @fires {@link SkylinkEvents.event:MEDIA_ACCESS_STOPPED|MEDIA ACCESS STOPPED} event with parameter payload <code>isSelf=true</code> and <code>isScreensharing=false</code> if there is a <code>getUserMedia</code> stream.
    * @fires {@link SkylinkEvents.event:STREAM_ENDED|STREAM ENDED} event with parameter payload <code>isSelf=true</code> and <code>isScreensharing=false</code> if there is a <code>getUserMedia</code> stream and user is in a room.
    * @fires {@link SkylinkEvents.event:PEER_UPDATED|PEER UPDATED} event with parameter payload <code>isSelf=true</code>.

@@ -56,6 +56,10 @@
                     <td>User ID</td>
                     <td id="display_user_id">Not in Room</td>
                   </tr>
+                  <tr>
+                    <td>Room Session ID</td>
+                    <td id="display_room_session_id"></td>
+                  </tr>
                   <tr id="channel_status">
                     <td>Channel status</td>
                     <td id="channel">-</td>
@@ -179,10 +183,50 @@
 
                 </div>
               </div>
-              <button id="join_room_btn" type="button" title="Join room" class="btn btn-primary">
-                <span class="glyphicon glyphicon glyphicon-play-circle"></span>
-                Join Room
-              </button>
+              <table>
+                <tbody>
+                <tr>
+                  <td>
+                    <div >
+                      <table>
+                        <tr>
+                          <td>
+                            <div class="margin-right-5">
+                              <input id="join_room_user_info" type="text" class="form-control">
+                            </div>
+                          </td>
+                          <td>
+                            <div class="margin-right-5">
+                              <button id="join_room_btn" type="button" title="Join room" class="btn btn-primary">
+                                <span class="glyphicon glyphicon glyphicon-play-circle"></span>
+                                Join Room
+                              </button>
+                            </div>
+                          </td>
+<!--                          UNCOMMENT TO TEST JOIN ROOM WITH PREFETCHED STREAMS -->
+<!--                          <td>-->
+<!--                            <div class="margin-right-5">-->
+<!--                              <button id="join_room_with_prefetched_stream_btn" type="button" title="Join room with prefetched stream" class="btn btn-primary">-->
+<!--                                <span class="glyphicon glyphicon glyphicon-play-circle"></span>-->
+<!--                                Join Room with Prefetched Stream-->
+<!--                              </button>-->
+<!--                            </div>-->
+<!--                          </td>-->
+                          <td>
+                            <div class="checkbox">
+                              <label for="remember_me">
+                                <input id="remember_me" type="checkbox" value="true" onclick="rememberMe(this)">
+                                <b>remember me</b>
+                              </label>
+                            </div>
+                          </td>
+                        </tr>
+                      </table>
+                    </div>
+                  </td>
+                </tr>
+                </tbody>
+              </table>
             </div>
           </div>
         </div>
@@ -400,7 +444,17 @@
                   <div id="chat_log" class="list-group"></div>
                 </div>
               </div>
-              <button id="get_stored_messages_button" class="btn btn-primary">Get Stored Messages</button>
+              <div class="input-group">
+                <div>
+                  <label for="room_session_id"><b>Room Session Id</b><i> (for testing)</i>
+                    <input id="room_session_id" type="text" class="form-control">
+                  </label>
+                </div>
+                <br>
+                <div class="btns">
+                  <button id="get_stored_messages_button" class="btn btn-primary">Get Stored Messages</button>
+                </div>
+              </div>
             </div>
             <div class="encrypt-secrets-panel">
               <div id="secret_id_panel" class="panel panel-default">
@@ -436,7 +490,17 @@
                 </div>
               </form>
               <textarea id="chat_input" placeholder="Enter your chat message here" class="well panel-chat"></textarea>
-              <button id="send_message_button" class="btn btn-primary">Send Message</button>
+              <div class="input-group">
+                <div>
+                  <label for="peer_session_id"><b>Peer Session Id</b><i> (for testing)</i>
+                    <input id="peer_session_id" type="text" class="form-control">
+                  </label>
+                </div>
+                <br>
+                <div class="btns">
+                  <button id="send_message_button" class="btn btn-primary">Send Message</button>
+                </div>
+              </div>
             </div>
           </div>
 

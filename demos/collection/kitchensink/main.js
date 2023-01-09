@@ -1,6 +1,36 @@
 /* eslint-disable import/extensions */
 import Skylink, { SkylinkLogger, SkylinkEventManager, SkylinkConstants } from '../../../build/skylink.complete.js';
 import { config, APPKEYS } from '../config.js';
+import { nanoid } from 'https://cdn.jsdelivr.net/npm/nanoid/nanoid.js'
+
+const tabSession = {};
+const tabSessionId = nanoid();
+
+const bc = new BroadcastChannel('temasys-kitchensink');
+bc.onmessage = event => {
+  if (event.origin === window.location.origin) {
+    if (event.data.action === "room-joined") {
+      if (tabSession[event.data.tabSessionId]) {
+
+      } else {
+        tabSession[event.data.tabSessionId] = 1;
+        // inform other tab of this tab presence
+        bc.postMessage({
+          action: "room-joined",
+          tabSessionId,
+        })
+      }
+    }
+
+    if (event.data.action === "tab-close") {
+      if (tabSession[event.data.tabSessionId]) {
+        delete tabSession[event.data.tabSessionId];
+      }
+    }
+  }
+
+  console.log('[Kitchensink] tabSession', tabSession);
+}
 
 /********************************************************
   API Settings
@@ -19,7 +49,14 @@ Demo.isMCU = false;
 Demo.videoStream = null;
 Demo.audioStream = null;
 Demo.transferIds = [];
+Demo.localStorageAccess = false;
+Demo.rememberMe = false;
+Demo.userData = null;
 
+if (window.localStorage) {
+  console.log("[Kitchensink] Local Storage available");
+  Demo.localStorageAccess = true;
+}
 
 window.Demo = Demo;
 let selectedPeers = [];
@@ -35,12 +72,9 @@ if (window.location.href.indexOf("appKey=") > -1) {
 }
 
 //----- join room options
-const displayName = `name_user_${  Math.floor((Math.random() * 1000) + 1)}`;
-$('#display_user_info').val(displayName);
 const joinRoomOptions = {
   audio: true,
   video: true,
-  userData: displayName,
   autoBandwidthAdjustment: true
 };
 
@@ -198,6 +232,49 @@ Demo.Methods.logToConsoleDOM = (message, level) => {
   $logListItem.prependTo($loggerListParentDOM);
 };
 
+Demo.Methods.saveToLocalStorage = (key, value) => {
+  if (Demo.localStorageAccess) {
+    let skylink = window.localStorage.getItem("kitchensink");
+
+    if (skylink) {
+      skylink = JSON.parse(skylink);
+    } else {
+      skylink = {};
+    }
+
+    skylink[key] = value;
+    window.localStorage.setItem("kitchensink", JSON.stringify(skylink));
+    console.log("[Kitchensink] Saved to localStorage", key, value);
+  }
+}
+
+Demo.Methods.getFromLocalStorage = (key) => {
+  if (Demo.localStorageAccess) {
+    let skylink = window.localStorage.getItem("kitchensink");
+
+    if (skylink) {
+      skylink = JSON.parse(skylink);
+      console.log("[Kitchensink] Using existing peerSessionId", skylink[key]);
+      return skylink[key];
+    } else {
+      console.log("[Kitchensink] No value for key", key);
+      return '';
+    }
+  } else {
+    throw Error('[Kitchensink] No localStorage access');
+  }
+}
+
+Demo.Methods.clearLocalStorage = () => {
+  if (Demo.localStorageAccess) {
+    window.localStorage.removeItem('kitchensink');
+    console.log("[Kitchensink] Cleared localStorage");
+  }
+}
+
+let displayName = Demo.Methods.getFromLocalStorage('displayName') || `name_user_${  Math.floor((Math.random() * 1000) + 1)}`;
+$('#join_room_user_info').val(displayName);
+
 /********************************************************
  SKYLINK EVENTS
  *********************************************************/
@@ -207,10 +284,11 @@ Demo.Methods.logToConsoleDOM = (message, level) => {
 // //---------------------------------------------------
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) => {
   const eventDetail = evt.detail;
-  const { isSelf, peerId, peerInfo } = eventDetail;
+  const { isSelf, peerId, peerInfo, peerSessionId, room } = eventDetail;
   const streamIds = Object.keys(peerInfo.mediaStatus);
   let audioStreamId = null;
   let videoStreamId = null;
+  const userData = JSON.parse(peerInfo.userData);
 
   if (streamIds[0] && peerInfo.mediaStatus[streamIds[0]].videoMuted === -1) {
     audioStreamId = streamIds[0];
@@ -218,6 +296,25 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
   }
 
   if (isSelf) {
+    $('#display_room_session_id').html(room.roomSessionId);
+
+    bc.postMessage({
+      action: "room-joined",
+      tabSessionId,
+    })
+
+    $('#display_user_info').val(userData.displayName);
+    console.log(`[Kitchensink] Room Session Id - ${peerInfo.room.roomSessionId}`);
+
+    if (Demo.Methods.getFromLocalStorage('peerSessionId')) {
+      // has existing peerSessionId
+    } else {
+      Demo.Methods.saveToLocalStorage('peerSessionId', peerSessionId);
+      Demo.userData.peerSessionId = peerSessionId;
+      Demo.Skylink.setUserData(config.defaultRoom, JSON.stringify(Demo.userData));
+      Demo.Methods.saveToLocalStorage('displayName', userData.displayName);
+    }
+
     _peerId = peerId;
     if (!Demo.isMCU)  {
       Demo.Methods.toggleInRoomSettings(peerId, true);
@@ -236,7 +333,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
     Demo.Methods.logToConsoleDOM(`Peer ${peerId} has joined the room`, 'System');
     var newListEntry = '<tr id="user' + peerId + '" class="badQuality">' +
       '<td><input class="select-user" target="' + peerId + '" type="checkbox" onclick="selectTargetPeer(this);">' +
-      '<span class="name">' + peerInfo.userData + '</span></td><td>';
+      '<span class="name">' + userData.displayName + '</span></td><td>';
     var titleList = [
       'Joined Room', 'Handshake: Welcome', 'Handshake: Offer',
       'Handshake: Answer', 'Candidate Generation state', 'ICE Connection state',
@@ -345,6 +442,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_UPDATED, (evt)
   let streamIds = Object.keys(peerInfo.mediaStatus);
   let audioStreamId = null;
   let videoStreamId = null;
+  const userData = JSON.parse(peerInfo.userData);
 
   if (Demo.Streams && Demo.Streams[_peerId] && Demo.Streams[_peerId].streams.screenShare) {
     streamIds = streamIds.filter((id) => id !== Object.keys(Demo.Streams[_peerId].streams.screenShare)[0]);
@@ -378,7 +476,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_UPDATED, (evt)
       Demo.Methods.logToConsoleDOM(`Peer ${peerId} ${audioMuted ? 'muted' : 'unmuted' } audio`, 'Media');
     }
 
-    $('#user' + peerId + ' .name').html(peerInfo.userData);
+    $('#user' + peerId + ' .name').html(userData.displayName);
   }
 });
 
@@ -396,6 +494,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.SERVER_PEER_JOINED,
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM, (evt) => {
   const eventDetail = evt.detail;
   const { peerId, stream, isSelf, peerInfo, isVideo, isAudio } = eventDetail;
+  const userData = JSON.parse(peerInfo.userData);
   let peerVideo = $('#video' + peerId + ' .video-obj')[0];
   let peerAudio = $('#video' + peerId + ' .audio-obj')[0];
 
@@ -424,7 +523,7 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_STREAM,
         (isVideoStream && peerInfo.mediaStatus[stream.id].videoMuted === 1) ? 'green' : 'red');
     }
   } else {
-    $('#user' + peerId + ' .name').html(peerInfo.userData);
+    $('#user' + peerId + ' .name').html(userData.displayName);
   }
 
   if (Demo.ShowStats[peerId]) {
@@ -525,7 +624,8 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ENCRYPT_SECRETS_UPD
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_MESSAGE, (evt) => {
   const eventDetail = evt.detail;
   const { isSelf, peerInfo, message } = eventDetail;
-  const peerId = isSelf ? 'You' : peerInfo.userData;
+  const userData = JSON.parse(peerInfo.userData);
+  const peerId = isSelf ? 'You' : userData.displayName;
   const isPrivate = message.isPrivate;
   let content = message.isDataChannel ? 'P2P' : 'Socket';
 
@@ -544,11 +644,25 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.ON_INCOMING_MESSAGE
 
 SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.STORED_MESSAGES, (evt) => {
   const eventDetail = evt.detail;
-  const { storedMessages } = eventDetail;
+  const { storedMessages, room } = eventDetail;
+  const peersInRoom = Demo.Skylink.getPeersInRoom(room.roomName);
+  const peerSessions = {};
+  Object.values(peersInRoom).forEach((peer) => {
+    const userData = JSON.parse(peer.userData);
+    peerSessions[userData.peerSessionId] = {};
+    peerSessions[userData.peerSessionId].isSelf = peer.isSelf;
+    peerSessions[userData.peerSessionId].displayName = userData.displayName;
 
+  })
 
   storedMessages.forEach((message) => {
-    const peerId = 'Stored Message' + ` [${message.senderPeerId}]`;
+    let peerId;
+    if (peerSessions[message.senderPeerId]) {
+      peerId = 'Stored Message' + ` [${(peerSessions[message.senderPeerId].isSelf ? 'You' : peerSessions[message.senderPeerId].displayName)}]`;
+    } else {
+      peerId = 'Stored Message' + ` [${message.senderPeerId}]`
+    }
+
     const content = `${message.isDataChannel ? 'P2P' : 'Socket'} -> GRP [${message['timeStamp'].replace('T', ", ").replace("Z", "")}] : ${message.content}`;
     Demo.Methods.displayChatMessage(peerId, content, message.isPrivate);
   })
@@ -997,6 +1111,25 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.GET_CONNECTION_STAT
   }
 });
 
+// //---------------------------------------------------
+// // RECORDING EVENTS
+// //---------------------------------------------------
+SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.RECORDING_STATE, (evt) => {
+  const eventDetail = evt.detail;
+  const { recordingId, state, error } = eventDetail;
+  if (state === SkylinkConstants.RECORDING_STATE.ERROR) {
+    Demo.Methods.logToConsoleDOM(`Recording Error - ${error}`, 'error');
+  }
+
+  if (state === SkylinkConstants.RECORDING_STATE.START) {
+    Demo.Methods.logToConsoleDOM(`Recording started: ${recordingId}`, 'Recording');
+  }
+
+  if (state === SkylinkConstants.RECORDING_STATE.STOP) {
+    Demo.Methods.logToConsoleDOM(`Recording stopped: ${recordingId}`, 'Recording');
+  }
+});
+
 /********************************************************
   DOM Events
 *********************************************************/
@@ -1028,9 +1161,9 @@ $(document).ready(function() {
       }
     } else {
       if (selectedPeers.length > 0) {
-        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), selectedPeers);
+        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), selectedPeers, $('#peer_session_id').val() || Demo.Methods.getFromLocalStorage('peerSessionId'));
       } else {
-        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val());
+        Demo.Skylink.sendMessage(config.defaultRoom, $('#chat_input').val(), null, $('#peer_session_id').val() || Demo.Methods.getFromLocalStorage('peerSessionId'));
       }
     }
     $('#chat_input').val('');
@@ -1062,11 +1195,13 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#get_stored_messages_button').click(function() {
-    Demo.Skylink.getStoredMessages(config.defaultRoom);
+    Demo.Skylink.getStoredMessages(config.defaultRoom, $('#room_session_id').val());
+    $('#room_session_id').val('');
   });
   // //---------------------------------------------------
   $('#update_user_info_btn').click(function() {
-    Demo.Skylink.setUserData(config.defaultRoom, $('#display_user_info').val());
+    Demo.userData.displayName = $('#display_user_info').val();
+    Demo.Skylink.setUserData(config.defaultRoom, JSON.stringify(Demo.userData));
   });
   // //---------------------------------------------------
   $('#lock_btn').click(function() {
@@ -1237,7 +1372,12 @@ $(document).ready(function() {
   });
   // //---------------------------------------------------
   $('#join_room_btn').click(function () {
+    Demo.userData = { displayName: $('#join_room_user_info').val(), peerSessionId: Demo.Methods.getFromLocalStorage('peerSessionId')};
+    joinRoomOptions.userData = JSON.stringify(Demo.userData);
+    Demo.rememberMe = $('#remember_me').prop('checked');
+
     config.appKey = selectedAppKey || config.appKey;
+
     Demo.Skylink = new Skylink(config);
     Demo.Skylink.joinRoom(joinRoomOptions);
     $('#join_room_btn').addClass('disabled');
@@ -1245,6 +1385,47 @@ $(document).ready(function() {
       $('#join_room_container').css("display", "none");
       $('#mcu_loading').css("display", "block");
     }
+  })
+  // //---------------------------------------------------
+  // Uncomment join_room_with_prefetched_stream_btn in index.html to test
+  $('#join_room_with_prefetched_stream_btn').click(function () {
+    if (!joinRoomOptions.audio && !joinRoomOptions.video) {
+      console.error(`Audio or Video must be requested to join with a prefetched stream.`);
+      return
+    }
+
+    Demo.userData = { displayName: $('#join_room_user_info').val(), peerSessionId: Demo.Methods.getFromLocalStorage('peerSessionId')};
+    joinRoomOptions.userData = JSON.stringify(Demo.userData);
+    Demo.rememberMe = $('#remember_me').prop('checked');
+
+    config.appKey = selectedAppKey || config.appKey;
+
+    Demo.Skylink = new Skylink(config);
+    Demo.Skylink.getStreamSources().then(sources => {
+      const audioInputDevices = sources.audio.input;
+      const videoInputDevices = sources.video.input;
+      const prefetchJoinRoomOptions = {}
+      if (joinRoomOptions.audio) {
+        prefetchJoinRoomOptions.audio = {
+          deviceId : audioInputDevices[0].deviceId,
+        }
+      }
+
+      if (joinRoomOptions.video) {
+        prefetchJoinRoomOptions.video = {
+          deviceId   : videoInputDevices[0].deviceId,
+        }
+      }
+
+      Demo.Skylink.getUserMedia(null, prefetchJoinRoomOptions).then(prefetchedStreams => {
+        Demo.Skylink.joinRoom(joinRoomOptions, prefetchedStreams);
+        $('#join_room_btn').addClass('disabled');
+        if (Demo.isMCU) {
+          $('#join_room_container').css("display", "none");
+          $('#mcu_loading').css("display", "block");
+        }
+      })
+    })
   });
   // //---------------------------------------------------
   $('#share_screen_btn').click(function () {
@@ -1286,16 +1467,13 @@ $(document).ready(function() {
   // //---------------------------------------------------
   $('#start_recording_btn').click(function() {
     Demo.Skylink.startRecording(config.defaultRoom)
-    .then((recordingId) => {
-      Demo.Methods.logToConsoleDOM(`Recording started: ${recordingId}`, 'Recording');
-    })
+    .catch((error) => Demo.Methods.logToConsoleDOM(error.message, 'error'));
   });
   // //---------------------------------------------------
   $('#stop_recording_btn').click(function() {
     Demo.Skylink.stopRecording(config.defaultRoom)
-    .then((recordingId) => {
-      Demo.Methods.logToConsoleDOM(`Recording stopped: ${recordingId}`, 'Recording');
-      });
+    .catch((error) => Demo.Methods.logToConsoleDOM(error.message, 'error'));
+
     $('#peer_video_list').on('click', '.toggle-connstats', function() {
       $(this).parent().find('.connstats').slideToggle();
       $(this).attr('toggled', $(this).attr('toggled') ? '' : 'true');
@@ -1392,6 +1570,10 @@ $(document).ready(function() {
     }
   };
 
+  window.rememberMe = dom => {
+    console.log('save user to local storage', dom.checked);
+  }
+
   window.onerror = function (error) {
     let message = 'Check console for error';
     if (error.indexOf('Failed decrypting message') > -1) {
@@ -1409,6 +1591,20 @@ $(document).ready(function() {
     let message = promiseRejectionEvent.reason;
     Demo.Methods.logToConsoleDOM(message, 'error');
   });
+
+  window.onbeforeunload = () => {
+    if (!Demo.rememberMe) {
+      if (Object.keys(tabSession).length === 0) {
+        Demo.Methods.clearLocalStorage();
+      }
+    }
+
+    // alert other tabs that this tab is closing
+    bc.postMessage({
+      action: "tab-close",
+      tabSessionId,
+    })
+  };
 });
 
 var DemoSkylinkEventManager = SkylinkEventManager;

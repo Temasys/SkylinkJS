@@ -272,8 +272,8 @@ class SkylinkSignalingServer {
     }
   }
 
-  getStoredMessages(roomState) {
-    const history = this.messageBuilder.getGetStoredMessagesMessage(roomState);
+  getStoredMessages(roomState, roomSessionId) {
+    const history = this.messageBuilder.getGetStoredMessagesMessage(roomState, roomSessionId);
     if (history) {
       this.sendMessage(history);
     }
