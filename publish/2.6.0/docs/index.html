@@ -1,5 +1,3 @@
-
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,7 +6,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      skylink-events/peer-events.js - Documentation
+      Home - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -53,16 +51,15 @@
 
   <div class="top-nav-wrapper">
     <ul>
-      <li >
+      <li  class="active" >
         <a href="index.html">
           
-            <svg fill="#6D6D6D" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
+          
+            <svg fill="#0095dd" height="24" viewBox="0 0 24 24" width="24" xmlns="http://www.w3.org/2000/svg">
               <path d="M10 20v-6h4v6h5v-8h3L12 3 2 12h3v8z"/>
               <path d="M0 0h24v24H0z" fill="none"/>
             </svg>
-           <div>Web SDK Client Reference</div>
-
-          
+            <div>Web SDK Client Reference</div>
           
         </a>
       </li>
@@ -83,145 +80,133 @@
 
   <div id="main">
     
-      <h1 class="page-title">
-        skylink-events/peer-events.js
-      </h1>
-    
 
     
       
 
-<section>
-  <article>
-    <pre class="prettyprint source linenums"><code>import {
-  PEER_UPDATED,
-  PEER_JOINED,
-  PEER_LEFT,
-  SERVER_PEER_JOINED,
-  SERVER_PEER_LEFT,
-  GET_PEERS_STATE_CHANGE,
-  PEER_CONNECTION_STATE,
-  SESSION_DISCONNECT,
-  GET_CONNECTION_STATUS_STATE_CHANGE,
-} from './constants';
-import SkylinkEvent from '../utils/skylinkEvent';
 
-/**
- * @event SkylinkEvents.PEER_UPDATED
- * @description Event triggered when a Peer session information has been updated.
- * @param {Object} detail - Event's payload.
- * @param {roomInfo} detail.room - The current room
- * @param {String} detail.peerId - The peer's id
- * @param {boolean} detail.isSelf -The flag if Peer is User.
- * @param {peerInfo} detail.peerInfo - The Peer session information. Object signature matches the &lt;code>peerInfo&lt;/code> parameter payload received in the &lt;code> {@link SkylinkEvents.event:PEER_JOINED|PEER JOINED}&lt;/code> event.
- */
-export const peerUpdated = (detail = {}) => new SkylinkEvent(PEER_UPDATED, { detail });
 
-/**
- * @event SkylinkEvents.PEER_JOINED
- * @description Event triggered when a Peer joins the room.
- * &lt;blockquote>&lt;code>PEER_JOINED&lt;/code> event with &lt;code>isSelf=true&lt;/code> indicates that the local peer has successfully joined the
- * room. All call actions should be done after the &lt;code>PEER_JOINED&lt;/code> event is registered.
- * If &lt;code>MCU&lt;/code> feature is enabled on the appKey, {@link SkylinkEvents.event:SERVER_PEER_JOINED|SERVER PEER JOINED} is the
- * corresponding event.
- * &lt;/blockquote>
- * @param {Object} detail - Event's payload
- * @param {roomInfo} detail.room - The current room.
- * @param {String} detail.peerId - The Peer ID.
- * @param {peerInfo} detail.peerInfo - The Peer session information.
- * @param {boolean} detail.isSelf - The flag if Peer is User.
- */
-export const peerJoined = (detail = {}) => new SkylinkEvent(PEER_JOINED, { detail });
+    
 
-/**
- * @event SkylinkEvents.PEER_LEFT
- * @description Event triggered when a Peer leaves the room.
- * @param {Object} detail - Event's payload.
- * @param {String} detail.peerId - The Peer ID.
- * @param {peerInfo} detail.peerInfo - The Peer session information. Object signature matches the &lt;code>peerInfo&lt;/code> parameter payload received in the&lt;code>peerJoined&lt;/code> event.
- * @param {boolean} detail.isSelf - The flag if Peer is User.
- * @param {roomInfo} detail.room - The room.
- */
-export const peerLeft = (detail = {}) => new SkylinkEvent(PEER_LEFT, { detail });
+      
 
-/**
- * @event SkylinkEvents.SERVER_PEER_JOINED
- * @description Event triggered when a server Peer joins the room.
- *  * &lt;blockquote>&lt;code>SERVER_PEER_JOINED&lt;/code> event indicates that the &lt;code>MCU&lt;/code> has successfully joined the
- * room. All call actions should be done after the &lt;code>SERVER_PEER_JOINED&lt;/code> event is registered.
- * For &lt;code>P2P&lt;/code> key, {@link SkylinkEvents.event:PEER_JOINED|PEER JOINED} is the
- * corresponding event.
- * &lt;/blockquote>
- * @param {Object} detail - Event's payload.
- * @param {roomInfo} detail.room - The current room
- * @param {String} detail.peerId - The peer's id
- * @param {SkylinkConstants.SERVER_PEER_TYPE} detail.serverPeerType - The server Peer type
- */
-export const serverPeerJoined = (detail = {}) => new SkylinkEvent(SERVER_PEER_JOINED, { detail });
 
-/**
- * @event SkylinkEvents.SERVER_PEER_LEFT
- * @description Event triggered when a server Peer leaves the room.
- * - Handling an MCU disconnect using the &lt;code>serverPeerLeft&lt;/code> event - {@link Reconnection}
- * @param {Object} detail - Event's payload
- * @param {String} detail.peerId - The Peer ID
- * @param {roomInfo} detail.room - The room.
- * @param {SkylinkConstants.SERVER_PEER_TYPE} detail.serverPeerType - The server Peer type
- */
-export const serverPeerLeft = (detail = {}) => new SkylinkEvent(SERVER_PEER_LEFT, { detail });
+  <section class="readme">
+    <article>
+      <h1>SKYLINK WEB SDK 2.6.0</h1>
+<blockquote>
+<p>Temasys SkylinkJS Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing.</p>
+</blockquote>
+<p>You'll need a Temasys Account, and an App key to use this. <a href="https://console.temasys.io">Register here to get your App key</a>.</p>
+<h4>Supported Browsers</h4>
+<table>
+<thead>
+<tr>
+<th>Features</th>
+<th>Chrome</th>
+<th>Firefox</th>
+<th>Safari</th>
+<th>Edge (Chromium)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Platforms:</td>
+<td>Win, Mac, Linux, Android</td>
+<td>Win, Mac, Linux, Android</td>
+<td>Mac, iOS</td>
+<td>Win, Mac</td>
+</tr>
+<tr>
+<td>Minimum Recommended Versions:</td>
+<td>72</td>
+<td>66</td>
+<td>13</td>
+<td>80</td>
+</tr>
+<tr>
+<td>Screensharing</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Video Call</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Audio Call</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr>
+<td>Messaging</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>(+) Latest browser versions indicates the last tested browser version. It should work with the updated next versions, but if it doesn't, open a bug ticket.</li>
+</ul>
+<h4>Read more</h4>
+<ul>
+<li><a href="https://github.com/Temasys/GettingStarted">Getting started</a></li>
+<li><a href="https://cdn.temasys.io/skylink/skylinkjs/latest/docs/index.html">API Docs</a></li>
+<li><a href="https://github.com/Temasys/SkylinkJS/releases">Versions</a></li>
+<li><a href="https://console.temasys.io">Temasys Console  - Get your App key</a></li>
+<li><a href="https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/demos/collection/README.md">View Code Examples</a></li>
+</ul>
+<h4>MCU Behaviour</h4>
+<ul>
+<li>There are certain considerations to note when using an MCU key. Read more <a href="https://github.com/Temasys/SkylinkJS/tree/2.x.x/master/MCU_BEHAVIOUR.md">here</a></li>
+</ul>
+<h4>Need help or want something changed?</h4>
+<ul>
+<li>You can raise tickets at our <a href="https://temasys.io/knowledge-center/">knowledge center</a> or on our <a href="https://github.com/Temasys/SkylinkJS/issues">Github Page</a>.</li>
+</ul>
+<h4>Current versions and stability</h4>
+<ul>
+<li>We recommend that you always use the latest versions of the Temasys SkylinkJS Web SDK as WebRTC is still evolving and we adapt to changes very frequently.</li>
+<li>It is advised to not attach any event handlers to the WebRTC APIs as doing so may override the handlers set in SkylinkJS and result in unexpected behaviour.</li>
+</ul>
+<p><a href="https://github.com/Temasys/SkylinkJS/releases/tag/2.6.0">Latest version: 2.6.0</a></p>
+<h2>How to build your own Temasys SkylinkJS Web SDK</h2>
+<p>Using <a href="https://git-scm.com/download">Git</a> command line tools, execute the following:</p>
+<p>Node version: <code>14.17.5</code></p>
+<pre class="prettyprint source"><code># 1. Clone or download this repository via git terminal.
 
-/**
- * @event SkylinkEvents.GET_PEERS_STATE_CHANGE
- * @description Event triggered when &lt;code>{@link Skylink#getPeers|getPeers}&lt;/code> method retrieval state changes.
- * @param {Object} detail - Event's payload
- * @param {SkylinkConstants.GET_PEERS_STATE} detail.state - The current &lt;code>{@link Skylink#getPeers|getPeers}&lt;/code> retrieval state.
- * @param {SkylinkUser.sid} detail.privilegePeerId - The Users privileged Peer Id.
- * @param {Object} detail.peerList - The list of Peer IDs Rooms within the same App space.
- * @param {Array} detail.peerList.#room - The list of Peer IDs associated with the Room defined in &lt;code>#room&lt;/code> property.
- * @memberOf SkylinkEvents
- */
-export const getPeersStateChange = (detail = {}) => new SkylinkEvent(GET_PEERS_STATE_CHANGE, { detail });
+git clone https://github.com/Temasys/SkylinkJS.git
 
-/**
- * @event SkylinkEvents.PEER_CONNECTION_STATE
- * @description Event triggered when a Peer connection session description exchanging state has changed.
- *  &lt;blockquote class="info">
- *   Learn more about how ICE works in this
- *   &lt;a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here&lt;/a>.
- * &lt;/blockquote>
- * @param {Object} detail - Event's payload
- * @param {SkylinkConstants.PEER_CONNECTION_STATE} detail.state - The current Peer connection session description exchanging states.
- * @param {String} detail.peerId - The Peer ID
- */
-export const peerConnectionState = (detail = {}) => new SkylinkEvent(PEER_CONNECTION_STATE, { detail });
+# 2. Install all required dependencies. Use (sudo npm install) if required.
 
-/**
- * @event SkylinkEvents.SESSION_DISCONNECT
- * @description Event triggered when Room session has ended abruptly due to network disconnections.
- * - Handling a socket disconnect using the &lt;code>sessionDisconnect&lt;/code> event - {@link Reconnection}
- * @param {Object} detail - Event's payload.
- * @param {String} detail.peerId - The User's Room session Peer ID
- * @param {peerInfo} detail.peerInfo - The User's Room session information. Object signature matches the &lt;code>peerInfo&lt;/code> parameter payload received in the&lt;code> {@link SkylinkEvents.event:PEER_JOINED|PEER JOINED}&lt;/code> event.
- * @param {peerInfo} detail.reason - Reason for the disconnect
- */
-export const sessionDisconnect = (detail = {}) => new SkylinkEvent(SESSION_DISCONNECT, { detail });
+npm install
 
-/**
- * Event triggered when &lt;code>{@link
-  * Skylink#getConnectionStatus|getConnectionStatus}&lt;/code> method
- * retrieval state changes.
- * @event SkylinkEvents.GET_CONNECTION_STATUS_STATE_CHANGE
- * @param {Object} detail - Event's payload/
- * @param {SkylinkConstants.GET_CONNECTION_STATUS_STATE} detail.state The current retrieval state from &lt;code>{@link
-  * Skylink#getConnectionStatus|getConnectionStatus}&lt;/code> method.
- * @param {String} detail.peerId The Peer ID.
- * @param {statistics} [detail.stats] The Peer connection current stats.
- * @param {Error} detail.error - The error object. Defined only when &lt;code>state&lt;/code> payload is &lt;code>RETRIEVE_ERROR&lt;/code>.
- */
-export const getConnectionStatusStateChange = (detail = {}) => new SkylinkEvent(GET_CONNECTION_STATUS_STATE_CHANGE, { detail });
+# 3. Run the start script to start a local webserver to access the demo and doc folders. This will popup Chrome (Mac). You can configure a different browser in the start.sh file. Alternatively, you can run (sh start.sh)
+
+npm start # Note that this runs in Chrome currently.
 </code></pre>
-  </article>
-</section>
+<p><strong>What's included in the repository?</strong></p>
+<ul>
+<li><code>demos</code> : Reference Code Examples.</li>
+<li><code>docs</code> : Generated documentation for the Temasys Web SDK.</li>
+<li><code>temasys-jsdoc-template</code> : Templates used documentation.</li>
+<li><code>publish</code> : Production version of the library as well as minified variants</li>
+<li><code>src</code> : Temasys Web SDK source</li>
+</ul>
+<h2>License</h2>
+<p><a href="https://www.apache.org/licenses/LICENSE-2.0.html">APACHE 2.0</a></p>
+    </article>
+  </section>
+
 
     
 

@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      server-communication/signaling-server/message-handler/handlers/candidateHandler.js - Documentation
+      peer-connection/helpers/peer-addition/createPeerConnection.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        server-communication/signaling-server/message-handler/handlers/candidateHandler.js
+        peer-connection/helpers/peer-addition/createPeerConnection.js
       </h1>
     
 
@@ -93,147 +93,119 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>import Skylink from '../../../../index';
-import logger from '../../../../logger';
-import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import { candidateProcessingState } from '../../../../skylink-events';
-import * as constants from '../../../../constants';
-import PeerConnection from '../../../../peer-connection';
-import IceConnection from '../../../../ice-connection';
-import messages from '../../../../messages';
-import HandleIceCandidateStats from '../../../../skylink-stats/handleIceCandidateStats';
-import Room from '../../../../room';
+    <pre class="prettyprint source linenums"><code>import {
+  HANDSHAKE_PROGRESS, PEER_TYPE, BROWSER_AGENT, TAGS, CONFIG_NAME,
+} from '../../../constants';
+import Skylink from '../../../index';
+import logger from '../../../logger';
+import callbacks from './callbacks/index';
+import { dispatchEvent } from '../../../utils/skylinkEventManager';
+import { handshakeProgress } from '../../../skylink-events';
+import MESSAGES from '../../../messages';
+import { isAgent } from '../../../utils/helpers';
+import retrieveConfig from '../../../defaults';
+import Room from '../../../room';
 
-
-/**
- * Function that handles the "candidate" socket message received.
- * @param {JSON} message
- * @memberOf SignalingMessageHandler
- * @returns {null}
- * @fires CANDIDATE_PROCESSING_STATE
- */
-const candidateHandler = (message) => {
-  const { candidate, mid, rid } = message;
-  const state = Skylink.getSkylinkState(rid);
-  const { room } = state;
-  const peerConnection = state.peerConnections[mid];
-  const peerEndOfCandidatesCounter = state.peerEndOfCandidatesCounter[mid] || {};
-  const { RTCIceCandidate } = window;
-  const { ICE_CANDIDATE, PEER_CONNECTION, STATS_MODULE: { HANDLE_ICE_GATHERING_STATS } } = messages;
+const createNativePeerConnection = (targetMid, constraints, hasScreenShare, currentRoom) => {
   const initOptions = Skylink.getInitOptions();
-  const handleIceCandidateStats = new HandleIceCandidateStats();
-
-  if (!candidate &amp;&amp; !message.id) {
-    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, null, ICE_CANDIDATE.INVALID_CANDIDATE], message);
-    return null;
-  }
-
-  const nativeCandidate = new RTCIceCandidate({
-    sdpMLineIndex: message.label,
-    candidate,
-    sdpMid: message.id,
+  const state = Skylink.getSkylinkState(currentRoom.id);
+  logger.log.DEBUG([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.CREATE_NEW], {
+    constraints,
   });
-  const candidateId = `can-${nativeCandidate.foundation}`;
-  const candidateType = nativeCandidate.candidate.split(' ')[7] || '';
+  const { RTCPeerConnection, msRTCPeerConnection } = window;
+  const rtcPeerConnection = new (initOptions.useEdgeWebRTC &amp;&amp; msRTCPeerConnection ? window.msRTCPeerConnection : RTCPeerConnection)(constraints);
+  const callbackExtraParams = [rtcPeerConnection, targetMid, state];
 
-  logger.log.DEBUG([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.VALID_CANDIDATE], nativeCandidate);
+  // attributes (added on by Temasys)
+  rtcPeerConnection.setOffer = '';
+  rtcPeerConnection.setAnswer = '';
+  rtcPeerConnection.hasMainChannel = false;
+  rtcPeerConnection.gathered = false;
+  rtcPeerConnection.gathering = false;
+  rtcPeerConnection.setRemoteDescriptionSuccess = null;
 
-  peerEndOfCandidatesCounter.len = peerEndOfCandidatesCounter.len || 0;
-  peerEndOfCandidatesCounter.hasSet = false;
-  peerEndOfCandidatesCounter.len += 1;
-
-  Skylink.setSkylinkState(state, rid);
-
-  const candidateProcessingStateEventDetail = {
-    candidate: {
-      candidate: nativeCandidate.candidate,
-      sdpMid: nativeCandidate.sdpMid,
-      sdpMLineIndex: nativeCandidate.sdpMLineIndex,
-    },
-    error: null,
+  // candidates
+  state.gatheredCandidates[targetMid] = {
+    sending: { host: [], srflx: [], relay: [] },
+    receiving: { host: [], srflx: [], relay: [] },
   };
 
-  dispatchEvent(candidateProcessingState({
-    room: Room.getRoomInfo(room),
-    state: constants.CANDIDATE_PROCESSING_STATE.RECEIVED,
-    peerId: mid,
-    candidateId,
-    candidateType,
-    candidate: candidateProcessingStateEventDetail.candidate,
-    error: candidateProcessingStateEventDetail.error,
-  }));
+  state.peerEndOfCandidatesCounter[targetMid] = state.peerEndOfCandidatesCounter[targetMid] || {};
 
-  if (!(peerConnection &amp;&amp; peerConnection.signalingState !== constants.PEER_CONNECTION_STATE.CLOSED)) {
-    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, PEER_CONNECTION.NO_PEER_CONNECTION]);
-
-    candidateProcessingStateEventDetail.error = new Error(PEER_CONNECTION.NO_PEER_CONNECTION);
-    handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.PROCESS_FAILED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
-    dispatchEvent(candidateProcessingState({
-      room: Room.getRoomInfo(room),
-      state: constants.CANDIDATE_PROCESSING_STATE.DROPPED,
-      peerId: mid,
-      candidateId,
-      candidateType,
-      candidate: candidateProcessingStateEventDetail.candidate,
-      error: candidateProcessingStateEventDetail.error,
-    }));
-
-    PeerConnection.signalingEndOfCandidates(mid, state);
-    return null;
-  }
-
-  if (initOptions.filterCandidatesType[candidateType]) {
-    if (!(state.hasMCU &amp;&amp; initOptions.forceTURN)) {
-      logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FILTERED_CANDIDATE], nativeCandidate);
-
-      candidateProcessingStateEventDetail.error = new Error(ICE_CANDIDATE.FILTERED_CANDIDATE);
-      handleIceCandidateStats.send(room.id, HANDLE_ICE_GATHERING_STATS.DROPPED, mid, candidateId, candidateProcessingStateEventDetail.candidate, candidateProcessingStateEventDetail.error);
-      dispatchEvent(candidateProcessingState({
-        room: Room.getRoomInfo(room),
-        state: constants.CANDIDATE_PROCESSING_STATE.DROPPED,
-        peerId: mid,
-        candidateId,
-        candidateType,
-        candidate: candidateProcessingStateEventDetail.candidate,
-        error: candidateProcessingStateEventDetail.error,
-      }));
-
-      PeerConnection.signalingEndOfCandidates(mid, state);
-      return null;
+  // FIXME: ESS-1620 - To check if still needed
+  if (targetMid === PEER_TYPE.MCU) {
+    logger.log.INFO('Creating an empty transceiver of kind video with MCU');
+    if (typeof rtcPeerConnection.addTransceiver === 'function') {
+      rtcPeerConnection.addTransceiver('video');
     }
-
-    logger.log.WARN([mid, constants.TAGS.CANDIDATE_HANDLER, `${candidateId}:${candidateType}`, ICE_CANDIDATE.FILTERING_FLAG_NOT_HONOURED], nativeCandidate);
   }
 
-  if (peerConnection.remoteDescription &amp;&amp; peerConnection.remoteDescription.sdp &amp;&amp; peerConnection.localDescription &amp;&amp; peerConnection.localDescription.sdp) {
-    IceConnection.addIceCandidate(mid, candidateId, candidateType, nativeCandidate, state);
-  } else {
-    IceConnection.addIceCandidateToQueue(mid, candidateId, candidateType, nativeCandidate, state);
+  if (rtcPeerConnection.restartIce) {
+    state.enableIceRestart = true;
   }
 
-  PeerConnection.signalingEndOfCandidates(mid, state);
+  Skylink.setSkylinkState(state, currentRoom.id);
 
-  let gatheredCandidates = state.gatheredCandidates[mid];
-  if (!gatheredCandidates) {
-    gatheredCandidates = {
-      sending: { host: [], srflx: [], relay: [] },
-      receiving: { host: [], srflx: [], relay: [] },
-    };
+  /* CALLBACKS */
+  rtcPeerConnection.ontrack = callbacks.ontrack.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.ondatachannel = callbacks.ondatachannel.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.onicecandidate = callbacks.onicecandidate.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.oniceconnectionstatechange = callbacks.oniceconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.onconnectionstatechange = callbacks.onconnectionstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.onsignalingstatechange = callbacks.onsignalingstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+  rtcPeerConnection.onicegatheringstatechange = callbacks.onicegatheringstatechange.bind(rtcPeerConnection, ...callbackExtraParams);
+
+  if (isAgent(BROWSER_AGENT.REACT_NATIVE)) {
+    rtcPeerConnection.onsenderadded = callbacks.onsenderadded.bind(rtcPeerConnection, ...callbackExtraParams);
+    rtcPeerConnection.onremovetrack = callbacks.onremovetrack.bind(rtcPeerConnection, targetMid, state.room, false);
   }
 
-  gatheredCandidates.receiving[candidateType].push({
-    sdpMid: nativeCandidate.sdpMid,
-    sdpMLineIndex: nativeCandidate.sdpMLineIndex,
-    candidate: nativeCandidate.candidate,
-  });
-
-  state.gatheredCandidates[mid] = gatheredCandidates;
-  Skylink.setSkylinkState(state, rid);
-
-  return null;
+  return rtcPeerConnection;
 };
 
-export default candidateHandler;
+/**
+ * Function that creates the Peer Connection.
+ * @param {JSON} params
+ * @return {RTCPeerConnection} peerConnection
+ * @memberOf PeerConnection.PeerConnectionHelpers
+ * @fires HANDSHAKE_PROGRESS
+ */
+const createPeerConnection = (params) => {
+  let peerConnection = null;
+  const {
+    currentRoom,
+    targetMid,
+    cert,
+    hasScreenShare,
+  } = params;
+  const state = Skylink.getSkylinkState(currentRoom.id);
+  const { room } = state;
+  const constraints = Object.assign({ iceServers: room.connection.peerConfig.iceServers }, retrieveConfig(CONFIG_NAME.PEER_CONNECTION, { rid: currentRoom.id }));
+
+  if (cert) {
+    constraints.certificates = [cert];
+  }
+
+  Skylink.setSkylinkState(state, currentRoom.id);
+
+  try {
+    peerConnection = createNativePeerConnection(targetMid, constraints, hasScreenShare, currentRoom);
+    peerConnection.constraints = constraints;
+  } catch (error) {
+    logger.log.ERROR([targetMid, null, null, 'Failed creating peer connection:'], error);
+    peerConnection = null;
+    dispatchEvent(handshakeProgress({
+      state: HANDSHAKE_PROGRESS.ERROR,
+      peerId: targetMid,
+      error,
+      room: Room.getRoomInfo(room),
+    }));
+  }
+
+  return peerConnection;
+};
+
+export default createPeerConnection;
 </code></pre>
   </article>
 </section>

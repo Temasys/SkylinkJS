@@ -8,7 +8,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
   <title>
-      server-communication/signaling-server/negotiationState/helpers/processNewPeer.js - Documentation
+      skylink-events/peer-events.js - Documentation
   </title>
 
   <link href="https://www.braintreepayments.com/images/favicon-ccda0b14.png" rel="icon" type="image/png">
@@ -84,7 +84,7 @@
   <div id="main">
     
       <h1 class="page-title">
-        server-communication/signaling-server/negotiationState/helpers/processNewPeer.js
+        skylink-events/peer-events.js
       </h1>
     
 
@@ -93,213 +93,132 @@
 
 <section>
   <article>
-    <pre class="prettyprint source linenums"><code>/* eslint-disable no-underscore-dangle */
-import Skylink from '../../../../index';
-import {
-  HANDSHAKE_PROGRESS, PEER_TYPE, SERVER_PEER_TYPE, TAGS,
-} from '../../../../constants';
-import PeerConnection from '../../../../peer-connection';
-import logger from '../../../../logger';
-import MESSAGES from '../../../../messages';
-import { dispatchEvent } from '../../../../utils/skylinkEventManager';
-import { handshakeProgress, peerJoined, serverPeerJoined } from '../../../../skylink-events';
-import Room from '../../../../room';
-import PeerData from '../../../../peer-data';
-import parsers from '../../parsers';
-
-const _addPeerConnection = (params) => {
-  const {
-    currentRoom,
-    targetMid,
-    cert,
-    userInfo,
-    message,
-  } = params;
-  const state = Skylink.getSkylinkState(currentRoom.id);
-  const hasScreenshare = !!userInfo.screenshare;
-
-  PeerConnection.buildAndSetPeerInformations(targetMid, message.userInfo, state);
-
-  PeerConnection.addPeer({
-    currentRoom,
-    targetMid,
-    peerBrowser: {
-      agent: userInfo.agent.name,
-      version: userInfo.agent.version,
-      os: userInfo.agent.os,
-    },
-    cert,
-    hasScreenshare,
-  });
-};
-
-const _processPeerFromWelcome = (params) => {
-  const {
-    currentRoom,
-    targetMid,
-    message,
-  } = params;
-  const state = Skylink.getSkylinkState(currentRoom.id);
-  const { hasMCU, peerInformations } = state;
-
-  // process based on room type
-  switch (hasMCU) {
-    case true:
-      // MCU will always send welcome
-      // 1) process the new MCU connection
-      if (targetMid === PEER_TYPE.MCU &amp;&amp; !peerInformations.MCU) {
-        _addPeerConnection(params);
-
-        logger.log.INFO([targetMid, TAGS.PEER_CONNECTION, null, MESSAGES.PEER_CONNECTION.MCU]);
-
-        state.hasMCU = true;
-
-        dispatchEvent(serverPeerJoined({
-          peerId: targetMid,
-          serverPeerType: SERVER_PEER_TYPE.MCU,
-          room: Room.getRoomInfo(currentRoom),
-        }));
-
-        dispatchEvent(handshakeProgress({
-          peerId: targetMid,
-          state: HANDSHAKE_PROGRESS.WELCOME,
-          error: null,
-          room: Room.getRoomInfo(currentRoom),
-        }));
-      }
-
-      // process other peers in the room if any
-      if (Array.isArray(message.peersInRoom) &amp;&amp; message.peersInRoom.length) {
-        const userId = state.user.sid;
-        for (let peersInRoomIndex = 0; peersInRoomIndex &lt; message.peersInRoom.length; peersInRoomIndex += 1) {
-          const PEER_ID = message.peersInRoom[peersInRoomIndex].mid;
-          if (PEER_ID !== userId) {
-            const parsedMsg = parsers.enterAndWelcome(message.peersInRoom[peersInRoomIndex]);
-            const peerUserInfo = parsedMsg.userInfo;
-
-            PeerConnection.buildAndSetPeerInformations(PEER_ID, peerUserInfo, state);
-
-            dispatchEvent(peerJoined({
-              peerId: PEER_ID,
-              peerInfo: PeerData.getPeerInfo(PEER_ID, currentRoom),
-              isSelf: false,
-              room: Room.getRoomInfo(currentRoom),
-            }));
-          }
-        }
-      }
-
-
-      break;
-    case false: // P2P
-      if (!peerInformations[targetMid]) {
-        _addPeerConnection(params);
-
-        dispatchEvent(peerJoined({
-          peerId: targetMid,
-          peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
-          isSelf: false,
-          room: Room.getRoomInfo(currentRoom),
-        }));
-
-        dispatchEvent(handshakeProgress({
-          peerId: targetMid,
-          state: HANDSHAKE_PROGRESS.WELCOME,
-          error: null,
-          room: Room.getRoomInfo(currentRoom),
-        }));
-      }
-
-      break;
-    default:
-      // should not come here
-      break;
-  }
-};
-
-const _processPeerFromEnter = (params) => {
-  const {
-    currentRoom,
-    userInfo,
-    targetMid,
-  } = params;
-  const state = Skylink.getSkylinkState(currentRoom.id);
-  const { hasMCU, peerInformations } = state;
-
-  switch (hasMCU) {
-    case true:
-      // enter is forwarded by the MCU from a new peer that enters a room
-      PeerConnection.buildAndSetPeerInformations(targetMid, userInfo, state);
-
-      dispatchEvent(peerJoined({
-        peerId: targetMid,
-        peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
-        isSelf: false,
-        room: Room.getRoomInfo(currentRoom),
-      }));
-
-      break;
-    case false:
-
-      if (!peerInformations[targetMid]) {
-        _addPeerConnection(params);
-
-        dispatchEvent(peerJoined({
-          peerId: targetMid,
-          peerInfo: PeerData.getPeerInfo(targetMid, currentRoom),
-          isSelf: false,
-          room: Room.getRoomInfo(currentRoom),
-        }));
-      }
-
-      break;
-    default:
-      // should not come here
-      break;
-  }
-};
+    <pre class="prettyprint source linenums"><code>import {
+  PEER_UPDATED,
+  PEER_JOINED,
+  PEER_LEFT,
+  SERVER_PEER_JOINED,
+  SERVER_PEER_LEFT,
+  GET_PEERS_STATE_CHANGE,
+  PEER_CONNECTION_STATE,
+  SESSION_DISCONNECT,
+  GET_CONNECTION_STATUS_STATE_CHANGE,
+} from './constants';
+import SkylinkEvent from '../utils/skylinkEvent';
 
 /**
- * Function that adds a Peer Connection and updates the state(Skylink State).
- * @param {JSON} message
- * @memberOf SignalingMessageHandler
- * @fires SERVER_PEER_JOINED
- * @fires PEER_JOINED
- * @fires HANDSHAKE_PROGRESS
+ * @event SkylinkEvents.PEER_UPDATED
+ * @description Event triggered when a Peer session information has been updated.
+ * @param {Object} detail - Event's payload.
+ * @param {roomInfo} detail.room - The current room
+ * @param {String} detail.peerId - The peer's id
+ * @param {boolean} detail.isSelf -The flag if Peer is User.
+ * @param {peerInfo} detail.peerInfo - The Peer session information. Object signature matches the &lt;code>peerInfo&lt;/code> parameter payload received in the &lt;code> {@link SkylinkEvents.event:PEER_JOINED|PEER JOINED}&lt;/code> event.
  */
-const processNewPeer = (message) => {
-  const parsedMsg = parsers.enterAndWelcome(message);
-  const {
-    rid, mid, userInfo, publisherId,
-  } = parsedMsg;
-  const state = Skylink.getSkylinkState(rid);
-  const { hasMCU } = state;
-  const targetMid = hasMCU &amp;&amp; publisherId ? publisherId : mid;
-  const peerParams = {
-    currentRoom: state.room,
-    targetMid,
-    userInfo,
-    message: parsedMsg,
-  };
-  const updatedState = Skylink.getSkylinkState(rid);
+export const peerUpdated = (detail = {}) => new SkylinkEvent(PEER_UPDATED, { detail });
 
-  // TODO: check if this is used
-  updatedState.peerMessagesStamps[targetMid] = updatedState.peerMessagesStamps[targetMid] || {
-    userData: 0,
-    audioMuted: 0,
-    videoMuted: 0,
-  };
-  Skylink.setSkylinkState(updatedState, rid);
+/**
+ * @event SkylinkEvents.PEER_JOINED
+ * @description Event triggered when a Peer joins the room.
+ * &lt;blockquote>&lt;code>PEER_JOINED&lt;/code> event with &lt;code>isSelf=true&lt;/code> indicates that the local peer has successfully joined the
+ * room. All call actions should be done after the &lt;code>PEER_JOINED&lt;/code> event is registered.
+ * If &lt;code>MCU&lt;/code> feature is enabled on the appKey, {@link SkylinkEvents.event:SERVER_PEER_JOINED|SERVER PEER JOINED} is the
+ * corresponding event.
+ * &lt;/blockquote>
+ * @param {Object} detail - Event's payload
+ * @param {roomInfo} detail.room - The current room.
+ * @param {String} detail.peerId - The Peer ID.
+ * @param {peerInfo} detail.peerInfo - The Peer session information.
+ * @param {boolean} detail.isSelf - The flag if Peer is User.
+ */
+export const peerJoined = (detail = {}) => new SkylinkEvent(PEER_JOINED, { detail });
 
-  if (message.type === 'enter') {
-    _processPeerFromEnter(peerParams);
-  } else if (message.type === 'welcome') {
-    _processPeerFromWelcome(peerParams);
-  }
-};
+/**
+ * @event SkylinkEvents.PEER_LEFT
+ * @description Event triggered when a Peer leaves the room.
+ * @param {Object} detail - Event's payload.
+ * @param {String} detail.peerId - The Peer ID.
+ * @param {peerInfo} detail.peerInfo - The Peer session information. Object signature matches the &lt;code>peerInfo&lt;/code> parameter payload received in the&lt;code>peerJoined&lt;/code> event.
+ * @param {boolean} detail.isSelf - The flag if Peer is User.
+ * @param {roomInfo} detail.room - The room.
+ */
+export const peerLeft = (detail = {}) => new SkylinkEvent(PEER_LEFT, { detail });
 
-export default processNewPeer;
-</code></pre>
+/**
+ * @event SkylinkEvents.SERVER_PEER_JOINED
+ * @description Event triggered when a server Peer joins the room.
+ *  * &lt;blockquote>&lt;code>SERVER_PEER_JOINED&lt;/code> event indicates that the &lt;code>MCU&lt;/code> has successfully joined the
+ * room. All call actions should be done after the &lt;code>SERVER_PEER_JOINED&lt;/code> event is registered.
+ * For &lt;code>P2P&lt;/code> key, {@link SkylinkEvents.event:PEER_JOINED|PEER JOINED} is the
+ * corresponding event.
+ * &lt;/blockquote>
+ * @param {Object} detail - Event's payload.
+ * @param {roomInfo} detail.room - The current room
+ * @param {String} detail.peerId - The peer's id
+ * @param {SkylinkConstants.PEER_TYPE} detail.serverPeerType - The server Peer type
+ */
+export const serverPeerJoined = (detail = {}) => new SkylinkEvent(SERVER_PEER_JOINED, { detail });
+
+/**
+ * @event SkylinkEvents.SERVER_PEER_LEFT
+ * @description Event triggered when a server Peer leaves the room.
+ * - Handling an MCU disconnect using the &lt;code>serverPeerLeft&lt;/code> event - {@link Reconnection}
+ * @param {Object} detail - Event's payload
+ * @param {String} detail.peerId - The Peer ID
+ * @param {roomInfo} detail.room - The room.
+ * @param {SkylinkConstants.PEER_TYPE} detail.serverPeerType - The server Peer type
+ */
+export const serverPeerLeft = (detail = {}) => new SkylinkEvent(SERVER_PEER_LEFT, { detail });
+
+/**
+ * @event SkylinkEvents.GET_PEERS_STATE_CHANGE
+ * @description Event triggered when &lt;code>{@link Skylink#getPeers|getPeers}&lt;/code> method retrieval state changes.
+ * @param {Object} detail - Event's payload
+ * @param {SkylinkConstants.GET_PEERS_STATE} detail.state - The current &lt;code>{@link Skylink#getPeers|getPeers}&lt;/code> retrieval state.
+ * @param {SkylinkUser.sid} detail.privilegePeerId - The Users privileged Peer Id.
+ * @param {Object} detail.peerList - The list of Peer IDs Rooms within the same App space.
+ * @param {Array} detail.peerList.#room - The list of Peer IDs associated with the Room defined in &lt;code>#room&lt;/code> property.
+ * @memberOf SkylinkEvents
+ */
+export const getPeersStateChange = (detail = {}) => new SkylinkEvent(GET_PEERS_STATE_CHANGE, { detail });
+
+/**
+ * @event SkylinkEvents.PEER_CONNECTION_STATE
+ * @description Event triggered when a Peer connection session description exchanging state has changed.
+ *  &lt;blockquote class="info">
+ *   Learn more about how ICE works in this
+ *   &lt;a href="https://temasys.io/ice-and-webrtc-what-is-this-sorcery-we-explain/">article here&lt;/a>.
+ * &lt;/blockquote>
+ * @param {Object} detail - Event's payload
+ * @param {SkylinkConstants.PEER_CONNECTION_STATE} detail.state - The current Peer connection session description exchanging states.
+ * @param {String} detail.peerId - The Peer ID
+ */
+export const peerConnectionState = (detail = {}) => new SkylinkEvent(PEER_CONNECTION_STATE, { detail });
+
+/**
+ * @event SkylinkEvents.SESSION_DISCONNECT
+ * @description Event triggered when Room session has ended abruptly due to network disconnections.
+ * - Handling a socket disconnect using the &lt;code>sessionDisconnect&lt;/code> event - {@link Reconnection}
+ * @param {Object} detail - Event's payload.
+ * @param {String} detail.peerId - The User's Room session Peer ID
+ * @param {peerInfo} detail.peerInfo - The User's Room session information. Object signature matches the &lt;code>peerInfo&lt;/code> parameter payload received in the&lt;code> {@link SkylinkEvents.event:PEER_JOINED|PEER JOINED}&lt;/code> event.
+ * @param {peerInfo} detail.reason - Reason for the disconnect
+ */
+export const sessionDisconnect = (detail = {}) => new SkylinkEvent(SESSION_DISCONNECT, { detail });
+
+/**
+ * Event triggered when &lt;code>{@link
+  * Skylink#getConnectionStatus|getConnectionStatus}&lt;/code> method
+ * retrieval state changes.
+ * @event SkylinkEvents.GET_CONNECTION_STATUS_STATE_CHANGE
+ * @param {Object} detail - Event's payload/
+ * @param {SkylinkConstants.GET_CONNECTION_STATUS_STATE} detail.state The current retrieval state from &lt;code>{@link
+  * Skylink#getConnectionStatus|getConnectionStatus}&lt;/code> method.
+ * @param {String} detail.peerId The Peer ID.
+ * @param {statistics} [detail.stats] The Peer connection current stats.
+ * @param {Error} detail.error - The error object. Defined only when &lt;code>state&lt;/code> payload is &lt;code>RETRIEVE_ERROR&lt;/code>.
+ */
+export const getConnectionStatusStateChange = (detail = {}) => new SkylinkEvent(GET_CONNECTION_STATUS_STATE_CHANGE, { detail });</code></pre>
   </article>
 </section>
 
