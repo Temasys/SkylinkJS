@@ -45,7 +45,15 @@ const commonRecordingOperations = (roomState, isStartRecording) => new Promise((
   const {
     currentRecordingId, recordingStartInterval, peerConnections, hasMCU,
   } = roomState;
-  const errorMessage = isStartRecording ? MESSAGES.RECORDING.START_FAILED : MESSAGES.RECORDING.STOP_FAILED;
+  let errorMessage = isStartRecording ? MESSAGES.RECORDING.START_FAILED : MESSAGES.RECORDING.STOP_FAILED;
+
+  // TODO: Remove this block of code when REC SERV is ready to be released
+  if (!hasMCU) {
+    errorMessage = `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.MCU_NOT_CONNECTED}`;
+    const statsStateKey = isStartRecording ? MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_NO_MCU_START : MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_NO_MCU_STOP;
+    const error = manageErrorStatsAndCallback(roomState, errorMessage, statsStateKey, null, null);
+    reject(error);
+  }
 
   if (isStartRecording && currentRecordingId) {
     const error = manageErrorStatsAndCallback(roomState, `${errorMessage} - ${MESSAGES.RECORDING.ERRORS.EXISTING_RECORDING_IN_PROGRESS}`, MESSAGES.STATS_MODULE.HANDLE_RECORDING_STATS.ERROR_START_ACTIVE, currentRecordingId, null);
@@ -76,11 +84,11 @@ const commonRecordingOperations = (roomState, isStartRecording) => new Promise((
  * @param {SkylinkState} roomState
  * @private
  */
-export const startRecording = roomState => commonRecordingOperations(roomState, true);
+export const startRecording = (roomState) => commonRecordingOperations(roomState, true);
 
 /**
  * The current room's Skylink state
  * @param {SkylinkState} roomState
  * @private
  */
-export const stopRecording = roomState => commonRecordingOperations(roomState, false);
+export const stopRecording = (roomState) => commonRecordingOperations(roomState, false);
