@@ -1,7 +1,7 @@
 {
   "name": "skylinkjs",
   "description": "Temasys Web SDK is an open-source client-side library for your web-browser that enables any website to easily leverage the capabilities of WebRTC and its direct data streaming powers between peers for audio/video conferencing or file transfer.",
-  "version": "2.6.0",
+  "version": "2.6.1",
   "homepage": "https://temasys.io/",
   "author": {
     "name": "Temasys Communications Pte. Ltd.",
