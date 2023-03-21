@@ -27,7 +27,7 @@ You'll need a Temasys Account, and an App key to use this. [Register here to get
 
 
 #### Need help or want something changed?
-- You can raise tickets at our [knowledge center](https://temasys.io/knowledge-center/) or on our [Github Page](https://github.com/Temasys/SkylinkJS/issues).
+- You can raise tickets at our [support portal](https://support.temasys.io/) or on our [Github Page](https://github.com/Temasys/SkylinkJS/issues).
 
 
 #### Current versions and stability
