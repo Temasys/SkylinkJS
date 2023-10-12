@@ -21,9 +21,7 @@ const parseGumSettings = (settings, type) => {
         gumSettings.audio.echoCancellation = settings.audio.echoCancellation;
       }
 
-      if (isAgent(BROWSER_AGENT.FIREFOX)) {
-        // do nothing
-      } else if (settings.audio.deviceId && isAString(settings.audio.deviceId)) {
+      if (settings.audio.deviceId && isAString(settings.audio.deviceId)) {
         gumSettings.audio.deviceId = settings.audio.exactConstraints
           ? { exact: settings.audio.deviceId } : { ideal: settings.audio.deviceId };
       }
@@ -82,9 +80,7 @@ const parseSettings = (options, type = '') => {
         settings.audio.echoCancellation = options.audio.echoCancellation;
       }
 
-      if (isAgent(BROWSER_AGENT.FIREFOX)) {
-        // do nothing
-      } else if (options.audio.deviceId && isAString(options.audio.deviceId)) {
+      if (options.audio.deviceId && isAString(options.audio.deviceId)) {
         settings.audio.deviceId = options.audio.deviceId;
       }
 
