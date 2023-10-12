@@ -63,6 +63,8 @@ let selectedPeers = [];
 let _peerId = null;
 let selectedAppKey = null;
 let stopStreamsOnLeaveRoom = true;
+let audioDeviceLabel = 'default';
+let videoDeviceLabel = 'default';
 
 const { $, document } = window;
 
@@ -71,8 +73,37 @@ if (window.location.href.indexOf("appKey=") > -1) {
   $('#join_room_mcu_key').prop('disabled', true);
 }
 
+
+function getDevices() {
+  navigator.mediaDevices.getUserMedia({audio: true, video: true})
+  .then((stream) => navigator.mediaDevices.enumerateDevices().then((devices) => {
+      devices.forEach((d) => {
+        let element;
+        let option = document.createElement('option');
+        option.value = d.deviceId;
+        option.label = d.label;
+        option.dataset.label = d.label;
+
+        if (d.kind === 'videoinput') {
+          element = '#video-devices'
+        }
+
+        if (d.kind === 'audioinput') {
+          element = '#audio-devices'
+        }
+
+        $(element).append(option);
+      })
+
+    stream.getTracks().forEach((t) => t.stop())
+    })
+  )
+}
+
+getDevices();
+
 //----- join room options
-const joinRoomOptions = {
+let joinRoomOptions = {
   audio: true,
   video: true,
   autoBandwidthAdjustment: true
@@ -304,6 +335,10 @@ SkylinkEventManager.addEventListener(SkylinkConstants.EVENTS.PEER_JOINED, (evt) 
     })
 
     $('#display_user_info').val(userData.displayName);
+
+    $('#audio-device-label').html(audioDeviceLabel);
+    $('#video-device-label').html(videoDeviceLabel);
+
     console.log(`[Kitchensink] Room Session Id - ${peerInfo.room.roomSessionId}`);
 
     if (Demo.Methods.getFromLocalStorage('peerSessionId')) {
@@ -1496,6 +1531,17 @@ $(document).ready(function() {
     SkylinkLogger.clearLogs();
     Demo.Methods.logToConsoleDOM(`Check console log for output`, 'System');
   });
+
+  // //---------------------------------------------------
+  $('#audio-devices').on('change', function(evt) {
+    joinRoomOptions.audio =  { deviceId : evt.target.value};
+    audioDeviceLabel = evt.target.options[evt.target.options.selectedIndex].label
+  })
+
+  $('#video-devices').on('change', function(evt) {
+    joinRoomOptions.video =  { deviceId : evt.target.value};
+    videoDeviceLabel = evt.target.options[evt.target.options.selectedIndex].label
+  })
 
   window.setSelectedSecret = dom => {
     var secretId = $(dom).attr('value');
