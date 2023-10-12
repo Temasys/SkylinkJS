@@ -63,6 +63,7 @@ const parseGumSettings = (settings, type) => {
     }
   }
 
+  console.log('parsed gumSettings', gumSettings)
   return gumSettings;
 };
 
@@ -103,17 +104,17 @@ const parseSettings = (options, type = '') => {
 
       if (options.video.resolution && isAObj(options.video.resolution)) {
         if ((options.video.resolution.width && isAString(options.video.resolution.width))
-          || isANumber(options.video.resolution.width)) {
+          || isANumber(options.video.resolution.width) || isAObj(options.video.resolution.width)) {
           settings.video.resolution.width = options.video.resolution.width;
         }
         if ((options.video.resolution.height && isAString(options.video.resolution.height))
-          || isANumber(options.video.resolution.height)) {
+          || isANumber(options.video.resolution.height) || isAObj(options.video.resolution.height)) {
           settings.video.resolution.height = options.video.resolution.height;
         }
       }
 
       if ((options.video.frameRate && isAString(options.video.frameRate))
-        || isANumber(options.video.frameRate)) {
+        || isANumber(options.video.frameRate) || isAObj(options.video.frameRate)) {
         settings.video.frameRate = options.video.frameRate;
       }
 
