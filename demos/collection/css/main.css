@@ -48,6 +48,10 @@ input[type="text"] {
     word-break: break-word;
 }
 
+.table.media-devices {
+    padding-bottom: 10px;
+}
+
 .table td:first-child {
     font-weight: bold;
     width: 38%;
