@@ -1,9 +1,9 @@
 /* eslint-disable no-nested-ternary */
 import clone from 'clone';
-import { TRACK_KIND, BROWSER_AGENT } from '../../constants';
+import { TRACK_KIND } from '../../constants';
 import { DEFAULTS } from '../../defaults';
 import {
-  isABoolean, isAgent, isANumber, isAObj, isAString,
+  isABoolean, isANumber, isAObj, isAString,
 } from '../../utils/helpers';
 
 const parseGumSettings = (settings, type) => {
@@ -61,7 +61,6 @@ const parseGumSettings = (settings, type) => {
     }
   }
 
-  console.log('parsed gumSettings', gumSettings)
   return gumSettings;
 };
 
